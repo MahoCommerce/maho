@@ -58,7 +58,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Settings extends Mage_
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $fieldset = $form->addFieldset('settings', [
             'legend' => Mage::helper('catalog')->__('Select Configurable Attributes '),
         ]);

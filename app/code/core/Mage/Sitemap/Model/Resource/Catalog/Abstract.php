@@ -120,11 +120,11 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
     /**
      * Prepare catalog object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _prepareObject(array $row)
     {
-        $entity = new Varien_Object();
+        $entity = new \Maho\DataObject();
         $entity->setId($row[$this->getIdFieldName()]);
         $entity->setUrl($this->_getEntityUrl($row, $entity));
 
@@ -158,7 +158,7 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
      * Retrieve entity url
      *
      * @param array $row
-     * @param Varien_Object $entity
+     * @param \Maho\DataObject $entity
      * @return string
      */
     abstract protected function _getEntityUrl($row, $entity);

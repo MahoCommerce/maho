@@ -34,7 +34,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
      */
     public function loadGallery($product, $object)
     {
-        $eventObjectWrapper = new Varien_Object(
+        $eventObjectWrapper = new \Maho\DataObject(
             [
                 'product' => $product,
                 'backend_attribute' => $object,
@@ -91,7 +91,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
     public function insertGallery($data)
     {
         $adapter = $this->_getWriteAdapter();
-        $data    = $this->_prepareDataForTable(new Varien_Object($data), $this->getMainTable());
+        $data    = $this->_prepareDataForTable(new \Maho\DataObject($data), $this->getMainTable());
         $adapter->insert($this->getMainTable(), $data);
 
         return $adapter->lastInsertId($this->getMainTable());
@@ -125,7 +125,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
      */
     public function insertGalleryValueInStore($data)
     {
-        $data = $this->_prepareDataForTable(new Varien_Object($data), $this->getTable(self::GALLERY_VALUE_TABLE));
+        $data = $this->_prepareDataForTable(new \Maho\DataObject($data), $this->getTable(self::GALLERY_VALUE_TABLE));
         $this->_getWriteAdapter()->insert($this->getTable(self::GALLERY_VALUE_TABLE), $data);
 
         return $this;

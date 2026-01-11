@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     /**
      * Returns root node and sets 'checked' flag (if necessary)
      *
-     * @return Varien_Data_Tree_Node
+     * @return \Maho\Data\Tree\Node
      */
     public function getRootNode()
     {

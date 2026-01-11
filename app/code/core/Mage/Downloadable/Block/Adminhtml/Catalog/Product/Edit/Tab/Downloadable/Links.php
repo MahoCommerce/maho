@@ -200,7 +200,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             if ($this->getProduct()->getStoreId() && $priceWebsiteScope) {
                 $tmpLinkItem['website_price'] = $item->getWebsitePrice();
             }
-            $linkArr[] = new Varien_Object($tmpLinkItem);
+            $linkArr[] = new \Maho\DataObject($tmpLinkItem);
         }
         return $linkArr;
     }

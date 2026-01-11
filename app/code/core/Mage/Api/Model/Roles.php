@@ -62,7 +62,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     public function getResourcesTree()
     {
@@ -70,7 +70,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     public function getResourcesList()
     {
@@ -78,7 +78,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     public function getResourcesList2D()
     {
@@ -99,10 +99,10 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
      * @param bool|null $represent2Darray
      * @param bool $rawNodes
      * @param string $module
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     protected function _buildResourcesArray(
-        ?Varien_Simplexml_Element $resource = null,
+        ?\Maho\Simplexml\Element $resource = null,
         $parentName = null,
         $level = 0,
         $represent2Darray = null,

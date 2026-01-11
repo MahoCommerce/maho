@@ -23,7 +23,7 @@
  * @method $this updateBillingAgreementStatus(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $value)
  */
-abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
+abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 {
     public const ACTION_ORDER             = 'order';
     public const ACTION_AUTHORIZE         = 'authorize';
@@ -208,7 +208,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      *
      * @return  bool
      */
-    public function canVoid(Varien_Object $payment)
+    public function canVoid(\Maho\DataObject $payment)
     {
         return $this->_canVoid;
     }
@@ -441,7 +441,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function order(Varien_Object $payment, $amount)
+    public function order(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canOrder()) {
             Mage::throwException(Mage::helper('payment')->__('Order action is not available.'));
@@ -455,7 +455,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function authorize(Varien_Object $payment, $amount)
+    public function authorize(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canAuthorize()) {
             Mage::throwException(Mage::helper('payment')->__('Authorize action is not available.'));
@@ -469,7 +469,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canCapture()) {
             Mage::throwException(Mage::helper('payment')->__('Capture action is not available.'));
@@ -511,7 +511,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canRefund()) {
             Mage::throwException(Mage::helper('payment')->__('Refund action is not available.'));
@@ -537,7 +537,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      *
      * @return $this
      */
-    public function cancel(Varien_Object $payment)
+    public function cancel(\Maho\DataObject $payment)
     {
         return $this;
     }
@@ -547,7 +547,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      *
      * @return $this
      */
-    public function void(Varien_Object $payment)
+    public function void(\Maho\DataObject $payment)
     {
         if (!$this->canVoid($payment)) {
             Mage::throwException(Mage::helper('payment')->__('Void action is not available.'));
@@ -630,7 +630,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     {
         if (is_array($data)) {
             $this->getInfoInstance()->addData($data);
-        } elseif ($data instanceof Varien_Object) {
+        } elseif ($data instanceof \Maho\DataObject) {
             $this->getInfoInstance()->addData($data->getData());
         }
         return $this;

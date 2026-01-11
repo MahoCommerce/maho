@@ -11,7 +11,7 @@
 class Mage_Adminhtml_Block_System_Config_Form_Field_Cookie_Lifetime extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element): string
+    public function render(\Maho\Data\Form\Element\AbstractElement $element): string
     {
         if ($element->getHtmlId() === 'admin_security_session_cookie_lifetime') {
             $min = Mage_Adminhtml_Controller_Action::SESSION_MIN_LIFETIME;

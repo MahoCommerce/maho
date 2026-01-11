@@ -63,7 +63,7 @@ class Maho_CustomerSegmentation_Model_Rule_Condition_Segment extends Mage_Rule_M
     }
 
     #[\Override]
-    public function validate(Varien_Object $object): bool
+    public function validate(\Maho\DataObject $object): bool
     {
         $customerId = $object->getCustomerId();
         $websiteId = $object->getStore() ? $object->getStore()->getWebsiteId() : null;

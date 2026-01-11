@@ -44,7 +44,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     protected $_specificEntitiesLayoutHandles = [];
 
     /**
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_widgetConfigXml = null;
 
@@ -86,7 +86,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -350,7 +350,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     /**
      * Load widget XML config and merge with theme widget config
      *
-     * @return Varien_Simplexml_Element|null
+     * @return \Maho\Simplexml\Element|null
      */
     public function getWidgetConfig()
     {
@@ -366,7 +366,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
                 ]) . DS . 'widget.xml';
                 $configFile = Maho::findFile($configFile);
                 if (is_readable($configFile)) {
-                    $themeWidgetsConfig = new Varien_Simplexml_Config();
+                    $themeWidgetsConfig = new \Maho\Simplexml\Config();
                     $themeWidgetsConfig->loadFile($configFile);
                     if ($themeWidgetTypeConfig = $themeWidgetsConfig->getNode($this->_widgetConfigXml->getName())) {
                         $this->_widgetConfigXml->extend($themeWidgetTypeConfig);

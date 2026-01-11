@@ -17,7 +17,7 @@ class Mage_Rating_Model_Observer
      *
      * @return Mage_Rating_Model_Observer
      */
-    public function processProductAfterDeleteEvent(Varien_Event_Observer $observer)
+    public function processProductAfterDeleteEvent(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $eventProduct */
         $eventProduct = $observer->getEvent()->getProduct();

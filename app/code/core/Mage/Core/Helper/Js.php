@@ -200,7 +200,7 @@ class Mage_Core_Helper_Js extends Mage_Core_Helper_Abstract
     /**
      * Load config from files and try to cache it
      *
-     * @return Varien_Simplexml_Config
+     * @return \Maho\Simplexml\Config
      */
     protected function _getXmlConfig()
     {

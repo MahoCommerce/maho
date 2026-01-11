@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Resource_Iterator extends Varien_Object
+class Mage_Core_Model_Resource_Iterator extends \Maho\DataObject
 {
     /**
      * Walk over records fetched from query one by one using callback function

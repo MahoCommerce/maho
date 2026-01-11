@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Cms_Page_Edit_Tab_Design extends Mage_Adminhtml_Block
             $isElementDisabled = true;
         }
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $form->setHtmlIdPrefix('page_');
 

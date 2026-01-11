@@ -18,7 +18,7 @@ class Mage_Eav_Model_Entity_Attribute_Frontend_Datetime extends Mage_Eav_Model_E
      * @return mixed
      */
     #[\Override]
-    public function getValue(Varien_Object $object)
+    public function getValue(\Maho\DataObject $object)
     {
         $data = '';
         $value = parent::getValue($object);

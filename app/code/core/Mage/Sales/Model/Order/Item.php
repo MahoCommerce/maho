@@ -223,7 +223,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -779,7 +779,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      * Returns formatted buy request - object, holding request received from
      * product view page with keys and options for configured product
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getBuyRequest()
     {
@@ -787,7 +787,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         if (!$option) {
             $option = [];
         }
-        $buyRequest = new Varien_Object($option);
+        $buyRequest = new \Maho\DataObject($option);
         $buyRequest->setQty($this->getQtyOrdered() * 1);
         return $buyRequest;
     }

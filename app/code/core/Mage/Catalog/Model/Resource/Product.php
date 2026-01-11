@@ -98,7 +98,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     /**
      * Retrieve product category identifiers
      *
-     * @param Mage_Catalog_Model_Product|Varien_Object $product
+     * @param Mage_Catalog_Model_Product|\Maho\DataObject $product
      * @return array
      */
     public function getCategoryIds($product)
@@ -135,7 +135,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      * @param Mage_Catalog_Model_Product $object
      */
     #[\Override]
-    protected function _beforeSave(Varien_Object $object)
+    protected function _beforeSave(\Maho\DataObject $object)
     {
         /**
          * Try to detect product id by sku if id is not declared
@@ -163,7 +163,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      * @param Mage_Catalog_Model_Product $product
      */
     #[\Override]
-    protected function _afterSave(Varien_Object $product)
+    protected function _afterSave(\Maho\DataObject $product)
     {
         $this->_saveWebsiteIds($product)
             ->_saveCategories($product);
@@ -225,7 +225,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      *
      * @return $this
      */
-    protected function _saveCategories(Varien_Object $object)
+    protected function _saveCategories(\Maho\DataObject $object)
     {
         /**
          * If category ids data is not declared we haven't do manipulations

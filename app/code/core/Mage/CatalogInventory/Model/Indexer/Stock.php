@@ -238,7 +238,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
         // Saving stock item without product object
         // Register re-index price process if products out of stock hidden on Front-end
         if (!Mage::helper('cataloginventory')->isShowOutOfStock() && !$object->getProduct()) {
-            $massObject = new Varien_Object();
+            $massObject = new \Maho\DataObject();
             $massObject->setAttributesData(['force_reindex_required' => 1]);
             $massObject->setProductIds([$object->getProductId()]);
             Mage::getSingleton('index/indexer')->logEvent(

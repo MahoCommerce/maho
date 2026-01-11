@@ -158,7 +158,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
      *
      * @return  Mage_CatalogInventory_Model_Stock
      */
-    public function registerItemSale(Varien_Object $item)
+    public function registerItemSale(\Maho\DataObject $item)
     {
         $productId = $item->getProductId();
         if ($productId) {

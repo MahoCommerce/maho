@@ -15,7 +15,7 @@ class Mage_Sales_Model_Resource_Order_Attribute_Backend_Billing extends Mage_Eav
     /**
      * Perform operation before save
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -31,7 +31,7 @@ class Mage_Sales_Model_Resource_Order_Attribute_Backend_Billing extends Mage_Eav
     /**
      * Perform operation after save
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]

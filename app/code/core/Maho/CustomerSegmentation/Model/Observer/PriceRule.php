@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Maho_CustomerSegmentation_Model_Observer_PriceRule
 {
-    public function addSegmentConditionToSalesRule(Varien_Event_Observer $observer): void
+    public function addSegmentConditionToSalesRule(\Maho\Event\Observer $observer): void
     {
         $additional = $observer->getAdditional();
         $conditions = $additional->getConditions();

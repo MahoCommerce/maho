@@ -16,7 +16,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Field_SolutionType extends Mage_
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $countryCode = Mage::helper('paypal')->getConfigurationCountryCode();
         if ($countryCode === 'DE') {

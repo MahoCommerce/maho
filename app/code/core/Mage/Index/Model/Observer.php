@@ -32,7 +32,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
-    public function processStoreSave(Varien_Event_Observer $observer)
+    public function processStoreSave(\Maho\Event\Observer $observer)
     {
         $store = $observer->getEvent()->getStore();
         $this->_indexer->processEntityAction(
@@ -47,7 +47,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
-    public function processStoreGroupSave(Varien_Event_Observer $observer)
+    public function processStoreGroupSave(\Maho\Event\Observer $observer)
     {
         $storeGroup = $observer->getEvent()->getStoreGroup();
         $this->_indexer->processEntityAction(
@@ -62,7 +62,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
-    public function processWebsiteSave(Varien_Event_Observer $observer)
+    public function processWebsiteSave(\Maho\Event\Observer $observer)
     {
         $website = $observer->getEvent()->getWebsite();
         $this->_indexer->processEntityAction(
@@ -77,7 +77,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
-    public function processStoreDelete(Varien_Event_Observer $observer)
+    public function processStoreDelete(\Maho\Event\Observer $observer)
     {
         $store = $observer->getEvent()->getStore();
         $this->_indexer->processEntityAction(
@@ -92,7 +92,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
-    public function processStoreGroupDelete(Varien_Event_Observer $observer)
+    public function processStoreGroupDelete(\Maho\Event\Observer $observer)
     {
         $storeGroup = $observer->getEvent()->getStoreGroup();
         $this->_indexer->processEntityAction(
@@ -107,7 +107,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
-    public function processWebsiteDelete(Varien_Event_Observer $observer)
+    public function processWebsiteDelete(\Maho\Event\Observer $observer)
     {
         $website = $observer->getEvent()->getWebsite();
         $this->_indexer->processEntityAction(
@@ -122,7 +122,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
-    public function processConfigDataSave(Varien_Event_Observer $observer)
+    public function processConfigDataSave(\Maho\Event\Observer $observer)
     {
         $configData = $observer->getEvent()->getConfigData();
         $this->_indexer->processEntityAction(

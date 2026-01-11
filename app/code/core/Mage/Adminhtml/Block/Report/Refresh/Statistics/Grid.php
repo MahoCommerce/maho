@@ -56,7 +56,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = new Varien_Data_Collection();
+        $collection = new \Maho\Data\Collection();
 
         $data = [
             [
@@ -110,7 +110,7 @@ class Mage_Adminhtml_Block_Report_Refresh_Statistics_Grid extends Mage_Adminhtml
         ];
 
         foreach ($data as $value) {
-            $item = new Varien_Object();
+            $item = new \Maho\DataObject();
             $item->setData($value);
             $collection->addItem($item);
         }

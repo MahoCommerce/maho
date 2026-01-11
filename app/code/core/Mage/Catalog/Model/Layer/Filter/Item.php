@@ -22,7 +22,7 @@
  * @method $this setValue(string $value)
  * @method $this setFilter(Mage_Catalog_Model_Layer_Filter_Abstract $value)
  */
-class Mage_Catalog_Model_Layer_Filter_Item extends Varien_Object
+class Mage_Catalog_Model_Layer_Filter_Item extends \Maho\DataObject
 {
     /**
      * Get filter instance

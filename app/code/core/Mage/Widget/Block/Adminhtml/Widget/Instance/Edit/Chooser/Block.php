@@ -24,7 +24,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
     protected $_layoutHandlesXml = null;
 
     /**
-     * @var Varien_Simplexml_Element[]
+     * @var \Maho\Simplexml\Element[]
      */
     protected $_layoutHandleUpdates = [];
 

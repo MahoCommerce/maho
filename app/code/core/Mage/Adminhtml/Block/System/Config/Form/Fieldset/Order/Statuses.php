@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses extends Ma
     protected $_values;
 
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $html = ''; //$this->_getHeaderHtml($element);
 
@@ -34,7 +34,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Order_Statuses extends Ma
     protected function _getDummyElement()
     {
         if (empty($this->_dummyElement)) {
-            $this->_dummyElement = new Varien_Object(['show_in_default' => 1, 'show_in_website' => 1]);
+            $this->_dummyElement = new \Maho\DataObject(['show_in_default' => 1, 'show_in_website' => 1]);
         }
         return $this->_dummyElement;
     }

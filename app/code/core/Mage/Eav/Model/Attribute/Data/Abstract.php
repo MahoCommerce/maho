@@ -184,7 +184,7 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Return Data Form Input/Output Filter
      *
-     * @return Varien_Data_Form_Filter_Interface|false
+     * @return \Maho\Data\Form\Filter\FilterInterface|false
      */
     protected function _getFormFilter()
     {

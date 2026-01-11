@@ -15,7 +15,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Edit_Form extends Mage_Adminhtml_Block
     #[\Override]
     protected function _prepareForm()
     {
-        $form   = new Varien_Data_Form([
+        $form   = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method'    => 'post',

@@ -33,7 +33,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return Varien_Data_Collection
+     * @return \Maho\Data\Collection
      */
     public function getGalleryCollection()
     {
@@ -41,7 +41,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return Varien_Object|null
+     * @return \Maho\DataObject|null
      * @throws Exception
      */
     public function getCurrentImage()
@@ -96,7 +96,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return false|Varien_Object
+     * @return false|\Maho\DataObject
      * @throws Exception
      */
     public function getPreviusImage()
@@ -116,7 +116,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return false|Varien_Object
+     * @return false|\Maho\DataObject
      * @throws Exception
      */
     public function getNextImage()

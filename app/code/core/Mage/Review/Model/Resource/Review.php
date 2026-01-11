@@ -333,7 +333,7 @@ class Mage_Review_Model_Resource_Review extends Mage_Core_Model_Resource_Db_Abst
             ];
             $oldData = $readAdapter->fetchRow($select, $bind);
 
-            $data = new Varien_Object();
+            $data = new \Maho\DataObject();
 
             $data->setReviewsCount($reviewsCount)
                 ->setEntityPkValue($object->getEntityPkValue())

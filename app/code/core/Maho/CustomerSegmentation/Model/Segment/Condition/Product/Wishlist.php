@@ -51,7 +51,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Product_Wishlist extends
     }
 
     #[\Override]
-    public function getAttributeElement(): Varien_Data_Form_Element_Abstract
+    public function getAttributeElement(): \Maho\Data\Form\Element\AbstractElement
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();

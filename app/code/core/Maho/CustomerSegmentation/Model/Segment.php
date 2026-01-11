@@ -237,7 +237,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    public function validate(?Varien_Object $object = null): bool
+    public function validate(?\Maho\DataObject $object = null): bool
     {
         $errors = [];
 

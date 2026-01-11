@@ -362,7 +362,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject();
             $params->setCategoryId(false);
             $params->setConfigureMode(true);
             $params->setBuyRequest($quoteItem->getBuyRequest());
@@ -403,7 +403,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 Mage::throwException($this->__('Quote item is not found.'));
             }
 
-            $item = $cart->updateItem($id, new Varien_Object($params));
+            $item = $cart->updateItem($id, new \Maho\DataObject($params));
             if (is_string($item)) {
                 Mage::throwException($item);
             }
@@ -784,7 +784,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     protected function _setProductBuyRequest(): void
     {
         $buyRequest = $this->getRequest()->getPost();
-        $buyRequestObject = new Varien_Object($buyRequest);
+        $buyRequestObject = new \Maho\DataObject($buyRequest);
         $this->_getSession()->setProductBuyRequest($buyRequestObject);
     }
 }

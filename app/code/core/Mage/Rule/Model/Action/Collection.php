@@ -98,7 +98,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getNewChildElement()
     {
@@ -109,7 +109,7 @@ class Mage_Rule_Model_Action_Collection extends Mage_Rule_Model_Action_Abstract
         ]);
 
         $renderer = Mage::getBlockSingleton('rule/newchild');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $element->setRenderer($renderer);
         }
 

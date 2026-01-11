@@ -594,7 +594,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
                 ];
             }
 
-            $data = new Varien_Object($this->_prepareDataForSave($object));
+            $data = new \Maho\DataObject($this->_prepareDataForSave($object));
             $select = $this->_getWriteAdapter()->select()
                 ->from($this->getMainTable());
 

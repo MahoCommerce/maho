@@ -37,7 +37,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function catalogEntityAttributeSaveAfter(Varien_Event_Observer $observer)
+    public function catalogEntityAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -74,7 +74,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function catalogProductStatusUpdate(Varien_Event_Observer $observer)
+    public function catalogProductStatusUpdate(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -95,7 +95,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function catalogProductWebsiteUpdate(Varien_Event_Observer $observer)
+    public function catalogProductWebsiteUpdate(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -123,7 +123,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function catalogProductSaveAfter(Varien_Event_Observer $observer)
+    public function catalogProductSaveAfter(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -142,7 +142,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function storeAdd(Varien_Event_Observer $observer)
+    public function storeAdd(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -160,7 +160,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function storeEdit(Varien_Event_Observer $observer)
+    public function storeEdit(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -180,7 +180,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function storeDelete(Varien_Event_Observer $observer)
+    public function storeDelete(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -199,7 +199,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function storeGroupSave(Varien_Event_Observer $observer)
+    public function storeGroupSave(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -223,7 +223,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function catalogProductImportAfter(Varien_Event_Observer $observer)
+    public function catalogProductImportAfter(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;
@@ -239,7 +239,7 @@ class Mage_Catalog_Model_Product_Flat_Observer
      *
      * @return $this
      */
-    public function customerGroupSaveAfter(Varien_Event_Observer $observer)
+    public function customerGroupSaveAfter(\Maho\Event\Observer $observer)
     {
         if (!$this->_getHelper()->isAvailable() || !$this->_getHelper()->isBuilt()) {
             return $this;

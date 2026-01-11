@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Tax_Rate_Grid_Renderer_Country extends Mage_Adminhtml
      * @return string
      */
     #[\Override]
-    public function renderExport(Varien_Object $row)
+    public function renderExport(\Maho\DataObject $row)
     {
         return $row->getData($this->getColumn()->getIndex());
     }

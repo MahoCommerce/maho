@@ -101,7 +101,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Grid_Renderer_Item extends Mag
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $item)
+    public function render(\Maho\DataObject $item)
     {
         $this->setItem($item);
         return $this->toHtml();

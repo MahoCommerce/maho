@@ -29,8 +29,8 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
     #[\Override]
     protected function _prepareForm()
     {
-        $rateObject = new Varien_Object(Mage::getSingleton('tax/calculation_rate')->getData());
-        $form = new Varien_Data_Form();
+        $rateObject = new \Maho\DataObject(Mage::getSingleton('tax/calculation_rate')->getData());
+        $form = new \Maho\Data\Form();
 
         $countries = Mage::getModel('adminhtml/system_config_source_country')->toOptionArray();
         unset($countries[0]);

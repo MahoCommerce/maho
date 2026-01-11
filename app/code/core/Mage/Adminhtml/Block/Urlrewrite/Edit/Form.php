@@ -34,7 +34,7 @@ class Mage_Adminhtml_Block_Urlrewrite_Edit_Form extends Mage_Adminhtml_Block_Wid
         $product  = Mage::registry('current_product');
         $category = Mage::registry('current_category');
 
-        $form = new Varien_Data_Form(
+        $form = new \Maho\Data\Form(
             [
                 'id' => 'edit_form',
                 'action' => $this->getData('action'),

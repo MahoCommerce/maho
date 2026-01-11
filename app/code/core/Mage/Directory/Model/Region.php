@@ -118,7 +118,7 @@ class Mage_Directory_Model_Region extends Mage_Core_Model_Abstract
     /**
      * Return collection of translated region names
      */
-    public function getTranslationCollection(): Varien_Data_Collection_Db
+    public function getTranslationCollection(): \Maho\Data\Collection\Db
     {
         return $this->_getResource()->getTranslationCollection($this);
     }

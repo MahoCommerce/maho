@@ -41,7 +41,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Cart extends Mage_Adminhtml_Bl
         }
         $quote->loadByCustomer(Mage::registry('current_customer'));
 
-        $collection = $quote ? $quote->getItemsCollection(false) : new Varien_Data_Collection();
+        $collection = $quote ? $quote->getItemsCollection(false) : new \Maho\Data\Collection();
 
         $collection->addFieldToFilter('parent_item_id', ['null' => true]);
         $this->setCollection($collection);

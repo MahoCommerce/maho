@@ -36,7 +36,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Recurring extends Mage_Eav_Mo
      * @return $this
      */
     #[\Override]
-    protected function _unserialize(Varien_Object $product)
+    protected function _unserialize(\Maho\DataObject $product)
     {
         if ($product->hasIsRecurring()) {
             if ($product->isRecurring()) {

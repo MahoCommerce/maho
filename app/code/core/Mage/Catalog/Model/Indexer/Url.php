@@ -214,7 +214,7 @@ class Mage_Catalog_Model_Indexer_Url extends Mage_Index_Model_Indexer_Abstract
 
         // Force rewrites history saving
         $dataObject = $event->getDataObject();
-        if ($dataObject instanceof Varien_Object && $dataObject->hasData('save_rewrites_history')) {
+        if ($dataObject instanceof \Maho\DataObject && $dataObject->hasData('save_rewrites_history')) {
             $urlModel->setShouldSaveRewritesHistory($dataObject->getData('save_rewrites_history'));
         }
 

@@ -608,11 +608,11 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
     /**
      * Retrieve Product Emulator (Varien Object)
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getProductEmulator()
     {
-        $productEmulator = new Varien_Object();
+        $productEmulator = new \Maho\DataObject();
         $productEmulator->setIdFieldName('entity_id');
 
         return $productEmulator;

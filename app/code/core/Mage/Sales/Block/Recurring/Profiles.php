@@ -41,30 +41,30 @@ class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
         $profile = Mage::getModel('sales/recurring_profile');
 
         $this->setGridColumns([
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'reference_id',
                 'title' => $profile->getFieldLabel('reference_id'),
                 'is_nobr' => true,
                 'width' => 1,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'state',
                 'title' => $profile->getFieldLabel('state'),
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'created_at',
                 'title' => $profile->getFieldLabel('created_at'),
                 'is_nobr' => true,
                 'width' => 1,
                 'is_amount' => true,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'updated_at',
                 'title' => $profile->getFieldLabel('updated_at'),
                 'is_nobr' => true,
                 'width' => 1,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'method_code',
                 'title' => $profile->getFieldLabel('method_code'),
                 'is_nobr' => true,
@@ -77,7 +77,7 @@ class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
         $locale = Mage::app()->getLocale();
         foreach ($this->_profiles as $profile) {
             $profile->setStore($store)->setLocale($locale);
-            $profiles[] = new Varien_Object([
+            $profiles[] = new \Maho\DataObject([
                 'reference_id' => $profile->getReferenceId(),
                 'reference_id_link_url' => $this->getUrl('sales/recurring_profile/view/', ['profile' => $profile->getId()]),
                 'state'       => $profile->renderData('state'),

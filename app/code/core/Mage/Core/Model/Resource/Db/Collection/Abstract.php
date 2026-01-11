@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends Varien_Data_Collection_Db
+abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Data\Collection\Db
 {
     public const CACHE_TAG = 'COLLECTION_DATA';
 

@@ -66,7 +66,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     {
         if (is_null($this->_productTypes)) {
             $this->_productTypes = [];
-            $productEmulator     = new Varien_Object();
+            $productEmulator     = new \Maho\DataObject();
 
             foreach (array_keys(Mage_Catalog_Model_Product_Type::getTypes()) as $typeId) {
                 $productEmulator->setTypeId($typeId);

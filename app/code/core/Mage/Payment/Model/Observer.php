@@ -15,7 +15,7 @@ class Mage_Payment_Model_Observer
     /**
      * Set forced canCreditmemo flag
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function salesOrderBeforeSave($observer)
@@ -48,7 +48,7 @@ class Mage_Payment_Model_Observer
      *
      * Also sets the collected information and schedule as informational static options
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function prepareProductRecurringProfileOptions($observer)
     {
@@ -93,7 +93,7 @@ class Mage_Payment_Model_Observer
     /**
      * Sets current instructions for bank transfer account
      */
-    public function beforeOrderPaymentSave(Varien_Event_Observer $observer)
+    public function beforeOrderPaymentSave(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Payment $payment */
         $payment = $observer->getEvent()->getPayment();
@@ -109,7 +109,7 @@ class Mage_Payment_Model_Observer
      * Will veto the unassignment of the order status if it is currently configured in any of the payment method
      * configurations.
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @throws Mage_Core_Exception
      */
     public function beforeSalesOrderStatusUnassign($observer)
@@ -159,7 +159,7 @@ class Mage_Payment_Model_Observer
         }
     }
 
-    public function encryptionKeyRegenerated(Varien_Event_Observer $observer): void
+    public function encryptionKeyRegenerated(\Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */
         $output = $observer->getEvent()->getOutput();

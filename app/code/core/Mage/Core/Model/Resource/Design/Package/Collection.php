@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Resource_Design_Package_Collection extends Varien_Object
+class Mage_Core_Model_Resource_Design_Package_Collection extends \Maho\DataObject
 {
     /**
      * Load design package collection

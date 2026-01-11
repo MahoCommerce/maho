@@ -52,11 +52,11 @@ class Mage_Sitemap_Model_Resource_Cms_Page extends Mage_Core_Model_Resource_Db_A
     /**
      * Prepare page object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _prepareObject(array $data)
     {
-        $object = new Varien_Object();
+        $object = new \Maho\DataObject();
         $object->setId($data[$this->getIdFieldName()]);
         $object->setUrl($data['url']);
 

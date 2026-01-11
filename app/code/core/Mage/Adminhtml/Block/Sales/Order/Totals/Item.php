@@ -36,7 +36,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals_Item extends Mage_Adminhtml_Block_
      */
     public function initTotals()
     {
-        $total = new Varien_Object([
+        $total = new \Maho\DataObject([
             'code'      => $this->getNameInLayout(),
             'block_name' => $this->getNameInLayout(),
             'area'      => $this->getDisplayArea(),

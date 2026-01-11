@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Toolbar_Main_Filter ext
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $collection = Mage::getModel('eav/entity_attribute_set')
             ->getResourceCollection()

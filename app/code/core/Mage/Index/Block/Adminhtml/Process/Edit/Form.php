@@ -18,7 +18,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit_Form extends Mage_Adminhtml_Block_
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form(['id' => 'edit_form', 'action' => $this->getActionUrl(), 'method' => 'post']);
+        $form = new \Maho\Data\Form(['id' => 'edit_form', 'action' => $this->getActionUrl(), 'method' => 'post']);
         $form->setUseContainer(true);
         $this->setForm($form);
         return parent::_prepareForm();

@@ -13,7 +13,7 @@
 class Mage_Sales_Model_Entity_Order_Attribute_Backend_Shipping extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -27,7 +27,7 @@ class Mage_Sales_Model_Entity_Order_Attribute_Backend_Shipping extends Mage_Eav_
     }
 
     /**
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      * @throws Exception
      */

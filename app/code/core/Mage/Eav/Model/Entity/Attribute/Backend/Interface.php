@@ -62,14 +62,14 @@ interface Mage_Eav_Model_Entity_Attribute_Backend_Interface
     /**
      * Get entity value id
      *
-     * @param Varien_Object $entity
+     * @param \Maho\DataObject $entity
      */
     public function getEntityValueId($entity);
 
     /**
      * Set entity value id
      *
-     * @param Varien_Object $entity
+     * @param \Maho\DataObject $entity
      * @param int $valueId
      */
     public function setEntityValueId($entity, $valueId);

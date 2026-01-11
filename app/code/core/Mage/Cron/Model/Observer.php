@@ -31,7 +31,7 @@ class Mage_Cron_Model_Observer
      * Generate tasks schedule
      * Cleanup tasks schedule
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function dispatch($observer)
     {
@@ -58,19 +58,19 @@ class Mage_Cron_Model_Observer
     /**
      * Process cron queue for tasks marked as always
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function dispatchAlways($observer)
     {
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
-        if ($jobsRoot instanceof Varien_Simplexml_Element) {
+        if ($jobsRoot instanceof \Maho\Simplexml\Element) {
             foreach ($jobsRoot->children() as $jobCode => $jobConfig) {
                 $this->_processAlwaysTask($jobCode, $jobConfig);
             }
         }
 
         $defaultJobsRoot = Mage::getConfig()->getNode('default/crontab/jobs');
-        if ($defaultJobsRoot instanceof Varien_Simplexml_Element) {
+        if ($defaultJobsRoot instanceof \Maho\Simplexml\Element) {
             foreach ($defaultJobsRoot->children() as $jobCode => $jobConfig) {
                 $this->_processAlwaysTask($jobCode, $jobConfig);
             }

@@ -142,7 +142,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
             $obj = Mage::getSingleton('eav/config')
                 ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $this->getAttribute());
         } catch (Exception $e) {
-            $obj = new Varien_Object();
+            $obj = new \Maho\DataObject();
             $obj->setEntity(Mage::getResourceSingleton('catalog/product'))
                 ->setFrontendInput('text');
         }
@@ -303,7 +303,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Retrieve attribute element
      *
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     #[\Override]
     public function getAttributeElement()
@@ -469,7 +469,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         $attrCode = $this->getAttribute();
         if (!($object instanceof Mage_Catalog_Model_Product)) {

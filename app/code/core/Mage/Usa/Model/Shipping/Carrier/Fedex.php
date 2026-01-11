@@ -50,7 +50,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest = null;
 
@@ -176,7 +176,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     {
         $this->_request = $request;
 
-        $r = new Varien_Object();
+        $r = new \Maho\DataObject();
 
         if ($request->getLimitMethod()) {
             $r->setService($request->getLimitMethod());
@@ -880,7 +880,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      */
     protected function setTrackingReqeust()
     {
-        $r = new Varien_Object();
+        $r = new \Maho\DataObject();
 
         $account = $this->getConfigData('account');
         $r->setAccount($account);
@@ -1128,7 +1128,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      *
      * @return array
      */
-    protected function _formShipmentRequest(Varien_Object $request)
+    protected function _formShipmentRequest(\Maho\DataObject $request)
     {
         if ($request->getReferenceData()) {
             $referenceData = $request->getReferenceData() . $request->getPackageId();
@@ -1152,7 +1152,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
         $productIds = [];
         $packageItems = $request->getPackageItems();
         foreach ($packageItems as $itemShipment) {
-            $item = new Varien_Object();
+            $item = new \Maho\DataObject();
             $item->setData($itemShipment);
 
             $unitPrice  += $item->getPrice();
@@ -1309,13 +1309,13 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
-    protected function _doShipmentRequest(Varien_Object $request)
+    protected function _doShipmentRequest(\Maho\DataObject $request)
     {
         $this->_prepareShipmentRequest($request);
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         $client = $this->_createShipSoapClient();
         $requestClient = $this->_formShipmentRequest($request);
         $response = $client->processShipment($requestClient);
@@ -1379,7 +1379,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      * @return array|bool
      */
     #[\Override]
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         if ($params == null) {
             return $this->_getAllowedContainers($params);
@@ -1438,7 +1438,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
      * @return array
      */
     #[\Override]
-    public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
+    public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
         return $this->getCode('delivery_confirmation_types');
     }

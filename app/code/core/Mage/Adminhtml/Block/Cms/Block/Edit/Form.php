@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Cms_Block_Edit_Form extends Mage_Adminhtml_Block_Widg
     {
         $model = Mage::registry('cms_block');
 
-        $form = new Varien_Data_Form(
+        $form = new \Maho\Data\Form(
             ['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post'],
         );
 

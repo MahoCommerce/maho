@@ -26,7 +26,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Simple extends 
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $form->setFieldNameSuffix('simple_product');
         $form->setDataObject($this->_getProduct());

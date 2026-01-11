@@ -128,7 +128,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
     /**
      * Instantiate state and set it to state object
      * @param string $paymentAction
-     * @param Varien_Object $stateObject
+     * @param \Maho\DataObject $stateObject
      */
     #[\Override]
     public function initialize($paymentAction, $stateObject)

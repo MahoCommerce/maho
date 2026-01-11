@@ -26,7 +26,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
     {
         $model = Mage::registry('blog_post');
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['id' => $this->getRequest()->getParam('id')]),
             'method' => 'post',

@@ -13,7 +13,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
 {
     public function getAllowedExtensions(): array
     {
-        return Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS;
+        return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
     }
 
     #[\Override]

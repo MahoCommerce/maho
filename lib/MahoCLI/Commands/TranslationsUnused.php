@@ -99,7 +99,7 @@ class TranslationsUnused extends BaseMahoCommand
             return $map;
         }
 
-        $parser = new \Varien_File_Csv();
+        $parser = new \Maho\File\Csv();
         $parser->setDelimiter(',');
         foreach ($files as $file) {
             $data = $parser->getDataPairs($file);
@@ -179,7 +179,7 @@ class TranslationsUnused extends BaseMahoCommand
             return 0;
         }
 
-        $parser = new \Varien_File_Csv();
+        $parser = new \Maho\File\Csv();
         $parser->setDelimiter(',');
         $data = $parser->getDataPairs($file);
 

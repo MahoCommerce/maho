@@ -210,7 +210,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
         if ($toDelete) {
             $this->getEntity()->setData($attribute->getAttributeCode(), '');
             $file = $path . $original;
-            $ioFile = new Varien_Io_File();
+            $ioFile = new \Maho\Io\File();
             if ($ioFile->fileExists($file)) {
                 $ioFile->rm($file);
             }
@@ -218,7 +218,7 @@ class Mage_Eav_Model_Attribute_Data_File extends Mage_Eav_Model_Attribute_Data_A
 
         if (!empty($value['tmp_name'])) {
             try {
-                $uploader = new Varien_File_Uploader($value);
+                $uploader = new \Maho\File\Uploader($value);
                 $uploader->setFilesDispersion(true);
                 $uploader->setFilenamesCaseSensitivity(false);
                 $uploader->setAllowRenameFiles(true);

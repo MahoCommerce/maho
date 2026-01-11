@@ -64,7 +64,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
     {
         $model = Mage::registry('current_promo_quote_rule');
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('rule_');
 
         $fieldset = $form->addFieldset(
@@ -173,7 +173,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main extends Mage_Adminhtml_Bloc
         ]);
 
         $renderer = $this->getLayout()->createBlock('adminhtml/promo_quote_edit_tab_main_renderer_checkbox');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $autoGenerationCheckbox->setRenderer($renderer);
         }
 

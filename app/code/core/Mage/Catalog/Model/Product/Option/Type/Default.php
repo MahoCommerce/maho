@@ -21,7 +21,7 @@
  * @method $this setRequest(Varien_Object $value)
  * @method $this setUserValue(array|int $value)
  */
-class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
+class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
 {
     /**
      * Option Instance
@@ -140,11 +140,11 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
     /**
      * Getter for Buy Request
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getRequest()
     {
-        if ($this->_getData('request') instanceof Varien_Object) {
+        if ($this->_getData('request') instanceof \Maho\DataObject) {
             return $this->_getData('request');
         }
         Mage::throwException(Mage::helper('catalog')->__('Wrong BuyRequest instance in options group.'));

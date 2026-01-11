@@ -24,7 +24,7 @@ class Mage_Api2_Block_Adminhtml_Roles_Tab_Info extends Mage_Adminhtml_Block_Widg
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $fieldset = $form->addFieldset('base_fieldset', [
             'legend'    => Mage::helper('adminhtml')->__('Role Information'),

@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_System_Config_Form_Field_File extends Varien_Data_Form_Element_File
+class Mage_Adminhtml_Block_System_Config_Form_Field_File extends \Maho\Data\Form\Element\File
 {
     /**
      * Get element html

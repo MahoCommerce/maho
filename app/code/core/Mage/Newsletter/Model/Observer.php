@@ -15,7 +15,7 @@ class Mage_Newsletter_Model_Observer
     /**
      * @return $this
      */
-    public function subscribeCustomer(Varien_Event_Observer $observer)
+    public function subscribeCustomer(\Maho\Event\Observer $observer)
     {
         $customer = $observer->getEvent()->getCustomer();
         if (($customer instanceof Mage_Customer_Model_Customer)) {
@@ -29,7 +29,7 @@ class Mage_Newsletter_Model_Observer
      *
      * @return $this
      */
-    public function customerDeleted(Varien_Event_Observer $observer)
+    public function customerDeleted(\Maho\Event\Observer $observer)
     {
         $subscriber = Mage::getModel('newsletter/subscriber')
             ->loadByEmail($observer->getEvent()->getCustomer()->getEmail());
@@ -40,7 +40,7 @@ class Mage_Newsletter_Model_Observer
     }
 
     /**
-     * @param Varien_Event_Observer $schedule
+     * @param \Maho\Event\Observer $schedule
      */
     public function scheduledSend($schedule)
     {

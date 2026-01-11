@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_System_Config_Form_Field_Image extends Varien_Data_Form_Element_Image
+class Mage_Adminhtml_Block_System_Config_Form_Field_Image extends \Maho\Data\Form\Element\Image
 {
     /**
      * Get image preview url
@@ -22,7 +22,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Image extends Varien_Data_Fo
         $url = parent::_getUrl();
 
         $config = $this->getFieldConfig();
-        /** @var Varien_Simplexml_Element $config */
+        /** @var \Maho\Simplexml\Element $config */
         if (!empty($config->base_url)) {
             $el = $config->descend('base_url');
             $urlType = empty($el['type']) ? 'link' : (string) $el['type'];

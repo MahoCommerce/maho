@@ -38,7 +38,7 @@ class Mage_Sales_Model_Resource_Recurring_Profile extends Mage_Sales_Model_Resou
      * @param mixed $defaultValue
      */
     #[\Override]
-    protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
+    protected function _unserializeField(\Maho\DataObject $object, $field, $defaultValue = null)
     {
         if ($field != 'additional_info') {
             return parent::_unserializeField($object, $field, $defaultValue);
@@ -61,7 +61,7 @@ class Mage_Sales_Model_Resource_Recurring_Profile extends Mage_Sales_Model_Resou
     /**
      * Return recurring profile child Orders Ids
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return array
      */
     public function getChildOrderIds($object)

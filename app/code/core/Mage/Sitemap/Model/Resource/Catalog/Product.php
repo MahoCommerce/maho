@@ -110,7 +110,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
      * Retrieve entity url
      *
      * @param array $row
-     * @param Varien_Object $entity
+     * @param \Maho\DataObject $entity
      * @return string
      */
     #[\Override]

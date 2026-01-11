@@ -179,7 +179,7 @@ class Mage_Paypal_Model_Report_Settlement extends Mage_Core_Model_Abstract
      */
     public function fetchAndSave($config)
     {
-        $connection = new Varien_Io_Sftp();
+        $connection = new \Maho\Io\Sftp();
         $connection->open([
             'host'     => $config['hostname'],
             'username' => $config['username'],

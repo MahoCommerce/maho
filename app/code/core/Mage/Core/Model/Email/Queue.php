@@ -189,7 +189,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                 }
 
                 try {
-                    $parameters = new Varien_Object($message->getMessageParameters());
+                    $parameters = new \Maho\DataObject($message->getMessageParameters());
                     $mailer = new Mailer(Transport::fromDsn($dsn));
                     $email = new Email();
                     $email->subject($parameters->getSubject());
@@ -220,7 +220,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                         $email->returnPath($parameters->getReturnTo());
                     }
 
-                    $transport = new Varien_Object();
+                    $transport = new \Maho\DataObject();
                     Mage::dispatchEvent('email_queue_send_before', [
                         'mail'      => $email,
                         'message'   => $message,

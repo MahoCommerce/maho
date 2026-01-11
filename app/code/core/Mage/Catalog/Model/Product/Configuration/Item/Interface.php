@@ -33,7 +33,7 @@ interface Mage_Catalog_Model_Product_Configuration_Item_Interface
      *  - 'url' - url of controller to give the file
      *  - 'urlParams' - additional parameters for url (custom option id, or item id, for example)
      *
-     * @return null|Varien_Object
+     * @return null|\Maho\DataObject
      */
     public function getFileDownloadParams();
 }

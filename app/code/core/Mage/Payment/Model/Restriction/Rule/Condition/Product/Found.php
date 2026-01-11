@@ -144,7 +144,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         // Get quote from object, handling different object types
         if ($object instanceof Mage_Sales_Model_Quote) {

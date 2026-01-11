@@ -15,7 +15,7 @@ class Mage_Api_Model_Resource_Abstract
     /**
      * Resource configuration
      *
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_resourceConfig = null;
 
@@ -44,7 +44,7 @@ class Mage_Api_Model_Resource_Abstract
      *
      * @return $this
      */
-    public function setResourceConfig(Varien_Simplexml_Element $xml)
+    public function setResourceConfig(\Maho\Simplexml\Element $xml)
     {
         $this->_resourceConfig = $xml;
         return $this;
@@ -53,7 +53,7 @@ class Mage_Api_Model_Resource_Abstract
     /**
      * Retrieve configuration for api resource
      *
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     public function getResourceConfig()
     {

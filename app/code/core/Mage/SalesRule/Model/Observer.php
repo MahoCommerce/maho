@@ -15,7 +15,7 @@ class Mage_SalesRule_Model_Observer
     /**
      * Registered callback: called after an order is placed
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -81,7 +81,7 @@ class Mage_SalesRule_Model_Observer
     /**
      * Registered callback: called after an order payment is canceled
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function sales_order_paymentCancel($observer)
@@ -199,7 +199,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    public function catalogAttributeSaveAfter(Varien_Event_Observer $observer)
+    public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -216,7 +216,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    public function catalogAttributeDeleteAfter(Varien_Event_Observer $observer)
+    public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -232,9 +232,9 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    public function addProductAttributes(Varien_Event_Observer $observer)
+    public function addProductAttributes(\Maho\Event\Observer $observer)
     {
-        /** @var Varien_Object $attributesTransfer */
+        /** @var \Maho\DataObject $attributesTransfer */
         $attributesTransfer = $observer->getEvent()->getAttributes();
 
         $attributes = Mage::getResourceModel('salesrule/rule')
@@ -253,7 +253,7 @@ class Mage_SalesRule_Model_Observer
     /**
      * Add coupon's rule name to order data
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function addSalesRuleNameToOrder($observer)

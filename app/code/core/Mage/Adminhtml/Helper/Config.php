@@ -46,7 +46,7 @@ class Mage_Adminhtml_Helper_Config extends Mage_Core_Helper_Abstract
     /**
      * Get field backend model by field config node
      */
-    public function getBackendModelByFieldConfig(Varien_Simplexml_Element $fieldConfig): ?string
+    public function getBackendModelByFieldConfig(\Maho\Simplexml\Element $fieldConfig): ?string
     {
         if (isset($fieldConfig->backend_model)) {
             return (string) $fieldConfig->backend_model;

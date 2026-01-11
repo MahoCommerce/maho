@@ -39,7 +39,7 @@ class Mage_Sales_Model_Resource_Order_Payment extends Mage_Sales_Model_Resource_
      * @param mixed $defaultValue
      */
     #[\Override]
-    protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
+    protected function _unserializeField(\Maho\DataObject $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);
         if (empty($value)) {

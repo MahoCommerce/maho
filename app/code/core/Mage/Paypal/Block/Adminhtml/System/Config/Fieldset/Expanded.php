@@ -15,7 +15,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Expanded extends Mage_A
     /**
      * Return collapse state
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return bool
      */
     #[\Override]

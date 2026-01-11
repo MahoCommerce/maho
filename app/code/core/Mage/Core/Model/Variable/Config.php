@@ -15,7 +15,7 @@ class Mage_Core_Model_Variable_Config
     /**
      * Prepare variable wysiwyg config
      *
-     * @param Varien_Object $config
+     * @param \Maho\DataObject $config
      * @return array
      */
     public function getWysiwygPluginSettings($config)

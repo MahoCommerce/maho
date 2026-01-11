@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter extends Mage_Adminhtml_B
 
     public function initForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('_newsletter');
         $customer = Mage::registry('current_customer');
         $subscriber = Mage::getModel('newsletter/subscriber')->loadByCustomer($customer);

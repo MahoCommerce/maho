@@ -138,7 +138,7 @@ class Mage_Catalog_Model_Category_Api extends Mage_Catalog_Model_Api_Resource
      *
      * @return array
      */
-    protected function _nodeToArray(Varien_Data_Tree_Node $node)
+    protected function _nodeToArray(\Maho\Data\Tree\Node $node)
     {
         // Only basic category data
         $result = [];

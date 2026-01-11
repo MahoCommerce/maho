@@ -36,7 +36,7 @@ interface Mage_Widget_Block_Interface
      *
      * @param string|array $key
      * @param mixed $value
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function setData($key, $value = null);
 }

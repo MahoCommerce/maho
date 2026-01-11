@@ -96,7 +96,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Sales_Block_Ord
 
     public function getPackageHtml(array $package): string
     {
-        $packageObj = new Varien_Object($package);
+        $packageObj = new \Maho\DataObject($package);
         $html = '<div class="package-details">';
 
         // Package type

@@ -31,7 +31,7 @@ class Mage_Checkout_Model_Observer
         }
     }
 
-    public function salesQuoteSaveAfter(Varien_Event_Observer $observer)
+    public function salesQuoteSaveAfter(\Maho\Event\Observer $observer)
     {
         $quote = $observer->getEvent()->getQuote();
         /** @var Mage_Sales_Model_Quote $quote */
@@ -40,7 +40,7 @@ class Mage_Checkout_Model_Observer
         }
     }
 
-    public function encryptionKeyRegenerated(Varien_Event_Observer $observer): void
+    public function encryptionKeyRegenerated(\Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */
         $output = $observer->getEvent()->getOutput();

@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Front extends Mage
     {
         $model = Mage::registry('entity_attribute');
 
-        $form = new Varien_Data_Form(['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
+        $form = new \Maho\Data\Form(['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
 
         $fieldset = $form->addFieldset('base_fieldset', ['legend' => Mage::helper('catalog')->__('Frontend Properties')]);
 

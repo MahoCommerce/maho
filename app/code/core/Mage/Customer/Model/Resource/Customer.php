@@ -45,7 +45,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    protected function _beforeSave(Varien_Object $customer)
+    protected function _beforeSave(\Maho\DataObject $customer)
     {
         parent::_beforeSave($customer);
 
@@ -97,7 +97,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      * @return Mage_Eav_Model_Entity_Abstract
      */
     #[\Override]
-    protected function _afterSave(Varien_Object $customer)
+    protected function _afterSave(\Maho\DataObject $customer)
     {
         $this->_saveAddresses($customer);
         return parent::_afterSave($customer);
@@ -291,7 +291,7 @@ class Mage_Customer_Model_Resource_Customer extends Mage_Eav_Model_Entity_Abstra
      * @return $this
      */
     #[\Override]
-    public function setNewIncrementId(Varien_Object $object)
+    public function setNewIncrementId(\Maho\DataObject $object)
     {
         if (Mage::getStoreConfig(Mage_Customer_Model_Customer::XML_PATH_GENERATE_HUMAN_FRIENDLY_ID)) {
             parent::setNewIncrementId($object);

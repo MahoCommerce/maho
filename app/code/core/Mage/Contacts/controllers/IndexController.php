@@ -56,7 +56,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                     Mage::throwException($this->__('Invalid Form Key. Please submit your request again.'));
                 }
 
-                $postObject = new Varien_Object();
+                $postObject = new \Maho\DataObject();
                 $postObject->setData($post);
 
                 // check data

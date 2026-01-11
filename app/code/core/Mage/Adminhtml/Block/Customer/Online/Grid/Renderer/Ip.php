@@ -13,7 +13,7 @@
 class Mage_Adminhtml_Block_Customer_Online_Grid_Renderer_Ip extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         /**
          * The output of the "inet_ntop" function was disabled to prevent an error throwing

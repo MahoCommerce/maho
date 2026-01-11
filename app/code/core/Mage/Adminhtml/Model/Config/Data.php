@@ -30,7 +30,7 @@
  * @method string getWebsite()
  * @method $this setWebsite(string $value)
  */
-class Mage_Adminhtml_Model_Config_Data extends Varien_Object
+class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
 {
     public const SCOPE_DEFAULT  = 'default';
     public const SCOPE_WEBSITES = 'websites';
@@ -353,7 +353,7 @@ class Mage_Adminhtml_Model_Config_Data extends Varien_Object
      * @param null|bool $inherit
      * @param null|array $configData
      * @param-out bool $inherit
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     public function getConfigDataValue($path, &$inherit = null, $configData = null)
     {

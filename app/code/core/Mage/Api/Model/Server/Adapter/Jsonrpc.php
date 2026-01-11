@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mage_Api_Model_Server_Adapter_Interface
+class Mage_Api_Model_Server_Adapter_Jsonrpc extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
     protected $_jsonRpc = null;
 
@@ -53,7 +53,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
     /**
      * Retrieve webservice api controller. If no controller have been set - emulate it by the use of Varien_Object
      *
-     * @return Mage_Api_Controller_Action|Varien_Object
+     * @return Mage_Api_Controller_Action|\Maho\DataObject
      */
     #[\Override]
     public function getController()
@@ -61,7 +61,7 @@ class Mage_Api_Model_Server_Adapter_Jsonrpc extends Varien_Object implements Mag
         $controller = $this->getData('controller');
 
         if (null === $controller) {
-            $controller = new Varien_Object(
+            $controller = new \Maho\DataObject(
                 ['request' => Mage::app()->getRequest(), 'response' => Mage::app()->getResponse()],
             );
 

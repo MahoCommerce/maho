@@ -17,7 +17,7 @@ class Mage_Admin_Model_Observer
     /**
      * Handler for controller_action_predispatch event
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function actionPreDispatchAdmin($observer)
     {

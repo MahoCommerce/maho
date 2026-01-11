@@ -29,7 +29,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
     /**
      * Item object
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_item;
 
@@ -87,7 +87,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
      *
      * @return $this
      */
-    public function setItem(Varien_Object $item)
+    public function setItem(\Maho\DataObject $item)
     {
         $this->_item = $item;
         return $this;
@@ -96,7 +96,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
     /**
      * Get item object
      *
-     * @return Varien_Object|null
+     * @return \Maho\DataObject|null
      */
     public function getItem()
     {

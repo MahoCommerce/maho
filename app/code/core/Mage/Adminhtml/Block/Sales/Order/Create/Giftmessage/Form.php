@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
     /**
      * Entity for editing of gift message
      *
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     protected $_entity;
 
@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
      *
      * @return $this
      */
-    public function setEntity(Varien_Object $entity)
+    public function setEntity(\Maho\DataObject $entity)
     {
         $this->_entity  = $entity;
         return $this;
@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
     /**
      * Retrieve entity for form
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getEntity()
     {
@@ -118,7 +118,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $fieldset = $form->addFieldset('main', ['no_container' => true]);
 
         $fieldset->addField(
@@ -163,7 +163,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
      *
      * @return $this
      */
-    protected function _prepareHiddenFields(Varien_Data_Form_Element_Fieldset $fieldset)
+    protected function _prepareHiddenFields(\Maho\Data\Form\Element\Fieldset $fieldset)
     {
         $fieldset->addField(
             'sender',
@@ -196,7 +196,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage_Form extends Mage_Admi
      *
      * @return $this
      */
-    protected function _prepareVisibleFields(Varien_Data_Form_Element_Fieldset $fieldset)
+    protected function _prepareVisibleFields(\Maho\Data\Form\Element\Fieldset $fieldset)
     {
         $fieldset->addField(
             'sender',

@@ -47,7 +47,7 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
 
                 // If all was selected save it only and nothing else.
                 if ($postedResources === ['all']) {
-                    $insertData = $this->_prepareDataForTable(new Varien_Object($row), $this->getMainTable());
+                    $insertData = $this->_prepareDataForTable(new \Maho\DataObject($row), $this->getMainTable());
 
                     $adapter->insert($this->getMainTable(), $insertData);
                 } else {
@@ -55,7 +55,7 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
                         $row['permission']  = (in_array($resName, $postedResources) ? 'allow' : 'deny');
                         $row['resource_id'] = trim($resName, '/');
 
-                        $insertData = $this->_prepareDataForTable(new Varien_Object($row), $this->getMainTable());
+                        $insertData = $this->_prepareDataForTable(new \Maho\DataObject($row), $this->getMainTable());
                         $adapter->insert($this->getMainTable(), $insertData);
                     }
                 }

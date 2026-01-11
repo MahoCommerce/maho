@@ -48,16 +48,16 @@ class Mage_Sales_Model_Order_Pdf_Shipment_Packaging extends Mage_Sales_Model_Ord
     /**
      * Format pdf file
      *
-     * @param array|Varien_Data_Collection $shipments Array or collection of shipments
+     * @param array|\Maho\Data\Collection $shipments Array or collection of shipments
      */
     #[\Override]
-    public function getPdf(array|Varien_Data_Collection $shipments = []): string
+    public function getPdf(array|\Maho\Data\Collection $shipments = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('shipment');
 
         // Handle collections
-        if ($shipments instanceof Varien_Data_Collection) {
+        if ($shipments instanceof \Maho\Data\Collection) {
             $shipments = $shipments->getItems();
         }
 

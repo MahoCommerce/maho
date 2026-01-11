@@ -832,7 +832,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      * @param bool $sorted
      * @param bool $asCollection
      * @param bool $toLoad
-     * @return array|Mage_Catalog_Model_Resource_Category_Collection|Varien_Data_Collection|Varien_Data_Tree_Node_Collection
+     * @return array|Mage_Catalog_Model_Resource_Category_Collection|\Maho\Data\Collection|\Maho\Data\Tree\Node\Collection
      */
     public function getCategories($parent, $recursionLevel = 0, $sorted = false, $asCollection = false, $toLoad = true)
     {

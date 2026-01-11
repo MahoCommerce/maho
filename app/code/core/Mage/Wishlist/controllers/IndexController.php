@@ -198,7 +198,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 $requestParams = $session->getBeforeWishlistRequest();
                 $session->unsBeforeWishlistRequest();
             }
-            $buyRequest = new Varien_Object($requestParams);
+            $buyRequest = new \Maho\DataObject($requestParams);
 
             $result = $wishlist->addNewItem($product, $buyRequest);
             if (is_string($result)) {
@@ -265,7 +265,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             Mage::register('wishlist_item', $item);
 
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject();
             $params->setCategoryId(false);
             $params->setConfigureMode(true);
             $buyRequest = $item->getBuyRequest();
@@ -320,7 +320,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 return;
             }
 
-            $buyRequest = new Varien_Object($this->getRequest()->getPost());
+            $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
 
             $wishlist

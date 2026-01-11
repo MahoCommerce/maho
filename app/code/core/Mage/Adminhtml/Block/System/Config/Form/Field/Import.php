@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_System_Config_Form_Field_Import extends Varien_Data_Form_Element_Abstract
+class Mage_Adminhtml_Block_System_Config_Form_Field_Import extends \Maho\Data\Form\Element\AbstractElement
 {
     /**
      * @param array $data

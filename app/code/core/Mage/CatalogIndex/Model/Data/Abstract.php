@@ -280,7 +280,7 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
     public function getTypeInstance()
     {
         if (is_null($this->_typeInstance)) {
-            $product = new Varien_Object();
+            $product = new \Maho\DataObject();
             $product->setTypeId($this->getTypeCode());
             $this->_typeInstance = Mage::getSingleton('catalog/product_type')
                 ->factory($product, true);

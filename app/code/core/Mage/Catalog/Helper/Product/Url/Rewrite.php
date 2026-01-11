@@ -52,7 +52,7 @@ class Mage_Catalog_Helper_Product_Url_Rewrite extends Mage_Core_Helper_Abstract 
             ->where('is_system = ?', 1)
             ->where('category_id = ? OR category_id IS NULL', (int) $categoryId)
             ->where('product_id IN(?)', $productIds)
-            ->order('category_id ' . Varien_Data_Collection::SORT_ORDER_DESC);
+            ->order('category_id ' . \Maho\Data\Collection::SORT_ORDER_DESC);
     }
 
     /**

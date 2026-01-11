@@ -63,7 +63,7 @@ class Mage_Core_Model_Domainpolicy
      *
      * @return $this
      */
-    public function addDomainPolicyHeader(Varien_Event_Observer $observer)
+    public function addDomainPolicyHeader(\Maho\Event\Observer $observer)
     {
         $action = $observer->getControllerAction();
         $response = $action->getResponse();

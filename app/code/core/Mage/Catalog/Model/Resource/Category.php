@@ -98,7 +98,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @return $this
      */
     #[\Override]
-    protected function _beforeDelete(Varien_Object $object)
+    protected function _beforeDelete(\Maho\DataObject $object)
     {
         parent::_beforeDelete($object);
 
@@ -121,7 +121,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      *
      * @return $this
      */
-    public function deleteChildren(Varien_Object $object)
+    public function deleteChildren(\Maho\DataObject $object)
     {
         $adapter = $this->_getWriteAdapter();
         $pathField = $adapter->quoteIdentifier('path');
@@ -154,7 +154,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @return $this
      */
     #[\Override]
-    protected function _beforeSave(Varien_Object $object)
+    protected function _beforeSave(\Maho\DataObject $object)
     {
         parent::_beforeSave($object);
 
@@ -195,7 +195,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @param Mage_Catalog_Model_Category $object
      */
     #[\Override]
-    protected function _afterSave(Varien_Object $object)
+    protected function _afterSave(\Maho\DataObject $object)
     {
         /**
          * Add identifier for new category
@@ -535,7 +535,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @param bool|string $sorted
      * @param bool $asCollection
      * @param bool $toLoad
-     * @return Varien_Data_Tree_Node_Collection|Mage_Catalog_Model_Resource_Category_Collection
+     * @return \Maho\Data\Tree\Node\Collection|Mage_Catalog_Model_Resource_Category_Collection
      */
     public function getCategories($parent, $recursionLevel = 0, $sorted = false, $asCollection = false, $toLoad = true)
     {

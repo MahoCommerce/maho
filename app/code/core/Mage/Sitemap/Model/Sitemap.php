@@ -61,7 +61,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $realPath = $io->getCleanPath(Mage::getBaseDir() . '/' . $this->getSitemapPath());
 
         /**
@@ -223,7 +223,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 }
             }
 
-            $categories = new Varien_Object();
+            $categories = new \Maho\DataObject();
             $categories->setItems($chunk);
             Mage::dispatchEvent('sitemap_categories_generating_before', [
                 'collection' => $categories,
@@ -276,7 +276,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 }
             }
 
-            $products = new Varien_Object();
+            $products = new \Maho\DataObject();
             $products->setItems($chunk);
             Mage::dispatchEvent('sitemap_products_generating_before', [
                 'collection' => $products,
@@ -315,7 +315,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $totalItems = count($fullCollection);
         $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
         foreach ($chunks as $pageNumber => $chunk) {
-            $pages = new Varien_Object();
+            $pages = new \Maho\DataObject();
             $pages->setItems($chunk);
             Mage::dispatchEvent('sitemap_cms_pages_generating_before', [
                 'collection' => $pages,
@@ -412,9 +412,9 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Open and initialize a sitemap file
      */
-    protected function openSitemapFile(string $filename): Varien_Io_File
+    protected function openSitemapFile(string $filename): \Maho\Io\File
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
         // Files should be saved in public directory for web accessibility
@@ -442,7 +442,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             return;
         }
 
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
         // Files should be saved in public directory for web accessibility

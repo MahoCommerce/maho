@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_System_Store_Delete_Form extends Mage_Adminhtml_Block
     {
         $dataObject = $this->getDataObject();
 
-        $form = new Varien_Data_Form(['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
+        $form = new \Maho\Data\Form(['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
 
         $form->setHtmlIdPrefix('store_');
 

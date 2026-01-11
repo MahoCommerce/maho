@@ -69,7 +69,7 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
         $id = false;
         if (is_array($data) && isset($data[$key])) {
             $id = $data[$key];
-        } elseif ($data instanceof Varien_Object && $data->getData($key)) {
+        } elseif ($data instanceof \Maho\DataObject && $data->getData($key)) {
             $id = $data->getData($key);
         }
         if ($id) {

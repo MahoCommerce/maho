@@ -10,7 +10,7 @@
 
 class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abstract
 {
-    public function initControllerRouters(Varien_Event_Observer $observer): void
+    public function initControllerRouters(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Core_Controller_Varien_Front $front */
         $front = $observer->getEvent()->getFront();

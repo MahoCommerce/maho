@@ -140,7 +140,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Subselect extends Ma
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         if (!$this->getConditions()) {
             return false;

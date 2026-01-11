@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Grid_Renderer_Type extends Mage
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $str = self::$_types[$row->getTemplateType()] ?? Mage::helper('adminhtml')->__('Unknown');
         return Mage::helper('adminhtml')->__($str);

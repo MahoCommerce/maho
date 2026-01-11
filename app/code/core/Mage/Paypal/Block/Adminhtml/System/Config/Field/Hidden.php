@@ -15,7 +15,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Field_Hidden extends Mage_Adminh
     /**
      * Decorate field row html to be invisible
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @param string $html
      * @return string
      */

@@ -21,10 +21,10 @@ class Mage_Sales_Block_Adminhtml_Report_Filter_Form_Order extends Mage_Sales_Blo
         parent::_prepareForm();
         $form = $this->getForm();
         $htmlIdPrefix = $form->getHtmlIdPrefix();
-        /** @var Varien_Data_Form_Element_Fieldset $fieldset */
+        /** @var \Maho\Data\Form\Element\Fieldset $fieldset */
         $fieldset = $this->getForm()->getElement('base_fieldset');
 
-        if (is_object($fieldset) && $fieldset instanceof Varien_Data_Form_Element_Fieldset) {
+        if (is_object($fieldset) && $fieldset instanceof \Maho\Data\Form\Element\Fieldset) {
             $fieldset->addField('show_actual_columns', 'select', [
                 'name'       => 'show_actual_columns',
                 'options'    => [

@@ -68,7 +68,7 @@ class Mage_Cms_Block_Page extends Mage_Core_Block_Abstract
                     'title' => $page->getTitle(),
                 ],
             ];
-            $breadcrumbsObject = new Varien_Object();
+            $breadcrumbsObject = new \Maho\DataObject();
             $breadcrumbsObject->setCrumbs($breadcrumbsArray);
 
             Mage::dispatchEvent('cms_generate_breadcrumbs', ['breadcrumbs' => $breadcrumbsObject]);

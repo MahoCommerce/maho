@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Tab_Main extends Mage_Adminhtml
     {
         $model = Mage::registry('permissions_user');
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $form->setHtmlIdPrefix('user_');
 

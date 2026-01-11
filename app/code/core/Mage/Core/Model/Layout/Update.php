@@ -364,7 +364,7 @@ class Mage_Core_Model_Layout_Update
         }
         $updateStr = '<update_xml>' . $updateStr . '</update_xml>';
         $updateStr = str_replace($this->_subst['from'], $this->_subst['to'], $updateStr);
-        /** @var Varien_Simplexml_Element $updateXml */
+        /** @var \Maho\Simplexml\Element $updateXml */
         $updateXml = simplexml_load_string($updateStr, $this->getElementClass());
         $this->fetchRecursiveUpdates($updateXml);
         $this->addUpdate($updateXml->innerXml());
@@ -456,7 +456,7 @@ class Mage_Core_Model_Layout_Update
             }
             $fileStr = file_get_contents($filename);
             $fileStr = str_replace($this->_subst['from'], $this->_subst['to'], $fileStr);
-            /** @var Varien_Simplexml_Element $fileXml */
+            /** @var \Maho\Simplexml\Element $fileXml */
             $fileXml = simplexml_load_string($fileStr, $elementClass);
             if (!$fileXml instanceof SimpleXMLElement) {
                 continue;

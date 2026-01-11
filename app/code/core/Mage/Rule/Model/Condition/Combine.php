@@ -130,7 +130,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getAggregatorElement()
     {
@@ -149,7 +149,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
         ]);
 
         $renderer = Mage::getBlockSingleton('rule/editable');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $element->setRenderer($renderer);
         }
 
@@ -308,7 +308,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getNewChildElement()
     {
@@ -319,7 +319,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
         ]);
 
         $renderer = Mage::getBlockSingleton('rule/newchild');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $element->setRenderer($renderer);
         }
 
@@ -368,7 +368,7 @@ class Mage_Rule_Model_Condition_Combine extends Mage_Rule_Model_Condition_Abstra
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         if (!$this->getConditions()) {
             return true;

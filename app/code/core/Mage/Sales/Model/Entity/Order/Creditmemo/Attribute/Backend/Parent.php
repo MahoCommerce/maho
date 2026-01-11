@@ -13,7 +13,7 @@
 class Mage_Sales_Model_Entity_Order_Creditmemo_Attribute_Backend_Parent extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
-     * @param Varien_Object|Mage_Sales_Model_Order_Creditmemo $object
+     * @param \Maho\DataObject|Mage_Sales_Model_Order_Creditmemo $object
      * @return $this
      */
     #[\Override]
