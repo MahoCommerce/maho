@@ -23,13 +23,46 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
         $value = $object->getData($name);
         $oldValue = $object->getOrigData($name);
 
+        // Handle delete
         if (is_array($value) && !empty($value['delete'])) {
+            if ($oldValue) {
+                $this->_deleteFile($oldValue);
+            }
+
+            $adapter = $object->getResource()->getWriteConnection();
+            $table = $this->getAttribute()->getBackend()->getTable();
+            $storeId = $object->getStoreId();
+            $entityId = $object->getId();
+            $attributeId = $this->getAttribute()->getId();
+
+            // Find the actual store_id used in database
+            $existingStoreId = $adapter->fetchOne(
+                $adapter->select()
+                    ->from($table, 'store_id')
+                    ->where('entity_id = ?', $entityId)
+                    ->where('attribute_id = ?', $attributeId)
+                    ->where('store_id IN (?)', [$storeId, 0])
+                    ->order('store_id DESC')
+            );
+
+            $actualStoreId = $existingStoreId !== false ? $existingStoreId : $storeId;
+
+            $adapter->update(
+                $table,
+                ['value' => ''],
+                [
+                    'entity_id = ?' => $entityId,
+                    'attribute_id = ?' => $attributeId,
+                    'store_id = ?' => $actualStoreId
+                ]
+            );
+
             $object->setData($name, '');
-            $this->getAttribute()->getEntity()->saveAttribute($object, $name);
             return $this;
         }
 
-        if (!empty($_FILES[$name])) {
+        // Handle file upload
+        if (!empty($_FILES[$name]['name'])) {
             try {
                 $validator = Mage::getModel('core/file_validator_image');
                 $uploader  = Mage::getModel('core/file_uploader', $name);
@@ -37,18 +70,58 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                 $uploader->setAllowRenameFiles(true);
                 $uploader->setFilesDispersion(false);
                 $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
-                $result = $uploader->save(Mage::getBaseDir('media') . DS . 'blog');
+                $result = $uploader->save(Mage::getBaseDir('media') . '/blog');
 
                 if ($result && isset($result['file'])) {
                     $fileName = $result['file'];
 
-                    // Delete old file if we're replacing it
+                    // Delete old file if replacing
                     if ($oldValue && $oldValue !== $fileName) {
                         $this->_deleteFile($oldValue);
                     }
 
+                    $adapter = $object->getResource()->getWriteConnection();
+                    $table = $this->getAttribute()->getBackend()->getTable();
+                    $storeId = $object->getStoreId();
+                    $entityId = $object->getId();
+                    $attributeId = $this->getAttribute()->getId();
+
+                    // Check if row exists
+                    $existingStoreId = $adapter->fetchOne(
+                        $adapter->select()
+                            ->from($table, 'store_id')
+                            ->where('entity_id = ?', $entityId)
+                            ->where('attribute_id = ?', $attributeId)
+                            ->where('store_id IN (?)', [$storeId, 0])
+                            ->order('store_id DESC')
+                    );
+
+                    if ($existingStoreId !== false) {
+                        // Row exists, UPDATE it
+                        $adapter->update(
+                            $table,
+                            ['value' => $fileName],
+                            [
+                                'entity_id = ?' => $entityId,
+                                'attribute_id = ?' => $attributeId,
+                                'store_id = ?' => $existingStoreId
+                            ]
+                        );
+                    } else {
+                        // No row exists, INSERT it
+                        $adapter->insert(
+                            $table,
+                            [
+                                'entity_type_id' => $object->getEntityTypeId(),
+                                'attribute_id' => $attributeId,
+                                'store_id' => 0,
+                                'entity_id' => $entityId,
+                                'value' => $fileName
+                            ]
+                        );
+                    }
+
                     $object->setData($name, $fileName);
-                    $this->getAttribute()->getEntity()->saveAttribute($object, $name);
                 }
             } catch (Exception $e) {
                 if ($e->getCode() != UPLOAD_ERR_NO_FILE) {
@@ -82,14 +155,13 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . DS . 'blog';
-            $filePath = $baseDir . DS . $fileName;
+            $baseDir = Mage::getBaseDir('media') . '/blog';
+            $filePath = $baseDir . '/' . $fileName;
 
             if (file_exists($filePath)) {
                 unlink($filePath);
             }
         } catch (Exception $e) {
-            // Silently fail - file deletion is not critical
             Mage::logException($e);
         }
     }
