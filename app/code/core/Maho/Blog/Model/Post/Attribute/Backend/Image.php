@@ -65,10 +65,12 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     /**
      * Save attribute value to database
      * Uses direct SQL to avoid UNIQUE constraint violations from double-save
+     *
+     * @param \Maho\DataObject $object
      */
-    protected function _saveAttributeValue($object, string $value): void
+    protected function _saveAttributeValue(\Maho\DataObject $object, string $value): void
     {
-        $adapter = $object->getResource()->getWriteConnection();
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
         $table = $this->getAttribute()->getBackend()->getTable();
         $storeId = $object->getStoreId();
         $entityId = $object->getId();
@@ -81,7 +83,7 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                 ->where('entity_id = ?', $entityId)
                 ->where('attribute_id = ?', $attributeId)
                 ->where('store_id IN (?)', [$storeId, 0])
-                ->order('store_id DESC')
+                ->order('store_id DESC'),
         );
 
         if ($existingStoreId !== false) {
@@ -92,8 +94,8 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                 [
                     'entity_id = ?' => $entityId,
                     'attribute_id = ?' => $attributeId,
-                    'store_id = ?' => $existingStoreId
-                ]
+                    'store_id = ?' => $existingStoreId,
+                ],
             );
         } else {
             // No row exists, INSERT it
@@ -104,8 +106,8 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                     'attribute_id' => $attributeId,
                     'store_id' => 0,
                     'entity_id' => $entityId,
-                    'value' => $value
-                ]
+                    'value' => $value,
+                ],
             );
         }
 
