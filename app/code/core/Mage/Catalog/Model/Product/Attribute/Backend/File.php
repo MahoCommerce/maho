@@ -1,24 +1,54 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
+class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
-    public function getAllowedExtensions(): array
+    /**
+     * Get file extension validator
+     */
+    protected function getExtensionValidator(): Mage_Core_Model_File_Validator_Extension
     {
-        return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
+        $validator = Mage::getModel('core/file_validator_extension');
+
+        // Set attribute-specific allowed extensions if configured
+        $attribute = $this->getAttribute();
+        if ($attribute && $attribute->getData('file_extensions')) {
+            $extensions = array_filter(array_map('trim', explode(',', $attribute->getData('file_extensions'))));
+            if (!empty($extensions)) {
+                $validator->setAllowedExtensions($extensions);
+            }
+        }
+
+        return $validator;
+    }
+
+    /**
+     * Validate file extension using validator
+     *
+     * @throws Mage_Core_Exception
+     */
+    protected function validateFileExtension(string $fileName): void
+    {
+        $validator = $this->getExtensionValidator();
+
+        if (!$validator->isValid($fileName)) {
+            $messages = $validator->getMessages();
+            Mage::throwException(implode(' ', $messages));
+        }
     }
 
     /**
      * Save uploaded file and set its name to product attribute
+     *
      * @param \Maho\DataObject $object
      * @return $this
      */
@@ -37,13 +67,22 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
 
         if (!empty($_FILES[$name])) {
             try {
-                $validator = Mage::getModel('core/file_validator_image');
+                // Validate file extension first
+                $originalFileName = $_FILES[$name]['name'] ?? '';
+                if ($originalFileName) {
+                    $this->validateFileExtension($originalFileName);
+                }
+
                 $uploader  = Mage::getModel('core/file_uploader', $name);
-                $uploader->setAllowedExtensions($this->getAllowedExtensions());
+                // Only set allowed extensions if specifically configured
+                $validator = $this->getExtensionValidator();
+                $allowedExtensions = $validator->getAllowedExtensions();
+                if ($allowedExtensions !== null) {
+                    $uploader->setAllowedExtensions($allowedExtensions);
+                }
                 $uploader->setAllowRenameFiles(true);
                 $uploader->setFilesDispersion(true);
-                $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
-                $uploader->save(Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product');
+                $uploader->save(Mage::getBaseDir('media') . DS . 'catalog' . DS . 'files');
 
                 $fileName = $uploader->getUploadedFileName();
                 if ($fileName) {
@@ -58,10 +97,24 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
             } catch (Exception $e) {
                 if ($e->getCode() != UPLOAD_ERR_NO_FILE) {
                     Mage::logException($e);
+                    // Re-throw to show error to user
+                    throw $e;
                 }
             }
         }
 
+        return $this;
+    }
+
+    /**
+     * After load method - no special handling needed for files
+     *
+     * @param \Maho\DataObject $object
+     * @return $this
+     */
+    #[\Override]
+    public function afterLoad($object)
+    {
         return $this;
     }
 
@@ -87,7 +140,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
     protected function _deleteFile(string $fileName): void
     {
         try {
-            $baseDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product';
+            $baseDir = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'files';
             $filePath = $baseDir . DS . $fileName;
 
             if (file_exists($filePath)) {
