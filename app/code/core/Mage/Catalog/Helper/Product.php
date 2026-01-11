@@ -230,6 +230,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
             ],
             'file'          => [
                 'backend_model'     => 'catalog/product_attribute_backend_file',
+                'frontend_model'    => 'catalog/product_attribute_frontend_file',
             ],
         ];
 
@@ -265,6 +266,21 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
         $inputTypes = $this->getAttributeInputTypes();
         if (!empty($inputTypes[$inputType]['source_model'])) {
             return $inputTypes[$inputType]['source_model'];
+        }
+        return null;
+    }
+
+    /**
+     * Return default attribute frontend model by input type
+     *
+     * @param string $inputType
+     * @return string|null
+     */
+    public function getAttributeFrontendModelByInputType($inputType)
+    {
+        $inputTypes = $this->getAttributeInputTypes();
+        if (!empty($inputTypes[$inputType]['frontend_model'])) {
+            return $inputTypes[$inputType]['frontend_model'];
         }
         return null;
     }

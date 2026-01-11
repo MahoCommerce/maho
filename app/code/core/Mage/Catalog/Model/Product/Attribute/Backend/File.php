@@ -17,6 +17,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_E
      */
     protected function getExtensionValidator(): Mage_Core_Model_File_Validator_Extension
     {
+        /** @var Mage_Core_Model_File_Validator_Extension $validator */
         $validator = Mage::getModel('core/file_validator_extension');
 
         // Set attribute-specific allowed extensions if configured
@@ -60,12 +61,32 @@ class Mage_Catalog_Model_Product_Attribute_Backend_File extends Mage_Eav_Model_E
         $oldValue = $object->getOrigData($name);
 
         if (is_array($value) && !empty($value['delete'])) {
-            $object->setData($name, '');
+            // Delete the physical file
+            if ($oldValue) {
+                $this->_deleteFile($oldValue);
+            }
+            $object->setData($name, null);
             $this->getAttribute()->getEntity()->saveAttribute($object, $name);
             return $this;
         }
 
+        // Handle both $_FILES[$name] and $_FILES['product'][$name] structures
+        $fileData = null;
         if (!empty($_FILES[$name])) {
+            $fileData = $name;
+        } elseif (!empty($_FILES['product']['name'][$name])) {
+            // File is in product array, need to restructure for uploader
+            $_FILES[$name] = [
+                'name' => $_FILES['product']['name'][$name],
+                'type' => $_FILES['product']['type'][$name],
+                'tmp_name' => $_FILES['product']['tmp_name'][$name],
+                'error' => $_FILES['product']['error'][$name],
+                'size' => $_FILES['product']['size'][$name],
+            ];
+            $fileData = $name;
+        }
+
+        if ($fileData) {
             try {
                 // Validate file extension first
                 $originalFileName = $_FILES[$name]['name'] ?? '';

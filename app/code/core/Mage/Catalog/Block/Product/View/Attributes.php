@@ -41,8 +41,16 @@ class Mage_Catalog_Block_Product_View_Attributes extends Mage_Core_Block_Templat
                 $value = $attribute->getFrontend()->getValue($product);
 
                 if (!$product->hasData($attribute->getAttributeCode())) {
+                    // Skip file attributes when they have no data
+                    if ($attribute->getFrontendInput() == 'file') {
+                        continue;
+                    }
                     $value = Mage::helper('catalog')->__('N/A');
                 } elseif (is_null($value) || $value === false || $value === '') {
+                    // Skip file attributes when empty instead of showing "No"
+                    if ($attribute->getFrontendInput() == 'file') {
+                        continue;
+                    }
                     $value = Mage::helper('catalog')->__('No');
                 } elseif ($attribute->getFrontendInput() == 'price' && is_string($value)) {
                     $value = Mage::app()->getStore()->convertPrice($value, true);

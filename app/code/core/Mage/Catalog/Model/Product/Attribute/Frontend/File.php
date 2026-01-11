@@ -25,7 +25,7 @@ class Mage_Catalog_Model_Product_Attribute_Frontend_File extends Mage_Eav_Model_
         $fileName = $object->getData($this->getAttribute()->getAttributeCode());
 
         if ($fileName) {
-            return Mage::app()->getStore($object->getStore())->getBaseUrl('media') . 'catalog/files/' . $fileName;
+            return Mage::app()->getStore($object->getStore())->getBaseUrl('media') . 'catalog/files/' . ltrim($fileName, '/');
         }
 
         return false;
@@ -60,11 +60,26 @@ class Mage_Catalog_Model_Product_Attribute_Frontend_File extends Mage_Eav_Model_
         $fileName = $this->getFileName($object);
 
         if ($url && $fileName) {
-            return '<a href="' . Mage::helper('core')->escapeHtml($url) . '" target="_blank" class="product-file-link">'
+            $icon = Mage::helper('core')->getIconSvg('file-download');
+
+            return '<a href="' . Mage::helper('core')->escapeHtml($url) . '" target="_blank" class="product-file-link" style="display: inline-flex; align-items: center; gap: 0.25rem;">'
+                . $icon
                 . Mage::helper('core')->escapeHtml($fileName)
                 . '</a>';
         }
 
         return '';
+    }
+
+    /**
+     * Get attribute value for display (calls getValueAsHtml)
+     *
+     * @param \Maho\DataObject $object
+     * @return string
+     */
+    #[\Override]
+    public function getValue(\Maho\DataObject $object)
+    {
+        return $this->getValueAsHtml($object);
     }
 }

@@ -53,9 +53,10 @@ class Mage_Core_Model_File_Validator_Extension
      */
     protected string $forbiddenConfigPath = 'catalog/custom_options/forbidden_extensions';
 
-    public function __construct(?string $forbiddenConfigPath = null)
+    public function __construct(mixed $forbiddenConfigPath = null)
     {
-        if ($forbiddenConfigPath !== null) {
+        // Handle both direct instantiation and Mage::getModel() calls
+        if (is_string($forbiddenConfigPath)) {
             $this->forbiddenConfigPath = $forbiddenConfigPath;
         }
         $this->initMessageTemplates();
