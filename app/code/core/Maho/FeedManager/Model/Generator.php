@@ -376,15 +376,6 @@ class Maho_FeedManager_Model_Generator
         // Apply product type filter
         $this->_applyProductTypeFilter($collection);
 
-        // Only visible products by default
-        $collection->addAttributeToFilter('visibility', [
-            'in' => [
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH,
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
-            ],
-        ]);
-
         // Collect validated attributes from conditions for efficient loading
         $conditions = $this->_feed->getConditions();
         if (method_exists($conditions, 'collectValidatedAttributes')) {
@@ -1470,15 +1461,6 @@ class Maho_FeedManager_Model_Generator
 
         // Only enabled products
         $collection->addAttributeToFilter('status', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-
-        // Only visible products
-        $collection->addAttributeToFilter('visibility', [
-            'in' => [
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH,
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
-            ],
-        ]);
 
         // Apply product type filter if set
         $includeTypes = $this->_feed->getData('include_product_types');

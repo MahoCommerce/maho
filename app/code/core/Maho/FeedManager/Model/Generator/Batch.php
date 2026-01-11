@@ -587,15 +587,6 @@ class Maho_FeedManager_Model_Generator_Batch
             $collection->addAttributeToFilter('type_id', ['in' => $types]);
         }
 
-        // Only visible products
-        $collection->addAttributeToFilter('visibility', [
-            'in' => [
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH,
-                Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH,
-            ],
-        ]);
-
         // Collect validated attributes from conditions
         $conditions = $this->_feed->getConditions();
         if (method_exists($conditions, 'collectValidatedAttributes')) {
