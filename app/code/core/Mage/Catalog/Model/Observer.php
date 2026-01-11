@@ -297,6 +297,11 @@ class Mage_Catalog_Model_Observer
             ],
         ];
 
+        // Sort types alphabetically by label
+        usort($types, function ($a, $b) {
+            return strcmp($a['label'], $b['label']);
+        });
+
         $response->setTypes($types);
 
         return $this;
