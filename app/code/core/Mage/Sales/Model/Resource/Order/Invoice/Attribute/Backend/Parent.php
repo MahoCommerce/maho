@@ -15,7 +15,7 @@ class Mage_Sales_Model_Resource_Order_Invoice_Attribute_Backend_Parent extends M
     /**
      * Method is invoked after save
      *
-     * @param Varien_Object|Mage_Sales_Model_Order_Invoice $object
+     * @param \Maho\DataObject|Mage_Sales_Model_Order_Invoice $object
      * @return $this
      */
     #[\Override]

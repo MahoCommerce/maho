@@ -12,7 +12,7 @@
 class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_EntityName extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $entityName = $row->getData($this->getColumn()->getIndex());
 
@@ -31,7 +31,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid_Renderer_EntityName ex
     }
 
     #[\Override]
-    public function renderExport(Varien_Object $row)
+    public function renderExport(\Maho\DataObject $row)
     {
         $entityName = $row->getData($this->getColumn()->getIndex());
 

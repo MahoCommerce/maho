@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Apply extends Varien_Data_Form_Element_Multiselect
+class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Apply extends \Maho\Data\Form\Element\Multiselect
 {
     #[\Override]
     public function getElementHtml()

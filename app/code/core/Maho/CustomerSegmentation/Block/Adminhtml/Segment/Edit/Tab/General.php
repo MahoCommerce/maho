@@ -17,7 +17,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_General extends
     protected function _prepareForm(): self
     {
         $model = Mage::registry('current_customer_segment');
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setUseContainer(false);
 
         $fieldset = $form->addFieldset('general_fieldset', [

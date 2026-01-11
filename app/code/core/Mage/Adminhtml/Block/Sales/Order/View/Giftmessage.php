@@ -86,7 +86,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Giftmessage extends Mage_Adminhtml_B
      * @param Mage_Sales_Model_Order $entity
      * @return $this
      */
-    public function setEntity(Varien_Object $entity)
+    public function setEntity(\Maho\DataObject $entity)
     {
         $this->_entity  = $entity;
         return $this;

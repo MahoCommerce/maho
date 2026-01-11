@@ -87,7 +87,7 @@ class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template
      *
      * @return string
      */
-    protected function _getItemType(Varien_Object $item)
+    protected function _getItemType(\Maho\DataObject $item)
     {
         if ($item->getOrderItem()) {
             $type = $item->getOrderItem()->getProductType();
@@ -104,7 +104,7 @@ class Mage_Sales_Block_Items_Abstract extends Mage_Core_Block_Template
      *
      * @return  string
      */
-    public function getItemHtml(Varien_Object $item)
+    public function getItemHtml(\Maho\DataObject $item)
     {
         $type = $this->_getItemType($item);
 

@@ -355,7 +355,7 @@ HTML;
      * @param string $key
      * @return mixed
      */
-    public function getObjectData(Varien_Object $object, $key)
+    public function getObjectData(\Maho\DataObject $object, $key)
     {
         return $object->getDataUsingMethod((string) $key);
     }

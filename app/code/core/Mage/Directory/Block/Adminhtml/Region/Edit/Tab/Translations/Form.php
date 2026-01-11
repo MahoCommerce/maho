@@ -15,7 +15,7 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Translations_Form extends M
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('translation_');
 
         $fieldset = $form->addFieldset('add_fieldset', [

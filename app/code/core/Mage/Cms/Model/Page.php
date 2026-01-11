@@ -123,7 +123,7 @@ class Mage_Cms_Model_Page extends Mage_Core_Model_Abstract
      */
     public function getAvailableStatuses()
     {
-        $statuses = new Varien_Object([
+        $statuses = new \Maho\DataObject([
             self::STATUS_ENABLED => Mage::helper('cms')->__('Enabled'),
             self::STATUS_DISABLED => Mage::helper('cms')->__('Disabled'),
         ]);

@@ -537,7 +537,7 @@ class Mage_Eav_Model_Config
      * Get codes of all entity type attributes
      *
      * @param Mage_Eav_Model_Entity_Type $entityType
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return array
      * @throws Mage_Core_Exception
      * @throws Exception
@@ -546,14 +546,14 @@ class Mage_Eav_Model_Config
     {
         $entityType = $this->getEntityType($entityType);
         $attributeSetId = 0;
-        if (($object instanceof Varien_Object) && $object->getAttributeSetId()) {
+        if (($object instanceof \Maho\DataObject) && $object->getAttributeSetId()) {
             $attributeSetId = $object->getAttributeSetId();
         }
 
         // Technically store id is irrelevant for attribute sets, they are the same in all store scopes.
         // Use current store id when not specified to avoid loading two store-scope attribute data sets from cache
         $storeId = $this->_storeId();
-        if (($object instanceof Varien_Object) && $object->getStoreId()) {
+        if (($object instanceof \Maho\DataObject) && $object->getStoreId()) {
             $storeId = $object->getStoreId();
         }
         $this->_initializeStore($storeId);

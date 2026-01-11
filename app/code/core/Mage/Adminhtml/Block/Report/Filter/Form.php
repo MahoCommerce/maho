@@ -97,7 +97,7 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
     protected function _prepareForm()
     {
         $actionUrl = $this->getUrl('*/*/sales');
-        $form = new Varien_Data_Form(
+        $form = new \Maho\Data\Form(
             ['id' => 'filter_form', 'action' => $actionUrl, 'method' => 'get'],
         );
         $htmlIdPrefix = 'sales_report_';
@@ -188,10 +188,10 @@ class Mage_Adminhtml_Block_Report_Filter_Form extends Mage_Adminhtml_Block_Widge
     {
         $result = parent::_beforeToHtml();
 
-        /** @var Varien_Data_Form_Element_Fieldset $fieldset */
+        /** @var \Maho\Data\Form\Element\Fieldset $fieldset */
         $fieldset = $this->getForm()->getElement('base_fieldset');
 
-        if (is_object($fieldset) && $fieldset instanceof Varien_Data_Form_Element_Fieldset) {
+        if (is_object($fieldset) && $fieldset instanceof \Maho\Data\Form\Element\Fieldset) {
             // apply field visibility
             foreach ($fieldset->getElements() as $field) {
                 if (!$this->getFieldVisibility($field->getId())) {

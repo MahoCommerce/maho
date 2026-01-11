@@ -55,9 +55,9 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
     {
         if (is_null($this->_batchExport)) {
             $object = Mage::getModel('dataflow/batch_export');
-            $this->_batchExport = Varien_Object_Cache::singleton()->save($object);
+            $this->_batchExport = \Maho\DataObject\Cache::singleton()->save($object);
         }
-        return Varien_Object_Cache::singleton()->load($this->_batchExport);
+        return \Maho\DataObject\Cache::singleton()->load($this->_batchExport);
     }
 
     /**
@@ -69,9 +69,9 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
     {
         if (is_null($this->_batchImport)) {
             $object = Mage::getModel('dataflow/batch_import');
-            $this->_batchImport = Varien_Object_Cache::singleton()->save($object);
+            $this->_batchImport = \Maho\DataObject\Cache::singleton()->save($object);
         }
-        return Varien_Object_Cache::singleton()->load($this->_batchImport);
+        return \Maho\DataObject\Cache::singleton()->load($this->_batchImport);
     }
 
     #[\Override]

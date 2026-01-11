@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     protected $_configDataObject;
 
     /**
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_configRoot;
 
@@ -95,7 +95,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     {
         $this->_initObjects();
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $sections = $this->_configFields->getSection(
             $this->getSectionCode(),
@@ -106,7 +106,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
             $sections = [];
         }
         foreach ($sections as $section) {
-            /** @var Varien_Simplexml_Element $section */
+            /** @var \Maho\Simplexml\Element $section */
             if (!$this->_canShowField($section)) {
                 continue;
             }
@@ -130,10 +130,10 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Init config group
      *
-     * @param Varien_Data_Form $form
-     * @param Varien_Simplexml_Element $group
-     * @param Varien_Simplexml_Element $section
-     * @param Varien_Data_Form_Element_Fieldset|null $parentElement
+     * @param \Maho\Data\Form $form
+     * @param \Maho\Simplexml\Element $group
+     * @param \Maho\Simplexml\Element $section
+     * @param \Maho\Data\Form\Element\Fieldset|null $parentElement
      */
     protected function _initGroup($form, $group, $section, $parentElement = null)
     {
@@ -154,7 +154,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                 $fieldsetConfig['expanded'] = (bool) $group->expanded;
             }
 
-            $fieldset = new Varien_Data_Form_Element_Fieldset($fieldsetConfig);
+            $fieldset = new \Maho\Data\Form\Element\Fieldset($fieldsetConfig);
             $fieldset->setId($section->getName() . '_' . $group->getName())
                 ->setRenderer($fieldsetRenderer)
                 ->setGroup($group);
@@ -205,9 +205,9 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Build the dependence array while resolving field names and checking element visibility
      *
-     * @param Varien_Simplexml_Element $node
-     * @param Varien_Simplexml_Element $group
-     * @param Varien_Simplexml_Element $section
+     * @param \Maho\Simplexml\Element $node
+     * @param \Maho\Simplexml\Element $group
+     * @param \Maho\Simplexml\Element $section
      * @param string $fieldPrefix
      * @return array
      */
@@ -270,9 +270,9 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Init fieldset fields
      *
-     * @param Varien_Data_Form_Element_Fieldset $fieldset
-     * @param Varien_Simplexml_Element $group
-     * @param Varien_Simplexml_Element $section
+     * @param \Maho\Data\Form\Element\Fieldset $fieldset
+     * @param \Maho\Simplexml\Element $group
+     * @param \Maho\Simplexml\Element $section
      * @param string $fieldPrefix
      * @param string $labelPrefix
      * @throw Mage_Core_Exception
@@ -428,7 +428,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
                     if (!$sourceModel) {
                         Mage::throwException("Source model '{$factoryName}' is not found");
                     }
-                    if ($sourceModel instanceof Varien_Object) {
+                    if ($sourceModel instanceof \Maho\DataObject) {
                         $sourceModel->setPath($path);
                     }
 
@@ -459,7 +459,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Return config root node for current scope
      *
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     public function getConfigRoot()
     {
@@ -472,8 +472,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Set "original_data" array to the element, composed from nodes with scalar values
      *
-     * @param Varien_Data_Form_Element_Abstract $field
-     * @param Varien_Simplexml_Element $xmlElement
+     * @param \Maho\Data\Form\Element\AbstractElement $field
+     * @param \Maho\Simplexml\Element $xmlElement
      */
     protected function _prepareFieldOriginalData($field, $xmlElement)
     {
@@ -556,8 +556,8 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @param Varien_Simplexml_Element $a
-     * @param Varien_Simplexml_Element $b
+     * @param \Maho\Simplexml\Element $a
+     * @param \Maho\Simplexml\Element $b
      * @return int
      */
     protected function _sortForm($a, $b)
@@ -566,7 +566,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @param Varien_Simplexml_Element $field
+     * @param \Maho\Simplexml\Element $field
      * @return bool
      */
     public function canUseDefaultValue($field)
@@ -581,7 +581,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     }
 
     /**
-     * @param Varien_Simplexml_Element $field
+     * @param \Maho\Simplexml\Element $field
      * @return bool
      */
     public function canUseWebsiteValue($field)
@@ -595,7 +595,7 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
     /**
      * Checking field visibility
      *
-     * @param   Varien_Simplexml_Element $field
+     * @param \Maho\Simplexml\Element $field
      * @return  bool
      */
     protected function _canShowField($field)

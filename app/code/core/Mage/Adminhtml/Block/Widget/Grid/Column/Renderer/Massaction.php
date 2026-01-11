@@ -45,7 +45,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Massaction extends Mage_A
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         if ($this->getColumn()->getGrid()->getMassactionIdFieldOnlyIndexValue()) {
             $this->setNoObjectId(true);

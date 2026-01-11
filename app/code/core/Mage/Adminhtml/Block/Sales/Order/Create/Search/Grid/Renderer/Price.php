@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Price extends
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         if ($row->getTypeId() == 'downloadable') {
             $row->setPrice($row->getPrice());

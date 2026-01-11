@@ -129,11 +129,11 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     /**
      * Return relation info about used products for specific type instance
      *
-     * @return Varien_Object Object with information data
+     * @return \Maho\DataObject Object with information data
      */
     public function getRelationInfo()
     {
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     /**
@@ -274,7 +274,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @param  string $processMode
      * @return array|string
      */
-    protected function _prepareProduct(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
     {
         $product = $this->getProduct($product);
         /** @var Mage_Catalog_Model_Product $product */
@@ -344,7 +344,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @return array|string
      */
     public function processConfiguration(
-        Varien_Object $buyRequest,
+        \Maho\DataObject $buyRequest,
         $product = null,
         $processMode = self::PROCESS_MODE_LITE,
     ) {
@@ -363,7 +363,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @param null|string $processMode
      * @return array|string
      */
-    public function prepareForCartAdvanced(Varien_Object $buyRequest, $product = null, $processMode = null)
+    public function prepareForCartAdvanced(\Maho\DataObject $buyRequest, $product = null, $processMode = null)
     {
         if (!$processMode) {
             $processMode = self::PROCESS_MODE_FULL;
@@ -379,7 +379,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @param Mage_Catalog_Model_Product $product
      * @return array|string
      */
-    public function prepareForCart(Varien_Object $buyRequest, $product = null)
+    public function prepareForCart(\Maho\DataObject $buyRequest, $product = null)
     {
         return $this->prepareForCartAdvanced($buyRequest, $product, self::PROCESS_MODE_FULL);
     }
@@ -412,7 +412,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
                         $path = dirname($dst);
                         $fileName = basename($dst);
 
-                        $io = new Varien_Io_File();
+                        $io = new \Maho\Io\File();
                         if (!$io->isWriteable($path) && !$io->mkdir($path, 0777, true)) {
                             Mage::throwException(Mage::helper('catalog')->__("Cannot create writeable directory '%s'.", $path));
                         }
@@ -481,7 +481,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @param string $processMode
      * @return array
      */
-    protected function _prepareOptions(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareOptions(\Maho\DataObject $buyRequest, $product, $processMode)
     {
         $transport = new stdClass();
         $transport->options = [];
@@ -697,7 +697,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
                     $confItemOption = $this->getProduct($product)->getCustomOption(self::OPTION_PREFIX . $optionId);
 
                     $group = $option->groupFactory($option->getType())
-                        ->setOption($option)->setListener(new Varien_Object());
+                        ->setOption($option)->setListener(new \Maho\DataObject());
 
                     if ($optionSku = $group->getOptionSku($confItemOption->getValue(), $skuDelimiter)) {
                         $sku .= $skuDelimiter . $optionSku;
@@ -754,7 +754,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * @param Mage_Catalog_Model_Product $product
      * @return $this
      */
-    public function updateQtyOption($options, Varien_Object $option, $value, $product = null)
+    public function updateQtyOption($options, \Maho\DataObject $option, $value, $product = null)
     {
         return $this;
     }
@@ -896,7 +896,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Prepare selected options for product
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return array
      */
     public function processBuyRequest($product, $buyRequest)
@@ -908,7 +908,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
      * Check product's options configuration
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return array
      */
     public function checkProductConfiguration($product, $buyRequest)

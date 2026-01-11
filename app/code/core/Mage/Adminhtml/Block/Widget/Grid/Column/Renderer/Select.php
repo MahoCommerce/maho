@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Select extends Mage_Admin
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $name = $this->getColumn()->getName() ?: $this->getColumn()->getId();
         $html = '<select name="' . $this->escapeHtml($name) . '" ' . $this->getColumn()->getValidateClass() . '>';

@@ -138,7 +138,7 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
     }
 
     /**
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract
      */
     #[\Override]

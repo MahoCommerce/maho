@@ -13,12 +13,12 @@
 use Laminas\Soap\Server as LaminasSoapServer;
 use Laminas\Soap\Exception\ExceptionInterface as LaminasSoapException;
 
-class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_Api_Model_Server_Adapter_Interface
+class Mage_Api_Model_Server_Adapter_Soap extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
     /**
      * Wsdl config
      *
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     protected $wsdlConfig = null;
 
@@ -41,11 +41,11 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
     /**
      * Get wsdl config
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getWsdlConfig()
     {
-        $wsdlConfig = new Varien_Object();
+        $wsdlConfig = new \Maho\DataObject();
         $queryParams = $this->getController()->getRequest()->getQuery();
         if (isset($queryParams['wsdl'])) {
             unset($queryParams['wsdl']);
@@ -96,7 +96,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
     /**
      * Retrieve webservice api controller. If no controller have been set - emulate it by the use of Varien_Object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function getController()
@@ -104,7 +104,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
         $controller = $this->getData('controller');
 
         if ($controller === null) {
-            $controller = new Varien_Object(
+            $controller = new \Maho\DataObject(
                 ['request' => Mage::app()->getRequest(), 'response' => Mage::app()->getResponse()],
             );
 
@@ -126,7 +126,7 @@ class Mage_Api_Model_Server_Adapter_Soap extends Varien_Object implements Mage_A
 
         if ($this->getController()->getRequest()->getParam('wsdl') !== null) {
             // Generating wsdl content from template
-            $io = new Varien_Io_File();
+            $io = new \Maho\Io\File();
             $io->open(['path' => Mage::getModuleDir('etc', 'Mage_Api')]);
 
             $wsdlContent = $io->read('wsdl.xml');

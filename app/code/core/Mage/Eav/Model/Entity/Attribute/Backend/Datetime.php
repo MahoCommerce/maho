@@ -18,7 +18,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Datetime extends Mage_Eav_Model_En
      * Should set (bool, string) correct type for empty value from html form,
      * necessary for farther process, else date string
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @throws Mage_Eav_Exception
      * @return $this
      */

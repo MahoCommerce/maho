@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
+class Mage_Core_Model_Email_Template_Filter extends \Maho\Filter\Template
 {
     /**
      * Use absolute links flag
@@ -238,7 +238,7 @@ class Mage_Core_Model_Email_Template_Filter extends Varien_Filter_Template
      */
     protected function _getBlockParameters($value)
     {
-        $tokenizer = new Varien_Filter_Template_Tokenizer_Parameter();
+        $tokenizer = new \Maho\Filter\Template\Tokenizer\Parameter();
         $tokenizer->setString($value);
 
         return $tokenizer->tokenize();

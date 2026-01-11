@@ -20,7 +20,7 @@
  * @method string getTitle()
  * @method string getTitleSourceField()
  */
-class Mage_Sales_Model_Order_Pdf_Total_Default extends Varien_Object
+class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
 {
     /**
      * Get array of arrays with totals information for display in PDF

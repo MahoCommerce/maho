@@ -10,14 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_GiftMessage_Model_Observer extends Varien_Object
+class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
 {
     /**
      * Set gift messages to order item on import item
      *
      * @return $this
      */
-    public function salesEventConvertQuoteItemToOrderItem(Varien_Event_Observer $observer)
+    public function salesEventConvertQuoteItemToOrderItem(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
         $orderItem = $observer->getEvent()->getOrderItem();
@@ -40,7 +40,7 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
      *
      * @return $this
      */
-    public function salesEventConvertQuoteAddressToOrder(Varien_Event_Observer $observer)
+    public function salesEventConvertQuoteAddressToOrder(\Maho\Event\Observer $observer)
     {
         if ($observer->getEvent()->getAddress()->getGiftMessageId()) {
             $observer->getEvent()->getOrder()
@@ -54,7 +54,7 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
      *
      * @return $this
      */
-    public function salesEventConvertQuoteToOrder(Varien_Event_Observer $observer)
+    public function salesEventConvertQuoteToOrder(\Maho\Event\Observer $observer)
     {
         $observer->getEvent()->getOrder()
             ->setGiftMessageId($observer->getEvent()->getQuote()->getGiftMessageId());
@@ -66,7 +66,7 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
      *
      * @return $this
      */
-    public function checkoutEventCreateGiftMessage(Varien_Event_Observer $observer)
+    public function checkoutEventCreateGiftMessage(\Maho\Event\Observer $observer)
     {
         $giftMessages = $observer->getEvent()->getRequest()->getParam('giftmessage');
         $quote = $observer->getEvent()->getQuote();
@@ -127,7 +127,7 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
      *
      * @return $this
      */
-    public function salesEventOrderToQuote(Varien_Event_Observer $observer)
+    public function salesEventOrderToQuote(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
@@ -155,7 +155,7 @@ class Mage_GiftMessage_Model_Observer extends Varien_Object
      *
      * @return $this
      */
-    public function salesEventOrderItemToQuoteItem(Varien_Event_Observer $observer)
+    public function salesEventOrderItemToQuoteItem(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
         $orderItem = $observer->getEvent()->getOrderItem();

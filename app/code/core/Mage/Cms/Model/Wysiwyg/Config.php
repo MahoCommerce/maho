@@ -14,7 +14,7 @@
  * @method string getStoreId()
  * @method $this setStoreId(string $value)
  */
-class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
+class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
 {
     /**
      * Wysiwyg behaviour: enabled
@@ -49,11 +49,11 @@ class Mage_Cms_Model_Wysiwyg_Config extends Varien_Object
      * files_browser_*:         Files Browser (media, images) settings
      *
      * @param array $data constructor params to override default config values
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getConfig($data = [])
     {
-        $config = new Varien_Object();
+        $config = new \Maho\DataObject();
 
         $config->setData([
             'enabled'                       => $this->isEnabled(),

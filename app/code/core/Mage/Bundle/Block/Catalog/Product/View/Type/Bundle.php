@@ -245,7 +245,7 @@ class Mage_Bundle_Block_Catalog_Product_View_Type_Bundle extends Mage_Catalog_Bl
                     'tierPriceHtml'    => $this->getTierPriceHtml($bundleSelection, $currentProduct),
                 ];
 
-                $responseObject = new Varien_Object();
+                $responseObject = new \Maho\DataObject();
                 $args = ['response_object' => $responseObject, 'selection' => $bundleSelection];
                 Mage::dispatchEvent('bundle_product_view_config', $args);
                 if (is_array($responseObject->getAdditionalOptions())) {

@@ -105,7 +105,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Orders extends Mage_Adminhtml_Block
     }
 
     /**
-     * @param Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return string
      */
     #[\Override]

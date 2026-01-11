@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_Promo_Catalog_Edit_Tab_Conditions extends Mage_Adminh
     {
         $model = Mage::registry('current_promo_catalog_rule');
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $form->setHtmlIdPrefix('rule_');
 

@@ -40,17 +40,17 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
      * Get request for product add to cart procedure
      *
      * @param   mixed $requestInfo
-     * @return  Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getProductRequest($requestInfo)
     {
-        if ($requestInfo instanceof Varien_Object) {
+        if ($requestInfo instanceof \Maho\DataObject) {
             $request = $requestInfo;
         } elseif (is_numeric($requestInfo)) {
-            $request = new Varien_Object();
+            $request = new \Maho\DataObject();
             $request->setQty($requestInfo);
         } else {
-            $request = new Varien_Object($requestInfo);
+            $request = new \Maho\DataObject($requestInfo);
         }
 
         if (!$request->hasQty()) {
@@ -68,7 +68,7 @@ class Mage_Checkout_Model_Api_Resource_Product extends Mage_Checkout_Model_Api_R
     protected function _getQuoteItemByProduct(
         Mage_Sales_Model_Quote $quote,
         Mage_Catalog_Model_Product $product,
-        Varien_Object $requestInfo,
+        \Maho\DataObject $requestInfo,
     ) {
         $cartCandidates = $product->getTypeInstance(true)
                         ->prepareForCartAdvanced(

@@ -61,7 +61,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         return $this->_url;
     }
 
-    protected function _buildMenuArray(?Varien_Simplexml_Element $parent = null, $path = '', $level = 0)
+    protected function _buildMenuArray(?\Maho\Simplexml\Element $parent = null, $path = '', $level = 0)
     {
         if (is_null($parent)) {
             $parent = Mage::getSingleton('admin/config')->getAdminhtmlConfig()->getNode('menu');
@@ -113,7 +113,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         return $a['sort_order'] <=> $b['sort_order'];
     }
 
-    protected function _checkDepends(Varien_Simplexml_Element $depends)
+    protected function _checkDepends(\Maho\Simplexml\Element $depends)
     {
         if ($depends->module) {
             $modulesConfig = Mage::getConfig()->getNode('modules');
@@ -127,7 +127,7 @@ class Mage_Adminhtml_Model_System_Config_Source_Admin_Page
         return true;
     }
 
-    protected function _getHelperValue(Varien_Simplexml_Element $child)
+    protected function _getHelperValue(\Maho\Simplexml\Element $child)
     {
         $helperName         = 'adminhtml';
         $titleNodeName      = 'title';

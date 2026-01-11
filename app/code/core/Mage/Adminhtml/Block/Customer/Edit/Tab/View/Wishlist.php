@@ -40,7 +40,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Wishlist extends Mage_Adminhtm
         if ($wishlist) {
             $collection = $wishlist->getItemsCollection();
         } else {
-            $collection = new Varien_Data_Collection();
+            $collection = new \Maho\Data\Collection();
         }
 
         $collection

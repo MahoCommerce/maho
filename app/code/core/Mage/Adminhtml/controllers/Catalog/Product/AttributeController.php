@@ -128,7 +128,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
 
     public function validateAction(): void
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setError(false);
 
         $attributeCode  = $this->getRequest()->getParam('attribute_code');

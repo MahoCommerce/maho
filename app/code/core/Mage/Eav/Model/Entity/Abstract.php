@@ -563,7 +563,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Check whether the attribute is Applicable to the object
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param   Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @return bool
      */
@@ -790,7 +790,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Validate all object's attributes against configuration
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @throws Mage_Eav_Model_Entity_Attribute_Exception
      * @return true|array
      */
@@ -818,7 +818,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return $this
      */
-    public function setNewIncrementId(Varien_Object $object)
+    public function setNewIncrementId(\Maho\DataObject $object)
     {
         if ($object->getIncrementId()) {
             return $this;
@@ -836,7 +836,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Check attribute unique value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return bool
      */
     public function checkAttributeUniqueValue(Mage_Eav_Model_Entity_Attribute_Abstract $attribute, $object)
@@ -939,7 +939,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Load model attributes data
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $object
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $object
      * @return $this
      */
     protected function _loadModelAttributes($object)
@@ -992,7 +992,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve select object for loading base entity row
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param   mixed $rowId
      * @return  Maho\Db\Select
      */
@@ -1006,7 +1006,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve select object for loading entity attributes values
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param string $table
      * @return Maho\Db\Select
      */
@@ -1035,7 +1035,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Initialize attribute value for object
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param   array $valueRow
      * @return  $this
      */
@@ -1056,7 +1056,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return $this
      */
-    public function save(Varien_Object $object)
+    public function save(\Maho\DataObject $object)
     {
         if ($object->isDeleted()) {
             return $this->delete($object);
@@ -1082,8 +1082,8 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Retrieve Object instance with original data
      *
-     * @param Varien_Object $object
-     * @return Varien_Object
+     * @param \Maho\DataObject $object
+     * @return \Maho\DataObject
      */
     protected function _getOrigObject($object)
     {
@@ -1103,7 +1103,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *  'newObject', 'entityRow', 'insert', 'update', 'delete'
      * )
      *
-     * @param   Varien_Object $newObject
+     * @param \Maho\DataObject $newObject
      * @return  array
      */
     protected function _collectSaveData($newObject)
@@ -1304,7 +1304,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         /**
          * Process base row
          */
-        $entityObject = new Varien_Object($entityRow);
+        $entityObject = new \Maho\DataObject($entityRow);
         $entityRow    = $this->_prepareDataForTable($entityObject, $entityTable);
         if ($insertEntity) {
             if (!empty($entityId)) {
@@ -1359,7 +1359,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Insert entity attribute value
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param   Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param   mixed $value
      * @return  $this
@@ -1372,7 +1372,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Update entity attribute value
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param   Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param   mixed $valueId
      * @param   mixed $value
@@ -1388,7 +1388,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * Collect for mass save
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $object
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $value
      * @return $this
@@ -1466,7 +1466,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Delete entity attribute values
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param   string $table
      * @param   array $info
      * @return  $this
@@ -1491,7 +1491,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
         return $this;
     }
 
-    public function saveAttribute(Varien_Object $object, string $attributeCode): self
+    public function saveAttribute(\Maho\DataObject $object, string $attributeCode): self
     {
         $this->_attributeValuesToSave   = [];
         $this->_attributeValuesToDelete = [];
@@ -1554,7 +1554,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Save static attribute to main entity table
      */
-    protected function saveStaticAttribute(Varien_Object $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): self
+    protected function saveStaticAttribute(\Maho\DataObject $object, Mage_Eav_Model_Entity_Attribute_Abstract $attribute): self
     {
         $attributeCode = $attribute->getAttributeCode();
         $newValue = $object->getData($attributeCode);
@@ -1574,7 +1574,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     /**
      * Delete entity using current object's data
      *
-     * @param int|string|Varien_Object $object
+     * @param int|string|\Maho\DataObject $object
      * @return $this
      * @throws Exception
      */
@@ -1582,7 +1582,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
     {
         if (is_numeric($object)) {
             $id = (int) $object;
-        } elseif ($object instanceof Varien_Object) {
+        } elseif ($object instanceof \Maho\DataObject) {
             $id = (int) $object->getId();
         }
 
@@ -1610,7 +1610,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return $this
      */
-    protected function _afterLoad(Varien_Object $object)
+    protected function _afterLoad(\Maho\DataObject $object)
     {
         $this->walkAttributes('backend/afterLoad', [$object]);
         return $this;
@@ -1621,7 +1621,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return $this
      */
-    protected function _beforeSave(Varien_Object $object)
+    protected function _beforeSave(\Maho\DataObject $object)
     {
         $this->walkAttributes('backend/beforeSave', [$object]);
         return $this;
@@ -1632,7 +1632,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return $this
      */
-    protected function _afterSave(Varien_Object $object)
+    protected function _afterSave(\Maho\DataObject $object)
     {
         $this->walkAttributes('backend/afterSave', [$object]);
         return $this;
@@ -1643,7 +1643,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return $this
      */
-    protected function _beforeDelete(Varien_Object $object)
+    protected function _beforeDelete(\Maho\DataObject $object)
     {
         $this->walkAttributes('backend/beforeDelete', [$object]);
         return $this;
@@ -1654,7 +1654,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
      *
      * @return $this
      */
-    protected function _afterDelete(Varien_Object $object)
+    protected function _afterDelete(\Maho\DataObject $object)
     {
         $this->walkAttributes('backend/afterDelete', [$object]);
         return $this;

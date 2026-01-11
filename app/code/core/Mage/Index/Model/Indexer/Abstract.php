@@ -216,7 +216,7 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
             $resourceModel->reindexProducts($entityIds);
         } elseif ($this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION)) {
             // Create comprehensive mass action data object that all indexers expect
-            $actionObject = new class ($entityIds) extends Varien_Object {
+            $actionObject = new class ($entityIds) extends \Maho\DataObject {
                 private array $productIds;
 
                 public function __construct(array $productIds)

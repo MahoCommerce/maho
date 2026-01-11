@@ -438,7 +438,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get product price with all tax settings processing
      *
-     * @param Mage_Catalog_Model_Product|Varien_Object $product
+     * @param Mage_Catalog_Model_Product|\Maho\DataObject $product
      * @param float $price inputted product price
      * @param bool $includingTax return price include tax flag
      * @param null|Mage_Customer_Model_Address $shippingAddress
@@ -753,7 +753,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getShippingPrice($price, $includingTax = null, $shippingAddress = null, $ctc = null, $store = null)
     {
-        $pseudoProduct = new Varien_Object();
+        $pseudoProduct = new \Maho\DataObject();
         $pseudoProduct->setTaxClassId($this->getShippingTaxClass($store));
 
         $billingAddress = false;

@@ -20,7 +20,7 @@
  * @method string getPkFieldName()
  * @method $this setPkFieldName(string $fieldName)
  */
-class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage_Catalog_Model_Product_Condition_Interface
+class Mage_Catalog_Model_Product_Condition extends \Maho\DataObject implements Mage_Catalog_Model_Product_Condition_Interface
 {
     /**
      * @param Mage_Catalog_Model_Resource_Product_Collection $collection

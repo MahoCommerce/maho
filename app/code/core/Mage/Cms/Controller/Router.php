@@ -15,7 +15,7 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
     /**
      * Initialize Controller Router
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function initControllerRouters($observer)
     {
@@ -40,7 +40,7 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
 
         $identifier = trim($request->getPathInfo(), '/');
 
-        $condition = new Varien_Object([
+        $condition = new \Maho\DataObject([
             'identifier' => $identifier,
             'continue'   => true,
         ]);

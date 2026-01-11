@@ -877,7 +877,7 @@ class Mage_Core_Model_App
      * Retrieve application store object without Store_Exception
      *
      * @param string|int|Mage_Core_Model_Store $id
-     * @return Mage_Core_Model_Store|Varien_Object
+     * @return Mage_Core_Model_Store|\Maho\DataObject
      */
     public function getSafeStore($id = null)
     {
@@ -886,7 +886,7 @@ class Mage_Core_Model_App
         } catch (Exception $e) {
             if ($this->_currentStore) {
                 $this->getRequest()->setActionName('noRoute');
-                return new Varien_Object();
+                return new \Maho\DataObject();
             }
             Mage::throwException(Mage::helper('core')->__('Requested invalid store "%s"', $id));
         }
@@ -1401,8 +1401,8 @@ class Mage_Core_Model_App
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
-                $observer = new Varien_Event_Observer([
-                    'event' => new Varien_Event([
+                $observer = new \Maho\Event\Observer([
+                    'event' => new \Maho\Event([
                         ...$obs['args'], // Default config.xml <args>
                         ...$args,        // Mage::dispatchEvent() $args
                         'name' => $eventName,
@@ -1437,7 +1437,7 @@ class Mage_Core_Model_App
      *
      * @param object $object
      * @param string $method
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @param string $observerName
      * @return $this
      * @throws Mage_Core_Exception

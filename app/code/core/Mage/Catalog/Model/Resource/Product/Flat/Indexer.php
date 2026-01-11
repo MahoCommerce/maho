@@ -355,7 +355,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 }
             }
 
-            $columnsObject = new Varien_Object();
+            $columnsObject = new \Maho\DataObject();
             $columnsObject->setColumns($this->_columns);
             Mage::dispatchEvent(
                 'catalog_product_flat_prepare_columns',
@@ -416,7 +416,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 }
             }
 
-            $indexesObject = new Varien_Object();
+            $indexesObject = new \Maho\DataObject();
             $indexesObject->setIndexes($this->_indexes);
             Mage::dispatchEvent('catalog_product_flat_prepare_indexes', [
                 'indexes'   => $indexesObject,
@@ -917,7 +917,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
     {
         if ($this->_productTypes === null) {
             $this->_productTypes = [];
-            $productEmulator     = new Varien_Object();
+            $productEmulator     = new \Maho\DataObject();
 
             foreach (array_keys(Mage_Catalog_Model_Product_Type::getTypes()) as $typeId) {
                 $productEmulator->setTypeId($typeId);

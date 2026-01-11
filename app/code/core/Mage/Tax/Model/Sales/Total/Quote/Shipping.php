@@ -44,7 +44,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
     /**
      * Request which can be used for tax rate calculation
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_storeTaxRequest = null;
 

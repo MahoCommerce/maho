@@ -497,7 +497,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      */
     public function validateAction(): void
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setError(false);
 
         try {

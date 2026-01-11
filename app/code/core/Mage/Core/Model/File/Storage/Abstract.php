@@ -50,7 +50,7 @@ abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abs
     {
         $path = ltrim($path, '\\/');
         $fullPath = $this->getMediaBaseDirectory() . DS . $path;
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         if (!file_exists($fullPath) || !is_file($fullPath)) {
             Mage::throwException(Mage::helper('core')->__('File %s does not exist', $io->getFilteredPath($fullPath)));
         }

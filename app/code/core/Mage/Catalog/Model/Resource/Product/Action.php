@@ -39,7 +39,7 @@ class Mage_Catalog_Model_Resource_Product_Action extends Mage_Catalog_Model_Reso
         $this->_attributeValuesToSave   = [];
         $this->_attributeValuesToDelete = [];
 
-        $object = new Varien_Object();
+        $object = new \Maho\DataObject();
         $object->setIdFieldName('entity_id')
             ->setStoreId($storeId);
 

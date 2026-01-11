@@ -103,7 +103,7 @@ class Mage_Core_Model_Layout_Validator
     /**
      * Returns true if and only if $value meets the validation requirements
      */
-    public function isValid(Varien_Simplexml_Element|string $value): bool
+    public function isValid(\Maho\Simplexml\Element|string $value): bool
     {
         $this->messages = [];
 

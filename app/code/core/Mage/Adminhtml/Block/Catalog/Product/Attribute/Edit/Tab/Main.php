@@ -23,7 +23,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
         parent::_prepareForm();
         $attributeObject = $this->getAttributeObject();
         $form = $this->getForm();
-        /** @var Varien_Data_Form_Element_Fieldset $fieldset */
+        /** @var \Maho\Data\Form\Element\Fieldset $fieldset */
         $fieldset = $form->getElement('base_fieldset');
 
         $fieldset->getElements()
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Edit_Tab_Main extends Mage_
             ];
         }
 
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setTypes([]);
         Mage::dispatchEvent('adminhtml_product_attribute_types', ['response' => $response]);
         $_disabledTypes = [];

@@ -90,7 +90,7 @@ class Mage_Catalog_Helper_Product_View extends Mage_Core_Helper_Abstract
      *
      * @param int $productId
      * @param Mage_Core_Controller_Front_Action $controller
-     * @param null|Varien_Object $params
+     * @param null|\Maho\DataObject $params
      *
      * @return $this
      */
@@ -99,7 +99,7 @@ class Mage_Catalog_Helper_Product_View extends Mage_Core_Helper_Abstract
         // Prepare data
         $productHelper = Mage::helper('catalog/product');
         if (!$params) {
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject();
         }
 
         // Standard algorithm to prepare and render a product view page

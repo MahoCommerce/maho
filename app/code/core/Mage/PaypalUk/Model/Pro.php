@@ -46,7 +46,7 @@ class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro
      * @param float $amount
      */
     #[\Override]
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         if ($captureTxnId = $this->_getParentTransactionId($payment)) {
             $api = $this->getApi();
@@ -71,7 +71,7 @@ class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro
      * @return string
      */
     #[\Override]
-    protected function _getParentTransactionId(Varien_Object $payment)
+    protected function _getParentTransactionId(\Maho\DataObject $payment)
     {
         if ($payment->getParentTransactionId()) {
             return $payment->getTransaction($payment->getParentTransactionId())

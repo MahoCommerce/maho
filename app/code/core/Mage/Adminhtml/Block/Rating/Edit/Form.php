@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Form extends Mage_Adminhtml_Block_Widget_
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['id' => $this->getRequest()->getParam('id')]),
             'method' => 'post',

@@ -53,7 +53,7 @@ class Mage_Catalog_Block_Seo_Sitemap_Tree_Pager extends Mage_Page_Block_Html_Pag
     }
 
     /**
-     * @param Varien_Data_Collection $collection
+     * @param \Maho\Data\Collection $collection
      * @return $this|Mage_Page_Block_Html_Pager
      */
     #[\Override]

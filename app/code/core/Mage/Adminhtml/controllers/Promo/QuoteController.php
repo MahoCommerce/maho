@@ -139,7 +139,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
 
                 $session = Mage::getSingleton('adminhtml/session');
 
-                $validateResult = $model->validateData(new Varien_Object($data));
+                $validateResult = $model->validateData(new \Maho\DataObject($data));
                 if ($validateResult !== true) {
                     foreach ($validateResult as $errorMessage) {
                         $session->addError($errorMessage);

@@ -735,7 +735,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param string $path separated by slashes
      * @param string $value
      * @param bool $overwrite
-     * @return Varien_Simplexml_Config
+     * @return \Maho\Simplexml\Config
      */
     #[\Override]
     public function setNode($path, $value, $overwrite = true)
@@ -993,9 +993,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * specidied xml file name to one object
      *
      * @param string $fileName
-     * @param null|Mage_Core_Model_Config_Base|Varien_Simplexml_Config $mergeToObject
-     * @param Varien_Simplexml_Config|null $mergeModel
-     * @return Mage_Core_Model_Config_Base|Varien_Simplexml_Config
+     * @param null|Mage_Core_Model_Config_Base|\Maho\Simplexml\Config $mergeToObject
+     * @param \Maho\Simplexml\Config|null $mergeModel
+     * @return Mage_Core_Model_Config_Base|\Maho\Simplexml\Config
      */
     public function loadModulesConfiguration($fileName, $mergeToObject = null, $mergeModel = null)
     {
@@ -1498,7 +1498,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Retrieve resource type configuration for resource name
      *
      * @param string $type
-     * @return SimpleXMLElement|Varien_Simplexml_Element|Mage_Core_Model_Config_Element
+     * @return SimpleXMLElement|\Maho\Simplexml\Element|Mage_Core_Model_Config_Element
      */
     public function getResourceTypeConfig($type)
     {
@@ -1753,7 +1753,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $area
      */
-    protected function _makeEventsLowerCase($area, Varien_Simplexml_Config $mergeModel)
+    protected function _makeEventsLowerCase($area, \Maho\Simplexml\Config $mergeModel)
     {
         $events = $mergeModel->getNode($area . '/' . Mage_Core_Model_App_Area::PART_EVENTS);
         if ($events !== false) {

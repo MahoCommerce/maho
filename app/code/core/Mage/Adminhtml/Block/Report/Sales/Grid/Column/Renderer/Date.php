@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Report_Sales_Grid_Column_Renderer_Date extends Mage_A
     }
 
     #[\Override]
-    public function render(Varien_Object $row): string
+    public function render(\Maho\DataObject $row): string
     {
         $column = $this->getColumn();
         if ($data = $row->getData($column->getIndex())) {

@@ -53,7 +53,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
     }
 
     #[\Override]
-    public function getAttributeElement(): Varien_Data_Form_Element_Abstract
+    public function getAttributeElement(): \Maho\Data\Form\Element\AbstractElement
     {
         $element = parent::getAttributeElement();
         $element->setShowAsText(true);
@@ -161,7 +161,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Customer extends Mage_Rule_M
     }
 
     #[\Override]
-    public function validate(Varien_Object $object): bool
+    public function validate(\Maho\DataObject $object): bool
     {
         // Get customer from quote or use directly if passed
         if ($object instanceof Mage_Customer_Model_Customer) {

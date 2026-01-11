@@ -256,7 +256,7 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve template processor for catalog content
      *
-     * @return Varien_Filter_Template
+     * @return \Maho\Filter\Template
      */
     public function getPageTemplateProcessor()
     {

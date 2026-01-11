@@ -22,7 +22,7 @@ class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Co
     {
         try {
             $uploader = Mage::getModel('core/file_uploader', 'image');
-            $uploader->setAllowedExtensions(Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS);
+            $uploader->setAllowedExtensions(\Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS);
             $uploader->addValidateCallback(
                 'catalog_product_image',
                 Mage::helper('catalog/image'),

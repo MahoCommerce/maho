@@ -63,7 +63,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Sidebar_Cart extends Mage_Adminhtm
     /**
      * Retrieve identifier of block item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return int
      */
     #[\Override]

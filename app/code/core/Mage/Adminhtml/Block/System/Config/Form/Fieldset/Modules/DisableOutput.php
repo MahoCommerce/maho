@@ -17,13 +17,13 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
     protected $_values;
 
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $html = $this->_getHeaderHtml($element);
 
         $modules = array_keys((array) Mage::getConfig()->getNode('modules')->children());
 
-        $dispatchResult = new Varien_Object($modules);
+        $dispatchResult = new \Maho\DataObject($modules);
         Mage::dispatchEvent(
             'adminhtml_system_config_advanced_disableoutput_render_before',
             ['modules' => $dispatchResult],
@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset_Modules_DisableOutput ext
     protected function _getDummyElement()
     {
         if (empty($this->_dummyElement)) {
-            $this->_dummyElement = new Varien_Object(['show_in_default' => 1, 'show_in_website' => 1]);
+            $this->_dummyElement = new \Maho\DataObject(['show_in_default' => 1, 'show_in_website' => 1]);
         }
         return $this->_dummyElement;
     }

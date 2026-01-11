@@ -47,7 +47,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
     /**
      * Chooser form element getter
      *
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getElement()
     {
@@ -57,19 +57,19 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
     /**
      * Convert Array config to Object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getConfig()
     {
-        if ($this->_getData('config') instanceof Varien_Object) {
+        if ($this->_getData('config') instanceof \Maho\DataObject) {
             return $this->_getData('config');
         }
 
         $configArray = $this->_getData('config');
-        $config = new Varien_Object();
+        $config = new \Maho\DataObject();
         $this->setConfig($config);
         if (!is_array($configArray)) {
-            /** @var Varien_Object $configData */
+            /** @var \Maho\DataObject $configData */
             $configData = $this->_getData('config');
             return $configData;
         }
@@ -91,7 +91,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         }
         $config->setButtons($buttons);
 
-        /** @var Varien_Object $configData */
+        /** @var \Maho\DataObject $configData */
         $configData = $this->_getData('config');
         return $configData;
     }
@@ -135,7 +135,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
     protected function _toHtml()
     {
         $element   = $this->getElement();
-        /** @var Varien_Data_Form_Element_Fieldset $fieldset */
+        /** @var \Maho\Data\Form\Element\Fieldset $fieldset */
         $fieldset  = $element->getForm()->getElement($this->getFieldsetId());
         $chooserId = $this->getUniqId();
         $config    = $this->getConfig();
@@ -147,7 +147,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         ]);
         $hiddenHtml = '';
         if ($this->getHiddenEnabled()) {
-            $hidden = new Varien_Data_Form_Element_Hidden($element->getData());
+            $hidden = new \Maho\Data\Form\Element\Hidden($element->getData());
             $hidden->setId("{$chooserId}value")->setForm($element->getForm());
             if ($element->getRequired()) {
                 $hidden->addClass('required-entry');

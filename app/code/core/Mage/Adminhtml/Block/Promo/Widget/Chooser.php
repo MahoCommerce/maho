@@ -28,10 +28,10 @@ class Mage_Adminhtml_Block_Promo_Widget_Chooser extends Mage_Adminhtml_Block_Wid
     /**
      * Prepare chooser element HTML
      *
-     * @param Varien_Data_Form_Element_Abstract $element Form Element
-     * @return Varien_Data_Form_Element_Abstract
+     * @param \Maho\Data\Form\Element\AbstractElement $element Form Element
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
-    public function prepareElementHtml(Varien_Data_Form_Element_Abstract $element)
+    public function prepareElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $uniqId = Mage::helper('core')->uniqHash($element->getId());
         $sourceUrl = $this->getUrl('*/promo_quote/chooser', ['uniq_id' => $uniqId]);

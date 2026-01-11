@@ -42,7 +42,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         if ($this->getColumn()->getEditable()) {
             $value = $this->_getValue($row);
@@ -58,7 +58,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
      *
      * @return string
      */
-    public function renderExport(Varien_Object $row)
+    public function renderExport(\Maho\DataObject $row)
     {
         return $this->render($row);
     }
@@ -66,7 +66,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string|null
      */
-    protected function _getValue(Varien_Object $row)
+    protected function _getValue(\Maho\DataObject $row)
     {
         if ($getter = $this->getColumn()->getGetter()) {
             if (is_string($getter)) {
@@ -86,7 +86,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string
      */
-    public function _getInputValueElement(Varien_Object $row)
+    public function _getInputValueElement(\Maho\DataObject $row)
     {
         return  '<input type="text" class="input-text '
                 . $this->getColumn()->getValidateClass()
@@ -97,7 +97,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string|null
      */
-    protected function _getInputValue(Varien_Object $row)
+    protected function _getInputValue(\Maho\DataObject $row)
     {
         return $this->_getValue($row);
     }
@@ -157,7 +157,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string|null
      */
-    public function getCopyableText(Varien_Object $row)
+    public function getCopyableText(\Maho\DataObject $row)
     {
         return $this->_getValue($row);
     }

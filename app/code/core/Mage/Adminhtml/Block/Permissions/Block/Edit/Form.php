@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Permissions_Block_Edit_Form extends Mage_Adminhtml_Bl
     {
         $block = Mage::getModel('admin/block')->load((int) $this->getRequest()->getParam('block_id'));
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['block_id' => (int) $this->getRequest()->getParam('block_id')]),
             'method' => 'post',

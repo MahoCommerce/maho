@@ -24,7 +24,7 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
     /**
      * Template processor instance
      *
-     * @var Varien_Filter_Template
+     * @var \Maho\Filter\Template
      */
     protected $_templateProcessor = null;
 
@@ -34,7 +34,7 @@ class Mage_Catalog_Helper_Output extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @return Varien_Filter_Template
+     * @return \Maho\Filter\Template
      */
     protected function _getTemplateProcessor()
     {

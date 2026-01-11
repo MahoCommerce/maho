@@ -15,7 +15,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
     /**
      * Validate process
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return bool
      */
     #[\Override]
@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
     /**
      * Before Attribute Save Process
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -93,7 +93,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
     }
 
     /**
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract
      */
     #[\Override]

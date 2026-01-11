@@ -90,7 +90,7 @@ class Mage_Adminhtml_Block_Tag_Grid_All extends Mage_Adminhtml_Block_Widget_Grid
     }
 
     /**
-     * @param Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return string
      */
     #[\Override]

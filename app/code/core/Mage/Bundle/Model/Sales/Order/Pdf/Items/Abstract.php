@@ -15,7 +15,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Getting all available children for Invoice, Shipmen or Creditmemo item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return array
      */
     public function getChilds($item): ?array
@@ -48,7 +48,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve is Shipment Separately flag for Item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function isShipmentSeparately($item = null): bool
     {
@@ -95,7 +95,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve is Child Calculated
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function isChildCalculated($item = null): bool
     {
@@ -142,7 +142,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve Bundle Options
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function getBundleOptions($item = null): array
     {
@@ -157,7 +157,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve Selection attributes
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function getSelectionAttributes($item): mixed
     {
@@ -175,7 +175,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve Order options
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function getOrderOptions($item = null): array
     {

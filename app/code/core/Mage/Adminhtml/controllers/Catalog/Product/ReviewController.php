@@ -281,7 +281,7 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
 
     public function jsonProductInfoAction(): void
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $product = Mage::getModel('catalog/product')
             ->load((int) $this->getRequest()->getParam('id'));
 

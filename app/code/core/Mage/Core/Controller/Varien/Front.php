@@ -15,7 +15,7 @@
  * @method $this setAction(Mage_Core_Controller_Varien_Action $value)
  * @method bool getNoRender()
  */
-class Mage_Core_Controller_Varien_Front extends Varien_Object
+class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 {
     protected $_defaults = [];
 

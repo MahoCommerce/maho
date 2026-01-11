@@ -15,12 +15,12 @@ interface Mage_Customer_Block_Address_Renderer_Interface
     /**
      * Set format type object
      */
-    public function setType(Varien_Object $type);
+    public function setType(\Maho\DataObject $type);
 
     /**
      * Retrieve format type object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getType();
 

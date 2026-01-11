@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Select_Flatproduct extends M
      * @return string
      */
     #[\Override]
-    protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
+    protected function _getElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         // Flat catalog is only supported on MySQL
         $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');

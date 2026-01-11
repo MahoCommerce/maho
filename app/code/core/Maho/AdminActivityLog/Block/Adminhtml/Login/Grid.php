@@ -87,7 +87,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Login_Grid extends Mage_Adminhtml_Bl
         return parent::_prepareColumns();
     }
 
-    public function decorateType(string $value, Varien_Object $row, Varien_Object $column, bool $isExport): string
+    public function decorateType(string $value, \Maho\DataObject $row, \Maho\DataObject $column, bool $isExport): string
     {
         // Get the actual type value from the row data
         $type = $row->getData('type');

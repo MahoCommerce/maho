@@ -27,7 +27,7 @@ class Mage_Core_Controller_Response_Http
     /**
      * Transport object for observers to perform
      */
-    protected static ?Varien_Object $_transportObject = null;
+    protected static ?\Maho\DataObject $_transportObject = null;
 
     /**
      * Array of headers
@@ -145,7 +145,7 @@ class Mage_Core_Controller_Response_Http
          * Use single transport object instance
          */
         if (self::$_transportObject === null) {
-            self::$_transportObject = new Varien_Object();
+            self::$_transportObject = new \Maho\DataObject();
         }
         self::$_transportObject->setUrl($url);
         self::$_transportObject->setCode($code);

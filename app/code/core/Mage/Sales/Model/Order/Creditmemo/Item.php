@@ -126,7 +126,7 @@ class Mage_Sales_Model_Order_Creditmemo_Item extends Mage_Core_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()

@@ -16,7 +16,7 @@ class Mage_Index_Block_Adminhtml_Process_Edit_Tab_Main extends Mage_Adminhtml_Bl
     protected function _prepareForm()
     {
         $model = Mage::registry('current_index_process');
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('index_process_');
         $fieldset = $form->addFieldset(
             'base_fieldset',

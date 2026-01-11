@@ -113,7 +113,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function validate(Varien_Object $object): bool
+    public function validate(\Maho\DataObject $object): bool
     {
         return $this->getConditions()->validate($object);
     }

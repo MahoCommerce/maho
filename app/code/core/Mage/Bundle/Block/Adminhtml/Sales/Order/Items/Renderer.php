@@ -14,7 +14,7 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_Items_Renderer extends Mage_Adminh
     /**
      * Getting all available children for Invoice, Shipmen or Credit memo item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return array
      */
     public function getChilds($item)
@@ -126,7 +126,7 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_Items_Renderer extends Mage_Adminh
     }
 
     /**
-     * @param Varien_Object|Mage_Sales_Model_Order_Invoice_Item $item
+     * @param \Maho\DataObject|Mage_Sales_Model_Order_Invoice_Item $item
      * @return mixed|null
      */
     public function getSelectionAttributes($item)

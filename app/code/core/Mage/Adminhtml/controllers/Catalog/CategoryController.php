@@ -139,7 +139,7 @@ class Mage_Adminhtml_Catalog_CategoryController extends Mage_Adminhtml_Controlle
         if ($this->getRequest()->isAjax()) {
             $this->_renderTitles();
 
-            $eventResponse = new Varien_Object([
+            $eventResponse = new \Maho\DataObject([
                 'title' => implode(' / ', array_reverse($this->_titles)),
                 'content' => $this->getLayout()->getBlock('category.edit')->getFormHtml(),
                 'messages' => $this->getLayout()->getMessagesBlock()->getGroupedHtml(),

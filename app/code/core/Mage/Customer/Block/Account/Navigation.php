@@ -31,7 +31,7 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
      */
     public function addLink($name, $path, $label, $urlParams = [])
     {
-        $this->_links[$name] = new Varien_Object([
+        $this->_links[$name] = new \Maho\DataObject([
             'name' => $name,
             'path' => $path,
             'label' => $label,
@@ -73,7 +73,7 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
     }
 
     /**
-     * @param Varien_Object $link
+     * @param \Maho\DataObject $link
      * @return bool
      */
     public function isActive($link)

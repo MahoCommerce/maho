@@ -85,12 +85,12 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     /**
      * Return relation info about used products
      *
-     * @return Varien_Object Object with information data
+     * @return \Maho\DataObject Object with information data
      */
     #[\Override]
     public function getRelationInfo()
     {
-        $info = new Varien_Object();
+        $info = new \Maho\DataObject();
         $info->setTable('catalog/product_super_link')
             ->setParentFieldName('parent_id')
             ->setChildFieldName('product_id');
@@ -571,7 +571,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
      * @return array|string
      */
     #[\Override]
-    protected function _prepareProduct(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
     {
         $attributes = $buyRequest->getSuperAttribute();
         if ($attributes || !$this->_isStrictProcessMode($processMode)) {
@@ -667,7 +667,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
         $product = $this->getProduct($product);
         $option = $product->getCustomOption('info_buyRequest');
         if ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
-            $buyRequest = new Varien_Object(unserialize($option->getValue(), ['allowed_classes' => false]));
+            $buyRequest = new \Maho\DataObject(unserialize($option->getValue(), ['allowed_classes' => false]));
             $attributes = $buyRequest->getSuperAttribute();
             if (is_array($attributes)) {
                 foreach ($attributes as $key => $val) {
@@ -848,7 +848,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
      * Prepare selected options for configurable product
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return array
      */
     #[\Override]

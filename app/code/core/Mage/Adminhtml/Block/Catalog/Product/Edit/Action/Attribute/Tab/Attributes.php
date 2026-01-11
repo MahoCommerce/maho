@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
         ]);
         Mage::dispatchEvent('adminhtml_catalog_product_form_prepare_excluded_field_list', ['object' => $this]);
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $fieldset = $form->addFieldset('fields', ['legend' => Mage::helper('catalog')->__('Attributes')]);
         $attributes = $this->getAttributes();
         /**
@@ -75,7 +75,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Action_Attribute_Tab_Attributes 
     /**
      * Custom additional element html
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     #[\Override]

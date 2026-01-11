@@ -25,7 +25,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
     /**
      * The Varien SimpleXml object
      *
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_value;
 
@@ -82,7 +82,7 @@ class Mage_Adminhtml_Model_LayoutUpdate_Validator
      *
      * @throws Exception            Throw exception when xml object is not
      *                              instance of Varien_Simplexml_Element
-     * @param Varien_Simplexml_Element|string $value
+     * @param \Maho\Simplexml\Element|string $value
      * @return bool
      */
     public function isValid($value)

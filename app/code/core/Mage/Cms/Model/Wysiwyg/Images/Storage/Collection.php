@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Cms_Model_Wysiwyg_Images_Storage_Collection extends Varien_Data_Collection_Filesystem
+class Mage_Cms_Model_Wysiwyg_Images_Storage_Collection extends \Maho\Data\Collection\Filesystem
 {
     #[\Override]
     protected function _generateRow($filename)

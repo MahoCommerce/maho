@@ -90,7 +90,7 @@ abstract class Mage_Dataflow_Model_Convert_Profile_Abstract implements Mage_Data
         return $this;
     }
 
-    public function importXml(Varien_Simplexml_Element $profileNode)
+    public function importXml(\Maho\Simplexml\Element $profileNode)
     {
         foreach ($profileNode->action as $actionNode) {
             $action = $profile->addAction();

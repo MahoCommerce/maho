@@ -82,7 +82,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
      * Add new tab after another
      *
      * @param   string $tabId new tab Id
-     * @param   string|array|Varien_Object $tab
+     * @param string|array|\Maho\DataObject $tab
      * @param   string $afterTabId
      */
     public function addTabAfter($tabId, $tab, $afterTabId)
@@ -95,14 +95,14 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
      * Add new tab
      *
      * @param   string $tabId
-     * @param   string|array|Varien_Object $tab
+     * @param string|array|\Maho\DataObject $tab
      * @return  $this
      */
     public function addTab($tabId, $tab)
     {
         if (is_array($tab)) {
-            $this->_tabs[$tabId] = new Varien_Object($tab);
-        } elseif ($tab instanceof Varien_Object) {
+            $this->_tabs[$tabId] = new \Maho\DataObject($tab);
+        } elseif ($tab instanceof \Maho\DataObject) {
             $this->_tabs[$tabId] = $tab;
             if (!$this->_tabs[$tabId]->hasTabId()) {
                 $this->_tabs[$tabId]->setTabId($tabId);
@@ -277,7 +277,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @param bool $withPrefix
      * @return string
      */
@@ -290,7 +290,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @return bool
      */
     public function canShowTab($tab)
@@ -302,7 +302,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @return bool
      */
     public function getTabIsHidden($tab)
@@ -314,7 +314,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @return string
      */
     public function getTabUrl($tab)
@@ -332,7 +332,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @return string
      */
     public function getTabTitle($tab)
@@ -344,7 +344,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @return string
      */
     public function getTabClass($tab)
@@ -359,7 +359,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @return string
      */
     public function getTabLabel($tab)
@@ -371,7 +371,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Object|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
+     * @param \Maho\DataObject|Mage_Adminhtml_Block_Widget_Tab_Interface $tab
      * @return string
      */
     public function getTabContent($tab)
@@ -453,7 +453,7 @@ class Mage_Adminhtml_Block_Widget_Tabs extends Mage_Adminhtml_Block_Widget
      */
     public function setTabData($tab, $key, $value)
     {
-        if (isset($this->_tabs[$tab]) && $this->_tabs[$tab] instanceof Varien_Object) {
+        if (isset($this->_tabs[$tab]) && $this->_tabs[$tab] instanceof \Maho\DataObject) {
             if ($key == 'url') {
                 $value = $this->getUrl($value, ['_current' => true, '_use_rewrite' => true]);
             }

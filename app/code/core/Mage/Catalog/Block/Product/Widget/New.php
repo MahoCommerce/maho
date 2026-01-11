@@ -60,7 +60,7 @@ class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_N
     /**
      * Product collection initialize process
      *
-     * @return Mage_Catalog_Model_Resource_Product_Collection|Object|Varien_Data_Collection
+     * @return Mage_Catalog_Model_Resource_Product_Collection|Object|\Maho\Data\Collection
      */
     #[\Override]
     protected function _getProductCollection()
@@ -75,7 +75,7 @@ class Mage_Catalog_Block_Product_Widget_New extends Mage_Catalog_Block_Product_N
     /**
      * Prepare collection for recent product list
      *
-     * @return Mage_Catalog_Model_Resource_Product_Collection|Object|Varien_Data_Collection
+     * @return Mage_Catalog_Model_Resource_Product_Collection|Object|\Maho\Data\Collection
      */
     protected function _getRecentlyAddedProductsCollection()
     {

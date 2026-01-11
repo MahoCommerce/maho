@@ -55,7 +55,7 @@ class Mage_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @return false|string
      */
-    public function getElementBackendConfig(Varien_Data_Form_Element_Abstract $element)
+    public function getElementBackendConfig(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $config = $element->getFieldConfig()->backend_congif;
         if (!$config) {

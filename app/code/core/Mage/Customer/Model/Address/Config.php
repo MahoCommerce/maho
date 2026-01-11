@@ -77,7 +77,7 @@ class Mage_Customer_Model_Address_Config extends Mage_Core_Model_Config_Base
     /**
      * Retrieve address formats
      *
-     * @return Varien_Object[]
+     * @return \Maho\DataObject[]
      */
     public function getFormats()
     {
@@ -87,7 +87,7 @@ class Mage_Customer_Model_Address_Config extends Mage_Core_Model_Config_Base
             $this->_types[$storeId] = [];
             foreach ($this->getNode('formats')->children() as $typeCode => $typeConfig) {
                 $path = sprintf('%s%s', self::XML_PATH_ADDRESS_TEMPLATE, $typeCode);
-                $type = new Varien_Object();
+                $type = new \Maho\DataObject();
                 $htmlEscape = strtolower((string) $typeConfig->htmlEscape);
                 $htmlEscape = !($htmlEscape == 'false' || $htmlEscape == '0' || $htmlEscape == 'no'
                     || !strlen($htmlEscape));
@@ -115,14 +115,14 @@ class Mage_Customer_Model_Address_Config extends Mage_Core_Model_Config_Base
     /**
      * Retrieve default address format
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getDefaultFormat()
     {
         $store = $this->getStore();
         $storeId = $store->getId();
         if (!isset($this->_defaultType[$storeId])) {
-            $this->_defaultType[$storeId] = new Varien_Object();
+            $this->_defaultType[$storeId] = new \Maho\DataObject();
             $this->_defaultType[$storeId]->setCode('default')
                 ->setDefaultFormat('{{depend prefix}}{{var prefix}} {{/depend}}{{var firstname}} {{depend middlename}}'
                         . '{{var middlename}} {{/depend}}{{var lastname}}{{depend suffix}} {{var suffix}}{{/depend}}, '
@@ -140,7 +140,7 @@ class Mage_Customer_Model_Address_Config extends Mage_Core_Model_Config_Base
      * Retrieve address format by code
      *
      * @param string $typeCode
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getFormatByCode($typeCode)
     {

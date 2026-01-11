@@ -109,7 +109,7 @@ class Mage_Page_Block_Html_Pager extends Mage_Core_Block_Template
     /**
      * Set collection for pagination
      *
-     * @param  Varien_Data_Collection $collection
+     * @param \Maho\Data\Collection $collection
      * @return $this
      */
     public function setCollection($collection)

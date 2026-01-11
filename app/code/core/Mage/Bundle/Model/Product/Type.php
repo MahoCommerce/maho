@@ -71,12 +71,12 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
     /**
      * Return relation info about used products
      *
-     * @return Varien_Object Object with information data
+     * @return \Maho\DataObject Object with information data
      */
     #[\Override]
     public function getRelationInfo()
     {
-        $info = new Varien_Object();
+        $info = new \Maho\DataObject();
         $info->setTable('bundle/selection')
             ->setParentFieldName('parent_product_id')
             ->setChildFieldName('product_id');
@@ -417,7 +417,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * @return  Mage_Bundle_Model_Product_Type
      */
     #[\Override]
-    public function updateQtyOption($options, Varien_Object $option, $value, $product = null)
+    public function updateQtyOption($options, \Maho\DataObject $option, $value, $product = null)
     {
         $optionProduct      = $option->getProduct($product);
         $optionUpdateFlag   = $option->getHasQtyOptionUpdate();
@@ -510,7 +510,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * @return array|string
      */
     #[\Override]
-    protected function _prepareProduct(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
     {
         $result = parent::_prepareProduct($buyRequest, $product, $processMode);
 
@@ -924,7 +924,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
         $selectionIds       = $product->getCustomOption('bundle_selection_ids');
         $selectionIds       = (array) unserialize($selectionIds->getValue(), ['allowed_classes' => false]);
         $buyRequest         = $product->getCustomOption('info_buyRequest');
-        $buyRequest         = new Varien_Object(unserialize($buyRequest->getValue(), ['allowed_classes' => false]));
+        $buyRequest         = new \Maho\DataObject(unserialize($buyRequest->getValue(), ['allowed_classes' => false]));
         $bundleOption       = $buyRequest->getBundleOption();
 
         if (empty($bundleOption) && empty($selectionIds)) {
@@ -989,7 +989,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
      * Prepare selected options for bundle product
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return array
      */
     #[\Override]

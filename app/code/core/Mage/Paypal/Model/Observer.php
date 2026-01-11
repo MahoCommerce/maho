@@ -38,7 +38,7 @@ class Mage_Paypal_Model_Observer
      *
      * @return $this
      */
-    public function saveOrderAfterSubmit(Varien_Event_Observer $observer)
+    public function saveOrderAfterSubmit(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getData('order');
@@ -52,7 +52,7 @@ class Mage_Paypal_Model_Observer
      *
      * @return $this
      */
-    public function setResponseAfterSaveOrder(Varien_Event_Observer $observer)
+    public function setResponseAfterSaveOrder(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = Mage::registry('hss_order');
@@ -88,7 +88,7 @@ class Mage_Paypal_Model_Observer
     /**
      * Load country dependent PayPal solutions system configuration
      */
-    public function loadCountryDependentSolutionsConfig(Varien_Event_Observer $observer)
+    public function loadCountryDependentSolutionsConfig(\Maho\Event\Observer $observer)
     {
         $countryCode = Mage::helper('paypal')->getConfigurationCountryCode();
         $paymentGroups   = $observer->getEvent()->getConfig()->getNode('sections/payment/groups');
@@ -114,9 +114,9 @@ class Mage_Paypal_Model_Observer
     /**
      * Update transaction with HTML representation of txn_id
      */
-    public function observeHtmlTransactionId(Varien_Event_Observer $observer)
+    public function observeHtmlTransactionId(\Maho\Event\Observer $observer)
     {
-        /** @var Varien_Object $transaction */
+        /** @var \Maho\DataObject $transaction */
         $transaction = $observer->getEvent()->getTransaction();
         $transaction->setHtmlTxnId(Mage::helper('paypal')->getHtmlTransactionId(
             $observer->getEvent()->getPayment()->getMethodInstance()->getCode(),

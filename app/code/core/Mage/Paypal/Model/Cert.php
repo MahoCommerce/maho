@@ -66,7 +66,7 @@ class Mage_Paypal_Model_Cert extends Mage_Core_Model_Abstract
     {
         $certDir = $this->_getBaseDir();
         if (!is_dir($certDir)) {
-            $ioAdapter = new Varien_Io_File();
+            $ioAdapter = new \Maho\Io\File();
             $ioAdapter->checkAndCreateFolder($certDir);
         } else {
             $this->_removeOutdatedCertFile();

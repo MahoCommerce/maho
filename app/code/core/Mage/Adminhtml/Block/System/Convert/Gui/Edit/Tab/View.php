@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_System_Convert_Gui_Edit_Tab_View extends Mage_Adminht
      */
     public function initForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('_view');
 
         $model = Mage::registry('current_convert_profile');

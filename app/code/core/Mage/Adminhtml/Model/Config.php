@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
+class Mage_Adminhtml_Model_Config extends \Maho\Simplexml\Config
 {
     /**
      * @var string
@@ -23,14 +23,14 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
     protected $_config;
 
     /**
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_sections;
 
     /**
      * Tabs
      *
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_tabs;
 
@@ -38,7 +38,7 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
      * @param string $sectionCode
      * @param string $websiteCode
      * @param string $storeCode
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     public function getSections($sectionCode = null, $websiteCode = null, $storeCode = null)
     {
@@ -52,7 +52,7 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
     /**
      * Retrieve tabs
      *
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     public function getTabs()
     {
@@ -129,7 +129,7 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
      * @param string $sectionCode
      * @param string $websiteCode
      * @param string $storeCode
-     * @return Varien_Simplexml_Element|void
+     * @return \Maho\Simplexml\Element|void
      */
     public function getSection($sectionCode = null, $websiteCode = null, $storeCode = null)
     {
@@ -145,7 +145,7 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
     }
 
     /**
-     * @param Varien_Simplexml_Element $node
+     * @param \Maho\Simplexml\Element $node
      * @param string $websiteCode
      * @param string $storeCode
      * @param bool $isField
@@ -194,9 +194,9 @@ class Mage_Adminhtml_Model_Config extends Varien_Simplexml_Config
     /**
      * Get translate module name
      *
-     * @param Varien_Simplexml_Element|false|null $sectionNode
-     * @param Varien_Simplexml_Element|false|null $groupNode
-     * @param Varien_Simplexml_Element|false|null $fieldNode
+     * @param \Maho\Simplexml\Element|false|null $sectionNode
+     * @param \Maho\Simplexml\Element|false|null $groupNode
+     * @param \Maho\Simplexml\Element|false|null $fieldNode
      * @return string
      */
     public function getAttributeModule($sectionNode = null, $groupNode = null, $fieldNode = null)

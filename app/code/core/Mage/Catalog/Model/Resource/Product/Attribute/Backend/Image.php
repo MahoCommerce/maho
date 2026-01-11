@@ -14,12 +14,12 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Image extends Mage_E
 {
     public function getAllowedExtensions(): array
     {
-        return Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS;
+        return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
     }
 
     /**
      * Save uploaded file and set its name to product attribute
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]

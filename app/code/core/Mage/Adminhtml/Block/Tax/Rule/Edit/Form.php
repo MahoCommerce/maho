@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Tax_Rule_Edit_Form extends Mage_Adminhtml_Block_Widge
     protected function _prepareForm()
     {
         $model  = Mage::registry('tax_rule');
-        $form   = new Varien_Data_Form([
+        $form   = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method'    => 'post',

@@ -32,7 +32,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Field_Country extends Mage_Admin
      * @throws Exception
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $country = $this->getRequest()->getParam(self::REQUEST_PARAM_COUNTRY);
         if ($country) {
@@ -66,7 +66,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Field_Country extends Mage_Admin
      * @return string
      */
     #[\Override]
-    protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
+    protected function _getElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $configDataModel = Mage::getSingleton('adminhtml/config_data');
         $urlParams = [

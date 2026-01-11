@@ -14,12 +14,12 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Image extends Mage_Eav_Model
 {
     public function getAllowedExtensions(): array
     {
-        return Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS;
+        return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
     }
 
     /**
      * Save uploaded file and set its name to category attribute
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]

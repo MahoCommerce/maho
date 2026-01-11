@@ -48,7 +48,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Store rule form instance
      *
-     * @var Varien_Data_Form
+     * @var \Maho\Data\Form
      */
     protected $_form;
 
@@ -264,12 +264,12 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Rule form getter
      *
-     * @return Varien_Data_Form
+     * @return \Maho\Data\Form
      */
     public function getForm()
     {
         if (!$this->_form) {
-            $this->_form = new Varien_Data_Form();
+            $this->_form = new \Maho\Data\Form();
         }
         return $this->_form;
     }
@@ -338,7 +338,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      *
      * @return bool
      */
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         return $this->getConditions()->validate($object);
     }
@@ -348,7 +348,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      *
      * @return bool|array - return true if validation passed successfully. Array with errors description otherwise
      */
-    public function validateData(Varien_Object $object)
+    public function validateData(\Maho\DataObject $object)
     {
         $result   = [];
         $fromDate = $toDate = null;

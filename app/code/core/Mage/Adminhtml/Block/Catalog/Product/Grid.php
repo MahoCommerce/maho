@@ -341,7 +341,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                         'label' => Mage::helper('catalog')->__('Attribute Set'),
                         'values' => Mage::getResourceModel('eav/entity_attribute_set_collection')
                             ->setEntityTypeFilter(Mage::getModel('catalog/product')->getResource()->getTypeId())
-                            ->setOrder('attribute_set_name', Varien_Data_Collection::SORT_ORDER_ASC)
+                            ->setOrder('attribute_set_name', \Maho\Data\Collection::SORT_ORDER_ASC)
                             ->toOptionArray(),
                     ],
                 ],

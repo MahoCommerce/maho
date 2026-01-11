@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Notification_Grid_Renderer_Notice extends Mage_Adminh
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         return '<span class="grid-row-title">' . $this->escapeHtml($row->getTitle()) . '</span>'
             . ($row->getDescription() ? '<br />' . $this->escapeHtml($row->getDescription()) : '');

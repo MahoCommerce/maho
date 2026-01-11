@@ -20,7 +20,7 @@
  * @method int  getLengthMax()
  * @method int  getLengthMin()
  */
-class Mage_SalesRule_Model_Coupon_Codegenerator extends Varien_Object implements Mage_SalesRule_Model_Coupon_CodegeneratorInterface
+class Mage_SalesRule_Model_Coupon_Codegenerator extends \Maho\DataObject implements Mage_SalesRule_Model_Coupon_CodegeneratorInterface
 {
     /**
      * Retrieve generated code

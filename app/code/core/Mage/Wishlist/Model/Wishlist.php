@@ -446,11 +446,11 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     public function addNewItem($product, $buyRequest = null, $forciblySetQty = false)
     {
         if (is_array($buyRequest)) {
-            $buyRequest = new Varien_Object($buyRequest);
+            $buyRequest = new \Maho\DataObject($buyRequest);
         } elseif (is_string($buyRequest)) {
-            $buyRequest = new Varien_Object(unserialize($buyRequest, ['allowed_classes' => false]));
-        } elseif (!$buyRequest instanceof Varien_Object) {
-            $buyRequest = new Varien_Object();
+            $buyRequest = new \Maho\DataObject(unserialize($buyRequest, ['allowed_classes' => false]));
+        } elseif (!$buyRequest instanceof \Maho\DataObject) {
+            $buyRequest = new \Maho\DataObject();
         }
 
         if (!$product instanceof Mage_Catalog_Model_Product) {
@@ -564,8 +564,8 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
      * For more options see Mage_Catalog_Helper_Product->addParamsToBuyRequest()
      *
      * @param int|Mage_Wishlist_Model_Item $itemId
-     * @param Varien_Object $buyRequest
-     * @param null|array|Varien_Object $params
+     * @param \Maho\DataObject $buyRequest
+     * @param null|array|\Maho\DataObject $params
      * @return $this
      *
      * @see Mage_Catalog_Helper_Product::addParamsToBuyRequest()
@@ -585,9 +585,9 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
             ->load($productId);
 
         if (is_array($params)) {
-            $params = new Varien_Object($params);
-        } elseif (!$params instanceof Varien_Object) {
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject($params);
+        } elseif (!$params instanceof \Maho\DataObject) {
+            $params = new \Maho\DataObject();
         }
         $params->setCurrentConfig($item->getBuyRequest());
         $buyRequest = Mage::helper('catalog/product')->addParamsToBuyRequest($buyRequest, $params);

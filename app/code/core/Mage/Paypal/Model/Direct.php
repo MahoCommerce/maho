@@ -157,7 +157,7 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function authorize(Varien_Object $payment, $amount)
+    public function authorize(\Maho\DataObject $payment, $amount)
     {
         return $this->_placeOrder($payment, $amount);
     }
@@ -169,7 +169,7 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function void(Varien_Object $payment)
+    public function void(\Maho\DataObject $payment)
     {
         $this->_pro->void($payment);
         return $this;
@@ -182,7 +182,7 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(\Maho\DataObject $payment, $amount)
     {
         if ($this->_pro->capture($payment, $amount) === false) {
             $this->_placeOrder($payment, $amount);
@@ -197,7 +197,7 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         $this->_pro->refund($payment, $amount);
         return $this;
@@ -210,7 +210,7 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function cancel(Varien_Object $payment)
+    public function cancel(\Maho\DataObject $payment)
     {
         $this->void($payment);
 
@@ -357,7 +357,7 @@ class Mage_Paypal_Model_Direct extends Mage_Payment_Model_Method_Cc
      * @return  bool
      */
     #[\Override]
-    public function canVoid(Varien_Object $payment)
+    public function canVoid(\Maho\DataObject $payment)
     {
         if ($payment instanceof Mage_Sales_Model_Order_Invoice
             || $payment instanceof Mage_Sales_Model_Order_Creditmemo

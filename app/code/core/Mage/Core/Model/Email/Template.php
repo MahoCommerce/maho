@@ -98,7 +98,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @return  $this
      */
-    public function setTemplateFilter(Varien_Filter_Template $filter)
+    public function setTemplateFilter(\Maho\Filter\Template $filter)
     {
         $this->_templateFilter = $filter;
         return $this;
@@ -441,7 +441,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             }
             $mailer = new Mailer(Transport::fromDsn($dsn));
 
-            $transportObj = new Varien_Object();
+            $transportObj = new \Maho\DataObject();
             Mage::dispatchEvent('email_template_send_before', [
                 'mail'      => $email,
                 'template'  => $this,

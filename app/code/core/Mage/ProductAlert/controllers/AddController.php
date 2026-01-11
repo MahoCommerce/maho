@@ -31,7 +31,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
 
     public function testObserverAction(): void
     {
-        $object = new Varien_Object();
+        $object = new \Maho\DataObject();
         $observer = Mage::getSingleton('productalert/observer');
         $observer->process($object);
     }

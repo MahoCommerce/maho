@@ -82,9 +82,9 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
     }
 
     #[\Override]
-    protected function _doShipmentRequest(Varien_Object $request)
+    protected function _doShipmentRequest(\Maho\DataObject $request)
     {
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     #[\Override]

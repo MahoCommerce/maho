@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Paypal_Model_Payflow_Request extends Varien_Object
+class Mage_Paypal_Model_Payflow_Request extends \Maho\DataObject
 {
     /**
      * Set/Get attribute wrapper
@@ -32,7 +32,7 @@ class Mage_Paypal_Model_Payflow_Request extends Varien_Object
             'set' => $this->setData($key, $args[0] ?? null),
             'uns' => $this->unsetData($key),
             'has' => isset($this->_data[$key]),
-            default => throw new Varien_Exception('Invalid method ' . static::class . '::' . $method . '(' . print_r($args, true) . ')'),
+            default => throw new \Maho\Exception('Invalid method ' . static::class . '::' . $method . '(' . print_r($args, true) . ')'),
         };
     }
 }

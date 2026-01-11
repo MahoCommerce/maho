@@ -44,7 +44,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest = null;
 
@@ -116,7 +116,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     {
         $this->_request = $request;
 
-        $r = new Varien_Object();
+        $r = new \Maho\DataObject();
 
         if ($request->getLimitMethod()) {
             $r->setAction($this->getCode('action', 'single'));
@@ -873,7 +873,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     }
 
     #[\Override]
-    protected function _doShipmentRequest(Varien_Object $request): Varien_Object
+    protected function _doShipmentRequest(\Maho\DataObject $request): \Maho\DataObject
     {
         return $this->_doShipmentRequestRest($request);
     }
@@ -881,7 +881,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      */
-    protected function _doShipmentRequestRest(Varien_Object $request): Varien_Object
+    protected function _doShipmentRequestRest(\Maho\DataObject $request): \Maho\DataObject
     {
         $request->setShipperAddressCountryCode(
             $this->getNormalizedCountryCode(
@@ -899,7 +899,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             ),
         );
 
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         $this->_prepareShipmentRequest($request);
         $rawJsonRequest = $this->_formShipmentRestRequest($request);
         try {
@@ -1014,7 +1014,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         return $countryCode;
     }
 
-    protected function _formShipmentRestRequest(Varien_Object $request): string
+    protected function _formShipmentRestRequest(\Maho\DataObject $request): string
     {
         $shipmentDescription = $this->generateShipmentDescription($request->getPackageItems());
         $packageParams = $request->getPackageParams();
@@ -1204,7 +1204,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $itemsDesc = [];
         $itemsShipment = $items;
         foreach ($itemsShipment as $itemShipment) {
-            $item = new Varien_Object();
+            $item = new \Maho\DataObject();
             $item->setData($itemShipment);
             $itemsDesc[] = $item->getName();
         }
@@ -1218,7 +1218,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * @return array|bool
      */
     #[\Override]
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         if ($params == null) {
             return $this->_getAllowedContainers($params);
@@ -1301,7 +1301,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * @return array
      */
     #[\Override]
-    public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
+    public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
         $countryRecipient           = $params != null ? $params->getCountryRecipient() : null;
         $deliveryConfirmationTypes  = [];
@@ -1688,7 +1688,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Setting common request params for Rate Request
      */
-    private function setQuoteRequestData(Varien_Object $rowRequest): array
+    private function setQuoteRequestData(\Maho\DataObject $rowRequest): array
     {
         if (self::USA_COUNTRY_ID == $rowRequest->getDestCountry()) {
             $destPostal = substr((string) $rowRequest->getDestPostal(), 0, 5);

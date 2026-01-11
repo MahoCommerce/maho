@@ -15,7 +15,7 @@ class Mage_GoogleAnalytics_Model_Observer
     /**
      * Add order information into GA block to render on checkout success pages
      */
-    public function setGoogleAnalyticsOnOrderSuccessPageView(Varien_Event_Observer $observer)
+    public function setGoogleAnalyticsOnOrderSuccessPageView(\Maho\Event\Observer $observer)
     {
         $orderIds = $observer->getEvent()->getOrderIds();
         if (empty($orderIds) || !is_array($orderIds)) {
@@ -30,7 +30,7 @@ class Mage_GoogleAnalytics_Model_Observer
     /**
      * Process items added or removed from cart for GA4 block to render event on cart view
      */
-    public function processItemsAddedOrRemovedFromCart(Varien_Event_Observer $observer): void
+    public function processItemsAddedOrRemovedFromCart(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Quote_Item $item */
         $item = $observer->getEvent()->getItem();

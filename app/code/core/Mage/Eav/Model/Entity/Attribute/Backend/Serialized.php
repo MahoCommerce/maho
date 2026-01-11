@@ -15,7 +15,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
     /**
      * Serialize before saving
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -33,7 +33,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
     /**
      * Unserialize after saving
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -47,7 +47,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
     /**
      * Unserialize after loading
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -63,7 +63,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
      *
      * @return $this
      */
-    protected function _unserialize(Varien_Object $object)
+    protected function _unserialize(\Maho\DataObject $object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
         if ($object->getData($attrCode)) {

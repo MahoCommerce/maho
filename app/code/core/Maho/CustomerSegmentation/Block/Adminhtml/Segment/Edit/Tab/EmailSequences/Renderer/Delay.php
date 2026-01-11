@@ -14,7 +14,7 @@ declare(strict_types=1);
 class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_EmailSequences_Renderer_Delay extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(Varien_Object $row): string
+    public function render(\Maho\DataObject $row): string
     {
         $minutes = (int) $row->getData($this->getColumn()->getIndex());
 

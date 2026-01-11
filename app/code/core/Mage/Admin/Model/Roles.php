@@ -67,7 +67,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     /**
      * Return tree of acl resources
      *
-     * @return Varien_Simplexml_Element|array
+     * @return \Maho\Simplexml\Element|array
      */
     public function getResourcesTree()
     {
@@ -77,7 +77,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     /**
      * Return list of acl resources
      *
-     * @return Varien_Simplexml_Element|array
+     * @return \Maho\Simplexml\Element|array
      */
     public function getResourcesList()
     {
@@ -87,7 +87,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     /**
      * Return list of acl resources in 2D format
      *
-     * @return Varien_Simplexml_Element|array
+     * @return \Maho\Simplexml\Element|array
      */
     public function getResourcesList2D()
     {
@@ -112,10 +112,10 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
      * @param  null|mixed $represent2Darray
      * @param  bool $rawNodes
      * @param  string $module
-     * @return Varien_Simplexml_Element|false|array
+     * @return \Maho\Simplexml\Element|false|array
      */
     protected function _buildResourcesArray(
-        ?Varien_Simplexml_Element $resource = null,
+        ?\Maho\Simplexml\Element $resource = null,
         $parentName = null,
         $level = 0,
         $represent2Darray = null,

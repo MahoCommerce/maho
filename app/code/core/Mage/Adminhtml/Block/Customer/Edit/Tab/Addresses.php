@@ -102,7 +102,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses extends Mage_Adminhtml_Bl
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = Mage::registry('current_customer');
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $fieldset = $form->addFieldset('address_fieldset', [
             'legend'    => Mage::helper('customer')->__("Edit Customer's Address")]);
 
