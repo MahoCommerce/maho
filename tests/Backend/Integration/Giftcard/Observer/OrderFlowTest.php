@@ -497,3 +497,215 @@ describe('Observer: Add Gift Card Total to Admin Order View', function () {
         expect(true)->toBeTrue();
     });
 });
+describe('Observer: Refund Gift Card on Order Cancel', function () {
+    test('refunds gift card balance when order is canceled', function () {
+        // Create a gift card with initial balance
+        $giftcard = Mage::getModel('giftcard/giftcard');
+        $giftcard->setCode('CANCEL-TEST-' . uniqid());
+        $giftcard->setBalance(100.00);
+        $giftcard->setInitialBalance(100.00);
+        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard->setWebsiteId(1);
+        $giftcard->save();
+
+        $code = $giftcard->getCode();
+        $initialBalance = $giftcard->getBalance();
+
+        // Create and place an order using the gift card
+        $order = Mage::getModel('sales/order');
+        $order->setIncrementId('100000099');
+        $order->setStoreId(1);
+        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
+        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setGrandTotal(50.00);
+        $order->setBaseGrandTotal(50.00);
+        $order->setGiftcardAmount(50.00);
+        $order->setBaseGiftcardAmount(50.00);
+        $order->setGiftcardCodes(json_encode([$code => 50.00]));
+        $order->save();
+
+        // Simulate order placement to deduct balance
+        $giftcard->setBalance(50.00);
+        $giftcard->save();
+
+        // Verify balance was deducted
+        $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+        expect($giftcard->getBalance())->toBe(50.00);
+
+        // Cancel the order
+        $order->cancel();
+        $order->save();
+
+        // Manually trigger the observer (since we're in a test environment)
+        $observer = Mage::getModel('giftcard/observer');
+        $event = new Maho\Event();
+        $event->setOrder($order);
+        $eventObserver = new Maho\Event\Observer();
+        $eventObserver->setEvent($event);
+        $observer->refundGiftcardOnOrderCancel($eventObserver);
+
+        // Reload gift card and verify balance was refunded
+        $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+        expect($giftcard->getBalance())->toBe(100.00);
+        expect($giftcard->getStatus())->toBe(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+
+        // Verify history entry was created
+        $history = Mage::getResourceModel('giftcard/history_collection')
+            ->addFieldToFilter('giftcard_id', $giftcard->getId())
+            ->addFieldToFilter('action', Maho_Giftcard_Model_Giftcard::ACTION_REFUNDED)
+            ->addFieldToFilter('order_id', $order->getId())
+            ->getFirstItem();
+
+        expect($history->getId())->toBeGreaterThan(0);
+        expect((float) $history->getBaseAmount())->toBe(50.00);
+        expect((float) $history->getBalanceBefore())->toBe(50.00);
+        expect((float) $history->getBalanceAfter())->toBe(100.00);
+        expect($history->getComment())->toContain('canceled order');
+    });
+
+    test('refunds multiple gift cards proportionally on cancel', function () {
+        // Create two gift cards
+        $giftcard1 = Mage::getModel('giftcard/giftcard');
+        $giftcard1->setCode('CANCEL-MULTI-1-' . uniqid());
+        $giftcard1->setBalance(100.00);
+        $giftcard1->setInitialBalance(100.00);
+        $giftcard1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard1->setWebsiteId(1);
+        $giftcard1->save();
+
+        $giftcard2 = Mage::getModel('giftcard/giftcard');
+        $giftcard2->setCode('CANCEL-MULTI-2-' . uniqid());
+        $giftcard2->setBalance(75.00);
+        $giftcard2->setInitialBalance(75.00);
+        $giftcard2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard2->setWebsiteId(1);
+        $giftcard2->save();
+
+        $code1 = $giftcard1->getCode();
+        $code2 = $giftcard2->getCode();
+
+        // Create order using both gift cards
+        $order = Mage::getModel('sales/order');
+        $order->setIncrementId('100000098');
+        $order->setStoreId(1);
+        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
+        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setGrandTotal(120.00);
+        $order->setBaseGrandTotal(120.00);
+        $order->setGiftcardAmount(120.00);
+        $order->setBaseGiftcardAmount(120.00);
+        $order->setGiftcardCodes(json_encode([
+            $code1 => 80.00,
+            $code2 => 40.00,
+        ]));
+        $order->save();
+
+        // Deduct balances
+        $giftcard1->setBalance(20.00);
+        $giftcard1->save();
+        $giftcard2->setBalance(35.00);
+        $giftcard2->save();
+
+        // Verify balances were deducted
+        $giftcard1 = Mage::getModel('giftcard/giftcard')->loadByCode($code1);
+        $giftcard2 = Mage::getModel('giftcard/giftcard')->loadByCode($code2);
+        expect($giftcard1->getBalance())->toBe(20.00);
+        expect($giftcard2->getBalance())->toBe(35.00);
+
+        // Cancel the order
+        $order->cancel();
+        $order->save();
+
+        // Manually trigger the observer
+        $observer = Mage::getModel('giftcard/observer');
+        $event = new Maho\Event();
+        $event->setOrder($order);
+        $eventObserver = new Maho\Event\Observer();
+        $eventObserver->setEvent($event);
+        $observer->refundGiftcardOnOrderCancel($eventObserver);
+
+        // Verify both balances were refunded
+        $giftcard1 = Mage::getModel('giftcard/giftcard')->loadByCode($code1);
+        $giftcard2 = Mage::getModel('giftcard/giftcard')->loadByCode($code2);
+        expect($giftcard1->getBalance())->toBe(100.00);
+        expect($giftcard2->getBalance())->toBe(75.00);
+    });
+
+    test('does nothing when order has no gift card amount', function () {
+        // Create order without gift card
+        $order = Mage::getModel('sales/order');
+        $order->setIncrementId('100000097');
+        $order->setStoreId(1);
+        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
+        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setGrandTotal(100.00);
+        $order->setBaseGrandTotal(100.00);
+        $order->save();
+
+        // Cancel the order - should not throw any errors
+        $order->cancel();
+        $order->save();
+
+        // Test passes if no exception was thrown
+        expect(true)->toBeTrue();
+    });
+
+    test('extends expiration on refund when configured', function () {
+        // Create an expiring gift card
+        $expiresAt = new DateTime('now', new DateTimeZone('UTC'));
+        $expiresAt->modify('+5 days'); // Expires soon
+
+        $giftcard = Mage::getModel('giftcard/giftcard');
+        $giftcard->setCode('CANCEL-EXTEND-' . uniqid());
+        $giftcard->setBalance(100.00);
+        $giftcard->setInitialBalance(100.00);
+        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard->setWebsiteId(1);
+        $giftcard->setExpiresAt($expiresAt->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+        $giftcard->save();
+
+        $code = $giftcard->getCode();
+
+        // Create and place order
+        $order = Mage::getModel('sales/order');
+        $order->setIncrementId('100000096');
+        $order->setStoreId(1);
+        $order->setState(Mage_Sales_Model_Order::STATE_NEW);
+        $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+        $order->setGrandTotal(50.00);
+        $order->setBaseGrandTotal(50.00);
+        $order->setGiftcardAmount(50.00);
+        $order->setBaseGiftcardAmount(50.00);
+        $order->setGiftcardCodes(json_encode([$code => 50.00]));
+        $order->save();
+
+        // Deduct balance
+        $giftcard->setBalance(50.00);
+        $giftcard->save();
+
+        // Set extension days config (default is 30 days)
+        $originalExtension = Mage::getStoreConfig('giftcard/general/refund_expiration_extension');
+
+        // Cancel order
+        $order->cancel();
+        $order->save();
+
+        // Manually trigger the observer
+        $observer = Mage::getModel('giftcard/observer');
+        $event = new Maho\Event();
+        $event->setOrder($order);
+        $eventObserver = new Maho\Event\Observer();
+        $eventObserver->setEvent($event);
+        $observer->refundGiftcardOnOrderCancel($eventObserver);
+
+        // Reload and check expiration was extended
+        $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
+        $newExpiresAt = new DateTime($giftcard->getExpiresAt(), new DateTimeZone('UTC'));
+
+        // Should be extended by at least 25 days (allowing some margin)
+        $minExpectedExpiration = new DateTime('now', new DateTimeZone('UTC'));
+        $minExpectedExpiration->modify('+25 days');
+
+        expect($newExpiresAt->getTimestamp())->toBeGreaterThan($minExpectedExpiration->getTimestamp());
+    });
+});

@@ -184,6 +184,14 @@
                     </giftcard_refund_balance>
                 </observers>
             </sales_order_creditmemo_refund>
+            <order_cancel_after>
+                <observers>
+                    <giftcard_refund_on_cancel>
+                        <class>giftcard/observer</class>
+                        <method>refundGiftcardOnOrderCancel</method>
+                    </giftcard_refund_on_cancel>
+                </observers>
+            </order_cancel_after>
             <payment_method_is_active>
                 <observers>
                     <giftcard_filter_payment_methods>
