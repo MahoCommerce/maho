@@ -115,7 +115,7 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
                 $model->getInitialBalance(),
                 2,
                 [],
-                false
+                false,
             );
 
             $fieldset->addField('initial_balance_display', 'note', [

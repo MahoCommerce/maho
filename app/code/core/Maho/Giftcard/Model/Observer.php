@@ -811,9 +811,6 @@ class Maho_Giftcard_Model_Observer
      * Filter payment methods for zero-total orders covered by gift cards
      * Prevents non-zero-total payment methods (like Check/Money Order) from showing
      * when gift cards fully cover the order. Only the "free" payment method should show.
-     *
-     * @param Maho\Event\Observer $observer
-     * @return void
      */
     public function filterPaymentMethodsForZeroTotal(Maho\Event\Observer $observer): void
     {
