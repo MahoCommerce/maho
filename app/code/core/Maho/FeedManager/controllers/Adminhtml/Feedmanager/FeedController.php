@@ -757,7 +757,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 }
             } else {
                 // JSON uses object format
-                foreach (array_merge($requiredAttributes, $optionalAttributes) as $key => $attr) {
+                foreach (array_keys(array_merge($requiredAttributes, $optionalAttributes)) as $key) {
                     $mapping = $mappings[$key] ?? ['source_type' => 'attribute', 'source_value' => ''];
                     $structure[$key] = [
                         'type' => 'string',

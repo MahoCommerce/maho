@@ -180,7 +180,7 @@ class Maho_FeedManager_Model_Cron
                     $this->_uploadFeed($feed, $log);
                 } else {
                     $log->recordUploadSkipped(
-                        !$feed->getAutoUpload() ? 'Auto-upload disabled' : 'No destination configured',
+                        $feed->getAutoUpload() ? 'No destination configured' : 'Auto-upload disabled',
                     );
                 }
             } else {

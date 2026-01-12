@@ -76,17 +76,16 @@ class FeedGenerate extends BaseMahoCommand
                 }
 
                 return Command::SUCCESS;
-            } else {
-                $output->writeln('');
-                $output->writeln('<error>Feed generation failed!</error>');
-                $errors = $log->getErrorMessagesArray();
-                if (!empty($errors)) {
-                    foreach ($errors as $error) {
-                        $output->writeln('  - ' . $error);
-                    }
-                }
-                return Command::FAILURE;
             }
+            $output->writeln('');
+            $output->writeln('<error>Feed generation failed!</error>');
+            $errors = $log->getErrorMessagesArray();
+            if (!empty($errors)) {
+                foreach ($errors as $error) {
+                    $output->writeln('  - ' . $error);
+                }
+            }
+            return Command::FAILURE;
         } catch (\Exception $e) {
             $output->writeln('');
             $output->writeln('<error>Error: ' . $e->getMessage() . '</error>');

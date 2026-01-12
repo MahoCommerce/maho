@@ -631,10 +631,11 @@ class Maho_FeedManager_Model_Generator
         // Check XML preview mode
         $xmlStructure = $feed->getXmlStructure();
         $xmlTemplate = $feed->getXmlItemTemplate();
-
         if (!empty($xmlStructure) && $feed->getFileFormat() === 'xml') {
             return $this->_generateXmlStructurePreview($feed, $limit);
-        } elseif (!empty($xmlTemplate) && $feed->getFileFormat() === 'xml') {
+        }
+
+        if (!empty($xmlTemplate) && $feed->getFileFormat() === 'xml') {
             return $this->_generateXmlTemplatePreview($feed, $limit);
         }
 

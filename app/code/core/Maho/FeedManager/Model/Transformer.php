@@ -307,7 +307,6 @@ class Maho_FeedManager_Model_Transformer
      * Build a transformer chain string from array format
      *
      * @param array<int, array{transformer: string, options?: array<string, string>}> $chain
-     * @return string
      */
     public static function buildChainString(array $chain): string
     {

@@ -94,26 +94,22 @@ class FeedValidate extends BaseMahoCommand
             }
 
             return Command::SUCCESS;
-        } else {
-            $output->writeln('<error>Feed validation failed!</error>');
-            $output->writeln('');
-
-            if (!empty($errors)) {
-                $output->writeln('<error>Errors:</error>');
-                foreach ($errors as $error) {
-                    $output->writeln('  - ' . $error);
-                }
-            }
-
-            if (!empty($warnings)) {
-                $output->writeln('');
-                $output->writeln('<comment>Warnings:</comment>');
-                foreach ($warnings as $warning) {
-                    $output->writeln('  - ' . $warning);
-                }
-            }
-
-            return Command::FAILURE;
         }
+        $output->writeln('<error>Feed validation failed!</error>');
+        $output->writeln('');
+        if (!empty($errors)) {
+            $output->writeln('<error>Errors:</error>');
+            foreach ($errors as $error) {
+                $output->writeln('  - ' . $error);
+            }
+        }
+        if (!empty($warnings)) {
+            $output->writeln('');
+            $output->writeln('<comment>Warnings:</comment>');
+            foreach ($warnings as $warning) {
+                $output->writeln('  - ' . $warning);
+            }
+        }
+        return Command::FAILURE;
     }
 }
