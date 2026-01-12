@@ -391,21 +391,56 @@ it('can process customer orders', function () {
 - Use PHP 8.3+ features like `#[\Override]` attribute for overridden methods
 
 ### Security Patterns
-- Use `getUserParam()` instead of `getParam()` for user-supplied parameters in controllers
+
+**Parameter Handling:**
+- **ALWAYS use `getParam()`** for retrieving request parameters in controllers (both frontend and admin)
+- **NEVER use `getUserParam()`** in controllers - it only checks route parameters and will break query string URLs
+- `getUserParam()` is designed for URL building (in `Mage_Core_Model_Url`), NOT for parameter retrieval
+- Security comes from validation, ACL, and CSRF tokens, not from which getter method you use
+
+```php
+// ✅ CORRECT - Works with both /edit/id/123 and /edit?id=123
+$id = $this->getRequest()->getParam('id');
+
+// ❌ WRONG - Only works with /edit/id/123, breaks /edit?id=123
+$id = $this->getRequest()->getUserParam('id');
+```
+
+**Security Best Practices:**
 - Define `public const ADMIN_RESOURCE` in admin controllers for ACL permissions
-- Example:
+- Use `_setForcedFormKeyActions()` for state-changing actions (delete, save, etc.)
+- Validate and sanitize all user input at the model/business logic layer
+- Use Doctrine DBAL's parameterized queries (automatic in Maho)
+
+Example:
 ```php
 declare(strict_types=1);
 
 class Mage_Module_Adminhtml_SomeController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/module/resource';
-    
+
     #[\Override]
     public function preDispatch()
     {
         $this->_setForcedFormKeyActions('delete');
         return parent::preDispatch();
+    }
+
+    public function editAction(): void
+    {
+        // ✅ Use getParam() - standard Maho pattern
+        $id = $this->getRequest()->getParam('id');
+        $model = Mage::getModel('module/entity')->load($id);
+
+        // Validate at model layer
+        if (!$model->getId()) {
+            $this->_getSession()->addError($this->__('Entity not found.'));
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        // ... rest of action
     }
 }
 ```
