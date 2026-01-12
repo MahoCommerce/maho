@@ -513,7 +513,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
 
         // Create and place an order using the gift card
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('100000099');
+        $order->setIncrementId('CANCEL-TEST-' . uniqid());
         $order->setStoreId(1);
         $order->setState(Mage_Sales_Model_Order::STATE_NEW);
         $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
@@ -586,7 +586,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
 
         // Create order using both gift cards
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('100000098');
+        $order->setIncrementId('CANCEL-MULTI-' . uniqid());
         $order->setStoreId(1);
         $order->setState(Mage_Sales_Model_Order::STATE_NEW);
         $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
@@ -634,7 +634,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
     test('does nothing when order has no gift card amount', function () {
         // Create order without gift card
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('100000097');
+        $order->setIncrementId('CANCEL-NOGC-' . uniqid());
         $order->setStoreId(1);
         $order->setState(Mage_Sales_Model_Order::STATE_NEW);
         $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
@@ -668,7 +668,7 @@ describe('Observer: Refund Gift Card on Order Cancel', function () {
 
         // Create and place order
         $order = Mage::getModel('sales/order');
-        $order->setIncrementId('100000096');
+        $order->setIncrementId('CANCEL-EXPIRE-' . uniqid());
         $order->setStoreId(1);
         $order->setState(Mage_Sales_Model_Order::STATE_NEW);
         $order->setStatus(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
