@@ -16,7 +16,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
      * Validate product attribute value for condition
      */
     #[\Override]
-    public function validate(Varien_Object $object): bool
+    public function validate(\Maho\DataObject $object): bool
     {
         $attrCode = $this->getAttribute();
 
@@ -48,7 +48,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Validate stock-related attributes
      */
-    protected function _validateStockAttribute(Varien_Object $object): bool
+    protected function _validateStockAttribute(\Maho\DataObject $object): bool
     {
         $attrCode = $this->getAttribute();
 
@@ -77,7 +77,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Validate product
      */
-    protected function _validateProduct(Varien_Object $object): bool
+    protected function _validateProduct(\Maho\DataObject $object): bool
     {
         return Mage_Rule_Model_Condition_Abstract::validate($object);
     }
@@ -85,7 +85,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Restore old attribute value
      */
-    protected function _restoreOldAttrValue(Varien_Object $object, mixed $oldAttrValue): void
+    protected function _restoreOldAttrValue(\Maho\DataObject $object, mixed $oldAttrValue): void
     {
         $attrCode = $this->getAttribute();
         if (is_null($oldAttrValue)) {
@@ -98,7 +98,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Get attribute value
      */
-    protected function _getAttributeValue(Varien_Object $object): mixed
+    protected function _getAttributeValue(\Maho\DataObject $object): mixed
     {
         $attrCode = $this->getAttribute();
         $storeId = $object->getStoreId();
@@ -116,7 +116,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Prepare datetime attribute value
      */
-    protected function _prepareDatetimeValue(mixed $value, Varien_Object $object): mixed
+    protected function _prepareDatetimeValue(mixed $value, \Maho\DataObject $object): mixed
     {
         $attribute = $object->getResource()->getAttribute($this->getAttribute());
         if ($attribute && $attribute->getBackendType() === 'datetime') {
@@ -131,7 +131,7 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Prepare multiselect attribute value
      */
-    protected function _prepareMultiselectValue(mixed $value, Varien_Object $object): mixed
+    protected function _prepareMultiselectValue(mixed $value, \Maho\DataObject $object): mixed
     {
         $attribute = $object->getResource()->getAttribute($this->getAttribute());
         if ($attribute && $attribute->getFrontendInput() === 'multiselect') {
