@@ -12,8 +12,17 @@ Maho is an open-source ecommerce platform forked from OpenMage, designed for med
 ```bash
 vendor/bin/php-cs-fixer fix        # Fix code style (lint)
 vendor/bin/phpstan analyze         # Run static analysis
-vendor/bin/rector -c .rector.php
+vendor/bin/rector -c .rector.php   # Code modernization
+./maho translations:missing        # Check for missing translations
+./maho translations:unused         # Check for unused translations
+./maho phpstorm:metadata:generate  # Generate IDE metadata
 ```
+
+**Before committing**, ensure all quality checks pass:
+1. PHP-CS-Fixer - no style issues
+2. PHPStan - no static analysis errors
+3. Rector - no modernization needed
+4. Translations - no missing/unused strings in changed modules
 
 ### Cache Management
 ```bash
@@ -160,7 +169,7 @@ try {
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 ```
-- Before committing, ensure all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in the corresponding CSV files in `app/locale/en_US/`
+- Before committing, run `./maho translations:missing` and `./maho translations:unused` to verify all translatable strings (`$this->__()` or `Mage::helper()->__()`) are present in `app/locale/en_US/` and no unused strings remain
 
 ### Adding New Features
 - If you've to create a new module, use the `app/code/core/Maho/` namespace 
