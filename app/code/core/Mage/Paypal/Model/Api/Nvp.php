@@ -854,7 +854,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
     /**
      * GetRecurringPaymentsProfileDetails call
      */
-    public function callGetRecurringPaymentsProfileDetails(Varien_Object $result)
+    public function callGetRecurringPaymentsProfileDetails(\Maho\DataObject $result)
     {
         $request = $this->_exportToRequest($this->_getRecurringPaymentsProfileDetailsRequest);
         $response = $this->call('GetRecurringPaymentsProfileDetails', $request);
@@ -865,12 +865,12 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
     /**
      * Import callback request array into $this public data
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function prepareShippingOptionsCallbackAddress(array $request)
     {
-        $address = new Varien_Object();
-        Varien_Object_Mapper::accumulateByMap($request, $address, $this->_callbackRequestMap);
+        $address = new \Maho\DataObject();
+        \Maho\DataObject\Mapper::accumulateByMap($request, $address, $this->_callbackRequestMap);
         $address->setExportedKeys(array_values($this->_callbackRequestMap));
         $this->_applyStreetAndRegionWorkarounds($address);
         return $address;
@@ -1189,15 +1189,15 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      */
     protected function _exportAddressses($data)
     {
-        $address = new Varien_Object();
-        Varien_Object_Mapper::accumulateByMap($data, $address, $this->_billingAddressMap);
+        $address = new \Maho\DataObject();
+        \Maho\DataObject\Mapper::accumulateByMap($data, $address, $this->_billingAddressMap);
         $address->setExportedKeys(array_values($this->_billingAddressMap));
         $this->_applyStreetAndRegionWorkarounds($address);
         $this->setExportedBillingAddress($address);
         // assume there is shipping address if there is at least one field specific to shipping
         if (isset($data['SHIPTONAME'])) {
             $shippingAddress = clone $address;
-            Varien_Object_Mapper::accumulateByMap($data, $shippingAddress, $this->_shippingAddressMap);
+            \Maho\DataObject\Mapper::accumulateByMap($data, $shippingAddress, $this->_shippingAddressMap);
             $this->_applyStreetAndRegionWorkarounds($shippingAddress);
             // PayPal doesn't provide detailed shipping name fields, so the name will be overwritten
             $shippingAddress->addData([
@@ -1210,7 +1210,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
     /**
      * Adopt specified address object to be compatible with Magento
      */
-    protected function _applyStreetAndRegionWorkarounds(Varien_Object $address)
+    protected function _applyStreetAndRegionWorkarounds(\Maho\DataObject $address)
     {
         // merge street addresses into 1
         if ($address->hasStreet2()) {
@@ -1254,7 +1254,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         $billingAddress  = $this->getBillingAddress() ?: $this->getAddress();
         $shippingAddress = $this->getAddress();
 
-        $to = Varien_Object_Mapper::accumulateByMap(
+        $to = \Maho\DataObject\Mapper::accumulateByMap(
             $billingAddress,
             $to,
             array_merge(array_flip($this->_billingAddressMap), $this->_billingAddressMapRequest),
@@ -1263,7 +1263,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
             $to['STATE'] = $regionCode;
         }
         if (!$this->getSuppressShipping()) {
-            $to = Varien_Object_Mapper::accumulateByMap($shippingAddress, $to, array_flip($this->_shippingAddressMap));
+            $to = \Maho\DataObject\Mapper::accumulateByMap($shippingAddress, $to, array_flip($this->_shippingAddressMap));
             if ($regionCode = $this->_lookupRegionCodeFromAddress($shippingAddress)) {
                 $to['SHIPTOSTATE'] = $regionCode;
             }
@@ -1440,7 +1440,7 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
      *
      * @param string $value
      */
-    protected function _analyzeRecurringProfileStatus($value, Varien_Object $result)
+    protected function _analyzeRecurringProfileStatus($value, \Maho\DataObject $result)
     {
         switch ($value) {
             case 'ActiveProfile':

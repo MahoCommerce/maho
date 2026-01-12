@@ -100,7 +100,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param Varien_Data_Collection $collection
+     * @param \Maho\Data\Collection $collection
      * @param string $from
      * @param string $to
      * @param string $periodType

@@ -12,7 +12,7 @@
 class Mage_Eav_Model_Observer
 {
     /**
-     * @param Varien_Event_Observer $event
+     * @param \Maho\Event\Observer $event
      * @return void
      * @throws Mage_Core_Model_Store_Exception
      */

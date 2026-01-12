@@ -347,7 +347,7 @@ class Mage_Shipping_Model_Shipping
      * @param null|bool|array $limitCarrier
      * @return $this
      */
-    public function collectRatesByAddress(Varien_Object $address, $limitCarrier = null)
+    public function collectRatesByAddress(\Maho\DataObject $address, $limitCarrier = null)
     {
         /** @var Mage_Shipping_Model_Rate_Request $request */
         $request = Mage::getModel('shipping/rate_request');
@@ -413,7 +413,7 @@ class Mage_Shipping_Model_Shipping
     /**
      * Prepare and do request to shipment
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function requestToShipment(Mage_Sales_Model_Order_Shipment $orderShipment)
     {
@@ -436,7 +436,7 @@ class Mage_Shipping_Model_Shipping
 
         $originStreet1 = Mage::getStoreConfig(self::XML_PATH_STORE_ADDRESS1, $shipmentStoreId);
         $originStreet2 = Mage::getStoreConfig(self::XML_PATH_STORE_ADDRESS2, $shipmentStoreId);
-        $storeInfo = new Varien_Object(Mage::getStoreConfig('general/store_information', $shipmentStoreId));
+        $storeInfo = new \Maho\DataObject(Mage::getStoreConfig('general/store_information', $shipmentStoreId));
 
         if (!$admin->getFirstname() || !$admin->getLastname() || !$storeInfo->getName() || !$storeInfo->getPhone()
             || !$originStreet1 || !Mage::getStoreConfig(self::XML_PATH_STORE_CITY, $shipmentStoreId)

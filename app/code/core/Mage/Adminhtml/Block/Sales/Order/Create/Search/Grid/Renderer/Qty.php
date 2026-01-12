@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Qty extends M
     /**
      * Returns whether this qty field must be inactive
      *
-     * @param   Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return  bool
      */
     protected function _isInactive($row)
@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid_Renderer_Qty extends M
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         // Prepare values
         $isInactive = $this->_isInactive($row);

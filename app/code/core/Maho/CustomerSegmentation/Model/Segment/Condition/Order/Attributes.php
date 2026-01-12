@@ -156,7 +156,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Order_Attributes extends
     }
 
     #[\Override]
-    public function getValueElement(): Varien_Data_Form_Element_Abstract
+    public function getValueElement(): \Maho\Data\Form\Element\AbstractElement
     {
         return parent::getValueElement();
     }

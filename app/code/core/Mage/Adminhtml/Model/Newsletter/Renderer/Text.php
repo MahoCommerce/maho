@@ -10,10 +10,10 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Model_Newsletter_Renderer_Text implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Model_Newsletter_Renderer_Text implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $html = '<tr><td class="label">' . "\n";
         if ($element->getLabel()) {

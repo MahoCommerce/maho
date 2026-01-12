@@ -144,7 +144,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
      *
      * @return  string
      */
-    public function getRowField(Varien_Object $row)
+    public function getRowField(\Maho\DataObject $row)
     {
         $renderedValue = $this->getRenderer()->render($row);
         if ($this->getHtmlDecorators()) {
@@ -175,7 +175,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
      *
      * @return  string
      */
-    public function getRowFieldExport(Varien_Object $row)
+    public function getRowFieldExport(\Maho\DataObject $row)
     {
         $renderedValue = $this->getRenderer()->renderExport($row);
 

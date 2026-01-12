@@ -17,7 +17,7 @@
  *
  * @method string getPath()
  */
-class Mage_Adminhtml_Model_System_Config_Source_Email_Template extends Varien_Object
+class Mage_Adminhtml_Model_System_Config_Source_Email_Template extends \Maho\DataObject
 {
     /**
      * Config xpath to email template node

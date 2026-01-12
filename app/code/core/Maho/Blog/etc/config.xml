@@ -12,7 +12,7 @@
 <config>
     <modules>
         <Maho_Blog>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </Maho_Blog>
     </modules>
     <global>
@@ -30,6 +30,9 @@
                     <post_store>
                         <table>blog_post_store</table>
                     </post_store>
+                    <eav_attribute>
+                        <table>blog_eav_attribute</table>
+                    </eav_attribute>
                 </entities>
             </blog_resource>
         </models>

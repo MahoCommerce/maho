@@ -20,7 +20,7 @@ $productList = $this->getLayout()->createBlock('catalogsearch/autocomplete_produ
 $numProducts = count($productList->getLoadedProductCollection());
 
 // Collect additional autocomplete content through events
-$autocompleteData = new Varien_Object([
+$autocompleteData = new \Maho\DataObject([
     'html' => '',
     'layout' => $this->getLayout()
 ]);

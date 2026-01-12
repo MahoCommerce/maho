@@ -245,7 +245,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
                         }
                     }
 
-                    $one = new Varien_Object();
+                    $one = new \Maho\DataObject();
                     $one->setName(Mage::helper('catalog')->__($attribute->getFrontend()->getLabel()))
                         ->setAmount($amount)
                         ->setTaxAmount($taxAmount)

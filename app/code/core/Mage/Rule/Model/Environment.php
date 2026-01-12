@@ -12,7 +12,7 @@
 /**
  * @method $this setNow(int $value)
  */
-class Mage_Rule_Model_Environment extends Varien_Object
+class Mage_Rule_Model_Environment extends \Maho\DataObject
 {
     /**
      * Collect application environment for rules filtering

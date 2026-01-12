@@ -42,7 +42,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
         $imageFileName = $this->_getFileName($data);
 
         try {
-            $ioAdapter = new Varien_Io_File();
+            $ioAdapter = new \Maho\Io\File();
             $ioAdapter->checkAndCreateFolder($apiTempDir);
             $ioAdapter->open(['path' => $apiTempDir]);
             $ioAdapter->write($imageFileName, $imageFileContent, 0666);

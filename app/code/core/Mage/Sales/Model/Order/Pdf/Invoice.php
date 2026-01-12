@@ -46,16 +46,16 @@ class Mage_Sales_Model_Order_Pdf_Invoice extends Mage_Sales_Model_Order_Pdf_Abst
     /**
      * Return PDF document
      *
-     * @param array|Varien_Data_Collection $invoices Array or collection of invoices
+     * @param array|\Maho\Data\Collection $invoices Array or collection of invoices
      */
     #[\Override]
-    public function getPdf(array|Varien_Data_Collection $invoices = []): string
+    public function getPdf(array|\Maho\Data\Collection $invoices = []): string
     {
         $this->_beforeGetPdf();
         $this->_initRenderer('invoice');
 
         // Handle collections
-        if ($invoices instanceof Varien_Data_Collection) {
+        if ($invoices instanceof \Maho\Data\Collection) {
             $invoices = $invoices->getItems();
         }
 

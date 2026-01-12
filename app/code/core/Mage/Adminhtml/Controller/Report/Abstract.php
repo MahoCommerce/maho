@@ -48,7 +48,7 @@ abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_
     /**
      * Report action init operations
      *
-     * @param array|Varien_Object $blocks
+     * @param array|\Maho\DataObject $blocks
      * @return Mage_Adminhtml_Controller_Report_Abstract
      */
     public function _initReportAction($blocks)
@@ -60,7 +60,7 @@ abstract class Mage_Adminhtml_Controller_Report_Abstract extends Mage_Adminhtml_
         $requestData = Mage::helper('adminhtml')->prepareFilterString($this->getRequest()->getParam('filter', ''));
         $requestData = $this->_filterDates($requestData, ['from', 'to']);
         $requestData['store_ids'] = $this->getRequest()->getParam('store_ids');
-        $params = new Varien_Object();
+        $params = new \Maho\DataObject();
 
         foreach ($requestData as $key => $value) {
             if (!empty($value)) {

@@ -491,15 +491,15 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param string $fieldset
      * @param string $aspect
-     * @param array|Varien_Object $source
-     * @param array|Varien_Object $target
+     * @param array|\Maho\DataObject $source
+     * @param array|\Maho\DataObject $target
      * @param string $root
      * @return bool
      */
     public function copyFieldset($fieldset, $aspect, $source, $target, $root = 'global')
     {
-        if (!(is_array($source) || $source instanceof Varien_Object)
-            || !(is_array($target) || $target instanceof Varien_Object)
+        if (!(is_array($source) || $source instanceof \Maho\DataObject)
+            || !(is_array($target) || $target instanceof \Maho\DataObject)
         ) {
             return false;
         }

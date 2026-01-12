@@ -53,7 +53,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      *
      * @return Mage_Catalog_Model_Product
      */
-    protected function _getProduct(Varien_Object $object)
+    protected function _getProduct(\Maho\DataObject $object)
     {
         return $object->getProduct() instanceof Mage_Catalog_Model_Product
             ? $object->getProduct()
@@ -107,7 +107,7 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Attribute_Assigned extends Mag
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         $product    = $this->_getProduct($object);
         $attributes = $product->getAttributes();

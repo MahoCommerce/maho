@@ -12,7 +12,7 @@
 class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Order_Item_Renderer_Default
 {
     /**
-     * @param Varien_Object|null $item
+     * @param \Maho\DataObject|null $item
      * @return bool
      */
     public function isShipmentSeparately($item = null)
@@ -53,7 +53,7 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
     }
 
     /**
-     * @param Varien_Object|null $item
+     * @param \Maho\DataObject|null $item
      * @return bool
      */
     public function isChildCalculated($item = null)
@@ -94,7 +94,7 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
     }
 
     /**
-     * @param Varien_Object|Mage_Sales_Model_Order_Item $item
+     * @param \Maho\DataObject|Mage_Sales_Model_Order_Item $item
      * @return mixed|null
      */
     public function getSelectionAttributes($item)
@@ -127,7 +127,7 @@ class Mage_Bundle_Block_Sales_Order_Items_Renderer extends Mage_Sales_Block_Orde
     /**
      * Getting all available children for Invoice, Shipment or Credit Memo item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return array
      */
     public function getChilds($item)

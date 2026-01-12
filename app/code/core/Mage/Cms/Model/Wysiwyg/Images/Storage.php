@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
+class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
 {
     public const DIRECTORY_NAME_REGEXP = '/^[a-z0-9\-\_]+$/si';
     public const THUMBS_DIRECTORY_NAME = '.thumbs';
@@ -34,7 +34,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      * Return one-level child directories for specified path
      *
      * @param string $path Parent directory path
-     * @return Varien_Data_Collection_Filesystem
+     * @return \Maho\Data\Collection\Filesystem
      */
     public function getDirsCollection($path)
     {
@@ -75,7 +75,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      *
      * @param string $path Parent directory path
      * @param string $type Type of storage, e.g. image, media etc.
-     * @return Varien_Data_Collection_Filesystem
+     * @return \Maho\Data\Collection\Filesystem
      */
     public function getFilesCollection($path, $type = null)
     {
@@ -84,7 +84,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
             ->setCollectDirs(false)
             ->setCollectFiles(true)
             ->setCollectRecursively(false)
-            ->setOrder('mtime', Varien_Data_Collection::SORT_ORDER_ASC);
+            ->setOrder('mtime', \Maho\Data\Collection::SORT_ORDER_ASC);
 
         // Add files extension filter
         if ($allowed = $this->getAllowedExtensions($type)) {
@@ -134,7 +134,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      * Storage collection
      *
      * @param string $path Path to the directory
-     * @return Varien_Data_Collection_Filesystem
+     * @return \Maho\Data\Collection\Filesystem
      */
     public function getCollection($path = null)
     {
@@ -168,7 +168,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
             Mage::throwException(Mage::helper('cms')->__('A directory with the same name already exists. Please try another folder name.'));
         }
 
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         if ($io->mkdir($newPath)) {
 
             return [
@@ -192,7 +192,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         $rootCmp = rtrim($this->getHelper()->getStorageRoot(), DS);
         $pathCmp = rtrim($path, DS);
 
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
 
         if ($rootCmp == $pathCmp) {
             Mage::throwException(Mage::helper('cms')->__(
@@ -223,7 +223,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
      */
     public function deleteFile($target)
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->rm($target);
 
         $thumb = $this->getThumbnailPath($target, true);
@@ -328,7 +328,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends Varien_Object
         }
 
         $targetDir = $this->getThumbsPath($source);
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         if (!$io->isWriteable($targetDir)) {
             $io->mkdir($targetDir);
         }

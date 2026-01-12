@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Settings extends Mage_Adminh
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $fieldset = $form->addFieldset('settings', ['legend' => Mage::helper('catalog')->__('Create Product Settings')]);
 
         $entityType = Mage::registry('product')->getResource()->getEntityType();

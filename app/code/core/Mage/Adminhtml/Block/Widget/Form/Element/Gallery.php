@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Block_Template implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Block_Template implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     protected $_element = null;
 
@@ -20,13 +20,13 @@ class Mage_Adminhtml_Block_Widget_Form_Element_Gallery extends Mage_Adminhtml_Bl
     }
 
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->setElement($element);
         return $this->toHtml();
     }
 
-    public function setElement(Varien_Data_Form_Element_Abstract $element)
+    public function setElement(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->_element = $element;
         return $this;

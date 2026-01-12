@@ -91,7 +91,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
      * Get sales item (quote item, order item etc) price including tax based on row total and tax amount
      * excluding weee tax
      *
-     * @param   Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return  float
      */
     public function getPriceInclTax($item)
@@ -108,7 +108,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get sales item (quote item, order item etc) row total price including tax
      *
-     * @param   Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return  float
      */
     public function getSubtotalInclTax($item)
@@ -136,7 +136,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get the base price of the item including tax , excluding weee
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return float
      */
     public function getBasePriceInclTax($item)
@@ -149,7 +149,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get sales item (quote item, order item etc) row total price including tax excluding wee
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return float
      */
     public function getBaseSubtotalInclTax($item)
@@ -323,7 +323,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
         $guestCheckout = Mage::getStoreConfigFlag(self::XML_PATH_GUEST_CHECKOUT, $store);
 
         if ($guestCheckout == true) {
-            $result = new Varien_Object();
+            $result = new \Maho\DataObject();
             $result->setIsAllowed($guestCheckout);
             Mage::dispatchEvent('checkout_allow_guest', [
                 'quote'  => $quote,

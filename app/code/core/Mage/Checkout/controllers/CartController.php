@@ -362,7 +362,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         }
 
         try {
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject();
             $params->setCategoryId(false);
             $params->setConfigureMode(true);
             $params->setBuyRequest($quoteItem->getBuyRequest());
@@ -381,7 +381,16 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
      */
     public function updateItemOptionsAction(): void
     {
+        $isAjax = (bool) $this->getRequest()->getParam('isAjax');
+
         if (!$this->_validateFormKey()) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => $this->__('Invalid form key. Please refresh the page.'),
+                ]);
+                return;
+            }
             $this->_redirect('*/*/');
             return;
         }
@@ -403,7 +412,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 Mage::throwException($this->__('Quote item is not found.'));
             }
 
-            $item = $cart->updateItem($id, new Varien_Object($params));
+            $item = $cart->updateItem($id, new \Maho\DataObject($params));
             if (is_string($item)) {
                 Mage::throwException($item);
             }
@@ -424,6 +433,20 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 'checkout_cart_update_item_complete',
                 ['item' => $item, 'request' => $this->getRequest(), 'response' => $this->getResponse()],
             );
+
+            if ($isAjax) {
+                $message = $this->__('%s was updated in your shopping cart.', Mage::helper('core')->escapeHtml($item->getProduct()->getName()));
+
+                $this->loadLayout();
+                $this->getResponse()->setBodyJson([
+                    'success' => true,
+                    'message' => $message,
+                    'qty' => $this->_getCart()->getSummaryQty(),
+                    'content' => $this->getLayout()->getBlock('minicart_content')->toHtml(),
+                ]);
+                return;
+            }
+
             if (!$this->_getSession()->getNoCartRedirect(true)) {
                 if (!$cart->getQuote()->getHasError()) {
                     $message = $this->__('%s was updated in your shopping cart.', Mage::helper('core')->escapeHtml($item->getProduct()->getName()));
@@ -432,6 +455,14 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->_goBack();
             }
         } catch (Mage_Core_Exception $e) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ]);
+                return;
+            }
+
             if ($this->_getSession()->getUseNotice(true)) {
                 $this->_getSession()->addNotice($e->getMessage());
             } else {
@@ -448,6 +479,14 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->_redirectReferer(Mage::helper('checkout/cart')->getCartUrl());
             }
         } catch (Exception $e) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'error' => $this->__('Cannot update the item.'),
+                ]);
+                return;
+            }
+
             $this->_setProductBuyRequest();
             $this->_getSession()->addException($e, $this->__('Cannot update the item.'));
             $this->_goBack();
@@ -784,7 +823,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     protected function _setProductBuyRequest(): void
     {
         $buyRequest = $this->getRequest()->getPost();
-        $buyRequestObject = new Varien_Object($buyRequest);
+        $buyRequestObject = new \Maho\DataObject($buyRequest);
         $this->_getSession()->setProductBuyRequest($buyRequestObject);
     }
 }

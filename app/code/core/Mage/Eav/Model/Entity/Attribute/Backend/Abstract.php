@@ -156,7 +156,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Set entity value id
      *
-     * @param Varien_Object $entity
+     * @param \Maho\DataObject $entity
      * @param int $valueId
      * @return $this
      */
@@ -185,7 +185,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Get entity value id
      *
-     * @param Varien_Object $entity
+     * @param \Maho\DataObject $entity
      * @return int
      */
     #[\Override]
@@ -219,7 +219,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Validate object
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this|bool
      * @throws Mage_Eav_Exception|Mage_Core_Exception
      */
@@ -263,7 +263,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * After load method
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -275,7 +275,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Before save method
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -292,7 +292,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * After save method
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -304,7 +304,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * Before delete method
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -316,7 +316,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Backend_Abstract implements Mage_
     /**
      * After delete method
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]

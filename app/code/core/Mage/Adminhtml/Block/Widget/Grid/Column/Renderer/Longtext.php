@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Longtext extends Mage_Adm
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $truncateLength = 250;
         // stringLength() is for legacy purposes

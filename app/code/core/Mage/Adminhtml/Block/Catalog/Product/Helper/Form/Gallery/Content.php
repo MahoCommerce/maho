@@ -43,7 +43,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery_Content extends M
         $browseConfig = $this->getUploader()->getButtonConfig();
         $browseConfig
             ->setAttributes([
-                'accept' => $browseConfig->getMimeTypesByExtensions(Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS),
+                'accept' => $browseConfig->getMimeTypesByExtensions(\Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS),
             ]);
 
         Mage::dispatchEvent('catalog_product_gallery_prepare_layout', ['block' => $this]);

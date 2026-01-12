@@ -39,7 +39,7 @@ class Mage_Dataflow_Model_Batch_Io
     /**
      * Varien IO File class
      *
-     * @var Varien_Io_File|null
+     * @var \Maho\Io\File|null
      */
     protected $_ioFile;
 
@@ -94,12 +94,12 @@ class Mage_Dataflow_Model_Batch_Io
     /**
      * Retrieve Io File Adapter
      *
-     * @return Varien_Io_File
+     * @return \Maho\Io\File
      */
     public function getIoAdapter()
     {
         if (is_null($this->_ioFile)) {
-            $this->_ioFile = new Varien_Io_File();
+            $this->_ioFile = new \Maho\Io\File();
         }
         return $this->_ioFile;
     }

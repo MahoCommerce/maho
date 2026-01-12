@@ -201,7 +201,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     /**
      * Set collection to pager
      *
-     * @param Varien_Data_Collection $collection
+     * @param \Maho\Data\Collection $collection
      * @return $this
      */
     public function setCollection($collection)
@@ -812,7 +812,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     {
         $pagerBlock = $this->getChild('product_list_toolbar_pager');
 
-        if ($pagerBlock instanceof Varien_Object) {
+        if ($pagerBlock instanceof \Maho\DataObject) {
             /** @var Mage_Page_Block_Html_Pager $pagerBlock */
             $pagerBlock->setAvailableLimit($this->getAvailableLimit());
 

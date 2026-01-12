@@ -333,7 +333,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
         if ($user->getId() > 0) {
             $role = Mage::getModel('api/role')->load($user->getRoleId());
         } else {
-            $role = new Varien_Object(['tree_level' => 0]);
+            $role = new \Maho\DataObject(['tree_level' => 0]);
         }
         $adapter->insert($this->getTable('api/role'), [
             'parent_id'  => $user->getRoleId(),

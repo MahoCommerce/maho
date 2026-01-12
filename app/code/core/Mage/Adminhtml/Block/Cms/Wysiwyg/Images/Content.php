@@ -79,7 +79,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
      */
     public function getFilebrowserSetupObject()
     {
-        $setupObject = new Varien_Object();
+        $setupObject = new \Maho\DataObject();
 
         $setupObject->setData([
             'targetElementId' => $this->getTargetElementId(),

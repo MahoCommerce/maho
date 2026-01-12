@@ -15,7 +15,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
     /**
      * Get attribute value for save.
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return string|bool
      */
     #[\Override]
@@ -37,7 +37,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
      * Before save hook.
      * Prepare attribute value for save
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return Mage_Catalog_Model_Product_Attribute_Backend_Startdate
      */
     #[\Override]

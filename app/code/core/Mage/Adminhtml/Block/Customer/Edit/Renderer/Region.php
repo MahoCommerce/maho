@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_Block_Abstract implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * Factory instance
@@ -30,7 +30,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $country = $element->getForm()->getElement('country_id');
         if (is_null($country)) {

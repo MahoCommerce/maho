@@ -13,7 +13,7 @@
 class Mage_Adminhtml_Block_Report_Grid_Column_Renderer_Blanknumber extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number
 {
     #[\Override]
-    protected function _getValue(Varien_Object $row)
+    protected function _getValue(\Maho\DataObject $row)
     {
         $data = parent::_getValue($row);
         if (!is_null($data)) {

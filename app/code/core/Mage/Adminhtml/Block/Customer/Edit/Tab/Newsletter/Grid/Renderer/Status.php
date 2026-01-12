@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Status ext
     }
 
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         return Mage::helper('customer')->__(self::getStatus($row->getQueueStatus()));
     }

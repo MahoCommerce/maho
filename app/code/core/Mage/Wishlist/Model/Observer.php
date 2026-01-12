@@ -29,7 +29,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
     /**
      * Check move quote item to wishlist request
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  Mage_Wishlist_Model_Observer
      */
     public function processCartUpdateBefore($observer)
@@ -71,7 +71,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function processAddToCart($observer)
     {
@@ -129,7 +129,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    public function customerLogin(Varien_Event_Observer $observer)
+    public function customerLogin(\Maho\Event\Observer $observer)
     {
         Mage::helper('wishlist')->calculate();
 
@@ -141,7 +141,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    public function customerLogout(Varien_Event_Observer $observer)
+    public function customerLogout(\Maho\Event\Observer $observer)
     {
         Mage::getSingleton('customer/session')->setWishlistItemCount(0);
 

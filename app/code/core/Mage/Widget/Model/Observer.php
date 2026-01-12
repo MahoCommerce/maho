@@ -17,7 +17,7 @@ class Mage_Widget_Model_Observer
      *
      * @return $this
      */
-    public function prepareWidgetsPluginConfig(Varien_Event_Observer $observer)
+    public function prepareWidgetsPluginConfig(\Maho\Event\Observer $observer)
     {
         $config = $observer->getEvent()->getConfig();
 

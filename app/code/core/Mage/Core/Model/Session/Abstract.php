@@ -28,7 +28,7 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
  * @method bool|null getSkipEmptySessionCheck()
  * @method $this setSkipEmptySessionCheck(bool $flag)
  */
-class Mage_Core_Model_Session_Abstract extends Varien_Object
+class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 {
     public const REGISTRY_KEY                          = 'symfony_session';
 

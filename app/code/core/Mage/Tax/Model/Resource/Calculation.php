@@ -66,7 +66,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Get tax rate information: calculation process data and tax rate
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getRateInfo($request)
@@ -81,7 +81,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Get tax rate for specific tax rate request
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return int
      */
     public function getRate($request)
@@ -92,7 +92,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Retrieve Calculation Process
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @param array $rates
      * @return array
      */
@@ -217,7 +217,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
      * Returns tax rates for request - either pereforms SELECT from DB, or returns already cached result
      * Notice that productClassId due to optimization can be array of ids
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     protected function _getRates($request)
@@ -359,7 +359,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Get rate ids applicable for some address
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getApplicableRateIds($request)
@@ -425,7 +425,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Retrieve rate ids
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getRateIds($request)
@@ -488,7 +488,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
 
         $result = [];
         foreach ($csp as $one) {
-            $request = new Varien_Object();
+            $request = new \Maho\DataObject();
             $request->setCountryId($one['country'])
                 ->setRegionId($one['region_id'])
                 ->setPostcode($one['postcode'])

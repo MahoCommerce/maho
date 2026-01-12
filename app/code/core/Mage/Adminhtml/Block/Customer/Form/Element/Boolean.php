@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Customer_Form_Element_Boolean extends Varien_Data_Form_Element_Select
+class Mage_Adminhtml_Block_Customer_Form_Element_Boolean extends \Maho\Data\Form\Element\Select
 {
     /**
      * Prepare default SELECT values

@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Admin
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $html = '';
         $actions = $this->getColumn()->getActions();
@@ -49,7 +49,7 @@ class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Admin
      * @return string
      */
     #[\Override]
-    protected function _toLinkHtml($action, Varien_Object $row)
+    protected function _toLinkHtml($action, \Maho\DataObject $row)
     {
         $product = $row->getProduct();
 

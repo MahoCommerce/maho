@@ -173,7 +173,7 @@
  * @method float getQty()
  * @method $this setQty(float $value)
  *
- * @method $this setRatingSummary(Varien_Object $summary)
+ * @method $this setRatingSummary(\Maho\DataObject $summary)
  * @method $this setRatingVotes(Mage_Rating_Model_Resource_Rating_Option_Vote_Collection $value)
  * @method string getRealPriceHtml()
  * @method $this setRealPriceHtml(string $value)
@@ -217,7 +217,7 @@
  * @method string getThumbnail()
  * @method float|null getTaxPercent()
  * @method $this setTaxPercent(float|null $value)
- * @method $this setTypeId(int $value)
+ * @method $this setTypeId(string $value)
  * @method bool getTypeHasOptions()
  * @method $this setTypeHasOptions(bool $value)
  * @method bool getTypeHasRequiredOptions()
@@ -231,8 +231,8 @@
  * @method bool hasUpSellProductIds()
  * @method $this setUpSellProductIds(array $value)
  * @method bool hasUrlDataObject()
- * @method Varien_Object getUrlDataObject()
- * @method $this setUrlDataObject(Varien_Object $value)
+ * @method \Maho\DataObject getUrlDataObject()
+ * @method $this setUrlDataObject(\Maho\DataObject $value)
  * @method string getUrlKey()
  * @method $this setUrlKey(string $value)
  *
@@ -347,7 +347,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -1252,12 +1252,12 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Retrieve media gallery images
      *
-     * @return Varien_Data_Collection
+     * @return \Maho\Data\Collection
      */
     public function getMediaGalleryImages()
     {
         if (!$this->hasData('media_gallery_images') && is_array($this->getMediaGallery('images'))) {
-            $images = new Varien_Data_Collection();
+            $images = new \Maho\Data\Collection();
             foreach ($this->getMediaGallery('images') as $image) {
                 if ($image['disabled']) {
                     continue;
@@ -1265,7 +1265,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
                 $image['url'] = $this->getMediaConfig()->getMediaUrl($image['file']);
                 $image['id'] = $image['value_id'] ?? null;
                 $image['path'] = $this->getMediaConfig()->getMediaPath($image['file']);
-                $images->addItem(new Varien_Object($image));
+                $images->addItem(new \Maho\DataObject($image));
             }
             $this->setData('media_gallery_images', $images);
         }
@@ -1551,7 +1551,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
 
         $salable = $this->isAvailable();
 
-        $object = new Varien_Object([
+        $object = new \Maho\DataObject([
             'product'    => $this,
             'is_salable' => $salable,
         ]);
@@ -2065,7 +2065,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      *
      * @param string $key
      * @param mixed $data
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function setOrigData($key = null, $data = null)
@@ -2141,11 +2141,11 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Parse buyRequest into options values used by product
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    public function processBuyRequest(Varien_Object $buyRequest)
+    public function processBuyRequest(\Maho\DataObject $buyRequest)
     {
-        $options = new Varien_Object();
+        $options = new \Maho\DataObject();
 
         /* add product custom options data */
         $customOptions = $buyRequest->getOptions();
@@ -2172,13 +2172,13 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
     /**
      * Get preconfigured values from product
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getPreconfiguredValues()
     {
         $preconfiguredValues = $this->getData('preconfigured_values');
         if (!$preconfiguredValues) {
-            $preconfiguredValues = new Varien_Object();
+            $preconfiguredValues = new \Maho\DataObject();
         }
 
         return $preconfiguredValues;

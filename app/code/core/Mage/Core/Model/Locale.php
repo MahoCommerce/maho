@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Locale extends Varien_Object
+class Mage_Core_Model_Locale extends \Maho\DataObject
 {
     /**
      * Default locale name
@@ -770,7 +770,7 @@ class Mage_Core_Model_Locale extends Varien_Object
             }
 
             // Get custom options from event
-            $options = new Varien_Object();
+            $options = new \Maho\DataObject();
             if ($customSymbol) {
                 $options->setData('symbol', $customSymbol);
             }

@@ -43,7 +43,7 @@ class Mage_Sales_Model_Resource_Order_Status extends Mage_Core_Model_Resource_Db
      *
      * @param string $field
      * @param mixed $value
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return  Maho\Db\Select
      */
     #[\Override]

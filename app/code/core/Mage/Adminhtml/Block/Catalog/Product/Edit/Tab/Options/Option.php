@@ -277,7 +277,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Options_Option extends Mage_
                         $value['scopePriceDisabled'] = is_null($option->getStorePrice()) ? 'disabled' : null;
                     }
                 }
-                $values[] = new Varien_Object($value);
+                $values[] = new \Maho\DataObject($value);
             }
             $this->_values = $values;
         }

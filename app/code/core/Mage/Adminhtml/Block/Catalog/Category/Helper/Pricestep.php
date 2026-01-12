@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Catalog_Category_Helper_Pricestep extends Varien_Data_Form_Element_Text
+class Mage_Adminhtml_Block_Catalog_Category_Helper_Pricestep extends \Maho\Data\Form\Element\Text
 {
     /**
      * Returns js code that is used instead of default toggle code for "Use default config" checkbox

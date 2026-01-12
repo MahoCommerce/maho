@@ -358,7 +358,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Tax calculation for shipping price
      *
-     * @param Varien_Object $taxRateRequest
+     * @param \Maho\DataObject $taxRateRequest
      * @return $this
      */
     protected function _calculateShippingTax(Mage_Sales_Model_Quote_Address $address, $taxRateRequest)
@@ -387,7 +387,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Calculate address tax amount based on one unit price and tax amount
      *
-     * @param Varien_Object $taxRateRequest
+     * @param \Maho\DataObject $taxRateRequest
      * @return $this
      */
     protected function _unitBaseCalculation(Mage_Sales_Model_Quote_Address $address, $taxRateRequest)
@@ -433,7 +433,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * @param Mage_Sales_Model_Quote_Address $address
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param Varien_Object $taxRateRequest
+     * @param \Maho\DataObject $taxRateRequest
      * @param array $itemTaxGroups
      * @param bool $catalogPriceInclTax
      */
@@ -665,7 +665,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Calculate address total tax based on row total
      *
-     * @param Varien_Object $taxRateRequest
+     * @param \Maho\DataObject $taxRateRequest
      * @return $this
      */
     protected function _rowBaseCalculation(Mage_Sales_Model_Quote_Address $address, $taxRateRequest)
@@ -711,7 +711,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * @param Mage_Sales_Model_Quote_Address $address
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param Varien_Object $taxRateRequest
+     * @param \Maho\DataObject $taxRateRequest
      * @param array $itemTaxGroups
      * @param bool $catalogPriceInclTax
      */
@@ -940,7 +940,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
     /**
      * Calculate address total tax based on address subtotal
      *
-     * @param   Varien_Object $taxRateRequest
+     * @param \Maho\DataObject $taxRateRequest
      * @return  $this
      */
     protected function _totalBaseCalculation(Mage_Sales_Model_Quote_Address $address, $taxRateRequest)
@@ -1005,7 +1005,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Tax extends Mage_Sales_Model_Quote_Addres
 
     /**
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param Varien_Object $taxRateRequest
+     * @param \Maho\DataObject $taxRateRequest
      * @param array $taxGroups
      * @param array $itemTaxGroups
      * @param bool $catalogPriceInclTax

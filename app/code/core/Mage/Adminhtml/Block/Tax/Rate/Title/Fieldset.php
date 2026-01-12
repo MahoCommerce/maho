@@ -13,7 +13,7 @@
 /**
  * Tax Rate Titles Fieldset
  */
-class Mage_Adminhtml_Block_Tax_Rate_Title_Fieldset extends Varien_Data_Form_Element_Fieldset
+class Mage_Adminhtml_Block_Tax_Rate_Title_Fieldset extends \Maho\Data\Form\Element\Fieldset
 {
     #[\Override]
     public function getChildrenHtml()

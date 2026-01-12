@@ -13,7 +13,7 @@
 /**
  * @method $this setStore(int $value)
  */
-class Mage_Catalog_Model_Layer extends Varien_Object
+class Mage_Catalog_Model_Layer extends \Maho\DataObject
 {
     /**
      * Product collections array

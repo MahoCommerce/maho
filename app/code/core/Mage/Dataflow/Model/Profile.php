@@ -159,7 +159,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
             ->setProfileId($this->getId())
             ->setActionCode($this->getOrigData('profile_id') ? 'update' : 'create')
             ->save();
-        $csvParser = new Varien_File_Csv();
+        $csvParser = new \Maho\File\Csv();
         $delimiter = trim($this->getData('gui_data/parse/delimiter') ?? '');
         if ($delimiter) {
             $csvParser->setDelimiter($delimiter);

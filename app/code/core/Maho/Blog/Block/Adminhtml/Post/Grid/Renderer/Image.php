@@ -12,7 +12,7 @@
 class Maho_Blog_Block_Adminhtml_Post_Grid_Renderer_Image extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $value = $row->getData($this->getColumn()->getIndex());
 

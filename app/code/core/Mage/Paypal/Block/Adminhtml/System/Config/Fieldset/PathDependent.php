@@ -30,7 +30,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_PathDependent extends M
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         if (!$this->hasActivePathDependencies($this->getGroup($element)->asArray())) {
             return parent::render($element);

@@ -58,7 +58,7 @@ class Mage_Reports_Model_Resource_Event extends Mage_Core_Model_Resource_Db_Abst
      * @return $this
      */
     public function applyLogToCollection(
-        Varien_Data_Collection_Db $collection,
+        \Maho\Data\Collection\Db $collection,
         $eventTypeId,
         $eventSubjectId,
         $subtype,

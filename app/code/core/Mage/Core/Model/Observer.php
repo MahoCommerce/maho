@@ -26,7 +26,7 @@ class Mage_Core_Model_Observer
      *
      * @return $this
      */
-    public function cleanCacheByTags(Varien_Event_Observer $observer)
+    public function cleanCacheByTags(\Maho\Event\Observer $observer)
     {
         /** @var array $tags */
         $tags = $observer->getEvent()->getTags();
@@ -53,7 +53,7 @@ class Mage_Core_Model_Observer
      * @throws Exception
      * @return Mage_Core_Model_Observer
      */
-    public function secureVarProcessing(Varien_Event_Observer $observer)
+    public function secureVarProcessing(\Maho\Event\Observer $observer)
     {
         if (Mage::registry('varProcessing')) {
             Mage::throwException(Mage::helper('core')->__('Disallowed template variable method.'));

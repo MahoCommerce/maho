@@ -112,7 +112,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
             try {
                 $store = Mage::app()->getStore($this->getVar('store'));
             } catch (Exception $e) {
-                $this->addException(Mage::helper('catalog')->__('An invalid store was specified.'), Varien_Convert_Exception::FATAL);
+                $this->addException(Mage::helper('catalog')->__('An invalid store was specified.'), \Maho\Convert\Exception::FATAL);
                 throw $e;
             }
             $this->_store = $store;
@@ -431,7 +431,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
             try {
                 // validate SKU
                 if (empty($row['email'])) {
-                    $this->addException(Mage::helper('customer')->__('Missing email, skipping the record.'), Varien_Convert_Exception::ERROR);
+                    $this->addException(Mage::helper('customer')->__('Missing email, skipping the record.'), \Maho\Convert\Exception::ERROR);
                     continue;
                 }
                 $this->setPosition('Line: ' . ($i + 1) . ', email: ' . $row['email']);
@@ -444,7 +444,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                 // get attribute_set_id, if not throw error
                 $row['attribute_set_id'] = $this->getAttributeSetId($entityTypeId, $row['attribute_set']);
                 if (!$row['attribute_set_id']) {
-                    $this->addException(Mage::helper('customer')->__('Invalid attribute set specified, skipping the record.'), Varien_Convert_Exception::ERROR);
+                    $this->addException(Mage::helper('customer')->__('Invalid attribute set specified, skipping the record.'), \Maho\Convert\Exception::ERROR);
                     continue;
                 }
 
@@ -453,19 +453,19 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                 }
 
                 if (empty($row['firstname'])) {
-                    $this->addException(Mage::helper('customer')->__('Missing firstname, skipping the record.'), Varien_Convert_Exception::ERROR);
+                    $this->addException(Mage::helper('customer')->__('Missing firstname, skipping the record.'), \Maho\Convert\Exception::ERROR);
                     continue;
                 }
 
                 if (empty($row['lastname'])) {
-                    $this->addException(Mage::helper('customer')->__('Missing lastname, skipping the record.'), Varien_Convert_Exception::ERROR);
+                    $this->addException(Mage::helper('customer')->__('Missing lastname, skipping the record.'), \Maho\Convert\Exception::ERROR);
                     continue;
                 }
 
                 // get store ids
                 $storeIds = $this->getStoreIds($row['store'] ?? $this->getVar('store'));
                 if (!$storeIds) {
-                    $this->addException(Mage::helper('customer')->__('Invalid store specified, skipping the record.'), Varien_Convert_Exception::ERROR);
+                    $this->addException(Mage::helper('customer')->__('Invalid store specified, skipping the record.'), \Maho\Convert\Exception::ERROR);
                     continue;
                 }
 
@@ -484,7 +484,6 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                         $attribute = $entity->getAttribute($field);
                         if (!$attribute) {
                             continue;
-                            #$this->addException(Mage::helper('catalog')->__("Unknown attribute: %s.", $field), Varien_Convert_Exception::ERROR);
                         }
 
                         if ($attribute->usesSource()) {
@@ -498,7 +497,7 @@ class Mage_Customer_Model_Convert_Parser_Customer extends Mage_Eav_Model_Convert
                                         $field,
                                         $value,
                                     ),
-                                    Varien_Convert_Exception::ERROR,
+                                    \Maho\Convert\Exception::ERROR,
                                 );
                                 continue;
                             }

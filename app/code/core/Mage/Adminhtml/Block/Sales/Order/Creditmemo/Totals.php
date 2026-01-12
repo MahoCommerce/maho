@@ -12,8 +12,14 @@
 
 class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals extends Mage_Adminhtml_Block_Sales_Totals
 {
+    /**
+     * @var Mage_Sales_Model_Order_Creditmemo|null
+     */
     protected $_creditmemo;
 
+    /**
+     * @return Mage_Sales_Model_Order_Creditmemo|null
+     */
     public function getCreditmemo()
     {
         if ($this->_creditmemo === null) {
@@ -28,6 +34,9 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals extends Mage_Adminhtml_
         return $this->_creditmemo;
     }
 
+    /**
+     * @return Mage_Sales_Model_Order_Creditmemo|null
+     */
     #[\Override]
     public function getSource()
     {
@@ -43,13 +52,13 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals extends Mage_Adminhtml_
     protected function _initTotals()
     {
         parent::_initTotals();
-        $this->addTotal(new Varien_Object([
+        $this->addTotal(new \Maho\DataObject([
             'code'      => 'adjustment_positive',
             'value'     => $this->getSource()->getAdjustmentPositive(),
             'base_value' => $this->getSource()->getBaseAdjustmentPositive(),
             'label'     => $this->helper('sales')->__('Adjustment Refund'),
         ]));
-        $this->addTotal(new Varien_Object([
+        $this->addTotal(new \Maho\DataObject([
             'code'      => 'adjustment_negative',
             'value'     => $this->getSource()->getAdjustmentNegative(),
             'base_value' => $this->getSource()->getBaseAdjustmentNegative(),

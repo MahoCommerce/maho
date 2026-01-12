@@ -50,7 +50,7 @@ class Mage_Sales_Model_Quote_Address_Total_Nominal extends Mage_Sales_Model_Quot
                     $isCompounded = false;
                 }
                 if ((float) $itemRowTotal > 0 && $label = $model->getLabel()) {
-                    $totalDetails[] = new Varien_Object([
+                    $totalDetails[] = new \Maho\DataObject([
                         'label'  => $label,
                         'amount' => $itemRowTotal,
                         'is_compounded' => $isCompounded,

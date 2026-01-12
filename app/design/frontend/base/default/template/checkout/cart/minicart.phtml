@@ -21,3 +21,15 @@
 <div id="header-cart" class="block-cart skip-content">
     <?= $this->getChildHtml('minicart_content') ?>
 </div>
+
+<script type="text/javascript">
+    // Initialize minicart globally if it doesn't exist
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof window.minicart === 'undefined') {
+            window.minicart = new Minicart({
+                formKey: "<?= $this->getFormKey() ?>"
+            });
+            minicart.init();
+        }
+    });
+</script>

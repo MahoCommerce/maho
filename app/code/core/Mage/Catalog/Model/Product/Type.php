@@ -33,7 +33,7 @@ class Mage_Catalog_Model_Product_Type
     /**
      * Product type instance factory
      *
-     * @param Varien_Object|Mage_Catalog_Model_Product $product
+     * @param \Maho\DataObject|Mage_Catalog_Model_Product $product
      * @param bool $singleton
      * @return false|Mage_Core_Model_Abstract
      */

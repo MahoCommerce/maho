@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Edit_Form extends Mage_Adminhtml_Blo
         /** @var Mage_Newsletter_Model_Queue $queue */
         $queue = Mage::getSingleton('newsletter/queue');
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $fieldset = $form->addFieldset('base_fieldset', [
             'legend'    =>  Mage::helper('newsletter')->__('Queue Information'),

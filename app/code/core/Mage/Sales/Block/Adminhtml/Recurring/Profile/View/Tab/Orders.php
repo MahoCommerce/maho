@@ -116,7 +116,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_View_Tab_Orders extends Mage_
     /**
      * Return row url for js event handlers
      *
-     * @param Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return string
      */
     #[\Override]

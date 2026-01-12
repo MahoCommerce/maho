@@ -50,7 +50,7 @@ class Mage_Checkout_Block_Onepage_Success extends Mage_Core_Block_Template
      *
      * @return string
      */
-    public function getProfileUrl(Varien_Object $profile)
+    public function getProfileUrl(\Maho\DataObject $profile)
     {
         return $this->getUrl('sales/recurring_profile/view', ['profile' => $profile->getId()]);
     }

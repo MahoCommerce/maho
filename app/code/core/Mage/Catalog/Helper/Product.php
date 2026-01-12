@@ -228,6 +228,10 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
             'boolean'       => [
                 'source_model'      => 'eav/entity_attribute_source_boolean',
             ],
+            'file'          => [
+                'backend_model'     => 'catalog/product_attribute_backend_file',
+                'frontend_model'    => 'catalog/product_attribute_frontend_file',
+            ],
         ];
 
         if (is_null($inputType)) {
@@ -267,6 +271,21 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
     }
 
     /**
+     * Return default attribute frontend model by input type
+     *
+     * @param string $inputType
+     * @return string|null
+     */
+    public function getAttributeFrontendModelByInputType($inputType)
+    {
+        $inputTypes = $this->getAttributeInputTypes();
+        if (!empty($inputTypes[$inputType]['frontend_model'])) {
+            return $inputTypes[$inputType]['frontend_model'];
+        }
+        return null;
+    }
+
+    /**
      * Inits product to be used for product controller actions and layouts
      * $params can have following data:
      *   'category_id' - id of category to check and append to product as current.
@@ -274,7 +293,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      *
      * @param int $productId
      * @param Mage_Core_Controller_Front_Action $controller
-     * @param Varien_Object $params
+     * @param \Maho\DataObject $params
      *
      * @return false|Mage_Catalog_Model_Product
      */
@@ -282,7 +301,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
     {
         // Prepare data for routine
         if (!$params) {
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject();
         }
 
         if (!$productId) {
@@ -350,7 +369,7 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      * Also parses and adds product management related values - e.g. qty
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return $this
      */
     public function prepareProductOptions($product, $buyRequest)
@@ -367,30 +386,30 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
      * This method is used to attach additional parameters to processed buyRequest.
      *
      * $params holds parameters of what operation must be performed:
-     * - 'current_config', Varien_Object or array - current buyRequest that configures product in this item,
+     * - 'current_config', \Maho\DataObject or array - current buyRequest that configures product in this item,
      *   used to restore currently attached files
      * - 'files_prefix': string[a-z0-9_] - prefix that was added at frontend to names of file inputs,
      *   so they won't intersect with other submitted options
      *
-     * @param Varien_Object|array $buyRequest
-     * @param Varien_Object|array $params
-     * @return Varien_Object
+     * @param \Maho\DataObject|array $buyRequest
+     * @param \Maho\DataObject|array $params
+     * @return \Maho\DataObject
      */
     public function addParamsToBuyRequest($buyRequest, $params)
     {
         if (is_array($buyRequest)) {
-            $buyRequest = new Varien_Object($buyRequest);
+            $buyRequest = new \Maho\DataObject($buyRequest);
         }
         if (is_array($params)) {
-            $params = new Varien_Object($params);
+            $params = new \Maho\DataObject($params);
         }
 
-        // Ensure that currentConfig goes as Varien_Object - for easier work with it later
+        // Ensure that currentConfig goes as \Maho\DataObject - for easier work with it later
         $currentConfig = $params->getCurrentConfig();
         if ($currentConfig) {
             if (is_array($currentConfig)) {
-                $params->setCurrentConfig(new Varien_Object($currentConfig));
-            } elseif (!($currentConfig instanceof Varien_Object)) {
+                $params->setCurrentConfig(new \Maho\DataObject($currentConfig));
+            } elseif (!($currentConfig instanceof \Maho\DataObject)) {
                 $params->unsCurrentConfig();
             }
         }
@@ -400,8 +419,8 @@ class Mage_Catalog_Helper_Product extends Mage_Core_Helper_Url
          * where '_processing_params' comes in $buyRequest as array from user input
          */
         $processingParams = $buyRequest->getData('_processing_params');
-        if (!$processingParams || !($processingParams instanceof Varien_Object)) {
-            $processingParams = new Varien_Object();
+        if (!$processingParams || !($processingParams instanceof \Maho\DataObject)) {
+            $processingParams = new \Maho\DataObject();
             $buyRequest->setData('_processing_params', $processingParams);
         }
         $processingParams->addData($params->getData());

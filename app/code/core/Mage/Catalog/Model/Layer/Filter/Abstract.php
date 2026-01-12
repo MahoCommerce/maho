@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
+abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
 {
     /**
      * Request variable name with filter value

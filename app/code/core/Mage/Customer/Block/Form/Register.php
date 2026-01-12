@@ -67,14 +67,14 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     /**
      * Retrieve form data
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getFormData()
     {
         $data = $this->getData('form_data');
         if (is_null($data)) {
             $formData = Mage::getSingleton('customer/session')->getCustomerFormData(true);
-            $data = new Varien_Object();
+            $data = new \Maho\DataObject();
             if ($formData) {
                 $data->addData($formData);
                 $data->setCustomerData(1);

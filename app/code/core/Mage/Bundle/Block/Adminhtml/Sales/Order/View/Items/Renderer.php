@@ -88,7 +88,7 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_View_Items_Renderer extends Mage_A
     }
 
     /**
-     * @param Varien_Object|Mage_Sales_Model_Order_Item $item
+     * @param \Maho\DataObject|Mage_Sales_Model_Order_Item $item
      * @return mixed|null
      */
     public function getSelectionAttributes($item)

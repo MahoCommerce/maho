@@ -55,20 +55,20 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     /**
      * Returns additional params for processing options
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getProcessingParams()
     {
         $buyRequest = $this->getRequest();
         $params = $buyRequest->getData('_processing_params');
         /*
-         * Notice check for params to be Varien_Object - by using object we protect from
+         * Notice check for params to be \Maho\DataObject - by using object we protect from
          * params being forged and contain data from user frontend input
          */
-        if ($params instanceof Varien_Object) {
+        if ($params instanceof \Maho\DataObject) {
             return $params;
         }
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     /**
@@ -699,7 +699,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $this->_createWriteableDir($this->getOrderTargetDir());
 
         // Directory listing and hotlink secure
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->cd($this->getTargetDir());
         if (!$io->fileExists($this->getTargetDir() . DS . '.htaccess')) {
             $io->streamOpen($this->getTargetDir() . DS . '.htaccess');
@@ -718,7 +718,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     protected function _createWriteableDir($path)
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         if (!$io->isWriteable($path) && !$io->mkdir($path, 0777, true)) {
             Mage::throwException(Mage::helper('catalog')->__("Cannot create writeable directory '%s'.", $path));
         }

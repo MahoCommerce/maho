@@ -26,7 +26,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
     {
         $model = Mage::registry('blog_post');
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['id' => $this->getRequest()->getParam('id')]),
             'method' => 'post',
@@ -63,6 +63,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
             'label' => Mage::helper('blog')->__('Image'),
             'name' => 'image',
             'required' => false,
+            'base_url' => Mage::getBaseUrl('media') . 'blog/',
         ]);
 
         if (!Mage::app()->isSingleStoreMode()) {
@@ -158,14 +159,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Form extends Mage_Adminhtml_Block_Widg
         ]);
 
         if (Mage::registry('blog_post')) {
-            $data = Mage::registry('blog_post')->getData();
-
-            // Prepend the blog path to the image for proper display
-            if (!empty($data['image'])) {
-                $data['image'] = 'blog/' . $data['image'];
-            }
-
-            $form->setValues($data);
+            $form->setValues(Mage::registry('blog_post')->getData());
         }
 
         return parent::_prepareForm();

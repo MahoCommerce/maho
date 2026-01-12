@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main_Renderer_Checkbox extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main_Renderer_Checkbox extends Mage_Adminhtml_Block_Abstract implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * Checkbox render function
@@ -18,9 +18,9 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Main_Renderer_Checkbox extends M
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
-        $checkbox = new Varien_Data_Form_Element_Checkbox($element->getData());
+        $checkbox = new \Maho\Data\Form\Element\Checkbox($element->getData());
         $checkbox->setForm($element->getForm());
 
         $elementHtml = $checkbox->getElementHtml() . sprintf(

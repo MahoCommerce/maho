@@ -30,7 +30,7 @@
  * @method $this setType(string $value)
  * @method bool hasWrapperMustBeVisible()
  */
-abstract class Mage_Core_Block_Abstract extends Varien_Object
+abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
 {
     /**
      * Prefix for cache key
@@ -157,7 +157,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     protected static $_urlModel;
 
     /**
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     private static $_transportObject;
 
@@ -256,7 +256,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Retrieve parent block
      *
-     * @return $this
+     * @return self|null
      */
     public function getParentBlock()
     {
@@ -933,7 +933,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
          * Use single transport object instance for all blocks
          */
         if (self::$_transportObject === null) {
-            self::$_transportObject = new Varien_Object();
+            self::$_transportObject = new \Maho\DataObject();
         }
         self::$_transportObject->setHtml($html);
         Mage::dispatchEvent(
@@ -1590,7 +1590,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * Collect and retrieve items tags.
      * Item should implement Mage_Core_Model_Abstract::getCacheIdTags method
      *
-     * @param array|Varien_Data_Collection $items
+     * @param array|\Maho\Data\Collection $items
      * @return array
      */
     public function getItemsTags($items)

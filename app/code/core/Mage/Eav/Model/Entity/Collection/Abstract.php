@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Collection_Db
+abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Collection\Db
 {
     /**
      * Array of items with item id key
@@ -216,7 +216,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     /**
      * Set template object for the collection
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return  $this
      */
     public function setObject($object = null)
@@ -234,7 +234,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * Add an object to the collection
      */
     #[\Override]
-    public function addItem(Varien_Object $object)
+    public function addItem(\Maho\DataObject $object)
     {
         if ($object::class !== $this->_itemObjectClass) {
             throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Attempt to add an invalid object'));
@@ -308,7 +308,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     }
 
     /**
-     * Wrapper for compatibility with Varien_Data_Collection_Db
+     * Wrapper for compatibility with \Maho\Data\Collection\Db
      */
     #[\Override]
     public function addFieldToFilter($attribute, $condition = null)

@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action extends Mage_Admin
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $actions = $this->getColumn()->getActions();
         if (empty($actions) || !is_array($actions)) {
@@ -52,9 +52,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action extends Mage_Admin
      * @param array $action
      * @return string
      */
-    protected function _toOptionHtml($action, Varien_Object $row)
+    protected function _toOptionHtml($action, \Maho\DataObject $row)
     {
-        $actionAttributes = new Varien_Object();
+        $actionAttributes = new \Maho\DataObject();
 
         $actionCaption = '';
         $this->_transformActionData($action, $actionCaption, $row);
@@ -70,9 +70,9 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action extends Mage_Admin
      * @param array $action
      * @return string
      */
-    protected function _toLinkHtml($action, Varien_Object $row)
+    protected function _toLinkHtml($action, \Maho\DataObject $row)
     {
-        $actionAttributes = new Varien_Object();
+        $actionAttributes = new \Maho\DataObject();
 
         $actionCaption = '';
         $this->_transformActionData($action, $actionCaption, $row);
@@ -95,7 +95,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Action extends Mage_Admin
      * @param string $actionCaption
      * @return $this
      */
-    protected function _transformActionData(&$action, &$actionCaption, Varien_Object $row)
+    protected function _transformActionData(&$action, &$actionCaption, \Maho\DataObject $row)
     {
         foreach (array_keys($action) as $attribute) {
             if (isset($action[$attribute]) && !is_array($action[$attribute])) {

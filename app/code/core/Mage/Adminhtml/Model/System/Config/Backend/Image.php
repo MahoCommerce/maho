@@ -15,7 +15,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image extends Mage_Adminhtml_Mo
     #[\Override]
     protected function _getAllowedExtensions(): array
     {
-        return Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS;
+        return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
     }
 
     #[\Override]

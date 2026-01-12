@@ -15,14 +15,14 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
     /**
      * Format type object
      *
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     protected $_type;
 
     /**
      * Retrieve format type object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function getType()
@@ -36,7 +36,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
      * @return $this
      */
     #[\Override]
-    public function setType(Varien_Object $type)
+    public function setType(\Maho\DataObject $type)
     {
         $this->_type = $type;
         return $this;
@@ -77,7 +77,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
             default => Mage_Customer_Model_Attribute_Data::OUTPUT_FORMAT_TEXT,
         };
 
-        $formater   = new Varien_Filter_Template();
+        $formater   = new \Maho\Filter\Template();
         $attributes = Mage::helper('customer/address')->getAttributes();
 
         $data = [];

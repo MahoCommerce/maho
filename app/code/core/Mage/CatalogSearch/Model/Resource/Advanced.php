@@ -23,12 +23,12 @@ class Mage_CatalogSearch_Model_Resource_Advanced extends Mage_Core_Model_Resourc
      * Return response object
      *
      * @param Maho\Db\Select $select
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _dispatchPreparePriceEvent($select)
     {
         // prepare response object for event
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setAdditionalCalculations([]);
 
         // prepare event arguments

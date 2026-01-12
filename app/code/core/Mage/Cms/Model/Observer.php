@@ -17,7 +17,7 @@ class Mage_Cms_Model_Observer
      *
      * @return $this
      */
-    public function noRoute(Varien_Event_Observer $observer)
+    public function noRoute(\Maho\Event\Observer $observer)
     {
         $observer->getEvent()->getStatus()
             ->setLoaded(true)
@@ -32,7 +32,7 @@ class Mage_Cms_Model_Observer
      *
      * @return $this
      */
-    public function noCookies(Varien_Event_Observer $observer)
+    public function noCookies(\Maho\Event\Observer $observer)
     {
         $redirect = $observer->getEvent()->getRedirect();
 

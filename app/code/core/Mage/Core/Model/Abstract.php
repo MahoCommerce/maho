@@ -19,7 +19,7 @@
  * @method Mage_Customer_Model_Address_Abstract getBillingAddress()
  * @method Mage_Customer_Model_Address_Abstract getShippingAddress()
  */
-abstract class Mage_Core_Model_Abstract extends Varien_Object
+abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
 {
     /**
      * Prefix of model events names

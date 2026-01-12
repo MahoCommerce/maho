@@ -43,7 +43,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     #[\Override]
     public function getAttributeElement()
@@ -106,7 +106,7 @@ class Mage_SalesRule_Model_Rule_Condition_Address extends Mage_Rule_Model_Condit
      * @param Mage_Sales_Model_Quote_Address $object
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         $address = $object;
         if (!$address instanceof Mage_Sales_Model_Quote_Address) {

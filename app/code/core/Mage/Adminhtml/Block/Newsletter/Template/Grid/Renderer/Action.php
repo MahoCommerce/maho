@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Grid_Renderer_Action extends Mage
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         if ($row->isValidForSend()) {
             $actions[] = [

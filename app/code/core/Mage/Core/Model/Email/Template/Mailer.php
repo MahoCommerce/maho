@@ -14,7 +14,7 @@
  * @method $this setQueue(Mage_Core_Model_Abstract $value)
  * @method Mage_Core_Model_Email_Queue getQueue()
  */
-class Mage_Core_Model_Email_Template_Mailer extends Varien_Object
+class Mage_Core_Model_Email_Template_Mailer extends \Maho\DataObject
 {
     /**
      * List of email infos

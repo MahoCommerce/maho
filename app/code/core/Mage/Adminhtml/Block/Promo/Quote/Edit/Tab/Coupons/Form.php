@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Promo_Quote_Edit_Tab_Coupons_Form extends Mage_Adminh
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         /**
          * @var Mage_SalesRule_Helper_Coupon $couponHelper

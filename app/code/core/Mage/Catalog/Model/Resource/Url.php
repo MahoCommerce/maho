@@ -98,7 +98,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @param string $idPath
      * @param int $storeId
-     * @return Varien_Object|false
+     * @return \Maho\DataObject|false
      */
     public function getRewriteByIdPath($idPath, $storeId)
     {
@@ -116,7 +116,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
         if (!$row) {
             return false;
         }
-        $rewrite = new Varien_Object($row);
+        $rewrite = new \Maho\DataObject($row);
         $rewrite->setIdFieldName($this->getIdFieldName());
 
         return $rewrite;
@@ -127,7 +127,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @param string $requestPath
      * @param int $storeId
-     * @return Varien_Object|false
+     * @return \Maho\DataObject|false
      */
     public function getRewriteByRequestPath($requestPath, $storeId)
     {
@@ -145,7 +145,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
         if (!$row) {
             return false;
         }
-        $rewrite = new Varien_Object($row);
+        $rewrite = new \Maho\DataObject($row);
         $rewrite->setIdFieldName($this->getIdFieldName());
 
         return $rewrite;
@@ -257,7 +257,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
         $rowSet = $adapter->fetchAll($select, $bind);
 
         foreach ($rowSet as $row) {
-            $rewrite = new Varien_Object($row);
+            $rewrite = new \Maho\DataObject($row);
             $rewrite->setIdFieldName($this->getIdFieldName());
             $rewrites[$rewrite->getIdPath()] = $rewrite;
         }
@@ -269,7 +269,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * Save rewrite URL
      *
      * @param array $rewriteData
-     * @param Varien_Object|Mage_Core_Model_Url_Rewrite $rewrite
+     * @param \Maho\DataObject|Mage_Core_Model_Url_Rewrite $rewrite
      * @return $this
      */
     public function saveRewrite($rewriteData, $rewrite)
@@ -309,7 +309,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      */
     public function saveRewriteHistory($rewriteData)
     {
-        $rewriteData = new Varien_Object($rewriteData);
+        $rewriteData = new \Maho\DataObject($rewriteData);
         // check if rewrite exists with save request_path
         $rewrite = $this->getRewriteByRequestPath($rewriteData->getRequestPath(), $rewriteData->getStoreId());
         if ($rewrite === false) {
@@ -327,7 +327,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * @param bool $ignoreDefault
      * @return $this
      */
-    public function saveCategoryAttribute(Varien_Object $category, $attributeCode, $ignoreDefault = false)
+    public function saveCategoryAttribute(\Maho\DataObject $category, $attributeCode, $ignoreDefault = false)
     {
         $adapter = $this->_getWriteAdapter();
         if (!isset($this->_categoryAttributes[$attributeCode])) {
@@ -481,7 +481,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * @param bool $ignoreDefault
      * @return $this
      */
-    public function saveProductAttribute(Varien_Object $product, $attributeCode, $ignoreDefault = false)
+    public function saveProductAttribute(\Maho\DataObject $product, $attributeCode, $ignoreDefault = false)
     {
         $adapter = $this->_getWriteAdapter();
         if (!isset($this->_productAttributes[$attributeCode])) {
@@ -621,7 +621,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return $this
      */
-    protected function _prepareCategoryParentId(Varien_Object $category)
+    protected function _prepareCategoryParentId(\Maho\DataObject $category)
     {
         if ($category->getPath() != $category->getId()) {
             $split = explode('/', $category->getPath());
@@ -738,7 +738,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
                 }
             }
 
-            $category = new Varien_Object($row);
+            $category = new \Maho\DataObject($row);
             $category->setIdFieldName('entity_id');
             $category->setStoreId($storeId);
             $this->_prepareCategoryParentId($category);
@@ -768,7 +768,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @param int $categoryId
      * @param int $storeId
-     * @return Varien_Object|false
+     * @return \Maho\DataObject|false
      */
     public function getCategory($categoryId, $storeId)
     {
@@ -799,9 +799,9 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Retrieve category children data objects
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    public function loadCategoryChilds(Varien_Object $category)
+    public function loadCategoryChilds(\Maho\DataObject $category)
     {
         if ($category->getId() === null || $category->getStoreId() === null) {
             return $category;
@@ -839,7 +839,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * @param int $categoryId
      * @param string $categoryPath
      * @param bool $includeStart
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getRootChildrenIds($categoryId, $categoryPath, $includeStart = true)
     {
@@ -870,7 +870,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @return string
      */
-    public function getCategoryParentPath(Varien_Object $category)
+    public function getCategoryParentPath(\Maho\DataObject $category)
     {
         $store = Mage::app()->getStore($category->getStoreId());
         if ($category->getId() == $store->getRootCategoryId()) {
@@ -888,12 +888,12 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
     /**
      * Retrieve product ids by category
      *
-     * @param Varien_Object|int $category
+     * @param \Maho\DataObject|int $category
      * @return array
      */
     public function getProductIdsByCategory($category)
     {
-        if ($category instanceof Varien_Object) {
+        if ($category instanceof \Maho\DataObject) {
             $categoryId = $category->getId();
         } else {
             $categoryId = $category;
@@ -948,7 +948,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
 
         $rowSet = $adapter->fetchAll($select, $bind);
         foreach ($rowSet as $row) {
-            $product = new Varien_Object($row);
+            $product = new \Maho\DataObject($row);
             $product->setIdFieldName('entity_id');
             $product->setCategoryIds([]);
             $product->setStoreId($storeId);
@@ -989,7 +989,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      *
      * @param int $productId
      * @param int $storeId
-     * @return Varien_Object|false
+     * @return \Maho\DataObject|false
      */
     public function getProduct($productId, $storeId)
     {
@@ -1016,7 +1016,7 @@ class Mage_Catalog_Model_Resource_Url extends Mage_Core_Model_Resource_Db_Abstra
      * @param int $lastEntityId
      * @return array
      */
-    public function getProductsByCategory(Varien_Object $category, &$lastEntityId)
+    public function getProductsByCategory(\Maho\DataObject $category, &$lastEntityId)
     {
         $productIds = $this->getProductIdsByCategory($category);
         if (!$productIds) {

@@ -252,7 +252,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     /**
      * @return Mage_Eav_Model_Convert_Adapter_Entity
      * @throws Mage_Core_Model_Store_Exception
-     * @throws Varien_Convert_Exception
+     * @throws \Maho\Convert\Exception
      */
     #[\Override]
     public function load()
@@ -336,7 +336,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
 
     /**
      * @throws Mage_Core_Exception
-     * @throws Varien_Exception
+     * @throws \Maho\Exception
      */
     public function setCustomer(Mage_Customer_Model_Customer $customer)
     {

@@ -117,7 +117,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      *
      * @return Mage_Tag_Model_Resource_Tag_Collection
      */
-    protected function _getProductEventTagsCollection(Varien_Event_Observer $observer)
+    protected function _getProductEventTagsCollection(\Maho\Event\Observer $observer)
     {
         return $this->getResourceCollection()
             ->joinRel()
@@ -188,7 +188,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function productEventAggregate($observer)
@@ -200,7 +200,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
     /**
      * Product delete event action
      *
-     * @param  Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function productDeleteEventAction($observer)

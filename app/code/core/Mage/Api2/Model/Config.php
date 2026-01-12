@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api2_Model_Config extends Varien_Simplexml_Config
+class Mage_Api2_Model_Config extends \Maho\Simplexml\Config
 {
     /**
      * Node name of resource groups
@@ -38,7 +38,7 @@ class Mage_Api2_Model_Config extends Varien_Simplexml_Config
      * Initializes XML for this configuration
      * Local cache configuration
      *
-     * @param string|Varien_Simplexml_Element|null $sourceData
+     * @param string|\Maho\Simplexml\Element|null $sourceData
      */
     public function __construct($sourceData = null)
     {
@@ -89,7 +89,7 @@ class Mage_Api2_Model_Config extends Varien_Simplexml_Config
                 continue;
             }
 
-            /** @var Varien_Simplexml_Element $route */
+            /** @var \Maho\Simplexml\Element $route */
             foreach ($resource->routes->children() as $route) {
                 $arguments = [
                     Mage_Api2_Model_Route_Abstract::PARAM_ROUTE    => (string) $route->route,
@@ -109,7 +109,7 @@ class Mage_Api2_Model_Config extends Varien_Simplexml_Config
     /**
      * Retrieve all resources from config files api2.xml
      *
-     * @return SimpleXMLElement|Varien_Simplexml_Element
+     * @return SimpleXMLElement|\Maho\Simplexml\Element
      */
     public function getResources()
     {
@@ -134,7 +134,7 @@ class Mage_Api2_Model_Config extends Varien_Simplexml_Config
     /**
      * Retrieve all resource groups from config files api2.xml
      *
-     * @return Varien_Simplexml_Element|false
+     * @return \Maho\Simplexml\Element|false
      */
     public function getResourceGroups()
     {
@@ -143,11 +143,11 @@ class Mage_Api2_Model_Config extends Varien_Simplexml_Config
             return false;
         }
 
-        /** @var Varien_Simplexml_Element $groups */
+        /** @var \Maho\Simplexml\Element $groups */
         $groups = $groups[0];
 
         if (!$this->_resourcesGrouped) {
-            /** @var Varien_Simplexml_Element $node */
+            /** @var \Maho\Simplexml\Element $node */
             foreach ($this->getResources() as $node) {
                 $result = $node->xpath('group');
                 if (!$result) {
@@ -160,10 +160,10 @@ class Mage_Api2_Model_Config extends Varien_Simplexml_Config
                         continue;
                     }
 
-                    /** @var Varien_Simplexml_Element $group */
+                    /** @var \Maho\Simplexml\Element $group */
                     $group = $result[0];
 
-                    $children = $group->children ?? new Varien_Simplexml_Element('<children />');
+                    $children = $group->children ?? new \Maho\Simplexml\Element('<children />');
                     $node->resource = 1;
                     $children->appendChild($node);
                     $group->appendChild($children);
@@ -192,7 +192,7 @@ class Mage_Api2_Model_Config extends Varien_Simplexml_Config
      * Retrieve resource by type (node)
      *
      * @param string $node
-     * @return Varien_Simplexml_Element|boolean
+     * @return \Maho\Simplexml\Element|boolean
      */
     public function getResource($node)
     {

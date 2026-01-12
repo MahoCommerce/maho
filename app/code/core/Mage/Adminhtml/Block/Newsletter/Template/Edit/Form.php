@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
         $identityName = Mage::getStoreConfig('trans_email/ident_' . $identity . '/name');
         $identityEmail = Mage::getStoreConfig('trans_email/ident_' . $identity . '/email');
 
-        $form   = new Varien_Data_Form([
+        $form   = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method'    => 'post',

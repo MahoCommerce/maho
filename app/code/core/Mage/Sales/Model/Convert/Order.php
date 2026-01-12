@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Sales_Model_Convert_Order extends Varien_Object
+class Mage_Sales_Model_Convert_Order extends \Maho\DataObject
 {
     /**
      * Converting order object to quote object

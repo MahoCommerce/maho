@@ -63,7 +63,7 @@ class Mage_Catalog_Block_Product_New extends Mage_Catalog_Block_Product_Abstract
     /**
      * Prepare and return product collection
      *
-     * @return Mage_Catalog_Model_Resource_Product_Collection|Object|Varien_Data_Collection
+     * @return Mage_Catalog_Model_Resource_Product_Collection|Object|\Maho\Data\Collection
      */
     protected function _getProductCollection()
     {

@@ -36,16 +36,19 @@ class Mage_Adminhtml_Block_Sales_Order_Totals_Item extends Mage_Adminhtml_Block_
      */
     public function initTotals()
     {
-        $total = new Varien_Object([
+        /** @var Mage_Sales_Block_Order_Totals $parent */
+        $parent = $this->getParentBlock();
+
+        $total = new \Maho\DataObject([
             'code'      => $this->getNameInLayout(),
             'block_name' => $this->getNameInLayout(),
             'area'      => $this->getDisplayArea(),
             'strong'    => $this->getStrong(),
         ]);
         if ($this->getBeforeCondition()) {
-            $this->getParentBlock()->addTotalBefore($total, $this->getBeforeCondition());
+            $parent->addTotalBefore($total, $this->getBeforeCondition());
         } else {
-            $this->getParentBlock()->addTotal($total, $this->getAfterCondition());
+            $parent->addTotal($total, $this->getAfterCondition());
         }
         return $this;
     }

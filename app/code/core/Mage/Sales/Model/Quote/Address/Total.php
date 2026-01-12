@@ -16,7 +16,7 @@
  * @method string getCode()
  * @method $this setTitle(string $value)
  */
-class Mage_Sales_Model_Quote_Address_Total extends Varien_Object
+class Mage_Sales_Model_Quote_Address_Total extends \Maho\DataObject
 {
     /**
      * Merge numeric total values

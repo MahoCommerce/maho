@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends Varien_Data_Form_Element_Text
+class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends \Maho\Data\Form\Element\Text
 {
     /**
      * @param array $attributes

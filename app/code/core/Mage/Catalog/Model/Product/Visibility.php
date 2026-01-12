@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Catalog_Model_Product_Visibility extends Varien_Object
+class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
 {
     public const VISIBILITY_NOT_VISIBLE    = 1;
     public const VISIBILITY_IN_CATALOG     = 2;

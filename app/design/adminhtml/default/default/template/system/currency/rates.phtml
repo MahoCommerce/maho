@@ -13,7 +13,7 @@
 ?>
 <div class="content-header">
     <h3><?= $this->getHeader() ?></h3>
-    <p class="content-buttons form-buttons">
+    <div class="content-buttons form-buttons">
         <form action="<?= $this->getImportFormAction() ?>" method="post">
             <?= $this->getBlockHtml('formkey') ?>
             <?= $this->getServicesHtml() ?>
@@ -21,6 +21,6 @@
         </form>
         <?= $this->getResetButtonHtml() ?>
         <?= $this->getSaveButtonHtml() ?>
-    </p>
+    </div>
 </div>
 <?= $this->getRatesMatrixHtml() ?>

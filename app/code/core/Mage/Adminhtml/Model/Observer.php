@@ -54,7 +54,7 @@ class Mage_Adminhtml_Model_Observer
     /**
      * Set the admin's session lifetime based on config
      */
-    public function setCookieLifetime(Varien_Event_Observer $observer): void
+    public function setCookieLifetime(\Maho\Event\Observer $observer): void
     {
         if ($observer->getSessionName() === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
             /** @var Mage_Adminhtml_Model_Session $session */

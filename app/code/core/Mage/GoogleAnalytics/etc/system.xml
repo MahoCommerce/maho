@@ -15,7 +15,7 @@
         <google translate="label" module="googleanalytics">
             <label>Google API</label>
             <tab>sales</tab>
-            <sort_order>340</sort_order>
+            <sort_order>300</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>

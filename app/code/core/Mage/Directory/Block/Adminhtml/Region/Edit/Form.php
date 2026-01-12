@@ -15,7 +15,7 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Form extends Mage_Adminhtml_Blo
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['_current' => ['id']]),
             'method' => 'post',

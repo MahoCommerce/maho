@@ -60,7 +60,7 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
      *
      * @return string
      */
-    public function getItemDetailsRowLabel(Varien_Object $row)
+    public function getItemDetailsRowLabel(\Maho\DataObject $row)
     {
         return $row->getLabel();
     }
@@ -70,7 +70,7 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
      *
      * @return string
      */
-    public function getItemDetailsRowAmount(Varien_Object $row)
+    public function getItemDetailsRowAmount(\Maho\DataObject $row)
     {
         return $row->getAmount();
     }
@@ -80,7 +80,7 @@ class Mage_Checkout_Block_Total_Nominal extends Mage_Checkout_Block_Total_Defaul
      *
      * @return bool
      */
-    public function getItemDetailsRowIsCompounded(Varien_Object $row)
+    public function getItemDetailsRowIsCompounded(\Maho\DataObject $row)
     {
         return $row->getIsCompounded();
     }

@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Cache_Grid extends Mage_Adminhtml_Block_Widget_Grid
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = new Varien_Data_Collection();
+        $collection = new \Maho\Data\Collection();
         foreach (Mage::app()->getCache()->getTypes() as $type) {
             $collection->addItem($type);
         }

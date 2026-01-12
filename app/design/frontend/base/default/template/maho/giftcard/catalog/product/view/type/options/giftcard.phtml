@@ -1,0 +1,321 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    base_default
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Giftcard_Block_Catalog_Product_View_Type_Giftcard $this */
+$product = $this->getProduct();
+$type = $this->getGiftcardType();
+$amounts = $this->getGiftcardAmounts();
+$isMessageAllowed = $this->isMessageAllowed();
+
+// Get preconfigured values for editing cart item
+$preAmount = $this->getPreconfiguredValue('giftcard_amount');
+$preRecipientName = $this->getPreconfiguredValue('giftcard_recipient_name');
+$preRecipientEmail = $this->getPreconfiguredValue('giftcard_recipient_email');
+$preSenderName = $this->getPreconfiguredValue('giftcard_sender_name');
+$preSenderEmail = $this->getPreconfiguredValue('giftcard_sender_email');
+$preMessage = $this->getPreconfiguredValue('giftcard_message');
+$preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
+?>
+
+<?php if ($product->isSaleable()): ?>
+<style>
+.giftcard-options {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+.giftcard-options .fields-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+@media (max-width: 600px) {
+    .giftcard-options .fields-row {
+        grid-template-columns: 1fr;
+    }
+}
+.giftcard-options .field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.giftcard-options .field.hidden {
+    display: none;
+}
+.giftcard-options .field.full-width {
+    grid-column: 1 / -1;
+}
+.giftcard-options input[type="text"],
+.giftcard-options input[type="email"],
+.giftcard-options input[type="number"],
+.giftcard-options textarea {
+    width: 100%;
+}
+.giftcard-options textarea {
+    max-width: none;
+}
+</style>
+
+<div class="giftcard-options">
+    <!-- Amount -->
+    <?php if ($type === 'fixed' && !empty($amounts)): ?>
+        <div class="field">
+            <label for="giftcard_amount" class="required">
+                <?php echo $this->__('Select Amount'); ?>
+            </label>
+            <select name="giftcard_amount" id="giftcard_amount" class="required-entry" required>
+                <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
+                <?php foreach ($amounts as $amount): ?>
+                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preAmount !== null && abs((float)$amount - (float)$preAmount) < 0.01): ?> selected<?php endif; ?>>
+                        <?php echo $this->formatPrice((float)$amount); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+    <?php elseif ($type === 'combined' && !empty($amounts)): ?>
+        <?php
+        // Check if preconfigured amount matches a fixed value or is custom
+        $preIsCustom = false;
+        $preMatchedAmount = null;
+        if ($preAmount !== null) {
+            foreach ($amounts as $amount) {
+                if (abs((float)$amount - (float)$preAmount) < 0.01) {
+                    $preMatchedAmount = $amount;
+                    break;
+                }
+            }
+            if ($preMatchedAmount === null) {
+                $preIsCustom = true;
+            }
+        }
+        ?>
+        <div class="field">
+            <label for="giftcard_amount_select" class="required">
+                <?php echo $this->__('Select Amount'); ?>
+            </label>
+            <select name="giftcard_amount_select" id="giftcard_amount_select" class="required-entry" required>
+                <option value=""><?php echo $this->__('-- Please Select --'); ?></option>
+                <?php foreach ($amounts as $amount): ?>
+                    <option value="<?php echo $this->escapeHtml($amount); ?>"<?php if ($preMatchedAmount !== null && abs((float)$amount - (float)$preMatchedAmount) < 0.01): ?> selected<?php endif; ?>>
+                        <?php echo $this->formatPrice((float)$amount); ?>
+                    </option>
+                <?php endforeach; ?>
+                <option value="custom"<?php if ($preIsCustom): ?> selected<?php endif; ?>><?php echo $this->__('Other Amount'); ?></option>
+            </select>
+            <input type="hidden" name="giftcard_amount" id="giftcard_amount" value="<?php echo $preAmount !== null ? $this->escapeHtml($preAmount) : ''; ?>" />
+        </div>
+        <div class="field<?php if (!$preIsCustom): ?> hidden<?php endif; ?>" id="giftcard_custom_amount_field">
+            <label for="giftcard_custom_amount" class="required">
+                <?php echo $this->__('Custom Amount'); ?>
+                <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?>
+                    <span class="hint">(<?php echo (int)$this->getMinAmount(); ?> - <?php echo (int)$this->getMaxAmount(); ?>)</span>
+                <?php endif; ?>
+            </label>
+            <input
+                type="number"
+                id="giftcard_custom_amount"
+                class="<?php if ($preIsCustom): ?>required-entry <?php endif; ?>validate-digits validate-greater-than-zero"
+                step="1"
+                placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
+                <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
+                <?php if ($preIsCustom): ?>required<?php endif; ?>
+                value="<?php echo $preIsCustom ? $this->escapeHtml($preAmount) : ''; ?>"
+            />
+        </div>
+    <?php else: ?>
+        <div class="field">
+            <label for="giftcard_amount" class="required">
+                <?php echo $this->__('Amount'); ?>
+                <?php if ($this->getMinAmount() && $this->getMaxAmount()): ?>
+                    <span class="hint">(<?php echo (int)$this->getMinAmount(); ?> - <?php echo (int)$this->getMaxAmount(); ?>)</span>
+                <?php endif; ?>
+            </label>
+            <input
+                type="number"
+                name="giftcard_amount"
+                id="giftcard_amount"
+                class="required-entry validate-digits validate-greater-than-zero"
+                required
+                step="1"
+                placeholder="<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>"
+                <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
+                <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
+                value="<?php echo $preAmount !== null ? $this->escapeHtml($preAmount) : ''; ?>"
+            />
+        </div>
+    <?php endif; ?>
+
+    <!-- Sender -->
+    <div class="fields-row">
+        <div class="field">
+            <label for="giftcard_sender_name" class="required"><?php echo $this->__('Your Name'); ?></label>
+            <input type="text" name="giftcard_sender_name" id="giftcard_sender_name" class="required-entry" maxlength="255" required value="<?php echo $preSenderName !== null ? $this->escapeHtml($preSenderName) : ''; ?>" />
+        </div>
+        <div class="field">
+            <label for="giftcard_sender_email" class="required"><?php echo $this->__('Your Email'); ?></label>
+            <input type="email" name="giftcard_sender_email" id="giftcard_sender_email" class="required-entry validate-email" maxlength="255" required value="<?php echo $preSenderEmail !== null ? $this->escapeHtml($preSenderEmail) : ''; ?>" />
+        </div>
+    </div>
+
+    <!-- Recipient -->
+    <div class="fields-row">
+        <div class="field">
+            <label for="giftcard_recipient_name" class="required"><?php echo $this->__('Recipient Name'); ?></label>
+            <input type="text" name="giftcard_recipient_name" id="giftcard_recipient_name" class="required-entry" maxlength="255" required value="<?php echo $preRecipientName !== null ? $this->escapeHtml($preRecipientName) : ''; ?>" />
+        </div>
+        <div class="field">
+            <label for="giftcard_recipient_email" class="required"><?php echo $this->__('Recipient Email'); ?></label>
+            <input type="email" name="giftcard_recipient_email" id="giftcard_recipient_email" class="required-entry validate-email" maxlength="255" required value="<?php echo $preRecipientEmail !== null ? $this->escapeHtml($preRecipientEmail) : ''; ?>" />
+        </div>
+    </div>
+
+    <!-- Optional -->
+    <?php if ($isMessageAllowed): ?>
+    <div class="fields-row">
+        <div class="field full-width">
+            <label for="giftcard_message"><?php echo $this->__('Personal Message'); ?></label>
+            <textarea name="giftcard_message" id="giftcard_message" maxlength="500" placeholder="<?php echo $this->__('Add a message...'); ?>"><?php echo $preMessage !== null ? $this->escapeHtml($preMessage) : ''; ?></textarea>
+        </div>
+        <div class="field">
+            <label for="giftcard_delivery_date"><?php echo $this->__('Schedule Delivery'); ?></label>
+            <input type="date" name="giftcard_delivery_date" id="giftcard_delivery_date" min="<?php echo date('Y-m-d'); ?>" value="<?php echo $preDeliveryDate !== null ? $this->escapeHtml($preDeliveryDate) : ''; ?>" />
+            <p class="note"><?php echo $this->__('Leave blank for immediate delivery'); ?></p>
+        </div>
+    </div>
+    <?php else: ?>
+    <div class="field">
+        <label for="giftcard_delivery_date"><?php echo $this->__('Schedule Delivery'); ?> <span class="hint">(<?php echo $this->__('Optional'); ?>)</span></label>
+        <input type="date" name="giftcard_delivery_date" id="giftcard_delivery_date" min="<?php echo date('Y-m-d'); ?>" value="<?php echo $preDeliveryDate !== null ? $this->escapeHtml($preDeliveryDate) : ''; ?>" />
+        <p class="note"><?php echo $this->__('Leave blank for immediate delivery'); ?></p>
+    </div>
+    <?php endif; ?>
+</div>
+
+<script type="module">
+const currencySymbol = '<?php echo Mage::app()->getStore()->getCurrentCurrency()->getCurrencySymbol(); ?>';
+<?php if ($this->getMinAmount()): ?>
+const minAmount = <?php echo $this->getMinAmount(); ?>;
+<?php else: ?>
+const minAmount = null;
+<?php endif; ?>
+<?php if ($this->getMaxAmount()): ?>
+const maxAmount = <?php echo $this->getMaxAmount(); ?>;
+<?php else: ?>
+const maxAmount = null;
+<?php endif; ?>
+
+function updateGiftCardPrice(amount) {
+    const price = parseFloat(amount);
+    if (!isNaN(price) && price > 0) {
+        document.querySelectorAll('.price-box .price').forEach(el => {
+            el.innerHTML = currencySymbol + price.toFixed(2);
+        });
+        if (typeof optionsPrice !== 'undefined' && optionsPrice) {
+            optionsPrice.productPrice = price;
+            optionsPrice.reload();
+        }
+    }
+}
+
+function validateAndClampAmount(input) {
+    let value = parseInt(input.value, 10);
+    if (isNaN(value) || value <= 0) {
+        input.value = '';
+        return null;
+    }
+    if (minAmount !== null && value < minAmount) {
+        value = minAmount;
+    }
+    if (maxAmount !== null && value > maxAmount) {
+        value = maxAmount;
+    }
+    input.value = value;
+    return value;
+}
+
+<?php if ($type === 'combined'): ?>
+// Combined type: dropdown + custom amount option
+const amountSelect = document.getElementById('giftcard_amount_select');
+const amountHidden = document.getElementById('giftcard_amount');
+const customField = document.getElementById('giftcard_custom_amount_field');
+const customInput = document.getElementById('giftcard_custom_amount');
+
+if (amountSelect) {
+    amountSelect.addEventListener('change', () => {
+        if (amountSelect.value === 'custom') {
+            customField.classList.remove('hidden');
+            customInput.classList.add('required-entry');
+            customInput.required = true;
+            amountHidden.value = customInput.value || '';
+            if (customInput.value) {
+                updateGiftCardPrice(customInput.value);
+            }
+        } else {
+            customField.classList.add('hidden');
+            customInput.classList.remove('required-entry');
+            customInput.required = false;
+            amountHidden.value = amountSelect.value;
+            if (amountSelect.value) {
+                updateGiftCardPrice(amountSelect.value);
+            }
+        }
+    });
+
+    // Initialize price on page load if value is preconfigured
+    if (amountHidden.value) {
+        updateGiftCardPrice(amountHidden.value);
+    }
+}
+
+if (customInput) {
+    customInput.addEventListener('input', () => {
+        amountHidden.value = customInput.value;
+        updateGiftCardPrice(customInput.value);
+    });
+    customInput.addEventListener('blur', () => {
+        const value = validateAndClampAmount(customInput);
+        if (value !== null) {
+            amountHidden.value = value;
+            updateGiftCardPrice(value);
+        } else {
+            amountHidden.value = '';
+        }
+    });
+}
+<?php else: ?>
+// Fixed or Range type
+const amountField = document.getElementById('giftcard_amount');
+
+if (amountField) {
+    if (amountField.tagName === 'SELECT') {
+        amountField.addEventListener('change', () => updateGiftCardPrice(amountField.value));
+        if (amountField.value) updateGiftCardPrice(amountField.value);
+    } else {
+        amountField.addEventListener('input', () => updateGiftCardPrice(amountField.value));
+        amountField.addEventListener('blur', () => {
+            const value = validateAndClampAmount(amountField);
+            if (value !== null) {
+                updateGiftCardPrice(value);
+            }
+        });
+
+        // Initialize price: use preconfigured value if set, otherwise use min amount
+        if (amountField.value) {
+            updateGiftCardPrice(amountField.value);
+        } else if (minAmount !== null) {
+            amountField.value = minAmount;
+            updateGiftCardPrice(minAmount);
+        }
+    }
+}
+<?php endif; ?>
+</script>
+<?php endif; ?>

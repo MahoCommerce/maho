@@ -290,7 +290,7 @@ class Mage_Core_Model_Translate
     {
         $data = [];
         if (file_exists($file)) {
-            $parser = new Varien_File_Csv();
+            $parser = new \Maho\File\Csv();
             $parser->setDelimiter(self::CSV_SEPARATOR);
             $data = $parser->getDataPairs($file);
         }
@@ -459,7 +459,7 @@ class Mage_Core_Model_Translate
                       . DS . 'template' . DS . $type . DS . $file;
         }
 
-        $ioAdapter = new Varien_Io_File();
+        $ioAdapter = new \Maho\Io\File();
         $ioAdapter->open(['path' => Mage::getBaseDir('locale')]);
 
         return (string) $ioAdapter->read($filePath);

@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
         $group      = $this->getGroup();
         $attributes = $this->getAttributes();
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('group_' . $group->getId());
         $form->setDataObject($this->getCategory());
 
@@ -101,7 +101,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
                     $fieldset->removeField('url_key');
                 } else {
                     $renderer = $this->getLayout()->createBlock('adminhtml/catalog_form_renderer_attribute_urlkey');
-                    if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+                    if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
                         $form->getElement('url_key')->setRenderer($renderer);
                     }
                 }

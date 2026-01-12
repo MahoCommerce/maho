@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Paypal_Model_Hostedpro_Request extends Varien_Object
+class Mage_Paypal_Model_Hostedpro_Request extends \Maho\DataObject
 {
     /**
      * Request's order model
@@ -162,7 +162,7 @@ class Mage_Paypal_Model_Hostedpro_Request extends Varien_Object
      *
      * @return array
      */
-    protected function _getShippingAddress(Varien_Object $address)
+    protected function _getShippingAddress(\Maho\DataObject $address)
     {
         $request = [
             'first_name' => $address->getFirstname(),
@@ -188,7 +188,7 @@ class Mage_Paypal_Model_Hostedpro_Request extends Varien_Object
      *
      * @return array
      */
-    protected function _getBillingAddress(Varien_Object $address)
+    protected function _getBillingAddress(\Maho\DataObject $address)
     {
         $request = [
             'billing_first_name' => $address->getFirstname(),

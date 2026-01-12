@@ -15,12 +15,12 @@
  * @method bool getDisplayZero()
  * @method int getFontSize()
  * @method Mage_Sales_Model_Order getOrder()
- * @method Varien_Object getSource()
+ * @method \Maho\DataObject getSource()
  * @method string getSourceField()
  * @method string getTitle()
  * @method string getTitleSourceField()
  */
-class Mage_Sales_Model_Order_Pdf_Total_Default extends Varien_Object
+class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
 {
     /**
      * Get array of arrays with totals information for display in PDF

@@ -63,7 +63,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest = null;
 
@@ -71,7 +71,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Raw rate tracking request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawTrackRequest = null;
 
@@ -130,7 +130,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     {
         $this->_request = $request;
 
-        $r = new Maho\DataObject();
+        $r = new \Maho\DataObject();
 
         if ($request->getLimitMethod()) {
             $r->setService($request->getLimitMethod());
@@ -1067,7 +1067,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      */
     protected function setTrackingRequest(): void
     {
-        $r = new Maho\DataObject();
+        $r = new \Maho\DataObject();
         $r->setClientId($this->getConfigData('client_id'));
         $this->_rawTrackRequest = $r;
     }
@@ -1468,13 +1468,13 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Do shipment request via REST API v3
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    protected function _doShipmentRequest(Varien_Object $request)
+    protected function _doShipmentRequest(\Maho\DataObject $request)
     {
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
 
         try {
             $restClient = $this->getRestClient();
@@ -1809,7 +1809,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @return array|bool
      */
     #[\Override]
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         if (is_null($params)) {
             return $this->_getAllowedContainers();
@@ -1843,7 +1843,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @return array
      */
     #[\Override]
-    public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
+    public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
         if ($params == null) {
             return [];
@@ -1873,7 +1873,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @return array
      */
     #[\Override]
-    public function getContentTypes(Varien_Object $params)
+    public function getContentTypes(\Maho\DataObject $params)
     {
         $countryShipper     = $params->getCountryShipper();
         $countryRecipient   = $params->getCountryRecipient();

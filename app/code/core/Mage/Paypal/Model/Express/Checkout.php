@@ -768,7 +768,7 @@ class Mage_Paypal_Model_Express_Checkout
                 $amountExclTax = Mage::helper('tax')->getShippingPrice($amount, false, $address);
                 $amountInclTax = Mage::helper('tax')->getShippingPrice($amount, true, $address);
 
-                $options[$i] = new Varien_Object([
+                $options[$i] = new \Maho\DataObject([
                     'is_default' => $isDefault,
                     'name'       => trim("{$rate->getCarrier()} - {$rate->getMethodTitle()}", ' -'),
                     'code'       => $rate->getCode(),
@@ -792,7 +792,7 @@ class Mage_Paypal_Model_Express_Checkout
         }
 
         if ($mayReturnEmpty && is_null($userSelectedOption)) {
-            $options[] = new Varien_Object([
+            $options[] = new \Maho\DataObject([
                 'is_default' => true,
                 'name'       => Mage::helper('paypal')->__('N/A'),
                 'code'       => 'no_rate',
@@ -826,7 +826,7 @@ class Mage_Paypal_Model_Express_Checkout
      *
      * @return int
      */
-    protected static function cmpShippingOptions(Varien_Object $option1, Varien_Object $option2)
+    protected static function cmpShippingOptions(\Maho\DataObject $option1, \Maho\DataObject $option2)
     {
         return $option1->getAmount() <=> $option2->getAmount();
     }

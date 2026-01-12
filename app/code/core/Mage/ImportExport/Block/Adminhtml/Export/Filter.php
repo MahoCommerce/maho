@@ -243,7 +243,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
      * @param bool $isExport
      * @return string
      */
-    public function decorateFilter($value, Mage_Eav_Model_Entity_Attribute $row, Varien_Object $column, $isExport)
+    public function decorateFilter($value, Mage_Eav_Model_Entity_Attribute $row, \Maho\DataObject $column, $isExport)
     {
         $value  = null;
         $values = $column->getValues();

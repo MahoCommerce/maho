@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
         /** @var Mage_Core_Model_Store_Group $groupModel */
         /** @var Mage_Core_Model_Store $storeModel */
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method'    => 'post',

@@ -10,12 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Admin_Model_Config extends Varien_Simplexml_Config
+class Mage_Admin_Model_Config extends \Maho\Simplexml\Config
 {
     /**
      * adminhtml.xml merged config
      *
-     * @var Varien_Simplexml_Config
+     * @var \Maho\Simplexml\Config
      */
     protected $_adminhtmlConfig;
 
@@ -29,9 +29,9 @@ class Mage_Admin_Model_Config extends Varien_Simplexml_Config
 
         $adminhtmlConfig = Mage::app()->loadCache($this->getCacheId());
         if ($adminhtmlConfig) {
-            $this->_adminhtmlConfig = new Varien_Simplexml_Config($adminhtmlConfig);
+            $this->_adminhtmlConfig = new \Maho\Simplexml\Config($adminhtmlConfig);
         } else {
-            $adminhtmlConfig = new Varien_Simplexml_Config();
+            $adminhtmlConfig = new \Maho\Simplexml\Config();
             $adminhtmlConfig->loadString('<?xml version="1.0"?><config></config>');
             Mage::getConfig()->loadModulesConfiguration('adminhtml.xml', $adminhtmlConfig);
             $this->_adminhtmlConfig = $adminhtmlConfig;
@@ -49,7 +49,7 @@ class Mage_Admin_Model_Config extends Varien_Simplexml_Config
     /**
      * Load Acl resources from config
      *
-     * @param Mage_Core_Model_Config_Element|Varien_Simplexml_Element $resource
+     * @param Mage_Core_Model_Config_Element|\Maho\Simplexml\Element $resource
      * @param string $parentName
      * @return $this
      */
@@ -90,7 +90,7 @@ class Mage_Admin_Model_Config extends Varien_Simplexml_Config
      * Get acl assert config
      *
      * @param string $name
-     * @return false|SimpleXMLElement|Varien_Simplexml_Element|Mage_Core_Model_Config_Element
+     * @return false|SimpleXMLElement|\Maho\Simplexml\Element|Mage_Core_Model_Config_Element
      */
     public function getAclAssert($name = '')
     {
@@ -106,7 +106,7 @@ class Mage_Admin_Model_Config extends Varien_Simplexml_Config
      * Retrieve privilege set by name
      *
      * @param string $name
-     * @return false|SimpleXMLElement|Varien_Simplexml_Element
+     * @return false|SimpleXMLElement|\Maho\Simplexml\Element
      */
     public function getAclPrivilegeSet($name = '')
     {
@@ -121,7 +121,7 @@ class Mage_Admin_Model_Config extends Varien_Simplexml_Config
     /**
      * Retrieve xml config
      *
-     * @return Varien_Simplexml_Config
+     * @return \Maho\Simplexml\Config
      */
     public function getAdminhtmlConfig()
     {

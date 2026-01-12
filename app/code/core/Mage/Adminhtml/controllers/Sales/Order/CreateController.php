@@ -314,7 +314,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
         /** @var Mage_Catalog_Helper_Product $productHelper */
         $productHelper = Mage::helper('catalog/product');
         foreach ($items as $id => $item) {
-            $buyRequest = new Varien_Object($item);
+            $buyRequest = new \Maho\DataObject($item);
             $params = ['files_prefix' => 'item_' . $id . '_'];
             $buyRequest = $productHelper->addParamsToBuyRequest($buyRequest, $params);
             if ($buyRequest->hasData()) {
@@ -546,7 +546,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     public function configureProductToAddAction()
     {
         $sessionQuote = Mage::getSingleton('adminhtml/session_quote');
-        $configureResult = new Varien_Object([
+        $configureResult = new \Maho\DataObject([
             'ok'                  => true,
             'product_id'          => (int) $this->getRequest()->getParam('id'),
             'current_store_id'    => $sessionQuote->getStore()->getId(),
@@ -582,7 +582,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
 
             $quoteItem->setOptions($optionCollection->getOptionsByItem($quoteItem));
 
-            $configureResult = new Varien_Object([
+            $configureResult = new \Maho\DataObject([
                 'ok'                  => true,
                 'product_id'          => $quoteItem->getProductId(),
                 'buy_request'         => $quoteItem->getBuyRequest(),

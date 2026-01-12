@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_New_Form extends Mage_Adminhtml_Bl
         $model  = Mage::registry('current_status');
         $labels = $model ? $model->getStoreLabels() : [];
 
-        $form   = new Varien_Data_Form([
+        $form   = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method'    => 'post',
@@ -78,7 +78,7 @@ class Mage_Adminhtml_Block_Sales_Order_Status_New_Form extends Mage_Adminhtml_Bl
         ]);
 
         $renderer = $this->getLayout()->createBlock('adminhtml/store_switcher_form_renderer_fieldset');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $fieldset->setRenderer($renderer);
         }
 

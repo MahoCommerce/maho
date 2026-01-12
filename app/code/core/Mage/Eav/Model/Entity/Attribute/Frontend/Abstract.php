@@ -71,7 +71,7 @@ abstract class Mage_Eav_Model_Entity_Attribute_Frontend_Abstract implements Mage
      *
      * @return mixed
      */
-    public function getValue(Varien_Object $object)
+    public function getValue(\Maho\DataObject $object)
     {
         $value = $object->getData($this->getAttribute()->getAttributeCode());
         if (in_array($this->getConfigField('input'), ['select','boolean'])) {

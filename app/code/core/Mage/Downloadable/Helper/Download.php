@@ -36,7 +36,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
     /**
      * Resource open handle
      *
-     * @var resource|Varien_Io_File|null
+     * @var resource|\Maho\Io\File|null
      */
     protected $_handle          = null;
 
@@ -147,7 +147,7 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
                     Mage::throwException(Mage::helper('downloadable')->__('An error occurred while getting the requested content. Please contact the store owner.'));
                 }
             } elseif ($this->_linkType == self::LINK_TYPE_FILE) {
-                $this->_handle = new Varien_Io_File();
+                $this->_handle = new \Maho\Io\File();
                 if (!is_file($this->_resourceFile)) {
                     Mage::throwException(Mage::helper('downloadable')->__('The file does not exist.'));
                 }

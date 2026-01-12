@@ -16,18 +16,18 @@ class Mage_Adminhtml_Block_Catalog_Form extends Mage_Adminhtml_Block_Widget_Form
     protected function _prepareLayout()
     {
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_element');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setElementRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setElementRenderer($renderer);
         }
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_fieldset');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setFieldsetRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setFieldsetRenderer($renderer);
         }
 
         $renderer = $this->getLayout()->createBlock('adminhtml/catalog_form_renderer_fieldset_element');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setFieldsetElementRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setFieldsetElementRenderer($renderer);
         }
 
         return $this;

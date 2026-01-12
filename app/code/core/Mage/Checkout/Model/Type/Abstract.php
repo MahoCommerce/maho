@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Checkout_Model_Type_Abstract extends Varien_Object
+abstract class Mage_Checkout_Model_Type_Abstract extends \Maho\DataObject
 {
     /**
      * Retrieve checkout session model

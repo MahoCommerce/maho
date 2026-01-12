@@ -25,8 +25,8 @@ class Mage_Payment_Model_Method_Cc extends Mage_Payment_Model_Method_Abstract
     #[\Override]
     public function assignData($data)
     {
-        if (!($data instanceof Varien_Object)) {
-            $data = new Varien_Object($data);
+        if (!($data instanceof \Maho\DataObject)) {
+            $data = new \Maho\DataObject($data);
         }
         $info = $this->getInfoInstance();
         $info->setCcType($data->getCcType())

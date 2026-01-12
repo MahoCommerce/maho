@@ -426,7 +426,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isRegistrationAllowed()
     {
-        $result = new Varien_Object(['is_allowed' => true]);
+        $result = new \Maho\DataObject(['is_allowed' => true]);
         Mage::dispatchEvent('customer_registration_is_allowed', ['result' => $result]);
         return $result->getIsAllowed();
     }
@@ -564,7 +564,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      * Retrieve customer group ID based on his VAT number
      *
      * @param string $customerCountryCode
-     * @param Varien_Object $vatValidationResult
+     * @param \Maho\DataObject $vatValidationResult
      * @param Mage_Core_Model_Store|string|int $store
      * @return null|int
      */
@@ -596,12 +596,12 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $requesterCountryCode
      * @param string $requesterVatNumber
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function checkVatNumber($countryCode, $vatNumber, $requesterCountryCode = '', $requesterVatNumber = '')
     {
         // Default response
-        $gatewayResponse = new Varien_Object([
+        $gatewayResponse = new \Maho\DataObject([
             'is_valid' => false,
             'request_date' => '',
             'request_identifier' => '',
@@ -685,7 +685,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      * Get VAT class
      *
      * @param string $customerCountryCode
-     * @param Varien_Object $vatValidationResult
+     * @param \Maho\DataObject $vatValidationResult
      * @param Mage_Core_Model_Store|string|int|null $store
      * @return null|string
      */
@@ -719,8 +719,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param Mage_Customer_Model_Address $customerAddress
      * @param bool $customerGroupAutoAssignDisabled
-     * @param Varien_Object $validationResult
-     * @return Varien_Object
+     * @param \Maho\DataObject $validationResult
+     * @return \Maho\DataObject
      */
     public function getVatValidationUserMessage($customerAddress, $customerGroupAutoAssignDisabled, $validationResult)
     {
@@ -761,7 +761,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
                 . $contactUsMessage;
         }
 
-        $validationMessageEnvelope = new Varien_Object();
+        $validationMessageEnvelope = new \Maho\DataObject();
         $validationMessageEnvelope->setMessage($message);
         $validationMessageEnvelope->setIsError($isError);
 

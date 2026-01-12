@@ -13,7 +13,7 @@
 class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Action extends Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract
 {
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $actions = [];
 
@@ -42,7 +42,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Newsletter_Grid_Renderer_Action ext
     protected function _actionsToHtml(array $actions)
     {
         $html = [];
-        $attributesObject = new Varien_Object();
+        $attributesObject = new \Maho\DataObject();
         foreach ($actions as $action) {
             $attributesObject->setData($action['@']);
             $html[] = '<a ' . $attributesObject->serialize() . '>' . $action['#'] . '</a>';

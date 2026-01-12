@@ -91,7 +91,7 @@ class Mage_Adminhtml_Block_Tag_Grid_Pending extends Mage_Adminhtml_Block_Widget_
     /**
      * Retrieves row click URL
      *
-     * @param Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return string
      */
     #[\Override]

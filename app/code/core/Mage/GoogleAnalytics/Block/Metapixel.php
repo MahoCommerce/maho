@@ -214,7 +214,7 @@ class Mage_GoogleAnalytics_Block_Metapixel extends Mage_Core_Block_Template
             }
         }
 
-        $metaDataTransport = new Varien_Object();
+        $metaDataTransport = new \Maho\DataObject();
         $metaDataTransport->setData($result);
         Mage::dispatchEvent('googleanalytics_meta_send_data_before', ['meta_data_transport' => $metaDataTransport]);
         $result = $metaDataTransport->getData();

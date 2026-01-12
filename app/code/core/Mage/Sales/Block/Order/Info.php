@@ -30,7 +30,6 @@ class Mage_Sales_Block_Order_Info extends Mage_Core_Block_Template
             $headBlock->setTitle($this->__('Order # %s', $this->getOrder()->getRealOrderId()));
         }
 
-        /** @var Mage_Payment_Helper_Data $helper */
         $helper = $this->helper('payment');
         $this->setChild(
             'payment_info',
@@ -66,7 +65,7 @@ class Mage_Sales_Block_Order_Info extends Mage_Core_Block_Template
      */
     public function addLink($name, $path, $label)
     {
-        $this->_links[$name] = new Varien_Object([
+        $this->_links[$name] = new \Maho\DataObject([
             'name' => $name,
             'label' => $label,
             'url' => empty($path) ? '' : Mage::getUrl($path, ['order_id' => $this->getOrder()->getId()]),

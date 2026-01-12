@@ -34,7 +34,7 @@ class Mage_Bundle_Model_Resource_Option extends Mage_Core_Model_Resource_Db_Abst
         $write = $this->_getWriteAdapter();
         $write->delete($this->getTable('bundle/option_value'), $condition);
 
-        $data = new Varien_Object();
+        $data = new \Maho\DataObject();
         $data->setOptionId($object->getId())
             ->setStoreId($object->getStoreId())
             ->setTitle($object->getTitle());

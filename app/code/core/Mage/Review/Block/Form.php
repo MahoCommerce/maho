@@ -24,7 +24,7 @@ class Mage_Review_Block_Form extends Mage_Core_Block_Template
         parent::__construct();
 
         $data =  Mage::getSingleton('review/session')->getFormData(true);
-        $data = new Varien_Object($data);
+        $data = new \Maho\DataObject($data);
 
         // add logged in customer name as nickname
         if (!$data->getNickname()) {

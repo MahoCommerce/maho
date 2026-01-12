@@ -19,7 +19,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit_Form exten
         $sequence = Mage::registry('current_email_sequence');
         $segment = Mage::registry('current_customer_segment');
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/saveSequence', ['id' => $sequence->getId()]),
             'method' => 'post',

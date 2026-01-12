@@ -557,7 +557,7 @@ abstract class Mage_Core_Controller_Varien_Action
      */
     public function norouteAction($coreRoute = null): void
     {
-        $status = $this->getRequest()->getParam('__status__') ?: new Varien_Object();
+        $status = $this->getRequest()->getParam('__status__') ?: new \Maho\DataObject();
 
         Mage::dispatchEvent('controller_action_noroute', ['action' => $this, 'status' => $status]);
         if ($status->getLoaded() !== true
@@ -579,7 +579,7 @@ abstract class Mage_Core_Controller_Varien_Action
 
     public function noCookiesAction(): void
     {
-        $redirect = new Varien_Object();
+        $redirect = new \Maho\DataObject();
         Mage::dispatchEvent('controller_action_nocookies', [
             'action'    => $this,
             'redirect'  => $redirect,
@@ -980,7 +980,7 @@ abstract class Mage_Core_Controller_Varien_Action
             return $array;
         }
 
-        $filter = new Varien_Data_Form_Filter_Date(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
+        $filter = new \Maho\Data\Form\Filter\Date(Mage::app()->getLocale()->getDateFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
         foreach ($dateFields as $dateField) {
             if (!empty($dateField) && isset($array[$dateField]) && $array[$dateField] !== '') {
                 $array[$dateField] = $filter->inputFilter($array[$dateField]);
@@ -1003,7 +1003,7 @@ abstract class Mage_Core_Controller_Varien_Action
             return $array;
         }
 
-        $filter = new Varien_Data_Form_Filter_Datetime(Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
+        $filter = new \Maho\Data\Form\Filter\Datetime(Mage::app()->getLocale()->getDateTimeFormat(Mage_Core_Model_Locale::FORMAT_TYPE_SHORT));
         foreach ($dateFields as $dateField) {
             if (!empty($dateField) && isset($array[$dateField]) && $array[$dateField] !== '') {
                 $array[$dateField] = $filter->inputFilter($array[$dateField]);
@@ -1063,7 +1063,7 @@ abstract class Mage_Core_Controller_Varien_Action
                 $this->getResponse()->clearBody();
                 $this->getResponse()->sendHeaders();
 
-                $ioAdapter = new Varien_Io_File();
+                $ioAdapter = new \Maho\Io\File();
                 $ioAdapter->open(['path' => $ioAdapter->dirname($file)]);
                 $ioAdapter->streamOpen($file, 'r');
                 while ($buffer = $ioAdapter->streamRead()) {

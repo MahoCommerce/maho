@@ -276,7 +276,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
     protected function _afterToHtml($html)
     {
         $html = parent::_afterToHtml($html);
-        $transport = new Varien_Object();
+        $transport = new \Maho\DataObject();
         $transport->setHtml($html);
         Mage::dispatchEvent(
             'checkout_block_cart_sidebar_aftertohtml',

@@ -85,7 +85,7 @@ class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage
 
             $this->_quoteItem->setOptions($optionCollection->getOptionsByItem($this->_quoteItem));
 
-            $configureResult = new Varien_Object([
+            $configureResult = new \Maho\DataObject([
                 'ok'                  => true,
                 'product_id'          => $this->_quoteItem->getProductId(),
                 'buy_request'         => $this->_quoteItem->getBuyRequest(),
@@ -119,7 +119,7 @@ class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage
         try {
             $this->_initData();
 
-            $buyRequest = new Varien_Object($this->getRequest()->getPost());
+            $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
 
             $this->_quote->updateItem($this->_quoteItem->getId(), $buyRequest);

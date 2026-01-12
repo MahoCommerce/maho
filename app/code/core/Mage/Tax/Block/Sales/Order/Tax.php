@@ -54,7 +54,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     /**
      * Get data (totals) source model
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getSource()
     {
@@ -68,6 +68,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
      */
     public function initTotals()
     {
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $this->_order   = $parent->getOrder();
         $this->_source  = $parent->getSource();
@@ -94,11 +95,14 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
      */
     protected function _addTax($after = 'discount')
     {
-        $taxTotal = new Varien_Object([
+        /** @var Mage_Sales_Block_Order_Totals $parent */
+        $parent = $this->getParentBlock();
+
+        $taxTotal = new \Maho\DataObject([
             'code'      => 'tax',
             'block_name' => $this->getNameInLayout(),
         ]);
-        $this->getParentBlock()->addTotal($taxTotal, $after);
+        $parent->addTotal($taxTotal, $after);
         return $this;
     }
 
@@ -118,6 +122,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     protected function _initSubtotal()
     {
         $store  = $this->getStore();
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $subtotal = $parent->getTotal('subtotal');
         if (!$subtotal) {
@@ -148,13 +153,13 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
 
             $subtotalIncl = max(0, $subtotalIncl);
             $baseSubtotalIncl = max(0, $baseSubtotalIncl);
-            $totalExcl = new Varien_Object([
+            $totalExcl = new \Maho\DataObject([
                 'code'      => 'subtotal_excl',
                 'value'     => $subtotal,
                 'base_value' => $baseSubtotal,
                 'label'     => $this->__('Subtotal (Excl.Tax)'),
             ]);
-            $totalIncl = new Varien_Object([
+            $totalIncl = new \Maho\DataObject([
                 'code'      => 'subtotal_incl',
                 'value'     => $subtotalIncl,
                 'base_value' => $baseSubtotalIncl,
@@ -193,6 +198,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     protected function _initShipping()
     {
         $store  = $this->getStore();
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $shipping = $parent->getTotal('shipping');
         if (!$shipping) {
@@ -211,13 +217,13 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
                 $baseShippingIncl = $baseShipping + (float) $this->_source->getBaseShippingTaxAmount();
             }
 
-            $totalExcl = new Varien_Object([
+            $totalExcl = new \Maho\DataObject([
                 'code'      => 'shipping',
                 'value'     => $shipping,
                 'base_value' => $baseShipping,
                 'label'     => $this->__('Shipping & Handling (Excl.Tax)'),
             ]);
-            $totalIncl = new Varien_Object([
+            $totalIncl = new \Maho\DataObject([
                 'code'      => 'shipping_incl',
                 'value'     => $shippingIncl,
                 'base_value' => $baseShippingIncl,
@@ -253,6 +259,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     protected function _initGrandTotal()
     {
         $store  = $this->getStore();
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $grandototal = $parent->getTotal('grand_total');
         if (!$grandototal || !(float) $this->_source->getGrandTotal()) {
@@ -266,14 +273,14 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
             $baseGrandtotalExcl = $baseGrandtotal - $this->_source->getBaseTaxAmount();
             $grandtotalExcl     = max($grandtotalExcl, 0);
             $baseGrandtotalExcl = max($baseGrandtotalExcl, 0);
-            $totalExcl = new Varien_Object([
+            $totalExcl = new \Maho\DataObject([
                 'code'      => 'grand_total',
                 'strong'    => true,
                 'value'     => $grandtotalExcl,
                 'base_value' => $baseGrandtotalExcl,
                 'label'     => $this->__('Grand Total (Excl.Tax)'),
             ]);
-            $totalIncl = new Varien_Object([
+            $totalIncl = new \Maho\DataObject([
                 'code'      => 'grand_total_incl',
                 'strong'    => true,
                 'value'     => $grandtotal,

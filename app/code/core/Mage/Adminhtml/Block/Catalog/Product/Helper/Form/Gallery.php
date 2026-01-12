@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery extends Varien_Data_Form_Element_Abstract
+class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery extends \Maho\Data\Form\Element\AbstractElement
 {
     #[\Override]
     public function getElementHtml()

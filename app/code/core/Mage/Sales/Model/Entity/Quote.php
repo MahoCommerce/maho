@@ -24,7 +24,7 @@ class Mage_Sales_Model_Entity_Quote extends Mage_Eav_Model_Entity_Abstract
     /**
      * Retrieve select object for loading base entity row
      *
-     * @param   Varien_Object|Mage_Sales_Model_Quote $object
+     * @param \Maho\DataObject|Mage_Sales_Model_Quote $object
      * @param   int $rowId
      * @return  Maho\Db\Select
      */

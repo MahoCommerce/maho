@@ -77,12 +77,12 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
     /**
      * Return relation info about used products
      *
-     * @return Varien_Object Object with information data
+     * @return \Maho\DataObject Object with information data
      */
     #[\Override]
     public function getRelationInfo()
     {
-        $info = new Varien_Object();
+        $info = new \Maho\DataObject();
         $info->setTable('catalog/product_link')
             ->setParentFieldName('product_id')
             ->setChildFieldName('linked_product_id')
@@ -288,7 +288,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
      * @return array|string
      */
     #[\Override]
-    protected function _prepareProduct(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
     {
         $product = $this->getProduct($product);
         $productsInfo = $buyRequest->getSuperGroup();
@@ -369,7 +369,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
      * Prepare selected qty for grouped product's options
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return array
      */
     #[\Override]

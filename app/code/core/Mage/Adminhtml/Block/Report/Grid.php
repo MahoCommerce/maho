@@ -386,7 +386,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     #[\Override]
     public function addExportType($url, $label)
     {
-        $this->_exportTypes[] = new Varien_Object(
+        $this->_exportTypes[] = new \Maho\DataObject(
             [
                 'url'   => $this->getUrl(
                     $url,
@@ -443,7 +443,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     public function getGrandTotals()
     {
         if (!$this->_grandTotals) {
-            $this->_grandTotals = new Varien_Object();
+            $this->_grandTotals = new \Maho\DataObject();
         }
         return $this->_grandTotals;
     }
@@ -588,7 +588,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
             $data[] = $row;
         }
 
-        $xmlObj = new Varien_Convert_Parser_Xml_Excel();
+        $xmlObj = new \Maho\Convert\Parser\Xml\Excel();
         $xmlObj->setVar('single_sheet', $fileName);
         $xmlObj->setData($data);
         $xmlObj->unparse();

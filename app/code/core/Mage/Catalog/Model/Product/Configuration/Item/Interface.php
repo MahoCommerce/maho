@@ -29,11 +29,11 @@ interface Mage_Catalog_Model_Product_Configuration_Item_Interface
     /**
      * Returns special download params (if needed) for custom option with type = 'file''
      * Return null, if not special params needed'
-     * Or return Varien_Object with any of the following indexes:
+     * Or return \Maho\DataObject with any of the following indexes:
      *  - 'url' - url of controller to give the file
      *  - 'urlParams' - additional parameters for url (custom option id, or item id, for example)
      *
-     * @return null|Varien_Object
+     * @return null|\Maho\DataObject
      */
     public function getFileDownloadParams();
 }

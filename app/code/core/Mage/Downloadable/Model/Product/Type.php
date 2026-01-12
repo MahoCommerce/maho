@@ -265,7 +265,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
      * @return array|string
      */
     #[\Override]
-    protected function _prepareProduct(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
     {
         $result = parent::_prepareProduct($buyRequest, $product, $processMode);
 
@@ -321,7 +321,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
         $product = $this->getProduct($product);
         $option = $product->getCustomOption('info_buyRequest');
         if ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
-            $buyRequest = new Varien_Object(unserialize($option->getValue(), ['allowed_classes' => false]));
+            $buyRequest = new \Maho\DataObject(unserialize($option->getValue(), ['allowed_classes' => false]));
             if (!$buyRequest->hasLinks()) {
                 if (!$product->getLinksPurchasedSeparately()) {
                     $allLinksIds = Mage::getModel('downloadable/link')
@@ -447,7 +447,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
      * Prepare selected options for downloadable product
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return array
      */
     #[\Override]

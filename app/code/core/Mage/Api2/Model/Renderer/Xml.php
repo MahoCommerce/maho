@@ -70,7 +70,7 @@ class Mage_Api2_Model_Renderer_Xml implements Mage_Api2_Model_Renderer_Interface
     /**
      * Prepare convert data
      *
-     * @param array|Varien_Object $data
+     * @param array|\Maho\DataObject $data
      * @param bool $root
      * @return array
      * @throws Exception
@@ -84,7 +84,7 @@ class Mage_Api2_Model_Renderer_Xml implements Mage_Api2_Model_Renderer_Interface
                 throw new Exception('Prepare data must be an object or an array.');
             }
         }
-        $data = $data instanceof Varien_Object ? $data->toArray() : (array) $data;
+        $data = $data instanceof \Maho\DataObject ? $data->toArray() : (array) $data;
         $isAssoc = !preg_match('/^\d+$/', implode('', array_keys($data)));
 
         $preparedData = [];

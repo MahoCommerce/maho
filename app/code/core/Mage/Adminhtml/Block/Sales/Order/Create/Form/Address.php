@@ -184,7 +184,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Address extends Mage_Adminhtm
      * @return Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract
      */
     #[\Override]
-    protected function _addAdditionalFormElementData(Varien_Data_Form_Element_Abstract $element)
+    protected function _addAdditionalFormElementData(\Maho\Data\Form\Element\AbstractElement $element)
     {
         if ($element->getId() === 'region_id') {
             $element->setNoDisplay(true);

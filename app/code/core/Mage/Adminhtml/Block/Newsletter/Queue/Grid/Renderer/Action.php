@@ -17,7 +17,7 @@ class Mage_Adminhtml_Block_Newsletter_Queue_Grid_Renderer_Action extends Mage_Ad
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $actions = [];
 
