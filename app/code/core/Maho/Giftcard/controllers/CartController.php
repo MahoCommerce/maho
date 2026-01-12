@@ -372,6 +372,12 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
             $result['message'] = $this->__('Gift card "%s" was applied.', $code);
             $result['data'] = $this->_getGiftcardData($quote);
 
+            // Include updated payment methods HTML if this is a checkout context
+            // and gift cards fully cover the order
+            if ($result['data']['is_fully_covered'] && $this->getRequest()->getParam('checkout') === '1') {
+                $result['payment_methods_html'] = $this->_getPaymentMethodsHtml($quote);
+            }
+
         } catch (Exception $e) {
             $result['message'] = $e->getMessage();
         }
@@ -428,6 +434,12 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
                 $result['success'] = true;
                 $result['message'] = $this->__('Gift card was removed.');
                 $result['data'] = $this->_getGiftcardData($quote);
+
+                // Include updated payment methods HTML if this is a checkout context
+                // The payment methods need to be refreshed when removing gift cards too
+                if ($this->getRequest()->getParam('checkout') === '1') {
+                    $result['payment_methods_html'] = $this->_getPaymentMethodsHtml($quote);
+                }
             } else {
                 $result['message'] = $this->__('Gift card not found.');
             }
@@ -518,5 +530,22 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     protected function _getQuote()
     {
         return Mage::getSingleton('checkout/session')->getQuote();
+    }
+
+    /**
+     * Get payment methods HTML for checkout
+     *
+     * @param Mage_Sales_Model_Quote $quote
+     * @return string
+     */
+    protected function _getPaymentMethodsHtml(Mage_Sales_Model_Quote $quote): string
+    {
+        $this->loadLayout('checkout_onepage_paymentmethod');
+        $block = $this->getLayout()->getBlock('root');
+        if ($block) {
+            $block->setQuote($quote);
+            return $block->toHtml();
+        }
+        return '';
     }
 }

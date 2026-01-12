@@ -837,7 +837,11 @@ class Maho_Giftcard_Model_Observer
         // When gift cards fully cover the order (grand total = $0),
         // only allow the "free" payment method. Disable all others.
         $methodCode = $methodInstance->getCode();
-        if ($methodCode !== 'free') {
+        if ($methodCode === 'free') {
+            // Force-enable the free payment method when gift cards fully cover the order
+            $result->isAvailable = true;
+        } else {
+            // Disable all other payment methods
             $result->isAvailable = false;
         }
     }
