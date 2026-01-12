@@ -94,14 +94,13 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
         }
 
         if (!$model->getId()) {
-            // New gift card - show single amount field
             $fieldset->addField('balance', 'text', [
                 'name'     => 'balance',
                 'label'    => Mage::helper('giftcard')->__('Amount'),
                 'title'    => Mage::helper('giftcard')->__('Amount'),
                 'required' => true,
                 'class'    => 'validate-number validate-greater-than-zero',
-                'note'     => $currencyNote . '<br/>' . Mage::helper('giftcard')->__('The initial value of the gift card'),
+                'note'     => $currencyNote,
             ]);
 
             // Hidden field to sync initial_balance with balance on create
