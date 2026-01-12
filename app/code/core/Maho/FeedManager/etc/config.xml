@@ -25,22 +25,22 @@
                 <class>Maho_FeedManager_Model_Resource</class>
                 <entities>
                     <feed>
-                        <table>maho_feedmanager_feed</table>
+                        <table>feedmanager_feed</table>
                     </feed>
                     <attribute_mapping>
-                        <table>maho_feedmanager_attribute_mapping</table>
+                        <table>feedmanager_attribute_mapping</table>
                     </attribute_mapping>
                     <category_mapping>
-                        <table>maho_feedmanager_category_mapping</table>
+                        <table>feedmanager_category_mapping</table>
                     </category_mapping>
                     <log>
-                        <table>maho_feedmanager_log</table>
+                        <table>feedmanager_log</table>
                     </log>
                     <destination>
-                        <table>maho_feedmanager_destination</table>
+                        <table>feedmanager_destination</table>
                     </destination>
                     <dynamic_rule>
-                        <table>maho_feedmanager_dynamic_rule</table>
+                        <table>feedmanager_dynamic_rule</table>
                     </dynamic_rule>
                 </entities>
             </feedmanager_resource>
@@ -108,6 +108,14 @@
                     <model>feedmanager/cron::generateScheduledFeeds</model>
                 </run>
             </feedmanager_generate_scheduled>
+            <feedmanager_cleanup_logs>
+                <schedule>
+                    <cron_expr>30 3 * * *</cron_expr>
+                </schedule>
+                <run>
+                    <model>feedmanager/cron::cleanupOldLogs</model>
+                </run>
+            </feedmanager_cleanup_logs>
         </jobs>
     </crontab>
 
@@ -117,6 +125,7 @@
                 <enabled>1</enabled>
                 <output_directory>feeds</output_directory>
                 <batch_size>500</batch_size>
+                <log_retention_days>30</log_retention_days>
             </general>
         </feedmanager>
     </default>

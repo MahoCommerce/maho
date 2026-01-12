@@ -254,24 +254,30 @@ class Maho_FeedManager_Model_Cron
     }
 
     /**
-     * Clean old logs
+     * Clean up old logs based on retention setting
      *
-     * Removes logs older than 30 days
+     * Called by cron daily at 3:30 AM (configurable in config.xml)
      */
-    public function cleanOldLogs(): void
+    public function cleanupOldLogs(): void
     {
-        $cutoffDate = (new DateTime())->modify('-30 days')->format('Y-m-d H:i:s');
+        $retentionDays = (int) Mage::getStoreConfig('feedmanager/general/log_retention_days');
 
-        $collection = Mage::getResourceModel('feedmanager/log_collection')
-            ->addFieldToFilter('started_at', ['lt' => $cutoffDate]);
-
-        foreach ($collection as $log) {
-            $log->delete();
+        // If set to 0, cleanup is disabled
+        if ($retentionDays <= 0) {
+            return;
         }
 
-        $deleted = $collection->getSize();
+        $cutoffDate = (new DateTime())->modify("-{$retentionDays} days")->format('Y-m-d H:i:s');
+
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+        $tableName = $resource->getTableName('feedmanager/log');
+
+        // Use direct SQL for efficient bulk deletion
+        $deleted = $connection->delete($tableName, ['started_at < ?' => $cutoffDate]);
+
         if ($deleted > 0) {
-            Mage::log("FeedManager: Cleaned {$deleted} old log entries", Mage::LOG_INFO);
+            Mage::log("FeedManager: Cleaned {$deleted} log entries older than {$retentionDays} days", Mage::LOG_INFO);
         }
     }
 }

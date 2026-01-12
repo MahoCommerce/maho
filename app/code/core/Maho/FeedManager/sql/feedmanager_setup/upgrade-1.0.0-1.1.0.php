@@ -18,7 +18,7 @@ $installer->startSetup();
 $connection = $installer->getConnection();
 
 /**
- * Create table 'maho_feedmanager_destination'
+ * Create table 'feedmanager_destination'
  * Central configuration for upload destinations (SFTP, FTP, API endpoints)
  */
 $table = $connection

@@ -18,7 +18,7 @@ $installer->startSetup();
 $connection = $installer->getConnection();
 
 /**
- * Create table 'maho_feedmanager_feed'
+ * Create table 'feedmanager_feed'
  */
 $table = $connection
     ->newTable($installer->getTable('feedmanager/feed'))
@@ -120,7 +120,7 @@ $table = $connection
 $connection->createTable($table);
 
 /**
- * Create table 'maho_feedmanager_attribute_mapping'
+ * Create table 'feedmanager_attribute_mapping'
  */
 $table = $connection
     ->newTable($installer->getTable('feedmanager/attribute_mapping'))
@@ -169,7 +169,7 @@ $table = $connection
 $connection->createTable($table);
 
 /**
- * Create table 'maho_feedmanager_category_mapping'
+ * Create table 'feedmanager_category_mapping'
  */
 $table = $connection
     ->newTable($installer->getTable('feedmanager/category_mapping'))
@@ -213,7 +213,7 @@ $table = $connection
 $connection->createTable($table);
 
 /**
- * Create table 'maho_feedmanager_log'
+ * Create table 'feedmanager_log'
  */
 $table = $connection
     ->newTable($installer->getTable('feedmanager/log'))
