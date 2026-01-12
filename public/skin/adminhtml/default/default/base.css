@@ -1673,6 +1673,32 @@ td.divider {
     border-top: none
 }
 
+.note-list .note-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap
+}
+
+.note-list .note-header > *:not(:last-child):after {
+    content: "|";
+    margin-left: 8px;
+    color: #b9b9b9;
+    font-size: .9em
+}
+
+.note-list .icon {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle
+}
+
+.note-list .icon svg {
+    width: 16px;
+    height: 16px
+}
+
 .wrapper {
     min-width: 960px
 }
