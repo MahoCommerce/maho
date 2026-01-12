@@ -317,4 +317,39 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
         $normalized = strtolower(trim((string) $value));
         return in_array($normalized, ['1', 'true', 'yes']) ? 'yes' : 'no';
     }
+
+    /**
+     * Transform availability value to platform format
+     *
+     * @param mixed $value Raw availability value (qty, boolean, string)
+     * @param bool $useUnderscore Use underscore format (in_stock) vs space format (in stock)
+     * @return string Normalized availability string
+     */
+    protected function _transformAvailability(mixed $value, bool $useUnderscore = false): string
+    {
+        $inStock = $useUnderscore ? 'in_stock' : 'in stock';
+        $outOfStock = $useUnderscore ? 'out_of_stock' : 'out of stock';
+
+        // Numeric value (qty or boolean 0/1)
+        if (is_numeric($value)) {
+            return (int) $value > 0 ? $inStock : $outOfStock;
+        }
+
+        // Map various string formats to normalized output
+        $map = [
+            '1' => $inStock,
+            '0' => $outOfStock,
+            'in_stock' => $inStock,
+            'out_of_stock' => $outOfStock,
+            'in stock' => $inStock,
+            'out of stock' => $outOfStock,
+            'available' => $inStock,
+            'unavailable' => $outOfStock,
+            'yes' => $inStock,
+            'no' => $outOfStock,
+        ];
+
+        $normalized = strtolower(trim((string) $value));
+        return $map[$normalized] ?? $outOfStock;
+    }
 }

@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminhtml_Block_Widget_Form
 {
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
     #[\Override]
     protected function _prepareForm(): self
     {
@@ -1183,10 +1185,5 @@ XML;
 </channel>
 </rss>
 XML;
-    }
-
-    protected function _getFeed(): Maho_FeedManager_Model_Feed
-    {
-        return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 }

@@ -17,6 +17,8 @@ declare(strict_types=1);
  */
 abstract class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_AbstractBuilder extends Mage_Adminhtml_Block_Abstract
 {
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
     /**
      * Get the builder HTML for this format
      */
@@ -91,13 +93,5 @@ abstract class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_AbstractBu
             $html .= '<option value="' . $code . '">' . $this->escapeHtml($label) . '</option>';
         }
         return $html;
-    }
-
-    /**
-     * Get the current feed model
-     */
-    protected function _getFeed(): Maho_FeedManager_Model_Feed
-    {
-        return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 }

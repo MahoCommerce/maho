@@ -311,7 +311,8 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
         return $errors;
     }
 
-    protected function _transformAvailability(mixed $value): string
+    #[\Override]
+    protected function _transformAvailability(mixed $value, bool $useUnderscore = false): string
     {
         if (is_numeric($value)) {
             return (int) $value > 0 ? 'in stock' : 'out of stock';

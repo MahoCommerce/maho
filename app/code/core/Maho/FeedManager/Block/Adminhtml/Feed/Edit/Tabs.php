@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
 {
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
     public function __construct()
     {
         parent::__construct();
@@ -60,10 +62,5 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tabs extends Mage_Adminhtml_Blo
         }
 
         return parent::_beforeToHtml();
-    }
-
-    protected function _getFeed(): Maho_FeedManager_Model_Feed
-    {
-        return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 }

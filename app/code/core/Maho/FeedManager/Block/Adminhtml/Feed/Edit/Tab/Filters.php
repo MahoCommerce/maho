@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminhtml_Block_Widget_Form
 {
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
     #[\Override]
     protected function _prepareForm(): self
     {
@@ -80,6 +82,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $operators = $this->_getOperators();
         $categories = $this->_getCategoryOptions();
         $productTypes = $this->_getProductTypeOptions();
+        $visibilityOptions = $this->_getVisibilityOptions();
 
         // For new feeds with no conditions, add a default "price > 0" condition
         $isNewFeed = !$feed->getId();
@@ -106,7 +109,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                      '</div>';
         } else {
             foreach ($existingGroups as $groupIndex => $group) {
-                $html .= $this->_renderGroup($groupIndex, $group, $attributeData, $operators, $categories, $productTypes, count($existingGroups) > 1);
+                $html .= $this->_renderGroup($groupIndex, $group, $attributeData, $operators, $categories, $productTypes, $visibilityOptions, count($existingGroups) > 1);
             }
         }
 
@@ -122,7 +125,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $html .= '</div>';
 
         // JavaScript
-        $html .= $this->_getJavaScript($attributeData, $operators, $categories, $productTypes, count($existingGroups));
+        $html .= $this->_getJavaScript($attributeData, $operators, $categories, $productTypes, $visibilityOptions, count($existingGroups));
 
         return $html;
     }
@@ -130,7 +133,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
     /**
      * Render a single condition group
      */
-    protected function _renderGroup(int $groupIndex, array $group, array $attributes, array $operators, array $categories, array $productTypes, bool $showAndLabel = false): string
+    protected function _renderGroup(int $groupIndex, array $group, array $attributes, array $operators, array $categories, array $productTypes, array $visibilityOptions, bool $showAndLabel = false): string
     {
         $conditions = $group['conditions'] ?? [];
 
@@ -158,7 +161,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $html .= '<div class="cond-list" id="cond-list-' . $groupIndex . '">';
 
         if (empty($conditions)) {
-            $html .= $this->_renderCondition($groupIndex, 0, '', 'eq', '', $attributes, $operators, $categories, $productTypes, false);
+            $html .= $this->_renderCondition($groupIndex, 0, '', 'eq', '', $attributes, $operators, $categories, $productTypes, $visibilityOptions, false);
         } else {
             foreach ($conditions as $condIndex => $condition) {
                 $html .= $this->_renderCondition(
@@ -171,6 +174,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                     $operators,
                     $categories,
                     $productTypes,
+                    $visibilityOptions,
                     $condIndex > 0,
                 );
             }
@@ -191,7 +195,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
     /**
      * Render a single condition row
      */
-    protected function _renderCondition(int $groupIndex, int $condIndex, string $attribute, string $operator, string $value, array $attributeData, array $operators, array $categories, array $productTypes, bool $showOrLabel = false): string
+    protected function _renderCondition(int $groupIndex, int $condIndex, string $attribute, string $operator, string $value, array $attributeData, array $operators, array $categories, array $productTypes, array $visibilityOptions, bool $showOrLabel = false): string
     {
         $html = '';
 
@@ -228,10 +232,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         // Determine special attribute states
         $isCategory = ($attribute === 'category_ids');
         $isProductType = ($attribute === 'type_id');
+        $isVisibility = ($attribute === 'visibility');
         $isStock = ($attribute === 'is_in_stock');
         $hideValue = in_array($operator, ['null', 'notnull']);
         $isSingleCategory = $isCategory && in_array($operator, ['eq', 'neq']);
         $isSingleProductType = $isProductType && in_array($operator, ['eq', 'neq']);
+        $isSingleVisibility = $isVisibility && in_array($operator, ['eq', 'neq']);
 
         // Stock availability select (shown when attribute is is_in_stock)
         $stockStyle = (!$isStock || $hideValue) ? ' style="display:none"' : '';
@@ -250,6 +256,18 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         foreach ($productTypes as $typeCode => $typeLabel) {
             $selected = in_array($typeCode, $selectedTypes) ? ' selected' : '';
             $html .= '<option value="' . $this->escapeHtml($typeCode) . '"' . $selected . '>' . $this->escapeHtml($typeLabel) . '</option>';
+        }
+        $html .= '</select>';
+
+        // Visibility select (shown when attribute is visibility)
+        $visibilityStyle = (!$isVisibility || $hideValue) ? ' style="display:none"' : '';
+        $selectedVisibilities = $isVisibility ? array_map('trim', explode(',', $value)) : [];
+        $multipleVisAttr = $isSingleVisibility ? '' : ' multiple="multiple"';
+        $html .= '<select name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][visibility_value]" ' .
+                 'class="visibility-select"' . $visibilityStyle . $multipleVisAttr . ' onchange="FMConditions.onVisibilityChange(this)">';
+        foreach ($visibilityOptions as $visCode => $visLabel) {
+            $selected = in_array((string) $visCode, $selectedVisibilities) ? ' selected' : '';
+            $html .= '<option value="' . $this->escapeHtml((string) $visCode) . '"' . $selected . '>' . $this->escapeHtml($visLabel) . '</option>';
         }
         $html .= '</select>';
 
@@ -275,7 +293,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $html .= '</div>';
 
         // Text value input (hidden for null/notnull operators and special attributes)
-        $valueStyle = ($hideValue || $isCategory || $isStock || $isProductType) ? ' style="display:none"' : '';
+        $valueStyle = ($hideValue || $isCategory || $isStock || $isProductType || $isVisibility) ? ' style="display:none"' : '';
         $html .= '<input type="text" name="condition_groups[' . $groupIndex . '][conditions][' . $condIndex . '][value]" ' .
                  'class="input-text value-input" value="' . $this->escapeHtml($value) . '" ' .
                  'placeholder="' . $this->__('Value') . '"' . $valueStyle . ' />';
@@ -341,6 +359,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             .cond-row select.stock-select { width: 120px; }
             .cond-row select.type-select { width: 180px; min-height: auto; }
             .cond-row select.type-select[multiple] { min-height: 80px; height: auto; }
+            .cond-row select.visibility-select { width: 180px; min-height: auto; }
+            .cond-row select.visibility-select[multiple] { min-height: 80px; height: auto; }
             .cond-row .input-text.value-input { flex: 1; min-width: 120px; }
 
             /* Category container */
@@ -395,13 +415,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
     /**
      * Get JavaScript for dynamic conditions
      */
-    protected function _getJavaScript(array $attributeData, array $operators, array $categories, array $productTypes, int $groupCount): string
+    protected function _getJavaScript(array $attributeData, array $operators, array $categories, array $productTypes, array $visibilityOptions, int $groupCount): string
     {
         $attributeGroupsJson = Mage::helper('core')->jsonEncode($attributeData['groups']);
         $attributesFlatJson = Mage::helper('core')->jsonEncode($attributeData['flat']);
         $operatorsJson = Mage::helper('core')->jsonEncode($operators);
         $categoriesJson = Mage::helper('core')->jsonEncode($categories);
         $productTypesJson = Mage::helper('core')->jsonEncode($productTypes);
+        $visibilityOptionsJson = Mage::helper('core')->jsonEncode($visibilityOptions);
         $specialAttrs = Mage::helper('core')->jsonEncode($this->_getSpecialAttributes());
 
         return <<<SCRIPT
@@ -414,6 +435,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             operators: {$operatorsJson},
             categories: {$categoriesJson},
             productTypes: {$productTypesJson},
+            visibilityOptions: {$visibilityOptionsJson},
             specialAttributes: {$specialAttrs},
 
             init: function() {
@@ -478,6 +500,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 var attrValue = select.value;
                 var isCategory = (attrValue === 'category_ids');
                 var isProductType = (attrValue === 'type_id');
+                var isVisibility = (attrValue === 'visibility');
                 var isStock = (attrValue === 'is_in_stock');
                 var opSelect = condition.querySelector('.op-select');
 
@@ -489,13 +512,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 // Show/hide appropriate inputs
                 var categoryContainer = condition.querySelector('.cond-category-wrap');
                 var typeSelect = condition.querySelector('.type-select');
+                var visibilitySelect = condition.querySelector('.visibility-select');
                 var stockSelect = condition.querySelector('.stock-select');
                 var valueInput = condition.querySelector('.value-input');
 
                 if (categoryContainer) categoryContainer.style.display = (isCategory && !hideValue) ? '' : 'none';
                 if (typeSelect) typeSelect.style.display = (isProductType && !hideValue) ? '' : 'none';
+                if (visibilitySelect) visibilitySelect.style.display = (isVisibility && !hideValue) ? '' : 'none';
                 if (stockSelect) stockSelect.style.display = (isStock && !hideValue) ? '' : 'none';
-                if (valueInput) valueInput.style.display = (isCategory || isProductType || isStock || hideValue) ? 'none' : '';
+                if (valueInput) valueInput.style.display = (isCategory || isProductType || isVisibility || isStock || hideValue) ? 'none' : '';
 
                 // Sync value when switching to stock
                 if (isStock && stockSelect) {
@@ -505,11 +530,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 if (isProductType && typeSelect) {
                     this.onTypeChange(typeSelect);
                 }
+                // Sync value when switching to visibility
+                if (isVisibility && visibilitySelect) {
+                    this.onVisibilityChange(visibilitySelect);
+                }
             },
 
             filterOperators: function(opSelect, attrValue) {
                 var validOps = null;
-                if (attrValue === 'category_ids' || attrValue === 'type_id') {
+                if (attrValue === 'category_ids' || attrValue === 'type_id' || attrValue === 'visibility') {
                     validOps = this.selectOperators;
                 } else if (attrValue === 'is_in_stock') {
                     validOps = this.stockOperators;
@@ -545,19 +574,22 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 var attrValue = attrSelect ? attrSelect.value : '';
                 var isCategory = (attrValue === 'category_ids');
                 var isProductType = (attrValue === 'type_id');
+                var isVisibility = (attrValue === 'visibility');
                 var isStock = (attrValue === 'is_in_stock');
                 var hideValue = ['null', 'notnull'].indexOf(select.value) !== -1;
 
                 var categoryContainer = condition.querySelector('.cond-category-wrap');
                 var typeSelect = condition.querySelector('.type-select');
+                var visibilitySelect = condition.querySelector('.visibility-select');
                 var stockSelect = condition.querySelector('.stock-select');
                 var valueInput = condition.querySelector('.value-input');
                 var categorySelect = condition.querySelector('.category-select');
 
                 if (categoryContainer) categoryContainer.style.display = (isCategory && !hideValue) ? '' : 'none';
                 if (typeSelect) typeSelect.style.display = (isProductType && !hideValue) ? '' : 'none';
+                if (visibilitySelect) visibilitySelect.style.display = (isVisibility && !hideValue) ? '' : 'none';
                 if (stockSelect) stockSelect.style.display = (isStock && !hideValue) ? '' : 'none';
-                if (valueInput) valueInput.style.display = (isCategory || isProductType || isStock || hideValue) ? 'none' : '';
+                if (valueInput) valueInput.style.display = (isCategory || isProductType || isVisibility || isStock || hideValue) ? 'none' : '';
 
                 // Update category select multiple attribute based on operator
                 if (isCategory && categorySelect) {
@@ -588,6 +620,21 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                     }
                     this.onTypeChange(typeSelect);
                 }
+
+                // Update visibility select multiple attribute based on operator
+                if (isVisibility && visibilitySelect) {
+                    var isMulti = ['in', 'nin'].indexOf(select.value) !== -1;
+                    if (isMulti && !visibilitySelect.hasAttribute('multiple')) {
+                        visibilitySelect.setAttribute('multiple', 'multiple');
+                    } else if (!isMulti && visibilitySelect.hasAttribute('multiple')) {
+                        visibilitySelect.removeAttribute('multiple');
+                        if (visibilitySelect.selectedOptions.length > 1) {
+                            var firstVal = visibilitySelect.selectedOptions[0].value;
+                            visibilitySelect.value = firstVal;
+                        }
+                    }
+                    this.onVisibilityChange(visibilitySelect);
+                }
             },
 
             onCategoryChange: function(select) {
@@ -612,6 +659,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 var condition = select.closest('.cond-row');
                 var valueInput = condition.querySelector('.value-input');
                 if (valueInput) valueInput.value = select.value;
+            },
+
+            onVisibilityChange: function(select) {
+                var condition = select.closest('.cond-row');
+                var valueInput = condition.querySelector('.value-input');
+                if (valueInput) {
+                    var selected = Array.from(select.selectedOptions).map(function(opt) { return opt.value; });
+                    valueInput.value = selected.join(',');
+                }
             },
 
             filterCategories: function(input) {
@@ -694,6 +750,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 }
                 html += '</select>';
 
+                // Visibility select (hidden by default)
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][visibility_value]" class="visibility-select" style="display:none" onchange="FMConditions.onVisibilityChange(this)">';
+                for (var visCode in this.visibilityOptions) {
+                    html += '<option value="' + this.escapeHtml(visCode) + '">' + this.escapeHtml(this.visibilityOptions[visCode]) + '</option>';
+                }
+                html += '</select>';
+
                 // Category container (hidden by default)
                 html += '<div class="cond-category-wrap" style="display:none">';
                 html += '<input type="text" class="input-text" placeholder="Filter categories..." onkeyup="FMConditions.filterCategories(this)" />';
@@ -742,6 +805,7 @@ SCRIPT;
         $specialAttributes = [
             'category_ids' => $this->__('Category'),
             'type_id' => $this->__('Product Type'),
+            'visibility' => $this->__('Visibility'),
             'qty' => $this->__('Quantity'),
             'is_in_stock' => $this->__('Stock Availability'),
         ];
@@ -755,7 +819,6 @@ SCRIPT;
             'cost' => $this->__('Cost'),
             'weight' => $this->__('Weight'),
             'attribute_set_id' => $this->__('Attribute Set'),
-            'visibility' => $this->__('Visibility'),
             'created_at' => $this->__('Created Date'),
             'updated_at' => $this->__('Updated Date'),
         ];
@@ -788,7 +851,7 @@ SCRIPT;
      */
     protected function _getSpecialAttributes(): array
     {
-        return ['category_ids', 'type_id', 'qty', 'is_in_stock'];
+        return ['category_ids', 'type_id', 'visibility', 'qty', 'is_in_stock'];
     }
 
     /**
@@ -803,6 +866,19 @@ SCRIPT;
             'bundle' => $this->__('Bundle Product'),
             'virtual' => $this->__('Virtual Product'),
             'downloadable' => $this->__('Downloadable Product'),
+        ];
+    }
+
+    /**
+     * Get visibility options
+     */
+    protected function _getVisibilityOptions(): array
+    {
+        return [
+            Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE => $this->__('Not Visible Individually'),
+            Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG => $this->__('Catalog'),
+            Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH => $this->__('Search'),
+            Mage_Catalog_Model_Product_Visibility::VISIBILITY_BOTH => $this->__('Catalog, Search'),
         ];
     }
 
@@ -863,10 +939,5 @@ SCRIPT;
         }
 
         return $options;
-    }
-
-    protected function _getFeed(): Maho_FeedManager_Model_Feed
-    {
-        return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 }

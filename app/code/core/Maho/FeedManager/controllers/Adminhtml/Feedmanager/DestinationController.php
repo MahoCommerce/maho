@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_Adminhtml_Controller_Action
 {
+    use Maho_FeedManager_Adminhtml_Feedmanager_JsonResponseTrait;
+
     public const ADMIN_RESOURCE = 'catalog/feedmanager/destinations';
 
     protected function _initAction(): self
@@ -339,15 +341,5 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         }
 
         $this->_redirect('*/*/');
-    }
-
-    /**
-     * Send JSON response
-     */
-    protected function _sendJsonResponse(array $data): void
-    {
-        $this->getResponse()
-            ->setHeader('Content-Type', 'application/json')
-            ->setBody(Mage::helper('core')->jsonEncode($data));
     }
 }

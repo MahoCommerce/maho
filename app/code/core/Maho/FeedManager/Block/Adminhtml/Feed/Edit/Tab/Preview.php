@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminhtml_Block_Widget_Form
 {
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
     #[\Override]
     protected function _prepareForm(): self
     {
@@ -25,7 +27,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
         ]);
 
         $fieldset->addField('preview_note', 'note', [
-            'text' => '<p style="margin-bottom: 15px;">' .
+            'text' => '<p class="fm-help-text">' .
                 $this->__('Preview shows sample output using your current template configuration. This uses real product data from your store.') .
                 '</p>',
         ]);
@@ -44,15 +46,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
 
         // Generate button
         $fieldset->addField('preview_button', 'note', [
-            'text' => '<button type="button" id="generate-preview-btn" style="padding: 10px 20px; margin: 15px 0;">' .
+            'text' => '<button type="button" id="generate-preview-btn" class="scalable">' .
                 '<span>' . $this->__('Generate Preview') . '</span>' .
                 '</button>',
         ]);
 
         // Preview output area
         $fieldset->addField('preview_output', 'note', [
-            'text' => '<div id="preview-output-container" style="background: #1e1e1e; border-radius: 4px; padding: 15px; min-height: 400px; max-height: 600px; overflow: auto;">' .
-                '<pre id="preview-output" style="margin: 0; font-family: \'SF Mono\', Monaco, Consolas, monospace; font-size: 12px; line-height: 1.5; white-space: pre-wrap; color: #d4d4d4;">' .
+            'text' => '<div id="preview-output-container" class="fm-preview-panel">' .
+                '<pre id="preview-output" class="fm-preview-content">' .
                 $this->__('Click "Generate Preview" to see sample output...') .
                 '</pre>' .
                 '</div>',
@@ -124,12 +126,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
             function highlightXml(element) {
                 var text = element.textContent;
 
-                // Simple XML syntax highlighting
-                text = text.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span style="color: #6a9955;">$1</span>');
-                text = text.replace(/(&lt;\?[\s\S]*?\?&gt;)/g, '<span style="color: #569cd6;">$1</span>');
-                text = text.replace(/(&lt;!\[CDATA\[[\s\S]*?\]\]&gt;)/g, '<span style="color: #ce9178;">$1</span>');
-                text = text.replace(/(&lt;\/?)([\w:-]+)/g, '<span style="color: #569cd6;">$1</span><span style="color: #4ec9b0;">$2</span>');
-                text = text.replace(/([\w:-]+)(=)(&quot;[^&]*&quot;)/g, '<span style="color: #9cdcfe;">$1</span><span style="color: #d4d4d4;">$2</span><span style="color: #ce9178;">$3</span>');
+                // Simple XML syntax highlighting using CSS classes
+                text = text.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="fm-syntax-comment">$1</span>');
+                text = text.replace(/(&lt;\?[\s\S]*?\?&gt;)/g, '<span class="fm-syntax-keyword">$1</span>');
+                text = text.replace(/(&lt;!\[CDATA\[[\s\S]*?\]\]&gt;)/g, '<span class="fm-syntax-string">$1</span>');
+                text = text.replace(/(&lt;\/?)([\w:-]+)/g, '<span class="fm-syntax-keyword">$1</span><span class="fm-syntax-tag">$2</span>');
+                text = text.replace(/([\w:-]+)(=)(&quot;[^&]*&quot;)/g, '<span class="fm-syntax-attr">$1</span>$2<span class="fm-syntax-string">$3</span>');
 
                 element.innerHTML = text
                     .replace(/</g, '&lt;')
@@ -140,10 +142,5 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
         });
         </script>
 SCRIPT;
-    }
-
-    protected function _getFeed(): Maho_FeedManager_Model_Feed
-    {
-        return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 }

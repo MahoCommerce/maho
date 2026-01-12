@@ -321,7 +321,8 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
      * Transform stock status to Facebook availability
      * Note: Facebook uses spaces in availability values
      */
-    protected function _transformAvailability(mixed $value): string
+    #[\Override]
+    protected function _transformAvailability(mixed $value, bool $useUnderscore = false): string
     {
         if (is_numeric($value)) {
             return (int) $value > 0 ? 'in stock' : 'out of stock';

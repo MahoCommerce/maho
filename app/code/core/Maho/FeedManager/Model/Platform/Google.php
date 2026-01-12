@@ -353,27 +353,12 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
     }
 
     /**
-     * Transform stock status to Google availability
+     * Transform stock status to Google availability (uses underscore format)
      */
-    protected function _transformAvailability(mixed $value): string
+    #[\Override]
+    protected function _transformAvailability(mixed $value, bool $useUnderscore = true): string
     {
-        if (is_numeric($value)) {
-            return (int) $value > 0 ? 'in_stock' : 'out_of_stock';
-        }
-
-        $map = [
-            '1' => 'in_stock',
-            '0' => 'out_of_stock',
-            'in stock' => 'in_stock',
-            'out of stock' => 'out_of_stock',
-            'available' => 'in_stock',
-            'unavailable' => 'out_of_stock',
-            'yes' => 'in_stock',
-            'no' => 'out_of_stock',
-        ];
-
-        $normalized = strtolower(trim((string) $value));
-        return $map[$normalized] ?? 'out_of_stock';
+        return parent::_transformAvailability($value, true);
     }
 
     /**

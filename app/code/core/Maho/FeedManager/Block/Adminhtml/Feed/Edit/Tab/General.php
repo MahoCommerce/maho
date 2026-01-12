@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminhtml_Block_Widget_Form
 {
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
     #[\Override]
     protected function _prepareForm(): self
     {
@@ -147,7 +149,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
                 'label' => $this->__('Manual Upload'),
                 'text' => '<button type="button" class="scalable" onclick="FeedUploader.upload(\'' . $uploadUrl . '\')" id="upload-now-btn-fieldset">'
                     . '<span><span><span>' . $this->__('Upload Now') . '</span></span></span></button>'
-                    . '<span id="upload-status" style="margin-left: 10px;"></span>'
+                    . '<span id="upload-status" class="fm-test-result"></span>'
                     . $this->_getUploadScript(),
             ]);
         } elseif ($feed->getId() && !$feed->getDestinationId()) {
@@ -166,11 +168,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
         $this->setForm($form);
 
         return parent::_prepareForm();
-    }
-
-    protected function _getFeed(): Maho_FeedManager_Model_Feed
-    {
-        return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 
     /**
@@ -210,11 +207,11 @@ const FeedUploader = {
             }
             if (data.success) {
                 if (status) {
-                    status.innerHTML = '<span style="color: #2e7d32;">✓ ' + this.escapeHtml(data.message || '{$success}') + '</span>';
+                    status.innerHTML = '<span class="fm-status-success">✓ ' + this.escapeHtml(data.message || '{$success}') + '</span>';
                 }
             } else {
                 if (status) {
-                    status.innerHTML = '<span style="color: #c62828;">✗ ' + this.escapeHtml(data.message || '{$failed}') + '</span>';
+                    status.innerHTML = '<span class="fm-status-error">✗ ' + this.escapeHtml(data.message || '{$failed}') + '</span>';
                 }
             }
         })
@@ -224,7 +221,7 @@ const FeedUploader = {
                 btn.querySelector('span span span').textContent = '{$uploadNow}';
             }
             if (status) {
-                status.innerHTML = '<span style="color: #c62828;">✗ ' + this.escapeHtml(error.message || '{$failed}') + '</span>';
+                status.innerHTML = '<span class="fm-status-error">✗ ' + this.escapeHtml(error.message || '{$failed}') + '</span>';
             }
         });
     },

@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
 {
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
     public function __construct()
     {
         $this->_objectId = 'id';
@@ -55,11 +57,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
             return $this->__("Edit Feed '%s'", $this->escapeHtml($feed->getName()));
         }
         return $this->__('New Feed');
-    }
-
-    protected function _getFeed(): Maho_FeedManager_Model_Feed
-    {
-        return Mage::registry('current_feed') ?: Mage::getModel('feedmanager/feed');
     }
 
     /**
@@ -495,7 +492,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     }
 
                     if (data.file_url) {
-                        buttonsHtml += ' <a href="' + data.file_url + '" class="modal-btn btn-success" target="_blank">' +
+                        const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
+                        buttonsHtml += ' <a href="' + data.file_url + cacheBuster + Date.now() + '" class="modal-btn btn-success" target="_blank">' +
                             this.translations.download + '</a>';
                     }
                     if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
