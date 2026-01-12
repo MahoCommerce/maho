@@ -104,8 +104,13 @@
         </reference>
     </adminhtml_sales_order_create_load_block_items>
 
+    <!-- Gift Card Grid - AJAX Grid Action -->
+    <adminhtml_giftcard_grid>
+        <block type="giftcard/adminhtml_giftcard_grid" name="root" output="toHtml" />
+    </adminhtml_giftcard_grid>
+
     <!-- Gift Card History Grid - AJAX Grid Action -->
     <adminhtml_giftcard_history_grid>
-        <block type="giftcard/adminhtml_giftcard_history_grid" name="giftcard.history.grid" output="toHtml" />
+        <block type="giftcard/adminhtml_giftcard_history_grid" name="root" output="toHtml" />
     </adminhtml_giftcard_history_grid>
 </layout>
