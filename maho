@@ -87,6 +87,11 @@ $application->addCommand(new \MahoCLI\Commands\CreateCommand());
 $application->addCommand(new \MahoCLI\Commands\FrontendLayoutDebug());
 $application->addCommand(new \MahoCLI\Commands\FrontendThemeCreate());
 
+$application->addCommand(new \MahoCLI\Commands\FeedList());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerate());
+$application->addCommand(new \MahoCLI\Commands\FeedGenerateAll());
+$application->addCommand(new \MahoCLI\Commands\FeedValidate());
+
 $discoverer = new CommandDiscoverer();
 $commands = $discoverer->discover(__DIR__ . '/vendor/*/*') + $discoverer->discover(__DIR__);
 foreach ($commands as $command) {

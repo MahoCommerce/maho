@@ -1,0 +1,66 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tabs extends Mage_Adminhtml_Block_Widget_Tabs
+{
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setId('feed_tabs');
+        $this->setDestElementId('edit_form');
+        $this->setTitle($this->__('Feed Configuration'));
+    }
+
+    #[\Override]
+    protected function _beforeToHtml(): self
+    {
+        $this->addTab('general', [
+            'label' => $this->__('General Settings'),
+            'title' => $this->__('General Settings'),
+            'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_feed_edit_tab_general')->toHtml(),
+        ]);
+
+        $this->addTab('mapping', [
+            'label' => $this->__('Feed Content'),
+            'title' => $this->__('Feed Content'),
+            'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_feed_edit_tab_mapping')->toHtml(),
+        ]);
+
+        $this->addTab('filters', [
+            'label' => $this->__('Product Filters'),
+            'title' => $this->__('Product Filters'),
+            'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_feed_edit_tab_filters')->toHtml(),
+        ]);
+
+        // Only show preview and logs tabs for existing feeds
+        if ($this->_getFeed()->getId()) {
+            $this->addTab('preview', [
+                'label' => $this->__('Preview'),
+                'title' => $this->__('Feed Preview'),
+                'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_feed_edit_tab_preview')->toHtml(),
+            ]);
+        }
+
+        // Only show logs tab for existing feeds
+        if ($this->_getFeed()->getId()) {
+            $this->addTab('logs', [
+                'label' => $this->__('Generation History'),
+                'title' => $this->__('Generation History'),
+                'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_feed_edit_tab_logs')->toHtml(),
+            ]);
+        }
+
+        return parent::_beforeToHtml();
+    }
+}

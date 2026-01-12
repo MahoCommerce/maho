@@ -1,0 +1,90 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <menu>
+        <catalog>
+            <children>
+                <feedmanager translate="title" module="feedmanager">
+                    <title>Feed Manager</title>
+                    <sort_order>100</sort_order>
+                    <children>
+                        <feeds translate="title" module="feedmanager">
+                            <title>Manage Feeds</title>
+                            <action>adminhtml/feedmanager_feed</action>
+                            <sort_order>10</sort_order>
+                        </feeds>
+                        <destinations translate="title" module="feedmanager">
+                            <title>Upload Destinations</title>
+                            <action>adminhtml/feedmanager_destination</action>
+                            <sort_order>20</sort_order>
+                        </destinations>
+                        <category_mapping translate="title" module="feedmanager">
+                            <title>Category Mapping</title>
+                            <action>adminhtml/feedmanager_category</action>
+                            <sort_order>30</sort_order>
+                        </category_mapping>
+                        <dynamicrules translate="title" module="feedmanager">
+                            <title>Dynamic Rules</title>
+                            <action>adminhtml/feedmanager_dynamicrule</action>
+                            <sort_order>40</sort_order>
+                        </dynamicrules>
+                    </children>
+                </feedmanager>
+            </children>
+        </catalog>
+    </menu>
+
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <feedmanager translate="title" module="feedmanager">
+                                        <title>Feed Manager</title>
+                                    </feedmanager>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                    <catalog>
+                        <children>
+                            <feedmanager translate="title" module="feedmanager">
+                                <title>Feed Manager</title>
+                                <sort_order>100</sort_order>
+                                <children>
+                                    <feeds translate="title" module="feedmanager">
+                                        <title>Manage Feeds</title>
+                                        <sort_order>10</sort_order>
+                                    </feeds>
+                                    <destinations translate="title" module="feedmanager">
+                                        <title>Upload Destinations</title>
+                                        <sort_order>20</sort_order>
+                                    </destinations>
+                                    <category_mapping translate="title" module="feedmanager">
+                                        <title>Category Mapping</title>
+                                        <sort_order>30</sort_order>
+                                    </category_mapping>
+                                    <dynamicrules translate="title" module="feedmanager">
+                                        <title>Dynamic Rules</title>
+                                        <sort_order>40</sort_order>
+                                    </dynamicrules>
+                                </children>
+                            </feedmanager>
+                        </children>
+                    </catalog>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>
