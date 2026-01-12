@@ -313,7 +313,7 @@ describe('FeedManager Writer Integration', function () {
 
             // Verify all fields present
             expect($decoded['products'][0])->toHaveKeys([
-                'id', 'title', 'description', 'price', 'link', 'image_link', 'availability', 'brand'
+                'id', 'title', 'description', 'price', 'link', 'image_link', 'availability', 'brand',
             ]);
         });
     });

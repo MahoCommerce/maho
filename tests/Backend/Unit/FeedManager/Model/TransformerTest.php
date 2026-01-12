@@ -27,7 +27,7 @@ describe('FeedManager Transformers', function () {
         test('removes HTML tags', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 '<p>Hello <b>World</b>!</p>',
-                'strip_tags'
+                'strip_tags',
             );
             expect($result)->toBe('Hello World!');
         });
@@ -36,7 +36,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 '<p>Hello <b>World</b>!</p>',
                 'strip_tags',
-                ['allowed_tags' => '<b>']
+                ['allowed_tags' => '<b>'],
             );
             expect($result)->toBe('Hello <b>World</b>!');
         });
@@ -44,7 +44,7 @@ describe('FeedManager Transformers', function () {
         test('normalizes whitespace', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'Hello    World   ',
-                'strip_tags'
+                'strip_tags',
             );
             expect($result)->toBe('Hello World');
         });
@@ -55,7 +55,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'This is a very long text that needs to be truncated',
                 'truncate',
-                ['max_length' => 20]
+                ['max_length' => 20],
             );
             expect(strlen($result))->toBeLessThanOrEqual(20);
         });
@@ -64,7 +64,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'This is a very long text',
                 'truncate',
-                ['max_length' => 15, 'suffix' => '...']
+                ['max_length' => 15, 'suffix' => '...'],
             );
             expect(str_ends_with($result, '...'))->toBeTrue();
         });
@@ -73,7 +73,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'This is a test',
                 'truncate',
-                ['max_length' => 10, 'word_boundary' => true]
+                ['max_length' => 10, 'word_boundary' => true],
             );
             expect($result)->not()->toContain('tes'); // Should not cut mid-word
         });
@@ -82,7 +82,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'Short',
                 'truncate',
-                ['max_length' => 100]
+                ['max_length' => 100],
             );
             expect($result)->toBe('Short');
         });
@@ -93,7 +93,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 99.99,
                 'format_price',
-                ['currency' => 'AUD']
+                ['currency' => 'AUD'],
             );
             expect($result)->toBe('99.99 AUD');
         });
@@ -102,7 +102,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 99,
                 'format_price',
-                ['decimals' => 2]
+                ['decimals' => 2],
             );
             expect($result)->toBe('99.00');
         });
@@ -113,7 +113,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 '1',
                 'map_values',
-                ['mapping' => "1=in_stock\n0=out_of_stock"]
+                ['mapping' => "1=in_stock\n0=out_of_stock"],
             );
             expect($result)->toBe('in_stock');
         });
@@ -122,7 +122,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'unknown',
                 'map_values',
-                ['mapping' => "1=yes\n0=no", 'default' => 'maybe']
+                ['mapping' => "1=yes\n0=no", 'default' => 'maybe'],
             );
             expect($result)->toBe('maybe');
         });
@@ -131,7 +131,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'original',
                 'map_values',
-                ['mapping' => "1=yes\n0=no"]
+                ['mapping' => "1=yes\n0=no"],
             );
             expect($result)->toBe('original');
         });
@@ -142,7 +142,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 '',
                 'default_value',
-                ['default' => 'N/A']
+                ['default' => 'N/A'],
             );
             expect($result)->toBe('N/A');
         });
@@ -151,7 +151,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 null,
                 'default_value',
-                ['default' => 'N/A']
+                ['default' => 'N/A'],
             );
             expect($result)->toBe('N/A');
         });
@@ -160,7 +160,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 'existing',
                 'default_value',
-                ['default' => 'N/A']
+                ['default' => 'N/A'],
             );
             expect($result)->toBe('existing');
         });
@@ -171,7 +171,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 100,
                 'conditional',
-                ['operator' => 'gt', 'compare_value' => '50', 'true_value' => 'High', 'false_value' => 'Low']
+                ['operator' => 'gt', 'compare_value' => '50', 'true_value' => 'High', 'false_value' => 'Low'],
             );
             expect($result)->toBe('High');
         });
@@ -180,7 +180,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 30,
                 'conditional',
-                ['operator' => 'gt', 'compare_value' => '50', 'true_value' => 'High', 'false_value' => 'Low']
+                ['operator' => 'gt', 'compare_value' => '50', 'true_value' => 'High', 'false_value' => 'Low'],
             );
             expect($result)->toBe('Low');
         });
@@ -189,7 +189,7 @@ describe('FeedManager Transformers', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 '',
                 'conditional',
-                ['operator' => 'empty', 'true_value' => 'Empty', 'false_value' => 'Not Empty']
+                ['operator' => 'empty', 'true_value' => 'Empty', 'false_value' => 'Not Empty'],
             );
             expect($result)->toBe('Empty');
         });
@@ -203,7 +203,7 @@ describe('FeedManager Transformers', function () {
                 '',
                 'combine_fields',
                 ['template' => '{{brand}} - {{name}} ({{sku}})'],
-                $productData
+                $productData,
             );
             expect($result)->toBe('Nike - Air Max (NK-001)');
         });
@@ -215,7 +215,7 @@ describe('FeedManager Transformers', function () {
                 '',
                 'combine_fields',
                 ['template' => '{{brand}} - {{name}}'],
-                $productData
+                $productData,
             );
             expect($result)->toBe('Nike - ');
         });
@@ -228,7 +228,7 @@ describe('FeedManager Transformers', function () {
                 [
                     ['transformer' => 'strip_tags'],
                     ['transformer' => 'truncate', 'options' => ['max_length' => 15, 'suffix' => '...']],
-                ]
+                ],
             );
 
             expect(strlen($result))->toBeLessThanOrEqual(18); // 15 + 3 for suffix

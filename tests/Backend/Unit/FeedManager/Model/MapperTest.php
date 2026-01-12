@@ -121,7 +121,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 99.99,
                 'format_price',
-                ['currency' => 'AUD', 'skip_if_empty' => true]
+                ['currency' => 'AUD', 'skip_if_empty' => true],
             );
             expect($result)->toBe('99.99 AUD');
         });
@@ -130,7 +130,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 null,
                 'format_price',
-                ['currency' => 'AUD', 'skip_if_empty' => true]
+                ['currency' => 'AUD', 'skip_if_empty' => true],
             );
             expect($result)->toBe('');
         });
@@ -139,7 +139,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 0,
                 'format_price',
-                ['currency' => 'AUD', 'skip_if_empty' => true]
+                ['currency' => 'AUD', 'skip_if_empty' => true],
             );
             expect($result)->toBe('');
         });
@@ -148,7 +148,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 '',
                 'format_price',
-                ['currency' => 'AUD', 'skip_if_empty' => true]
+                ['currency' => 'AUD', 'skip_if_empty' => true],
             );
             expect($result)->toBe('');
         });
@@ -157,7 +157,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Transformer::apply(
                 0,
                 'format_price',
-                ['currency' => 'AUD', 'skip_if_empty' => false]
+                ['currency' => 'AUD', 'skip_if_empty' => false],
             );
             expect($result)->toBe('0.00 AUD');
         });
@@ -173,7 +173,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentFallback(
                 'special_price',
                 $productData,
-                true // use_parent_fallback enabled
+                true, // use_parent_fallback enabled
             );
             expect($result)->toBe(79.99);
         });
@@ -187,7 +187,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentFallback(
                 'special_price',
                 $productData,
-                true // use_parent_fallback enabled
+                true, // use_parent_fallback enabled
             );
             expect($result)->toBe(89.99);
         });
@@ -201,7 +201,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentFallback(
                 'special_price',
                 $productData,
-                true // use_parent_fallback enabled
+                true, // use_parent_fallback enabled
             );
             expect($result)->toBeNull();
         });
@@ -215,7 +215,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentFallback(
                 'special_price',
                 $productData,
-                false // use_parent_fallback disabled
+                false, // use_parent_fallback disabled
             );
             expect($result)->toBeNull();
         });
@@ -229,7 +229,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentFallback(
                 'url',
                 $productData,
-                true // use_parent_fallback enabled
+                true, // use_parent_fallback enabled
             );
             // When child has value, use child
             expect($result)->toBe('https://example.com/child-product');
@@ -244,7 +244,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentFallback(
                 'url',
                 $productData,
-                true // use_parent_fallback enabled
+                true, // use_parent_fallback enabled
             );
             expect($result)->toBe('https://example.com/parent-product');
         });
@@ -270,7 +270,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $formatted = Maho_FeedManager_Model_Transformer::apply(
                 $validPrice,
                 'format_price',
-                ['currency' => 'AUD', 'skip_if_empty' => true]
+                ['currency' => 'AUD', 'skip_if_empty' => true],
             );
             expect($formatted)->toBe('79.99 AUD');
         });
@@ -318,7 +318,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $formatted = Maho_FeedManager_Model_Transformer::apply(
                 $validPrice,
                 'format_price',
-                ['currency' => 'AUD', 'skip_if_empty' => true]
+                ['currency' => 'AUD', 'skip_if_empty' => true],
             );
             expect($formatted)->toBe('');
         });
@@ -334,7 +334,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'url',
                 $productData,
-                '' // empty mode
+                '', // empty mode
             );
             expect($result)->toBe('https://example.com/child-product');
         });
@@ -348,7 +348,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'url',
                 $productData,
-                '' // empty mode
+                '', // empty mode
             );
             expect($result)->toBeNull();
         });
@@ -362,7 +362,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'url',
                 $productData,
-                'if_empty'
+                'if_empty',
             );
             expect($result)->toBe('https://example.com/child-product');
         });
@@ -376,7 +376,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'url',
                 $productData,
-                'if_empty'
+                'if_empty',
             );
             expect($result)->toBe('https://example.com/parent-product');
         });
@@ -390,7 +390,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'url',
                 $productData,
-                'always'
+                'always',
             );
             expect($result)->toBe('https://example.com/parent-product');
         });
@@ -404,7 +404,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'url',
                 $productData,
-                'always'
+                'always',
             );
             expect($result)->toBe('https://example.com/child-product');
         });
@@ -415,7 +415,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'url',
                 $productData,
-                'always'
+                'always',
             );
             expect($result)->toBeNull();
         });
@@ -428,7 +428,7 @@ describe('FeedManager Mapper - Special Price Handling', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 '',
                 $productData,
-                'if_empty'
+                'if_empty',
             );
             expect($result)->toBeNull();
         });
@@ -443,6 +443,16 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
         $this->feed->setStoreId(1);
         $this->feed->setPlatform('custom'); // Required for Mapper initialization
         $this->mapper = new Maho_FeedManager_Model_Mapper($this->feed);
+
+        // Helper to create mock products with required entity_id (PostgreSQL requires valid integer)
+        $this->createMockProduct = function (array $data = []): Mage_Catalog_Model_Product {
+            $product = Mage::getModel('catalog/product');
+            $product->setData('entity_id', 999999); // Use high ID to avoid conflicts
+            foreach ($data as $key => $value) {
+                $product->setData($key, $value);
+            }
+            return $product;
+        };
     });
 
     describe('Basic XML Element Generation', function () {
@@ -451,8 +461,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'id', 'source_type' => 'attribute', 'source_value' => 'sku'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('sku', 'TEST123');
+            $product = ($this->createMockProduct)(['sku' => 'TEST123']);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -466,7 +475,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'condition', 'source_type' => 'static', 'source_value' => 'new'],
             ];
 
-            $product = Mage::getModel('catalog/product');
+            $product = ($this->createMockProduct)([]);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -478,8 +487,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'title', 'source_type' => 'attribute', 'source_value' => 'name', 'cdata' => true],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('name', 'Test Product <Special>');
+            $product = ($this->createMockProduct)(['name' => 'Test Product <Special>']);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -491,8 +499,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'title', 'source_type' => 'attribute', 'source_value' => 'name', 'cdata' => false],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('name', 'Test & Product <Special>');
+            $product = ($this->createMockProduct)(['name' => 'Test & Product <Special>']);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -507,8 +514,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'brand', 'source_type' => 'attribute', 'source_value' => 'manufacturer', 'optional' => true],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('sku', 'TEST123');
+            $product = ($this->createMockProduct)(['sku' => 'TEST123']);
             // manufacturer not set
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
@@ -522,7 +528,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'brand', 'source_type' => 'static', 'source_value' => 'Nike', 'optional' => true],
             ];
 
-            $product = Mage::getModel('catalog/product');
+            $product = ($this->createMockProduct)([]);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -534,7 +540,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'brand', 'source_type' => 'attribute', 'source_value' => 'manufacturer', 'optional' => false],
             ];
 
-            $product = Mage::getModel('catalog/product');
+            $product = ($this->createMockProduct)([]);
             // manufacturer not set
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
@@ -555,8 +561,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 99.99);
+            $product = ($this->createMockProduct)(['price' => 99.99]);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -580,7 +585,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ],
             ];
 
-            $product = Mage::getModel('catalog/product');
+            $product = ($this->createMockProduct)([]);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -597,7 +602,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
             $result = Maho_FeedManager_Model_Mapper::getValueWithParentMode(
                 'description',
                 $productData,
-                'if_empty'
+                'if_empty',
             );
 
             expect($result)->toBe('Parent Description');
@@ -616,7 +621,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'test', 'source_type' => 'static', 'source_value' => 'value'],
             ];
 
-            $product = Mage::getModel('catalog/product');
+            $product = ($this->createMockProduct)([]);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -638,8 +643,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'id', 'source_type' => 'attribute', 'source_value' => 'sku'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('sku', 'TEST123');
+            $product = ($this->createMockProduct)(['sku' => 'TEST123']);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'product', 0);
 
@@ -652,8 +656,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'id', 'source_type' => 'attribute', 'source_value' => 'sku'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('sku', 'TEST123');
+            $product = ($this->createMockProduct)(['sku' => 'TEST123']);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, '', 0);
 
@@ -671,10 +674,11 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'g:condition', 'source_type' => 'static', 'source_value' => 'new'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('sku', 'PROD001');
-            $product->setData('name', 'Test Product');
-            $product->setData('price', 49.99);
+            $product = ($this->createMockProduct)([
+                'sku' => 'PROD001',
+                'name' => 'Test Product',
+                'price' => 49.99,
+            ]);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -694,8 +698,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
         test('handles empty structure array', function () {
             $structure = [];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('sku', 'TEST123');
+            $product = ($this->createMockProduct)(['sku' => 'TEST123']);
 
             $xml = $this->mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -718,8 +721,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'price', 'source_type' => 'attribute', 'source_value' => 'price'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 295.0000);
+            $product = ($this->createMockProduct)(['price' => 295.0000]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -737,8 +739,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'sale_price', 'source_type' => 'attribute', 'source_value' => 'special_price'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('special_price', 149.9900);
+            $product = ($this->createMockProduct)(['special_price' => 149.9900]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -757,8 +758,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'price', 'source_type' => 'attribute', 'source_value' => 'price'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 1234567.89);
+            $product = ($this->createMockProduct)(['price' => 1234567.89]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -777,8 +777,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'price', 'source_type' => 'attribute', 'source_value' => 'price'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 1234.56);
+            $product = ($this->createMockProduct)(['price' => 1234.56]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -796,8 +795,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'sku', 'source_type' => 'attribute', 'source_value' => 'sku'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('sku', 'TEST-SKU-123');
+            $product = ($this->createMockProduct)(['sku' => 'TEST-SKU-123']);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -820,8 +818,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 295.99);
+            $product = ($this->createMockProduct)(['price' => 295.99]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -839,7 +836,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'special_price', 'source_type' => 'attribute', 'source_value' => 'special_price', 'optional' => true],
             ];
 
-            $product = Mage::getModel('catalog/product');
+            $product = ($this->createMockProduct)([]);
             // special_price not set
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
@@ -859,8 +856,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'price', 'source_type' => 'attribute', 'source_value' => 'price'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 99.99);
+            $product = ($this->createMockProduct)(['price' => 99.99]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -881,8 +877,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'price', 'source_type' => 'attribute', 'source_value' => 'price'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 295.00);
+            $product = ($this->createMockProduct)(['price' => 295.00]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
@@ -903,8 +898,7 @@ describe('FeedManager Mapper - XML Structure Generation', function () {
                 ['tag' => 'price', 'source_type' => 'attribute', 'source_value' => 'price'],
             ];
 
-            $product = Mage::getModel('catalog/product');
-            $product->setData('price', 295.00);
+            $product = ($this->createMockProduct)(['price' => 295.00]);
 
             $xml = $mapper->mapProductToXmlStructure($product, $structure, 'item', 0);
 
