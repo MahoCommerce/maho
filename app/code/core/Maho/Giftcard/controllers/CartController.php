@@ -534,9 +534,6 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
 
     /**
      * Get payment methods HTML for checkout
-     *
-     * @param Mage_Sales_Model_Quote $quote
-     * @return string
      */
     protected function _getPaymentMethodsHtml(Mage_Sales_Model_Quote $quote): string
     {
