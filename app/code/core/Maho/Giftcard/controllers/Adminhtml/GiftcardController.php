@@ -136,7 +136,12 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
                     $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
                 }
 
-                // If balance changed, record as adjustment
+                // For new gift cards, set initial_balance = balance
+                if (!$model->getId() && isset($data['balance'])) {
+                    $data['initial_balance'] = $data['balance'];
+                }
+
+                // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
                 $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;
 

@@ -42,7 +42,6 @@ namespace PHPSTORM_META {
         'customersegmentation/coupon' => \Maho_CustomerSegmentation_Helper_Coupon::class,
         'customersegmentation/data' => \Maho_CustomerSegmentation_Helper_Data::class,
         'giftcard/data' => \Maho_Giftcard_Helper_Data::class,
-        'giftcard/payment' => \Maho_Giftcard_Helper_Payment::class,
         'giftmessage/data' => \Mage_GiftMessage_Helper_Data::class,
         'giftmessage/message' => \Mage_GiftMessage_Helper_Message::class,
         'googleanalytics/data' => \Mage_GoogleAnalytics_Helper_Data::class,

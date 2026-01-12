@@ -93,24 +93,46 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Edit_Form extends Mage_Adminhtml_Bl
             $currencyNote = '[' . $model->getCurrencyCode() . ']';
         }
 
-        $fieldset->addField('balance', 'text', [
-            'name'     => 'balance',
-            'label'    => Mage::helper('giftcard')->__('Balance'),
-            'title'    => Mage::helper('giftcard')->__('Balance'),
-            'required' => true,
-            'class'    => 'validate-number',
-            'note'     => $currencyNote,
-        ]);
+        if (!$model->getId()) {
+            // New gift card - show single amount field
+            $fieldset->addField('balance', 'text', [
+                'name'     => 'balance',
+                'label'    => Mage::helper('giftcard')->__('Amount'),
+                'title'    => Mage::helper('giftcard')->__('Amount'),
+                'required' => true,
+                'class'    => 'validate-number validate-greater-than-zero',
+                'note'     => $currencyNote . '<br/>' . Mage::helper('giftcard')->__('The initial value of the gift card'),
+            ]);
 
-        $fieldset->addField('initial_balance', 'text', [
-            'name'     => 'initial_balance',
-            'label'    => Mage::helper('giftcard')->__('Initial Balance'),
-            'title'    => Mage::helper('giftcard')->__('Initial Balance'),
-            'required' => !$model->getId(),
-            'class'    => 'validate-number',
-            'disabled' => (bool) $model->getId(),
-            'note'     => $currencyNote,
-        ]);
+            // Hidden field to sync initial_balance with balance on create
+            $fieldset->addField('initial_balance', 'hidden', [
+                'name'  => 'initial_balance',
+            ]);
+        } else {
+            // Existing gift card - show initial balance as read-only reference
+            $website = Mage::app()->getWebsite($model->getWebsiteId());
+            $formattedInitialBalance = $website->getBaseCurrency()->formatPrecision(
+                $model->getInitialBalance(),
+                2,
+                [],
+                false
+            );
+
+            $fieldset->addField('initial_balance_display', 'note', [
+                'label' => Mage::helper('giftcard')->__('Initial Balance'),
+                'text'  => $formattedInitialBalance,
+            ]);
+
+            // Current balance is editable for manual adjustments
+            $fieldset->addField('balance', 'text', [
+                'name'     => 'balance',
+                'label'    => Mage::helper('giftcard')->__('Current Balance'),
+                'title'    => Mage::helper('giftcard')->__('Current Balance'),
+                'required' => true,
+                'class'    => 'validate-number',
+                'note'     => $currencyNote . '<br/>' . Mage::helper('giftcard')->__('Edit this to manually adjust the balance. Use "Admin Comment" to explain the adjustment.'),
+            ]);
+        }
 
         $fieldset->addField('expires_at', 'date', [
             'name'   => 'expires_at',

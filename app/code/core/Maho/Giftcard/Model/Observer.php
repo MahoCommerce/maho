@@ -454,13 +454,21 @@ class Maho_Giftcard_Model_Observer
 
             $newBalance = $baseBalanceBefore - $amountToDeduct;
 
+            // Prepare update data
+            $updateData = [
+                'balance' => $newBalance,
+                'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+            ];
+
+            // Update status if fully used
+            if ($newBalance <= 0) {
+                $updateData['status'] = Maho_Giftcard_Model_Giftcard::STATUS_USED;
+            }
+
             // Update gift card balance directly with locked row
             $adapter->update(
                 $giftcardTable,
-                [
-                    'balance' => $newBalance,
-                    'updated_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
-                ],
+                $updateData,
                 ['giftcard_id = ?' => $giftcardData['giftcard_id']],
             );
 
@@ -533,71 +541,6 @@ class Maho_Giftcard_Model_Observer
 
             // Add after tax, before grand_total
             $block->addTotal($total, 'tax');
-        }
-    }
-
-    /**
-     * Update payment method label when fully paid by gift card
-     *
-     * @return void
-     */
-    public function updatePaymentMethodForGiftcard(Maho\Event\Observer $observer)
-    {
-        $order = $observer->getEvent()->getOrder();
-        if (!$order) {
-            $order = $observer->getEvent()->getInvoice()->getOrder();
-        }
-        if (!$order) {
-            return;
-        }
-
-        $giftcardAmount = abs($order->getGiftcardAmount());
-        $grandTotal = $order->getGrandTotal();
-
-        // If order is fully paid by gift card
-        if ($giftcardAmount > 0 && $giftcardAmount >= $grandTotal) {
-            $payment = $order->getPayment();
-            if ($payment) {
-                // Store original payment method
-                $payment->setAdditionalInformation('original_method', $payment->getMethod());
-                // Update display to show gift card
-                $payment->setMethod('giftcard');
-                $payment->setMethodTitle('Gift Card');
-            }
-        }
-    }
-
-    /**
-     * Auto-select gift card payment method when order is fully covered
-     *
-     * @return void
-     */
-    public function autoSelectPaymentMethod(Maho\Event\Observer $observer)
-    {
-        $controller = $observer->getEvent()->getControllerAction();
-        $request = $controller->getRequest();
-        $quote = Mage::getSingleton('checkout/session')->getQuote();
-
-        // Check if gift cards fully cover the order
-        $giftcardAmount = abs((float) $quote->getGiftcardAmount());
-        $grandTotal = (float) $quote->getGrandTotal();
-
-        if ($giftcardAmount > 0 && $grandTotal <= 0.01) {
-            // Auto-select gift card payment method
-            $payment = $request->getPost('payment', []);
-
-            // Only override if no payment method was selected
-            if (!isset($payment['method']) || $payment['method'] === '') {
-                $payment['method'] = 'giftcard';
-                $request->setPost('payment', $payment);
-
-                // Also set it directly on the quote
-                try {
-                    $quote->getPayment()->setMethod('giftcard');
-                } catch (Exception $e) {
-                    Mage::logException($e);
-                }
-            }
         }
     }
 
@@ -862,5 +805,43 @@ class Maho_Giftcard_Model_Observer
 
         // Mark for recollection
         $orderCreateModel->setRecollect(true);
+    }
+
+    /**
+     * Filter payment methods for zero-total orders covered by gift cards
+     * Prevents non-zero-total payment methods (like Check/Money Order) from showing
+     * when gift cards fully cover the order. Only the "free" payment method should show.
+     *
+     * @param Maho\Event\Observer $observer
+     * @return void
+     */
+    public function filterPaymentMethodsForZeroTotal(Maho\Event\Observer $observer): void
+    {
+        /** @var stdClass $result */
+        $result = $observer->getResult();
+        /** @var Mage_Payment_Model_Method_Abstract $methodInstance */
+        $methodInstance = $observer->getMethodInstance();
+        /** @var Mage_Sales_Model_Quote $quote */
+        $quote = $observer->getQuote();
+
+        if (!$quote) {
+            return;
+        }
+
+        // Check if gift cards fully cover the order
+        $giftcardAmount = abs((float) $quote->getGiftcardAmount());
+        $grandTotal = (float) $quote->getGrandTotal();
+        $isFullyCovered = ($giftcardAmount > 0 && $grandTotal <= 0.01);
+
+        if (!$isFullyCovered) {
+            return;
+        }
+
+        // When gift cards fully cover the order (grand total = $0),
+        // only allow the "free" payment method. Disable all others.
+        $methodCode = $methodInstance->getCode();
+        if ($methodCode !== 'free') {
+            $result->isAvailable = false;
+        }
     }
 }

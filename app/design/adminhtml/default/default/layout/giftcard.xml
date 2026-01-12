@@ -103,4 +103,9 @@
             <block type="giftcard/adminhtml_sales_order_create_giftcard" template="maho/giftcard/sales/order/create/giftcard.phtml" name="giftcard" after="coupons" />
         </reference>
     </adminhtml_sales_order_create_load_block_items>
+
+    <!-- Gift Card History Grid - AJAX Grid Action -->
+    <adminhtml_giftcard_history_grid>
+        <block type="giftcard/adminhtml_giftcard_history_grid" name="giftcard.history.grid" output="toHtml" />
+    </adminhtml_giftcard_history_grid>
 </layout>

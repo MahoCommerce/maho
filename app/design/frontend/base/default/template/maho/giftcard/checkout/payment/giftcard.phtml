@@ -253,57 +253,13 @@ const GiftcardCheckout = {
     },
 
     updatePaymentMethods(isFullyCovered) {
-        const paymentMethodsContainer = document.getElementById('checkout-payment-method-load');
-        if (!paymentMethodsContainer) return;
+        // When gift cards fully cover the order (grand total = $0),
+        // the standard "free" payment method will automatically be available.
+        // We don't need to manually manage payment method visibility.
 
-        const paymentMethods = paymentMethodsContainer.querySelectorAll('dt');
-        const giftcardMethod = document.getElementById('dt_method_giftcard');
-        const freeMethod = document.getElementById('dt_method_free');
-
-        if (isFullyCovered) {
-            // Hide all payment methods except giftcard/free
-            paymentMethods.forEach(method => {
-                const methodId = method.id;
-                if (methodId === 'dt_method_giftcard' || methodId === 'dt_method_free') {
-                    method.style.display = '';
-                    const dd = method.nextElementSibling;
-                    if (dd && dd.tagName === 'DD') {
-                        dd.style.display = '';
-                    }
-                    // Auto-select
-                    const radio = method.querySelector('input[type="radio"]');
-                    if (radio && !document.querySelector('#checkout-payment-method-load input[type="radio"]:checked')) {
-                        radio.checked = true;
-                        if (typeof payment !== 'undefined' && payment.switchMethod) {
-                            payment.switchMethod(radio.value);
-                        }
-                    }
-                } else {
-                    method.style.display = 'none';
-                    const dd = method.nextElementSibling;
-                    if (dd && dd.tagName === 'DD') {
-                        dd.style.display = 'none';
-                    }
-                }
-            });
-        } else {
-            // Show all payment methods except giftcard (which is only for full coverage)
-            paymentMethods.forEach(method => {
-                const methodId = method.id;
-                if (methodId === 'dt_method_giftcard') {
-                    method.style.display = 'none';
-                    const dd = method.nextElementSibling;
-                    if (dd && dd.tagName === 'DD') {
-                        dd.style.display = 'none';
-                    }
-                } else {
-                    method.style.display = '';
-                    const dd = method.nextElementSibling;
-                    if (dd && dd.tagName === 'DD') {
-                        dd.style.display = '';
-                    }
-                }
-            });
+        // Just trigger checkout totals reload to update available payment methods
+        if (typeof checkout !== 'undefined' && checkout.reloadPaymentMethods) {
+            checkout.reloadPaymentMethods();
         }
     },
 
@@ -341,11 +297,5 @@ const GiftcardCheckout = {
 
 // Initialize when DOM is ready
 GiftcardCheckout.init();
-
-// Also initialize payment methods visibility on load
-document.addEventListener('DOMContentLoaded', () => {
-    const isFullyCovered = <?php echo $isFullyCovered ? 'true' : 'false' ?>;
-    GiftcardCheckout.updatePaymentMethods(isFullyCovered);
-});
 </script>
 <?php endif; ?>
