@@ -215,6 +215,12 @@ abstract class AbstractElement extends AbstractForm
         if ($filter = $this->getValueFilter()) {
             $value = $filter->filter($value);
         }
+
+        // Handle array values (e.g., from delete checkbox)
+        if (is_array($value)) {
+            return '';
+        }
+
         return $this->_escape((string) $value);
     }
 

@@ -207,9 +207,10 @@
             </file>
             <validator_data>
                 <input_types>
-                    <price>price</price>
-                    <media_image>media_image</media_image>
+                    <file>file</file>
                     <gallery>gallery</gallery>
+                    <media_image>media_image</media_image>
+                    <price>price</price>
                 </input_types>
             </validator_data>
         </general>

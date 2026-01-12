@@ -271,4 +271,49 @@ class Mage_Catalog_Model_Observer
             );
         }
     }
+
+    /**
+     * Add file attribute type to product attributes
+     *
+     * @return $this
+     */
+    public function addFileAttributeType(\Maho\Event\Observer $observer)
+    {
+        $response = $observer->getEvent()->getResponse();
+        $types = $response->getTypes();
+        $types[] = [
+            'value' => 'file',
+            'label' => Mage::helper('catalog')->__('File'),
+            'hide_fields' => [
+                'is_searchable',
+                'is_visible_in_advanced_search',
+                'is_filterable',
+                'is_filterable_in_search',
+                'is_comparable',
+                'is_used_for_promo_rules',
+                'used_for_sort_by',
+                'is_wysiwyg_enabled',
+                'is_html_allowed_on_front',
+            ],
+        ];
+
+        $response->setTypes($types);
+
+        return $this;
+    }
+
+    /**
+     * Add file element type for product edit form
+     *
+     * @return $this
+     */
+    public function addFileElementType(\Maho\Event\Observer $observer)
+    {
+        $response = $observer->getEvent()->getResponse();
+        $types = $response->getTypes();
+        $types['file'] = Mage::getConfig()->getBlockClassName('adminhtml/catalog_product_helper_form_file');
+        $response->setTypes($types);
+
+        return $this;
+    }
 }
