@@ -166,17 +166,17 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
                     if (result) {
                         if (data.success) {
                             result.textContent = '✓ ' + data.message;
-                            result.style.color = '#2e7d32';
+                            result.className = 'fm-status-success';
                         } else {
                             result.textContent = '✗ ' + (data.message || 'Connection failed');
-                            result.style.color = '#c62828';
+                            result.className = 'fm-status-error';
                         }
                     }
                 })
                 .catch(function(err) {
                     if (result) {
                         result.textContent = '✗ Error: ' + err.message;
-                        result.style.color = '#c62828';
+                        result.className = 'fm-status-error';
                     }
                 })
                 .finally(function() {
@@ -250,7 +250,7 @@ SCRIPT;
             $fieldset->addField('sftp_test_connection', 'note', [
                 'label' => '',
                 'text' => '<button type="button" class="scalable" onclick="testConnection(\'sftp\')" id="sftp_test_btn"><span>' . $this->__('Test Connection') . '</span></button>
-                           <span id="sftp_test_result" style="margin-left: 10px;"></span>',
+                           <span id="sftp_test_result" class="fm-test-result"></span>',
             ]);
         }
     }
@@ -315,7 +315,7 @@ SCRIPT;
             $fieldset->addField('ftp_test_connection', 'note', [
                 'label' => '',
                 'text' => '<button type="button" class="scalable" onclick="testConnection(\'ftp\')" id="ftp_test_btn"><span>' . $this->__('Test Connection') . '</span></button>
-                           <span id="ftp_test_result" style="margin-left: 10px;"></span>',
+                           <span id="ftp_test_result" class="fm-test-result"></span>',
             ]);
         }
     }

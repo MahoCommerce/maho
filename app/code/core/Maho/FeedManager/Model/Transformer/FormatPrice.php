@@ -21,25 +21,25 @@ class Maho_FeedManager_Model_Transformer_FormatPrice extends Maho_FeedManager_Mo
             'label' => 'Currency Code',
             'type' => 'text',
             'required' => false,
-            'note' => 'ISO currency code (e.g., USD, EUR). Leave empty for no currency suffix.',
+            'note' => 'ISO currency code (e.g., USD, EUR). Uses feed settings if empty.',
         ],
         'decimals' => [
             'label' => 'Decimal Places',
             'type' => 'text',
             'required' => false,
-            'note' => 'Number of decimal places (default: 2)',
+            'note' => 'Number of decimal places. Uses feed settings if empty.',
         ],
         'decimal_separator' => [
             'label' => 'Decimal Separator',
             'type' => 'text',
             'required' => false,
-            'note' => 'Character for decimal (default: .)',
+            'note' => 'Character for decimal. Uses feed settings if empty.',
         ],
         'thousands_separator' => [
             'label' => 'Thousands Separator',
             'type' => 'text',
             'required' => false,
-            'note' => 'Character for thousands (default: none)',
+            'note' => 'Character for thousands. Uses feed settings if empty.',
         ],
         'skip_if_empty' => [
             'label' => 'Skip if Empty',
@@ -67,10 +67,18 @@ class Maho_FeedManager_Model_Transformer_FormatPrice extends Maho_FeedManager_Mo
             return $skipIfEmpty ? '' : $value;
         }
 
-        $currency = (string) $this->_getOption($options, 'currency', '');
-        $decimals = (int) $this->_getOption($options, 'decimals', 2);
-        $decimalSep = (string) $this->_getOption($options, 'decimal_separator', '.');
-        $thousandsSep = (string) $this->_getOption($options, 'thousands_separator', '');
+        // Get feed settings as defaults (from Formats & Regional Settings)
+        $feedConfig = $productData['_feed'] ?? [];
+        $defaultDecimals = $feedConfig['price_decimals'] ?? 2;
+        $defaultDecimalSep = $feedConfig['price_decimal_point'] ?? '.';
+        $defaultThousandsSep = $feedConfig['price_thousands_sep'] ?? '';
+        $defaultCurrency = $feedConfig['price_currency'] ?? '';
+
+        // Use explicit options if provided, otherwise use feed defaults
+        $currency = (string) $this->_getOption($options, 'currency', $defaultCurrency);
+        $decimals = (int) $this->_getOption($options, 'decimals', $defaultDecimals);
+        $decimalSep = (string) $this->_getOption($options, 'decimal_separator', $defaultDecimalSep);
+        $thousandsSep = (string) $this->_getOption($options, 'thousands_separator', $defaultThousandsSep);
 
         $formatted = number_format((float) $value, $decimals, $decimalSep, $thousandsSep);
 

@@ -13,6 +13,12 @@ declare(strict_types=1);
 /**
  * Feed model
  *
+ * Error Handling Pattern:
+ * - Getter methods (getPlatformAdapter, getStore): Return null if not found
+ * - Validation methods (validate via Mage_Rule): Throw Mage_Core_Exception with user-friendly message
+ * - Boolean checks (isEnabled, hasAttributeMappings): Return false on failure, never throw
+ * - File operations (getOutputFilePath): Return path string, caller handles file existence
+ *
  * @method int getFeedId()
  * @method string getName()
  * @method $this setName(string $name)
@@ -30,6 +36,12 @@ declare(strict_types=1);
  * @method $this setGenerationTime(string $time)
  * @method string getConfigurableMode()
  * @method $this setConfigurableMode(string $mode)
+ * @method int|null getDestinationId()
+ * @method $this setDestinationId(int|null $destinationId)
+ * @method int getAutoUpload()
+ * @method $this setAutoUpload(int $autoUpload)
+ * @method string|null getSchedule()
+ * @method $this setSchedule(string|null $schedule)
  * @method string|null getProductFilters()
  * @method $this setProductFilters(string|null $filters)
  * @method string|null getConditionsSerialized()
@@ -40,6 +52,52 @@ declare(strict_types=1);
  * @method $this setExcludeDisabled(int $value)
  * @method int getExcludeOutOfStock()
  * @method $this setExcludeOutOfStock(int $value)
+ * @method string|null getIncludeProductTypes()
+ * @method $this setIncludeProductTypes(string|null $types)
+ * @method string|null getFormatPreset()
+ * @method $this setFormatPreset(string|null $preset)
+ * @method string|null getPriceCurrency()
+ * @method $this setPriceCurrency(string|null $currency)
+ * @method int|null getPriceDecimals()
+ * @method $this setPriceDecimals(int|null $decimals)
+ * @method string|null getPriceDecimalPoint()
+ * @method $this setPriceDecimalPoint(string|null $point)
+ * @method string|null getPriceThousandsSep()
+ * @method $this setPriceThousandsSep(string|null $sep)
+ * @method string|null getTaxMode()
+ * @method $this setTaxMode(string|null $mode)
+ * @method int|null getUseParentValue()
+ * @method $this setUseParentValue(int|null $value)
+ * @method int|null getExcludeCategoryUrl()
+ * @method $this setExcludeCategoryUrl(int|null $value)
+ * @method string|null getNoImageUrl()
+ * @method $this setNoImageUrl(string|null $url)
+ * @method string|null getXmlHeader()
+ * @method $this setXmlHeader(string|null $header)
+ * @method string|null getXmlItemTemplate()
+ * @method $this setXmlItemTemplate(string|null $template)
+ * @method string|null getXmlFooter()
+ * @method $this setXmlFooter(string|null $footer)
+ * @method string|null getConditionGroups()
+ * @method $this setConditionGroups(string|null $groups)
+ * @method string|null getXmlItemTag()
+ * @method $this setXmlItemTag(string|null $tag)
+ * @method string|null getCsvColumns()
+ * @method $this setCsvColumns(string|null $columns)
+ * @method string|null getCsvDelimiter()
+ * @method $this setCsvDelimiter(string|null $delimiter)
+ * @method string|null getCsvEnclosure()
+ * @method $this setCsvEnclosure(string|null $enclosure)
+ * @method int|null getCsvIncludeHeader()
+ * @method $this setCsvIncludeHeader(int|null $value)
+ * @method string|null getJsonStructure()
+ * @method $this setJsonStructure(string|null $structure)
+ * @method string|null getJsonRootKey()
+ * @method $this setJsonRootKey(string|null $key)
+ * @method string|null getXmlStructure()
+ * @method $this setXmlStructure(string|null $structure)
+ * @method int getPriceCurrencySuffix()
+ * @method $this setPriceCurrencySuffix(int $value)
  * @method string|null getLastGeneratedAt()
  * @method $this setLastGeneratedAt(string|null $datetime)
  * @method int|null getLastProductCount()
@@ -48,6 +106,8 @@ declare(strict_types=1);
  * @method $this setLastFileSize(int|null $size)
  * @method string getCreatedAt()
  * @method string getUpdatedAt()
+ * @method Maho_FeedManager_Model_Resource_Feed getResource()
+ * @method Maho_FeedManager_Model_Resource_Feed _getResource()
  */
 class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
 {
@@ -290,7 +350,11 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
     public function getOutputFilePath(): string
     {
         $directory = Mage::helper('feedmanager')->getOutputDirectory();
-        return $directory . DS . $this->getFilename() . '.' . $this->getFileFormat();
+        $extension = $this->getFileFormat();
+        if ($this->getGzipCompression()) {
+            $extension .= '.gz';
+        }
+        return $directory . DS . $this->getFilename() . '.' . $extension;
     }
 
     /**
@@ -300,7 +364,11 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
     {
         $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
         $directory = Mage::getStoreConfig('feedmanager/general/output_directory') ?: 'feeds';
-        return $baseUrl . $directory . '/' . $this->getFilename() . '.' . $this->getFileFormat();
+        $extension = $this->getFileFormat();
+        if ($this->getGzipCompression()) {
+            $extension .= '.gz';
+        }
+        return $baseUrl . $directory . '/' . $this->getFilename() . '.' . $extension;
     }
 
     /**

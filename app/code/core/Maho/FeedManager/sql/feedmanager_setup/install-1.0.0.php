@@ -58,6 +58,18 @@ $table = $connection
         'nullable' => false,
         'default'  => 'children_only',
     ], 'Configurable Product Mode')
+    ->addColumn('destination_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
+        'unsigned' => true,
+        'nullable' => true,
+    ], 'Upload Destination ID')
+    ->addColumn('auto_upload', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
+        'unsigned' => true,
+        'nullable' => false,
+        'default'  => 0,
+    ], 'Auto Upload After Generation')
+    ->addColumn('schedule', Maho\Db\Ddl\Table::TYPE_VARCHAR, 50, [
+        'nullable' => true,
+    ], 'Generation Schedule (hourly, daily, twice_daily, or comma-separated hours)')
     ->addColumn('product_filters', Maho\Db\Ddl\Table::TYPE_TEXT, '64k', [
         'nullable' => true,
     ], 'Product Filters (JSON)')
@@ -98,6 +110,10 @@ $table = $connection
         $installer->getTable('core/store'),
         'store_id',
         Maho\Db\Ddl\Table::ACTION_CASCADE,
+    )
+    ->addIndex(
+        $installer->getIdxName('feedmanager/feed', ['destination_id']),
+        ['destination_id'],
     )
     ->setComment('Feed Manager - Feeds');
 

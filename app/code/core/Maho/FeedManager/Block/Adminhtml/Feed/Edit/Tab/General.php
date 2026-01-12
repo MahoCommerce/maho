@@ -142,6 +142,17 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
             'note' => $this->__('Automatically upload feed after generation'),
         ]);
 
+        $uploadFieldset->addField('gzip_compression', 'select', [
+            'name' => 'gzip_compression',
+            'label' => $this->__('Gzip Compression'),
+            'title' => $this->__('Gzip Compression'),
+            'values' => [
+                ['value' => 0, 'label' => $this->__('No')],
+                ['value' => 1, 'label' => $this->__('Yes')],
+            ],
+            'note' => $this->__('Compress the feed file with gzip (.gz extension)'),
+        ]);
+
         // Add Upload Now button for existing feeds with a generated file and destination
         if ($feed->getId() && $feed->getLastGeneratedAt() && $feed->getDestinationId()) {
             $uploadUrl = $this->getUrl('*/*/upload', ['id' => $feed->getId()]);

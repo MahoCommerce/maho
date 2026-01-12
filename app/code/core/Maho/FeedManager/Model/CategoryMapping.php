@@ -13,6 +13,10 @@ declare(strict_types=1);
 /**
  * Category Mapping model
  *
+ * Error Handling Pattern:
+ * - Getter methods (getCategory): Return null if category not found, never throw
+ * - Load methods (loadByPlatformAndCategory): Return self even if not found (check getId())
+ *
  * @method int getMappingId()
  * @method string getPlatform()
  * @method $this setPlatform(string $platform)
@@ -22,6 +26,8 @@ declare(strict_types=1);
  * @method $this setPlatformCategoryId(string $categoryId)
  * @method string getPlatformCategoryPath()
  * @method $this setPlatformCategoryPath(string $path)
+ * @method Maho_FeedManager_Model_Resource_CategoryMapping getResource()
+ * @method Maho_FeedManager_Model_Resource_CategoryMapping _getResource()
  */
 class Maho_FeedManager_Model_CategoryMapping extends Mage_Core_Model_Abstract
 {

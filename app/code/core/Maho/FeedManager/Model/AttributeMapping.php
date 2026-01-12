@@ -13,6 +13,10 @@ declare(strict_types=1);
 /**
  * Attribute Mapping model
  *
+ * Error Handling Pattern:
+ * - Getter methods (getConditionsArray, getTransformersArray): Return empty array if JSON invalid, never throw
+ * - Setter methods (setConditionsArray, setTransformersArray): Encode to JSON, return self for chaining
+ *
  * @method int getMappingId()
  * @method int getFeedId()
  * @method $this setFeedId(int $feedId)
@@ -28,6 +32,8 @@ declare(strict_types=1);
  * @method $this setTransformers(string|null $transformers)
  * @method int getSortOrder()
  * @method $this setSortOrder(int $order)
+ * @method Maho_FeedManager_Model_Resource_AttributeMapping getResource()
+ * @method Maho_FeedManager_Model_Resource_AttributeMapping _getResource()
  */
 class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
 {

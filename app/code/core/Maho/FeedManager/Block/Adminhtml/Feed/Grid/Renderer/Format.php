@@ -24,8 +24,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid_Renderer_Format extends Mage_Ad
             return '';
         }
 
-        return '<code style="display:inline-block;padding:2px 6px;background:#f5f5f5;border-radius:4px;font-family:ui-monospace,monospace;font-size:11px;color:#525252;text-transform:uppercase;">'
-            . $this->escapeHtml($value)
-            . '</code>';
+        return strtoupper($this->escapeHtml($value));
     }
 }

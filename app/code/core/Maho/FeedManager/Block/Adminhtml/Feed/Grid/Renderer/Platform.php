@@ -24,18 +24,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid_Renderer_Platform extends Mage_
             return '';
         }
 
-        // Platform-specific colors (muted, not decorative - color for meaning)
-        $styles = match ($value) {
-            'google' => 'background:#f0fdf4;color:#166534;border-color:#bbf7d0;',
-            'facebook' => 'background:#eff6ff;color:#1e40af;border-color:#bfdbfe;',
-            'custom' => 'background:#f5f5f5;color:#525252;border-color:#e5e5e5;',
-            default => 'background:#f5f5f5;color:#525252;border-color:#e5e5e5;',
-        };
-
         $label = Maho_FeedManager_Model_Platform::getPlatformOptions()[$value] ?? ucfirst($value);
 
-        return '<span style="display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500;border:1px solid;' . $styles . '">'
-            . $this->escapeHtml($label)
-            . '</span>';
+        return $this->escapeHtml($label);
     }
 }

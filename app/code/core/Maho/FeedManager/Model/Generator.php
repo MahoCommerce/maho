@@ -111,9 +111,9 @@ class Maho_FeedManager_Model_Generator
             }
             $this->_tempPath = null; // Clear temp path after successful move
 
-            // Apply gzip compression if enabled
+            // Apply gzip compression if enabled for this feed
             $finalPath = $outputPath;
-            if (Mage::helper('feedmanager')->isGzipCompressionEnabled()) {
+            if ($feed->getGzipCompression()) {
                 $finalPath = $this->_compressFile($outputPath);
             }
 

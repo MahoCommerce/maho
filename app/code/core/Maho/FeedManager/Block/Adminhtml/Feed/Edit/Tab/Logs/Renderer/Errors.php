@@ -18,22 +18,47 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Errors extend
         $errorMessages = $row->getData($this->getColumn()->getIndex());
 
         if (empty($errorMessages)) {
-            return '<span style="color: green;">None</span>';
+            return '<span class="grid-severity-notice"><span>' . $this->__('None') . '</span></span>';
         }
 
         $errors = Mage::helper('core')->jsonDecode($errorMessages);
         if (!is_array($errors) || empty($errors)) {
-            return '<span style="color: green;">None</span>';
+            return '<span class="grid-severity-notice"><span>' . $this->__('None') . '</span></span>';
         }
 
         $count = count($errors);
-        $preview = htmlspecialchars(substr($errors[0], 0, 50));
+        $firstError = is_array($errors[0]) ? ($errors[0]['message'] ?? '') : $errors[0];
+        $preview = $this->escapeHtml($this->truncateText($firstError, 50));
+        $fullText = $this->escapeHtml($this->formatErrorsForTooltip($errors));
 
         if ($count === 1) {
-            return '<span style="color: red;" title="' . htmlspecialchars($errors[0]) . '">' . $preview . '</span>';
+            return '<span class="grid-severity-critical" title="' . $fullText . '"><span>' . $preview . '</span></span>';
         }
 
-        return '<span style="color: red;" title="' . htmlspecialchars(implode("\n", $errors)) . '">' .
-            $count . ' errors: ' . $preview . '...</span>';
+        return '<span class="grid-severity-critical" title="' . $fullText . '"><span>' .
+            $this->__('%d errors', $count) . ': ' . $preview . '...</span></span>';
+    }
+
+    /**
+     * Truncate text to specified length
+     */
+    protected function truncateText(string $text, int $length): string
+    {
+        if (mb_strlen($text) <= $length) {
+            return $text;
+        }
+        return mb_substr($text, 0, $length) . '...';
+    }
+
+    /**
+     * Format errors array for tooltip display
+     */
+    protected function formatErrorsForTooltip(array $errors): string
+    {
+        $messages = [];
+        foreach ($errors as $error) {
+            $messages[] = is_array($error) ? ($error['message'] ?? '') : $error;
+        }
+        return implode("\n", $messages);
     }
 }

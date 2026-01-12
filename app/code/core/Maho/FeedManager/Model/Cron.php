@@ -13,7 +13,14 @@ declare(strict_types=1);
 /**
  * Feed Manager Cron Model
  *
- * Handles scheduled feed generation
+ * Handles scheduled feed generation via Maho cron system.
+ *
+ * Error Handling Pattern:
+ * - generateScheduledFeeds(): Catches all exceptions per-feed, continues with remaining feeds
+ * - _generateFeed(): Wraps Generator call in try/catch, logs errors to system.log
+ * - _uploadFeed(): Catches upload exceptions, records failure in Log model
+ * - _cleanupHungFeeds(): Marks stuck feeds as failed, never throws
+ * - resetHungFeed(): Returns boolean success, never throws
  */
 class Maho_FeedManager_Model_Cron
 {
@@ -213,7 +220,11 @@ class Maho_FeedManager_Model_Cron
 
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
             $filePath = $feed->getOutputFilePath();
-            $remoteName = $feed->getFilename() . '.' . $feed->getFileFormat();
+            $extension = $feed->getFileFormat();
+            if ($feed->getGzipCompression()) {
+                $extension .= '.gz';
+            }
+            $remoteName = $feed->getFilename() . '.' . $extension;
 
             $success = $uploader->upload($filePath, $remoteName);
 

@@ -15,8 +15,6 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public const XML_PATH_ENABLED = 'feedmanager/general/enabled';
     public const XML_PATH_OUTPUT_DIRECTORY = 'feedmanager/general/output_directory';
     public const XML_PATH_BATCH_SIZE = 'feedmanager/general/batch_size';
-    public const XML_PATH_GZIP_COMPRESSION = 'feedmanager/general/gzip_compression';
-
     protected $_moduleName = 'Maho_FeedManager';
 
     /**
@@ -56,14 +54,6 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public function getBatchSize(): int
     {
         return (int) (Mage::getStoreConfig(self::XML_PATH_BATCH_SIZE) ?: 1000);
-    }
-
-    /**
-     * Check if gzip compression is enabled
-     */
-    public function isGzipCompressionEnabled(): bool
-    {
-        return Mage::getStoreConfigFlag(self::XML_PATH_GZIP_COMPRESSION);
     }
 
     /**
@@ -141,7 +131,11 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public function getFeedUrl(Maho_FeedManager_Model_Feed $feed): string
     {
         $baseUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
+        $extension = $feed->getFileFormat();
+        if ($feed->getGzipCompression()) {
+            $extension .= '.gz';
+        }
         return $baseUrl . $this->getOutputDirectoryRelative() . '/' .
-               $feed->getFilename() . '.' . $feed->getFileFormat();
+               $feed->getFilename() . '.' . $extension;
     }
 }

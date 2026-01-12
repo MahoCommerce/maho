@@ -154,7 +154,7 @@ class Maho_FeedManager_Model_Uploader
         $localSize = filesize($localPath);
         $stat = $sftp->stat($remoteFile);
         if ($stat === false) {
-            throw new RuntimeException("Upload verification failed: file not found on server after upload");
+            throw new RuntimeException('Upload verification failed: file not found on server after upload');
         }
         $remoteSize = $stat['size'] ?? 0;
         if ($remoteSize !== $localSize) {

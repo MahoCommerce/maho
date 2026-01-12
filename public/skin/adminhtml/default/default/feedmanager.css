@@ -1,0 +1,614 @@
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/* ==========================================================================
+   CSS Custom Properties (for easy theming)
+   ========================================================================== */
+
+:root {
+    /* Colors */
+    --fm-color-success: #2e7d32;
+    --fm-color-error: #c62828;
+    --fm-color-muted: #666;
+    --fm-color-text: #374151;
+    --fm-color-border: #ddd;
+    --fm-color-border-light: #ccc;
+    --fm-color-bg-light: #f5f5f5;
+    --fm-color-bg-header: #f5f5f5;
+
+    /* Preview/Code colors (dark theme) */
+    --fm-code-bg: #1e1e1e;
+    --fm-code-text: #d4d4d4;
+    --fm-code-comment: #6a9955;
+    --fm-code-keyword: #569cd6;
+    --fm-code-string: #ce9178;
+    --fm-code-tag: #4ec9b0;
+    --fm-code-attr: #9cdcfe;
+
+    /* Spacing */
+    --fm-spacing-xs: 4px;
+    --fm-spacing-sm: 8px;
+    --fm-spacing-md: 10px;
+    --fm-spacing-lg: 15px;
+    --fm-spacing-xl: 20px;
+
+    /* Border radius */
+    --fm-radius-sm: 3px;
+    --fm-radius-md: 4px;
+    --fm-radius-lg: 8px;
+}
+
+/* ==========================================================================
+   Toolbar
+   ========================================================================== */
+
+.fm-toolbar {
+    display: flex;
+    gap: var(--fm-spacing-md);
+    align-items: center;
+    margin-bottom: var(--fm-spacing-md);
+}
+
+.fm-toolbar-spacer {
+    flex-grow: 1;
+}
+
+/* ==========================================================================
+   Panels
+   ========================================================================== */
+
+.fm-panel {
+    border: 1px solid var(--fm-color-border);
+    border-radius: var(--fm-radius-md);
+}
+
+.fm-panel-header {
+    padding: var(--fm-spacing-md);
+    background: var(--fm-color-bg-header);
+    border-bottom: 1px solid var(--fm-color-border);
+    font-weight: 600;
+}
+
+.fm-panel-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.fm-panel-content {
+    padding: var(--fm-spacing-lg);
+}
+
+.fm-panel-footer {
+    padding: var(--fm-spacing-md);
+    border-top: 1px solid var(--fm-color-border);
+    display: flex;
+    gap: var(--fm-spacing-md);
+}
+
+/* Panel layouts */
+.fm-panels-container {
+    display: flex;
+    gap: var(--fm-spacing-xl);
+    max-height: 600px;
+    overflow-y: auto;
+    align-items: flex-start;
+}
+
+.fm-panel-main {
+    flex: 1;
+    min-height: 400px;
+}
+
+.fm-panel-sidebar {
+    width: 350px;
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+    max-height: 580px;
+    overflow-y: auto;
+}
+
+/* ==========================================================================
+   Form Elements
+   ========================================================================== */
+
+.fm-form-group {
+    margin-bottom: var(--fm-spacing-lg);
+}
+
+.fm-form-label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.fm-form-hint {
+    margin: var(--fm-spacing-xs) 0 0;
+    font-size: 11px;
+    color: var(--fm-color-muted);
+}
+
+.fm-input-full {
+    width: 100%;
+}
+
+.fm-input-sm {
+    width: 70px;
+    font-size: 11px;
+    padding: 2px;
+}
+
+.fm-input-md {
+    width: 100px;
+}
+
+.fm-input-lg {
+    width: 150px;
+}
+
+.fm-form-row {
+    display: flex;
+    gap: var(--fm-spacing-lg);
+    margin-bottom: 12px;
+}
+
+.fm-form-col {
+    flex: 1;
+}
+
+/* ==========================================================================
+   Status Indicators
+   ========================================================================== */
+
+.fm-status-success {
+    color: var(--fm-color-success);
+}
+
+.fm-status-error {
+    color: var(--fm-color-error);
+}
+
+.fm-status-muted {
+    color: var(--fm-color-muted);
+}
+
+.fm-status-icon {
+    margin-left: var(--fm-spacing-md);
+}
+
+/* ==========================================================================
+   Platform Badge
+   ========================================================================== */
+
+.fm-platform-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    background: #e3f2fd;
+    color: #1565c0;
+    border-radius: var(--fm-radius-sm);
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* ==========================================================================
+   Preview Panel
+   ========================================================================== */
+
+.fm-preview-panel {
+    margin-top: var(--fm-spacing-lg);
+    border: 1px solid var(--fm-color-border-light);
+    border-radius: var(--fm-radius-md);
+    overflow: hidden;
+}
+
+.fm-preview-header {
+    padding: var(--fm-spacing-md);
+    background: var(--fm-color-bg-header);
+    border-bottom: 1px solid var(--fm-color-border-light);
+    display: flex;
+    align-items: center;
+    gap: var(--fm-spacing-md);
+}
+
+.fm-preview-title {
+    font-weight: 500;
+}
+
+.fm-preview-meta {
+    color: var(--fm-color-muted);
+}
+
+.fm-preview-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: var(--fm-spacing-md);
+}
+
+.fm-preview-content {
+    margin: 0;
+    padding: var(--fm-spacing-lg);
+    max-height: 400px;
+    overflow: auto;
+    font-size: 12px;
+    background: var(--fm-code-bg);
+    color: var(--fm-code-text);
+    white-space: pre;
+    word-wrap: normal;
+    font-family: 'SF Mono', Monaco, Consolas, monospace;
+    line-height: 1.5;
+}
+
+/* Syntax highlighting */
+.fm-syntax-comment { color: var(--fm-code-comment); }
+.fm-syntax-keyword { color: var(--fm-code-keyword); }
+.fm-syntax-string { color: var(--fm-code-string); }
+.fm-syntax-tag { color: var(--fm-code-tag); }
+.fm-syntax-attr { color: var(--fm-code-attr); }
+
+/* ==========================================================================
+   Modal
+   ========================================================================== */
+
+.fm-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+}
+
+.fm-modal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    padding: var(--fm-spacing-xl);
+    border-radius: var(--fm-radius-lg);
+    min-width: 500px;
+}
+
+.fm-modal-title {
+    margin-top: 0;
+}
+
+.fm-modal-footer {
+    margin-top: var(--fm-spacing-lg);
+    text-align: right;
+}
+
+.fm-modal-textarea {
+    width: 100%;
+    height: 150px;
+    font-family: monospace;
+}
+
+.fm-modal-textarea-sm {
+    height: 100px;
+}
+
+/* ==========================================================================
+   Tree/Node View
+   ========================================================================== */
+
+.fm-tree {
+    padding: var(--fm-spacing-md);
+    min-height: 300px;
+}
+
+.fm-tree-empty {
+    color: var(--fm-color-muted);
+    padding: var(--fm-spacing-md);
+}
+
+.fm-node {
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: var(--fm-radius-sm);
+    cursor: pointer;
+}
+
+.fm-node:hover {
+    background: #f0f0f0;
+}
+
+.fm-node-selected {
+    background: #e3f2fd;
+}
+
+.fm-node-selected:hover {
+    background: #bbdefb;
+}
+
+.fm-node-key {
+    font-weight: 600;
+    color: var(--fm-code-attr);
+}
+
+.fm-node-type {
+    color: var(--fm-color-muted);
+    font-size: 11px;
+}
+
+.fm-node-value {
+    color: var(--fm-code-string);
+    font-size: 12px;
+}
+
+.fm-node-muted {
+    color: var(--fm-color-muted);
+}
+
+/* Indentation levels (for static nesting) */
+.fm-indent-0 { padding-left: 0; }
+.fm-indent-1 { padding-left: 20px; }
+.fm-indent-2 { padding-left: 40px; }
+.fm-indent-3 { padding-left: 60px; }
+.fm-indent-4 { padding-left: 80px; }
+.fm-indent-5 { padding-left: 100px; }
+
+/* JSON/XML node base styles */
+.json-node,
+.xml-node {
+    padding: 6px 10px;
+    margin: 2px 0;
+    border-radius: var(--fm-radius-sm);
+    cursor: pointer;
+}
+
+.json-node:hover,
+.xml-node:hover {
+    background: #f0f0f0;
+}
+
+.json-node.selected,
+.xml-node.selected {
+    background: #e3f2fd;
+}
+
+.json-node.selected:hover,
+.xml-node.selected:hover {
+    background: #bbdefb;
+}
+
+.json-key,
+.xml-tag-name {
+    font-weight: 600;
+    color: var(--fm-code-attr);
+}
+
+.json-type,
+.xml-type {
+    color: var(--fm-color-muted);
+    font-size: 11px;
+}
+
+.json-toggle,
+.xml-toggle {
+    cursor: pointer;
+    user-select: none;
+}
+
+/* ==========================================================================
+   CSV Builder Table
+   ========================================================================== */
+
+.fm-csv-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.fm-csv-table th,
+.fm-csv-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--fm-color-border);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.fm-csv-table th {
+    background: var(--fm-color-bg-light);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.fm-csv-col-drag { width: 30px; }
+.fm-csv-col-parent { width: 80px; text-align: center; }
+.fm-csv-col-actions { width: 60px; }
+
+.fm-csv-empty {
+    text-align: center;
+    padding: 12px;
+    background: #fafafa;
+    border-top: 1px solid var(--fm-color-border);
+}
+
+.fm-drag-handle {
+    cursor: move;
+    color: #999;
+}
+
+/* ==========================================================================
+   Transformer Modal
+   ========================================================================== */
+
+.transformer-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.transformer-modal-content {
+    background: #fff;
+    border-radius: var(--fm-radius-lg);
+    width: 700px;
+    max-width: 90vw;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.transformer-header {
+    padding: var(--fm-spacing-lg);
+    border-bottom: 1px solid var(--fm-color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.transformer-header h3 {
+    margin: 0;
+    font-size: 16px;
+}
+
+.transformer-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.transformer-body {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+
+.transformer-list {
+    width: 220px;
+    border-right: 1px solid var(--fm-color-border);
+    overflow-y: auto;
+    padding: var(--fm-spacing-sm);
+}
+
+.transformer-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.transformer-search {
+    padding: var(--fm-spacing-md);
+    border-bottom: 1px solid var(--fm-color-border);
+}
+
+.transformer-options {
+    flex: 1;
+    padding: var(--fm-spacing-lg);
+    overflow-y: auto;
+}
+
+.transformer-no-options {
+    color: var(--fm-color-muted);
+    font-size: 12px;
+}
+
+.transformer-footer {
+    padding: var(--fm-spacing-lg);
+    border-top: 1px solid var(--fm-color-border);
+    display: flex;
+    gap: var(--fm-spacing-md);
+    justify-content: flex-end;
+}
+
+.transformer-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border: 1px solid var(--fm-color-border);
+    border-radius: var(--fm-radius-md);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 100;
+}
+
+/* ==========================================================================
+   CSV Settings Row
+   ========================================================================== */
+
+.fm-csv-settings {
+    display: flex;
+    gap: var(--fm-spacing-xl);
+    margin-bottom: var(--fm-spacing-lg);
+}
+
+/* ==========================================================================
+   Button styles
+   ========================================================================== */
+
+.fm-btn-inline {
+    padding: 2px 8px;
+    margin-right: var(--fm-spacing-xs);
+}
+
+/* ==========================================================================
+   Connection Test
+   ========================================================================== */
+
+.fm-test-result {
+    margin-left: var(--fm-spacing-md);
+}
+
+/* ==========================================================================
+   Checkbox label
+   ========================================================================== */
+
+.fm-checkbox-label {
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ==========================================================================
+   Divider
+   ========================================================================== */
+
+.fm-divider {
+    border-top: 1px solid var(--fm-color-border);
+    padding-top: var(--fm-spacing-lg);
+    margin-top: var(--fm-spacing-lg);
+}
+
+/* ==========================================================================
+   Condition Builder (Filters)
+   ========================================================================== */
+
+.fm-condition-group {
+    margin-bottom: var(--fm-spacing-lg);
+    border: 1px solid var(--fm-color-border);
+    border-radius: var(--fm-radius-md);
+    padding: var(--fm-spacing-lg);
+}
+
+/* ==========================================================================
+   Info/Help text
+   ========================================================================== */
+
+.fm-help-text {
+    margin-bottom: var(--fm-spacing-lg);
+}

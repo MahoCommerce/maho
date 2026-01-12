@@ -26,6 +26,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
         $columnsData = $columns ? Mage::helper('core')->jsonDecode($columns) : [];
         $sourceTypes = Maho_FeedManager_Model_Mapper::getSourceTypeOptions();
         $attributeOptions = $this->_getProductAttributeOptionsForEditor();
+        $ruleOptions = $this->_getDynamicRuleOptionsArray();
         $platformOptions = $this->_getPlatformPresetOptions();
 
         return '
@@ -104,6 +105,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             columns: ' . Mage::helper('core')->jsonEncode($columnsData) . ',
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',
             attributeOptionsHtml: ' . Mage::helper('core')->jsonEncode($attributeOptions) . ',
+            ruleOptions: ' . Mage::helper('core')->jsonEncode($ruleOptions) . ',
             previewUrl: "' . $this->getUrl('*/*/csvPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
             feedId: ' . (int) $feed->getId() . ',
@@ -157,6 +159,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 if (col.source_type === "attribute" || col.source_type === "custom_field" || !col.source_type) {
                     var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + this.escapeHtml(col.source_value || "") + "\""), "value=\"" + this.escapeHtml(col.source_value || "") + "\" selected");
                     tdValue.innerHTML = "<select class=\"fm-input-full\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\">" + selectHtml + "</select>";
+                } else if (col.source_type === "rule") {
+                    var ruleSelectHtml = "<select class=\"fm-input-full\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\">";
+                    ruleSelectHtml += "<option value=\"\">' . addslashes($this->__('-- Select Rule --')) . '</option>";
+                    for (var ruleCode in this.ruleOptions) {
+                        var selected = (col.source_value === ruleCode) ? " selected" : "";
+                        ruleSelectHtml += "<option value=\"" + this.escapeHtml(ruleCode) + "\"" + selected + ">" + this.escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
+                    }
+                    ruleSelectHtml += "</select>";
+                    tdValue.innerHTML = ruleSelectHtml;
                 } else {
                     var placeholder = col.source_type === "combined" ? "{{manufacturer}} - {{name}}" : "";
                     tdValue.innerHTML = "<input type=\"text\" class=\"input-text fm-input-full\" value=\"" + this.escapeHtml(col.source_value || "") + "\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\" placeholder=\"" + placeholder + "\">";

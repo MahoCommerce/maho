@@ -94,4 +94,38 @@ abstract class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_AbstractBu
         }
         return $html;
     }
+
+    /**
+     * Get dynamic rule options for dropdown (HTML)
+     */
+    protected function _getDynamicRuleOptionsHtml(): string
+    {
+        $collection = Mage::getResourceModel('feedmanager/dynamicRule_collection')
+            ->addEnabledFilter()
+            ->setOrder('sort_order', 'ASC');
+
+        $html = '<option value="">' . $this->__('-- Select Rule --') . '</option>';
+        foreach ($collection as $rule) {
+            $html .= '<option value="' . htmlspecialchars($rule->getCode()) . '">'
+                   . htmlspecialchars($rule->getName())
+                   . '</option>';
+        }
+        return $html;
+    }
+
+    /**
+     * Get dynamic rule options as array for JavaScript
+     */
+    protected function _getDynamicRuleOptionsArray(): array
+    {
+        $collection = Mage::getResourceModel('feedmanager/dynamicRule_collection')
+            ->addEnabledFilter()
+            ->setOrder('sort_order', 'ASC');
+
+        $options = [];
+        foreach ($collection as $rule) {
+            $options[$rule->getCode()] = $rule->getName();
+        }
+        return $options;
+    }
 }

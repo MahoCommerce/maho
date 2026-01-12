@@ -272,8 +272,8 @@ class Maho_FeedManager_Model_Generator_Batch
                 throw new RuntimeException('Failed to move generated file to output directory');
             }
 
-            // Apply gzip compression if enabled
-            if (Mage::helper('feedmanager')->isGzipCompressionEnabled()) {
+            // Apply gzip compression if enabled for this feed
+            if ($this->_feed->getGzipCompression()) {
                 $finalPath = $this->_compressFile($finalPath);
             }
 
@@ -692,7 +692,11 @@ class Maho_FeedManager_Model_Generator_Batch
             // Perform upload
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
             $filePath = $this->_feed->getOutputFilePath();
-            $remoteName = $this->_feed->getFilename() . '.' . $this->_feed->getFileFormat();
+            $extension = $this->_feed->getFileFormat();
+            if ($this->_feed->getGzipCompression()) {
+                $extension .= '.gz';
+            }
+            $remoteName = $this->_feed->getFilename() . '.' . $extension;
 
             $success = $uploader->upload($filePath, $remoteName);
 

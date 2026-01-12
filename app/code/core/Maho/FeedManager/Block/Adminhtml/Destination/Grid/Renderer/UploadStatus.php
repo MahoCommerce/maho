@@ -21,23 +21,17 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Grid_Renderer_UploadStatus ex
         $value = $row->getData($this->getColumn()->getIndex());
 
         if (!$value) {
-            return '<span style="color:#9ca3af;font-size:12px;">—</span>';
+            return '<span class="grid-severity-minor"><span>—</span></span>';
         }
 
         if ($value === 'success') {
-            return '<span style="display:inline-flex;align-items:center;gap:6px;">'
-                . '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;"></span>'
-                . '<span style="color:#166534;font-size:12px;font-weight:500;">Success</span>'
-                . '</span>';
+            return '<span class="grid-severity-notice"><span>' . $this->__('Success') . '</span></span>';
         }
 
         if ($value === 'failed') {
-            return '<span style="display:inline-flex;align-items:center;gap:6px;">'
-                . '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;"></span>'
-                . '<span style="color:#dc2626;font-size:12px;font-weight:500;">Failed</span>'
-                . '</span>';
+            return '<span class="grid-severity-critical"><span>' . $this->__('Failed') . '</span></span>';
         }
 
-        return '<span style="color:#6b7280;font-size:12px;">' . $this->escapeHtml(ucfirst($value)) . '</span>';
+        return '<span class="grid-severity-minor"><span>' . $this->escapeHtml(ucfirst($value)) . '</span></span>';
     }
 }

@@ -31,6 +31,11 @@
                             <action>adminhtml/feedmanager_category</action>
                             <sort_order>30</sort_order>
                         </category_mapping>
+                        <dynamicrules translate="title" module="feedmanager">
+                            <title>Dynamic Rules</title>
+                            <action>adminhtml/feedmanager_dynamicrule</action>
+                            <sort_order>40</sort_order>
+                        </dynamicrules>
                     </children>
                 </feedmanager>
             </children>
@@ -70,6 +75,10 @@
                                         <title>Category Mapping</title>
                                         <sort_order>30</sort_order>
                                     </category_mapping>
+                                    <dynamicrules translate="title" module="feedmanager">
+                                        <title>Dynamic Rules</title>
+                                        <sort_order>40</sort_order>
+                                    </dynamicrules>
                                 </children>
                             </feedmanager>
                         </children>

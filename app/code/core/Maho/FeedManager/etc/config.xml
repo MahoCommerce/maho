@@ -11,7 +11,7 @@
 <config>
     <modules>
         <Maho_FeedManager>
-            <version>1.7.0</version>
+            <version>1.10.0</version>
         </Maho_FeedManager>
     </modules>
 
@@ -39,6 +39,9 @@
                     <destination>
                         <table>maho_feedmanager_destination</table>
                     </destination>
+                    <dynamic_rule>
+                        <table>maho_feedmanager_dynamic_rule</table>
+                    </dynamic_rule>
                 </entities>
             </feedmanager_resource>
         </models>
@@ -114,7 +117,6 @@
                 <enabled>1</enabled>
                 <output_directory>feeds</output_directory>
                 <batch_size>500</batch_size>
-                <gzip_compression>0</gzip_compression>
             </general>
         </feedmanager>
     </default>

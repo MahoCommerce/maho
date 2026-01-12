@@ -21,14 +21,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid_Renderer_LastGenerated extends 
         $value = $row->getData($this->getColumn()->getIndex());
 
         if (!$value) {
-            return '<span style="color:#9ca3af;font-size:12px;">Never</span>';
+            return '<span class="grid-severity-minor"><span>' . $this->__('Never') . '</span></span>';
         }
 
         $timestamp = strtotime($value);
         $relativeTime = $this->_getRelativeTime($timestamp);
-        $fullDate = date('M j, Y g:i A', $timestamp);
+        $fullDate = Mage::helper('core')->formatDate($value, 'medium', true);
 
-        return '<span title="' . $this->escapeHtml($fullDate) . '" style="font-size:12px;color:#374151;cursor:help;border-bottom:1px dotted #d1d5db;">'
+        return '<span title="' . $this->escapeHtml($fullDate) . '">'
             . $this->escapeHtml($relativeTime)
             . '</span>';
     }

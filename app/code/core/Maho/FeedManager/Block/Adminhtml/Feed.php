@@ -498,7 +498,8 @@ const FeedGenerator = {
         let buttonsHtml = '<button class="modal-btn btn-cancel" onclick="FeedGenerator.hideModal(); window.location.reload();">' +
             this.translations.close + '</button>';
         if (data.file_url) {
-            buttonsHtml += ' <a href="' + data.file_url + '" class="modal-btn btn-success" target="_blank">' +
+            const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
+            buttonsHtml += ' <a href="' + data.file_url + cacheBuster + Date.now() + '" class="modal-btn btn-success" target="_blank">' +
                 this.translations.download + '</a>';
         }
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;

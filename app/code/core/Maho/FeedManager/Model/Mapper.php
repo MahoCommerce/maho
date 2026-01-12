@@ -13,7 +13,13 @@ declare(strict_types=1);
 /**
  * Attribute Mapper
  *
- * Maps product attributes to feed attributes with transformation support
+ * Maps product attributes to feed attributes with transformation support.
+ *
+ * Error Handling Pattern:
+ * - mapProduct(): Returns array, catches exceptions and returns partial data with error info
+ * - Attribute getters: Return empty string if attribute not found, never throw
+ * - Category mapping: Returns empty string if no mapping found
+ * - Transformers: Applied in try/catch, failures logged and original value returned
  */
 class Maho_FeedManager_Model_Mapper
 {
@@ -149,10 +155,15 @@ class Maho_FeedManager_Model_Mapper
 
             // Get source value
             $value = $this->_getSourceValue($config, $rawData, $product);
+            $sourceValue = $config['source_value'] ?? '';
 
-            // Apply transformers
-            if (!empty($config['transformers'])) {
+            // Apply transformers, or auto-format price fields
+            $hasExplicitTransformers = !empty($config['transformers']);
+            if ($hasExplicitTransformers) {
                 $value = Maho_FeedManager_Model_Transformer::pipeline($value, $config['transformers'], $rawData);
+            } elseif ($this->_isPriceField($sourceValue) && is_numeric($value)) {
+                // Auto-format price fields using feed settings (only if no explicit transformer)
+                $value = $this->_formatPrice($value);
             }
 
             $mappedData[$feedAttribute] = $value;
@@ -253,6 +264,14 @@ class Maho_FeedManager_Model_Mapper
             }
         }
 
+        // Add feed config for transformers (Formats & Regional Settings)
+        $data['_feed'] = [
+            'price_decimals' => $this->_priceDecimals,
+            'price_decimal_point' => $this->_priceDecimalPoint,
+            'price_thousands_sep' => $this->_priceThousandsSep,
+            'price_currency' => $this->_priceCurrency,
+        ];
+
         return $data;
     }
 
@@ -335,24 +354,20 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
-     * Evaluate a rule-based source
+     * Evaluate a dynamic rule-based source
      */
-    protected function _evaluateRule(string $rule, array $rawData, Mage_Catalog_Model_Product $product): mixed
+    protected function _evaluateRule(string $ruleCode, array $rawData, Mage_Catalog_Model_Product $product): mixed
     {
-        return match ($rule) {
-            'stock_status' => $rawData['is_in_stock'] ? 'in_stock' : 'out_of_stock',
-            'availability' => $rawData['is_in_stock'] ? 'in stock' : 'out of stock',
-            'sale_price' => $rawData['special_price'] && $rawData['special_price'] < $rawData['regular_price']
-                ? $rawData['special_price']
-                : null,
-            'has_sale' => $rawData['special_price'] && $rawData['special_price'] < $rawData['regular_price'],
-            'category_path' => $rawData['category_path'],
-            'identifier_exists' => (!empty($rawData['gtin']) || !empty($rawData['mpn'])) ? 'yes' : 'no',
-            'item_group_id' => $product->getTypeId() === 'simple'
-                ? $this->_getParentId($product)
-                : $product->getId(),
-            default => null,
-        };
+        // Load the rule by code
+        $rule = Mage::getModel('feedmanager/dynamicRule')->loadByCode($ruleCode);
+
+        if (!$rule->getId() || !$rule->getIsEnabled()) {
+            return null;
+        }
+
+        // Create evaluator and evaluate
+        $evaluator = new Maho_FeedManager_Model_DynamicRule_Evaluator($rule);
+        return $evaluator->evaluate($rawData, $product);
     }
 
     /**
@@ -821,13 +836,18 @@ class Maho_FeedManager_Model_Mapper
                 }
             } else {
                 $value = $this->_getSourceValue($config, $rawData, $product);
+                $sourceValue = $config['source_value'] ?? '';
 
                 // Apply transformers
-                if (!empty($config['transformers'])) {
+                $hasExplicitTransformers = !empty($config['transformers']);
+                if ($hasExplicitTransformers) {
                     $transformers = is_array($config['transformers'])
                         ? $config['transformers']
                         : Maho_FeedManager_Model_Transformer::parseChainString($config['transformers']);
                     $value = Maho_FeedManager_Model_Transformer::pipeline($value, $transformers, $rawData);
+                } elseif ($this->_isPriceField($sourceValue) && is_numeric($value)) {
+                    // Auto-format price fields using feed settings (only if no explicit transformer)
+                    $value = $this->_formatPrice($value);
                 }
 
                 // Cast to appropriate type
@@ -956,7 +976,7 @@ class Maho_FeedManager_Model_Mapper
             (float) $value,
             $this->_priceDecimals,
             $this->_priceDecimalPoint,
-            $this->_priceThousandsSep
+            $this->_priceThousandsSep,
         );
 
         if ($this->_priceCurrencySuffix && $this->_priceCurrency !== '') {

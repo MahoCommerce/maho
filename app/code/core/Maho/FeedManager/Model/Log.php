@@ -13,6 +13,12 @@ declare(strict_types=1);
 /**
  * Feed Generation Log model
  *
+ * Error Handling Pattern:
+ * - Getter methods (getFeed, getErrorsArray): Return null/empty array if not found, never throw
+ * - Status methods (isRunning, isCompleted, isFailed): Return boolean, never throw
+ * - Recording methods (addError, recordUploadSuccess): Append to internal arrays, save on demand
+ * - Duration methods (getDuration, getDurationFormatted): Return 0 or formatted string on failure
+ *
  * @method int getLogId()
  * @method int getFeedId()
  * @method $this setFeedId(int $feedId)
@@ -40,6 +46,8 @@ declare(strict_types=1);
  * @method $this setUploadMessage(string|null $message)
  * @method int|null getDestinationId()
  * @method $this setDestinationId(int|null $id)
+ * @method Maho_FeedManager_Model_Resource_Log getResource()
+ * @method Maho_FeedManager_Model_Resource_Log _getResource()
  */
 class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
 {
@@ -157,7 +165,7 @@ class Maho_FeedManager_Model_Log extends Mage_Core_Model_Abstract
         }
 
         $minutes = floor($seconds / 60);
-        $seconds = $seconds % 60;
+        $seconds %= 60;
         return $minutes . 'm ' . round($seconds, 0) . 's';
     }
 

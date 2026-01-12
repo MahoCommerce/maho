@@ -26,6 +26,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
         $structureData = $structure ? Mage::helper('core')->jsonDecode($structure) : $this->_getDefaultXmlStructure();
         $sourceTypes = Maho_FeedManager_Model_Mapper::getSourceTypeOptions();
         $attributeOptions = $this->_getProductAttributeOptionsForEditor();
+        $ruleOptions = $this->_getDynamicRuleOptionsArray();
         $platformOptions = $this->_getPlatformPresetOptions();
 
         return '
@@ -104,6 +105,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             structure: ' . Mage::helper('core')->jsonEncode($structureData) . ',
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',
             attributeOptionsHtml: ' . Mage::helper('core')->jsonEncode($attributeOptions) . ',
+            ruleOptions: ' . Mage::helper('core')->jsonEncode($ruleOptions) . ',
             selectedPath: null,
             previewUrl: "' . $this->getUrl('*/*/xmlPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
@@ -186,6 +188,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     if (node.source_type === "attribute" || !node.source_type) {
                         var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + this.escapeHtml(node.source_value || "") + "\""), "value=\"" + this.escapeHtml(node.source_value || "") + "\" selected");
                         html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">" + selectHtml + "</select>";
+                    } else if (node.source_type === "rule") {
+                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
+                        html += "<option value=\"\">' . $this->__('-- Select Rule --') . '</option>";
+                        for (var ruleCode in this.ruleOptions) {
+                            var selected = (node.source_value === ruleCode) ? " selected" : "";
+                            html += "<option value=\"" + this.escapeHtml(ruleCode) + "\"" + selected + ">" + this.escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
+                        }
+                        html += "</select>";
                     } else {
                         var placeholder = node.source_type === "combined" ? "{{name}} - {{sku}}" : "";
                         html += "<input type=\"text\" class=\"input-text\" value=\"" + this.escapeHtml(node.source_value || "") + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"width: 100%;\">";

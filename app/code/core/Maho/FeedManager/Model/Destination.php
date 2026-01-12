@@ -13,6 +13,11 @@ declare(strict_types=1);
 /**
  * Upload Destination model
  *
+ * Error Handling Pattern:
+ * - Getter methods (getConfigArray, getConfigValue): Return empty array/null if not found, never throw
+ * - Boolean checks (isEnabled, isSftp, isFtp): Return false on failure, never throw
+ * - Connection testing: Throws Exception with descriptive message for caller to handle
+ *
  * @method int getDestinationId()
  * @method string getName()
  * @method $this setName(string $name)
@@ -28,6 +33,8 @@ declare(strict_types=1);
  * @method $this setLastUploadStatus(string|null $status)
  * @method string getCreatedAt()
  * @method string getUpdatedAt()
+ * @method Maho_FeedManager_Model_Resource_Destination getResource()
+ * @method Maho_FeedManager_Model_Resource_Destination _getResource()
  */
 class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 {

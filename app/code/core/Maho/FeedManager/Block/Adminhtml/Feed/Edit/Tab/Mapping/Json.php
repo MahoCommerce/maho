@@ -26,6 +26,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
         $structureData = $structure ? Mage::helper('core')->jsonDecode($structure) : new stdClass();
         $sourceTypes = Maho_FeedManager_Model_Mapper::getSourceTypeOptions();
         $attributeOptions = $this->_getProductAttributeOptionsForEditor();
+        $ruleOptions = $this->_getDynamicRuleOptionsArray();
         $platformOptions = $this->_getPlatformPresetOptions();
 
         return '
@@ -101,6 +102,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
             structure: ' . Mage::helper('core')->jsonEncode($structureData) . ',
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',
             attributeOptionsHtml: ' . Mage::helper('core')->jsonEncode($attributeOptions) . ',
+            ruleOptions: ' . Mage::helper('core')->jsonEncode($ruleOptions) . ',
             selectedPath: null,
             previewUrl: "' . $this->getUrl('*/*/jsonPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
@@ -199,10 +201,18 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                         "<div style=\"margin-bottom: 15px;\">" +
                         "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Source Value') . '</label>";
 
-                    // Show attribute dropdown or text input based on source type
+                    // Show attribute dropdown, rule dropdown, or text input based on source type
                     if (node.source_type === "attribute") {
                         var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + this.escapeHtml(node.source_value || "") + "\""), "value=\"" + this.escapeHtml(node.source_value || "") + "\" selected");
                         html += "<select onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">" + selectHtml + "</select>";
+                    } else if (node.source_type === "rule") {
+                        html += "<select onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
+                        html += "<option value=\"\">' . $this->__('-- Select Rule --') . '</option>";
+                        for (var ruleCode in this.ruleOptions) {
+                            var selected = (node.source_value === ruleCode) ? " selected" : "";
+                            html += "<option value=\"" + this.escapeHtml(ruleCode) + "\"" + selected + ">" + this.escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
+                        }
+                        html += "</select>";
                     } else {
                         var placeholder = node.source_type === "combined" ? "{{name}} - {{sku}}" : "";
                         html += "<input type=\"text\" class=\"input-text\" value=\"" + this.escapeHtml(node.source_value || "") + "\" onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"width: 100%;\">";

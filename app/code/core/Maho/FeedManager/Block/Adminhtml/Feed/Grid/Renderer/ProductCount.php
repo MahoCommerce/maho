@@ -21,13 +21,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid_Renderer_ProductCount extends M
         $value = $row->getData($this->getColumn()->getIndex());
 
         if ($value === null || $value === '') {
-            return '<span style="color:#9ca3af;font-family:ui-monospace,monospace;font-size:12px;">—</span>';
+            return '<span class="grid-severity-minor"><span>—</span></span>';
         }
 
-        $formatted = number_format((int) $value);
-
-        return '<span style="font-family:ui-monospace,monospace;font-size:12px;font-variant-numeric:tabular-nums;color:#374151;">'
-            . $formatted
-            . '</span>';
+        return number_format((int) $value);
     }
 }

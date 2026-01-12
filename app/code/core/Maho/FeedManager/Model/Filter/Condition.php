@@ -101,6 +101,27 @@ class Maho_FeedManager_Model_Filter_Condition
     }
 
     /**
+     * Build visibility condition for product visibility filtering
+     *
+     * @return array<string, mixed>
+     */
+    public function buildVisibilityCondition(string $operator, string $value, array $condition): array
+    {
+        $visibilityValue = $condition['visibility_value'] ?? $value;
+
+        // Handle comma-separated string values
+        if (is_string($visibilityValue) && str_contains($visibilityValue, ',')) {
+            $visibilityValue = array_map('trim', explode(',', $visibilityValue));
+        }
+
+        return match ($operator) {
+            'eq', 'in' => ['in' => is_array($visibilityValue) ? $visibilityValue : [$visibilityValue]],
+            'neq', 'nin' => ['nin' => is_array($visibilityValue) ? $visibilityValue : [$visibilityValue]],
+            default => ['eq' => $visibilityValue],
+        };
+    }
+
+    /**
      * Apply stock condition to collection
      */
     public function applyStockConditionToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection, array $stockCond): void
@@ -287,6 +308,7 @@ class Maho_FeedManager_Model_Filter_Condition
             $stockConditions = [];
             $categoryConditions = [];
             $typeConditions = [];
+            $visibilityConditions = [];
 
             foreach ($conditions as $condition) {
                 $attribute = $condition['attribute'] ?? '';
@@ -304,6 +326,8 @@ class Maho_FeedManager_Model_Filter_Condition
                     $categoryConditions[] = $this->buildCategoryCondition($operator, $value, $condition);
                 } elseif ($attribute === 'type_id') {
                     $typeConditions[] = $this->buildTypeCondition($operator, $value, $condition);
+                } elseif ($attribute === 'visibility') {
+                    $visibilityConditions[] = $this->buildVisibilityCondition($operator, $value, $condition);
                 } else {
                     // Standard EAV attribute
                     $sqlCondition = $this->buildSqlCondition($attribute, $operator, $value);
@@ -336,6 +360,11 @@ class Maho_FeedManager_Model_Filter_Condition
             // Apply type conditions
             foreach ($typeConditions as $typeCond) {
                 $collection->addAttributeToFilter('type_id', $typeCond);
+            }
+
+            // Apply visibility conditions
+            foreach ($visibilityConditions as $visCond) {
+                $collection->addAttributeToFilter('visibility', $visCond);
             }
         }
     }

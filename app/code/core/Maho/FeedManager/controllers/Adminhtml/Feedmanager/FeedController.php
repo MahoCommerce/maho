@@ -860,8 +860,12 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 return;
             }
 
+            $extension = $feed->getFileFormat();
+            if ($feed->getGzipCompression()) {
+                $extension .= '.gz';
+            }
             $this->_prepareDownloadResponse(
-                $feed->getFilename() . '.' . $feed->getFileFormat(),
+                $feed->getFilename() . '.' . $extension,
                 file_get_contents($filePath),
                 'application/octet-stream',
             );
@@ -1290,7 +1294,11 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             // Perform upload
             $uploader = new Maho_FeedManager_Model_Uploader($destination);
-            $remoteName = $feed->getFilename() . '.' . $feed->getFileFormat();
+            $extension = $feed->getFileFormat();
+            if ($feed->getGzipCompression()) {
+                $extension .= '.gz';
+            }
+            $remoteName = $feed->getFilename() . '.' . $extension;
             $success = $uploader->upload($filePath, $remoteName);
 
             // Update destination last upload info

@@ -21,15 +21,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid_Renderer_Enabled extends Mage_A
         $value = (bool) $row->getData($this->getColumn()->getIndex());
 
         if ($value) {
-            return '<span style="display:inline-flex;align-items:center;gap:6px;">'
-                . '<span style="width:8px;height:8px;border-radius:50%;background:#22c55e;"></span>'
-                . '<span style="color:#166534;font-weight:500;">Enabled</span>'
-                . '</span>';
+            return '<span class="grid-severity-notice"><span>' . $this->__('Enabled') . '</span></span>';
         }
 
-        return '<span style="display:inline-flex;align-items:center;gap:6px;">'
-            . '<span style="width:8px;height:8px;border-radius:50%;background:#9ca3af;"></span>'
-            . '<span style="color:#6b7280;">Disabled</span>'
-            . '</span>';
+        return '<span class="grid-severity-minor"><span>' . $this->__('Disabled') . '</span></span>';
     }
 }
