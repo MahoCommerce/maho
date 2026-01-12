@@ -13,7 +13,7 @@ declare(strict_types=1);
 /**
  * Trait for sending JSON responses in admin controllers
  */
-trait Maho_FeedManager_Adminhtml_Feedmanager_JsonResponseTrait
+trait Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait
 {
     /**
      * Send a JSON response

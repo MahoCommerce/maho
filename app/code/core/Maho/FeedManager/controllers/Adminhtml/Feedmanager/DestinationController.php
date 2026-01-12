@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_Adminhtml_Controller_Action
 {
-    use Maho_FeedManager_Adminhtml_Feedmanager_JsonResponseTrait;
+    use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
 
     public const ADMIN_RESOURCE = 'catalog/feedmanager/destinations';
 
