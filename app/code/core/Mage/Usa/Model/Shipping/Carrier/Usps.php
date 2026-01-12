@@ -1111,9 +1111,6 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             } else {
                 $latestEvent = $response['trackingEvents'][0] ?? [];
                 $summary = $latestEvent['eventType'] ?? 'In Transit';
-                if (!empty($latestEvent['eventDescription'])) {
-                    $summary .= ': ' . $latestEvent['eventDescription'];
-                }
             }
 
             $tracking->setTrackSummary($summary);
@@ -1121,10 +1118,23 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             // Process all tracking events for detailed progress
             $progressDetail = [];
             foreach ($response['trackingEvents'] as $event) {
+                // Parse eventTimestamp (ISO 8601 format: "2023-08-02T07:31:00Z")
+                $deliveryDate = '';
+                $deliveryTime = '';
+                if (!empty($event['eventTimestamp'])) {
+                    try {
+                        $dt = new DateTime($event['eventTimestamp']);
+                        $deliveryDate = $dt->format('Y-m-d');
+                        $deliveryTime = $dt->format('H:i:s');
+                    } catch (Exception $e) {
+                        // Invalid timestamp, leave empty
+                    }
+                }
+
                 $progressDetail[] = [
-                    'activity' => $event['eventDescription'] ?? $event['eventType'] ?? '',
-                    'deliverydate' => $event['eventDate'] ?? '',
-                    'deliverytime' => $event['eventTime'] ?? '',
+                    'activity' => $event['eventType'] ?? '',
+                    'deliverydate' => $deliveryDate,
+                    'deliverytime' => $deliveryTime,
                     'deliverylocation' => $this->formatTrackingLocation($event),
                 ];
             }
@@ -1591,7 +1601,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             ],
             'fromAddress' => [
                 'streetAddress' => $shipperAddress->getStreet1(),
-                'streetAddressAbbreviation' => $shipperAddress->getStreet2() ?: '',
+                'secondaryAddress' => $shipperAddress->getStreet2() ?: '',
                 'city' => $shipperAddress->getCity(),
                 'state' => $shipperAddress->getRegionCode(),
                 'ZIPCode' => $shipperAddress->getPostcode(),
@@ -1602,7 +1612,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             ],
             'toAddress' => [
                 'streetAddress' => $recipientAddress->getStreet1(),
-                'streetAddressAbbreviation' => $recipientAddress->getStreet2() ?: '',
+                'secondaryAddress' => $recipientAddress->getStreet2() ?: '',
                 'city' => $recipientAddress->getCity(),
                 'state' => $recipientAddress->getRegionCode(),
                 'ZIPCode' => $recipientAddress->getPostcode(),
@@ -1775,25 +1785,20 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     protected function processLabelResponse(\Maho\DataObject $result, array $response): void
     {
         // Check if response has label data
-        if (empty($response['labelImage']) && empty($response['content'])) {
+        if (empty($response['labelImage'])) {
             Mage::throwException(
                 Mage::helper('usa')->__('No label data received from USPS'),
             );
         }
 
-        // Get label content (either from labelImage or content field)
-        $labelContent = $response['labelImage'] ?? $response['content'];
+        // labelImage is always base64 encoded according to USPS API
+        $labelContent = base64_decode((string) $response['labelImage']);
 
-        // If content is base64 encoded, decode it
-        if (isset($response['contentType'])) {
-            $labelContent = base64_decode($labelContent);
-        }
-
-        // Set tracking number
+        // Set tracking number (check for both domestic and international)
         if (!empty($response['trackingNumber'])) {
             $result->setTrackingNumber($response['trackingNumber']);
-        } elseif (!empty($response['SKU'])) {
-            $result->setTrackingNumber($response['SKU']);
+        } elseif (!empty($response['internationalTrackingNumber'])) {
+            $result->setTrackingNumber($response['internationalTrackingNumber']);
         }
 
         // Set label content
