@@ -68,6 +68,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
      */
     public function initTotals()
     {
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $this->_order   = $parent->getOrder();
         $this->_source  = $parent->getSource();
@@ -94,11 +95,14 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
      */
     protected function _addTax($after = 'discount')
     {
+        /** @var Mage_Sales_Block_Order_Totals $parent */
+        $parent = $this->getParentBlock();
+
         $taxTotal = new \Maho\DataObject([
             'code'      => 'tax',
             'block_name' => $this->getNameInLayout(),
         ]);
-        $this->getParentBlock()->addTotal($taxTotal, $after);
+        $parent->addTotal($taxTotal, $after);
         return $this;
     }
 
@@ -118,6 +122,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     protected function _initSubtotal()
     {
         $store  = $this->getStore();
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $subtotal = $parent->getTotal('subtotal');
         if (!$subtotal) {
@@ -193,6 +198,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     protected function _initShipping()
     {
         $store  = $this->getStore();
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $shipping = $parent->getTotal('shipping');
         if (!$shipping) {
@@ -253,6 +259,7 @@ class Mage_Tax_Block_Sales_Order_Tax extends Mage_Core_Block_Template
     protected function _initGrandTotal()
     {
         $store  = $this->getStore();
+        /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
         $grandototal = $parent->getTotal('grand_total');
         if (!$grandototal || !(float) $this->_source->getGrandTotal()) {

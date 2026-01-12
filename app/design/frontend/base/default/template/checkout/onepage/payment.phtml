@@ -11,6 +11,7 @@
 
 /** @var Mage_Checkout_Block_Onepage_Payment $this */
 ?>
+<?= $this->getChildChildHtml('before_form') ?>
 <script type="text/javascript">
     var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal() ?>;
     var checkQuoteBaseGrandTotal = quoteBaseGrandTotal;

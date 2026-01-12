@@ -1,0 +1,153 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    base_default
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Giftcard_Block_Checkout_Cart_Giftcard $this */
+$appliedCodes = $this->getAppliedGiftcardCodes();
+$formKey = Mage::getSingleton('core/session')->getFormKey();
+?>
+
+<form id="giftcard-cart-form">
+    <div class="discount">
+        <h2><?php echo $this->__('Gift Cards') ?></h2>
+        <div class="discount-form">
+            <?php if (!empty($appliedCodes)): ?>
+                <div class="applied-giftcards">
+                    <?php foreach ($appliedCodes as $code => $amount): ?>
+                        <?php
+                            $displayCode = $code;
+                            if (strlen($code) > 10) {
+                                $displayCode = substr($code, 0, 4) . '...' . substr($code, -4);
+                            }
+                        ?>
+                        <div class="applied-code">
+                            <span><?php echo $this->escapeHtml($displayCode) ?>: -<?php echo Mage::helper('core')->currency($amount, true, false) ?></span>
+                            <button type="button" class="btn-remove-giftcard" data-code="<?php echo $this->escapeHtml($code) ?>" title="<?php echo $this->__('Remove') ?>">[<?php echo $this->__('Remove') ?>]</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+            <div class="coupon-input-group">
+                <label for="giftcard_code" class="visually-hidden"><?php echo $this->__('Enter gift card code') ?></label>
+                <input class="input-text coupon-input" type="text" id="giftcard_code" name="giftcard_code" value="" placeholder="<?php echo $this->__('Enter gift card code') ?>">
+                <button type="button" title="<?php echo $this->__('Check Balance') ?>" class="button2 btn-apply" id="giftcard-check-btn"><?php echo $this->__('Check') ?></button>
+                <button type="button" title="<?php echo $this->__('Apply') ?>" class="button2 btn-apply" id="giftcard-apply-btn"><?php echo $this->__('Apply') ?></button>
+            </div>
+            <div id="giftcard-balance-result" style="display: none; margin-top: 10px; padding: 8px; border-radius: 4px;"></div>
+        </div>
+    </div>
+</form>
+
+<script type="module">
+const codeInput = document.getElementById('giftcard_code');
+const checkBtn = document.getElementById('giftcard-check-btn');
+const applyBtn = document.getElementById('giftcard-apply-btn');
+const balanceResult = document.getElementById('giftcard-balance-result');
+const formKey = <?php echo Mage::helper('core')->jsonEncode($formKey) ?>;
+
+const urls = {
+    apply: <?php echo Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/apply')) ?>,
+    remove: <?php echo Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/remove')) ?>,
+    checkBalance: <?php echo Mage::helper('core')->jsonEncode($this->getUrl('giftcard/cart/checkBalance')) ?>
+};
+
+function showBalanceResult(message, isSuccess) {
+    balanceResult.textContent = message;
+    balanceResult.style.display = 'block';
+    balanceResult.style.backgroundColor = isSuccess ? '#dff0d8' : '#f2dede';
+    balanceResult.style.color = isSuccess ? '#3c763d' : '#a94442';
+    balanceResult.style.border = isSuccess ? '1px solid #d6e9c6' : '1px solid #ebccd1';
+}
+
+function hideBalanceResult() {
+    balanceResult.style.display = 'none';
+}
+
+function setButtonsDisabled(disabled) {
+    checkBtn.disabled = disabled;
+    applyBtn.disabled = disabled;
+    codeInput.disabled = disabled;
+}
+
+async function checkBalance() {
+    const code = codeInput.value.trim();
+    if (!code) return;
+
+    hideBalanceResult();
+    setButtonsDisabled(true);
+    checkBtn.textContent = <?php echo Mage::helper('core')->jsonEncode($this->__('Checking...')) ?>;
+
+    try {
+        const data = await mahoFetch(urls.checkBalance, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({ giftcard_code: code, form_key: formKey })
+        });
+
+        showBalanceResult(data.message, data.success);
+
+    } catch (error) {
+        showBalanceResult(error.message || 'An error occurred', false);
+    } finally {
+        setButtonsDisabled(false);
+        checkBtn.textContent = <?php echo Mage::helper('core')->jsonEncode($this->__('Check')) ?>;
+    }
+}
+
+async function applyGiftcard() {
+    const code = codeInput.value.trim();
+    if (!code) return;
+
+    hideBalanceResult();
+    setButtonsDisabled(true);
+    applyBtn.textContent = <?php echo Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>;
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = urls.apply;
+    form.innerHTML = `
+        <input type="hidden" name="giftcard_code" value="${code}">
+        <input type="hidden" name="form_key" value="${formKey}">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+async function removeGiftcard(code) {
+    setButtonsDisabled(true);
+
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = urls.remove;
+    form.innerHTML = `
+        <input type="hidden" name="code" value="${code}">
+        <input type="hidden" name="form_key" value="${formKey}">
+    `;
+    document.body.appendChild(form);
+    form.submit();
+}
+
+checkBtn.addEventListener('click', checkBalance);
+applyBtn.addEventListener('click', applyGiftcard);
+
+codeInput.addEventListener('input', hideBalanceResult);
+
+codeInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        applyGiftcard();
+    }
+});
+
+document.querySelectorAll('.btn-remove-giftcard').forEach(btn => {
+    btn.addEventListener('click', () => {
+        removeGiftcard(btn.dataset.code);
+    });
+});
+</script>

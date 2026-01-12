@@ -23,7 +23,6 @@ class Mage_Payment_Block_Form_Container extends Mage_Core_Block_Template
     #[\Override]
     protected function _prepareLayout()
     {
-        /** @var Mage_Payment_Helper_Data $helper */
         $helper = $this->helper('payment');
 
         /**
@@ -92,7 +91,6 @@ class Mage_Payment_Block_Form_Container extends Mage_Core_Block_Template
     {
         $methods = $this->getData('methods');
         if ($methods === null) {
-            /** @var Mage_Payment_Helper_Data $helper */
             $helper = $this->helper('payment');
 
             $quote = $this->getQuote();

@@ -136,7 +136,8 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Sales_Block_Ord
         return $html;
     }
 
-    public function formatPrice(float $price): string
+    #[\Override]
+    public function formatPrice(float $price, ?string $currency = null): string
     {
         return $this->_order ? $this->_order->formatPriceTxt($price) : Mage::helper('core')->currency($price);
     }
