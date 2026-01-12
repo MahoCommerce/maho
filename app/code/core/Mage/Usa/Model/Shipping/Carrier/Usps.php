@@ -1560,7 +1560,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Build domestic label request data
      */
-    protected function buildDomesticLabelRequest(Varien_Object $request): array
+    protected function buildDomesticLabelRequest(\Maho\DataObject $request): array
     {
         $packageParams = $request->getPackageParams();
         $shipperAddress = $request->getShipperAddress();
@@ -1645,7 +1645,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Build international label request data
      */
-    protected function buildInternationalLabelRequest(Varien_Object $request): array
+    protected function buildInternationalLabelRequest(\Maho\DataObject $request): array
     {
         $packageParams = $request->getPackageParams();
         $shipperAddress = $request->getShipperAddress();
@@ -1722,7 +1722,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Build customs items for international shipments
      */
-    protected function buildCustomsItems(Varien_Object $request): array
+    protected function buildCustomsItems(\Maho\DataObject $request): array
     {
         $items = [];
         $packageItems = $request->getPackageItems();
@@ -1757,7 +1757,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Get extra services (like delivery confirmation)
      */
-    protected function getExtraServices(Varien_Object $request): array
+    protected function getExtraServices(\Maho\DataObject $request): array
     {
         $services = [];
 
@@ -1772,7 +1772,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Process label response from API
      */
-    protected function processLabelResponse(Varien_Object $result, array $response): void
+    protected function processLabelResponse(\Maho\DataObject $result, array $response): void
     {
         // Check if response has label data
         if (empty($response['labelImage']) && empty($response['content'])) {
