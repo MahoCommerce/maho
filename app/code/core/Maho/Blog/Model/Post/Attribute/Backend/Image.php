@@ -16,6 +16,12 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
         return \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS;
     }
 
+    /**
+     * Save uploaded file and set its name to post
+     *
+     * @param \Maho\DataObject $object
+     * @return $this
+     */
     #[\Override]
     public function afterSave($object)
     {
@@ -23,16 +29,15 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
         $value = $object->getData($name);
         $oldValue = $object->getOrigData($name);
 
-        // Handle delete
         if (is_array($value) && !empty($value['delete'])) {
             if ($oldValue) {
                 $this->_deleteFile($oldValue);
             }
-            $this->_saveAttributeValue($object, '');
+            $object->setData($name, '');
+            $this->_updateAttributeValue($object, '');
             return $this;
         }
 
-        // Handle file upload
         if (!empty($_FILES[$name]['name'])) {
             try {
                 $validator = Mage::getModel('core/file_validator_image');
@@ -46,11 +51,13 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
                 if ($result && isset($result['file'])) {
                     $fileName = $result['file'];
 
+                    // Delete old file if replacing
                     if ($oldValue && $oldValue !== $fileName) {
                         $this->_deleteFile($oldValue);
                     }
 
-                    $this->_saveAttributeValue($object, $fileName);
+                    $object->setData($name, $fileName);
+                    $this->_updateAttributeValue($object, $fileName);
                 }
             } catch (Exception $e) {
                 if ($e->getCode() != UPLOAD_ERR_NO_FILE) {
@@ -63,53 +70,36 @@ class Maho_Blog_Model_Post_Attribute_Backend_Image extends Mage_Eav_Model_Entity
     }
 
     /**
-     * Save attribute value to database
-     * Uses direct SQL to avoid UNIQUE constraint violations from double-save
+     * Update attribute value in database
+     *
+     * @param \Maho\DataObject $object
      */
-    protected function _saveAttributeValue(\Maho\DataObject $object, string $value): void
+    protected function _updateAttributeValue($object, string $value): void
     {
-        $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
-        $table = $this->getAttribute()->getBackend()->getTable();
-        $storeId = $object->getStoreId();
-        $entityId = $object->getId();
-        $attributeId = $this->getAttribute()->getId();
+        $attribute = $this->getAttribute();
+        $table = $attribute->getBackend()->getTable();
+        $entityIdField = $attribute->getEntity()->getEntityIdField();
+        $adapter = $this->_getWriteAdapter();
 
-        // Find actual store_id in database (could be 0 or current store)
-        $existingStoreId = $adapter->fetchOne(
-            $adapter->select()
-                ->from($table, 'store_id')
-                ->where('entity_id = ?', $entityId)
-                ->where('attribute_id = ?', $attributeId)
-                ->where('store_id IN (?)', [$storeId, 0])
-                ->order('store_id DESC'),
-        );
+        $data = [
+            'entity_type_id' => $attribute->getEntityTypeId(),
+            'attribute_id' => $attribute->getId(),
+            'store_id' => $object->getStoreId(),
+            $entityIdField => $object->getId(),
+            'value' => $value,
+        ];
 
-        if ($existingStoreId !== false) {
-            // Row exists, UPDATE it
-            $adapter->update(
-                $table,
-                ['value' => $value],
-                [
-                    'entity_id = ?' => $entityId,
-                    'attribute_id = ?' => $attributeId,
-                    'store_id = ?' => $existingStoreId,
-                ],
-            );
-        } else {
-            // No row exists, INSERT it
-            $adapter->insert(
-                $table,
-                [
-                    'entity_type_id' => $object->getEntityTypeId(),
-                    'attribute_id' => $attributeId,
-                    'store_id' => 0,
-                    'entity_id' => $entityId,
-                    'value' => $value,
-                ],
-            );
-        }
+        $adapter->insertOnDuplicate($table, $data, ['value']);
+    }
 
-        $object->setData($this->getAttribute()->getName(), $value);
+    /**
+     * Get write adapter
+     *
+     * @return Maho\Db\Adapter\AdapterInterface
+     */
+    protected function _getWriteAdapter()
+    {
+        return $this->getAttribute()->getEntity()->getWriteConnection();
     }
 
     /**
