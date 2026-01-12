@@ -172,7 +172,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     // check per customer usage limit
                     $customerId = $address->getQuote()->getCustomerId();
                     if ($customerId && $coupon->getUsagePerCustomer()) {
-                        $couponUsage = new Varien_Object();
+                        $couponUsage = new \Maho\DataObject();
                         Mage::getResourceModel('salesrule/coupon_usage')->loadByCustomerCoupon(
                             $couponUsage,
                             $customerId,
@@ -432,7 +432,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     break;
             }
 
-            $result = new Varien_Object([
+            $result = new \Maho\DataObject([
                 'discount_amount'      => $discountAmount,
                 'base_discount_amount' => $baseDiscountAmount,
             ]);

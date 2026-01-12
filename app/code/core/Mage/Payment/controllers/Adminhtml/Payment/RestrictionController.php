@@ -122,7 +122,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             $rule = Mage::getModel('payment/restriction_rule');
 
             // Set up the form for the rule
-            $form = new Varien_Data_Form();
+            $form = new \Maho\Data\Form();
             $form->setHtmlIdPrefix('rule_');
             $rule->setForm($form);
 

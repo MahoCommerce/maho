@@ -57,7 +57,7 @@ class Mage_Catalog_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer
     /**
      * Apply attribute option filter to product collection
      *
-     * @param   Varien_Object $filterBlock
+     * @param \Maho\DataObject $filterBlock
      * @return  Mage_Catalog_Model_Layer_Filter_Attribute
      */
     #[\Override]

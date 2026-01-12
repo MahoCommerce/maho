@@ -30,11 +30,11 @@ class Mage_Api2_Block_Adminhtml_Attribute_Grid extends Mage_Adminhtml_Block_Widg
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = new Varien_Data_Collection();
+        $collection = new \Maho\Data\Collection();
 
         foreach (Mage_Api2_Model_Auth_User::getUserTypes() as $type => $label) {
             $collection->addItem(
-                new Varien_Object(['user_type_name' => $label, 'user_type_code' => $type]),
+                new \Maho\DataObject(['user_type_name' => $label, 'user_type_code' => $type]),
             );
         }
 
@@ -71,7 +71,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Grid extends Mage_Adminhtml_Block_Widg
     /**
      * Get row URL
      *
-     * @param Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return string|null
      */
     #[\Override]

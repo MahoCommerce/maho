@@ -55,9 +55,9 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
         return Mage::getUrl('captcha/index/challenge');
     }
 
-    public function getWidgetAttributes(): Varien_Object
+    public function getWidgetAttributes(): \Maho\DataObject
     {
-        return new Varien_Object([
+        return new \Maho\DataObject([
             'challengeurl' => $this->getChallengeUrl(),
             'name' => 'maho_captcha',
             'id' => 'maho_captcha',

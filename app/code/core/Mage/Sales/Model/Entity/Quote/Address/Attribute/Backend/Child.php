@@ -13,7 +13,7 @@
 class Mage_Sales_Model_Entity_Quote_Address_Attribute_Backend_Child extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]

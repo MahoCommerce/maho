@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Uploader_Model_Config_Abstract extends Varien_Object
+abstract class Mage_Uploader_Model_Config_Abstract extends \Maho\DataObject
 {
     /**
      * Get file helper
@@ -28,8 +28,8 @@ abstract class Mage_Uploader_Model_Config_Abstract extends Varien_Object
      *
      * @param string $method
      * @param array $args
-     * @return bool|mixed|Varien_Object
-     * @throws Varien_Exception
+     * @return bool|mixed|\Maho\DataObject
+     * @throws \Maho\Exception
      */
     #[\Override]
     public function __call($method, $args)
@@ -40,7 +40,7 @@ abstract class Mage_Uploader_Model_Config_Abstract extends Varien_Object
             'set' => $this->setData($key, $args[0] ?? null),
             'uns' => $this->unsetData($key),
             'has' => isset($this->_data[$key]),
-            default => throw new Varien_Exception('Invalid method ' . static::class . '::' . $method . '(' . print_r($args, true) . ')'),
+            default => throw new \Maho\Exception('Invalid method ' . static::class . '::' . $method . '(' . print_r($args, true) . ')'),
         };
     }
 }

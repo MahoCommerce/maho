@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Radio extends Mage_Adminh
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $values = $this->getColumn()->getValues();
         $value  = $row->getData($this->getColumn()->getIndex());

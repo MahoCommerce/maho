@@ -13,7 +13,7 @@
 class Mage_Sales_Model_Entity_Order_Shipment_Attribute_Backend_Parent extends Mage_Eav_Model_Entity_Attribute_Backend_Abstract
 {
     /**
-     * @param Varien_Object|Mage_Sales_Model_Order_Shipment $object
+     * @param \Maho\DataObject|Mage_Sales_Model_Order_Shipment $object
      * @return $this
      */
     #[\Override]

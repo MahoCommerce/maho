@@ -175,7 +175,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             return;
         }
 
-        $responseAjax = new Varien_Object();
+        $responseAjax = new \Maho\DataObject();
         $isNeedCreateLabel = isset($data['create_shipping_label']) && $data['create_shipping_label'];
 
         try {
@@ -510,7 +510,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      */
     public function createLabelAction(): void
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         try {
             $shipment = $this->_initShipment();
             if (!$this->_createShippingLabel($shipment)) {

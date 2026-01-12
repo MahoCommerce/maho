@@ -81,7 +81,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     {
         if (is_null($this->_salesAmountExpression)) {
             $adapter = $this->getConnection();
-            $expressionTransferObject = new Varien_Object([
+            $expressionTransferObject = new \Maho\DataObject([
                 'expression' => '%s - %s - %s - (%s - %s - %s)',
                 'arguments' => [
                     $adapter->getIfNullSql('main_table.base_total_invoiced', 0),

@@ -146,7 +146,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Layout extends Ma
     protected function _collectLayoutHandles($layoutHandles)
     {
         if ($layoutHandlesArr = $layoutHandles->xpath('/*/*/label/..')) {
-            /** @var Varien_Simplexml_Element $node */
+            /** @var \Maho\Simplexml\Element $node */
             foreach ($layoutHandlesArr as $node) {
                 if ($this->_filterLayoutHandle($node->getName())) {
                     $helper = Mage::helper(Mage_Core_Model_Layout::findTranslationModuleName($node));

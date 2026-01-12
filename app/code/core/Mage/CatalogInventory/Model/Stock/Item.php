@@ -505,11 +505,11 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      * @param mixed $qty quantity of this item (item qty x parent item qty)
      * @param mixed $summaryQty quantity of this product
      * @param mixed $origQty original qty of item (not multiplied on parent item qty)
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function checkQuoteItemQty($qty, $summaryQty, $origQty = 0)
     {
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         $result->setHasError(false);
 
         if (!is_numeric($qty)) {
@@ -656,11 +656,11 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      * Check qty increments
      *
      * @param int|float $qty
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function checkQtyIncrements($qty)
     {
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         if ($this->getSuppressCheckQtyIncrements()) {
             return $result;
         }

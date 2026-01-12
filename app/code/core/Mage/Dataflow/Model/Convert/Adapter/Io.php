@@ -15,14 +15,14 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
     public const XML_PATH_EXPORT_LOCAL_VALID_PATH = 'general/file/importexport_local_valid_paths';
 
     /**
-     * @return Varien_Io_Abstract|false
+     * @return \Maho\Io\AbstractIo|false
      */
     #[\Override]
     public function getResource($forWrite = false)
     {
         if (!$this->_resource) {
             $type = $this->getVar('type', 'file');
-            $className = 'Varien_Io_' . ucwords($type);
+            $className = '\Maho\Io\\' . ucwords($type);
             $this->_resource = new $className();
 
             $isError = false;

@@ -17,7 +17,7 @@
  *
  * @method int getSendConfirmation()
  */
-class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements Mage_Checkout_Model_Cart_Interface
+class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implements Mage_Checkout_Model_Cart_Interface
 {
     /**
      * Quote session object
@@ -154,7 +154,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      */
     public function initRuleData()
     {
-        Mage::register('rule_data', new Varien_Object([
+        Mage::register('rule_data', new \Maho\DataObject([
             'store_id'  => $this->_session->getStore()->getId(),
             'website_id'  => $this->_session->getStore()->getWebsiteId(),
             'customer_group_id' => $this->getCustomerGroupId(),
@@ -431,7 +431,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
             }
 
             if ($additionalOptions = $orderItem->getProductOptionByCode('additional_options')) {
-                $item->addOption(new Varien_Object(
+                $item->addOption(new \Maho\DataObject(
                     [
                         'product' => $item->getProduct(),
                         'code' => 'additional_options',
@@ -573,13 +573,13 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
 
                         $info = $item->getOptionByCode('info_buyRequest');
                         if ($info) {
-                            $info = new Varien_Object(
+                            $info = new \Maho\DataObject(
                                 unserialize($info->getValue(), ['allowed_classes' => false]),
                             );
                             $info->setQty($qty);
                             $info->setOptions($this->_prepareOptionsForRequest($item));
                         } else {
-                            $info = new Varien_Object([
+                            $info = new \Maho\DataObject([
                                 'product_id' => $product->getId(),
                                 'qty' => $qty,
                                 'options' => $this->_prepareOptionsForRequest($item),
@@ -741,16 +741,16 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
      * $config can be either buyRequest config, or just qty
      *
      * @param   int|Mage_Catalog_Model_Product $product
-     * @param   float|array|Varien_Object $config
+     * @param float|array|\Maho\DataObject $config
      * @return  Mage_Adminhtml_Model_Sales_Order_Create
      */
     #[\Override]
     public function addProduct($product, $config = 1)
     {
-        if (!is_array($config) && !($config instanceof Varien_Object)) {
+        if (!is_array($config) && !($config instanceof \Maho\DataObject)) {
             $config = ['qty' => $config];
         }
-        $config = new Varien_Object($config);
+        $config = new \Maho\DataObject($config);
 
         if (!($product instanceof Mage_Catalog_Model_Product)) {
             $productId = $product;
@@ -828,7 +828,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
             try {
                 foreach ($data as $itemId => $info) {
                     if (!empty($info['configured'])) {
-                        $item = $this->getQuote()->updateItem($itemId, new Varien_Object($info));
+                        $item = $this->getQuote()->updateItem($itemId, new \Maho\DataObject($info));
                         $itemQty = (float) $item->getQty();
                     } else {
                         $item       = $this->getQuote()->getItemById($itemId);
@@ -961,7 +961,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
         }
         $item->save();
         if (!empty($options['options'])) {
-            $item->addOption(new Varien_Object(
+            $item->addOption(new \Maho\DataObject(
                 [
                     'product' => $item->getProduct(),
                     'code' => 'option_ids',
@@ -970,7 +970,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
             ));
 
             foreach ($options['options'] as $optionId => $optionValue) {
-                $item->addOption(new Varien_Object(
+                $item->addOption(new \Maho\DataObject(
                     [
                         'product' => $item->getProduct(),
                         'code' => 'option_' . $optionId,
@@ -980,7 +980,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends Varien_Object implements M
             }
         }
         if (!empty($options['additional_options'])) {
-            $item->addOption(new Varien_Object(
+            $item->addOption(new \Maho\DataObject(
                 [
                     'product' => $item->getProduct(),
                     'code' => 'additional_options',

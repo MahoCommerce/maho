@@ -35,7 +35,7 @@ class Mage_Paypal_Model_Cart
 
     /**
      * Rendered cart items
-     * Array of Varien_Objects
+     * Array of \Maho\DataObject
      *
      * @var array
      */
@@ -181,12 +181,12 @@ class Mage_Paypal_Model_Cart
      * @param numeric $qty
      * @param float $amount
      * @param string $identifier
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function addItem($name, $qty, $amount, $identifier = null)
     {
         $this->_shouldRender = true;
-        $item = new Varien_Object([
+        $item = new \Maho\DataObject([
             'name'   => $name,
             'qty'    => $qty,
             'amount' => (float) $amount,
@@ -421,9 +421,9 @@ class Mage_Paypal_Model_Cart
     /**
      * Add a usual line item with amount and qty
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    protected function _addRegularItem(Varien_Object $salesItem)
+    protected function _addRegularItem(\Maho\DataObject $salesItem)
     {
         if ($this->_salesEntity instanceof Mage_Sales_Model_Order) {
             // TODO: nominal item for order

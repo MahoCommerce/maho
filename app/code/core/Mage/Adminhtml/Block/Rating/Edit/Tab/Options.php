@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Rating_Edit_Tab_Options extends Mage_Adminhtml_Block_
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $fieldset = $form->addFieldset('options_form', ['legend' => Mage::helper('rating')->__('Assigned Options')]);
 

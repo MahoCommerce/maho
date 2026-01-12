@@ -15,7 +15,7 @@ abstract class Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract extends Mage
     /**
      * Format url key attribute before save, also use product name as url key if it empty
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -40,7 +40,7 @@ abstract class Mage_Catalog_Model_Attribute_Backend_Urlkey_Abstract extends Mage
     /**
      * Executes after url attribute save.
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      *
      * @return $this
      */

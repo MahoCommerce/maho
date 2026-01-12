@@ -9,4 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Paygate_Model_Authorizenet_Result extends Varien_Object {}
+class Mage_Paygate_Model_Authorizenet_Result extends \Maho\DataObject {}

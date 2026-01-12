@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
     protected $_actions = [];
 
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $this->_actions = [];
         if (Mage::helper('sales/reorder')->canReorder($row)) {
@@ -47,7 +47,7 @@ class Mage_Adminhtml_Block_Sales_Reorder_Renderer_Action extends Mage_Adminhtml_
     protected function _actionsToHtml(array $actions = [])
     {
         $html = [];
-        $attributesObject = new Varien_Object();
+        $attributesObject = new \Maho\DataObject();
 
         if (empty($actions)) {
             $actions = $this->_actions;

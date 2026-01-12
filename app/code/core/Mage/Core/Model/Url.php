@@ -66,7 +66,7 @@
  * @method string getPort()
  * @method string getPath()
  */
-class Mage_Core_Model_Url extends Varien_Object
+class Mage_Core_Model_Url extends \Maho\DataObject
 {
     /**
      * Default controller name

@@ -15,14 +15,14 @@ abstract class Mage_Core_Model_Resource_Entity_Abstract
     /**
      * Configuration object
      *
-     * @var Varien_Simplexml_Config
+     * @var \Maho\Simplexml\Config
      */
     protected $_config = [];
 
     /**
      * Set config
      *
-     * @param Varien_Simplexml_Config $config
+     * @param \Maho\Simplexml\Config $config
      */
     public function __construct($config)
     {

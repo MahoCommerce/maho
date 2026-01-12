@@ -695,7 +695,7 @@ abstract class Mage_Api2_Model_Resource
      *
      * @return $this
      */
-    final protected function _applyCollectionModifiers(Varien_Data_Collection_Db $collection)
+    final protected function _applyCollectionModifiers(\Maho\Data\Collection\Db $collection)
     {
         $pageNumber = $this->getRequest()->getPageNumber();
         if ($pageNumber === null) {
@@ -734,7 +734,7 @@ abstract class Mage_Api2_Model_Resource
      *
      * @return $this
      */
-    protected function _applyFilter(Varien_Data_Collection_Db $collection)
+    protected function _applyFilter(\Maho\Data\Collection\Db $collection)
     {
         $filter = $this->getRequest()->getFilter();
 

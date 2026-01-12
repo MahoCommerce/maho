@@ -121,11 +121,11 @@ class Mage_SalesRule_Model_Rule_Condition_Product_Subselect extends Mage_SalesRu
     /**
      * validate
      *
-     * @param Varien_Object $object Quote
+     * @param \Maho\DataObject $object Quote
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         if (!$this->getConditions()) {
             return false;

@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Customer_Online_Filter extends Mage_Adminhtml_Block_W
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $form->addField(
             'filter_value',

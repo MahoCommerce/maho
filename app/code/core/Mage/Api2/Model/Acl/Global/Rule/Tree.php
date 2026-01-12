@@ -51,7 +51,7 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
     /**
      * Resources from config model
      *
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_resourcesConfig;
 
@@ -245,7 +245,7 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
     /**
      * Get tree node
      *
-     * @param Varien_Simplexml_Element|array $node
+     * @param \Maho\Simplexml\Element|array $node
      * @param int $level
      * @return array|null
      */
@@ -301,7 +301,7 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
             }
         }
 
-        /** @var Varien_Simplexml_Element $child */
+        /** @var \Maho\Simplexml\Element $child */
         foreach ($children as $child) {
             if ($child->getName() != 'title' && $child->getName() != 'sort_order') {
                 if (!(string) $child->title) {
@@ -336,11 +336,11 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
      * Add privileges
      *
      * @param array $item                       Tree node
-     * @param Varien_Simplexml_Element $node    XML node
+     * @param \Maho\Simplexml\Element $node XML node
      * @param string $name                      Resource name
      * @return bool
      */
-    protected function _addPrivileges(&$item, Varien_Simplexml_Element $node, $name)
+    protected function _addPrivileges(&$item, \Maho\Simplexml\Element $node, $name)
     {
         $roleConfigNodeName = $this->getRole()->getConfigNodeName();
         $possibleList = [];
@@ -377,11 +377,11 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
      * Add operation
      *
      * @param array $item                       Tree node
-     * @param Varien_Simplexml_Element $node    XML node
+     * @param \Maho\Simplexml\Element $node XML node
      * @param string $name                      Resource name
      * @return bool
      */
-    protected function _addOperations(&$item, Varien_Simplexml_Element $node, $name)
+    protected function _addOperations(&$item, \Maho\Simplexml\Element $node, $name)
     {
         $cnt = 0;
         foreach ($this->_existOperations as $key => $title) {
@@ -416,12 +416,12 @@ class Mage_Api2_Model_Acl_Global_Rule_Tree extends Mage_Core_Helper_Abstract
      * Add privileges
      *
      * @param array $item Tree node
-     * @param Varien_Simplexml_Element $node XML node
+     * @param \Maho\Simplexml\Element $node XML node
      * @param string $name Node name
      * @param string $privilege Privilege name
      * @return bool
      */
-    protected function _addAttribute(&$item, Varien_Simplexml_Element $node, $name, $privilege)
+    protected function _addAttribute(&$item, \Maho\Simplexml\Element $node, $name, $privilege)
     {
         $cnt = 0;
         foreach ($this->_resourcesPermissions[$name]['operations'][$privilege]['attributes'] as $key => $attribute) {

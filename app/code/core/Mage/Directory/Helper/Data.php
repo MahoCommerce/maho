@@ -292,7 +292,7 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $topCountries = array_filter(explode(',', (string) Mage::getStoreConfig('general/country/top_countries')));
 
-        $transportObject = new Varien_Object();
+        $transportObject = new \Maho\DataObject();
         $transportObject->setData('top_countries', $topCountries);
         Mage::dispatchEvent('directory_get_top_countries', ['topCountries' => $transportObject]);
 

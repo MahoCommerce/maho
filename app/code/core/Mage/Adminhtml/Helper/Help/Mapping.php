@@ -220,7 +220,7 @@ abstract class Mage_Adminhtml_Helper_Help_Mapping extends Mage_Core_Helper_Abstr
     /**
      * Determine which version of docs should target onto
      *
-     * @return Mage_Core_Model_Config_Element|Varien_Simplexml_Element|false
+     * @return Mage_Core_Model_Config_Element|\Maho\Simplexml\Element|false
      */
     protected function getHelpTargetVersion()
     {

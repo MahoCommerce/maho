@@ -152,7 +152,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Instantiate state and set it to state object
      *
      * @param string $paymentAction
-     * @param Varien_Object $stateObject
+     * @param \Maho\DataObject $stateObject
      * @return $this
      */
     #[\Override]
@@ -441,7 +441,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * @return Mage_Paypal_Model_Payflow_Request
      */
     #[\Override]
-    protected function _buildBasicRequest(Varien_Object $payment)
+    protected function _buildBasicRequest(\Maho\DataObject $payment)
     {
         $request = Mage::getModel('paypal/payflow_request');
         $cscEditable = $this->getConfigData('csc_editable');
@@ -508,7 +508,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * If response is failed throw exception
      * Set token data in payment object
      *
-     * @param Varien_Object $response
+     * @param \Maho\DataObject $response
      * @param Mage_Payment_Model_Info|Mage_Sales_Model_Order_Payment $payment
      * @throws Mage_Core_Exception
      */

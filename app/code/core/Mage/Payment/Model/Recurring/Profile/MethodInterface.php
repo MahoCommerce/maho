@@ -29,7 +29,7 @@ interface Mage_Payment_Model_Recurring_Profile_MethodInterface
      *
      * @param string $referenceId
      */
-    public function getRecurringProfileDetails($referenceId, Varien_Object $result);
+    public function getRecurringProfileDetails($referenceId, \Maho\DataObject $result);
 
     /**
      * Check whether can get recurring profile details

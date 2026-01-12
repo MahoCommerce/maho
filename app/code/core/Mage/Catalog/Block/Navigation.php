@@ -105,7 +105,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
     /**
      * Get categories of current store
      *
-     * @return Varien_Data_Tree_Node_Collection
+     * @return \Maho\Data\Tree\Node\Collection
      */
     public function getStoreCategories()
     {
@@ -134,7 +134,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
     /**
      * Check whether specified category is active
      *
-     * @param Varien_Object $category
+     * @param \Maho\DataObject $category
      * @return bool
      */
     public function isCategoryActive($category)

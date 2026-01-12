@@ -274,7 +274,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      * Prepare shipment request.
      * Validate and correct request information
      */
-    protected function _prepareShipmentRequest(Varien_Object $request)
+    protected function _prepareShipmentRequest(\Maho\DataObject $request)
     {
         $phonePattern = '/[\s\_\-\(\)]+/';
         $phoneNumber = $request->getShipperContactPhoneNumber();
@@ -288,7 +288,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     /**
      * Do request to shipment
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function requestToShipment(Mage_Shipping_Model_Shipment_Request $request)
@@ -306,7 +306,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             $request->setPackageId($packageId);
             $request->setPackagingType($package['params']['container']);
             $request->setPackageWeight($package['params']['weight']);
-            $request->setPackageParams(new Varien_Object($package['params']));
+            $request->setPackageParams(new \Maho\DataObject($package['params']));
             $request->setPackageItems($package['items']);
             $result = $this->_doShipmentRequest($request);
 
@@ -325,7 +325,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             }
         }
 
-        $response = new Varien_Object([
+        $response = new \Maho\DataObject([
             'info'   => $data,
         ]);
         if ($result && $result->getErrors()) {
@@ -338,7 +338,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
      * Do request to RMA shipment
      *
      * @param $request
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function returnOfShipment($request)
@@ -357,7 +357,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             $request->setPackageId($packageId);
             $request->setPackagingType($package['params']['container']);
             $request->setPackageWeight($package['params']['weight']);
-            $request->setPackageParams(new Varien_Object($package['params']));
+            $request->setPackageParams(new \Maho\DataObject($package['params']));
             $request->setPackageItems($package['items']);
             $result = $this->_doShipmentRequest($request);
 
@@ -376,7 +376,7 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
             }
         }
 
-        $response = new Varien_Object([
+        $response = new \Maho\DataObject([
             'info'   => $data,
         ]);
         if ($result && $result->getErrors()) {
@@ -401,9 +401,9 @@ abstract class Mage_Usa_Model_Shipping_Carrier_Abstract extends Mage_Shipping_Mo
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    abstract protected function _doShipmentRequest(Varien_Object $request);
+    abstract protected function _doShipmentRequest(\Maho\DataObject $request);
 
     /**
      * Check is Country U.S. Possessions and Trust Territories

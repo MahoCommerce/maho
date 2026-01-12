@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg_Content extends Mage_Admi
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form(['id' => 'wysiwyg_edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
+        $form = new \Maho\Data\Form(['id' => 'wysiwyg_edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
 
         $config['document_base_url']     = $this->getData('store_media_url');
         $config['store_id']              = $this->getData('store_id');

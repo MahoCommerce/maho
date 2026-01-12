@@ -22,7 +22,7 @@
  * @method Mage_Core_Model_Store getStore()
  * @method $this setStore(Mage_Core_Model_Store $value)
  */
-abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
+abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
 {
     /**
      * Carrier's code
@@ -86,7 +86,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest;
 
@@ -139,11 +139,11 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      * Do request to shipment
      * Implementation must be in overridden method
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function requestToShipment(Mage_Shipping_Model_Shipment_Request $request)
     {
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     /**
@@ -151,11 +151,11 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      * Implementation must be in overridden method
      *
      * @param mixed $request
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function returnOfShipment($request)
     {
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     /**
@@ -163,7 +163,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array
      */
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         return [];
     }
@@ -173,7 +173,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array|bool
      */
-    protected function _getAllowedContainers(?Varien_Object $params = null)
+    protected function _getAllowedContainers(?\Maho\DataObject $params = null)
     {
         $containersAll = $this->getContainerTypesAll();
         if (empty($containersAll)) {
@@ -235,7 +235,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array
      */
-    public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
+    public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
         return [];
     }
@@ -583,7 +583,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array
      */
-    public function getContentTypes(Varien_Object $params)
+    public function getContentTypes(\Maho\DataObject $params)
     {
         return [];
     }

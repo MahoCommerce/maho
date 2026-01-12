@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage_Api_Model_Server_Adapter_Interface
+class Mage_Api_Model_Server_Adapter_Xmlrpc extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
     /**
      * XmlRpc Server
@@ -56,9 +56,9 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
     }
 
     /**
-     * Retrieve webservice api controller. If no controller have been set - emulate it by the use of Varien_Object
+     * Retrieve webservice api controller. If no controller have been set - emulate it by the use of \Maho\DataObject
      *
-     * @return Mage_Api_Controller_Action|Varien_Object
+     * @return Mage_Api_Controller_Action|\Maho\DataObject
      */
     #[\Override]
     public function getController()
@@ -66,7 +66,7 @@ class Mage_Api_Model_Server_Adapter_Xmlrpc extends Varien_Object implements Mage
         $controller = $this->getData('controller');
 
         if ($controller === null) {
-            $controller = new Varien_Object(
+            $controller = new \Maho\DataObject(
                 ['request' => Mage::app()->getRequest(), 'response' => Mage::app()->getResponse()],
             );
 

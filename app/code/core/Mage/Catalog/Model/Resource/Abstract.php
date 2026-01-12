@@ -47,7 +47,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Check whether the attribute is Applicable to the object
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @return bool
      */
@@ -73,7 +73,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             && ($method == 'beforeSave' || $method = 'afterSave')
         ) {
             $attributeCode = $instance->getAttribute()->getAttributeCode();
-            if (isset($args[0]) && $args[0] instanceof Varien_Object && $args[0]->getData($attributeCode) === false) {
+            if (isset($args[0]) && $args[0] instanceof \Maho\DataObject && $args[0]->getData($attributeCode) === false) {
                 return false;
             }
         }
@@ -85,7 +85,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * Retrieve select object for loading entity attributes values
      * Join attribute store value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param string $table
      * @return Maho\Db\Select
      */
@@ -201,7 +201,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Insert or Update attribute data
      *
-     * @param Mage_Catalog_Model_Abstract|Varien_Object $object
+     * @param Mage_Catalog_Model_Abstract|\Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract|Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
@@ -226,7 +226,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             ]);
         }
 
-        $data = new Varien_Object([
+        $data = new \Maho\DataObject([
             'entity_type_id'    => $attribute->getEntityTypeId(),
             'attribute_id'      => $attribute->getAttributeId(),
             'store_id'          => $storeId,
@@ -263,7 +263,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Insert entity attribute value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
@@ -287,7 +287,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             $row = $this->_getReadAdapter()->fetchOne($select);
 
             if (!$row) {
-                $data  = new Varien_Object([
+                $data  = new \Maho\DataObject([
                     'entity_type_id'    => $attribute->getEntityTypeId(),
                     'attribute_id'      => $attribute->getAttributeId(),
                     'store_id'          => $this->getDefaultStoreId(),
@@ -305,7 +305,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Update entity attribute value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $valueId
      * @param mixed $value
@@ -370,7 +370,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Delete entity attribute values
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param string $table
      * @param array $info
      * @return Mage_Catalog_Model_Resource_Abstract
@@ -441,8 +441,8 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Retrieve Object instance with original data
      *
-     * @param Varien_Object $object
-     * @return Varien_Object
+     * @param \Maho\DataObject $object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _getOrigObject($object)

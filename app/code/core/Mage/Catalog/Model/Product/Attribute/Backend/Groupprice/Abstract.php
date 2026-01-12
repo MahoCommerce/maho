@@ -335,7 +335,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
 
         if (!empty($insert)) {
             foreach ($insert as $data) {
-                $price = new Varien_Object($data);
+                $price = new \Maho\DataObject($data);
                 $price->setEntityId($productId);
                 $this->_getResource()->savePriceData($price);
 
@@ -346,7 +346,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
         if (!empty($update)) {
             foreach ($update as $k => $v) {
                 if ($old[$k]['price'] != $v['value'] || $old[$k]['is_percent'] != $v['is_percent']) {
-                    $price = new Varien_Object([
+                    $price = new \Maho\DataObject([
                         'value_id'   => $old[$k]['price_id'],
                         'value'      => $v['value'],
                         'is_percent' => $v['is_percent'],

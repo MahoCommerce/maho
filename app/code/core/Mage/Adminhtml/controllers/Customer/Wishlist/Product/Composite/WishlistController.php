@@ -77,7 +77,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
         try {
             $this->_initData();
 
-            $configureResult = new Varien_Object([
+            $configureResult = new \Maho\DataObject([
                 'ok'                  => true,
                 'product_id'          => $this->_wishlistItem->getProductId(),
                 'buy_request'         => $this->_wishlistItem->getBuyRequest(),
@@ -111,7 +111,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
         try {
             $this->_initData();
 
-            $buyRequest = new Varien_Object($this->getRequest()->getPost());
+            $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
 
             $this->_wishlist

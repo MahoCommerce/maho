@@ -204,7 +204,7 @@ class Mage_Index_Model_Indexer
      * @param   bool $doSave
      * @return  Mage_Index_Model_Event
      */
-    public function logEvent(Varien_Object $entity, $entityType, $eventType, $doSave = true)
+    public function logEvent(\Maho\DataObject $entity, $entityType, $eventType, $doSave = true)
     {
         $event = Mage::getModel('index/event')
             ->setEntity($entityType)
@@ -227,7 +227,7 @@ class Mage_Index_Model_Indexer
      * @param   string $eventType
      * @throws Exception|Throwable
      */
-    public function processEntityAction(Varien_Object $entity, $entityType, $eventType): Mage_Index_Model_Indexer
+    public function processEntityAction(\Maho\DataObject $entity, $entityType, $eventType): Mage_Index_Model_Indexer
     {
         $event = $this->logEvent($entity, $entityType, $eventType, false);
         /**

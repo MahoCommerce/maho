@@ -39,7 +39,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals_Item extends Mage_Adminhtml_Block_
         /** @var Mage_Sales_Block_Order_Totals $parent */
         $parent = $this->getParentBlock();
 
-        $total = new Varien_Object([
+        $total = new \Maho\DataObject([
             'code'      => $this->getNameInLayout(),
             'block_name' => $this->getNameInLayout(),
             'area'      => $this->getDisplayArea(),

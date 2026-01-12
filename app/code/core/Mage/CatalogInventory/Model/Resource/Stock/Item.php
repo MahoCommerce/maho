@@ -89,7 +89,7 @@ class Mage_CatalogInventory_Model_Resource_Stock_Item extends Mage_Core_Model_Re
      * @return array
      */
     #[\Override]
-    protected function _prepareDataForTable(Varien_Object $object, $table)
+    protected function _prepareDataForTable(\Maho\DataObject $object, $table)
     {
         $data = parent::_prepareDataForTable($object, $table);
         if (!$object->isObjectNew() && $object->getQtyCorrection()) {

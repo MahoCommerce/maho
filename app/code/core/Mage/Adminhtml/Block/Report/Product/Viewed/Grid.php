@@ -92,7 +92,7 @@ class Mage_Adminhtml_Block_Report_Product_Viewed_Grid extends Mage_Adminhtml_Blo
      * Don't use orders in collection
      *
      * @param Mage_Reports_Model_Resource_Report_Collection_Abstract $collection
-     * @param Varien_Object $filterData
+     * @param \Maho\DataObject $filterData
      * @return Mage_Adminhtml_Block_Report_Grid_Abstract
      */
     #[\Override]

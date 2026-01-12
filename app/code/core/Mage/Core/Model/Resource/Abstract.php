@@ -159,7 +159,7 @@ abstract class Mage_Core_Model_Resource_Abstract
      * @param bool $unsetEmpty
      * @return $this
      */
-    protected function _serializeField(Varien_Object $object, $field, $defaultValue = null, $unsetEmpty = false)
+    protected function _serializeField(\Maho\DataObject $object, $field, $defaultValue = null, $unsetEmpty = false)
     {
         $value = $object->getData($field);
         if (empty($value)) {
@@ -179,18 +179,18 @@ abstract class Mage_Core_Model_Resource_Abstract
     }
 
     /**
-     * Unserialize Varien_Object field in an object
+     * Unserialize \Maho\DataObject field in an object
      *
      * @param string $field
      * @param mixed $defaultValue
      */
-    protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
+    protected function _unserializeField(\Maho\DataObject $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);
         if (empty($value)) {
             $object->setData($field, $defaultValue);
         } elseif (!is_array($value) && !is_object($value)) {
-            $object->setData($field, unserialize($value, ['allowed_classes' => ['Varien_Object']]));
+            $object->setData($field, unserialize($value, ['allowed_classes' => [\Maho\DataObject::class]]));
         }
     }
 
@@ -200,7 +200,7 @@ abstract class Mage_Core_Model_Resource_Abstract
      * @param string $table
      * @return array
      */
-    protected function _prepareDataForTable(Varien_Object $object, $table)
+    protected function _prepareDataForTable(\Maho\DataObject $object, $table)
     {
         $data = [];
         $fields = $this->_getReadAdapter()->describeTable($table);

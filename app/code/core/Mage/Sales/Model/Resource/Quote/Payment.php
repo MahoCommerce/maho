@@ -36,7 +36,7 @@ class Mage_Sales_Model_Resource_Quote_Payment extends Mage_Sales_Model_Resource_
      * @see Mage_Core_Model_Resource_Abstract::_unserializeField()
      */
     #[\Override]
-    protected function _unserializeField(Varien_Object $object, $field, $defaultValue = null)
+    protected function _unserializeField(\Maho\DataObject $object, $field, $defaultValue = null)
     {
         $value = $object->getData($field);
         if (empty($value)) {

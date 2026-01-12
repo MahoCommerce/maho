@@ -666,6 +666,22 @@
                     </mage_catalog>
                 </observers>
             </admin_system_config_changed_section_catalog>
+            <adminhtml_product_attribute_types>
+                <observers>
+                    <catalog>
+                        <class>catalog/observer</class>
+                        <method>addFileAttributeType</method>
+                    </catalog>
+                </observers>
+            </adminhtml_product_attribute_types>
+            <adminhtml_catalog_product_edit_element_types>
+                <observers>
+                    <catalog>
+                        <class>catalog/observer</class>
+                        <method>addFileElementType</method>
+                    </catalog>
+                </observers>
+            </adminhtml_catalog_product_edit_element_types>
         </events>
     </adminhtml>
     <frontend>

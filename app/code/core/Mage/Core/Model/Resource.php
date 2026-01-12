@@ -242,7 +242,7 @@ class Mage_Core_Model_Resource
      *
      * @param string $model
      * @param string $entity
-     * @return SimpleXMLElement|Varien_Simplexml_Config
+     * @return SimpleXMLElement|\Maho\Simplexml\Config
      */
     public function getEntity($model, $entity)
     {

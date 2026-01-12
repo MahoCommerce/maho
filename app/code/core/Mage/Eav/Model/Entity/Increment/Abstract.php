@@ -13,7 +13,7 @@
  * @method string getLastId()
  * @method string getPrefix()
  */
-abstract class Mage_Eav_Model_Entity_Increment_Abstract extends Varien_Object implements Mage_Eav_Model_Entity_Increment_Interface
+abstract class Mage_Eav_Model_Entity_Increment_Abstract extends \Maho\DataObject implements Mage_Eav_Model_Entity_Increment_Interface
 {
     /**
      * @return int

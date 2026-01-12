@@ -49,7 +49,7 @@ class Mage_Payment_Helper_Data extends Mage_Core_Helper_Abstract
      * Get and sort available payment methods for specified or current store
      *
      * array structure:
-     *  $index => Varien_Simplexml_Element
+     *  $index => \Maho\Simplexml\Element
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $store
      * @param Mage_Sales_Model_Quote $quote

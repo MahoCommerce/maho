@@ -15,15 +15,15 @@ class Mage_Catalog_Block_Product_View_Options_Type_File extends Mage_Catalog_Blo
     /**
      * Returns info of file
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getFileInfo()
     {
         $info = $this->getProduct()->getPreconfiguredValues()->getData('options/' . $this->getOption()->getId());
         if (empty($info)) {
-            $info = new Varien_Object();
+            $info = new \Maho\DataObject();
         } elseif (is_array($info)) {
-            $info = new Varien_Object($info);
+            $info = new \Maho\DataObject($info);
         }
         return $info;
     }

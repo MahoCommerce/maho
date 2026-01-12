@@ -11,17 +11,17 @@
  */
 
 /**
- * @method $this setConfigurationItemOption(Varien_Object $value)
+ * @method $this setConfigurationItemOption(\Maho\DataObject $value)
  * @method bool getIsValid()
  * @method $this setIsValid(bool $value)
  * @method string getProcessMode()
  * @method $this setProcessMode(string $value)
  * @method $this setQuoteItem(Mage_Sales_Model_Quote_Item $value)
  * @method array|int getUserValue()
- * @method $this setRequest(Varien_Object $value)
+ * @method $this setRequest(\Maho\DataObject $value)
  * @method $this setUserValue(array|int $value)
  */
-class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
+class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
 {
     /**
      * Option Instance
@@ -140,11 +140,11 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
     /**
      * Getter for Buy Request
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getRequest()
     {
-        if ($this->_getData('request') instanceof Varien_Object) {
+        if ($this->_getData('request') instanceof \Maho\DataObject) {
             return $this->_getData('request');
         }
         Mage::throwException(Mage::helper('catalog')->__('Wrong BuyRequest instance in options group.'));

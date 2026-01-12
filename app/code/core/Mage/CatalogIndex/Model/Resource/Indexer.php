@@ -554,7 +554,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
      *
      * @return $this
      */
-    public function prepareCatalogProductFlatColumns(Varien_Object $object)
+    public function prepareCatalogProductFlatColumns(\Maho\DataObject $object)
     {
         $columns = $object->getColumns();
 
@@ -580,7 +580,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
      *
      * @return $this
      */
-    public function prepareCatalogProductFlatIndexes(Varien_Object $object)
+    public function prepareCatalogProductFlatIndexes(\Maho\DataObject $object)
     {
         $indexes = $object->getIndexes();
 

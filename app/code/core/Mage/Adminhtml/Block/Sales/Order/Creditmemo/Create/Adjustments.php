@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Sales_Order_Creditmemo_Create_Adjustments extends Mag
         /** @var Mage_Adminhtml_Block_Sales_Order_Creditmemo_Totals $parent */
         $parent = $this->getParentBlock();
         $this->_source  = $parent->getSource();
-        $total = new Varien_Object([
+        $total = new \Maho\DataObject([
             'code'      => 'agjustments',
             'block_name' => $this->getNameInLayout(),
         ]);

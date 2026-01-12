@@ -10,13 +10,13 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Rule_Model_Renderer_Conditions implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Rule_Model_Renderer_Conditions implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         if ($element->getRule() && $element->getRule()->getConditions()) {
             return $element->getRule()->getConditions()->asHtmlRecursive();

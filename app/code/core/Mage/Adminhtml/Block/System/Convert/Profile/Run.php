@@ -142,19 +142,19 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Run extends Mage_Adminhtml_Blo
         $this->getProfile()->run();
         foreach ($this->getProfile()->getExceptions() as $e) {
             switch ($e->getLevel()) {
-                case Varien_Convert_Exception::FATAL:
+                case \Maho\Convert\Exception::FATAL:
                     $iconSvg = Mage::helper('core')->getIconSvg('alert-circle');
                     $liStyle = 'background-color:#FBB; ';
                     break;
-                case Varien_Convert_Exception::ERROR:
+                case \Maho\Convert\Exception::ERROR:
                     $iconSvg = Mage::helper('core')->getIconSvg('alert-circle');
                     $liStyle = 'background-color:#FDD; ';
                     break;
-                case Varien_Convert_Exception::WARNING:
+                case \Maho\Convert\Exception::WARNING:
                     $iconSvg = Mage::helper('core')->getIconSvg('alert-triangle');
                     $liStyle = 'background-color:#FFD; ';
                     break;
-                case Varien_Convert_Exception::NOTICE:
+                case \Maho\Convert\Exception::NOTICE:
                 default:
                     $iconSvg = Mage::helper('core')->getIconSvg('circle-check');
                     $liStyle = 'background-color:#DDF; ';

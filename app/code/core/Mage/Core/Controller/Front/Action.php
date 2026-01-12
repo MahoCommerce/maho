@@ -129,7 +129,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
                 $this->getResponse()->clearBody();
                 $this->getResponse()->sendHeaders();
 
-                $ioAdapter = new Varien_Io_File();
+                $ioAdapter = new \Maho\Io\File();
                 if (!$ioAdapter->fileExists($file)) {
                     Mage::throwException(Mage::helper('core')->__('File not found'));
                 }

@@ -13,7 +13,7 @@
 /**
  * Top menu block item renderer
  *
- * @method Varien_Data_Tree_Node getMenuTree()
+ * @method \Maho\Data\Tree\Node getMenuTree()
  * @method string getChildrenWrapClass()
  */
 class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
@@ -60,7 +60,7 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
      * @param string $childrenWrapClass
      * @return string
      */
-    public function render(Varien_Data_Tree_Node $menuTree, $childrenWrapClass)
+    public function render(\Maho\Data\Tree\Node $menuTree, $childrenWrapClass)
     {
         ob_start();
         $html = include $this->_templateFile;

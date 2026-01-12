@@ -63,7 +63,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest = null;
 
@@ -71,7 +71,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Raw rate tracking request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawTrackRequest = null;
 
@@ -126,7 +126,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     {
         $this->_request = $request;
 
-        $r = new Varien_Object();
+        $r = new \Maho\DataObject();
 
         if ($request->getLimitMethod()) {
             $r->setService($request->getLimitMethod());
@@ -900,7 +900,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      */
     protected function setTrackingRequest()
     {
-        $r = new Varien_Object();
+        $r = new \Maho\DataObject();
 
         $userId = $this->getConfigData('userid');
         $r->setUserId($userId);
@@ -1316,7 +1316,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @deprecated This method should not be used anymore.
      * @see Mage_Usa_Model_Shipping_Carrier_Usps::_doShipmentRequest method doc block.
      */
-    protected function _formUsExpressShipmentRequest(Varien_Object $request)
+    protected function _formUsExpressShipmentRequest(\Maho\DataObject $request)
     {
         $packageParams = $request->getPackageParams();
 
@@ -1382,7 +1382,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @throws Exception
      * @return string
      */
-    protected function _formUsSignatureConfirmationShipmentRequest(Varien_Object $request, $serviceType)
+    protected function _formUsSignatureConfirmationShipmentRequest(\Maho\DataObject $request, $serviceType)
     {
         $serviceType = match ($serviceType) {
             'PRIORITY', 'Priority' => 'Priority',
@@ -1464,7 +1464,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @deprecated Should not be used anymore.
      * @see Mage_Usa_Model_Shipping_Carrier_Usps::_doShipmentRequest doc block.
      */
-    protected function _formIntlShipmentRequest(Varien_Object $request)
+    protected function _formIntlShipmentRequest(\Maho\DataObject $request)
     {
         $packageParams = $request->getPackageParams();
         $height = $packageParams->getHeight();
@@ -1593,7 +1593,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $countriesOfManufacture = [];
         $productIds = [];
         foreach ($packageItems as $itemShipment) {
-            $item = new Varien_Object();
+            $item = new \Maho\DataObject();
             $item->setData($itemShipment);
 
             $productIds[] = $item->getProductId();
@@ -1609,7 +1609,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
         $packagePoundsWeight = $packageOuncesWeight = 0;
         // for ItemDetail
         foreach ($packageItems as $itemShipment) {
-            $item = new Varien_Object();
+            $item = new \Maho\DataObject();
             $item->setData($itemShipment);
 
             $itemWeight = $item->getWeight() * $item->getQty();
@@ -1687,15 +1687,15 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      * @deprecated This method must not be used anymore. Starting from 23.02.2018 USPS eliminates API usage for
      * free shipping labels generating.
      */
     #[\Override]
-    protected function _doShipmentRequest(Varien_Object $request)
+    protected function _doShipmentRequest(\Maho\DataObject $request)
     {
         $this->_prepareShipmentRequest($request);
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         $service = $this->getCode('service_to_code', $request->getShippingMethod());
         $recipientUSCountry = $this->_isUSCountry($request->getRecipientAddressCountryCode());
 
@@ -1773,7 +1773,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @return array|bool
      */
     #[\Override]
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         if (is_null($params)) {
             return $this->_getAllowedContainers();
@@ -1807,7 +1807,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @return array
      */
     #[\Override]
-    public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
+    public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
         if ($params == null) {
             return [];
@@ -1837,7 +1837,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
      * @return array
      */
     #[\Override]
-    public function getContentTypes(Varien_Object $params)
+    public function getContentTypes(\Maho\DataObject $params)
     {
         $countryShipper     = $params->getCountryShipper();
         $countryRecipient   = $params->getCountryRecipient();

@@ -148,7 +148,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function validate(Varien_Object $object): bool
+    public function validate(\Maho\DataObject $object): bool
     {
         $conditions = $this->getConditions();
         if (!$conditions || !$conditions->getConditions()) {

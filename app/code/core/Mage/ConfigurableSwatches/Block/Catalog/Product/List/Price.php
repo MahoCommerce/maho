@@ -57,7 +57,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Product_List_Price extends Mage_Co
             $config['products'][$product->getId()] = $compositeProductHelper->prepareJsonProductConfig($product);
             $config['products'][$product->getId()]['swatchPrices'] = $product->getSwatchPrices();
 
-            $responseObject = new Varien_Object();
+            $responseObject = new \Maho\DataObject();
             Mage::dispatchEvent('catalog_product_view_config', [
                 'response_object' => $responseObject,
                 'product' => $product,

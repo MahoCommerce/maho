@@ -298,7 +298,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      *
      * @param array $children
      * @param string $path
-     * @param Varien_Object $parent
+     * @param \Maho\DataObject $parent
      */
     public function addChildNodes($children, $path, $parent)
     {
@@ -375,7 +375,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      * @param bool|string $sorted
      * @param bool $asCollection
      * @param bool $toLoad
-     * @return array|Varien_Data_Collection
+     * @return array|\Maho\Data\Collection
      */
     public function getCategories($parent, $recursionLevel = 0, $sorted = false, $asCollection = false, $toLoad = true)
     {
@@ -406,7 +406,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      *
      * @param int $nodeId
      * @param array $nodes
-     * @return Varien_Object|array
+     * @return \Maho\DataObject|array
      */
     public function getNodeById($nodeId, $nodes = null)
     {
@@ -887,7 +887,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
     /**
      * Synchronize flat data with eav model for category
      *
-     * @param Varien_Object $category
+     * @param \Maho\DataObject $category
      * @return $this
      */
     protected function _synchronize($category)
@@ -915,7 +915,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
 
             $storesObjects = [];
             foreach ($stores as $storeId => $rootCategoryId) {
-                $_store = new Varien_Object([
+                $_store = new \Maho\DataObject([
                     'store_id'          => $storeId,
                     'root_category_id'  => $rootCategoryId,
                 ]);
@@ -932,7 +932,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                 }
 
                 $attributeValues = $this->_getAttributeValues($categoryId, $storeId);
-                $data = new Varien_Object($category->getData());
+                $data = new \Maho\DataObject($category->getData());
                 $data->addData($attributeValues[$categoryId])
                     ->setStoreId($storeId);
                 $this->_synchronize($data);
@@ -952,7 +952,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             foreach ($stores as $storeId => $rootCategoryId) {
                 if (in_array($rootCategoryId, $path)) {
                     $attributeValues = $this->_getAttributeValues($category, $storeId);
-                    $data = new Varien_Object($row);
+                    $data = new \Maho\DataObject($row);
                     $data->addData($attributeValues[$category])
                         ->setStoreId($storeId);
                     $this->_synchronize($data);
@@ -1042,7 +1042,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             foreach ($addStores as $storeId => $storeCategoryIds) {
                 $attributeValues = $this->_getAttributeValues(array_keys($storeCategoryIds), $storeId);
                 foreach ($storeCategoryIds as $row) {
-                    $data = new Varien_Object($row);
+                    $data = new \Maho\DataObject($row);
                     $data->addData($attributeValues[$row['entity_id']])
                         ->setStoreId($storeId);
                     $this->_synchronize($data);
@@ -1126,7 +1126,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      * Prepare array of category data to insert or update.
      * ['field_name' => 'value']
      *
-     * @param Varien_Object $category
+     * @param \Maho\DataObject $category
      * @param array $replaceFields
      * @return array
      */

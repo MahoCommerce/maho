@@ -313,7 +313,7 @@ class Maho_CustomerSegmentation_Model_Resource_SequenceProgress extends Mage_Cor
     /**
      * Get read adapter for external access
      */
-    public function getReadAdapter(): Varien_Db_Adapter_Interface
+    public function getReadAdapter(): \Maho\Db\Adapter\AdapterInterface
     {
         return $this->_getReadAdapter();
     }

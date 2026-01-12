@@ -150,7 +150,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Price filter
      *
-     * @var Mage_Directory_Model_Currency_Filter|Varien_Filter_Sprintf
+     * @var Mage_Directory_Model_Currency_Filter|\Maho\Filter\Sprintf
      */
     protected $_priceFilter;
 
@@ -420,7 +420,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @param string $fullPath
      * @param string $path
-     * @param Varien_Simplexml_Element $node
+     * @param \Maho\Simplexml\Element $node
      * @return array|string
      */
     protected function _processConfigValue($fullPath, $path, $node)
@@ -889,7 +889,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Get store price filter
      *
-     * @return Mage_Directory_Model_Currency_Filter|Varien_Filter_Sprintf
+     * @return Mage_Directory_Model_Currency_Filter|\Maho\Filter\Sprintf
      */
     public function getPriceFilter()
     {
@@ -901,7 +901,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         } elseif ($this->getDefaultCurrency()) {
             $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
         } else {
-            $this->_priceFilter = new Varien_Filter_Sprintf('%s', 2);
+            $this->_priceFilter = new \Maho\Filter\Sprintf('%s', 2);
         }
         return $this->_priceFilter;
     }

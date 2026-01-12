@@ -86,7 +86,7 @@ class Mage_Core_Model_Layout_Validator
                 ),
                 self::INVALID_BLOCK_NAME => Mage::helper('core')->__('Disallowed block name for frontend.'),
                 self::INVALID_XML_OBJECT_EXCEPTION =>
-                    Mage::helper('core')->__('XML object is not instance of "Varien_Simplexml_Element".'),
+                    Mage::helper('core')->__('XML object is not instance of "\Maho\Simplexml\Element".'),
             ];
         }
         return $this;
@@ -103,20 +103,20 @@ class Mage_Core_Model_Layout_Validator
     /**
      * Returns true if and only if $value meets the validation requirements
      */
-    public function isValid(Varien_Simplexml_Element|string $value): bool
+    public function isValid(\Maho\Simplexml\Element|string $value): bool
     {
         $this->messages = [];
 
         if (is_string($value)) {
             $value = trim($value);
             try {
-                $value = simplexml_load_string('<config>' . $value . '</config>', 'Varien_Simplexml_Element');
+                $value = simplexml_load_string('<config>' . $value . '</config>', \Maho\Simplexml\Element::class);
             } catch (Exception $e) {
                 $this->_error(self::XML_INVALID);
                 return false;
             }
         }
-        // If $value is not a string at this point, it must be a Varien_Simplexml_Element
+        // If $value is not a string at this point, it must be a \Maho\Simplexml\Element
         // due to the type declaration, so no additional check is needed
 
         // if layout update declare custom templates then validate their paths
@@ -182,7 +182,7 @@ class Mage_Core_Model_Layout_Validator
      */
     protected function _validateTemplatePath(array $templatePaths): void
     {
-        /** @var Varien_Simplexml_Element $path */
+        /** @var \Maho\Simplexml\Element $path */
         foreach ($templatePaths as $path) {
             $path = $path->hasChildren()
                 ? stripcslashes(trim((string) $path->children(), '"'))

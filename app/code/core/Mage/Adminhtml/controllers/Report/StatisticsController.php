@@ -47,7 +47,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
         $requestData = Mage::helper('adminhtml')->prepareFilterString($this->getRequest()->getParam('filter', ''));
         $requestData = $this->_filterDates($requestData, ['from', 'to']);
         $requestData['store_ids'] = $this->getRequest()->getParam('store_ids');
-        $params = new Varien_Object();
+        $params = new \Maho\DataObject();
 
         foreach ($requestData as $key => $value) {
             if (!empty($value)) {

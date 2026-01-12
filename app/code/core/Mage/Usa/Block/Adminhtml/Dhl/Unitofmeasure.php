@@ -54,7 +54,7 @@ class Mage_Usa_Block_Adminhtml_Dhl_Unitofmeasure extends Mage_Adminhtml_Block_Sy
      * @return string
      */
     #[\Override]
-    protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
+    protected function _getElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         return parent::_getElementHtml($element) . $this->renderView();
     }

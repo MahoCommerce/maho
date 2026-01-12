@@ -15,7 +15,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Group extends Mage_Admi
     /**
      * Return header comment part of html for fieldset
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     #[\Override]
@@ -35,7 +35,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Group extends Mage_Admi
     /**
      * Return collapse state
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return int|false
      */
     #[\Override]

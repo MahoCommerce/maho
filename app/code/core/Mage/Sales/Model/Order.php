@@ -502,7 +502,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -1328,7 +1328,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
              * $method - carrier_method
              */
             $method = $this->getShippingMethod(true);
-            if ($method instanceof Varien_Object) {
+            if ($method instanceof \Maho\DataObject) {
                 $className = Mage::getStoreConfig('carriers/' . $method->getCarrierCode() . '/model');
                 if ($className) {
                     $carrierModel = Mage::getModel($className);
@@ -1343,7 +1343,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * Retrieve shipping method
      *
      * @param bool $asObject return carrier code and shipping method data as object
-     * @return string|Varien_Object
+     * @return string|\Maho\DataObject
      */
     public function getShippingMethod($asObject = false)
     {
@@ -1356,7 +1356,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
             $segments[1] = $segments[0];
         }
         [$carrierCode, $method] = $segments;
-        return new Varien_Object([
+        return new \Maho\DataObject([
             'carrier_code' => $carrierCode,
             'method'       => $method,
         ]);

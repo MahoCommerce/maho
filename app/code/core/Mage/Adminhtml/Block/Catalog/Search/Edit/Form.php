@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Catalog_Search_Edit_Form extends Mage_Adminhtml_Block
         $model = Mage::registry('current_catalog_search');
         /** @var Mage_CatalogSearch_Model_Query $model */
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method' => 'post',
@@ -74,7 +74,7 @@ class Mage_Adminhtml_Block_Catalog_Search_Edit_Form extends Mage_Adminhtml_Block
             ]);
 
             $renderer = $this->getLayout()->createBlock('adminhtml/store_switcher_form_renderer_fieldset_element');
-            if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+            if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
                 $field->setRenderer($renderer);
             }
         } else {

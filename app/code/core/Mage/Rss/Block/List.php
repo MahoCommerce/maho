@@ -63,7 +63,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
             $param = array_merge($param, ['cid' => $this->getCurrentCustomerGroupId()]);
         }
 
-        $this->_rssFeeds[] = new Varien_Object(
+        $this->_rssFeeds[] = new \Maho\DataObject(
             [
                 'url'   => Mage::getUrl($url, $param),
                 'label' => $label,
@@ -164,7 +164,7 @@ class Mage_Rss_Block_List extends Mage_Core_Block_Template
         if (Mage::getStoreConfigFlag($path)) {
             $category = Mage::getModel('catalog/category');
 
-            /** @var Varien_Data_Tree_Node $treeModel */
+            /** @var \Maho\Data\Tree\Node $treeModel */
             $treeModel = $category->getTreeModel()->loadNode(Mage::app()->getStore()->getRootCategoryId());
             $nodes = $treeModel->loadChildren()->getChildren();
 

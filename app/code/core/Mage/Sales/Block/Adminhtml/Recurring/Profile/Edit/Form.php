@@ -19,7 +19,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
     /**
      * Reference to the parent element (optional)
      *
-     * @var Varien_Data_Form_Element_Abstract
+     * @var \Maho\Data\Form\Element\AbstractElement
      */
     protected $_parentElement = null;
 
@@ -47,7 +47,7 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
      *
      * @return Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form
      */
-    public function setParentElement(Varien_Data_Form_Element_Abstract $element)
+    public function setParentElement(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->_parentElement = $element;
         return $this;
@@ -93,19 +93,19 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
     /**
      * Instantiate form and fields
      *
-     * @return Varien_Data_Form
+     * @return \Maho\Data\Form
      */
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_fieldset');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $form::setFieldsetRenderer($renderer);
         }
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_fieldset_element');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $form::setFieldsetElementRenderer($renderer);
         }
 
@@ -176,11 +176,11 @@ class Mage_Sales_Block_Adminhtml_Recurring_Profile_Edit_Form extends Mage_Adminh
      * Add a field to the form or fieldset
      * Form and fieldset have same abstract
      *
-     * @param Varien_Data_Form|Varien_Data_Form_Element_Fieldset $formOrFieldset
+     * @param \Maho\Data\Form|\Maho\Data\Form\Element\Fieldset $formOrFieldset
      * @param string $elementName
      * @param array $options
      * @param string $type
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     protected function _addField($formOrFieldset, $elementName, $options = [], $type = 'text')
     {

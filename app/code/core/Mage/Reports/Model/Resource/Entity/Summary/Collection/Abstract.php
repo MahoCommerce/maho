@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract extends Varien_Data_Collection
+class Mage_Reports_Model_Resource_Entity_Summary_Collection_Abstract extends \Maho\Data\Collection
 {
     /**
      * Entity collection for summaries

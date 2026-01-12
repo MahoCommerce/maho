@@ -15,7 +15,7 @@ class Mage_Customer_Model_Resource_Address_Attribute_Backend_Region extends Mage
     /**
      * Prepare object for save
      *
-     * @param Varien_Object|Mage_Customer_Model_Address $object
+     * @param \Maho\DataObject|Mage_Customer_Model_Address $object
      * @return $this
      */
     #[\Override]

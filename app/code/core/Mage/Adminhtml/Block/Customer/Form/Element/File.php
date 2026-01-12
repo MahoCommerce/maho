@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Customer_Form_Element_File extends Varien_Data_Form_Element_Abstract
+class Mage_Adminhtml_Block_Customer_Form_Element_File extends \Maho\Data\Form\Element\AbstractElement
 {
     /**
      * Initialize Form Element

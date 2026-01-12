@@ -39,7 +39,7 @@ class Mage_SalesRule_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condit
             ['label' => Mage::helper('salesrule')->__('Cart Attribute'), 'value' => $attributes],
         ]);
 
-        $additional = new Varien_Object();
+        $additional = new \Maho\DataObject();
         Mage::dispatchEvent('salesrule_rule_condition_combine', ['additional' => $additional]);
         if ($additionalConditions = $additional->getConditions()) {
             $conditions = array_merge_recursive($conditions, $additionalConditions);

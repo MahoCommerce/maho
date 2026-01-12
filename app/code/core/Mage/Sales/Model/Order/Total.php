@@ -9,4 +9,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Sales_Model_Order_Total extends Varien_Object {}
+class Mage_Sales_Model_Order_Total extends \Maho\DataObject {}

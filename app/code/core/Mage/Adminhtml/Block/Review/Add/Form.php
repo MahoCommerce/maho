@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Review_Add_Form extends Mage_Adminhtml_Block_Widget_F
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $fieldset = $form->addFieldset('add_review_form', ['legend' => Mage::helper('review')->__('Review Details'), 'class' => 'fieldset-wide']);
 

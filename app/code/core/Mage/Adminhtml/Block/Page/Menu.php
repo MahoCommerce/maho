@@ -91,7 +91,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return string
      */
-    protected function _getHelperValue(Varien_Simplexml_Element $child)
+    protected function _getHelperValue(\Maho\Simplexml\Element $child)
     {
         $helperName         = 'adminhtml';
         $titleNodeName      = 'title';
@@ -110,7 +110,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      * @param int $level
      * @return array
      */
-    protected function _buildMenuArray(Varien_Simplexml_Element $parent, $path = '', $level = 0)
+    protected function _buildMenuArray(\Maho\Simplexml\Element $parent, $path = '', $level = 0)
     {
         $parentArr = [];
         $sortOrder = 0;
@@ -187,7 +187,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return bool
      */
-    protected function _checkDepends(Varien_Simplexml_Element $depends)
+    protected function _checkDepends(\Maho\Simplexml\Element $depends)
     {
         if ($depends->module) {
             $modulesConfig = Mage::getConfig()->getNode('modules');
@@ -291,7 +291,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return bool
      */
-    protected function _isEnabledModuleOutput(Varien_Simplexml_Element $child)
+    protected function _isEnabledModuleOutput(\Maho\Simplexml\Element $child)
     {
         $helperName      = 'adminhtml';
         $childAttributes = $child->attributes();

@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Sales_Totals extends Mage_Sales_Block_Order_Totals
     /**
      * Format total value based on order currency
      *
-     * @param   Varien_Object $total
+     * @param \Maho\DataObject $total
      * @return  string
      */
     #[\Override]
@@ -42,7 +42,7 @@ class Mage_Adminhtml_Block_Sales_Totals extends Mage_Sales_Block_Order_Totals
     protected function _initTotals()
     {
         $this->_totals = [];
-        $this->_totals['subtotal'] = new Varien_Object([
+        $this->_totals['subtotal'] = new \Maho\DataObject([
             'code'      => 'subtotal',
             'value'     => $this->getSource()->getSubtotal(),
             'base_value' => $this->getSource()->getBaseSubtotal(),
@@ -55,7 +55,7 @@ class Mage_Adminhtml_Block_Sales_Totals extends Mage_Sales_Block_Order_Totals
         if (!$this->getSource()->getIsVirtual()
             && ((float) $this->getSource()->getShippingAmount() || $this->getSource()->getShippingDescription())
         ) {
-            $this->_totals['shipping'] = new Varien_Object([
+            $this->_totals['shipping'] = new \Maho\DataObject([
                 'code'      => 'shipping',
                 'value'     => $this->getSource()->getShippingAmount(),
                 'base_value' => $this->getSource()->getBaseShippingAmount(),
@@ -75,7 +75,7 @@ class Mage_Adminhtml_Block_Sales_Totals extends Mage_Sales_Block_Order_Totals
             } else {
                 $discountLabel = $this->helper('sales')->__('Discount');
             }
-            $this->_totals['discount'] = new Varien_Object([
+            $this->_totals['discount'] = new \Maho\DataObject([
                 'code'      => 'discount',
                 'value'     => $this->getSource()->getDiscountAmount(),
                 'base_value' => $this->getSource()->getBaseDiscountAmount(),
@@ -83,7 +83,7 @@ class Mage_Adminhtml_Block_Sales_Totals extends Mage_Sales_Block_Order_Totals
             ]);
         }
 
-        $this->_totals['grand_total'] = new Varien_Object([
+        $this->_totals['grand_total'] = new \Maho\DataObject([
             'code'      => 'grand_total',
             'strong'    => true,
             'value'     => $this->getSource()->getGrandTotal(),

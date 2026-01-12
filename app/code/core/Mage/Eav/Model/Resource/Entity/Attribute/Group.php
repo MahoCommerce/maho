@@ -101,7 +101,7 @@ class Mage_Eav_Model_Resource_Entity_Attribute_Group extends Mage_Core_Model_Res
         $select  = $adapter->select()
             ->from($this->getMainTable(), $this->getIdFieldName())
             ->where('attribute_set_id = :attribute_set_id')
-            ->order('default_id ' . Varien_Data_Collection::SORT_ORDER_DESC)
+            ->order('default_id ' . \Maho\Data\Collection::SORT_ORDER_DESC)
             ->limit(1);
 
         $groupId = $adapter->fetchOne($select, $bind);

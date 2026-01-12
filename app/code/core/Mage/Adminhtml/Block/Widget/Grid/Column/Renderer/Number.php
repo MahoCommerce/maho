@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Number extends Mage_Admin
      * @return mixed|string
      */
     #[\Override]
-    protected function _getValue(Varien_Object $row)
+    protected function _getValue(\Maho\DataObject $row)
     {
         $data = parent::_getValue($row);
         if (is_numeric($data)) {

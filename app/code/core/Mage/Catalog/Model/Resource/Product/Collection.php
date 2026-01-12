@@ -225,7 +225,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     protected function _preparePriceExpressionParameters($select)
     {
         // prepare response object for event
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setAdditionalCalculations([]);
         $tableAliases = array_keys($select->getPart(Maho\Db\Select::FROM));
         if (in_array(self::INDEX_TABLE_ALIAS, $tableAliases)) {
@@ -366,7 +366,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      * Retrieve collection empty item
      * Redeclared for specifying id field name without getting resource model inside model
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function getNewEmptyItem()

@@ -22,7 +22,7 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         $categoryId = (int) $this->getRequest()->getParam('category', false);
         $productId  = (int) $this->getRequest()->getParam('id');
 
-        $params = new Varien_Object();
+        $params = new \Maho\DataObject();
         $params->setCategoryId($categoryId);
 
         return Mage::helper('catalog/product')->initProduct($productId, $this, $params);
@@ -38,7 +38,7 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         // Prepare helper and params
         $viewHelper = Mage::helper('catalog/product_view');
 
-        $params = new Varien_Object();
+        $params = new \Maho\DataObject();
         $params->setCategoryId($categoryId);
         $params->setSpecifyOptions($specifyOptions);
 

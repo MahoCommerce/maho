@@ -161,7 +161,7 @@ abstract class Mage_Dataflow_Model_Convert_Action_Abstract implements Mage_Dataf
         return $this->_container;
     }
 
-    public function importXml(Varien_Simplexml_Element $actionNode)
+    public function importXml(\Maho\Simplexml\Element $actionNode)
     {
         foreach ($actionNode->attributes() as $key => $value) {
             $this->setParam($key, (string) $value);

@@ -31,7 +31,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
             if (!($entityType = $this->getVar('entity_type'))
                 || !(($entity = Mage::getResourceSingleton($entityType)) instanceof Mage_Eav_Model_Entity_Interface)
             ) {
-                $this->addException(Mage::helper('eav')->__('Invalid entity specified'), Varien_Convert_Exception::FATAL);
+                $this->addException(Mage::helper('eav')->__('Invalid entity specified'), \Maho\Convert\Exception::FATAL);
             }
             $this->_entity = $entity;
         }
@@ -48,7 +48,7 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
             $collection = Mage::getResourceModel($this->getEntity() . '_collection');
             $collection->load();
         } catch (Exception $e) {
-            $this->addException(Mage::helper('eav')->__('An error occurred while loading the collection, aborting. Error: %s', $e->getMessage()), Varien_Convert_Exception::FATAL);
+            $this->addException(Mage::helper('eav')->__('An error occurred while loading the collection, aborting. Error: %s', $e->getMessage()), \Maho\Convert\Exception::FATAL);
         }
 
         $data = [];
@@ -73,17 +73,17 @@ class Mage_Eav_Model_Convert_Adapter_Grid extends Mage_Dataflow_Model_Convert_Ad
                     $entity->load($row['entity_id']);
                     $this->setPosition('Line: ' . $i . (isset($row['entity_id']) ? ', entity_id: ' . $row['entity_id'] : ''));
                 } catch (Exception $e) {
-                    $this->addException(Mage::helper('eav')->__('An error occurred while loading a record, aborting. Error: %s', $e->getMessage()), Varien_Convert_Exception::FATAL);
+                    $this->addException(Mage::helper('eav')->__('An error occurred while loading a record, aborting. Error: %s', $e->getMessage()), \Maho\Convert\Exception::FATAL);
                 }
                 if (!$entity->getId()) {
-                    $this->addException(Mage::helper('eav')->__('Invalid entity_id, skipping the record.'), Varien_Convert_Exception::ERROR);
+                    $this->addException(Mage::helper('eav')->__('Invalid entity_id, skipping the record.'), \Maho\Convert\Exception::ERROR);
                     continue;
                 }
             }
             try {
                 $entity->addData($row)->save();
             } catch (Exception $e) {
-                $this->addException(Mage::helper('eav')->__('An error occurred while saving a record, aborting. Error: ', $e->getMessage()), Varien_Convert_Exception::FATAL);
+                $this->addException(Mage::helper('eav')->__('An error occurred while saving a record, aborting. Error: ', $e->getMessage()), \Maho\Convert\Exception::FATAL);
             }
         }
         return $this;

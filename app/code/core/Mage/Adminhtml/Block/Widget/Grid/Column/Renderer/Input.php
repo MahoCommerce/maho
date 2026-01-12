@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Input extends Mage_Adminh
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $html = '<input type="text" ';
         $html .= 'name="' . $this->getColumn()->getId() . '" ';

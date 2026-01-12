@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Catalog_Category_Helper_Sortby_Available extends Varien_Data_Form_Element_Multiselect
+class Mage_Adminhtml_Block_Catalog_Category_Helper_Sortby_Available extends \Maho\Data\Form\Element\Multiselect
 {
     /**
      * Returns js code that is used instead of default toggle code for "Use default config" checkbox

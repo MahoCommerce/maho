@@ -643,7 +643,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function clearCache(): void
     {
         $directory = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product' . DS . 'cache' . DS;
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->rmdir($directory, true);
 
     }

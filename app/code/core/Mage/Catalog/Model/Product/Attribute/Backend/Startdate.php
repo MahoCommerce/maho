@@ -20,7 +20,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate extends Mage_Eav_Mo
     /**
      * Get attribute value for save.
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return string|bool
      */
     protected function _getValueForSave($object)
@@ -34,7 +34,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate extends Mage_Eav_Mo
      * Before save hook.
      * Prepare attribute value for save
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]

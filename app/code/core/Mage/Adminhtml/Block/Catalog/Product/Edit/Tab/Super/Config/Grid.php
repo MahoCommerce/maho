@@ -344,7 +344,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config_Grid extends Ma
      *
      * @return array
      */
-    protected function _retrieveRowData(Varien_Object $item)
+    protected function _retrieveRowData(\Maho\DataObject $item)
     {
         $attributeValues = [];
         foreach ($this->_getConfigAttributeCodes() as $attributeCode) {

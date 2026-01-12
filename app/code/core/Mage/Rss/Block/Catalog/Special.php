@@ -159,7 +159,7 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
         }
 
         // dispatch event to determine whether the product will eventually get to the result
-        $product = new Varien_Object(['allowed_in_rss' => true, 'allowed_price_in_rss' => true]);
+        $product = new \Maho\DataObject(['allowed_in_rss' => true, 'allowed_price_in_rss' => true]);
         $args['product'] = $product;
         Mage::dispatchEvent('rss_catalog_special_xml_callback', $args);
         if (!$product->getAllowedInRss()) {
@@ -185,8 +185,8 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
     /**
      * Function for comparing two items in collection
      *
-     * @param Varien_Object $a
-     * @param Varien_Object $b
+     * @param \Maho\DataObject $a
+     * @param \Maho\DataObject $b
      * @return int
      */
     public function sortByStartDate($a, $b)

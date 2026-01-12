@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Permissions_User_Edit_Form extends Mage_Adminhtml_Blo
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form(['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
+        $form = new \Maho\Data\Form(['id' => 'edit_form', 'action' => $this->getData('action'), 'method' => 'post']);
         $form->setUseContainer(true);
         $this->setForm($form);
         return parent::_prepareForm();

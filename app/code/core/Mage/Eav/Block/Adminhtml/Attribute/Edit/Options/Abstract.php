@@ -130,7 +130,7 @@ abstract class Mage_Eav_Block_Adminhtml_Attribute_Edit_Options_Abstract extends 
                 if ($this->isConfigurableSwatchesEnabled()) {
                     $value['swatch'] = $option->getSwatchValue();
                 }
-                $values[] = new Varien_Object($value);
+                $values[] = new \Maho\DataObject($value);
             }
             $this->setData('option_values', $values);
         }

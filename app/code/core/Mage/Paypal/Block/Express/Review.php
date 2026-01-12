@@ -100,7 +100,7 @@ class Mage_Paypal_Block_Express_Review extends Mage_Core_Block_Template
      *
      * @return string
      */
-    public function renderShippingRateValue(Varien_Object $rate)
+    public function renderShippingRateValue(\Maho\DataObject $rate)
     {
         if ($rate->getErrorMessage()) {
             return '';
@@ -111,7 +111,7 @@ class Mage_Paypal_Block_Express_Review extends Mage_Core_Block_Template
     /**
      * Get shipping rate code title and its price or error message
      *
-     * @param Varien_Object $rate
+     * @param \Maho\DataObject $rate
      * @param string $format
      * @param string $inclTaxFormat
      * @return string

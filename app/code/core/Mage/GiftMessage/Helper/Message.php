@@ -48,7 +48,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * @param bool $dontDisplayContainer
      * @return string
      */
-    public function getInline($type, Varien_Object $entity, $dontDisplayContainer = false)
+    public function getInline($type, \Maho\DataObject $entity, $dontDisplayContainer = false)
     {
         if (!in_array($type, ['onepage_checkout','multishipping_adress'])
             && !$this->isMessagesAvailable($type, $entity)
@@ -70,7 +70,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * @param bool|int|Mage_Core_Model_Store|null|string $store
      * @return bool
      */
-    public function isMessagesAvailable($type, Varien_Object $entity, $store = null)
+    public function isMessagesAvailable($type, \Maho\DataObject $entity, $store = null)
     {
         switch ($type) {
             case self::TYPE_ITEMS:
@@ -146,7 +146,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * @param bool|int|Mage_Core_Model_Store|null|string $store
      * @return bool
      */
-    public function getIsMessagesAvailable($type, Varien_Object $entity, $store = null)
+    public function getIsMessagesAvailable($type, \Maho\DataObject $entity, $store = null)
     {
         return $this->isMessagesAvailable($type, $entity, $store);
     }
@@ -156,7 +156,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      *
      * @return string|null
      */
-    public function getEscapedGiftMessage(Varien_Object $entity)
+    public function getEscapedGiftMessage(\Maho\DataObject $entity)
     {
         $message = $this->getGiftMessageForEntity($entity);
         if ($message) {
@@ -170,7 +170,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      *
      * @return Mage_GiftMessage_Model_Message
      */
-    public function getGiftMessageForEntity(Varien_Object $entity)
+    public function getGiftMessageForEntity(\Maho\DataObject $entity)
     {
         if ($entity->getGiftMessageId() && !$entity->getGiftMessage()) {
             $message = $this->getGiftMessage($entity->getGiftMessageId());

@@ -98,7 +98,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
             if ($this->getProduct() && $item->getStoreTitle()) {
                 $tmpSampleItem['store_title'] = $item->getStoreTitle();
             }
-            $samplesArr[] = new Varien_Object($tmpSampleItem);
+            $samplesArr[] = new \Maho\DataObject($tmpSampleItem);
         }
 
         return $samplesArr;

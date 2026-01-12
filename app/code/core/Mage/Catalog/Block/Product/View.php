@@ -125,7 +125,7 @@ class Mage_Catalog_Block_Product_View extends Mage_Catalog_Block_Product_Abstrac
             $compositeProductHelper->prepareJsonProductConfig($product),
         );
 
-        $responseObject = new Varien_Object();
+        $responseObject = new \Maho\DataObject();
         Mage::dispatchEvent('catalog_product_view_config', ['response_object' => $responseObject]);
         if (is_array($responseObject->getAdditionalOptions())) {
             foreach ($responseObject->getAdditionalOptions() as $option => $value) {

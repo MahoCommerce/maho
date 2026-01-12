@@ -75,7 +75,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
         if (is_null($label) || $label === false) {
             return $this;
         }
-        $link = new Varien_Object([
+        $link = new \Maho\DataObject([
             'label'         => $label,
             'url'           => ($prepare ? $this->getUrl($url, (is_array($urlParams) ? $urlParams : [])) : $url),
             'title'         => $title,
@@ -93,7 +93,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
     /**
      * Add link into collection
      *
-     * @param Varien_Object $link
+     * @param \Maho\DataObject $link
      * @param int $position
      * @return $this
      */
@@ -170,7 +170,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
             $links = [];
             if (!empty($this->_links)) {
                 foreach ($this->_links as $position => $link) {
-                    if ($link instanceof Varien_Object) {
+                    if ($link instanceof \Maho\DataObject) {
                         $links[$position] = $link->getData();
                     }
                 }

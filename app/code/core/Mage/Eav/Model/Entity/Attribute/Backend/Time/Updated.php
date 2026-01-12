@@ -15,7 +15,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Updated extends Mage_Eav_Mode
     /**
      * Set modified date
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -28,7 +28,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Updated extends Mage_Eav_Mode
     /**
      * Convert update date after load
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]

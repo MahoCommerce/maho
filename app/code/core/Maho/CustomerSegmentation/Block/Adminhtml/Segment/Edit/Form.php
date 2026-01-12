@@ -16,7 +16,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Form extends Mage_A
     #[\Override]
     protected function _prepareForm(): self
     {
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id'     => 'edit_form',
             'action' => $this->getUrl('*/*/save', ['id' => $this->getRequest()->getParam('id')]),
             'method' => 'post',

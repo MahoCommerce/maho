@@ -309,7 +309,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
             }
         }
 
-        $ga4DataTransport = new Varien_Object();
+        $ga4DataTransport = new \Maho\DataObject();
         $ga4DataTransport->setData($result);
         Mage::dispatchEvent('googleanalytics_ga4_send_data_before', ['ga4_data_transport' => $ga4DataTransport]);
         $result = $ga4DataTransport->getData();

@@ -18,7 +18,7 @@
  * @method int getScheduledOperationId()
  * @method string getOperationType()
  */
-abstract class Mage_ImportExport_Model_Abstract extends Varien_Object
+abstract class Mage_ImportExport_Model_Abstract extends \Maho\DataObject
 {
     /**
      * Log directory

@@ -160,7 +160,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
             } catch (Exception $e) {
                 $this->addException(
                     Mage::helper('catalog')->__('Invalid store specified'),
-                    Varien_Convert_Exception::FATAL,
+                    \Maho\Convert\Exception::FATAL,
                 );
                 throw $e;
             }

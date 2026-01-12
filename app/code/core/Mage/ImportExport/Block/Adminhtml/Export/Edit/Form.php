@@ -15,7 +15,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Edit_Form extends Mage_Adminhtml_
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id'     => 'edit_form',
             'action' => $this->getUrl('*/*/getFilter'),
             'method' => 'post',

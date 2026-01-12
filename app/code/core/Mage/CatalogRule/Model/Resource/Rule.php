@@ -137,7 +137,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * @param array $websiteIds
      * @return bool
      */
-    public function validateProduct(Mage_CatalogRule_Model_Rule $rule, Varien_Object $product, $websiteIds = [])
+    public function validateProduct(Mage_CatalogRule_Model_Rule $rule, \Maho\DataObject $product, $websiteIds = [])
     {
         /** @var Mage_Catalog_Helper_Product_Flat $helper */
         $helper = $this->_factory->getHelper('catalog/product_flat');

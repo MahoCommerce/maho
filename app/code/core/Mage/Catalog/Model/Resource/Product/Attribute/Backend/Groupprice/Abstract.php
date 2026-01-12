@@ -106,7 +106,7 @@ abstract class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Groupprice_
      *
      * @return $this
      */
-    public function savePriceData(Varien_Object $priceObject)
+    public function savePriceData(\Maho\DataObject $priceObject)
     {
         $adapter = $this->_getWriteAdapter();
         $data    = $this->_prepareDataForTable($priceObject, $this->getMainTable());

@@ -44,7 +44,7 @@ class Mage_Core_Helper_EnvironmentConfigLoader extends Mage_Core_Helper_Abstract
      *
      * @return void
      */
-    public function overrideEnvironment(Varien_Simplexml_Config $xmlConfig)
+    public function overrideEnvironment(\Maho\Simplexml\Config $xmlConfig)
     {
         $env = $this->getEnv();
 

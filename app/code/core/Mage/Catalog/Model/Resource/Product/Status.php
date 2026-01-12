@@ -91,7 +91,7 @@ class Mage_Catalog_Model_Resource_Product_Status extends Mage_Core_Model_Resourc
         $refreshIndex       = true;
         $adapter            = $this->_getWriteAdapter();
 
-        $data = new Varien_Object([
+        $data = new \Maho\DataObject([
             'entity_type_id' => $statusEntityTypeId,
             'attribute_id'   => $statusAttributeId,
             'store_id'       => $storeId,

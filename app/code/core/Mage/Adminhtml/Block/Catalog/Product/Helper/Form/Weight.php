@@ -10,7 +10,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Weight extends Varien_Data_Form_Element_Text
+class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Weight extends \Maho\Data\Form\Element\Text
 {
     /**
      * Validation classes for weight field which corresponds to DECIMAL(12,4) SQL type

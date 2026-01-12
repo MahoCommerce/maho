@@ -17,7 +17,7 @@ class Mage_Reports_Model_Totals
      * @param Mage_Adminhtml_Block_Report_Grid $grid
      * @param string $from
      * @param string $to
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function countTotals($grid, $from, $to)
     {
@@ -65,7 +65,7 @@ class Mage_Reports_Model_Totals
             }
         }
 
-        $totals = new Varien_Object();
+        $totals = new \Maho\DataObject();
         $totals->setData($data);
 
         return $totals;

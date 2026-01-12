@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_Customer_System_Config_Validatevat extends Mage_Admin
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
         return parent::render($element);
@@ -45,7 +45,7 @@ class Mage_Adminhtml_Block_Customer_System_Config_Validatevat extends Mage_Admin
      * @return string
      */
     #[\Override]
-    protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
+    protected function _getElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $originalData = $element->getOriginalData();
         $this->addData([
