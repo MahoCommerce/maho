@@ -358,6 +358,8 @@
 "Text length does not satisfy specified text range.","Text length does not satisfy specified text range."
 "The %s you entered is invalid. Please make sure that it follows ""http://domain.com/"" format.","The %s you entered is invalid. Please make sure that it follows ""http://domain.com/"" format."
 "The default value is ""30 2 * * *"". An empty value disables automatic cache flushing.","The default value is ""30 2 * * *"". An empty value disables automatic cache flushing."
+"The file extension ""%s"" is not allowed. Allowed extensions: %s","The file extension ""%s"" is not allowed. Allowed extensions: %s"
+"The file extension ""%s"" is not allowed for security reasons.","The file extension ""%s"" is not allowed for security reasons."
 "The From Date value should be less than or equal to the To Date value.","The From Date value should be less than or equal to the To Date value."
 "Themes","Themes"
 "The store code may contain only letters (a-z), numbers (0-9), underscore(_) or dash(-), the first character must be a letter","The store code may contain only letters (a-z), numbers (0-9), underscore(_) or dash(-), the first character must be a letter"

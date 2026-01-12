@@ -215,7 +215,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     {
         $field = null;
         $field = match ($type) {
-            'text', 'gallery', 'media_image' => 'varchar',
+            'text', 'gallery', 'media_image', 'file' => 'varchar',
             'image', 'textarea', 'multiselect' => 'text',
             'date' => 'datetime',
             'select', 'boolean' => 'int',
