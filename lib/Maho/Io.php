@@ -10,12 +10,16 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+declare(strict_types=1);
+
 namespace Maho;
+
+use Maho\Io\IoInterface;
 
 /**
  * Abstract I/O class with security utilities for path validation
  */
-abstract class Io
+abstract class Io implements IoInterface
 {
     /**
      * If this variable is set to true, our library will be able to automatically
@@ -42,6 +46,7 @@ abstract class Io
      *
      * @return bool
      */
+    #[\Override]
     public function open(array $args = [])
     {
         return false;
@@ -50,6 +55,7 @@ abstract class Io
     /**
      * @return string
      */
+    #[\Override]
     public function dirsep()
     {
         return '/';
