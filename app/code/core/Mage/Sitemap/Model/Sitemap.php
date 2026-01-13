@@ -92,8 +92,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             $this->setSitemapFilename($this->getSitemapFilename() . '.xml');
         }
 
-        $this->setSitemapPath(rtrim(str_replace(str_replace('\\', '/', Mage::getBaseDir()), '', $realPath), '/') . '/');
-
         return parent::_beforeSave();
     }
 
@@ -105,7 +103,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function getPath()
     {
         if (is_null($this->_filePath)) {
-            $this->_filePath = str_replace('//', '/', Mage::getBaseDir() .
+            $this->_filePath = str_replace('//', '/', Mage::getBaseDir('public') . '/' .
                 $this->getSitemapPath());
         }
         return $this->_filePath;
