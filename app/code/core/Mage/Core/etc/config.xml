@@ -467,16 +467,6 @@
                     <shtml>shtml</shtml>
                     <!-- EOF HTML file extensions -->
                 </protected_extensions>
-
-                <!-- Valid Paths to make public files -->
-                <public_files_valid_paths>
-                    <protected>
-                        <app>/app/*/*</app>
-                        <js>/js/*/*</js>
-                        <lib>/lib/*/*</lib>
-                        <skin>/skin/*/*</skin>
-                    </protected>
-                </public_files_valid_paths>
             </file>
             <!-- Additional email for notifications -->
             <additional_notification_emails>
