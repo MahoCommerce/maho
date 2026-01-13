@@ -16,7 +16,6 @@
  * Model for multi-filtering all data which set to models
  * Example:
  * <code>
- * /** @var Mage_Core_Model_Input_Filter $filter {@*}
  * $filter = Mage::getModel('core/input_filter');
  * $filter->setFilters([
  *      'list_values' => [
