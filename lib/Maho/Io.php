@@ -116,7 +116,7 @@ abstract class Io implements IoInterface
      * Note: For paths that EXIST, prefer validatePath() which uses realpath()
      * for stronger security including symlink resolution.
      */
-    public function allowedPath(string $haystackPath, string $needlePath): bool
+    public static function allowedPath(string $haystackPath, string $needlePath): bool
     {
         // Block stream wrappers (phar://, http://, etc.)
         if (!Path::isLocal($haystackPath) || !Path::isLocal($needlePath)) {

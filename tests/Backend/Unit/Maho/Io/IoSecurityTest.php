@@ -79,7 +79,6 @@ describe('\Maho\Io Security Methods', function () {
         beforeEach(function () {
             $this->testDir = sys_get_temp_dir() . '/maho_io_test_' . uniqid();
             mkdir($this->testDir, 0755, true);
-            $this->io = new \Maho\Io\File();
         });
 
         afterEach(function () {
@@ -90,27 +89,27 @@ describe('\Maho\Io Security Methods', function () {
 
         it('allows non-existent path within base directory', function () {
             $nonExistentPath = $this->testDir . '/future/sitemap/';
-            expect($this->io->allowedPath($nonExistentPath, $this->testDir))->toBeTrue();
+            expect(\Maho\Io::allowedPath($nonExistentPath, $this->testDir))->toBeTrue();
         });
 
         it('returns false for phar:// path', function () {
-            expect($this->io->allowedPath('phar://malicious.phar', $this->testDir))->toBeFalse();
+            expect(\Maho\Io::allowedPath('phar://malicious.phar', $this->testDir))->toBeFalse();
         });
 
         it('returns false for phar:// base directory', function () {
-            expect($this->io->allowedPath('/some/path', 'phar://malicious.phar'))->toBeFalse();
+            expect(\Maho\Io::allowedPath('/some/path', 'phar://malicious.phar'))->toBeFalse();
         });
 
         it('blocks path traversal with ../', function () {
-            expect($this->io->allowedPath($this->testDir . '/../../../etc/passwd', $this->testDir))->toBeFalse();
+            expect(\Maho\Io::allowedPath($this->testDir . '/../../../etc/passwd', $this->testDir))->toBeFalse();
         });
 
         it('allows path exactly matching base directory', function () {
-            expect($this->io->allowedPath($this->testDir, $this->testDir))->toBeTrue();
+            expect(\Maho\Io::allowedPath($this->testDir, $this->testDir))->toBeTrue();
         });
 
         it('allows subdirectory path', function () {
-            expect($this->io->allowedPath($this->testDir . '/subdir/file.xml', $this->testDir))->toBeTrue();
+            expect(\Maho\Io::allowedPath($this->testDir . '/subdir/file.xml', $this->testDir))->toBeTrue();
         });
     });
 
