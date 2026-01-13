@@ -713,22 +713,6 @@ XML;
     }
 
     /**
-     * Check LFI protection
-     *
-     * @deprecated since 26.1 Use \Maho\Io::allowedPath() for path validation instead
-     * @throws Mage_Core_Exception
-     * @param string $name
-     * @return bool
-     */
-    public function checkLfiProtection($name)
-    {
-        if (preg_match('#\.\.[\\\/]#', $name)) {
-            throw new Mage_Core_Exception($this->__('Invalid template path: contains parent directory traversal'));
-        }
-        return true;
-    }
-
-    /**
      * Retrieve merchant country code
      *
      * @param Mage_Core_Model_Store|string|int|null $store
