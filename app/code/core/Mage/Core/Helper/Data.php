@@ -727,6 +727,7 @@ XML;
     /**
      * Check LFI protection
      *
+     * @deprecated Use \Maho\Io::allowedPath() for path validation instead
      * @throws Mage_Core_Exception
      * @param string $name
      * @return bool
