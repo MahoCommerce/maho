@@ -716,6 +716,7 @@ XML;
     /**
      * Return list with public files valid paths
      *
+     * @deprecated Use \Maho\Io::allowedPath() for path validation instead
      * @return array
      */
     public function getPublicFilesValidPath()

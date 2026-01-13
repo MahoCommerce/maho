@@ -76,6 +76,7 @@ class Mage_Adminhtml_Helper_Catalog extends Mage_Core_Helper_Abstract
     /**
      * Get list valid paths for generate a sitemap XML file
      *
+     * @deprecated Use \Maho\Io::allowedPath() for path validation instead
      * @return array
      */
     public function getSitemapValidPaths()

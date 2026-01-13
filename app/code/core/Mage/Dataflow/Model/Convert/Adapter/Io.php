@@ -12,8 +12,6 @@
 
 class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
-    public const XML_PATH_EXPORT_LOCAL_VALID_PATH = 'general/file/importexport_local_valid_paths';
-
     /**
      * @return \Maho\Io\IoInterface|false
      */
@@ -30,18 +28,6 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
             $ioConfig = $this->getVars();
             switch (strtolower($this->getVar('type', 'file'))) {
                 case 'file':
-                    //validate export/import path
-                    $path = rtrim($ioConfig['path'], '\\/')
-                          . DS . $ioConfig['filename'];
-                    /** @var Mage_Core_Model_File_Validator_AvailablePath $validator */
-                    $validator = Mage::getModel('core/file_validator_availablePath');
-                    $validator->setPaths(Mage::getStoreConfig(self::XML_PATH_EXPORT_LOCAL_VALID_PATH));
-                    if (!$validator->isValid($path)) {
-                        foreach ($validator->getMessages() as $message) {
-                            Mage::throwException($message);
-                        }
-                    }
-
                     if (preg_match('#^' . preg_quote(DS, '#') . '#', $this->getVar('path')) ||
                         preg_match('#^[a-z]:' . preg_quote(DS, '#') . '#i', $this->getVar('path'))
                     ) {
@@ -49,6 +35,16 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
                     } else {
                         $baseDir = Mage::getBaseDir();
                         $path = $this->_resource->getCleanPath($baseDir . DS . trim($this->getVar('path'), DS));
+                    }
+
+                    // Validate path is within allowed directories (var/export or var/import)
+                    $varDir = Mage::getBaseDir('var');
+                    $isInExport = $this->_resource->allowedPath($path, $varDir . DS . 'export');
+                    $isInImport = $this->_resource->allowedPath($path, $varDir . DS . 'import');
+                    if (!$isInExport && !$isInImport) {
+                        Mage::throwException(
+                            Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $ioConfig['path']),
+                        );
                     }
 
                     $this->_resource->checkAndCreateFolder($path);

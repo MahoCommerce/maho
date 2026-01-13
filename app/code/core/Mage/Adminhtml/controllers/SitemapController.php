@@ -132,41 +132,20 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
             // init model and set data
             $model = Mage::getModel('sitemap/sitemap');
 
-            //validate path to generate
-            if (!empty($data['sitemap_filename']) && !empty($data['sitemap_path'])) {
-                $path = rtrim($data['sitemap_path'], '\\/')
-                      . DS . $data['sitemap_filename'];
-
-                // check filename length
-                if (strlen($data['sitemap_filename']) > self::MAXIMUM_SITEMAP_NAME_LENGTH) {
-                    Mage::getSingleton('adminhtml/session')->addError(
-                        Mage::helper('sitemap')->__(
-                            'Please enter a sitemap name with at most %s characters.',
-                            self::MAXIMUM_SITEMAP_NAME_LENGTH,
-                        ),
-                    );
-                    $this->_redirect('*/*/edit', [
-                        'sitemap_id' => $this->getRequest()->getParam('sitemap_id'),
-                    ]);
-                    return;
-                }
-                /** @var Mage_Core_Model_File_Validator_AvailablePath $validator */
-                $validator = Mage::getModel('core/file_validator_availablePath');
-                /** @var Mage_Adminhtml_Helper_Catalog $helper */
-                $helper = Mage::helper('adminhtml/catalog');
-                $validator->setPaths($helper->getSitemapValidPaths());
-                if (!$validator->isValid($path)) {
-                    foreach ($validator->getMessages() as $message) {
-                        Mage::getSingleton('adminhtml/session')->addError($message);
-                    }
-                    // save data in session
-                    Mage::getSingleton('adminhtml/session')->setFormData($data);
-                    // redirect to edit form
-                    $this->_redirect('*/*/edit', [
-                        'sitemap_id' => $this->getRequest()->getParam('sitemap_id')]);
-                    return;
-                }
+            // Check filename length
+            if (!empty($data['sitemap_filename']) && strlen($data['sitemap_filename']) > self::MAXIMUM_SITEMAP_NAME_LENGTH) {
+                Mage::getSingleton('adminhtml/session')->addError(
+                    Mage::helper('sitemap')->__(
+                        'Please enter a sitemap name with at most %s characters.',
+                        self::MAXIMUM_SITEMAP_NAME_LENGTH,
+                    ),
+                );
+                $this->_redirect('*/*/edit', [
+                    'sitemap_id' => $this->getRequest()->getParam('sitemap_id'),
+                ]);
+                return;
             }
+            // Path validation is handled by Maho\Io::allowedPath() in model's _beforeSave()
 
             if ($this->getRequest()->getParam('sitemap_id')) {
                 $model ->load($this->getRequest()->getParam('sitemap_id'));
