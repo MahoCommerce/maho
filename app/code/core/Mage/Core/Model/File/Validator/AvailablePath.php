@@ -17,12 +17,12 @@ use Symfony\Component\Filesystem\Path;
 /**
  * Validator for check not protected/available path
  *
- * @deprecated since 26.1 Use \Maho\Io::allowedPath() instead for simpler and more secure path validation.
+ * @deprecated since 26.1 Use Maho\Io::allowedPath() instead for simpler and more secure path validation.
  *
  * Mask symbols from path:
  * "?" - something directory with any name
  * "*" - something directory structure, which can not exist
- * Note: For set directory structure which must be exist, need to set mask "/?/{@*}"
+ * Note: For set directory structure which must be exist, need to set mask "/?/{&#64;*}"
  * Mask symbols from filename:
  * "*" - something symbols in file name
  * Example:
@@ -30,7 +30,7 @@ use Symfony\Component\Filesystem\Path;
  * //set available path
  * $validator->setAvailablePath(['/path/to/?/*fileMask.xml']);
  * $validator->isValid('/path/to/MyDir/Some-fileMask.xml'); //return true
- * $validator->setAvailablePath(['/path/to/{@*}*.xml']);
+ * $validator->setAvailablePath(['/path/to/{&#64;*}*.xml']);
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
  */

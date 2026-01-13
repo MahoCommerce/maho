@@ -36,7 +36,7 @@ class Mage_ImportExport_Helper_Data extends Mage_Core_Helper_Data
     /**
      * Get valid path masks to files for importing/exporting
      *
-     * @deprecated since 26.1 Use \Maho\Io::allowedPath() for path validation instead
+     * @deprecated since 26.1 Use Maho\Io::allowedPath() for path validation instead
      * @return array
      */
     public function getLocalValidPaths()
