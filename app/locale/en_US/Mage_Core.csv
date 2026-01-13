@@ -240,6 +240,7 @@
 "Pagination","Pagination"
 "Pagination Frame","Pagination Frame"
 "Pagination Frame Skip","Pagination Frame Skip"
+"Path ""%s"" contains an invalid stream wrapper.","Path ""%s"" contains an invalid stream wrapper."
 "Path ""%s"" contains invalid parent directory references.","Path ""%s"" contains invalid parent directory references."
 "Path ""%s"" is not available and cannot be used.","Path ""%s"" is not available and cannot be used."
 "Path ""%s"" is protected and cannot be used.","Path ""%s"" is protected and cannot be used."
