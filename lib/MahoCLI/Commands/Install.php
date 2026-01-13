@@ -235,6 +235,9 @@ class Install extends BaseMahoCommand
                     $output->writeln('  Executing remapped SQL...');
                     $this->executeSqlForEngine($pdo, $remappedSql, $dbEngine, $output);
 
+                    // Merge attribute groups (creates new ones, builds group ID remap)
+                    $importer->mergeAttributeGroups();
+
                     // Merge sample data's attribute set assignments (adds new ones, preserves existing)
                     $importer->mergeEntityAttributes();
 

@@ -102,6 +102,16 @@ class SampleDataImporter
     private array $optionRemap = [];
 
     /**
+     * Remap: old_attribute_group_id => new_attribute_group_id
+     */
+    private array $attributeGroupRemap = [];
+
+    /**
+     * Parsed attribute groups from SQL: old_group_id => ['attribute_set_id' => int, 'attribute_group_name' => string]
+     */
+    private array $oldAttributeGroups = [];
+
+    /**
      * User-defined attributes that need to be created
      */
     private array $attributesToCreate = [];
@@ -230,19 +240,24 @@ class SampleDataImporter
         // Step 3: Parse eav_entity_attribute from SQL (for merging later)
         $this->parseEavEntityAttributeFromSql($sql);
 
-        // Step 4: Load current attribute mapping from installed DB
+        // Step 4: Parse eav_attribute_group from SQL (for group ID remapping)
+        $this->parseEavAttributeGroupFromSql($sql);
+
+        // Step 5: Load current attribute mapping from installed DB
         $this->loadCurrentAttributes();
 
-        // Step 5: Build attribute remap and identify attributes to create
+        // Step 6: Build attribute remap and identify attributes to create
         $this->buildAttributeRemap();
 
-        // Step 6: Create missing user-defined attributes
+        // Step 7: Create missing user-defined attributes
         $this->createMissingAttributes();
 
-        // Step 7: Build option remap (after attributes are created)
+        // Step 8: Build option remap (after attributes are created)
         $this->buildOptionRemap($sql);
 
-        // Step 8: Remap the SQL (this will skip eav_entity_attribute)
+        // Step 9: Remap the SQL (this will skip eav_entity_attribute)
+        // Note: Attribute group remapping happens later in mergeEntityAttributes()
+        // after the SQL has created the new attribute sets and groups
         $remappedSql = $this->remapSql($sql);
 
         return $remappedSql;
@@ -255,6 +270,9 @@ class SampleDataImporter
      */
     public function mergeEntityAttributes(): void
     {
+        // Note: attributeGroupRemap should already be built by mergeAttributeGroups()
+        // which must be called before this method
+
         $checkStmt = $this->pdo->prepare('
             SELECT 1 FROM eav_entity_attribute
             WHERE attribute_set_id = ? AND attribute_id = ?
@@ -271,12 +289,15 @@ class SampleDataImporter
         foreach ($this->sampleEntityAttributes as $entry) {
             $entityTypeId = $entry['entity_type_id'];
             $attributeSetId = $entry['attribute_set_id'];
-            $attributeGroupId = $entry['attribute_group_id'];
+            $oldAttributeGroupId = $entry['attribute_group_id'];
             $oldAttributeId = $entry['attribute_id'];
             $sortOrder = $entry['sort_order'];
 
             // Remap attribute_id
             $newAttributeId = $this->attributeRemap[$oldAttributeId] ?? $oldAttributeId;
+
+            // Remap attribute_group_id
+            $newAttributeGroupId = $this->attributeGroupRemap[$oldAttributeGroupId] ?? $oldAttributeGroupId;
 
             // Check if this attribute is already in this attribute set
             $checkStmt->execute([$attributeSetId, $newAttributeId]);
@@ -286,7 +307,7 @@ class SampleDataImporter
                 $insertStmt->execute([
                     $entityTypeId,
                     $attributeSetId,
-                    $attributeGroupId,
+                    $newAttributeGroupId,
                     $newAttributeId,
                     $sortOrder,
                 ]);
@@ -296,6 +317,68 @@ class SampleDataImporter
 
         if ($addedCount > 0) {
             $this->log("Added {$addedCount} attribute set assignments from sample data", 'info');
+        }
+    }
+
+    /**
+     * Merge sample data's attribute groups into the database
+     * Creates missing groups and builds the group ID remap
+     * Call this AFTER executing the remapped SQL but BEFORE mergeEntityAttributes
+     */
+    public function mergeAttributeGroups(): void
+    {
+        // Reset remap
+        $this->attributeGroupRemap = [];
+
+        // Load current attribute groups from DB: (attribute_set_id, group_name) => group_id
+        $stmt = $this->pdo->query('SELECT attribute_group_id, attribute_set_id, attribute_group_name FROM eav_attribute_group');
+        $currentGroups = [];
+
+        foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+            $key = $row['attribute_set_id'] . ':' . strtolower(trim($row['attribute_group_name']));
+            $currentGroups[$key] = (int) $row['attribute_group_id'];
+        }
+
+        $insertStmt = $this->pdo->prepare('
+            INSERT INTO eav_attribute_group (attribute_set_id, attribute_group_name, sort_order, default_id)
+            VALUES (?, ?, ?, ?)
+        ');
+
+        $addedCount = 0;
+        $remappedCount = 0;
+
+        foreach ($this->oldAttributeGroups as $oldGroupId => $groupInfo) {
+            $setId = $groupInfo['attribute_set_id'];
+            $groupName = $groupInfo['attribute_group_name'];
+            $sortOrder = $groupInfo['sort_order'] ?? 0;
+            $defaultId = $groupInfo['default_id'] ?? 0;
+
+            $key = $setId . ':' . strtolower(trim($groupName));
+
+            if (isset($currentGroups[$key])) {
+                // Group exists - add to remap
+                $newGroupId = $currentGroups[$key];
+                $this->attributeGroupRemap[$oldGroupId] = $newGroupId;
+
+                if ($oldGroupId !== $newGroupId) {
+                    $remappedCount++;
+                }
+            } else {
+                // Group doesn't exist - create it
+                $insertStmt->execute([$setId, $groupName, $sortOrder, $defaultId]);
+                $newGroupId = (int) $this->pdo->lastInsertId();
+
+                $this->attributeGroupRemap[$oldGroupId] = $newGroupId;
+                $currentGroups[$key] = $newGroupId;
+                $addedCount++;
+            }
+        }
+
+        if ($addedCount > 0) {
+            $this->log("Created {$addedCount} new attribute groups from sample data", 'info');
+        }
+        if ($remappedCount > 0) {
+            $this->log("Remapped {$remappedCount} attribute group IDs", 'info');
         }
     }
 
@@ -341,6 +424,59 @@ class SampleDataImporter
         }
 
         $this->log('Parsed ' . count($this->sampleEntityAttributes) . ' attribute set assignments from sample data', 'info');
+    }
+
+    /**
+     * Parse eav_attribute_group entries from sample data SQL
+     */
+    private function parseEavAttributeGroupFromSql(string $sql): void
+    {
+        // Match the eav_attribute_group INSERT/REPLACE block
+        $pattern = '/REPLACE\s+INTO\s+`eav_attribute_group`\s*\(([^)]+)\)\s*VALUES\s*(.*?)(?=;\s*(?:\/\*|LOCK|UNLOCK|$))/si';
+
+        if (!preg_match($pattern, $sql, $matches)) {
+            return;
+        }
+
+        $sqlColumns = array_map(fn($c) => trim($c, ' `'), explode(',', $matches[1]));
+        $valuesBlock = $matches[2];
+
+        // Find column positions
+        $groupIdPos = array_search('attribute_group_id', $sqlColumns);
+        $setIdPos = array_search('attribute_set_id', $sqlColumns);
+        $groupNamePos = array_search('attribute_group_name', $sqlColumns);
+        $sortOrderPos = array_search('sort_order', $sqlColumns);
+        $defaultIdPos = array_search('default_id', $sqlColumns);
+
+        if ($groupIdPos === false || $setIdPos === false || $groupNamePos === false) {
+            return;
+        }
+
+        // Parse each row
+        preg_match_all('/\(([^)]+)\)/s', $valuesBlock, $rowMatches);
+
+        foreach ($rowMatches[1] as $rowContent) {
+            $values = $this->parseValueRow($rowContent);
+
+            $groupId = (int) trim($values[$groupIdPos] ?? '0');
+            $setId = (int) trim($values[$setIdPos] ?? '0');
+            $groupName = $this->cleanSqlValue($values[$groupNamePos] ?? '');
+            $sortOrder = $sortOrderPos !== false ? (int) trim($values[$sortOrderPos] ?? '0') : 0;
+            $defaultId = $defaultIdPos !== false ? (int) trim($values[$defaultIdPos] ?? '0') : 0;
+
+            if ($groupId === 0 || $setId === 0 || $groupName === null) {
+                continue;
+            }
+
+            $this->oldAttributeGroups[$groupId] = [
+                'attribute_set_id' => $setId,
+                'attribute_group_name' => $groupName,
+                'sort_order' => $sortOrder,
+                'default_id' => $defaultId,
+            ];
+        }
+
+        $this->log('Parsed ' . count($this->oldAttributeGroups) . ' attribute groups from sample data', 'info');
     }
 
     /**
@@ -696,6 +832,11 @@ class SampleDataImporter
         // Skip eav_entity_attribute - we merge entries via mergeEntityAttributes()
         // This prevents REPLACE INTO from overwriting existing attribute set assignments
         $sql = $this->removeTableBlock($sql, 'eav_entity_attribute');
+
+        // Skip eav_attribute_group - we merge entries via mergeAttributeGroups()
+        // Sample data's hardcoded group IDs would overwrite setup script groups
+        // and break attribute group assignments (e.g., is_dynamic would end up in wrong group)
+        $sql = $this->removeTableBlock($sql, 'eav_attribute_group');
 
         // Remap attribute_id in EAV value tables
         foreach (self::TABLES_WITH_ATTRIBUTE_ID as $table) {
