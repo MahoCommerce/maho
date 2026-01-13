@@ -96,7 +96,7 @@ describe('Dataflow Parser Path Traversal Security', function () {
                 mkdir($subdir, 0755, true);
             }
             $subFile = 'subfile_' . uniqid() . '.csv';
-            file_put_contents($subdir . '/' . $subFile, "test");
+            file_put_contents($subdir . '/' . $subFile, 'test');
 
             try {
                 $result = validateImportPath('subdir/' . $subFile, $this->importDir);
