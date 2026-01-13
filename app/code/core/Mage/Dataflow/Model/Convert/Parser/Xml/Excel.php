@@ -58,8 +58,11 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         $batchIoAdapter = $this->getBatchModel()->getIoAdapter();
 
         if (Mage::app()->getRequest()->getParam('files')) {
-            $file = Mage::app()->getConfig()->getTempVarDir() . '/import/'
-                . str_replace('../', '', urldecode(Mage::app()->getRequest()->getParam('files')));
+            $baseDir = realpath(Mage::app()->getConfig()->getTempVarDir() . '/import');
+            $file = realpath($baseDir . '/' . urldecode(Mage::app()->getRequest()->getParam('files')));
+            if ($baseDir === false || $file === false || !str_starts_with($file, $baseDir . DIRECTORY_SEPARATOR)) {
+                Mage::throwException(Mage::helper('dataflow')->__('Invalid file path.'));
+            }
             $this->_copy($file);
         }
 

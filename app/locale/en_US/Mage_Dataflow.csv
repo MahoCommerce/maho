@@ -14,6 +14,7 @@
 "Found %d rows.","Found %d rows."
 "hour","hour"
 "hours","hours"
+"Invalid file path.","Invalid file path."
 "Invalid node.","Invalid node."
 "Less than a minute","Less than a minute"
 "Loaded successfully: ""%s"".","Loaded successfully: ""%s""."
