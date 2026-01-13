@@ -110,13 +110,10 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
 
                 // Validate path is within allowed directories (var/export or var/import)
                 $io = new \Maho\Io\File();
-                $filePath = $guiData['file']['path'];
-                if (!preg_match('#^' . preg_quote(DS, '#') . '#', $filePath) &&
-                    !preg_match('#^[a-z]:' . preg_quote(DS, '#') . '#i', $filePath)
-                ) {
-                    $filePath = Mage::getBaseDir() . DS . trim($filePath, DS);
-                }
-                $filePath = $io->getCleanPath($filePath);
+                $filePath = \Symfony\Component\Filesystem\Path::makeAbsolute(
+                    $guiData['file']['path'],
+                    Mage::getBaseDir(),
+                );
 
                 $varDir = Mage::getBaseDir('var');
                 $isInExport = $io->allowedPath($filePath, $varDir . DS . 'export');

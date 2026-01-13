@@ -28,14 +28,10 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
             $ioConfig = $this->getVars();
             switch (strtolower($this->getVar('type', 'file'))) {
                 case 'file':
-                    if (preg_match('#^' . preg_quote(DS, '#') . '#', $this->getVar('path')) ||
-                        preg_match('#^[a-z]:' . preg_quote(DS, '#') . '#i', $this->getVar('path'))
-                    ) {
-                        $path = $this->_resource->getCleanPath($this->getVar('path'));
-                    } else {
-                        $baseDir = Mage::getBaseDir();
-                        $path = $this->_resource->getCleanPath($baseDir . DS . trim($this->getVar('path'), DS));
-                    }
+                    $path = \Symfony\Component\Filesystem\Path::makeAbsolute(
+                        $this->getVar('path'),
+                        Mage::getBaseDir(),
+                    );
 
                     // Validate path is within allowed directories (var/export or var/import)
                     $varDir = Mage::getBaseDir('var');
