@@ -17,7 +17,13 @@ require __DIR__ . '/vendor/autoload.php';
 use MahoCLI\CommandDiscoverer;
 use Symfony\Component\Console\Application;
 
-$application = new Application('');
+$application = new class ('Maho', Mage::getVersion()) extends Application {
+    #[\Override]
+    public function getLongVersion(): string
+    {
+        return $this->getVersion();
+    }
+};
 
 $application->addCommand(new \MahoCLI\Commands\AdminUserList());
 $application->addCommand(new \MahoCLI\Commands\AdminUserCreate());
