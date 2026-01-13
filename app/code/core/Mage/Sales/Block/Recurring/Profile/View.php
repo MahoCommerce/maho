@@ -107,7 +107,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
             return;
         }
 
-        $request = unserialize($request);
+        $request = unserialize($request, ['allowed_classes' => false]);
         if (empty($request['options'])) {
             return;
         }

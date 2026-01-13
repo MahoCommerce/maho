@@ -248,7 +248,7 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $confItem = $this->getConfigurationItem();
         $infoBuyRequest = $confItem->getOptionByCode('info_buyRequest');
         try {
-            $value = unserialize($infoBuyRequest->getValue());
+            $value = unserialize($infoBuyRequest->getValue(), ['allowed_classes' => false]);
             if (is_array($value) && isset($value['options']) && isset($value['options'][$this->getOption()->getId()])) {
                 return $value['options'][$this->getOption()->getId()];
             }

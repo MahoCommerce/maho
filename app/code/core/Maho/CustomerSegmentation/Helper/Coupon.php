@@ -201,7 +201,7 @@ class Maho_CustomerSegmentation_Helper_Coupon extends Mage_Core_Helper_Abstract
 
         // Check if rule has conditions that might conflict with automation
         if ($rule->getConditionsSerialized()) {
-            $conditions = unserialize($rule->getConditionsSerialized());
+            $conditions = unserialize($rule->getConditionsSerialized(), ['allowed_classes' => false]);
             if (is_array($conditions) && !empty($conditions)) {
                 // Rule has conditions - this might be intended, so just warn
                 Mage::log(

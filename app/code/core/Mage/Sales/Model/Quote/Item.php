@@ -808,7 +808,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             // Check if this is a file option
             if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
                 try {
-                    $optionValue = @unserialize($option->getValue());
+                    $optionValue = @unserialize($option->getValue(), ['allowed_classes' => false]);
                     if (is_array($optionValue) && isset($optionValue['quote_path'])) {
                         $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
                         if (file_exists($filePath) && is_file($filePath)) {
@@ -850,7 +850,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     public function getBuyRequest()
     {
         $option = $this->getOptionByCode('info_buyRequest');
-        $buyRequest = new \Maho\DataObject($option ? unserialize($option->getValue()) : null);
+        $buyRequest = new \Maho\DataObject($option ? unserialize($option->getValue(), ['allowed_classes' => false]) : null);
 
         // Overwrite standard buy request qty, because item qty could have changed since adding to quote
         $buyRequest->setOriginalQty($buyRequest->getQty())

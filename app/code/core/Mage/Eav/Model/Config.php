@@ -273,7 +273,7 @@ class Mage_Eav_Model_Config
             \Maho\Profiler::stop('EAV: ' . __METHOD__);
             return false;
         }
-        $cacheData = unserialize($cacheData);
+        $cacheData = unserialize($cacheData, ['allowed_classes' => false]);
 
         $this->_entityTypes = [];
         $this->_entityTypeByCode = [];
