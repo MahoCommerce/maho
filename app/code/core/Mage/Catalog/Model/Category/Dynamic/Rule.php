@@ -44,7 +44,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
             if ($this->getConditionsSerialized()) {
                 $conditions = $this->getConditionsSerialized();
                 if (is_string($conditions)) {
-                    $conditions = @unserialize($conditions);
+                    $conditions = @unserialize($conditions, ['allowed_classes' => false]);
                 }
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->setConditions([])->loadArray($conditions);
@@ -134,7 +134,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         if ($this->getConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (is_string($conditions)) {
-                $conditions = @unserialize($conditions);
+                $conditions = @unserialize($conditions, ['allowed_classes' => false]);
             }
             if (is_array($conditions) && !empty($conditions)) {
                 // Reset and reload conditions

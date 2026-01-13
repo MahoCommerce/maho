@@ -1047,7 +1047,7 @@ abstract class AbstractPdoAdapter implements AdapterInterface
         if ($this->_cacheAdapter instanceof \Mage_Core_Model_Cache) {
             $data = $this->_cacheAdapter->load($tableCacheKey);
             if ($data !== false) {
-                $data = unserialize($data);
+                $data = unserialize($data, ['allowed_classes' => false]);
                 if (is_array($data) && isset($data[$ddlType])) {
                     $this->_ddlCache[$tableCacheKey] = $data;
                     return $data[$ddlType];

@@ -539,7 +539,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
             return null;
         }
 
-        return unserialize($str);
+        return unserialize($str, ['allowed_classes' => false]);
     }
 
     /**
@@ -567,7 +567,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
             return true;
         }
 
-        if (!unserialize($str)) {
+        if (!unserialize($str, ['allowed_classes' => false])) {
             return false;
         }
 

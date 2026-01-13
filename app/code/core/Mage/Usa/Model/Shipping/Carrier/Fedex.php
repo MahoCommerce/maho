@@ -389,7 +389,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 Mage::logException($e);
             }
         } else {
-            $response = unserialize($response);
+            $response = unserialize($response, ['allowed_classes' => false]);
             $debugData['result'] = $response;
         }
         $this->_debug($debugData);
@@ -936,7 +936,7 @@ class Mage_Usa_Model_Shipping_Carrier_Fedex extends Mage_Usa_Model_Shipping_Carr
                 Mage::logException($e);
             }
         } else {
-            $response = unserialize($response);
+            $response = unserialize($response, ['allowed_classes' => false]);
             $debugData['result'] = $response;
         }
         $this->_debug($debugData);
