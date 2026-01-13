@@ -183,7 +183,6 @@
 "Invalid or empty SVG file.","Invalid or empty SVG file."
 "Invalid query","Invalid query"
 "Invalid stream.","Invalid stream."
-"Invalid template path: contains parent directory traversal","Invalid template path: contains parent directory traversal"
 "Invalid template path used in layout update.","Invalid template path used in layout update."
 "Invalid transactional email code: %s","Invalid transactional email code: %s"
 "Invalid URL","Invalid URL"
