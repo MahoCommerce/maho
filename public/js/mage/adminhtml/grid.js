@@ -252,20 +252,15 @@ class varienGrid {
     bindFilterFields() {
         // Use event delegation on document body to catch all filter keypresses
         // This survives AJAX reloads since body doesn't get replaced
-        if (!document.body._gridFilterDelegated) {
+        // Track per-grid to support multiple grids on the same page
+        document.body._gridFilterDelegated = document.body._gridFilterDelegated || {};
+        if (!document.body._gridFilterDelegated[this.containerId]) {
             document.body.addEventListener('keypress', (event) => {
-                // Check if this is a filter field in our grid
                 if (event.target.matches(`#${this.containerId} .filter input, #${this.containerId} .filter select`)) {
                     this.filterKeyPress(event);
                 }
             });
-            document.body._gridFilterDelegated = true;
-        }
-
-        // Also try direct binding as fallback
-        const filters = document.querySelectorAll('#' + this.containerId + ' .filter input, #' + this.containerId + ' .filter select');
-        for (let i = 0; i < filters.length; i++) {
-            filters[i].addEventListener('keypress', this.filterKeyPress.bind(this));
+            document.body._gridFilterDelegated[this.containerId] = true;
         }
     }
 
