@@ -16,20 +16,15 @@ class Maho_Giftcard_Block_Adminhtml_Giftcard_Renderer_Order extends Mage_Adminht
     #[\Override]
     public function render(Maho\DataObject $row)
     {
-        $orderId = $row->getPurchaseOrderId();
+        $orderId = $row->getOrderId();
 
         if (!$orderId) {
             return '-';
         }
 
-        $order = Mage::getModel('sales/order')->load($orderId);
-
-        if (!$order->getId()) {
-            return '-';
-        }
-
         $url = $this->getUrl('adminhtml/sales_order/view', ['order_id' => $orderId]);
+        $incrementId = $row->getOrderIncrementId();
 
-        return sprintf('<a href="%s">#%s</a>', $url, $order->getIncrementId());
+        return sprintf('<a href="%s">#%s</a>', $url, $incrementId ?: $orderId);
     }
 }
