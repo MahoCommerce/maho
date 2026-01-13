@@ -12,48 +12,6 @@ declare(strict_types=1);
 uses(Tests\MahoBackendTestCase::class);
 
 describe('\Maho\Io Security Methods', function () {
-    describe('hasStreamWrapper()', function () {
-        it('detects phar:// wrapper', function () {
-            expect(\Maho\Io::hasStreamWrapper('phar://malicious.phar'))->toBeTrue();
-        });
-
-        it('detects http:// wrapper', function () {
-            expect(\Maho\Io::hasStreamWrapper('http://example.com/file'))->toBeTrue();
-        });
-
-        it('detects https:// wrapper', function () {
-            expect(\Maho\Io::hasStreamWrapper('https://example.com/file'))->toBeTrue();
-        });
-
-        it('detects ftp:// wrapper', function () {
-            expect(\Maho\Io::hasStreamWrapper('ftp://example.com/file'))->toBeTrue();
-        });
-
-        it('detects php:// wrapper', function () {
-            expect(\Maho\Io::hasStreamWrapper('php://filter/resource=file'))->toBeTrue();
-        });
-
-        it('detects data:// wrapper', function () {
-            expect(\Maho\Io::hasStreamWrapper('data://text/plain;base64,SGVsbG8='))->toBeTrue();
-        });
-
-        it('detects zip:// wrapper', function () {
-            expect(\Maho\Io::hasStreamWrapper('zip://archive.zip#file.txt'))->toBeTrue();
-        });
-
-        it('returns false for regular absolute path', function () {
-            expect(\Maho\Io::hasStreamWrapper('/var/www/file.txt'))->toBeFalse();
-        });
-
-        it('returns false for relative path', function () {
-            expect(\Maho\Io::hasStreamWrapper('path/to/file.txt'))->toBeFalse();
-        });
-
-        it('returns false for Windows path', function () {
-            expect(\Maho\Io::hasStreamWrapper('C:\\Users\\file.txt'))->toBeFalse();
-        });
-    });
-
     describe('validatePath()', function () {
         beforeEach(function () {
             $this->testDir = sys_get_temp_dir() . '/maho_io_test_' . uniqid();
@@ -114,6 +72,45 @@ describe('\Maho\Io Security Methods', function () {
         it('handles path traversal attempts', function () {
             $result = \Maho\Io::validatePath($this->testDir . '/../../../etc/passwd', $this->testDir);
             expect($result)->toBeFalse();
+        });
+    });
+
+    describe('allowedPath()', function () {
+        beforeEach(function () {
+            $this->testDir = sys_get_temp_dir() . '/maho_io_test_' . uniqid();
+            mkdir($this->testDir, 0755, true);
+            $this->io = new \Maho\Io\File();
+        });
+
+        afterEach(function () {
+            if (is_dir($this->testDir)) {
+                rmdir($this->testDir);
+            }
+        });
+
+        it('allows non-existent path within base directory', function () {
+            $nonExistentPath = $this->testDir . '/future/sitemap/';
+            expect($this->io->allowedPath($nonExistentPath, $this->testDir))->toBeTrue();
+        });
+
+        it('returns false for phar:// path', function () {
+            expect($this->io->allowedPath('phar://malicious.phar', $this->testDir))->toBeFalse();
+        });
+
+        it('returns false for phar:// base directory', function () {
+            expect($this->io->allowedPath('/some/path', 'phar://malicious.phar'))->toBeFalse();
+        });
+
+        it('blocks path traversal with ../', function () {
+            expect($this->io->allowedPath($this->testDir . '/../../../etc/passwd', $this->testDir))->toBeFalse();
+        });
+
+        it('allows path exactly matching base directory', function () {
+            expect($this->io->allowedPath($this->testDir, $this->testDir))->toBeTrue();
+        });
+
+        it('allows subdirectory path', function () {
+            expect($this->io->allowedPath($this->testDir . '/subdir/file.xml', $this->testDir))->toBeTrue();
         });
     });
 

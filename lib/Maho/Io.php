@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace Maho;
 
 use Maho\Io\IoInterface;
+use Symfony\Component\Filesystem\Path;
 
 /**
  * Abstract I/O class with security utilities for path validation
@@ -107,14 +108,23 @@ abstract class Io implements IoInterface
     }
 
     /**
-     * @deprecated Use \Maho\Io::validatePath() instead for secure path validation
-     * @param string $haystackPath
-     * @param string $needlePath
-     * @return bool
+     * Check if a path is within an allowed base directory
+     *
+     * This method canonicalizes both paths and checks containment.
+     * Works with paths that don't exist yet.
+     *
+     * Note: For paths that EXIST, prefer validatePath() which uses realpath()
+     * for stronger security including symlink resolution.
      */
-    public function allowedPath($haystackPath, $needlePath)
+    public function allowedPath(string $haystackPath, string $needlePath): bool
     {
-        return self::validatePath($haystackPath, $needlePath) !== false;
+        // Block stream wrappers (phar://, http://, etc.)
+        if (!Path::isLocal($haystackPath) || !Path::isLocal($needlePath)) {
+            return false;
+        }
+
+        // Canonicalize paths and check containment (handles ../ traversal)
+        return Path::isBasePath($needlePath, $haystackPath);
     }
 
     /**
@@ -134,17 +144,6 @@ abstract class Io implements IoInterface
     }
 
     /**
-     * Check if a path contains stream wrappers (phar://, http://, etc.)
-     *
-     * Stream wrappers like phar:// can trigger deserialization when used with
-     * functions like getimagesize(), file_exists(), is_readable(), etc.
-     */
-    public static function hasStreamWrapper(string $path): bool
-    {
-        return (bool) preg_match('#^[a-z][a-z0-9+.\-]*://#i', $path);
-    }
-
-    /**
      * Validate and resolve a file path securely
      *
      * This method provides comprehensive path validation:
@@ -159,30 +158,20 @@ abstract class Io implements IoInterface
     public static function validatePath(string $path, ?string $allowedBaseDir = null): string|false
     {
         // Block stream wrappers (phar://, http://, etc.)
-        if (self::hasStreamWrapper($path)) {
+        if (!Path::isLocal($path)) {
             return false;
         }
 
-        // Resolve to real path (handles symlinks, .., etc.)
+        // Resolve symlinks and verify existence
         $realPath = realpath($path);
         if ($realPath === false) {
             return false;
         }
 
-        // If base directory specified, ensure path stays within it
         if ($allowedBaseDir !== null) {
-            // Also block stream wrappers in base dir
-            if (self::hasStreamWrapper($allowedBaseDir)) {
-                return false;
-            }
-
             $realBaseDir = realpath($allowedBaseDir);
-            if ($realBaseDir === false) {
-                return false;
-            }
-
-            // Path must start with base directory + separator (or be exactly the base dir)
-            if ($realPath !== $realBaseDir && !str_starts_with($realPath, $realBaseDir . DIRECTORY_SEPARATOR)) {
+            // Check path is within allowed base directory
+            if ($realBaseDir === false || !Path::isBasePath($realBaseDir, $realPath)) {
                 return false;
             }
         }
