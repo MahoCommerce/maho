@@ -17,7 +17,7 @@ class Serialize extends AbstractParser
     #[\Override]
     public function parse()
     {
-        $this->setData(unserialize($this->getData()));
+        $this->setData(unserialize($this->getData(), ['allowed_classes' => false]));
         return $this;
     }
 

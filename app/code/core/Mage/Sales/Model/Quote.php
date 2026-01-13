@@ -393,7 +393,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                 // Check if this is a file option
                 if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
                     try {
-                        $optionValue = @unserialize($option->getValue());
+                        $optionValue = @unserialize($option->getValue(), ['allowed_classes' => false]);
                         if (is_array($optionValue) && isset($optionValue['quote_path'])) {
                             $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
                             if (file_exists($filePath) && is_file($filePath)) {
