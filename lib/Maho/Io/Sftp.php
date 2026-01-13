@@ -14,7 +14,7 @@ namespace Maho\Io;
 
 use phpseclib\Net\SFTP as PhpSecLibSftp;
 
-class Sftp extends AbstractIo implements IoInterface
+class Sftp extends \Maho\Io implements IoInterface
 {
     public const REMOTE_TIMEOUT = 10;
     public const SSH2_PORT = 22;

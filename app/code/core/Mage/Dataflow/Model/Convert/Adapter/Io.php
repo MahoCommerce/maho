@@ -15,7 +15,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
     public const XML_PATH_EXPORT_LOCAL_VALID_PATH = 'general/file/importexport_local_valid_paths';
 
     /**
-     * @return \Maho\Io\AbstractIo|false
+     * @return \Maho\Io\IoInterface|false
      */
     #[\Override]
     public function getResource($forWrite = false)

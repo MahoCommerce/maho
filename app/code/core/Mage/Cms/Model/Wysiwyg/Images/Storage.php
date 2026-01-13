@@ -112,7 +112,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
                     ]);
                 }
 
-                $size = @getimagesize($item->getFilename());
+                $size = @\Maho\Io::getImageSize($item->getFilename());
 
                 if (is_array($size)) {
                     $item->setWidth($size[0]);

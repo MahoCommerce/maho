@@ -23198,48 +23198,6 @@ parameters:
 			path: lib/Maho/Filter/Template/Tokenizer/Variable.php
 
 		-
-			rawMessage: 'Method Maho\Io\AbstractIo::allowedPath() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Io/AbstractIo.php
-
-		-
-			rawMessage: 'Method Maho\Io\AbstractIo::allowedPath() has parameter $haystackPath with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/Io/AbstractIo.php
-
-		-
-			rawMessage: 'Method Maho\Io\AbstractIo::allowedPath() has parameter $needlePath with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/Io/AbstractIo.php
-
-		-
-			rawMessage: 'Method Maho\Io\AbstractIo::dirsep() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Io/AbstractIo.php
-
-		-
-			rawMessage: 'Method Maho\Io\AbstractIo::getCleanPath() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: lib/Maho/Io/AbstractIo.php
-
-		-
-			rawMessage: 'Method Maho\Io\AbstractIo::getCleanPath() has parameter $path with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/Io/AbstractIo.php
-
-		-
-			rawMessage: 'Method Maho\Io\AbstractIo::getFilteredPath() has parameter $path with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/Io/AbstractIo.php
-
-		-
 			rawMessage: 'Method Maho\Io\File::dirname() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -23248,12 +23206,6 @@ parameters:
 		-
 			rawMessage: 'Method Maho\Io\File::dirname() has parameter $file with no type specified.'
 			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/Io/File.php
-
-		-
-			rawMessage: 'Method Maho\Io\File::dirsep() has no return type specified.'
-			identifier: missingType.return
 			count: 1
 			path: lib/Maho/Io/File.php
 

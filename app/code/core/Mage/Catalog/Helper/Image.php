@@ -624,7 +624,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
     public function validateUploadFile($filePath)
     {
         $maxDimension = Mage::getStoreConfig(self::XML_NODE_PRODUCT_MAX_DIMENSION);
-        $imageInfo = getimagesize($filePath);
+        $imageInfo = \Maho\Io::getImageSize($filePath);
         if (!$imageInfo) {
             Mage::throwException($this->__('Disallowed file type.'));
         }

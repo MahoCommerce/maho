@@ -65,9 +65,9 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $realPath = $io->getCleanPath(Mage::getBaseDir() . '/' . $this->getSitemapPath());
 
         /**
-         * Check path is allow
+         * Check path is allowed
          */
-        if (!$io->allowedPath($realPath, Mage::getBaseDir())) {
+        if (\Maho\Io::validatePath($realPath, Mage::getBaseDir()) === false) {
             Mage::throwException(Mage::helper('sitemap')->__('Please define correct path'));
         }
         /**

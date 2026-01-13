@@ -12,7 +12,7 @@
 
 namespace Maho\Io;
 
-class File extends AbstractIo
+class File extends \Maho\Io implements IoInterface
 {
     /**
      * Save initial working directory

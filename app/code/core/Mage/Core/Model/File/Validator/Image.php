@@ -93,7 +93,7 @@ class Mage_Core_Model_File_Validator_Image
             return null;
         }
 
-        [$imageWidth, $imageHeight, $fileType] = getimagesize($filePath);
+        [$imageWidth, $imageHeight, $fileType] = \Maho\Io::getImageSize($filePath);
         if ($fileType) {
             if ($fileType === IMAGETYPE_ICO) {
                 return null;

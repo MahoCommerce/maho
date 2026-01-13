@@ -386,7 +386,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $uploadedFile = $_FILES['edited_image']['tmp_name'];
 
             // Validate uploaded file is an image
-            if (!getimagesize($uploadedFile)) {
+            if (!\Maho\Io::getImageSize($uploadedFile)) {
                 throw new Exception('Uploaded file is not a valid image.');
             }
 

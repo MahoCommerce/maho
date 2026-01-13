@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Maho\Rector\SecureGetImageSizeRector;
 use Maho\Rector\SecureUnserializeRector;
 use Maho\Rector\VarienToMahoClassMap;
 use Rector\CodeQuality\Rector as CodeQuality;
@@ -22,6 +23,7 @@ return RectorConfig::configure()
         php70: true,
     )
     ->withRules([
+        SecureGetImageSizeRector::class,
         SecureUnserializeRector::class,
         CodeQuality\BooleanNot\ReplaceMultipleBooleanNotRector::class,
         CodeQuality\Foreach_\UnusedForeachValueToArrayKeysRector::class,
