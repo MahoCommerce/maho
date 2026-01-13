@@ -18,7 +18,6 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
     public const XML_PATH_PROTECTED_FILE_EXTENSIONS    = 'general/file/protected_extensions';
-    public const XML_PATH_PUBLIC_FILES_VALID_PATHS     = 'general/file/public_files_valid_paths';
     public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
     public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
@@ -711,31 +710,6 @@ XML;
     public function getProtectedFileExtensions($store = null)
     {
         return Mage::getStoreConfig(self::XML_PATH_PROTECTED_FILE_EXTENSIONS, $store);
-    }
-
-    /**
-     * Return list with public files valid paths
-     *
-     * @return array
-     */
-    public function getPublicFilesValidPath()
-    {
-        return Mage::getStoreConfig(self::XML_PATH_PUBLIC_FILES_VALID_PATHS);
-    }
-
-    /**
-     * Check LFI protection
-     *
-     * @throws Mage_Core_Exception
-     * @param string $name
-     * @return bool
-     */
-    public function checkLfiProtection($name)
-    {
-        if (preg_match('#\.\.[\\\/]#', $name)) {
-            throw new Mage_Core_Exception($this->__('Invalid template path: contains parent directory traversal'));
-        }
-        return true;
     }
 
     /**

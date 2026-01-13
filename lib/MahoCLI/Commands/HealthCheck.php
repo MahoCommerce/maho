@@ -69,7 +69,7 @@ class HealthCheck extends BaseMahoCommand
         'Varien_Filter_Object' => \Maho\Filter\ObjectFilter::class,
         'Varien_Filter_Template' => \Maho\Filter\Template::class,
         'Varien_Filter_Template_Tokenizer_Abstract' => \Maho\Filter\Template\Tokenizer\AbstractTokenizer::class,
-        'Varien_Io_Abstract' => \Maho\Io\AbstractIo::class,
+        'Varien_Io_Abstract' => \Maho\Io::class,
         'Varien_Io_File' => \Maho\Io\File::class,
         'Varien_Io_Ftp' => \Maho\Io\Ftp::class,
         'Varien_Io_Interface' => \Maho\Io\IoInterface::class,

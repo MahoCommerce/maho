@@ -25,7 +25,7 @@ class Mage_Eav_Model_Attribute_Data_Image extends Mage_Eav_Model_Attribute_Data_
         $label  = Mage::helper('eav')->__($this->getAttribute()->getStoreLabel());
         $rules  = $this->getAttribute()->getValidateRules();
 
-        $imageProp = @getimagesize($value['tmp_name']);
+        $imageProp = @\Maho\Io::getImageSize($value['tmp_name']);
 
         if (!is_uploaded_file($value['tmp_name']) || !$imageProp) {
             return [

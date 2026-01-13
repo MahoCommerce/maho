@@ -108,18 +108,19 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                         . '.' . ($guiData['parse']['type'] == 'csv' ? $guiData['parse']['type'] : 'xml');
                 }
 
-                //validate export available path
-                $path = rtrim($guiData['file']['path'], '\\/')
-                      . DS . $guiData['file']['filename'];
-                /** @var Mage_Core_Model_File_Validator_AvailablePath $validator */
-                $validator = Mage::getModel('core/file_validator_availablePath');
-                /** @var Mage_ImportExport_Helper_Data $helperImportExport */
-                $helperImportExport = Mage::helper('importexport');
-                $validator->setPaths($helperImportExport->getLocalValidPaths());
-                if (!$validator->isValid($path)) {
-                    foreach ($validator->getMessages() as $message) {
-                        Mage::throwException($message);
-                    }
+                // Validate path is within allowed directories (var/export or var/import)
+                $filePath = \Symfony\Component\Filesystem\Path::makeAbsolute(
+                    $guiData['file']['path'],
+                    Mage::getBaseDir(),
+                );
+
+                $varDir = Mage::getBaseDir('var');
+                $isInExport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'export');
+                $isInImport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'import');
+                if (!$isInExport && !$isInImport) {
+                    Mage::throwException(
+                        Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $guiData['file']['path']),
+                    );
                 }
 
                 $this->setGuiData($guiData);

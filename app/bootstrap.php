@@ -120,7 +120,7 @@ if (($_ENV['MAHO_ENABLE_VARIEN_ALIASES'] ?? $_SERVER['MAHO_ENABLE_VARIEN_ALIASES
     class_alias(\Maho\Filter\Template\Tokenizer\AbstractTokenizer::class, 'Varien_Filter_Template_Tokenizer_Abstract');
     class_alias(\Maho\Filter\Template\Tokenizer\Parameter::class, 'Varien_Filter_Template_Tokenizer_Parameter');
     class_alias(\Maho\Filter\Template\Tokenizer\Variable::class, 'Varien_Filter_Template_Tokenizer_Variable');
-    class_alias(\Maho\Io\AbstractIo::class, 'Varien_Io_Abstract');
+    class_alias(\Maho\Io::class, 'Varien_Io_Abstract');
     class_alias(\Maho\Io\Exception::class, 'Varien_Io_Exception');
     class_alias(\Maho\Io\File::class, 'Varien_Io_File');
     class_alias(\Maho\Io\Ftp::class, 'Varien_Io_Ftp');

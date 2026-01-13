@@ -128,7 +128,7 @@ final class VarienToMahoClassMap
             'Varien_Filter_Template_Tokenizer_Variable' => \Maho\Filter\Template\Tokenizer\Variable::class,
 
             // Io namespace
-            'Varien_Io_Abstract' => \Maho\Io\AbstractIo::class,
+            'Varien_Io_Abstract' => \Maho\Io::class,
             'Varien_Io_Exception' => \Maho\Io\Exception::class,
             'Varien_Io_File' => \Maho\Io\File::class,
             'Varien_Io_Ftp' => \Maho\Io\Ftp::class,

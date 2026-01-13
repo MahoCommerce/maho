@@ -197,14 +197,6 @@
             </catalog>
         </system>
         <general>
-            <file>
-                <sitemap_generate_valid_paths>
-                    <!-- This data should be merged with public_files_valid_paths -->
-                    <available>
-                        <any_path>/*/*.xml</any_path>
-                    </available>
-                </sitemap_generate_valid_paths>
-            </file>
             <validator_data>
                 <input_types>
                     <file>file</file>

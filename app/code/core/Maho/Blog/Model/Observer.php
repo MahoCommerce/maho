@@ -180,8 +180,8 @@ class Maho_Blog_Model_Observer
         $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
-        // Files should be saved in public directory for web accessibility
-        $resolvedPath = Mage::getBaseDir('public');
+        // Files should be saved in public/{sitemap_path} for web accessibility
+        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $sitemap->getSitemapPath(), '/');
 
         $io->open(['path' => $resolvedPath]);
 

@@ -83,7 +83,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     {
         $file = $this->getCurrentImage()->getPath();
         if (file_exists($file)) {
-            $size = getimagesize($file);
+            $size = \Maho\Io::getImageSize($file);
             if (isset($size[0])) {
                 if ($size[0] > 600) {
                     return 600;

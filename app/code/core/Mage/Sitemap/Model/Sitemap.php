@@ -62,23 +62,25 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $io = new \Maho\Io\File();
-        $realPath = $io->getCleanPath(Mage::getBaseDir() . '/' . $this->getSitemapPath());
+        // Sitemap files must be in public directory for web accessibility
+        $publicDir = Mage::getBaseDir('public');
+        $realPath = $io->getCleanPath($publicDir . '/' . $this->getSitemapPath());
 
         /**
-         * Check path is allow
+         * Check path is allowed (must be within public directory)
          */
-        if (!$io->allowedPath($realPath, Mage::getBaseDir())) {
+        if (!\Maho\Io::allowedPath($realPath, $publicDir)) {
             Mage::throwException(Mage::helper('sitemap')->__('Please define correct path'));
         }
         /**
          * Check exists and writeable path
          */
         if (!$io->fileExists($realPath, false)) {
-            Mage::throwException(Mage::helper('sitemap')->__('Please create the specified folder "%s" before saving the sitemap.', Mage::helper('core')->escapeHtml($this->getSitemapPath())));
+            Mage::throwException(Mage::helper('sitemap')->__('Please create the specified folder "%s" inside your public directory before saving the sitemap.', Mage::helper('core')->escapeHtml($this->getSitemapPath())));
         }
 
         if (!$io->isWriteable($realPath)) {
-            Mage::throwException(Mage::helper('sitemap')->__('Please make sure that "%s" is writable by web-server.', $this->getSitemapPath()));
+            Mage::throwException(Mage::helper('sitemap')->__('Please make sure that "%s" inside your public directory is writable by web-server.', $this->getSitemapPath()));
         }
         /**
          * Check allow filename
@@ -89,8 +91,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         if (!preg_match('#\.xml$#', $this->getSitemapFilename())) {
             $this->setSitemapFilename($this->getSitemapFilename() . '.xml');
         }
-
-        $this->setSitemapPath(rtrim(str_replace(str_replace('\\', '/', Mage::getBaseDir()), '', $realPath), '/') . '/');
 
         return parent::_beforeSave();
     }
@@ -103,7 +103,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function getPath()
     {
         if (is_null($this->_filePath)) {
-            $this->_filePath = str_replace('//', '/', Mage::getBaseDir() .
+            $this->_filePath = str_replace('//', '/', Mage::getBaseDir('public') . '/' .
                 $this->getSitemapPath());
         }
         return $this->_filePath;
@@ -417,8 +417,8 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
-        // Files should be saved in public directory for web accessibility
-        $resolvedPath = Mage::getBaseDir('public');
+        // Files should be saved in public/{sitemap_path} for web accessibility
+        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $this->getSitemapPath(), '/');
 
         $io->open(['path' => $resolvedPath]);
 
@@ -445,8 +445,8 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
-        // Files should be saved in public directory for web accessibility
-        $resolvedPath = Mage::getBaseDir('public');
+        // Files should be saved in public/{sitemap_path} for web accessibility
+        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $this->getSitemapPath(), '/');
 
         $io->open(['path' => $resolvedPath]);
 

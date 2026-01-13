@@ -270,7 +270,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $_width = 0;
             $_height = 0;
             if (is_readable($fileInfo['tmp_name'])) {
-                $_imageSize = @getimagesize($fileInfo['tmp_name']);
+                $_imageSize = @\Maho\Io::getImageSize($fileInfo['tmp_name']);
                 if ($_imageSize) {
                     $_width = $_imageSize[0];
                     $_height = $_imageSize[1];
@@ -383,7 +383,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
         if (count($_dimentions) > 0) {
-            $imageInfo = getimagesize($fileFullPath);
+            $imageInfo = \Maho\Io::getImageSize($fileFullPath);
             if ($imageInfo !== false) {
                 [$width, $height] = $imageInfo;
                 if (isset($_dimentions['maxwidth']) && $width > $_dimentions['maxwidth']) {
@@ -777,7 +777,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         if (!is_readable($fileInfo)) {
             return false;
         }
-        $imageInfo = getimagesize($fileInfo);
+        $imageInfo = \Maho\Io::getImageSize($fileInfo);
         if (!$imageInfo) {
             return false;
         }

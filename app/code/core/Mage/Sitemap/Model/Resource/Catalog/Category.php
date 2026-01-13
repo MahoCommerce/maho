@@ -75,12 +75,17 @@ class Mage_Sitemap_Model_Resource_Catalog_Category extends Mage_Sitemap_Model_Re
         ];
 
         $read = $this->_getReadAdapter();
+        // Use CASE instead of MySQL's FIELD() for cross-database compatibility (SQLite)
+        // Store-specific values ($storeId) should come first, then default (0)
+        $storeOrder = new \Maho\Db\Expr(
+            'CASE WHEN store_id = ' . (int) $storeId . ' THEN 0 WHEN store_id = 0 THEN 1 ELSE 2 END',
+        );
         $select = $read->select()
             ->from(['attr' => 'catalog_category_entity_varchar'], ['entity_id', 'attribute_id', 'value', 'store_id'])
             ->where('attr.entity_id IN (?)', $entityIds)
             ->where('attr.attribute_id IN (?)', array_keys($attributeMap))
             ->where('attr.store_id IN (?)', [0, $storeId])
-            ->order(['entity_id ASC', 'attribute_id ASC', 'FIELD(store_id, ' . $storeId . ', 0) DESC']);
+            ->order(['entity_id ASC', 'attribute_id ASC', $storeOrder]);
 
         $results = $read->fetchAll($select);
         $attributes = [];

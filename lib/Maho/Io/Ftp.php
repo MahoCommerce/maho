@@ -14,7 +14,7 @@ namespace Maho\Io;
 
 use FTP\Connection;
 
-class Ftp extends AbstractIo
+class Ftp extends \Maho\Io
 {
     public const ERROR_EMPTY_HOST = 1;
     public const ERROR_INVALID_CONNECTION = 2;

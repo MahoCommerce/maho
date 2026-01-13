@@ -12,8 +12,12 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Filesystem\Path;
+
 /**
  * Validator for check not protected/available path
+ *
+ * @deprecated since 26.1 Use \Maho\Io::allowedPath() instead for simpler and more secure path validation.
  *
  * Mask symbols from path:
  * "?" - something directory with any name
@@ -67,6 +71,12 @@ class Mage_Core_Model_File_Validator_AvailablePath
 
         if (!$this->availablePaths && !$this->protectedPaths) {
             $this->messages[] = Mage::helper('core')->__('Please set available and/or protected paths list(s) before validation.');
+            return false;
+        }
+
+        // Block stream wrappers (phar://, http://, etc.) to prevent deserialization attacks
+        if (!Path::isLocal($value)) {
+            $this->messages[] = Mage::helper('core')->__('Path "%s" contains an invalid stream wrapper.', $value);
             return false;
         }
 

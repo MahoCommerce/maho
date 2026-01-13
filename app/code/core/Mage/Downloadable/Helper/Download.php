@@ -232,14 +232,18 @@ class Mage_Downloadable_Helper_Download extends Mage_Core_Helper_Abstract
      * @param string $resourceFile
      * @param string $linkType
      * @return $this
+     * @throws Mage_Core_Exception
      */
     public function setResource($resourceFile, $linkType = self::LINK_TYPE_FILE)
     {
         if (self::LINK_TYPE_FILE == $linkType) {
-            //check LFI protection
-            /** @var Mage_Core_Helper_Data $helper */
-            $helper = Mage::helper('core');
-            $helper->checkLfiProtection($resourceFile);
+            // Validate file path is within allowed media directory
+            $mediaDir = Mage::getBaseDir('media');
+            if (!\Maho\Io::allowedPath($resourceFile, $mediaDir)) {
+                Mage::throwException(
+                    Mage::helper('downloadable')->__('Invalid file path.'),
+                );
+            }
         }
 
         $this->_resourceFile    = $resourceFile;

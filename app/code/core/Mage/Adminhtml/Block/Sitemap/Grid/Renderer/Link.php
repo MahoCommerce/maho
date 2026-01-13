@@ -26,8 +26,9 @@ class Mage_Adminhtml_Block_Sitemap_Grid_Renderer_Link extends Mage_Adminhtml_Blo
             Mage::app()->getStore($row->getStoreId())->getBaseUrl(Mage_Core_Model_Store::URL_TYPE_WEB) . $fileName,
         );
 
-        if (file_exists(BP . DS . $fileName)) {
-            return sprintf('<a href="%1$s">%1$s</a>', $url);
+        // Sitemap files are stored in the public directory
+        if (file_exists(Mage::getBaseDir('public') . DS . $fileName)) {
+            return sprintf('<a href="%1$s" target="_blank">%1$s</a>', $url);
         }
         return $url;
     }
