@@ -31,7 +31,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
     public function editAction(): void
     {
-        $id = $this->getRequest()->getUserParam('id');
+        $id = $this->getRequest()->getParam('id');
         $model = Mage::getModel('cataloglinkrule/rule');
 
         if ($id) {
@@ -110,7 +110,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
     public function deleteAction(): void
     {
-        if ($id = $this->getRequest()->getUserParam('id')) {
+        if ($id = $this->getRequest()->getParam('id')) {
             try {
                 $model = Mage::getModel('cataloglinkrule/rule')->load($id);
                 $model->delete();
@@ -128,7 +128,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
     public function massDeleteAction(): void
     {
-        $ruleIds = $this->getRequest()->getUserParam('rule_ids');
+        $ruleIds = $this->getRequest()->getParam('rule_ids');
         if (!is_array($ruleIds)) {
             Mage::getSingleton('adminhtml/session')->addError(
                 Mage::helper('cataloglinkrule')->__('Please select rule(s).'),
@@ -152,8 +152,8 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
 
     public function massStatusAction(): void
     {
-        $ruleIds = $this->getRequest()->getUserParam('rule_ids');
-        $status = (int) $this->getRequest()->getUserParam('status');
+        $ruleIds = $this->getRequest()->getParam('rule_ids');
+        $status = (int) $this->getRequest()->getParam('status');
 
         if (!is_array($ruleIds)) {
             Mage::getSingleton('adminhtml/session')->addError(
