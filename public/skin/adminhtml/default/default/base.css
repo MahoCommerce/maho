@@ -407,10 +407,6 @@ table.actions td {
     width: 2em!important
 }
 
-.pager .arrow {
-    margin: 0 3px;
-    vertical-align: middle
-}
 
 .grid tr.headings th {
     border-width: 1px;
@@ -5571,38 +5567,22 @@ img.rule-param-add {
     background-size: 13px
 }
 
-.pager img[src$="pager_arrow_left.gif"].arrow {
-    padding-left: 17px;
-    box-sizing: border-box;
-    width: 17px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%230090FF' d='M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M14,7L9,12L14,17V7Z' /%3E%3C/svg%3E")no-repeat;
-    height: 17px
+.pager .pager-arrow {
+    display: inline-flex;
+    align-items: center;
+    vertical-align: middle;
+    margin: 0 3px;
+    color: #888
 }
 
-.pager img[src$="pager_arrow_right.gif"].arrow {
-    padding-left: 17px;
-    box-sizing: border-box;
-    width: 17px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%230090FF' d='M2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12M10,17L15,12L10,7V17Z' /%3E%3C/svg%3E")no-repeat;
-    height: 17px
+.pager .pager-arrow svg {
+    width: 20px;
+    height: 20px
 }
 
-.pager img[src$="pager_arrow_left_off.gif"].arrow {
-    padding-left: 17px;
-    box-sizing: border-box;
-    width: 17px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%230090FF' d='M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M14,7L9,12L14,17V7Z' /%3E%3C/svg%3E")no-repeat;
-    height: 17px;
-    opacity: .5
-}
-
-.pager img[src$="pager_arrow_right_off.gif"].arrow {
-    padding-left: 17px;
-    box-sizing: border-box;
-    width: 17px;
-    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' style='width:24px;height:24px' viewBox='0 0 24 24'%3E%3Cpath fill='%230090FF' d='M2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12M10,17L15,12L10,7V17Z' /%3E%3C/svg%3E")no-repeat;
-    height: 17px;
-    opacity: .5
+.pager .pager-arrow.disabled {
+    opacity: .5;
+    cursor: default
 }
 
 .export img {
