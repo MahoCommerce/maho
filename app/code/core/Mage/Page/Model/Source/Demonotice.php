@@ -13,8 +13,8 @@ declare(strict_types=1);
 class Mage_Page_Model_Source_Demonotice
 {
     public const MODE_DISABLED = '0';
-    public const MODE_TEXT = 'text';
-    public const MODE_CMS_BLOCK = 'cms_block';
+    public const MODE_TEXT = '1'; // Use '1' for backward compatibility with old boolean config
+    public const MODE_CMS_BLOCK = '2';
 
     public function toOptionArray(): array
     {

@@ -30,15 +30,16 @@ class Mage_Page_Block_Html_Notices extends Mage_Core_Block_Template
         $mode = Mage::getStoreConfig('design/head/demonotice');
 
         if ($mode === Mage_Page_Model_Source_Demonotice::MODE_CMS_BLOCK) {
-            $blockId = Mage::getStoreConfig('design/head/demonotice_cms_block');
-            if ($blockId) {
+            $blockIdentifier = Mage::getStoreConfig('design/head/demonotice_cms_block');
+            if ($blockIdentifier) {
                 return $this->getLayout()
                     ->createBlock('cms/block')
-                    ->setBlockId($blockId)
+                    ->setBlockId($blockIdentifier)
                     ->toHtml();
             }
         }
 
+        // MODE_TEXT or legacy '1' value - check for custom text, fallback to default
         $customText = Mage::getStoreConfig('design/head/demonotice_text');
         if ($customText) {
             return $this->escapeHtml($customText);

@@ -120,7 +120,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><demonotice>text</demonotice></depends>
+                            <depends><demonotice>1</demonotice></depends>
                         </demonotice_text>
                         <demonotice_cms_block translate="label">
                             <label>Demo Store Notice CMS Block</label>
@@ -130,7 +130,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                            <depends><demonotice>cms_block</demonotice></depends>
+                            <depends><demonotice>2</demonotice></depends>
                         </demonotice_cms_block>
                     </fields>
                 </head>
