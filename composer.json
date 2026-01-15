@@ -55,6 +55,7 @@
         "spomky-labs/otphp": "^11.3",
         "symfony/cache": "^7.4",
         "symfony/console": "^7.4",
+        "symfony/filesystem": "^7.4",
         "symfony/http-client": "^7.4",
         "symfony/http-foundation": "^7.4",
         "symfony/mailer": "^7.4",
