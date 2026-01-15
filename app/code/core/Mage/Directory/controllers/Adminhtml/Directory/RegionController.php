@@ -23,7 +23,7 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
     protected function _initRegion(): Mage_Directory_Model_Region|false
     {
-        $id = $this->getRequest()->getUserParam('id');
+        $id = $this->getRequest()->getParam('id');
         $model = Mage::getModel('directory/region');
 
         if ($id) {

@@ -23,7 +23,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
     protected function _initCountry(): Mage_Directory_Model_Country|false
     {
-        $id = $this->getRequest()->getUserParam('id');
+        $id = $this->getRequest()->getParam('id');
         $model = Mage::getModel('directory/country');
 
         if ($id) {
