@@ -1613,31 +1613,6 @@
                         </use_frontend_sid>
                     </fields>
                 </session>
-                <browser_capabilities translate="label">
-                    <label>Browser Capabilities Detection</label>
-                    <sort_order>200</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <cookies translate="label" module="cms">
-                            <label>Redirect to CMS-page if Cookies are Disabled</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>100</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </cookies>
-                        <javascript translate="label" module="cms">
-                            <label>Show Notice if JavaScript is Disabled</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>200</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </javascript>
-                    </fields>
-                </browser_capabilities>
             </groups>
         </web>
     </sections>

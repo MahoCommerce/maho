@@ -191,34 +191,6 @@ faucibus et, tempus at, dui. Nunc risus. Proin scelerisque augue. Nam ullamcorpe
         'stores'        => [0],
         'sort_order'    => 0,
     ],
-    [
-        'title'         => 'Enable Cookies',
-        'root_template' => 'one_column',
-        'identifier'    => 'enable-cookies',
-        'content'       => '<div class="std">
-    <ul class="messages">
-        <li class="notice-msg">
-            <ul>
-                <li>Please enable cookies in your web browser to continue.</li>
-            </ul>
-        </li>
-    </ul>
-    <div class="page-title">
-        <h1><a name="top"></a>What are Cookies?</h1>
-    </div>
-    <p>Cookies are short pieces of data that are sent to your computer when you visit a website.
-    On later visits, this data is then returned to that website. Cookies allow us to recognize you automatically
-    whenever you visit our site so that we can personalize your experience and provide you with better service.
-    We also use cookies (and similar browser data, such as Flash cookies) for fraud prevention and other purposes.
-     If your web browser is set to refuse cookies from our website, you will not be able to complete a purchase
-     or take advantage of certain features of our website, such as storing items in your Shopping Cart or
-     receiving personalized recommendations. As a result, we strongly encourage you to configure your web
-     browser to accept cookies from our website.</p>
-</div>
-',
-        'is_active'     => 1,
-        'stores'        => [0],
-    ],
 ];
 
 /**

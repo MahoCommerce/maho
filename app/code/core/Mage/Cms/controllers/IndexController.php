@@ -71,26 +71,4 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
         $this->loadLayout();
         $this->renderLayout();
     }
-
-    /**
-     * Render Disable cookies page
-     */
-    #[\Override]
-    public function noCookiesAction(): void
-    {
-        $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_NO_COOKIES_PAGE);
-        if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
-            $this->_forward('defaultNoCookies');
-        }
-    }
-
-    /**
-     * Default no cookies page action
-     * Used if no cookies page don't configure or available
-     */
-    public function defaultNoCookiesAction(): void
-    {
-        $this->loadLayout();
-        $this->renderLayout();
-    }
 }

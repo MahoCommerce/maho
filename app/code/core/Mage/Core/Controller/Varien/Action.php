@@ -21,7 +21,6 @@ abstract class Mage_Core_Controller_Varien_Action
     public const FLAG_NO_POST_DISPATCH         = 'no-postDispatch';
     public const FLAG_NO_START_SESSION         = 'no-startSession';
     public const FLAG_NO_DISPATCH_BLOCK_EVENT  = 'no-beforeGenerateLayoutBlocksDispatch';
-    public const FLAG_NO_COOKIES_REDIRECT      = 'no-cookies-redirect';
 
     public const PARAM_NAME_SUCCESS_URL        = 'success_url';
     public const PARAM_NAME_ERROR_URL          = 'error_url';
@@ -60,13 +59,6 @@ abstract class Mage_Core_Controller_Varien_Action
      * @var array
      */
     protected $_flags = [];
-
-    /**
-     * Action list where need check enabled cookie
-     *
-     * @var array
-     */
-    protected $_cookieCheckActions = [];
 
     /**
      * Currently used area
@@ -473,41 +465,10 @@ abstract class Mage_Core_Controller_Varien_Action
         }
 
         if (!$this->getFlag('', self::FLAG_NO_START_SESSION)) {
-            $checkCookie = in_array($this->getRequest()->getActionName(), $this->_cookieCheckActions)
-                && !$this->getRequest()->getParam('nocookie', false);
-            $cookies = Mage::getSingleton('core/cookie')->get();
-            /** @var Mage_Core_Model_Session $session */
-            $session = Mage::getSingleton('core/session', ['name' => $this->_sessionNamespace])->start();
-
-            if (empty($cookies)) {
-                if ($session->getCookieShouldBeReceived()) {
-                    $this->setFlag('', self::FLAG_NO_COOKIES_REDIRECT, true);
-                    $session->unsCookieShouldBeReceived();
-                    $session->setSkipSessionIdFlag(true);
-                } elseif ($checkCookie) {
-                    if (isset($_GET[$session->getSessionIdQueryParam()]) && Mage::app()->getUseSessionInUrl()
-                        && $this->_sessionNamespace != Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE
-                    ) {
-                        $session->setCookieShouldBeReceived(true);
-                    } else {
-                        $this->setFlag('', self::FLAG_NO_COOKIES_REDIRECT, true);
-                    }
-                }
-            }
+            Mage::getSingleton('core/session', ['name' => $this->_sessionNamespace])->start();
         }
 
         Mage::app()->loadArea($this->getLayout()->getArea());
-
-        // Only redirect to noCookies page if:
-        // 1. The flag is true (cookies missing was detected)
-        // 2. The flag was NOT explicitly set to false (which means "skip cookie check")
-        // 3. Browser capabilities check is enabled
-        if ($this->getFlag('', self::FLAG_NO_COOKIES_REDIRECT) === true
-            && Mage::getStoreConfig('web/browser_capabilities/cookies')
-        ) {
-            $this->_forward('noCookies', 'index', 'core');
-            return;
-        }
 
         if ($this->getFlag('', self::FLAG_NO_PRE_DISPATCH)) {
             return;
@@ -575,26 +536,6 @@ abstract class Mage_Core_Controller_Varien_Action
                 ['__status__' => $status],
             );
         }
-    }
-
-    public function noCookiesAction(): void
-    {
-        $redirect = new \Maho\DataObject();
-        Mage::dispatchEvent('controller_action_nocookies', [
-            'action'    => $this,
-            'redirect'  => $redirect,
-        ]);
-
-        if ($url = $redirect->getRedirectUrl()) {
-            $this->_redirectUrl($url);
-        } elseif ($redirect->getRedirect()) {
-            $this->_redirect($redirect->getPath(), $redirect->getArguments());
-        } else {
-            $this->loadLayout(['default', 'noCookie']);
-            $this->renderLayout();
-        }
-
-        $this->getRequest()->setDispatched(true);
     }
 
     /**

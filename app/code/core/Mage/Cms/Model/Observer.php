@@ -26,26 +26,4 @@ class Mage_Cms_Model_Observer
             ->setForwardAction('noRoute');
         return $this;
     }
-
-    /**
-     * Modify no Cookies forward object
-     *
-     * @return $this
-     */
-    public function noCookies(\Maho\Event\Observer $observer)
-    {
-        $redirect = $observer->getEvent()->getRedirect();
-
-        $pageId  = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_NO_COOKIES_PAGE);
-        $pageUrl = Mage::helper('cms/page')->getPageUrl($pageId);
-
-        if ($pageUrl) {
-            $redirect->setRedirectUrl($pageUrl);
-        } else {
-            $redirect->setRedirect(true)
-                ->setPath('cms/index/noCookies')
-                ->setArguments([]);
-        }
-        return $this;
-    }
 }
