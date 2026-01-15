@@ -11,20 +11,8 @@
 
 /** @var Mage_Page_Block_Html_Notices $this */
 ?>
-<?php if ($this->displayNoscriptNotice()): ?>
-    <noscript>
-        <aside class="global-site-notice noscript" role="complementary" aria-label="<?= $this->__('Browser Notice') ?>">
-            <div class="notice-inner">
-                <p>
-                    <strong><?= $this->__('JavaScript seems to be disabled in your browser.') ?></strong><br />
-                    <?= $this->__('You must have JavaScript enabled in your browser to utilize the functionality of this website.') ?>
-                </p>
-            </div>
-        </aside>
-    </noscript>
-<?php endif ?>
 <?php if ($this->displayDemoNotice()): ?>
     <aside class="global-site-notice demo-notice" role="complementary" aria-label="<?= $this->__('Store Notice') ?>">
-        <div class="notice-inner"><p><?= $this->__('This is a demo store. Any orders placed through this store will not be honored or fulfilled.') ?></p></div>
+        <div class="notice-inner"><?= $this->getDemoNoticeContent() ?></div>
     </aside>
 <?php endif ?>

@@ -35,14 +35,6 @@
                     </cms>
                 </observers>
             </controller_action_noroute>
-            <controller_action_nocookies>
-                <observers>
-                    <cms>
-                        <class>cms/observer</class>
-                        <method>noCookies</method>
-                    </cms>
-                </observers>
-            </controller_action_nocookies>
         </events>
         <translate>
             <modules>

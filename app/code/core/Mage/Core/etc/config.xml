@@ -399,10 +399,6 @@
                 <use_frontend_sid>1</use_frontend_sid>
                 <use_admin_sid>0</use_admin_sid>
             </session>
-            <browser_capabilities>
-                <cookies>1</cookies>
-                <javascript>1</javascript>
-            </browser_capabilities>
         </web>
         <admin>
             <design>

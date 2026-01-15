@@ -21,11 +21,7 @@
 <script type="text/javascript">
     function allowSaveCookie() {
         Mage.Cookies.set('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>', '<?= Mage::helper('core/cookie')->getAcceptedSaveCookiesWebsiteIds()?>', new Date(new Date().getTime() + <?= Mage::helper('core/cookie')->getCookieRestrictionLifetime() ?> * 1000));
-        if (Mage.Cookies.get('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>')) {
-            window.location.reload();
-        } else {
-            window.location.href = '<?= Mage::getUrl('cms/index/noCookies') ?>';
-        }
+        window.location.reload();
     }
 
     document.getElementById('notice-cookie-block').style.display = 'block';

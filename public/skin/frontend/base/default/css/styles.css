@@ -1220,6 +1220,13 @@ a.button:hover {
   color: var(--maho-color-text-light);
   font-size: 0.688rem;
 }
+.global-site-notice a {
+  color: var(--maho-color-text-light);
+  text-decoration: underline;
+}
+.global-site-notice a:hover {
+  color: #fff;
+}
 .global-site-notice .notice-inner {
   width: 100%;
   max-width: 1200px;
@@ -7323,63 +7330,34 @@ div.paypal-logo span > img {
 /* ============================================ *
  * Cookies
  * ============================================ */
-.notice-cookie .notice-inner {
-  padding-bottom: 0;
+.notice-cookie {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  display: none;
 }
-.notice-cookie .notice-inner:after {
-  content: '';
-  display: table;
-  clear: both;
+.notice-cookie .notice-inner {
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
 }
 .notice-cookie .notice-text {
-  float: left;
-  max-width: 90%;
-  padding-top: 4px;
-  text-align: left;
+  flex: 1;
+  line-height: 1.4;
 }
 .notice-cookie .notice-text p {
-  padding-bottom: 14.5px;
-  line-height: 1.3;
-}
-.notice-cookie .actions {
-  float: left;
-  text-align: right;
-  padding-bottom: 14.5px;
+  margin: 0;
 }
 
-@media only screen and (max-width: 979px) {
-  .notice-cookie .notice-text {
-    max-width: 86%;
-  }
-}
-@media only screen and (max-width: 770px) {
-  .notice-cookie {
-    padding: 0 20px;
-  }
-  .notice-cookie .notice-text {
-    max-width: 82%;
-    padding-top: 0;
-  }
-}
 @media only screen and (max-width: 620px) {
-  .notice-cookie {
-    padding: 0 20px;
-  }
   .notice-cookie .notice-inner {
-    background-position: left 10px;
-  }
-  .notice-cookie .notice-inner:after {
-    content: '';
-    display: table;
-    clear: both;
-  }
-  .notice-cookie .notice-text {
-    float: none;
-    max-width: 100%;
-    padding-top: 0;
-  }
-  .notice-cookie .actions {
-    text-align: left;
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
   }
 }
 /* ============================================ *
