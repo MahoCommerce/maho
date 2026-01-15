@@ -6601,6 +6601,7 @@ div.paypal-logo span > img {
 .slideshow {
   width: 100%;
   overflow-x: auto;
+  overflow-y: hidden;
   scroll-behavior: smooth;
   scroll-snap-type: x mandatory;
   margin-bottom: 41px;
@@ -6620,9 +6621,9 @@ div.paypal-logo span > img {
 }
 
 .slideshow ul li img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .slideshow-dots {
