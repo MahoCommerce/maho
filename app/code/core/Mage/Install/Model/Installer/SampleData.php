@@ -358,73 +358,28 @@ class Mage_Install_Model_Installer_SampleData
     }
 
     /**
-     * Reindex all indexers via HTTP request (fresh PHP process)
+     * Reindex all indexers
      */
     private function reindexAll(): void
     {
-        $url = $this->getInstallUrl('reindex');
-        $result = $this->callInstallEndpoint($url);
+        /** @var Mage_Index_Model_Resource_Process_Collection $indexCollection */
+        $indexCollection = Mage::getResourceModel('index/process_collection');
 
-        if (!$result['success']) {
-            throw new Mage_Core_Exception(
-                Mage::helper('install')->__('Reindexing failed: %s', $result['error'] ?? 'Unknown error'),
-            );
+        foreach ($indexCollection as $index) {
+            /** @var Mage_Index_Model_Process $index */
+            if ($index->isLocked()) {
+                $index->unlock();
+            }
+            $index->reindexEverything();
         }
     }
 
     /**
-     * Clear caches via HTTP request (fresh PHP process)
+     * Clear all caches
      */
     private function clearCaches(): void
     {
-        $url = $this->getInstallUrl('cacheflush');
-        $result = $this->callInstallEndpoint($url);
-
-        if (!$result['success']) {
-            throw new Mage_Core_Exception(
-                Mage::helper('install')->__('Cache flush failed: %s', $result['error'] ?? 'Unknown error'),
-            );
-        }
-    }
-
-    /**
-     * Get install wizard URL from current request
-     */
-    private function getInstallUrl(string $action): string
-    {
-        $scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-        $scriptName = $_SERVER['SCRIPT_NAME'] ?? '/index.php';
-
-        return "{$scheme}://{$host}{$scriptName}/install/wizard/{$action}/";
-    }
-
-    /**
-     * Call an install endpoint via HTTP
-     */
-    private function callInstallEndpoint(string $url): array
-    {
-        $context = stream_context_create([
-            'http' => [
-                'method' => 'GET',
-                'timeout' => 300, // 5 minutes for reindex
-                'ignore_errors' => true,
-            ],
-        ]);
-
-        $response = file_get_contents($url, false, $context);
-
-        if ($response === false) {
-            return ['success' => false, 'error' => 'Failed to connect to endpoint'];
-        }
-
-        $data = json_decode($response, true);
-
-        if (!is_array($data)) {
-            return ['success' => false, 'error' => 'Invalid response from endpoint'];
-        }
-
-        return $data;
+        Mage::app()->getCache()->flush();
     }
 
     /**
