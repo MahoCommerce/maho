@@ -246,7 +246,10 @@ class Mage_Install_Model_Installer_SampleData
         // Execute the remapped SQL
         $this->executeSqlForEngine($pdo, $remappedSql, $dbEngine);
 
-        // Merge sample data's attribute set assignments
+        // Merge sample data's attribute groups first (builds group ID remap)
+        $importer->mergeAttributeGroups();
+
+        // Merge sample data's attribute set assignments (uses the group ID remap)
         $importer->mergeEntityAttributes();
 
         // Store importer for config remapping
