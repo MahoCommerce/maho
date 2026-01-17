@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -8,7 +10,7 @@
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  *
- * @method string getContent()
+ * @method string getContent() Returns raw content. For frontend display, use getFilteredContent() instead.
  * @method string getPublishedAt()
  * @method string getTitle()
  * @method string getImage()
@@ -91,5 +93,24 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         $prefix = $helper->getBlogUrlPrefix();
 
         return Mage::getUrl($prefix . '/' . $this->getUrlKey());
+    }
+
+    /**
+     * Get content with template directives processed
+     *
+     * Processes directives like {{media url="..."}}, {{widget ...}}, etc.
+     * Use this method for frontend display instead of getContent().
+     */
+    public function getFilteredContent(): string
+    {
+        $content = $this->getContent();
+        if (!$content) {
+            return '';
+        }
+
+        /** @var Mage_Cms_Helper_Data $helper */
+        $helper = Mage::helper('cms');
+
+        return $helper->getPageTemplateProcessor()->filter($content);
     }
 }

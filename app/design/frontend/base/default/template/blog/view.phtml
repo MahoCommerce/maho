@@ -19,4 +19,4 @@ $post = $this->getPost();
     <img class="blog_post_image" src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" />
 <?php endif ?>
 
-<div><?= $post->getContent() ?></div>
+<div><?= $post->getFilteredContent() ?></div>
