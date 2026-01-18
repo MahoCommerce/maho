@@ -10,20 +10,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 2rem;
     padding-bottom: 1.5rem;
-    border-bottom: 1px solid var(--maho-color-border-light);
-
-    .page-title {
-        margin: 0;
-
-        h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--maho-color-primary-dark);
-            letter-spacing: -0.02em;
-        }
-    }
 }
 
 .onestep-login-bar {
@@ -105,8 +92,7 @@
 
     .onestep-section-header {
         padding: 1rem 1.25rem;
-        background: var(--maho-color-background-alt);
-        border-bottom: 1px solid var(--maho-color-border-light);
+        background: var(--maho-color-primary);
 
         h2 {
             margin: 0;
@@ -114,7 +100,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: var(--maho-color-text-secondary);
+            color: white;
         }
     }
 
