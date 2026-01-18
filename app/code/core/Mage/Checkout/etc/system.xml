@@ -44,6 +44,15 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </minimal_layout>
+                        <onestep_checkout_enabled translate="label comment">
+                            <label>Enable One-Step Checkout</label>
+                            <comment>Displays all checkout steps on a single page in a 3-column layout</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </onestep_checkout_enabled>
                         <guest_checkout translate="label">
                             <label>Allow Guest Checkout</label>
                             <frontend_type>boolean</frontend_type>

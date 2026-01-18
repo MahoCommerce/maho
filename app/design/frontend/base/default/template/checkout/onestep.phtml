@@ -1,0 +1,115 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    base_default
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Checkout_Block_Onepage $this */
+$isVirtual = $this->getQuote()->isVirtual();
+$isLoggedIn = $this->isCustomerLoggedIn();
+?>
+<div class="onestep-header">
+    <div class="page-title">
+        <h1><?= $this->__('Checkout') ?></h1>
+    </div>
+    <?php if (!$isLoggedIn): ?>
+    <div class="onestep-login-bar">
+        <span class="onestep-login-text"><?= $this->__('Already have an account?') ?></span>
+        <a href="<?= $this->getUrl('customer/account/login', ['_secure' => true, 'referer' => base64_encode($this->getUrl('checkout/onepage'))]) ?>" class="button"><?= $this->__('Sign In') ?></a>
+    </div>
+    <?php endif ?>
+</div>
+
+<div class="onestep-checkout" id="onestep-checkout">
+    <!-- Column 1: Address -->
+    <div class="onestep-column onestep-column-address">
+        <div class="onestep-section" id="onestep-billing">
+            <div class="onestep-section-header">
+                <h2><?= $this->__('Billing Address') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-billing">
+                <?= $this->getChildHtml('billing') ?>
+            </div>
+        </div>
+
+        <?php if (!$isVirtual): ?>
+        <div class="onestep-section" id="onestep-shipping" style="display:none;">
+            <div class="onestep-section-header">
+                <h2><?= $this->__('Shipping Address') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-shipping">
+                <?= $this->getChildHtml('shipping') ?>
+            </div>
+        </div>
+        <?php endif ?>
+    </div>
+
+    <!-- Column 2: Shipping & Payment Methods + Order Summary -->
+    <div class="onestep-column onestep-column-right">
+        <div class="onestep-column-methods">
+            <?php if (!$isVirtual): ?>
+            <div class="onestep-section" id="onestep-shipping-method">
+                <div class="onestep-section-header">
+                    <h2><?= $this->__('Shipping Method') ?></h2>
+                </div>
+                <div class="onestep-section-content" id="checkout-step-shipping_method">
+                    <div class="onestep-placeholder" id="shipping-method-placeholder">
+                        <p><?= $this->__('Waiting for address...') ?></p>
+                    </div>
+                    <?= $this->getChildHtml('shipping_method') ?>
+                </div>
+            </div>
+            <?php endif ?>
+
+            <div class="onestep-section" id="onestep-payment">
+                <div class="onestep-section-header">
+                    <h2><?= $this->__('Payment Method') ?></h2>
+                </div>
+                <div class="onestep-section-content" id="checkout-step-payment">
+                    <?= $this->getChildHtml('payment') ?>
+                    <div class="onestep-placeholder" id="payment-method-placeholder">
+                        <p><?= $this->__('Waiting for shipping method...') ?></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="onestep-column-summary">
+            <div class="onestep-section" id="onestep-review">
+                <div class="onestep-section-header">
+                    <h2><?= $this->__('Order Summary') ?></h2>
+                </div>
+                <div class="onestep-section-content" id="checkout-step-review">
+                    <div id="checkout-review-load">
+                        <!-- Review content will be loaded here -->
+                    </div>
+                    <div id="onestep-review-please-wait" class="please-wait" style="display:none;">
+                        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>" class="v-middle" />
+                        <?= $this->__('Loading order summary...') ?>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    // Initialize the one-step checkout
+    const onestepCheckout = new OneStepCheckout({
+        progress: '<?= $this->getUrl('checkout/onepage/progress') ?>',
+        review: '<?= $this->getUrl('checkout/onepage/review') ?>',
+        saveMethod: '<?= $this->getUrl('checkout/onepage/saveMethod') ?>',
+        saveBilling: '<?= $this->getUrl('checkout/onepage/saveBilling') ?>',
+        saveShipping: '<?= $this->getUrl('checkout/onepage/saveShipping') ?>',
+        saveShippingMethod: '<?= $this->getUrl('checkout/onepage/saveShippingMethod') ?>',
+        savePayment: '<?= $this->getUrl('checkout/onepage/savePayment') ?>',
+        saveOrder: '<?= $this->getUrl('checkout/onepage/saveOrder') ?>',
+        successUrl: '<?= $this->getUrl('checkout/onepage/success') ?>',
+        failure: '<?= $this->getUrl('checkout/cart') ?>',
+        isVirtual: <?= $isVirtual ? 'true' : 'false' ?>,
+        isLoggedIn: <?= $isLoggedIn ? 'true' : 'false' ?>
+    });
+</script>

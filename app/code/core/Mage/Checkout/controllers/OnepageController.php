@@ -188,7 +188,13 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         Mage::getSingleton('checkout/session')->setCartWasUpdated(false);
         Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*', ['_secure' => true]));
         $this->getOnepage()->initCheckout();
-        $this->loadLayout();
+
+        if (Mage::getStoreConfigFlag('checkout/options/onestep_checkout_enabled')) {
+            $this->loadLayout(['default', 'checkout_onepage_index', 'checkout_onepage_index_onestep']);
+        } else {
+            $this->loadLayout();
+        }
+
         $this->_initLayoutMessages('customer/session');
         $this->getLayout()->getBlock('head')->setTitle($this->__('Checkout'));
         $this->renderLayout();

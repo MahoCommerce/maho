@@ -523,6 +523,31 @@ One page checkout order review block
         </block>
     </checkout_onepage_review>
 
+<!--
+One step checkout layout (all steps visible at once)
+-->
+
+    <checkout_onepage_index_onestep translate="label">
+        <label>One Step Checkout</label>
+        <!-- Remove the right sidebar with progress -->
+        <remove name="checkout.progress.wrapper"/>
+        <remove name="right"/>
+
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+
+        <reference name="head">
+            <action method="addItem"><type>skin_css</type><name>css/onestep-checkout.css</name></action>
+            <action method="addJs"><script>varien/onestepcheckout.js</script></action>
+        </reference>
+
+        <!-- Replace the main checkout block with one-step template -->
+        <reference name="checkout.onepage">
+            <action method="setTemplate"><template>checkout/onestep.phtml</template></action>
+        </reference>
+    </checkout_onepage_index_onestep>
+
     <checkout_onepage_success translate="label">
         <label>One Page Checkout Success</label>
         <reference name="root">

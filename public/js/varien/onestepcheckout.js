@@ -1,0 +1,620 @@
+/**
+ * Maho
+ *
+ * One-Step Checkout JavaScript
+ *
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/**
+ * Mock Accordion class for one-step checkout
+ * The existing checkout templates expect an accordion, but we don't use one
+ */
+class OneStepAccordion {
+    constructor() {
+        this.sections = [];
+    }
+
+    openSection(sectionId) {
+        // In one-step, all sections are always visible - no-op
+    }
+
+    closeSection(sectionId) {
+        // In one-step, all sections are always visible - no-op
+    }
+}
+
+/**
+ * One-Step Checkout Controller
+ * Works alongside the existing Billing, Shipping, ShippingMethod, Payment, Review classes
+ */
+class OneStepCheckout {
+    constructor(config) {
+        this.config = config;
+        this.urls = {
+            progress: config.progress,
+            review: config.review,
+            saveMethod: config.saveMethod,
+            saveBilling: config.saveBilling,
+            saveShipping: config.saveShipping,
+            saveShippingMethod: config.saveShippingMethod,
+            savePayment: config.savePayment,
+            saveOrder: config.saveOrder,
+            successUrl: config.successUrl,
+            failure: config.failure
+        };
+        this.isVirtual = config.isVirtual;
+        this.isLoggedIn = config.isLoggedIn;
+        this.currentStep = 'billing';
+        this.loadWaiting = false;
+
+        // Create mock accordion for compatibility
+        this.accordion = new OneStepAccordion();
+
+        // Make this instance available globally as 'checkout' for compatibility
+        window.checkout = this;
+        window.accordion = this.accordion;
+
+        this.billingForm = null;
+        this.shippingForm = null;
+        this.shippingMethodForm = null;
+        this.paymentForm = null;
+
+        this.init();
+    }
+
+    init() {
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', () => {
+            this.initForms();
+            this.initBillingShippingToggle();
+            this.initAutoSave();
+            this.initPlaceholders();
+            this.loadReview();
+            // Check if billing form is pre-filled and load shipping methods
+            // Use setTimeout to allow dynamic region dropdowns to populate
+            setTimeout(() => this.checkPrefilledBilling(), 100);
+        });
+    }
+
+    /**
+     * Check if billing form has pre-filled data and trigger shipping method load
+     */
+    checkPrefilledBilling() {
+        if (!this.billingForm || this.isVirtual) return;
+
+        const country = document.getElementById('billing:country_id')?.value;
+        const postcode = document.getElementById('billing:postcode')?.value;
+        const firstname = document.getElementById('billing:firstname')?.value;
+        const lastname = document.getElementById('billing:lastname')?.value;
+        const street = document.getElementById('billing:street1')?.value;
+        const city = document.getElementById('billing:city')?.value;
+        const telephone = document.getElementById('billing:telephone')?.value;
+
+        // Check if minimum required fields are pre-filled
+        if (country && postcode && firstname && lastname && street && city && telephone) {
+            // For US, also require region
+            if (country === 'US') {
+                const region = document.getElementById('billing:region_id')?.value;
+                if (!region) return;
+            }
+            // Form is pre-filled, trigger billing save to load shipping methods
+            this.saveBilling();
+        }
+    }
+
+    initPlaceholders() {
+        // Hide shipping method placeholder if methods already loaded
+        const shippingMethodLoad = document.getElementById('checkout-shipping-method-load');
+        const shippingPlaceholder = document.getElementById('shipping-method-placeholder');
+        if (shippingMethodLoad && shippingPlaceholder && shippingMethodLoad.children.length > 0) {
+            shippingPlaceholder.style.display = 'none';
+        }
+
+        // Hide payment method placeholder if methods already loaded (not showing "No Payment Methods")
+        const paymentForm = document.getElementById('co-payment-form');
+        const paymentPlaceholder = document.getElementById('payment-method-placeholder');
+        if (paymentForm && paymentPlaceholder) {
+            const hasPaymentMethods = paymentForm.querySelector('input[name="payment[method]"]');
+            if (hasPaymentMethods) {
+                paymentPlaceholder.style.display = 'none';
+            }
+        }
+    }
+
+    initForms() {
+        this.billingForm = document.getElementById('co-billing-form');
+        this.shippingForm = document.getElementById('co-shipping-form');
+        this.shippingMethodForm = document.getElementById('co-shipping-method-form');
+        this.paymentForm = document.getElementById('co-payment-form');
+    }
+
+    initBillingShippingToggle() {
+        // Handle "Ship to this address" / "Ship to different address" toggle
+        const useForShippingYes = document.getElementById('billing:use_for_shipping_yes');
+        const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
+        const shippingSection = document.getElementById('onestep-shipping');
+
+        if (!shippingSection) return; // Virtual product, no shipping
+
+        const toggleShipping = () => {
+            if (useForShippingNo && useForShippingNo.checked) {
+                shippingSection.style.display = 'block';
+            } else {
+                shippingSection.style.display = 'none';
+            }
+        };
+
+        if (useForShippingYes) {
+            useForShippingYes.addEventListener('change', toggleShipping);
+        }
+        if (useForShippingNo) {
+            useForShippingNo.addEventListener('change', toggleShipping);
+        }
+
+        // Initial state
+        toggleShipping();
+    }
+
+    initAutoSave() {
+        // Auto-save billing address on blur (for key fields that affect shipping)
+        const billingFields = ['billing:country_id', 'billing:postcode', 'billing:region_id'];
+        billingFields.forEach(fieldId => {
+            const field = document.getElementById(fieldId);
+            if (field) {
+                field.addEventListener('change', () => this.debouncedSaveBilling());
+            }
+        });
+
+        // Auto-save shipping method on change
+        this.initShippingMethodAutoSave();
+
+        // Auto-save payment method on change
+        this.initPaymentMethodAutoSave();
+    }
+
+    debouncedSaveBilling = this.debounce(() => {
+        this.saveBilling();
+    }, 500);
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    async saveBilling() {
+        if (!this.billingForm) return;
+
+        // Check if minimum required fields for shipping estimation are filled
+        const country = document.getElementById('billing:country_id')?.value;
+        const postcode = document.getElementById('billing:postcode')?.value;
+        const firstname = document.getElementById('billing:firstname')?.value;
+        const lastname = document.getElementById('billing:lastname')?.value;
+        const street = document.getElementById('billing:street1')?.value;
+        const city = document.getElementById('billing:city')?.value;
+        const telephone = document.getElementById('billing:telephone')?.value;
+
+        // Don't save until we have minimum required data
+        if (!country || !postcode || !firstname || !lastname || !street || !city || !telephone) {
+            return;
+        }
+
+        // For US, also require region
+        if (country === 'US') {
+            const region = document.getElementById('billing:region_id')?.value;
+            if (!region) {
+                return;
+            }
+        }
+
+        const formData = new FormData(this.billingForm);
+
+        try {
+            this.setLoading('onestep-billing', true);
+
+            // mahoFetch returns data directly, not a Response object
+            const result = await mahoFetch(this.urls.saveBilling, {
+                method: 'POST',
+                body: formData,
+                loaderArea: false
+            });
+
+            // Update shipping methods if available
+            if (result.update_section && result.update_section.name === 'shipping-method') {
+                this.updateShippingMethods(result.update_section.html);
+            }
+            // Refresh the review
+            this.loadReview();
+        } catch (error) {
+            // Validation errors are expected when form is incomplete, don't log them
+        } finally {
+            this.setLoading('onestep-billing', false);
+        }
+    }
+
+    async saveShipping() {
+        if (!this.shippingForm || this.isVirtual) return;
+
+        const formData = new FormData(this.shippingForm);
+
+        try {
+            this.setLoading('onestep-shipping', true);
+
+            const result = await mahoFetch(this.urls.saveShipping, {
+                method: 'POST',
+                body: formData,
+                loaderArea: false
+            });
+
+            // Refresh review
+            this.loadReview();
+        } catch (error) {
+            // Silently handle errors
+        } finally {
+            this.setLoading('onestep-shipping', false);
+        }
+    }
+
+    initShippingMethodAutoSave() {
+        // Listen for shipping method selection changes
+        const container = document.getElementById('checkout-shipping-method-load');
+        if (!container) return;
+
+        container.addEventListener('change', (e) => {
+            if (e.target.name === 'shipping_method') {
+                this.updatePlaceOrderButton();
+                this.saveShippingMethod();
+            }
+        });
+    }
+
+    async saveShippingMethod() {
+        const selected = document.querySelector('input[name="shipping_method"]:checked');
+        if (!selected) return;
+
+        // Use the actual form to include form key
+        const shippingMethodForm = document.getElementById('co-shipping-method-form');
+        if (!shippingMethodForm) return;
+
+        const formData = new FormData(shippingMethodForm);
+
+        try {
+            this.setLoading('onestep-shipping-method', true);
+
+            const result = await mahoFetch(this.urls.saveShippingMethod, {
+                method: 'POST',
+                body: formData,
+                loaderArea: false
+            });
+
+            // Update payment methods if provided
+            if (result.update_section && result.update_section.name === 'payment-method') {
+                this.updatePaymentMethods(result.update_section.html);
+            }
+            // Refresh review
+            this.loadReview();
+        } catch (error) {
+            // Silently handle errors
+        } finally {
+            this.setLoading('onestep-shipping-method', false);
+        }
+    }
+
+    initPaymentMethodAutoSave() {
+        // Listen for payment method selection changes
+        const container = document.getElementById('checkout-payment-method-load');
+        if (!container) return;
+
+        container.addEventListener('change', (e) => {
+            if (e.target.name === 'payment[method]') {
+                this.updatePlaceOrderButton();
+                this.savePayment();
+            }
+        });
+    }
+
+    async savePayment() {
+        const paymentForm = document.getElementById('co-payment-form');
+        if (!paymentForm) return;
+
+        const formData = new FormData(paymentForm);
+
+        try {
+            this.setLoading('onestep-payment', true);
+
+            const result = await mahoFetch(this.urls.savePayment, {
+                method: 'POST',
+                body: formData,
+                loaderArea: false
+            });
+
+            // Refresh review
+            this.loadReview();
+        } catch (error) {
+            // Silently handle errors
+        } finally {
+            this.setLoading('onestep-payment', false);
+        }
+    }
+
+    async loadShippingMethods() {
+        // Shipping methods are typically loaded as part of the billing save response
+        // or we can trigger a billing save to refresh them
+        if (this.isVirtual) return;
+
+        // For now, shipping methods are updated through saveBilling response
+        // No separate loading needed
+    }
+
+    updateShippingMethods(html) {
+        const container = document.getElementById('checkout-shipping-method-load');
+        const placeholder = document.getElementById('shipping-method-placeholder');
+
+        if (container && html) {
+            container.innerHTML = html;
+            // Hide placeholder when content is loaded
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            // Re-init any scripts
+            this.initShippingMethodAutoSave();
+            // Auto-select if only one shipping method
+            this.autoSelectSingleShippingMethod();
+            // Update button state
+            this.updatePlaceOrderButton();
+        }
+    }
+
+    /**
+     * Auto-select shipping method if only one is available and trigger payment load
+     */
+    autoSelectSingleShippingMethod() {
+        const shippingMethods = document.querySelectorAll('input[name="shipping_method"]');
+        if (shippingMethods.length === 1) {
+            // Ensure it's checked (may already be checked by server)
+            shippingMethods[0].checked = true;
+            // Trigger save to load payment methods
+            setTimeout(() => this.saveShippingMethod(), 50);
+        }
+    }
+
+    updatePaymentMethods(html) {
+        const container = document.getElementById('checkout-payment-method-load');
+        const placeholder = document.getElementById('payment-method-placeholder');
+
+        if (container && html) {
+            container.innerHTML = html;
+            // Hide placeholder when content is loaded
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            // Re-init any scripts
+            this.initPaymentMethodAutoSave();
+            // Auto-select if only one payment method
+            this.autoSelectSinglePaymentMethod();
+            // Update button state
+            this.updatePlaceOrderButton();
+        }
+    }
+
+    /**
+     * Auto-select payment method if only one is available
+     */
+    autoSelectSinglePaymentMethod() {
+        const paymentMethods = document.querySelectorAll('input[name="payment[method]"]');
+        if (paymentMethods.length === 1) {
+            // Ensure it's checked (may already be checked by server)
+            paymentMethods[0].checked = true;
+            // Trigger save to update review
+            setTimeout(() => this.savePayment(), 50);
+        }
+    }
+
+    async loadReview() {
+        const container = document.getElementById('checkout-review-load');
+        const loader = document.getElementById('onestep-review-please-wait');
+
+        if (!container) return;
+
+        try {
+            if (loader) loader.style.display = 'flex';
+
+            // mahoFetch returns text/html directly for non-JSON responses
+            const html = await mahoFetch(this.urls.review, {
+                method: 'GET',
+                loaderArea: false
+            });
+
+            container.innerHTML = html;
+
+            // Initialize the Review object if it exists in the returned HTML
+            this.initReviewButton();
+        } catch (error) {
+            // Silently handle errors - review will load when checkout state is valid
+        } finally {
+            if (loader) loader.style.display = 'none';
+        }
+    }
+
+    initReviewButton() {
+        // The review HTML includes its own script that creates a Review object
+        // We just need to make sure it's initialized
+        // The Review class is defined in opcheckout.js
+
+        // Update the Place Order button state based on checkout completion
+        this.updatePlaceOrderButton();
+    }
+
+    /**
+     * Check if checkout is ready to place order
+     */
+    isCheckoutComplete() {
+        // For non-virtual products, check shipping method is selected
+        if (!this.isVirtual) {
+            const shippingMethodSelected = document.querySelector('input[name="shipping_method"]:checked');
+            if (!shippingMethodSelected) {
+                return false;
+            }
+        }
+
+        // Check payment method is selected
+        const paymentMethodSelected = document.querySelector('input[name="payment[method]"]:checked');
+        if (!paymentMethodSelected) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Update the Place Order button enabled/disabled state
+     */
+    updatePlaceOrderButton() {
+        const button = document.querySelector('.btn-checkout');
+        if (!button) return;
+
+        const isComplete = this.isCheckoutComplete();
+
+        if (isComplete) {
+            button.disabled = false;
+            button.classList.remove('disabled');
+        } else {
+            button.disabled = true;
+            button.classList.add('disabled');
+        }
+    }
+
+    setLoading(sectionId, loading) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+            if (loading) {
+                section.classList.add('loading');
+            } else {
+                section.classList.remove('loading');
+            }
+        }
+    }
+
+    showError(message) {
+        if (Array.isArray(message)) {
+            message = message.join('\n');
+        }
+        alert(message);
+    }
+
+    // =============================================
+    // Compatibility methods for existing checkout scripts
+    // These methods are called by Billing, Shipping, etc. classes
+    // =============================================
+
+    /**
+     * Called by step classes to navigate to next section
+     * In one-step, we don't navigate - all sections visible
+     */
+    gotoSection(section, reloadProgressBlock) {
+        this.currentStep = section;
+        // In one-step, don't hide/show sections - just refresh data
+        if (section === 'review' || section === 'payment') {
+            this.loadReview();
+        }
+    }
+
+    /**
+     * Handle AJAX response from step save methods
+     */
+    setStepResponse(response) {
+        if (response.error) {
+            this.showError(response.message || response.error);
+            return false;
+        }
+
+        // Update section content if provided
+        if (response.update_section) {
+            const sectionName = response.update_section.name;
+            const html = response.update_section.html;
+
+            if (sectionName === 'shipping-method') {
+                this.updateShippingMethods(html);
+            } else if (sectionName === 'payment-method') {
+                this.updatePaymentMethods(html);
+            } else if (sectionName === 'review') {
+                const container = document.getElementById('checkout-review-load');
+                if (container) container.innerHTML = html;
+            }
+        }
+
+        // Handle section navigation
+        if (response.goto_section) {
+            this.gotoSection(response.goto_section, true);
+        }
+
+        // Refresh review on any successful update
+        this.loadReview();
+
+        return true;
+    }
+
+    /**
+     * Show/hide loading indicator for a step
+     */
+    setLoadWaiting(step, keepDisabled) {
+        // Map step names to our section IDs
+        const sectionMap = {
+            'billing': 'onestep-billing',
+            'shipping': 'onestep-shipping',
+            'shipping_method': 'onestep-shipping-method',
+            'payment': 'onestep-payment',
+            'review': 'onestep-review'
+        };
+
+        const sectionId = sectionMap[step];
+        if (sectionId) {
+            this.setLoading(sectionId, !!step && !keepDisabled);
+        }
+
+        this.loadWaiting = step;
+    }
+
+    /**
+     * Reload the progress block (sidebar in regular checkout)
+     * In one-step, we just refresh the review
+     */
+    reloadProgressBlock(toStep) {
+        this.loadReview();
+    }
+
+    /**
+     * Reload specific step content
+     */
+    reloadStep(step) {
+        // In one-step, we typically don't need to reload individual steps
+        // But we can refresh the review
+        this.loadReview();
+    }
+
+    /**
+     * Reload the review block
+     */
+    reloadReviewBlock() {
+        this.loadReview();
+    }
+
+    /**
+     * Get URLs object (for compatibility)
+     */
+    get progressUrl() { return this.urls.progress; }
+    get reviewUrl() { return this.urls.review; }
+    get saveMethodUrl() { return this.urls.saveMethod; }
+    get failureUrl() { return this.urls.failure; }
+}
+
+// Make it globally available
+window.OneStepCheckout = OneStepCheckout;
