@@ -55,6 +55,8 @@
         flex-direction: column;
         gap: 1.75rem;
         min-width: 0;
+        position: sticky;
+        top: 1rem;
     }
 
     /* Right column - methods and summary stacked */
@@ -63,6 +65,8 @@
         flex-direction: column;
         gap: 1.75rem;
         min-width: 0;
+        position: sticky;
+        top: 1rem;
     }
 
     .onestep-column-methods,
@@ -101,7 +105,7 @@
 
     .onestep-section-header {
         padding: 1rem 1.25rem;
-        background: var(--maho-color-background-light);
+        background: var(--maho-color-background-alt);
         border-bottom: 1px solid var(--maho-color-border-light);
 
         h2 {
@@ -337,7 +341,7 @@
 
             &:has(input[type="radio"]:checked) {
                 border-color: var(--maho-color-primary);
-                background: var(--maho-color-background-light);
+                background: var(--maho-color-background-alt);
             }
         }
 
@@ -378,8 +382,7 @@
                 text-transform: uppercase;
                 letter-spacing: 0.03em;
                 color: var(--maho-color-text-secondary);
-                background: rgba(4, 114, 173, 0.04);
-                border-bottom: 1px solid rgba(4, 114, 173, 0.1);
+                border-bottom: 1px solid var(--maho-color-border-light);
                 text-align: left;
                 white-space: nowrap;
                 overflow: hidden;
@@ -422,6 +425,10 @@
         }
 
         tfoot {
+            tr:first-child td {
+                border-top: 1px solid var(--maho-color-border-light);
+            }
+
             td {
                 padding: 0.5rem;
                 border-bottom: none;
@@ -437,8 +444,8 @@
                 padding-top: 0.75rem;
                 font-size: 1rem;
                 font-weight: 700;
-                color: var(--maho-color-primary-dark);
-                border-top: 2px solid var(--maho-color-primary);
+                color: var(--maho-color-text-primary);
+                border-top: 1px solid var(--maho-color-border-light);
             }
         }
     }
@@ -584,6 +591,11 @@
     .onestep-checkout {
         grid-template-columns: 1fr;
         gap: 1.25rem;
+
+        .onestep-column,
+        .onestep-column-right {
+            position: static;
+        }
 
         .onestep-section-content {
             padding: 1.25rem;
