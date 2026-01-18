@@ -227,7 +227,6 @@
 "Maximum magic link requests per email address per hour. Default: 3.","Maximum magic link requests per email address per hour. Default: 3."
 "Maximum magic link requests per IP address per hour. Default: 10.","Maximum magic link requests per IP address per hour. Default: 10."
 "Middle Name","Middle Name"
-"Middle Name/Initial","Middle Name"
 "Minimum admin password length","Minimum admin password length"
 "Minimum password length","Minimum password length"
 "Missing email, skipping the record, line: %s","Missing email, skipping the record, line: %s"
