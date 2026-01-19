@@ -438,11 +438,12 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $shippingAddress->setSameAsBilling(1)
                 ->addData($data)
                 ->implodeStreetAddress()
-                ->setCollectShippingRates(true)
-                ->collectShippingRates();
+                ->setCollectShippingRates(true);
         }
 
-        $quote->save();
+        // collectTotals() runs all total collectors including shipping,
+        // which properly calculates item qty before collecting rates
+        $quote->collectTotals()->save();
 
         $result = [
             'success' => true,
