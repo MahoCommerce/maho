@@ -170,6 +170,34 @@ class OneStepCheckout {
 
         // Auto-save payment method on change
         this.initPaymentMethodAutoSave();
+
+        // Update Place Order button on form field changes
+        this.initButtonStateListeners();
+    }
+
+    /**
+     * Add listeners to form fields to update Place Order button state in real-time
+     */
+    initButtonStateListeners() {
+        const updateButton = () => this.updatePlaceOrderButton();
+
+        // Listen to all input/select changes in billing form
+        if (this.billingForm) {
+            this.billingForm.addEventListener('input', updateButton);
+            this.billingForm.addEventListener('change', updateButton);
+        }
+
+        // Listen to all input/select changes in shipping form
+        if (this.shippingForm) {
+            this.shippingForm.addEventListener('input', updateButton);
+            this.shippingForm.addEventListener('change', updateButton);
+        }
+
+        // Listen to all input/select changes in payment form
+        if (this.paymentForm) {
+            this.paymentForm.addEventListener('input', updateButton);
+            this.paymentForm.addEventListener('change', updateButton);
+        }
     }
 
     debouncedSaveBilling = this.debounce(() => {
@@ -528,6 +556,19 @@ class OneStepCheckout {
      * Check if checkout is ready to place order
      */
     isCheckoutComplete() {
+        // Check billing form required fields have values
+        if (this.billingForm && !this.areRequiredFieldsFilled(this.billingForm)) {
+            return false;
+        }
+
+        // Check shipping form required fields if using different address
+        const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
+        if (useForShippingNo && useForShippingNo.checked && this.shippingForm) {
+            if (!this.areRequiredFieldsFilled(this.shippingForm)) {
+                return false;
+            }
+        }
+
         // For non-virtual products, check shipping method is selected
         if (!this.isVirtual) {
             const shippingMethodSelected = document.querySelector('input[name="shipping_method"]:checked');
@@ -542,6 +583,28 @@ class OneStepCheckout {
             return false;
         }
 
+        // Check payment form required fields have values
+        if (this.paymentForm && !this.areRequiredFieldsFilled(this.paymentForm)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Check if all required fields in a form have values (without showing validation errors)
+     */
+    areRequiredFieldsFilled(form) {
+        const requiredFields = form.querySelectorAll('.required-entry, [required]');
+        for (const field of requiredFields) {
+            // Skip hidden fields
+            if (field.offsetParent === null) continue;
+
+            const value = field.value?.trim();
+            if (!value) {
+                return false;
+            }
+        }
         return true;
     }
 
