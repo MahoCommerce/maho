@@ -5,6 +5,25 @@
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+/* Override default checkout layout - make col-main full width and centered */
+.checkout-onepage-index:has(.onestep-checkout) .col-main {
+    float: none;
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.checkout-onepage-index:has(.onestep-checkout) .col-right {
+    display: none;
+}
+
+/* Spacing before shipping address radio buttons */
+.onestep-checkout #co-billing-form ul.form-list > li:not(.control) + li.control,
+.onestep-checkout #co-shipping-form ul.form-list > li:not(.control) + li.control {
+    margin-top: 0.75rem;
+}
+
 /* Header with title and login */
 .onestep-header {
     display: flex;
@@ -20,7 +39,7 @@
 .onestep-login-bar {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.75rem;
 
     .onestep-login-text {
         color: var(--maho-color-text-secondary);
@@ -28,8 +47,19 @@
     }
 
     .button {
-        padding: 0.625rem 1.25rem;
+        padding: 0.5rem 1rem;
         font-size: 0.875rem;
+    }
+
+    .button-secondary {
+        background: transparent;
+        color: var(--maho-color-primary);
+        border: 1px solid var(--maho-color-primary);
+
+        &:hover {
+            background: var(--maho-color-primary);
+            color: white;
+        }
     }
 }
 
@@ -193,7 +223,13 @@
             .field {
                 margin: 0;
             }
+
+            /* Single field in a row should span full width */
+            .field:only-child {
+                grid-column: 1 / -1;
+            }
         }
+
 
         /* Name fields wrapper (first, middle, last) uses 3-column grid */
         .customer-name-middlename {
@@ -368,7 +404,6 @@
     .checkout-review-table {
         width: 100%;
         border-collapse: collapse;
-        table-layout: fixed;
 
         thead {
             th {
@@ -379,16 +414,10 @@
                 letter-spacing: 0.03em;
                 color: var(--maho-color-text-secondary);
                 border-bottom: 1px solid var(--maho-color-border-light);
-                text-align: left;
                 white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
 
-                /* Column widths */
-                &:nth-child(1) { width: 40%; } /* Product */
-                &:nth-child(2) { width: 20%; } /* Price */
-                &:nth-child(3) { width: 15%; text-align: center; } /* Qty */
-                &:nth-child(4) { width: 25%; text-align: right; } /* Subtotal */
+                /* First column expands, others stay compact */
+                &:nth-child(1) { width: 100%; } /* Product - takes remaining space */
             }
         }
 
@@ -401,12 +430,14 @@
                 text-overflow: ellipsis;
                 font-size: 0.875rem;
 
-                &:nth-child(3) {
-                    text-align: center;
+                &:nth-child(2),
+                &:nth-child(3),
+                &:last-child {
+                    white-space: nowrap;
+                    overflow: visible;
                 }
 
                 &:last-child {
-                    text-align: right;
                     font-weight: 600;
                 }
 
@@ -417,6 +448,7 @@
                     overflow: hidden;
                     text-overflow: ellipsis;
                 }
+
             }
         }
 
@@ -436,12 +468,16 @@
                 }
             }
 
-            tr:last-child td {
-                padding-top: 0.75rem;
-                font-size: 1rem;
-                font-weight: 700;
-                color: var(--maho-color-text-primary);
-                border-top: 1px solid var(--maho-color-border-light);
+            tr:last-child {
+                background: transparent;
+
+                td {
+                    padding-top: 0.75rem;
+                    font-size: 1rem;
+                    font-weight: 700;
+                    color: var(--maho-color-text-primary);
+                    border-top: 1px solid var(--maho-color-border-light);
+                }
             }
         }
     }

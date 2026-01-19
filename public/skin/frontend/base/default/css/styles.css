@@ -1555,7 +1555,8 @@ span.weee {
  * Item Options
  * ============================================ */
 .item-options {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
+  margin-left: 0.25rem;
 }
 .item-options:after {
   content: '';
@@ -1566,16 +1567,15 @@ span.weee {
   float: left;
   clear: left;
   font-weight: 600;
-  padding-right: 5px;
-  font-style: italic;
+  padding-right: 0;
 }
 .item-options dt:after {
   content: ': ';
 }
 .item-options dd {
   float: left;
-  padding-left: 10px;
-  margin: 0 0 6px;
+  padding-left: 0.25rem;
+  margin: 0 0 0.125rem;
 }
 
 .truncated,
@@ -2435,8 +2435,7 @@ form .form-instructions {
 }
 
 :is(.data-table, .availability-only-details) tbody td .item-options {
-  margin-left: 20px;
-  margin-top: 10px;
+  margin-left: 0.25rem;
 }
 :is(.data-table, .availability-only-details) tbody td .item-options dt:after {
   content: ':';
@@ -5448,12 +5447,6 @@ body.customer-account-login #main-content {
     #forgot-password-dialog {
         max-width: 400px;
     }
-}
-
-.opc #opc-login p:not(.required) {
-  font-style: italic;
-  font-size: 0.813rem;
-  color: var(--maho-color-text-secondary);
 }
 
 /* ============================================ *

@@ -19,16 +19,9 @@ class Mage_Checkout_Block_Onepage extends Mage_Checkout_Block_Onepage_Abstract
     public function getSteps()
     {
         $steps = [];
-        $stepCodes = $this->_getStepCodes();
-
-        if ($this->isCustomerLoggedIn()) {
-            $stepCodes = array_diff($stepCodes, ['login']);
-        }
-
-        foreach ($stepCodes as $step) {
+        foreach ($this->_getStepCodes() as $step) {
             $steps[$step] = $this->getCheckout()->getStepData($step);
         }
-
         return $steps;
     }
 
@@ -39,6 +32,6 @@ class Mage_Checkout_Block_Onepage extends Mage_Checkout_Block_Onepage_Abstract
      */
     public function getActiveStep()
     {
-        return $this->isCustomerLoggedIn() ? 'billing' : 'login';
+        return 'billing';
     }
 }

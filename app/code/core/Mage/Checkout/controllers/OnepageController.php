@@ -185,9 +185,24 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $this->_redirect('checkout/cart');
             return;
         }
+
+        // Redirect to login if guest checkout is disabled and customer is not logged in
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()
+            && !Mage::helper('checkout')->isAllowedGuestCheckout($quote)
+        ) {
+            Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('checkout/onepage', ['_secure' => true]));
+            $this->_redirect('customer/account/login');
+            return;
+        }
+
         Mage::getSingleton('checkout/session')->setCartWasUpdated(false);
         Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*', ['_secure' => true]));
         $this->getOnepage()->initCheckout();
+
+        // Set checkout method to guest for non-logged-in users
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
+            $this->getOnepage()->saveCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
+        }
 
         if (Mage::getStoreConfigFlag('checkout/options/onestep_checkout_enabled')) {
             $this->loadLayout(['default', 'checkout_onepage_index', 'checkout_onepage_index_onestep']);
@@ -390,6 +405,54 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
             $this->_prepareDataJSON($result);
         }
+    }
+
+    /**
+     * Save partial billing address for shipping estimation (one-step checkout)
+     *
+     * This action saves billing address fields to the quote without requiring
+     * all fields to be valid. Used for shipping rate estimation in one-step checkout.
+     */
+    public function estimateBillingAction(): void
+    {
+        if ($this->_expireAjax()) {
+            return;
+        }
+
+        if (!$this->getRequest()->isPost()) {
+            return;
+        }
+
+        $data = $this->getRequest()->getPost('billing', []);
+        $quote = $this->getOnepage()->getQuote();
+
+        // Save to billing address
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddress->addData($data);
+        $billingAddress->implodeStreetAddress();
+
+        // If using billing for shipping, also set shipping address
+        $useForShipping = $data['use_for_shipping'] ?? 1;
+        if ($useForShipping && !$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+            $shippingAddress->setSameAsBilling(1)
+                ->addData($data)
+                ->implodeStreetAddress()
+                ->setCollectShippingRates(true)
+                ->collectShippingRates();
+        }
+
+        $quote->save();
+
+        $result = [
+            'success' => true,
+            'update_section' => [
+                'name' => 'shipping-method',
+                'html' => $this->_getShippingMethodsHtml(),
+            ],
+        ];
+
+        $this->_prepareDataJSON($result);
     }
 
     /**

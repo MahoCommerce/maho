@@ -14,15 +14,13 @@ class Checkout
         this.accordion = accordion;
         this.progressUrl = urls.progress;
         this.reviewUrl = urls.review;
-        this.saveMethodUrl = urls.saveMethod;
         this.failureUrl = urls.failure;
         this.billingForm = false;
         this.shippingForm = false;
         this.syncBillingShipping = false;
-        this.method = '';
         this.payment = '';
         this.loadWaiting = false;
-        this.steps = ['login', 'billing', 'shipping', 'shipping_method', 'payment', 'review'];
+        this.steps = ['billing', 'shipping', 'shipping_method', 'payment', 'review'];
         this.currentStep = 'billing';
 
         // Add click listeners to all section titles
@@ -136,9 +134,6 @@ class Checkout
     }
 
     gotoSection(section, reloadProgressBlock) {
-        if ((this.currentStep === 'login' || this.currentStep === 'billing') && section === 'billing') {
-            document.body.classList.add('opc-has-progressed-from-login');
-        }
         if (reloadProgressBlock) {
             this.reloadProgressBlock(this.currentStep);
         }
@@ -169,55 +164,6 @@ class Checkout
     changeSection(section) {
         const changeStep = section.replace('opc-', '');
         this.gotoSection(changeStep, false);
-    }
-
-    async setMethod() {
-        try {
-            const method = document.querySelector('input[name=checkout_method]:is(:checked,[type=hidden])')?.value;
-            if (method === 'guest') {
-                this.method = 'guest';
-
-                const response = await fetch(this.saveMethodUrl, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'method=guest'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Server returned status ${response.status}`);
-                }
-
-                document.getElementById('register-customer-password').style.display = 'none';
-                this.gotoSection('billing', true);
-
-            } else if (method === 'register') {
-                this.method = 'register';
-
-                const response = await fetch(this.saveMethodUrl, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                    body: 'method=register'
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Server returned status ${response.status}`);
-                }
-
-                document.getElementById('register-customer-password').style.display = 'block';
-                this.gotoSection('billing', true);
-
-            } else {
-                alert(Translator.translate('Please choose to register or to checkout as a guest'));
-                return false;
-            }
-        } catch (error) {
-            this.ajaxFailure(error);
-        }
-
-        const event = new CustomEvent('login:setMethod', {
-            detail: { method: this.method }
-        });
-        document.body.dispatchEvent(event);
     }
 
     setBilling() {

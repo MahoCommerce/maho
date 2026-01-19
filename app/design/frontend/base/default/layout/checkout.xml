@@ -363,13 +363,6 @@ One page checkout main layout
         </reference>
         <reference name="content">
             <block type="checkout/onepage" name="checkout.onepage" template="checkout/onepage.phtml">
-                <block type="checkout/onepage_login" name="checkout.onepage.login" as="login" template="checkout/onepage/login.phtml">
-                    <block type="customer/form_remember" name="remember.me" template="customer/form/remember.phtml" />
-                    <block type="page/html_wrapper" name="checkout.onepage.login.before" as="login_before" translate="label">
-                        <label>Login/Registration Before</label>
-                        <action method="setMayBeInvisible"><value>1</value></action>
-                    </block>
-                </block>
                 <block type="checkout/onepage_billing" name="checkout.onepage.billing" as="billing" template="checkout/onepage/billing.phtml">
                     <block type="customer/form_remember" name="remember.me" template="customer/form/remember.phtml" />
                 </block>

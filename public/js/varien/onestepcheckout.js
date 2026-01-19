@@ -33,14 +33,14 @@ class OneStepCheckout {
         this.urls = {
             progress: config.progress,
             review: config.review,
-            saveMethod: config.saveMethod,
             saveBilling: config.saveBilling,
             saveShipping: config.saveShipping,
             saveShippingMethod: config.saveShippingMethod,
             savePayment: config.savePayment,
             saveOrder: config.saveOrder,
             successUrl: config.successUrl,
-            failure: config.failure
+            failure: config.failure,
+            estimateBilling: config.estimateBilling
         };
         this.isVirtual = config.isVirtual;
         this.isLoggedIn = config.isLoggedIn;
@@ -82,22 +82,20 @@ class OneStepCheckout {
     checkPrefilledBilling() {
         if (!this.billingForm || this.isVirtual) return;
 
+        // Only require the 4 shipping-related fields
         const country = document.getElementById('billing:country_id')?.value;
         const postcode = document.getElementById('billing:postcode')?.value;
-        const firstname = document.getElementById('billing:firstname')?.value;
-        const lastname = document.getElementById('billing:lastname')?.value;
-        const street = document.getElementById('billing:street1')?.value;
         const city = document.getElementById('billing:city')?.value;
-        const telephone = document.getElementById('billing:telephone')?.value;
 
-        // Check if minimum required fields are pre-filled
-        if (country && postcode && firstname && lastname && street && city && telephone) {
-            // For US, also require region
-            if (country === 'US') {
-                const region = document.getElementById('billing:region_id')?.value;
-                if (!region) return;
+        // Check if minimum required fields for shipping estimation are pre-filled
+        if (country && postcode && city) {
+            // Require region for countries that have regions (like US)
+            const regionSelect = document.getElementById('billing:region_id');
+            const regionId = document.getElementById('billing:region_id')?.value;
+            if (regionSelect && regionSelect.options.length > 1 && !regionId) {
+                return;
             }
-            // Form is pre-filled, trigger billing save to load shipping methods
+            // Form has shipping address data, trigger billing save to load shipping methods
             this.saveBilling();
         }
     }
@@ -156,14 +154,40 @@ class OneStepCheckout {
     }
 
     initAutoSave() {
-        // Auto-save billing address on blur (for key fields that affect shipping)
-        const billingFields = ['billing:country_id', 'billing:postcode', 'billing:region_id'];
-        billingFields.forEach(fieldId => {
-            const field = document.getElementById(fieldId);
-            if (field) {
-                field.addEventListener('change', () => this.debouncedSaveBilling());
-            }
-        });
+        // Auto-save billing address on any field change
+        // The saveBilling() method will only actually save when City, State, Zip, Country are filled
+        if (this.billingForm) {
+            this.billingForm.addEventListener('change', (e) => {
+                const target = e.target;
+                // Trigger auto-save for input, select, and textarea elements
+                if (target.matches('input, select, textarea')) {
+                    this.debouncedSaveBilling();
+                }
+            });
+            this.billingForm.addEventListener('blur', (e) => {
+                const target = e.target;
+                // Trigger auto-save on blur for text inputs
+                if (target.matches('input[type="text"], input[type="email"], input[type="tel"], textarea')) {
+                    this.debouncedSaveBilling();
+                }
+            }, true); // Use capture phase to catch blur events
+        }
+
+        // Auto-save shipping address on any field change (when using different shipping address)
+        if (this.shippingForm) {
+            this.shippingForm.addEventListener('change', (e) => {
+                const target = e.target;
+                if (target.matches('input, select, textarea')) {
+                    this.debouncedSaveShipping();
+                }
+            });
+            this.shippingForm.addEventListener('blur', (e) => {
+                const target = e.target;
+                if (target.matches('input[type="text"], input[type="email"], input[type="tel"], textarea')) {
+                    this.debouncedSaveShipping();
+                }
+            }, true);
+        }
 
         // Auto-save shipping method on change
         this.initShippingMethodAutoSave();
@@ -204,6 +228,10 @@ class OneStepCheckout {
         this.saveBilling();
     }, 500);
 
+    debouncedSaveShipping = this.debounce(() => {
+        this.saveShippingEstimate();
+    }, 500);
+
     debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
@@ -217,52 +245,60 @@ class OneStepCheckout {
     }
 
     async saveBilling() {
-        if (!this.billingForm) return;
+        if (!this.billingForm || this.isVirtual) return;
 
-        // Check if minimum required fields for shipping estimation are filled
-        const country = document.getElementById('billing:country_id')?.value;
-        const postcode = document.getElementById('billing:postcode')?.value;
-        const firstname = document.getElementById('billing:firstname')?.value;
-        const lastname = document.getElementById('billing:lastname')?.value;
-        const street = document.getElementById('billing:street1')?.value;
-        const city = document.getElementById('billing:city')?.value;
-        const telephone = document.getElementById('billing:telephone')?.value;
+        // Check if using billing address for shipping or separate shipping address
+        const useForShippingYes = document.getElementById('billing:use_for_shipping_yes');
+        const useForShipping = useForShippingYes ? useForShippingYes.checked : true;
 
-        // Don't save until we have minimum required data
-        if (!country || !postcode || !firstname || !lastname || !street || !city || !telephone) {
+        // Determine which form to check for shipping fields
+        let addressForm, fieldPrefix;
+        if (useForShipping) {
+            addressForm = this.billingForm;
+            fieldPrefix = 'billing';
+        } else {
+            // Using separate shipping address - check shipping form instead
+            addressForm = this.shippingForm;
+            fieldPrefix = 'shipping';
+            if (!addressForm) return;
+        }
+
+        // Only check the 4 shipping-related fields for auto-save
+        const country = document.getElementById(`${fieldPrefix}:country_id`)?.value;
+        const postcode = document.getElementById(`${fieldPrefix}:postcode`)?.value;
+        const city = document.getElementById(`${fieldPrefix}:city`)?.value;
+
+        if (!country || !postcode || !city) {
             return;
         }
 
-        // For US, also require region
-        if (country === 'US') {
-            const region = document.getElementById('billing:region_id')?.value;
-            if (!region) {
-                return;
-            }
+        // Require region for countries that have regions (like US)
+        const regionSelect = document.getElementById(`${fieldPrefix}:region_id`);
+        const regionId = document.getElementById(`${fieldPrefix}:region_id`)?.value;
+        if (regionSelect && regionSelect.options.length > 1 && !regionId) {
+            return;
         }
 
-        const formData = new FormData(this.billingForm);
-
         try {
-            this.setLoading('onestep-billing', true);
+            this.setLoading('onestep-shipping-method', true);
 
-            // mahoFetch returns data directly, not a Response object
-            const result = await mahoFetch(this.urls.saveBilling, {
+            // Use estimateBilling endpoint - saves billing to quote and returns shipping methods
+            const formData = new FormData(this.billingForm);
+
+            const response = await fetch(this.urls.estimateBilling, {
                 method: 'POST',
-                body: formData,
-                loaderArea: false
+                body: formData
             });
 
-            // Update shipping methods if available
-            if (result.update_section && result.update_section.name === 'shipping-method') {
+            const result = await response.json();
+
+            if (result.success && result.update_section) {
                 this.updateShippingMethods(result.update_section.html);
             }
-            // Refresh the review
-            this.loadReview();
         } catch (error) {
-            // Validation errors are expected when form is incomplete, don't log them
+            // Silently ignore errors during auto-save
         } finally {
-            this.setLoading('onestep-billing', false);
+            this.setLoading('onestep-shipping-method', false);
         }
     }
 
@@ -286,6 +322,69 @@ class OneStepCheckout {
             // Silently handle errors
         } finally {
             this.setLoading('onestep-shipping', false);
+        }
+    }
+
+    /**
+     * Save shipping address estimate when using different shipping address
+     */
+    async saveShippingEstimate() {
+        if (!this.shippingForm || this.isVirtual) return;
+
+        // Only run if using different shipping address
+        const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
+        if (!useForShippingNo || !useForShippingNo.checked) {
+            return;
+        }
+
+        // Check the 4 shipping-related fields
+        const country = document.getElementById('shipping:country_id')?.value;
+        const postcode = document.getElementById('shipping:postcode')?.value;
+        const city = document.getElementById('shipping:city')?.value;
+
+        if (!country || !postcode || !city) {
+            return;
+        }
+
+        // Require region for countries that have regions
+        const regionSelect = document.getElementById('shipping:region_id');
+        const regionId = document.getElementById('shipping:region_id')?.value;
+        if (regionSelect && regionSelect.options.length > 1 && !regionId) {
+            return;
+        }
+
+        try {
+            this.setLoading('onestep-shipping-method', true);
+
+            // Use cart's estimatePost for shipping address estimation
+            const estimateData = new FormData();
+            estimateData.append('country_id', country);
+            estimateData.append('estimate_postcode', postcode);
+            estimateData.append('estimate_city', city);
+            estimateData.append('region_id', regionId || '');
+            estimateData.append('region', document.getElementById('shipping:region')?.value || '');
+            estimateData.append('isAjax', '1');
+
+            const estimateResponse = await fetch(this.urls.estimateBilling.replace('estimateBilling', 'cart/estimatePost'), {
+                method: 'POST',
+                body: estimateData
+            });
+
+            const estimateResult = await estimateResponse.json();
+
+            if (estimateResult.success) {
+                // Load shipping methods from onepage checkout
+                const shippingResponse = await fetch(this.urls.saveBilling.replace('saveBilling', 'shippingMethod'));
+                const shippingHtml = await shippingResponse.text();
+
+                if (shippingHtml) {
+                    this.updateShippingMethods(shippingHtml);
+                }
+            }
+        } catch (error) {
+            // Silently ignore errors during auto-save
+        } finally {
+            this.setLoading('onestep-shipping-method', false);
         }
     }
 
@@ -839,7 +938,6 @@ class OneStepCheckout {
      */
     get progressUrl() { return this.urls.progress; }
     get reviewUrl() { return this.urls.review; }
-    get saveMethodUrl() { return this.urls.saveMethod; }
     get failureUrl() { return this.urls.failure; }
 }
 

@@ -1069,64 +1069,8 @@ td.product-cart-remove a {
         margin-left: 0;
     }
 }
-.opc #opc-login .step {
-    padding: 0px;
-}
-.opc #opc-login .buttons-set {
-    border-top: 0;
-    padding-top: 5px;
-}
-
-@media only screen and (max-width: 770px) {
-    .opc #opc-login .description,
-    .opc #opc-login p.required {
-        display: none;
-    }
-}
 #opc-payment .note {
     padding: 10px;
-}
-
-/* -------------------------------------------- *
- * This section hides everything but the "Checkout Method" step of the checkout process and fades in the content
- * once the customer progresses to the next step. The purpose of this is to simplify what the customer has to focus on.
- * It is limited to larger viewports since smaller devices are inherently going to be focused solely on the
- * "Checkout Method" step.
- */
-.opc.opc-firststep-login .section:not(#opc-login) .step-title,
-.opc-block-progress-step-login {
-    transition: opacity 300ms linear 0;
-}
-
-/* When a user progresses from the "Checkout Method" to "Billing Information" for the first time, the              */
-/* "opc-has-progressed-from-login" class gets added to the body. Also, the .opc element will only have the         */
-/* "opc-firststep-login" class if the first step of the checkout is the "Checkout Method" (eg, not when logged in) */
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section:not(#opc-login) .step-title,
-body:not(.opc-has-progressed-from-login) .opc-block-progress-step-login {
-    opacity: 0;
-}
-
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title h2 {
-    margin-left: 0px;
-}
-
-/* Hide the "Checkout Method" title and center content before login */
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title {
-    display: none;
-}
-
-@media only screen and (min-width: 980px) {
-    body:not(.opc-has-progressed-from-login).checkout-onepage-index .col-main {
-        float: none;
-        width: auto;
-        max-width: 960px;
-        margin: 0 auto;
-        padding-right: 0;
-    }
-
-    body:not(.opc-has-progressed-from-login).checkout-onepage-index .col-right {
-        display: none;
-    }
 }
 
 /* -------------------------------------------- *

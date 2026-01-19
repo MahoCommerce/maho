@@ -40,6 +40,14 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
             return;
         }
 
+        $session = Mage::getSingleton('customer/session');
+
+        // Respect an already-set redirect URL (e.g., from checkout when guest checkout is disabled)
+        $existingUrl = $session->getBeforeAuthUrl();
+        if ($existingUrl && $existingUrl !== Mage::helper('customer')->getLoginUrl()) {
+            return;
+        }
+
         if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
             $url = Mage::helper('customer')->getDashboardUrl();
         } else {
@@ -50,7 +58,7 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
                 $url = $this->getUrl('*/*/*', ['_current' => true]);
             }
         }
-        Mage::getSingleton('customer/session')->setBeforeAuthUrl($url);
+        $session->setBeforeAuthUrl($url);
     }
 
     /**

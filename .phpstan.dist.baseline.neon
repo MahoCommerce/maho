@@ -9751,12 +9751,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Block/Onepage/Billing.php
 
 		-
-			rawMessage: 'Method Mage_Customer_Model_Session::getUsername() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Checkout/Block/Onepage/Login.php
-
-		-
 			rawMessage: Property Mage_Checkout_Block_Onepage_Shipping_Method_Available::$_address has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -21546,24 +21540,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/design/frontend/base/default/template/checkout/multishipping/shipping.phtml
-
-		-
-			rawMessage: PHPDoc tag @var contains unresolvable type.
-			identifier: varTag.unresolvableType
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/login.phtml
-
-		-
-			rawMessage: PHPDoc tag @var does not specify variable name.
-			identifier: varTag.noVariable
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/login.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 33
-			path: app/design/frontend/base/default/template/checkout/onepage/login.phtml
 
 		-
 			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
