@@ -10,7 +10,20 @@
 /** @var Mage_Checkout_Block_Onepage $this */
 $isVirtual = $this->getQuote()->isVirtual();
 $isLoggedIn = $this->isCustomerLoggedIn();
+
+// Get applied promo codes
 $couponCode = $this->getQuote()->getCouponCode();
+$giftcardCodes = [];
+$giftcardEnabled = Mage::helper('core')->isModuleEnabled('Maho_Giftcard');
+
+if ($giftcardEnabled) {
+    $giftcardCodesJson = $this->getQuote()->getGiftcardCodes();
+    if ($giftcardCodesJson) {
+        $giftcardCodes = json_decode($giftcardCodesJson, true) ?: [];
+    }
+}
+
+$hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
 ?>
 <div class="onestep-header">
     <div class="page-title">
@@ -49,25 +62,50 @@ $couponCode = $this->getQuote()->getCouponCode();
         <?php endif ?>
     </div>
 
-    <!-- Column 2: Discount, Shipping & Payment Methods + Order Summary -->
+    <!-- Column 2: Promo Code, Shipping & Payment Methods + Order Summary -->
     <div class="onestep-column onestep-column-right">
-        <div class="onestep-section" id="onestep-coupon">
+        <div class="onestep-section" id="onestep-promo">
             <div class="onestep-section-header">
-                <h2><?= $this->__('Discount Codes') ?></h2>
+                <h2><?= $this->__('Discounts') ?></h2>
             </div>
             <div class="onestep-section-content">
-                <div class="onestep-coupon-form">
-                    <div class="coupon-input-group">
-                        <label for="onestep-coupon-code" class="visually-hidden"><?= $this->__('Enter discount code') ?></label>
-                        <input type="text"
-                               id="onestep-coupon-code"
-                               class="input-text"
-                               value="<?= $this->escapeHtml($couponCode) ?>"
-                               placeholder="<?= $this->__('Enter discount code') ?>" />
-                        <button type="button" id="onestep-coupon-apply" class="button"><?= $this->__('Apply') ?></button>
-                        <button type="button" id="onestep-coupon-cancel" class="button button-secondary"<?php if (!$couponCode): ?> style="display:none;"<?php endif ?>><?= $this->__('Cancel') ?></button>
+                <?php if ($hasAppliedCodes): ?>
+                <div class="applied-codes" id="onestep-applied-codes">
+                    <?php if ($couponCode): ?>
+                    <div class="applied-code applied-coupon" data-type="coupon" data-code="<?= $this->escapeHtml($couponCode) ?>">
+                        <span class="code-label"><?= $this->__('Coupon:') ?></span>
+                        <span class="code-value"><?= $this->escapeHtml($couponCode) ?></span>
+                        <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
                     </div>
-                    <div id="onestep-coupon-message" class="coupon-message"></div>
+                    <?php endif ?>
+                    <?php foreach ($giftcardCodes as $code => $amount): ?>
+                    <?php
+                        $displayCode = strlen($code) > 8
+                            ? substr($code, 0, 4) . str_repeat('*', strlen($code) - 8) . substr($code, -4)
+                            : $code;
+                        $formattedAmount = Mage::helper('core')->currency($amount, true, false);
+                    ?>
+                    <div class="applied-code applied-giftcard" data-type="giftcard" data-code="<?= $this->escapeHtml($code) ?>">
+                        <span class="code-label"><?= $this->__('Gift Card:') ?></span>
+                        <span class="code-value"><?= $this->escapeHtml($displayCode) ?></span>
+                        <span class="code-amount">-<?= $formattedAmount ?></span>
+                        <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
+                    </div>
+                    <?php endforeach ?>
+                </div>
+                <?php endif ?>
+
+                <div class="promo-code-form">
+                    <div class="coupon-input-group">
+                        <label for="onestep-promo-code" class="visually-hidden"><?= $this->__('Enter promo code') ?></label>
+                        <input type="text"
+                               id="onestep-promo-code"
+                               class="input-text coupon-input"
+                               value=""
+                               placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>" />
+                        <button type="button" id="onestep-promo-apply" class="button2 btn-apply"><?= $this->__('Apply') ?></button>
+                    </div>
+                    <div id="onestep-promo-message" class="promo-message"></div>
                 </div>
             </div>
         </div>
@@ -103,7 +141,7 @@ $couponCode = $this->getQuote()->getCouponCode();
         <div class="onestep-column-summary">
             <div class="onestep-section" id="onestep-review">
                 <div class="onestep-section-header">
-                    <h2><?= $this->__('Order Summary') ?></h2>
+                    <h2><?= $this->__('Summary') ?></h2>
                 </div>
                 <div class="onestep-section-content" id="checkout-step-review">
                     <div id="checkout-review-load">
@@ -137,4 +175,128 @@ $couponCode = $this->getQuote()->getCouponCode();
         isVirtual: <?= $isVirtual ? 'true' : 'false' ?>,
         isLoggedIn: <?= $isLoggedIn ? 'true' : 'false' ?>
     });
+
+    // Initialize promo code handling
+    const OnestepPromo = {
+        init() {
+            this.bindEvents();
+        },
+
+        bindEvents() {
+            const applyBtn = document.getElementById('onestep-promo-apply');
+            const codeInput = document.getElementById('onestep-promo-code');
+
+            if (applyBtn) {
+                applyBtn.addEventListener('click', () => this.applyCode());
+            }
+
+            if (codeInput) {
+                codeInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        this.applyCode();
+                    }
+                });
+                codeInput.addEventListener('input', () => this.clearMessage());
+            }
+
+            this.bindRemoveButtons();
+        },
+
+        bindRemoveButtons() {
+            document.querySelectorAll('#onestep-promo .btn-remove-code').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const codeEl = e.target.closest('.applied-code');
+                    if (codeEl) {
+                        this.removeCode(codeEl.dataset.type, codeEl.dataset.code);
+                    }
+                });
+            });
+        },
+
+        async applyCode() {
+            const codeInput = document.getElementById('onestep-promo-code');
+            const code = codeInput?.value.trim();
+
+            if (!code) {
+                this.showMessage(<?= Mage::helper('core')->jsonEncode($this->__('Please enter a promo code.')) ?>, 'error');
+                return;
+            }
+
+            const applyBtn = document.getElementById('onestep-promo-apply');
+            const originalText = applyBtn.textContent;
+            applyBtn.disabled = true;
+            applyBtn.textContent = <?= Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>;
+
+            try {
+                const response = await mahoFetch(onestepCheckout.urls.applyCoupon, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        form_key: onestepCheckout.formKey,
+                        promo_code: code,
+                        isAjax: '1'
+                    })
+                });
+
+                if (response.success) {
+                    this.showMessage(response.message, 'success');
+                    codeInput.value = '';
+                    // Reload the checkout to update totals
+                    onestepCheckout.loadReview();
+                    setTimeout(() => window.location.reload(), 800);
+                } else {
+                    this.showMessage(response.message, 'error');
+                }
+            } catch (error) {
+                this.showMessage(<?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>, 'error');
+            } finally {
+                applyBtn.disabled = false;
+                applyBtn.textContent = originalText;
+            }
+        },
+
+        async removeCode(type, code) {
+            try {
+                const response = await mahoFetch(onestepCheckout.urls.applyCoupon, {
+                    method: 'POST',
+                    body: new URLSearchParams({
+                        form_key: onestepCheckout.formKey,
+                        remove_type: type,
+                        remove_code: code,
+                        isAjax: '1'
+                    })
+                });
+
+                if (response.success) {
+                    window.location.reload();
+                } else {
+                    this.showMessage(response.message, 'error');
+                }
+            } catch (error) {
+                this.showMessage(<?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>, 'error');
+            }
+        },
+
+        showMessage(message, type) {
+            const messageContainer = document.getElementById('onestep-promo-message');
+            if (!messageContainer) return;
+
+            messageContainer.textContent = message;
+            messageContainer.className = 'promo-message ' + type;
+
+            if (type === 'success') {
+                setTimeout(() => this.clearMessage(), 3000);
+            }
+        },
+
+        clearMessage() {
+            const messageContainer = document.getElementById('onestep-promo-message');
+            if (messageContainer) {
+                messageContainer.textContent = '';
+                messageContainer.className = 'promo-message';
+            }
+        }
+    };
+
+    OnestepPromo.init();
 </script>

@@ -103,23 +103,43 @@
         border: 1px solid var(--maho-color-border-light);
         overflow: hidden;
 
-        &.loading {
-            opacity: 0.6;
-            pointer-events: none;
+        /* Loading state - overlay on content, doesn't affect layout */
+        .onestep-section-content {
             position: relative;
+
+            &::before,
+            &::after {
+                opacity: 0;
+                transition: opacity 0.15s ease;
+                pointer-events: none;
+            }
+
+            &::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                background: rgba(255, 255, 255, 0.7);
+                z-index: 1;
+            }
 
             &::after {
                 content: '';
                 position: absolute;
                 top: 50%;
                 left: 50%;
-                width: 28px;
-                height: 28px;
-                margin: -14px 0 0 -14px;
-                border: 2.5px solid var(--maho-color-primary);
-                border-top-color: transparent;
-                border-radius: 50%;
-                animation: spin 0.8s linear infinite;
+                width: 24px;
+                height: 24px;
+                background: url('../images/loading.svg') no-repeat center center;
+                z-index: 2;
+            }
+        }
+
+        &.loading .onestep-section-content {
+            pointer-events: none;
+
+            &::before,
+            &::after {
+                opacity: 1;
             }
         }
     }
@@ -155,7 +175,8 @@
     .buttons-set a.continue-shopping,
     .step-title,
     .opc,
-    p.required {
+    p.required,
+    #onestep-payment #checkout-giftcard-container {
         display: none;
     }
 
@@ -488,10 +509,12 @@
     }
 
     /* Review section buttons */
-    #onestep-review .buttons-set {
-        margin: 0;
+    #onestep-review .buttons-set,
+    #onestep-review #review-buttons-container {
+        margin: 0 !important;
         padding: 1.25rem;
-        border-top: 1px solid var(--maho-color-border-light);
+        border-top: none;
+        gap: 0;
     }
 
     /* Place Order button */
@@ -547,51 +570,95 @@
         }
     }
 
-    /* Coupon/Discount code styling */
-    .onestep-coupon-form {
+    /* Promo Code Section (inside onestep-section) */
+    #onestep-promo {
+        .applied-codes {
+            margin-bottom: 12px;
+        }
+
+        .applied-code {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            background: var(--maho-color-background-alt);
+            border: 1px solid var(--maho-color-border);
+            font-size: 0.8125rem;
+
+            &:last-child {
+                margin-bottom: 0;
+            }
+
+            .code-label {
+                color: var(--maho-color-text-secondary);
+            }
+
+            .code-value {
+                font-weight: 600;
+                font-family: monospace;
+            }
+
+            .code-amount {
+                color: var(--maho-color-success);
+                font-weight: 500;
+                margin-left: auto;
+            }
+
+            .btn-remove-code {
+                background: none;
+                border: none;
+                color: var(--maho-color-text-secondary);
+                cursor: pointer;
+                font-size: 1.25rem;
+                line-height: 1;
+                padding: 0 4px;
+                margin-left: auto;
+
+                &:hover {
+                    color: var(--maho-color-error);
+                }
+            }
+
+            &:has(.code-amount) .btn-remove-code {
+                margin-left: 8px;
+            }
+        }
+
         .coupon-input-group {
             display: flex;
             align-items: stretch;
             gap: 8px;
+        }
 
-            input[type="text"] {
-                flex: 1;
-                min-width: 0;
-                height: 40px;
-                padding: 8px 12px;
-                font-size: 0.875rem;
+        .coupon-input {
+            flex: 1;
+            min-width: 0;
+            height: 40px;
+            padding: 8px 12px;
+            border: 1px solid var(--maho-color-border);
+            font-size: 0.875rem;
+
+            &:focus {
+                outline: none;
+                border-color: var(--maho-color-primary);
             }
 
-            .button {
-                height: 40px;
-                padding: 8px 20px;
-                text-transform: uppercase;
-                cursor: pointer;
-                border: 1px solid var(--maho-color-primary);
-                background: transparent;
-                color: var(--maho-color-primary);
-
-                &:hover {
-                    background: var(--maho-color-primary);
-                    color: var(--maho-color-background);
-                }
-            }
-
-            .button-secondary {
-                border-color: var(--maho-color-border);
+            &::placeholder {
                 color: var(--maho-color-text-secondary);
-
-                &:hover {
-                    background: var(--maho-color-background-alt);
-                    color: var(--maho-color-text-secondary);
-                }
             }
         }
 
-        .coupon-message {
-            margin-top: 0.75rem;
+        .btn-apply {
+            height: 40px;
+            padding: 8px 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .promo-message {
+            margin-top: 0.5rem;
             font-size: 0.8125rem;
-            font-weight: normal;
             line-height: 1.4;
 
             &:empty {
@@ -719,6 +786,21 @@
         #onestep-place-order {
             padding: 1rem 1.5rem;
             font-size: 1rem;
+        }
+
+        /* Promo boxes responsive */
+        .onestep-promo-box .coupon-input-group,
+        #onestep-giftcard .coupon-input-group {
+            flex-wrap: wrap;
+
+            .coupon-input {
+                flex: 1 1 100%;
+            }
+
+            .btn-apply,
+            .btn-cancel {
+                flex: 1 1 auto;
+            }
         }
     }
 }
