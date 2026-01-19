@@ -736,12 +736,6 @@
     .onestep-header {
         flex-wrap: wrap;
         gap: 1rem;
-        padding-bottom: 1rem;
-        margin-bottom: 1.5rem;
-
-        .page-title h1 {
-            font-size: 1.5rem;
-        }
     }
 
     .onestep-login-text {
