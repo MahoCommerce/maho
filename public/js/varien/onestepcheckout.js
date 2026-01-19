@@ -40,8 +40,10 @@ class OneStepCheckout {
             saveOrder: config.saveOrder,
             successUrl: config.successUrl,
             failure: config.failure,
-            estimateBilling: config.estimateBilling
+            estimateBilling: config.estimateBilling,
+            applyCoupon: config.applyCoupon
         };
+        this.formKey = config.formKey;
         this.isVirtual = config.isVirtual;
         this.isLoggedIn = config.isLoggedIn;
         this.currentStep = 'billing';
@@ -69,6 +71,7 @@ class OneStepCheckout {
             this.initBillingShippingToggle();
             this.initAutoSave();
             this.initPlaceholders();
+            this.initCoupon();
             this.loadReview();
             // Check if billing form is pre-filled and load shipping methods
             // Use setTimeout to allow dynamic region dropdowns to populate
@@ -116,6 +119,121 @@ class OneStepCheckout {
             if (hasPaymentMethods) {
                 paymentPlaceholder.style.display = 'none';
             }
+        }
+    }
+
+    initCoupon() {
+        const applyBtn = document.getElementById('onestep-coupon-apply');
+        const cancelBtn = document.getElementById('onestep-coupon-cancel');
+        const input = document.getElementById('onestep-coupon-code');
+
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => this.applyCoupon());
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', () => this.removeCoupon());
+        }
+
+        // Allow Enter key to apply coupon
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.applyCoupon();
+                }
+            });
+        }
+    }
+
+    async applyCoupon() {
+        const input = document.getElementById('onestep-coupon-code');
+        const messageEl = document.getElementById('onestep-coupon-message');
+        const cancelBtn = document.getElementById('onestep-coupon-cancel');
+
+        if (!input) return;
+
+        const couponCode = input.value.trim();
+        if (!couponCode) {
+            this.showCouponMessage('Please enter a coupon code.', false);
+            return;
+        }
+
+        try {
+            this.setLoading('onestep-coupon', true);
+
+            const formData = new FormData();
+            formData.append('coupon_code', couponCode);
+            formData.append('form_key', this.formKey);
+            formData.append('isAjax', '1');
+
+            const result = await mahoFetch(this.urls.applyCoupon, {
+                method: 'POST',
+                body: formData,
+                loaderArea: false
+            });
+
+            this.showCouponMessage(result.message, result.success);
+
+            if (result.success && result.coupon_code) {
+                input.value = result.coupon_code;
+                if (cancelBtn) cancelBtn.style.display = '';
+                // Refresh the order summary to show discount
+                this.loadReview();
+            }
+        } catch (error) {
+            this.showCouponMessage(error.message || 'Failed to apply coupon.', false);
+        } finally {
+            this.setLoading('onestep-coupon', false);
+        }
+    }
+
+    async removeCoupon() {
+        const input = document.getElementById('onestep-coupon-code');
+        const cancelBtn = document.getElementById('onestep-coupon-cancel');
+
+        try {
+            this.setLoading('onestep-coupon', true);
+
+            const formData = new FormData();
+            formData.append('remove', '1');
+            formData.append('form_key', this.formKey);
+            formData.append('isAjax', '1');
+
+            const result = await mahoFetch(this.urls.applyCoupon, {
+                method: 'POST',
+                body: formData,
+                loaderArea: false
+            });
+
+            this.showCouponMessage(result.message, result.success);
+
+            if (result.success) {
+                if (input) input.value = '';
+                if (cancelBtn) cancelBtn.style.display = 'none';
+                // Refresh the order summary to remove discount
+                this.loadReview();
+            }
+        } catch (error) {
+            this.showCouponMessage(error.message || 'Failed to remove coupon.', false);
+        } finally {
+            this.setLoading('onestep-coupon', false);
+        }
+    }
+
+    showCouponMessage(message, success) {
+        const messageEl = document.getElementById('onestep-coupon-message');
+        if (!messageEl) return;
+
+        messageEl.textContent = message;
+        messageEl.className = 'coupon-message ' + (success ? 'success' : 'error');
+
+        // Auto-hide success messages after 5 seconds
+        if (success && message) {
+            setTimeout(() => {
+                messageEl.textContent = '';
+                messageEl.className = 'coupon-message';
+            }, 5000);
         }
     }
 

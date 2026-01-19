@@ -10,6 +10,7 @@
 /** @var Mage_Checkout_Block_Onepage $this */
 $isVirtual = $this->getQuote()->isVirtual();
 $isLoggedIn = $this->isCustomerLoggedIn();
+$couponCode = $this->getQuote()->getCouponCode();
 ?>
 <div class="onestep-header">
     <div class="page-title">
@@ -48,8 +49,29 @@ $isLoggedIn = $this->isCustomerLoggedIn();
         <?php endif ?>
     </div>
 
-    <!-- Column 2: Shipping & Payment Methods + Order Summary -->
+    <!-- Column 2: Discount, Shipping & Payment Methods + Order Summary -->
     <div class="onestep-column onestep-column-right">
+        <div class="onestep-section" id="onestep-coupon">
+            <div class="onestep-section-header">
+                <h2><?= $this->__('Discount Codes') ?></h2>
+            </div>
+            <div class="onestep-section-content">
+                <div class="onestep-coupon-form">
+                    <div class="coupon-input-group">
+                        <label for="onestep-coupon-code" class="visually-hidden"><?= $this->__('Enter discount code') ?></label>
+                        <input type="text"
+                               id="onestep-coupon-code"
+                               class="input-text"
+                               value="<?= $this->escapeHtml($couponCode) ?>"
+                               placeholder="<?= $this->__('Enter discount code') ?>" />
+                        <button type="button" id="onestep-coupon-apply" class="button"><?= $this->__('Apply') ?></button>
+                        <button type="button" id="onestep-coupon-cancel" class="button button-secondary"<?php if (!$couponCode): ?> style="display:none;"<?php endif ?>><?= $this->__('Cancel') ?></button>
+                    </div>
+                    <div id="onestep-coupon-message" class="coupon-message"></div>
+                </div>
+            </div>
+        </div>
+
         <div class="onestep-column-methods">
             <?php if (!$isVirtual): ?>
             <div class="onestep-section" id="onestep-shipping-method">
@@ -110,6 +132,8 @@ $isLoggedIn = $this->isCustomerLoggedIn();
         successUrl: '<?= $this->getUrl('checkout/onepage/success') ?>',
         failure: '<?= $this->getUrl('checkout/cart') ?>',
         estimateBilling: '<?= $this->getUrl('checkout/onepage/estimateBilling') ?>',
+        applyCoupon: '<?= $this->getUrl('checkout/cart/couponPost') ?>',
+        formKey: '<?= Mage::getSingleton('core/session')->getFormKey() ?>',
         isVirtual: <?= $isVirtual ? 'true' : 'false' ?>,
         isLoggedIn: <?= $isLoggedIn ? 'true' : 'false' ?>
     });

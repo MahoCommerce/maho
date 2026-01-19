@@ -666,10 +666,19 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
      */
     public function couponPostAction(): void
     {
+        $isAjax = (bool) $this->getRequest()->getParam('isAjax');
+
         /**
          * No reason continue with empty shopping cart
          */
         if (!$this->_getCart()->getQuote()->getItemsCount()) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'message' => $this->__('Your shopping cart is empty.'),
+                ]);
+                return;
+            }
             $this->_goBack();
             return;
         }
@@ -681,6 +690,10 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
         $oldCouponCode = $this->_getQuote()->getCouponCode();
 
         if (!strlen($couponCode) && !strlen($oldCouponCode)) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson(['success' => true, 'message' => '']);
+                return;
+            }
             $this->_goBack();
             return;
         }
@@ -696,23 +709,61 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 
             if ($codeLength) {
                 if ($isCodeLengthValid && $couponCode == $this->_getQuote()->getCouponCode()) {
-                    $this->_getSession()->addSuccess(
-                        $this->__('Coupon code "%s" was applied.', Mage::helper('core')->escapeHtml($couponCode)),
-                    );
+                    $message = $this->__('Coupon code "%s" was applied.', Mage::helper('core')->escapeHtml($couponCode));
+                    if ($isAjax) {
+                        $this->getResponse()->setBodyJson([
+                            'success' => true,
+                            'message' => $message,
+                            'coupon_code' => $couponCode,
+                        ]);
+                        return;
+                    }
+                    $this->_getSession()->addSuccess($message);
                     $this->_getSession()->setCartCouponCode($couponCode);
                 } else {
-                    $this->_getSession()->addError(
-                        $this->__('Coupon code "%s" is not valid.', Mage::helper('core')->escapeHtml($couponCode)),
-                    );
+                    $message = $this->__('Coupon code "%s" is not valid.', Mage::helper('core')->escapeHtml($couponCode));
+                    if ($isAjax) {
+                        $this->getResponse()->setBodyJson([
+                            'success' => false,
+                            'message' => $message,
+                        ]);
+                        return;
+                    }
+                    $this->_getSession()->addError($message);
                 }
             } else {
+                $message = $this->__('Coupon code was canceled.');
+                if ($isAjax) {
+                    $this->getResponse()->setBodyJson([
+                        'success' => true,
+                        'message' => $message,
+                        'coupon_code' => '',
+                    ]);
+                    return;
+                }
                 $this->_getSession()->setCartCouponCode('');
-                $this->_getSession()->addSuccess($this->__('Coupon code was canceled.'));
+                $this->_getSession()->addSuccess($message);
             }
         } catch (Mage_Core_Exception $e) {
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'message' => $e->getMessage(),
+                ]);
+                return;
+            }
             $this->_getSession()->addError($e->getMessage());
         } catch (Exception $e) {
-            $this->_getSession()->addError($this->__('Cannot apply the coupon code.'));
+            $message = $this->__('Cannot apply the coupon code.');
+            if ($isAjax) {
+                $this->getResponse()->setBodyJson([
+                    'success' => false,
+                    'message' => $message,
+                ]);
+                Mage::logException($e);
+                return;
+            }
+            $this->_getSession()->addError($message);
             Mage::logException($e);
         }
 

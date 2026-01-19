@@ -547,6 +547,67 @@
         }
     }
 
+    /* Coupon/Discount code styling */
+    .onestep-coupon-form {
+        .coupon-input-group {
+            display: flex;
+            align-items: stretch;
+            gap: 8px;
+
+            input[type="text"] {
+                flex: 1;
+                min-width: 0;
+                height: 40px;
+                padding: 8px 12px;
+                font-size: 0.875rem;
+            }
+
+            .button {
+                height: 40px;
+                padding: 8px 20px;
+                text-transform: uppercase;
+                cursor: pointer;
+                border: 1px solid var(--maho-color-primary);
+                background: transparent;
+                color: var(--maho-color-primary);
+
+                &:hover {
+                    background: var(--maho-color-primary);
+                    color: var(--maho-color-background);
+                }
+            }
+
+            .button-secondary {
+                border-color: var(--maho-color-border);
+                color: var(--maho-color-text-secondary);
+
+                &:hover {
+                    background: var(--maho-color-background-alt);
+                    color: var(--maho-color-text-secondary);
+                }
+            }
+        }
+
+        .coupon-message {
+            margin-top: 0.75rem;
+            font-size: 0.8125rem;
+            font-weight: normal;
+            line-height: 1.4;
+
+            &:empty {
+                display: none;
+            }
+
+            &.success {
+                color: var(--maho-color-success);
+            }
+
+            &.error {
+                color: var(--maho-color-error);
+            }
+        }
+    }
+
     /* Agreements styling */
     .checkout-agreements {
         margin: 1.25rem 0;
