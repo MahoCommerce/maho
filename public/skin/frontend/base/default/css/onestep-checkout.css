@@ -225,7 +225,8 @@
             }
 
             /* Single field in a row should span full width */
-            .field:only-child {
+            .field:only-child,
+            & > .fields:only-child {
                 grid-column: 1 / -1;
             }
         }
@@ -255,7 +256,6 @@
 
         label {
             display: block;
-            margin-bottom: 0.375rem;
             font-size: 0.8125rem;
             font-weight: 500;
             color: var(--maho-color-text-secondary);
