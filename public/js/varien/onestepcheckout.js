@@ -440,6 +440,9 @@ class OneStepCheckout {
                 this.executeScripts(container);
             }
 
+            // Wrap review.save() to add billing form validation
+            this.wrapReviewSave();
+
             // Update the Place Order button state based on checkout completion
             this.updatePlaceOrderButton();
         } catch (error) {
@@ -447,6 +450,62 @@ class OneStepCheckout {
         } finally {
             if (loader) loader.style.display = 'none';
         }
+    }
+
+    /**
+     * Wrap review.save() to add billing/shipping form validation
+     */
+    wrapReviewSave() {
+        if (typeof review === 'undefined' || !review.save) return;
+
+        const originalSave = review.save.bind(review);
+        const self = this;
+
+        review.save = function() {
+            // Validate billing form
+            if (self.billingForm) {
+                const billingValidator = new Validation(self.billingForm);
+                if (!billingValidator.validate()) {
+                    return;
+                }
+            }
+
+            // Validate shipping form if visible and using different address
+            const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
+            if (useForShippingNo && useForShippingNo.checked && self.shippingForm) {
+                const shippingValidator = new Validation(self.shippingForm);
+                if (!shippingValidator.validate()) {
+                    return;
+                }
+            }
+
+            // Validate shipping method is selected (for non-virtual orders)
+            if (!self.isVirtual) {
+                const shippingMethodSelected = document.querySelector('input[name="shipping_method"]:checked');
+                if (!shippingMethodSelected) {
+                    alert(Translator.translate('Please select a shipping method.'));
+                    return;
+                }
+            }
+
+            // Validate payment method is selected
+            const paymentMethodSelected = document.querySelector('input[name="payment[method]"]:checked');
+            if (!paymentMethodSelected) {
+                alert(Translator.translate('Please select a payment method.'));
+                return;
+            }
+
+            // Validate payment form (for credit card fields, etc.)
+            if (self.paymentForm) {
+                const paymentValidator = new Validation(self.paymentForm);
+                if (!paymentValidator.validate()) {
+                    return;
+                }
+            }
+
+            // Call original save
+            return originalSave();
+        };
     }
 
     /**
