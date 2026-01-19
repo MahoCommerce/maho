@@ -431,10 +431,17 @@ class OneStepCheckout {
                 loaderArea: false
             });
 
-            container.innerHTML = html;
+            // Insert HTML and execute any inline scripts
+            // This allows the Review object from opcheckout.js to be created
+            if (typeof updateElementHtmlAndExecuteScripts === 'function') {
+                updateElementHtmlAndExecuteScripts(container, html);
+            } else {
+                container.innerHTML = html;
+                this.executeScripts(container);
+            }
 
-            // Initialize the Review object if it exists in the returned HTML
-            this.initReviewButton();
+            // Update the Place Order button state based on checkout completion
+            this.updatePlaceOrderButton();
         } catch (error) {
             // Silently handle errors - review will load when checkout state is valid
         } finally {
@@ -442,13 +449,20 @@ class OneStepCheckout {
         }
     }
 
-    initReviewButton() {
-        // The review HTML includes its own script that creates a Review object
-        // We just need to make sure it's initialized
-        // The Review class is defined in opcheckout.js
-
-        // Update the Place Order button state based on checkout completion
-        this.updatePlaceOrderButton();
+    /**
+     * Execute script tags within a container (since innerHTML doesn't run them)
+     */
+    executeScripts(container) {
+        const scripts = container.querySelectorAll('script');
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement('script');
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+            } else {
+                newScript.textContent = oldScript.textContent;
+            }
+            oldScript.parentNode.replaceChild(newScript, oldScript);
+        });
     }
 
     /**
@@ -603,6 +617,99 @@ class OneStepCheckout {
      */
     reloadReviewBlock() {
         this.loadReview();
+    }
+
+    /**
+     * Place the order
+     */
+    async placeOrder() {
+        // Validate required fields before placing order
+        if (!this.isCheckoutComplete()) {
+            this.showError('Please select shipping and payment methods before placing your order.');
+            return;
+        }
+
+        // Validate billing form
+        if (this.billingForm && typeof this.billingForm.checkValidity === 'function') {
+            if (!this.billingForm.checkValidity()) {
+                this.billingForm.reportValidity();
+                return;
+            }
+        }
+
+        // Check agreements (terms and conditions)
+        const agreements = document.querySelectorAll('.checkout-agreements input[type="checkbox"]');
+        for (const agreement of agreements) {
+            if (!agreement.checked) {
+                this.showError('Please agree to all the terms and conditions before placing your order.');
+                return;
+            }
+        }
+
+        // Get the payment form
+        const paymentForm = document.getElementById('co-payment-form');
+        if (!paymentForm) {
+            this.showError('Payment form not found.');
+            return;
+        }
+
+        // Collect all form data
+        const formData = new FormData();
+
+        // Add billing data
+        if (this.billingForm) {
+            for (const [key, value] of new FormData(this.billingForm)) {
+                formData.append(key, value);
+            }
+        }
+
+        // Add payment data
+        for (const [key, value] of new FormData(paymentForm)) {
+            formData.append(key, value);
+        }
+
+        // Add agreements
+        agreements.forEach((agreement, index) => {
+            if (agreement.checked) {
+                formData.append(agreement.name, agreement.value);
+            }
+        });
+
+        try {
+            // Disable button and show loading
+            const button = document.querySelector('.btn-checkout');
+            if (button) {
+                button.disabled = true;
+                button.classList.add('disabled');
+            }
+            this.setLoading('onestep-review', true);
+
+            const result = await mahoFetch(this.urls.saveOrder, {
+                method: 'POST',
+                body: formData,
+                loaderArea: false
+            });
+
+            if (result.success || result.redirect) {
+                // Order placed successfully - redirect to success page
+                window.location.href = result.redirect || this.urls.successUrl;
+            } else if (result.error) {
+                this.showError(result.message || result.error_messages || 'An error occurred while placing your order.');
+                if (button) {
+                    button.disabled = false;
+                    button.classList.remove('disabled');
+                }
+            }
+        } catch (error) {
+            this.showError(error.message || 'An error occurred while placing your order. Please try again.');
+            const button = document.querySelector('.btn-checkout');
+            if (button) {
+                button.disabled = false;
+                button.classList.remove('disabled');
+            }
+        } finally {
+            this.setLoading('onestep-review', false);
+        }
     }
 
     /**
