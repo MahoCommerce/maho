@@ -141,6 +141,12 @@
         display: none;
     }
 
+    /* Address book select dropdown */
+    #billing-address-select,
+    #shipping-address-select {
+        margin-bottom: 1rem;
+    }
+
     /* Form styling - 2 column grid layout */
     .form-list {
         margin: 0;
