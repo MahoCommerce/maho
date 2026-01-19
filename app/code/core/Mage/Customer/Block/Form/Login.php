@@ -22,6 +22,38 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
     private $_username = -1;
 
     /**
+     * Set redirect URL before rendering login form
+     */
+    #[\Override]
+    protected function _beforeToHtml(): self
+    {
+        $this->_setBeforeAuthUrl();
+        return parent::_beforeToHtml();
+    }
+
+    /**
+     * Set the URL to redirect to after successful login
+     */
+    protected function _setBeforeAuthUrl(): void
+    {
+        if (Mage::helper('customer')->isLoggedIn()) {
+            return;
+        }
+
+        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
+            $url = Mage::helper('customer')->getDashboardUrl();
+        } else {
+            $pathInfo = $this->getRequest()->getOriginalPathInfo();
+            if (strtolower(substr($pathInfo, -5)) === '.html') {
+                $url = Mage::getBaseUrl() . ltrim($pathInfo, '/');
+            } else {
+                $url = $this->getUrl('*/*/*', ['_current' => true]);
+            }
+        }
+        Mage::getSingleton('customer/session')->setBeforeAuthUrl($url);
+    }
+
+    /**
      * Retrieve form posting url
      *
      * @return string
@@ -98,26 +130,8 @@ class Mage_Customer_Block_Form_Login extends Mage_Core_Block_Template
             return false;
         }
 
-        // Set redirect URL after login
-        if (Mage::getStoreConfigFlag(Mage_Customer_Helper_Data::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)) {
-            $url = Mage::helper('customer')->getDashboardUrl();
-        } else {
-            $pathInfo = $this->getRequest()->getOriginalPathInfo();
-            if (strtolower(substr($pathInfo, -5)) === '.html') {
-                // For URL rewrite, preserve the path without considering query or post.
-                $url = Mage::getBaseUrl() . ltrim($pathInfo, '/');
-            } else {
-                /**
-                 * If login in homepage, $pathInfo === '/', $url becomes 'cms/index/index/',
-                 * this prevents redirection to My Account after login
-                 * @see Mage_Customer_AccountController::_loginPostRedirect()
-                 *
-                 * Login in all other pages should redirect correctly.
-                 */
-                $url = $this->getUrl('*/*/*', ['_current' => true]);
-            }
-        }
-        Mage::getSingleton('customer/session')->setBeforeAuthUrl($url);
+        // Set redirect URL after login (also done in _beforeToHtml)
+        $this->_setBeforeAuthUrl();
 
         return true;
     }
