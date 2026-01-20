@@ -61,15 +61,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </guest_checkout>
-                        <redirect_register translate="label">
-                            <label>Use Separate Register Step</label>
-                            <comment><![CDATA["If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If email confirmation is required, users won't be able to complete the order before confirming their email."]]></comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>15</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </redirect_register>
                         <enable_agreements translate="label">
                             <label>Enable Terms and Conditions</label>
                             <frontend_type>boolean</frontend_type>
