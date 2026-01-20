@@ -21490,18 +21490,6 @@ parameters:
 			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
 
 		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/base/default/template/checkout/cart/sidebar/default.phtml
-
-		-
-			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/cart/sidebar/default.phtml
-
-		-
 			rawMessage: Left side of && is always true.
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1

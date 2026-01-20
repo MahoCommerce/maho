@@ -135,32 +135,6 @@
                     </fields>
                 </cart_link>
 
-                <sidebar translate="label">
-                    <label>Shopping Cart Sidebar</label>
-                    <sort_order>4</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <display translate="label">
-                            <label>Display Shopping Cart Sidebar</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </display>
-                        <count translate="label">
-                            <label>Maximum Display Recently Added Item(s)</label>
-                            <sort_order>2</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><display>1</display></depends>
-                        </count>
-                    </fields>
-                </sidebar>
-
                 <payment_failed translate="label">
                     <label>Payment Failed Emails</label>
                     <sort_order>100</sort_order>
