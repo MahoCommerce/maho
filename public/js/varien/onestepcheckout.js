@@ -272,39 +272,22 @@ class OneStepCheckout {
     }
 
     initAutoSave() {
-        // Auto-save billing address on any field change
-        // The saveBilling() method will only actually save when City, State, Zip, Country are filled
+        // Auto-save billing address on field change (change event only fires when value changes)
         if (this.billingForm) {
             this.billingForm.addEventListener('change', (e) => {
-                const target = e.target;
-                // Trigger auto-save for input, select, and textarea elements
-                if (target.matches('input, select, textarea')) {
+                if (e.target.matches('input, select, textarea')) {
                     this.debouncedSaveBilling();
                 }
             });
-            this.billingForm.addEventListener('blur', (e) => {
-                const target = e.target;
-                // Trigger auto-save on blur for text inputs
-                if (target.matches('input[type="text"], input[type="email"], input[type="tel"], textarea')) {
-                    this.debouncedSaveBilling();
-                }
-            }, true); // Use capture phase to catch blur events
         }
 
-        // Auto-save shipping address on any field change (when using different shipping address)
+        // Auto-save shipping address on field change (when using different shipping address)
         if (this.shippingForm) {
             this.shippingForm.addEventListener('change', (e) => {
-                const target = e.target;
-                if (target.matches('input, select, textarea')) {
+                if (e.target.matches('input, select, textarea')) {
                     this.debouncedSaveShipping();
                 }
             });
-            this.shippingForm.addEventListener('blur', (e) => {
-                const target = e.target;
-                if (target.matches('input[type="text"], input[type="email"], input[type="tel"], textarea')) {
-                    this.debouncedSaveShipping();
-                }
-            }, true);
         }
 
         // Auto-save shipping method on change
@@ -312,35 +295,8 @@ class OneStepCheckout {
 
         // Auto-save payment method on change
         this.initPaymentMethodAutoSave();
-
-        // Update Place Order button on form field changes
-        this.initButtonStateListeners();
     }
 
-    /**
-     * Add listeners to form fields to update Place Order button state in real-time
-     */
-    initButtonStateListeners() {
-        const updateButton = () => this.updatePlaceOrderButton();
-
-        // Listen to all input/select changes in billing form
-        if (this.billingForm) {
-            this.billingForm.addEventListener('input', updateButton);
-            this.billingForm.addEventListener('change', updateButton);
-        }
-
-        // Listen to all input/select changes in shipping form
-        if (this.shippingForm) {
-            this.shippingForm.addEventListener('input', updateButton);
-            this.shippingForm.addEventListener('change', updateButton);
-        }
-
-        // Listen to all input/select changes in payment form
-        if (this.paymentForm) {
-            this.paymentForm.addEventListener('input', updateButton);
-            this.paymentForm.addEventListener('change', updateButton);
-        }
-    }
 
     debouncedSaveBilling = this.debounce(() => {
         this.saveBilling();
@@ -370,15 +326,13 @@ class OneStepCheckout {
         const useForShipping = useForShippingYes ? useForShippingYes.checked : true;
 
         // Determine which form to check for shipping fields
-        let addressForm, fieldPrefix;
+        let fieldPrefix;
         if (useForShipping) {
-            addressForm = this.billingForm;
             fieldPrefix = 'billing';
         } else {
-            // Using separate shipping address - check shipping form instead
-            addressForm = this.shippingForm;
+            // Using separate shipping address - don't save billing for shipping estimate
             fieldPrefix = 'shipping';
-            if (!addressForm) return;
+            if (!this.shippingForm) return;
         }
 
         // Only check the 4 shipping-related fields for auto-save
@@ -513,7 +467,6 @@ class OneStepCheckout {
 
         container.addEventListener('change', (e) => {
             if (e.target.name === 'shipping_method') {
-                this.updatePlaceOrderButton();
                 this.saveShippingMethod();
             }
         });
@@ -558,7 +511,6 @@ class OneStepCheckout {
 
         container.addEventListener('change', (e) => {
             if (e.target.name === 'payment[method]') {
-                this.updatePlaceOrderButton();
                 this.savePayment();
             }
         });
@@ -611,8 +563,6 @@ class OneStepCheckout {
             this.initShippingMethodAutoSave();
             // Auto-select if only one shipping method
             this.autoSelectSingleShippingMethod();
-            // Update button state
-            this.updatePlaceOrderButton();
         }
     }
 
@@ -643,8 +593,6 @@ class OneStepCheckout {
             this.initPaymentMethodAutoSave();
             // Auto-select if only one payment method
             this.autoSelectSinglePaymentMethod();
-            // Update button state
-            this.updatePlaceOrderButton();
         }
     }
 
@@ -687,9 +635,6 @@ class OneStepCheckout {
 
             // Wrap review.save() to add billing form validation
             this.wrapReviewSave();
-
-            // Update the Place Order button state based on checkout completion
-            this.updatePlaceOrderButton();
         } catch (error) {
             // Silently handle errors - review will load when checkout state is valid
         } finally {
@@ -701,17 +646,30 @@ class OneStepCheckout {
      * Wrap review.save() to add billing/shipping form validation
      */
     wrapReviewSave() {
-        if (typeof review === 'undefined' || !review.save) return;
+        // If review object doesn't exist yet, retry after a short delay
+        if (typeof review === 'undefined' || !review.save) {
+            setTimeout(() => this.wrapReviewSave(), 100);
+            return;
+        }
+
+        // Don't wrap twice
+        if (review._onestepWrapped) return;
+        review._onestepWrapped = true;
 
         const originalSave = review.save.bind(review);
         const self = this;
 
         review.save = function() {
+            // Clear previous error messages
+            self.clearErrors();
+
+            let isValid = true;
+
             // Validate billing form
             if (self.billingForm) {
                 const billingValidator = new Validation(self.billingForm);
                 if (!billingValidator.validate()) {
-                    return;
+                    isValid = false;
                 }
             }
 
@@ -720,7 +678,7 @@ class OneStepCheckout {
             if (useForShippingNo && useForShippingNo.checked && self.shippingForm) {
                 const shippingValidator = new Validation(self.shippingForm);
                 if (!shippingValidator.validate()) {
-                    return;
+                    isValid = false;
                 }
             }
 
@@ -728,24 +686,38 @@ class OneStepCheckout {
             if (!self.isVirtual) {
                 const shippingMethodSelected = document.querySelector('input[name="shipping_method"]:checked');
                 if (!shippingMethodSelected) {
-                    alert(Translator.translate('Please select a shipping method.'));
-                    return;
+                    self.showError(self.config.messages.selectShippingMethodError);
+                    isValid = false;
                 }
             }
 
             // Validate payment method is selected
             const paymentMethodSelected = document.querySelector('input[name="payment[method]"]:checked');
             if (!paymentMethodSelected) {
-                alert(Translator.translate('Please select a payment method.'));
-                return;
+                self.showError(self.config.messages.selectPaymentMethodError);
+                isValid = false;
             }
 
             // Validate payment form (for credit card fields, etc.)
             if (self.paymentForm) {
                 const paymentValidator = new Validation(self.paymentForm);
                 if (!paymentValidator.validate()) {
-                    return;
+                    isValid = false;
                 }
+            }
+
+            // Validate agreements (terms and conditions)
+            const agreements = document.querySelectorAll('.checkout-agreements input[type="checkbox"]');
+            for (const agreement of agreements) {
+                if (!agreement.checked) {
+                    self.showError(self.config.messages.agreementsError, agreement);
+                    isValid = false;
+                }
+            }
+
+            // Only proceed if all validations passed
+            if (!isValid) {
+                return false;
             }
 
             // Call original save
@@ -768,81 +740,6 @@ class OneStepCheckout {
             oldScript.parentNode.replaceChild(newScript, oldScript);
         });
     }
-
-    /**
-     * Check if checkout is ready to place order
-     */
-    isCheckoutComplete() {
-        // Check billing form required fields have values
-        if (this.billingForm && !this.areRequiredFieldsFilled(this.billingForm)) {
-            return false;
-        }
-
-        // Check shipping form required fields if using different address
-        const useForShippingNo = document.getElementById('billing:use_for_shipping_no');
-        if (useForShippingNo && useForShippingNo.checked && this.shippingForm) {
-            if (!this.areRequiredFieldsFilled(this.shippingForm)) {
-                return false;
-            }
-        }
-
-        // For non-virtual products, check shipping method is selected
-        if (!this.isVirtual) {
-            const shippingMethodSelected = document.querySelector('input[name="shipping_method"]:checked');
-            if (!shippingMethodSelected) {
-                return false;
-            }
-        }
-
-        // Check payment method is selected
-        const paymentMethodSelected = document.querySelector('input[name="payment[method]"]:checked');
-        if (!paymentMethodSelected) {
-            return false;
-        }
-
-        // Check payment form required fields have values
-        if (this.paymentForm && !this.areRequiredFieldsFilled(this.paymentForm)) {
-            return false;
-        }
-
-        return true;
-    }
-
-    /**
-     * Check if all required fields in a form have values (without showing validation errors)
-     */
-    areRequiredFieldsFilled(form) {
-        const requiredFields = form.querySelectorAll('.required-entry, [required]');
-        for (const field of requiredFields) {
-            // Skip hidden fields
-            if (field.offsetParent === null) continue;
-
-            const value = field.value?.trim();
-            if (!value) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Update the Place Order button enabled/disabled state
-     */
-    updatePlaceOrderButton() {
-        const button = document.querySelector('.btn-checkout');
-        if (!button) return;
-
-        const isComplete = this.isCheckoutComplete();
-
-        if (isComplete) {
-            button.disabled = false;
-            button.classList.remove('disabled');
-        } else {
-            button.disabled = true;
-            button.classList.add('disabled');
-        }
-    }
-
     setLoading(sectionId, loading) {
         const section = document.getElementById(sectionId);
         if (section) {
@@ -854,11 +751,50 @@ class OneStepCheckout {
         }
     }
 
-    showError(message) {
+    /**
+     * Compatibility method: disable/enable all form elements in a container
+     */
+    _disableEnableAll(element, isDisabled) {
+        if (!element) return;
+        element.querySelectorAll('button, input, select, textarea').forEach(el => {
+            el.disabled = isDisabled;
+        });
+    }
+
+    /**
+     * Clear all custom error messages
+     */
+    clearErrors() {
+        document.querySelectorAll('.onestep-checkout .validation-advice.custom-error').forEach(el => el.remove());
+        document.querySelectorAll('.onestep-checkout .validation-failed.custom-error').forEach(el => el.classList.remove('validation-failed', 'custom-error'));
+    }
+
+    showError(message, element = null) {
         if (Array.isArray(message)) {
-            message = message.join('\n');
+            message = message.join('<br>');
         }
-        alert(message);
+
+        // Create error message element using standard validation-advice class
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'validation-advice custom-error';
+        errorDiv.innerHTML = message;
+
+        // If element provided, show error near it
+        if (element) {
+            element.classList.add('validation-failed', 'custom-error');
+            // Find the closest container for this specific element (not the whole section)
+            const parent = element.closest('li') || element.closest('.checkbox') || element.closest('label')?.parentElement || element.parentElement;
+            if (parent) {
+                // Insert after the parent element
+                parent.insertAdjacentElement('afterend', errorDiv);
+            }
+        } else {
+            // Show at top of checkout
+            const checkout = document.getElementById('onestep-checkout');
+            if (checkout) {
+                checkout.insertBefore(errorDiv, checkout.firstChild);
+            }
+        }
     }
 
     // =============================================
@@ -915,6 +851,7 @@ class OneStepCheckout {
 
     /**
      * Show/hide loading indicator for a step
+     * Compatible with original Checkout.setLoadWaiting
      */
     setLoadWaiting(step, keepDisabled) {
         // Map step names to our section IDs
@@ -926,9 +863,50 @@ class OneStepCheckout {
             'review': 'onestep-review'
         };
 
-        const sectionId = sectionMap[step];
-        if (sectionId) {
-            this.setLoading(sectionId, !!step && !keepDisabled);
+        if (step) {
+            // If already loading something, clear it first
+            if (this.loadWaiting) {
+                this.setLoadWaiting(false);
+            }
+
+            const sectionId = sectionMap[step];
+            if (sectionId) {
+                this.setLoading(sectionId, true);
+            }
+
+            // Handle original checkout's buttons-container and please-wait elements
+            const container = document.getElementById(`${step}-buttons-container`);
+            if (container) {
+                container.classList.add('disabled');
+                container.style.opacity = '0.5';
+                this._disableEnableAll(container, true);
+            }
+            const pleaseWait = document.getElementById(`${step}-please-wait`);
+            if (pleaseWait) {
+                pleaseWait.style.display = 'block';
+            }
+        } else {
+            // Clear loading state
+            if (this.loadWaiting) {
+                const sectionId = sectionMap[this.loadWaiting];
+                if (sectionId) {
+                    this.setLoading(sectionId, false);
+                }
+
+                // Handle original checkout's buttons-container and please-wait elements
+                const container = document.getElementById(`${this.loadWaiting}-buttons-container`);
+                if (container) {
+                    if (!keepDisabled) {
+                        container.classList.remove('disabled');
+                        container.style.opacity = '1';
+                    }
+                    this._disableEnableAll(container, !!keepDisabled);
+                }
+                const pleaseWait = document.getElementById(`${this.loadWaiting}-please-wait`);
+                if (pleaseWait) {
+                    pleaseWait.style.display = 'none';
+                }
+            }
         }
 
         this.loadWaiting = step;
@@ -956,99 +934,6 @@ class OneStepCheckout {
      */
     reloadReviewBlock() {
         this.loadReview();
-    }
-
-    /**
-     * Place the order
-     */
-    async placeOrder() {
-        // Validate required fields before placing order
-        if (!this.isCheckoutComplete()) {
-            this.showError('Please select shipping and payment methods before placing your order.');
-            return;
-        }
-
-        // Validate billing form
-        if (this.billingForm && typeof this.billingForm.checkValidity === 'function') {
-            if (!this.billingForm.checkValidity()) {
-                this.billingForm.reportValidity();
-                return;
-            }
-        }
-
-        // Check agreements (terms and conditions)
-        const agreements = document.querySelectorAll('.checkout-agreements input[type="checkbox"]');
-        for (const agreement of agreements) {
-            if (!agreement.checked) {
-                this.showError('Please agree to all the terms and conditions before placing your order.');
-                return;
-            }
-        }
-
-        // Get the payment form
-        const paymentForm = document.getElementById('co-payment-form');
-        if (!paymentForm) {
-            this.showError('Payment form not found.');
-            return;
-        }
-
-        // Collect all form data
-        const formData = new FormData();
-
-        // Add billing data
-        if (this.billingForm) {
-            for (const [key, value] of new FormData(this.billingForm)) {
-                formData.append(key, value);
-            }
-        }
-
-        // Add payment data
-        for (const [key, value] of new FormData(paymentForm)) {
-            formData.append(key, value);
-        }
-
-        // Add agreements
-        agreements.forEach((agreement, index) => {
-            if (agreement.checked) {
-                formData.append(agreement.name, agreement.value);
-            }
-        });
-
-        try {
-            // Disable button and show loading
-            const button = document.querySelector('.btn-checkout');
-            if (button) {
-                button.disabled = true;
-                button.classList.add('disabled');
-            }
-            this.setLoading('onestep-review', true);
-
-            const result = await mahoFetch(this.urls.saveOrder, {
-                method: 'POST',
-                body: formData,
-                loaderArea: false
-            });
-
-            if (result.success || result.redirect) {
-                // Order placed successfully - redirect to success page
-                window.location.href = result.redirect || this.urls.successUrl;
-            } else if (result.error) {
-                this.showError(result.message || result.error_messages || 'An error occurred while placing your order.');
-                if (button) {
-                    button.disabled = false;
-                    button.classList.remove('disabled');
-                }
-            }
-        } catch (error) {
-            this.showError(error.message || 'An error occurred while placing your order. Please try again.');
-            const button = document.querySelector('.btn-checkout');
-            if (button) {
-                button.disabled = false;
-                button.classList.remove('disabled');
-            }
-        } finally {
-            this.setLoading('onestep-review', false);
-        }
     }
 
     /**

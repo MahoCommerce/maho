@@ -802,7 +802,15 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             $quote->setCouponCode($code)->collectTotals()->save();
 
             // Check if coupon was actually applied
-            return $code === $quote->getCouponCode();
+            if ($code === $quote->getCouponCode()) {
+                return true;
+            }
+
+            // Coupon was not valid, restore old coupon if any
+            if ($oldCouponCode) {
+                $quote->setCouponCode($oldCouponCode)->collectTotals()->save();
+            }
+            return false;
         } catch (Exception $e) {
             // Restore old coupon if any
             if ($oldCouponCode) {

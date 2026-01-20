@@ -571,7 +571,7 @@
     /* Promo Code Section (inside onestep-section) */
     #onestep-promo {
         .applied-codes {
-            margin-bottom: 12px;
+            margin-top: 1rem;
         }
 
         .applied-code {

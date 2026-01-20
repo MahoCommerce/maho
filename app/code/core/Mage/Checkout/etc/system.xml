@@ -123,7 +123,7 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
-                        <use_qty translate="label">
+                        <use_qty translate="label comment">
                             <label>Count Method</label>
                             <comment>Controls how the item count is calculated in the cart icon badge.</comment>
                             <frontend_type>select</frontend_type>

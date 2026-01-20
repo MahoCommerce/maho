@@ -69,6 +69,19 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
                 <h2><?= $this->__('Discounts') ?></h2>
             </div>
             <div class="onestep-section-content">
+                <div class="promo-code-form">
+                    <div class="coupon-input-group">
+                        <label for="onestep-promo-code" class="visually-hidden"><?= $this->__('Enter promo code') ?></label>
+                        <input type="text"
+                               id="onestep-promo-code"
+                               class="input-text coupon-input"
+                               value=""
+                               placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>" />
+                        <button type="button" id="onestep-promo-apply" class="button2 btn-apply"><?= $this->__('Apply') ?></button>
+                    </div>
+                    <div id="onestep-promo-message" class="promo-message"></div>
+                </div>
+
                 <?php if ($hasAppliedCodes): ?>
                 <div class="applied-codes" id="onestep-applied-codes">
                     <?php if ($couponCode): ?>
@@ -94,19 +107,6 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
                     <?php endforeach ?>
                 </div>
                 <?php endif ?>
-
-                <div class="promo-code-form">
-                    <div class="coupon-input-group">
-                        <label for="onestep-promo-code" class="visually-hidden"><?= $this->__('Enter promo code') ?></label>
-                        <input type="text"
-                               id="onestep-promo-code"
-                               class="input-text coupon-input"
-                               value=""
-                               placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>" />
-                        <button type="button" id="onestep-promo-apply" class="button2 btn-apply"><?= $this->__('Apply') ?></button>
-                    </div>
-                    <div id="onestep-promo-message" class="promo-message"></div>
-                </div>
             </div>
         </div>
 
@@ -173,7 +173,14 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
         applyCoupon: '<?= $this->getUrl('checkout/cart/couponPost') ?>',
         formKey: '<?= Mage::getSingleton('core/session')->getFormKey() ?>',
         isVirtual: <?= $isVirtual ? 'true' : 'false' ?>,
-        isLoggedIn: <?= $isLoggedIn ? 'true' : 'false' ?>
+        isLoggedIn: <?= $isLoggedIn ? 'true' : 'false' ?>,
+        messages: {
+            agreementsError: <?= Mage::helper('core')->jsonEncode($this->__('Please agree to all the terms and conditions before placing the order.')) ?>,
+            selectMethodsError: <?= Mage::helper('core')->jsonEncode($this->__('Please select shipping and payment methods before placing your order.')) ?>,
+            selectShippingMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a shipping method.')) ?>,
+            selectPaymentMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a payment method.')) ?>,
+            genericError: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred while placing your order. Please try again.')) ?>
+        }
     });
 
     // Initialize promo code handling
