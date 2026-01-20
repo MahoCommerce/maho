@@ -1086,9 +1086,10 @@ td.product-cart-remove a {
         padding-left: 0;
     }
 }
-/* Constrain width in minimal checkout layout */
-body:has(.page-header-minimal) .main-container {
+/* Constrain width in minimal checkout layout (old onepage checkout only) */
+body.checkout-onepage-index:has(.page-header-minimal):not(:has(.onestep-checkout)) .main-container {
     max-width: 900px;
+    margin: 0 auto;
 }
 
 .opc select {

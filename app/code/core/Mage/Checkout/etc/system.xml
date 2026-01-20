@@ -46,7 +46,7 @@
                         </minimal_layout>
                         <onestep_checkout_enabled translate="label comment">
                             <label>Enable One-Step Checkout</label>
-                            <comment>Displays all checkout steps on a single page in a 3-column layout</comment>
+                            <comment>Displays all checkout steps on a single page in a 2-column layout</comment>
                             <frontend_type>boolean</frontend_type>
                             <sort_order>8</sort_order>
                             <show_in_default>1</show_in_default>
