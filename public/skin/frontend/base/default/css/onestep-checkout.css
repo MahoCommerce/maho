@@ -333,7 +333,6 @@
         dt {
             font-size: 0.8125rem;
             font-weight: 600;
-            color: var(--maho-color-text-secondary);
             text-transform: uppercase;
             letter-spacing: 0.04em;
             margin-bottom: 0.5rem;
@@ -433,7 +432,6 @@
                 font-weight: 600;
                 text-transform: uppercase;
                 letter-spacing: 0.03em;
-                color: var(--maho-color-text-secondary);
                 border-bottom: 1px solid var(--maho-color-border-light);
                 white-space: nowrap;
 
@@ -588,10 +586,6 @@
 
             &:last-child {
                 margin-bottom: 0;
-            }
-
-            .code-label {
-                color: var(--maho-color-text-secondary);
             }
 
             .code-value {
