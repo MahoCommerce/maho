@@ -16,7 +16,7 @@ uses(Tests\MahoBackendTestCase::class);
 /**
  * Mock helper that simulates WEEE being enabled with configurable settings
  */
-class MockWeeeHelper extends Mage_Weee_Helper_Data
+class WeeeTest_MockHelper extends Mage_Weee_Helper_Data
 {
     public bool $enabled = true;
     public bool $taxable = false;
@@ -49,7 +49,7 @@ class MockWeeeHelper extends Mage_Weee_Helper_Data
     }
 
     #[\Override]
-    public function getProductWeeeAttributes($product, $shipping = null, $billing = null, $website = null, $calculateTax = null, $round = true): array
+    public function getProductWeeeAttributes($product, $shipping = null, $billing = null, $website = null, $calculateTax = null, bool $round = true): array
     {
         return $this->weeeAttributes;
     }
@@ -133,7 +133,7 @@ describe('Weee _processTotalAmount is always called', function () {
         $this->quote->setStoreId(1);
         $this->quote->save();
 
-        $this->mockHelper = new MockWeeeHelper();
+        $this->mockHelper = new WeeeTest_MockHelper();
         $this->mockHelper->enabled = true;
     });
 
@@ -249,7 +249,7 @@ describe('Weee isTaxAffected flag behavior', function () {
         $this->quote->setStoreId(1);
         $this->quote->save();
 
-        $this->mockHelper = new MockWeeeHelper();
+        $this->mockHelper = new WeeeTest_MockHelper();
         $this->mockHelper->enabled = true;
     });
 
@@ -306,7 +306,7 @@ describe('Weee disabled scenarios', function () {
         $this->quote->setStoreId(1);
         $this->quote->save();
 
-        $this->mockHelper = new MockWeeeHelper();
+        $this->mockHelper = new WeeeTest_MockHelper();
     });
 
     test('no changes when WEEE is disabled', function () {
@@ -351,7 +351,7 @@ describe('Weee with multiple items', function () {
         $this->quote->setStoreId(1);
         $this->quote->save();
 
-        $this->mockHelper = new MockWeeeHelper();
+        $this->mockHelper = new WeeeTest_MockHelper();
         $this->mockHelper->enabled = true;
     });
 
