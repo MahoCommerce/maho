@@ -20402,6 +20402,7 @@ parameters:
 			identifier: missingType.parameter
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Dhl/International.php
+
 		-
 			rawMessage: 'Method Mage_Usa_Model_Shipping_Carrier_Dhl_International::_makePieces() has no return type specified.'
 			identifier: missingType.return
@@ -20635,6 +20636,7 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Usa/Model/Shipping/Carrier/Usps.php
+
 		-
 			rawMessage: 'Method Mage_Weee_Block_Renderer_Weee_Tax::_setAddButton() has no return type specified.'
 			identifier: missingType.return
@@ -21476,22 +21478,10 @@ parameters:
 			path: app/design/frontend/base/default/template/catalog/product/widget/link/link_inline.phtml
 
 		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/base/default/template/checkout/cart/item/default.phtml
-
-		-
 			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
 			identifier: argument.type
 			count: 1
 			path: app/design/frontend/base/default/template/checkout/cart/item/default.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 6
-			path: app/design/frontend/base/default/template/checkout/cart/minicart/default.phtml
 
 		-
 			rawMessage: 'Parameter #2 $visibility of method Mage_Catalog_Helper_Data::canApplyMsrp() expects int|null, string given.'
@@ -21588,12 +21578,6 @@ parameters:
 			identifier: whitespace.fileEnd
 			count: 1
 			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping_method.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/base/default/template/checkout/onepage/review/item.phtml
 
 		-
 			rawMessage: 'Parameter #1 $amount of method Mage_Checkout_Block_Total_Nominal::formatPrice() expects float, string given.'

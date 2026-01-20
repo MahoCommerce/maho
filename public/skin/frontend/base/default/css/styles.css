@@ -1521,6 +1521,39 @@ a.button:hover {
 
 span.weee {
   display: block;
+  font-size: 0.85em;
+  color: var(--maho-color-text-secondary);
+}
+
+/* WEEE info icon with CSS tooltip */
+.weee-info {
+  position: relative;
+  color: var(--maho-color-primary);
+  cursor: help;
+  margin-top: -1em;
+  margin-left: -0.3em;
+}
+.weee-info svg {
+  width: 16px;
+  height: 16px;
+}
+.weee-info::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  padding: 0.4em 0.6em;
+  background: var(--maho-color-text-primary);
+  color: white;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  border-radius: 4px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.weee-info:hover::after {
+  opacity: 1;
 }
 
 /* -------------------------------------------- *

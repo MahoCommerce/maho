@@ -235,6 +235,7 @@ td.product-cart-remove a {
 .cart-table .product-cart-total,
 .cart-table .product-cart-price {
     text-align: center;
+    white-space: nowrap;
 }
 .cart-table .cart-tax-total {
     position: relative;
@@ -1273,6 +1274,10 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 /* review step */
 #checkout-review-table .btn-remove img {
     display: none;
+}
+
+#checkout-review-table td.a-right {
+    white-space: nowrap;
 }
 
 #checkout-review-table-wrapper {

@@ -35,75 +35,42 @@
                             <span class="map-cart-sidebar-item"><?= $this->__('See price before order confirmation.') ?></span>
 
                         <?php else: ?>
+                            <?php
+                            $_weeeHelper = Mage::helper('weee');
+                            $_checkoutHelper = $this->helper('checkout');
+                            $_weeeApplied = $_weeeHelper->getApplied($_item);
+                            $_displayInclTax = $this->helper('tax')->displayCartPriceInclTax();
+                            $_displayBothPrices = $this->helper('tax')->displayCartBothPrices();
+                            ?>
 
-                            <?php if ($this->helper('tax')->displayCartPriceExclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
-                                <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
-                                    <?= $this->__('Excl. Tax') ?>:
-                                <?php endif ?>
-                                <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
-                                    <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()) ?>
+                            <?php if (!$_displayInclTax || $_displayBothPrices): ?>
+                                <?php if ($_displayBothPrices): ?><?= $this->__('Excl. Tax') ?>: <?php endif ?>
+                                <?php if ($_weeeHelper->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
+                                    <?= $_checkoutHelper->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition()) ?>
+                                <?php elseif ($_weeeHelper->typeOfDisplay($_item, 2, 'sales') && $_weeeApplied): ?>
+                                    <?= $_checkoutHelper->formatPrice($_item->getCalculationPrice() + $_item->getWeeeTaxAppliedAmount() + $_item->getWeeeTaxDisposition()) ?>
+                                    <span class="weee-info" data-tooltip="<?= strip_tags($_checkoutHelper->formatPrice($_item->getCalculationPrice())) ?><?php foreach ($_weeeApplied as $tax): ?> + <?= $this->escapeHtml($tax['title']) ?> <?= strip_tags($_checkoutHelper->formatPrice($tax['amount_incl_tax'])) ?><?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
                                 <?php else: ?>
-                                    <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice()) ?>
+                                    <?= $_checkoutHelper->formatPrice($_item->getCalculationPrice()) ?>
                                 <?php endif ?>
-                                <?php if (Mage::helper('weee')->getApplied($_item)): ?>
-                                    <br />
-                                    <?php if (Mage::helper('weee')->typeOfDisplay($_item, 1, 'sales')): ?>
-                                        <small>
-                                            <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
-                                                <span class="nobr"><?= $tax['title'] ?>: <?= Mage::helper('checkout')->formatPrice($tax['amount'],true,true) ?></span>
-                                            <?php endforeach ?>
-                                        </small>
-                                    <?php elseif (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                        <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
-                                            <span class="nobr"><small><?= $tax['title'] ?>: <?= Mage::helper('checkout')->formatPrice($tax['amount_incl_tax'],true,true) ?></small></span><br />
-                                        <?php endforeach ?>
-                                    <?php elseif (Mage::helper('weee')->typeOfDisplay($_item, 4, 'sales')): ?>
-                                        <small>
-                                            <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
-                                                <span class="nobr"><?= $tax['title'] ?>: <?= Mage::helper('checkout')->formatPrice($tax['amount_incl_tax'],true,true) ?></span><br />
-                                            <?php endforeach ?>
-                                        </small>
-                                    <?php endif ?>
-                                    <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                        <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br /> <?= $this->helper('checkout')->formatPrice($_item->getCalculationPrice()+$_item->getWeeeTaxAppliedAmount()+$_item->getWeeeTaxDisposition()) ?></span>
-                                    <?php endif ?>
+                                <?php if ($_weeeApplied && $_weeeHelper->typeOfDisplay($_item, 1, 'sales')): ?>
+                                    <span class="weee-info" data-tooltip="<?php foreach ($_weeeApplied as $tax): ?><?= $this->escapeHtml($tax['title']) ?> <?= strip_tags($_checkoutHelper->formatPrice($tax['amount'])) ?> <?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
                                 <?php endif ?>
                             <?php endif ?>
 
-
-
-                            <?php if ($this->helper('tax')->displayCartPriceInclTax() || $this->helper('tax')->displayCartBothPrices()): ?>
-                                <?php $_incl = $this->helper('checkout')->getPriceInclTax($_item); ?>
-                                <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
-                                    <br /><?= $this->__('Incl. Tax') ?>:
-                                <?php endif ?>
-                                <?php if (Mage::helper('weee')->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
-                                    <?= $this->helper('checkout')->formatPrice($_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?>
+                            <?php if ($_displayInclTax || $_displayBothPrices): ?>
+                                <?php $_incl = $_checkoutHelper->getPriceInclTax($_item); ?>
+                                <?php if ($_displayBothPrices): ?><br /><?= $this->__('Incl. Tax') ?>: <?php endif ?>
+                                <?php if ($_weeeHelper->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
+                                    <?= $_checkoutHelper->formatPrice($_incl + $_weeeHelper->getWeeeTaxInclTax($_item)) ?>
+                                <?php elseif ($_weeeHelper->typeOfDisplay($_item, 2, 'sales') && $_weeeApplied): ?>
+                                    <?= $_checkoutHelper->formatPrice($_incl + $_weeeHelper->getWeeeTaxInclTax($_item)) ?>
+                                    <span class="weee-info" data-tooltip="<?= strip_tags($_checkoutHelper->formatPrice($_incl - $_item->getWeeeTaxDisposition())) ?><?php foreach ($_weeeApplied as $tax): ?> + <?= $this->escapeHtml($tax['title']) ?> <?= strip_tags($_checkoutHelper->formatPrice($tax['amount_incl_tax'])) ?><?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
                                 <?php else: ?>
-                                    <?= $this->helper('checkout')->formatPrice($_incl-$_item->getWeeeTaxDisposition()) ?>
+                                    <?= $_checkoutHelper->formatPrice($_incl - $_item->getWeeeTaxDisposition()) ?>
                                 <?php endif ?>
-                                <?php if (Mage::helper('weee')->getApplied($_item)): ?>
-                                    <br />
-                                    <?php if (Mage::helper('weee')->typeOfDisplay($_item, 1, 'sales')): ?>
-                                        <small>
-                                            <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
-                                                <span class="nobr"><?= $tax['title'] ?>: <?= Mage::helper('checkout')->formatPrice($tax['amount'],true,true) ?></span><br />
-                                            <?php endforeach ?>
-                                        </small>
-                                    <?php elseif (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                        <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
-                                            <span class="nobr"><small><?= $tax['title'] ?>: <?= Mage::helper('checkout')->formatPrice($tax['amount_incl_tax'],true,true) ?></small></span>
-                                        <?php endforeach ?>
-                                    <?php elseif (Mage::helper('weee')->typeOfDisplay($_item, 4, 'sales')): ?>
-                                        <small>
-                                            <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
-                                                <span class="nobr"><?= $tax['title'] ?>: <?= Mage::helper('checkout')->formatPrice($tax['amount_incl_tax'],true,true) ?></span><br />
-                                            <?php endforeach ?>
-                                        </small>
-                                    <?php endif ?>
-                                    <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                        <span class="nobr"><?= Mage::helper('weee')->__('Total incl. tax') ?>:<br /> <?= $this->helper('checkout')->formatPrice($_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
-                                    <?php endif ?>
+                                <?php if ($_weeeApplied && $_weeeHelper->typeOfDisplay($_item, 1, 'sales')): ?>
+                                    <span class="weee-info" data-tooltip="<?php foreach ($_weeeApplied as $tax): ?><?= $this->escapeHtml($tax['title']) ?> <?= strip_tags($_checkoutHelper->formatPrice($tax['amount'])) ?> <?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
                                 <?php endif ?>
                             <?php endif ?>
 
