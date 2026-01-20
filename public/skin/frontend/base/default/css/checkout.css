@@ -1086,6 +1086,11 @@ td.product-cart-remove a {
         padding-left: 0;
     }
 }
+/* Constrain width in minimal checkout layout */
+body:has(.page-header-minimal) .main-container {
+    max-width: 900px;
+}
+
 .opc select {
     width: 365px;
 }
@@ -1153,7 +1158,7 @@ td.product-cart-remove a {
 }
 
 .opc .section .step {
-    padding: 20px;
+    padding-block: 20px;
 }
 .opc .section .step:after {
     content: '';
