@@ -199,8 +199,8 @@ class Mage_Weee_Model_Total_Quote_Weee extends Mage_Tax_Model_Sales_Total_Quote_
         $item->setBaseWeeeTaxAppliedRowAmount($baseTotalExclTaxRowValue);
 
         $hasRowValue = (bool) $totalExclTaxRowValue;
-        $isTaxAffected = $hasRowValue
-            || $this->_processTotalAmount($address, $totalExclTaxRowValue, $baseTotalExclTaxRowValue);
+        $processTotalResult = $this->_processTotalAmount($address, $totalExclTaxRowValue, $baseTotalExclTaxRowValue);
+        $isTaxAffected = $hasRowValue || $processTotalResult;
 
         if ($hasRowValue) {
             $item->unsRowTotalInclTax()
