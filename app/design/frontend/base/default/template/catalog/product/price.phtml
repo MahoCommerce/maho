@@ -156,14 +156,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 </span>
 
                 <?php if ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 1)): // show description ?>
-                    <span class="weee">(
-                        <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
-                            <?= $_weeeSeparator ?>
-                            <?= $_weeeTaxAttribute->getName() ?>
-                            : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true) ?>
-                            <?php $_weeeSeparator = ' + '; ?>
-                        <?php endforeach ?>
-                        )</span>
+                    <span class="weee-info" data-tooltip="<?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?><?= $_weeeSeparator ?><?= $this->escapeHtml($_weeeTaxAttribute->getName()) ?> <?= strip_tags($_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true)) ?><?php $_weeeSeparator = ' + '; ?><?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
                 <?php endif ?>
             <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 4)): // incl. + weee ?>
                 <span class="regular-price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
