@@ -5,7 +5,7 @@
  *
  * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -121,9 +121,14 @@ class Excel extends AbstractParser
                     }
                     $xml .= '<ss:Row>';
                     foreach ($fields as $fieldName) {
-                        $data = $row[$fieldName] ?? '';
-                        $fieldType = is_numeric($data) ? 'Number' : 'String';
-                        $xml .= '<ss:Cell><Data ss:Type="' . $fieldType . '">' . $data . '</Data></ss:Cell>';
+                        $value = $row[$fieldName] ?? '';
+                        $dataType = 'String';
+                        if (is_numeric($value)) {
+                            $dataType = 'Number';
+                            // is_numeric(' 96000') returns true, but Excel argues about space
+                            $value = trim($value);
+                        }
+                        $xml .= '<ss:Cell><Data ss:Type="' . $dataType . '">' . $value . '</Data></ss:Cell>';
                     }
                     $xml .= '</ss:Row>';
                 }
