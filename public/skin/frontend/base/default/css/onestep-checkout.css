@@ -70,37 +70,18 @@
     gap: 1.75rem;
     align-items: start;
 
-    /* Left column - address forms */
+    /* Columns */
     .onestep-column {
         display: flex;
         flex-direction: column;
-        gap: 1.75rem;
         min-width: 0;
         position: sticky;
         top: 1rem;
     }
 
-    /* Right column - methods and summary stacked */
-    .onestep-column-right {
-        display: flex;
-        flex-direction: column;
-        gap: 1.75rem;
-        min-width: 0;
-        position: sticky;
-        top: 1rem;
-    }
-
-    .onestep-column-methods,
-    .onestep-column-summary {
-        display: flex;
-        flex-direction: column;
-        gap: 1.75rem;
-    }
 
     /* Sections */
     .onestep-section {
-        background: var(--maho-color-background);
-        border: 1px solid var(--maho-color-border-light);
         overflow: hidden;
 
         /* Loading state - overlay on content, doesn't affect layout */
@@ -145,21 +126,33 @@
     }
 
     .onestep-section-header {
-        padding: 1rem 1.25rem;
-        background: var(--maho-color-primary);
+        padding-block-start: 1rem;
 
         h2 {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
             margin: 0;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: white;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--maho-color-text-primary);
+            text-transform: none;
+            padding-inline-end: 0.75rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 2px solid var(--maho-color-primary);
+
+            svg {
+                width: 24px;
+                height: 24px;
+                flex-shrink: 0;
+                color: var(--maho-color-text-secondary);
+            }
         }
     }
 
     .onestep-section-content {
         padding: 1.25rem;
+        margin-top: 1rem;
     }
 
     #onestep-review .onestep-section-content {
@@ -673,7 +666,6 @@
     .checkout-agreements {
         margin: 1.25rem 0;
         padding: 0 1.5rem;
-        list-style: none;
 
         li {
             margin-bottom: 1rem;
@@ -682,19 +674,16 @@
         .agreement-content {
             max-height: 120px;
             overflow-y: auto;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
+            padding: 0.25rem 0.75rem;
             background: white;
             border: 1px solid var(--maho-color-border-light);
             font-size: 0.8125rem;
-            line-height: 1.5;
             color: var(--maho-color-text-secondary);
         }
 
         .agree {
             display: flex;
             align-items: flex-start;
-            gap: 0.625rem;
 
             input[type="checkbox"] {
                 margin-top: 0.125rem;
@@ -717,14 +706,6 @@
     }
 }
 
-/* Responsive: Tablet */
-@media (max-width: 1024px) {
-    .onestep-checkout {
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-    }
-}
-
 /* Responsive: Mobile */
 @media (max-width: 768px) {
     .onestep-header {
@@ -738,7 +719,7 @@
 
     .onestep-checkout {
         grid-template-columns: 1fr;
-        gap: 1.25rem;
+        gap: 0;
 
         .onestep-column,
         .onestep-column-right {

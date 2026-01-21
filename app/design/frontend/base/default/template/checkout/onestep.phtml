@@ -43,7 +43,7 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
     <div class="onestep-column onestep-column-address">
         <div class="onestep-section" id="onestep-billing">
             <div class="onestep-section-header">
-                <h2><?= $this->__('Billing Address') ?></h2>
+                <h2><?= $this->getIconSvg('map-pin') ?><?= $this->__('Billing Address') ?></h2>
             </div>
             <div class="onestep-section-content" id="checkout-step-billing">
                 <?= $this->getChildHtml('billing') ?>
@@ -53,7 +53,7 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
         <?php if (!$isVirtual): ?>
         <div class="onestep-section" id="onestep-shipping" style="display:none;">
             <div class="onestep-section-header">
-                <h2><?= $this->__('Shipping Address') ?></h2>
+                <h2><?= $this->getIconSvg('truck') ?><?= $this->__('Shipping Address') ?></h2>
             </div>
             <div class="onestep-section-content" id="checkout-step-shipping">
                 <?= $this->getChildHtml('shipping') ?>
@@ -66,7 +66,7 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
     <div class="onestep-column onestep-column-right">
         <div class="onestep-section" id="onestep-promo">
             <div class="onestep-section-header">
-                <h2><?= $this->__('Discounts') ?></h2>
+                <h2><?= $this->getIconSvg('tag') ?><?= $this->__('Discounts') ?></h2>
             </div>
             <div class="onestep-section-content">
                 <div class="promo-code-form">
@@ -110,47 +110,43 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
             </div>
         </div>
 
-        <div class="onestep-column-methods">
-            <?php if (!$isVirtual): ?>
-            <div class="onestep-section" id="onestep-shipping-method">
-                <div class="onestep-section-header">
-                    <h2><?= $this->__('Shipping Method') ?></h2>
-                </div>
-                <div class="onestep-section-content" id="checkout-step-shipping_method">
-                    <div class="onestep-placeholder" id="shipping-method-placeholder">
-                        <p><?= $this->__('Waiting for address...') ?></p>
-                    </div>
-                    <?= $this->getChildHtml('shipping_method') ?>
-                </div>
+        <?php if (!$isVirtual): ?>
+        <div class="onestep-section" id="onestep-shipping-method">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('package') ?><?= $this->__('Shipping Method') ?></h2>
             </div>
-            <?php endif ?>
-
-            <div class="onestep-section" id="onestep-payment">
-                <div class="onestep-section-header">
-                    <h2><?= $this->__('Payment Method') ?></h2>
+            <div class="onestep-section-content" id="checkout-step-shipping_method">
+                <div class="onestep-placeholder" id="shipping-method-placeholder">
+                    <p><?= $this->__('Waiting for address...') ?></p>
                 </div>
-                <div class="onestep-section-content" id="checkout-step-payment">
-                    <?= $this->getChildHtml('payment') ?>
-                    <div class="onestep-placeholder" id="payment-method-placeholder">
-                        <p><?= $this->__('Waiting for shipping method...') ?></p>
-                    </div>
+                <?= $this->getChildHtml('shipping_method') ?>
+            </div>
+        </div>
+        <?php endif ?>
+
+        <div class="onestep-section" id="onestep-payment">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('credit-card') ?><?= $this->__('Payment Method') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-payment">
+                <?= $this->getChildHtml('payment') ?>
+                <div class="onestep-placeholder" id="payment-method-placeholder">
+                    <p><?= $this->__('Waiting for shipping method...') ?></p>
                 </div>
             </div>
         </div>
 
-        <div class="onestep-column-summary">
-            <div class="onestep-section" id="onestep-review">
-                <div class="onestep-section-header">
-                    <h2><?= $this->__('Summary') ?></h2>
+        <div class="onestep-section" id="onestep-review">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('receipt') ?><?= $this->__('Summary') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-review">
+                <div id="checkout-review-load">
+                    <!-- Review content will be loaded here -->
                 </div>
-                <div class="onestep-section-content" id="checkout-step-review">
-                    <div id="checkout-review-load">
-                        <!-- Review content will be loaded here -->
-                    </div>
-                    <div id="onestep-review-please-wait" class="please-wait" style="display:none;">
-                        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>" class="v-middle" />
-                        <?= $this->__('Loading order summary...') ?>
-                    </div>
+                <div id="onestep-review-please-wait" class="please-wait" style="display:none;">
+                    <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>" class="v-middle" />
+                    <?= $this->__('Loading order summary...') ?>
                 </div>
             </div>
         </div>
