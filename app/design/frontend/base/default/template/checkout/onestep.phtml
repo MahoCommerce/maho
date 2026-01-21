@@ -10,20 +10,6 @@
 /** @var Mage_Checkout_Block_Onepage $this */
 $isVirtual = $this->getQuote()->isVirtual();
 $isLoggedIn = $this->isCustomerLoggedIn();
-
-// Get applied promo codes
-$couponCode = $this->getQuote()->getCouponCode();
-$giftcardCodes = [];
-$giftcardEnabled = Mage::helper('core')->isModuleEnabled('Maho_Giftcard');
-
-if ($giftcardEnabled) {
-    $giftcardCodesJson = $this->getQuote()->getGiftcardCodes();
-    if ($giftcardCodesJson) {
-        $giftcardCodes = json_decode($giftcardCodesJson, true) ?: [];
-    }
-}
-
-$hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
 ?>
 <div class="onestep-header">
     <div class="page-title">
@@ -68,45 +54,8 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
             <div class="onestep-section-header">
                 <h2><?= $this->getIconSvg('tag') ?><?= $this->__('Discounts') ?></h2>
             </div>
-            <div class="onestep-section-content">
-                <div class="promo-code-form">
-                    <div class="coupon-input-group">
-                        <label for="onestep-promo-code" class="visually-hidden"><?= $this->__('Enter promo code') ?></label>
-                        <input type="text"
-                               id="onestep-promo-code"
-                               class="input-text coupon-input"
-                               value=""
-                               placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>" />
-                        <button type="button" id="onestep-promo-apply" class="button2 btn-apply"><?= $this->__('Apply') ?></button>
-                    </div>
-                    <div id="onestep-promo-message" class="promo-message"></div>
-                </div>
-
-                <?php if ($hasAppliedCodes): ?>
-                <div class="applied-codes" id="onestep-applied-codes">
-                    <?php if ($couponCode): ?>
-                    <div class="applied-code applied-coupon" data-type="coupon" data-code="<?= $this->escapeHtml($couponCode) ?>">
-                        <span class="code-label"><?= $this->__('Coupon:') ?></span>
-                        <span class="code-value"><?= $this->escapeHtml($couponCode) ?></span>
-                        <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
-                    </div>
-                    <?php endif ?>
-                    <?php foreach ($giftcardCodes as $code => $amount): ?>
-                    <?php
-                        $displayCode = strlen($code) > 8
-                            ? substr($code, 0, 4) . str_repeat('*', strlen($code) - 8) . substr($code, -4)
-                            : $code;
-                        $formattedAmount = Mage::helper('core')->currency($amount, true, false);
-                    ?>
-                    <div class="applied-code applied-giftcard" data-type="giftcard" data-code="<?= $this->escapeHtml($code) ?>">
-                        <span class="code-label"><?= $this->__('Gift Card:') ?></span>
-                        <span class="code-value"><?= $this->escapeHtml($displayCode) ?></span>
-                        <span class="code-amount">-<?= $formattedAmount ?></span>
-                        <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
-                    </div>
-                    <?php endforeach ?>
-                </div>
-                <?php endif ?>
+            <div class="onestep-section-content" id="maho-promo-section">
+                <?= $this->getChildHtml('coupon') ?>
             </div>
         </div>
 
@@ -181,19 +130,22 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
         applyUrl: onestepCheckout.urls.applyCoupon,
         formKey: onestepCheckout.formKey,
         elements: {
-            input: 'onestep-promo-code',
-            applyBtn: 'onestep-promo-apply',
-            message: 'onestep-promo-message',
-            codesContainer: 'onestep-promo'
+            input: 'maho-promo-code',
+            applyBtn: 'maho-promo-apply',
+            message: 'maho-promo-message',
+            codesContainer: 'maho-promo-section'
         },
         messages: {
             emptyCode: <?= Mage::helper('core')->jsonEncode($this->__('Please enter a promo code.')) ?>,
             applying: <?= Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>,
             error: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>
         },
+        successMessageTimeout: 2000,
         onSuccess: () => {
-            onestepCheckout.loadReview();
-            setTimeout(() => window.location.reload(), 800);
+            onestepCheckout.refreshAfterDiscount();
+        },
+        onRemoveSuccess: () => {
+            onestepCheckout.refreshAfterDiscount();
         }
     });
 </script>

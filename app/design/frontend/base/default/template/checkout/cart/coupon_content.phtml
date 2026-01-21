@@ -1,0 +1,58 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Checkout_Block_Cart_Coupon $this */
+$couponCode = $this->getCouponCode();
+$giftcardCodes = [];
+$giftcardEnabled = Mage::helper('core')->isModuleEnabled('Maho_Giftcard');
+
+if ($giftcardEnabled) {
+    $quote = Mage::getSingleton('checkout/session')->getQuote();
+    $giftcardCodesJson = $quote->getGiftcardCodes();
+    if ($giftcardCodesJson) {
+        $giftcardCodes = json_decode($giftcardCodesJson, true) ?: [];
+    }
+}
+
+$hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
+?>
+<div class="promo-code-form">
+    <div class="coupon-input-group">
+        <label for="maho-promo-code" class="visually-hidden"><?= $this->__('Enter promo code') ?></label>
+        <input
+            class="input-text coupon-input"
+            type="text"
+            id="maho-promo-code"
+            name="promo_code"
+            value=""
+            placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>" />
+        <button type="button" id="maho-promo-apply" title="<?= $this->quoteEscape($this->__('Apply')) ?>" class="button2 btn-apply"><?= $this->__('Apply') ?></button>
+    </div>
+    <div id="maho-promo-message" class="promo-message"></div>
+</div>
+
+<?php if ($hasAppliedCodes): ?>
+<div class="applied-codes" id="maho-applied-codes">
+    <?php if ($couponCode): ?>
+    <div class="applied-code applied-coupon" data-type="coupon" data-code="<?= $this->escapeHtml($couponCode) ?>">
+        <span class="code-label"><?= $this->__('Coupon:') ?></span>
+        <span class="code-value"><?= $this->escapeHtml($couponCode) ?></span>
+        <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
+    </div>
+    <?php endif ?>
+    <?php foreach ($giftcardCodes as $code => $amount): ?>
+    <div class="applied-code applied-giftcard" data-type="giftcard" data-code="<?= $this->escapeHtml($code) ?>">
+        <span class="code-label"><?= $this->__('Gift Card:') ?></span>
+        <span class="code-value"><?= $this->escapeHtml(Mage::helper('giftcard')->maskCode($code)) ?></span>
+        <span class="code-amount">-<?= Mage::helper('core')->currency($amount, true, false) ?></span>
+        <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
+    </div>
+    <?php endforeach ?>
+</div>
+<?php endif ?>

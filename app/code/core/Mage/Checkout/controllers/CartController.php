@@ -737,7 +737,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                     'message' => $message,
                     'type' => 'coupon',
                     'code' => $code,
-                    'applied_codes' => $this->_getAppliedPromoCodes(),
+                    'promo_block_html' => $this->_getPromoBlockHtml(),
                 ]);
                 return;
             }
@@ -758,7 +758,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                     'message' => $message,
                     'type' => 'giftcard',
                     'code' => $code,
-                    'applied_codes' => $this->_getAppliedPromoCodes(),
+                    'promo_block_html' => $this->_getPromoBlockHtml(),
                 ]);
                 return;
             }
@@ -933,7 +933,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
                 $this->getResponse()->setBodyJson([
                     'success' => true,
                     'message' => $message,
-                    'applied_codes' => $this->_getAppliedPromoCodes(),
+                    'promo_block_html' => $this->_getPromoBlockHtml(),
                 ]);
                 return;
             }
@@ -953,57 +953,16 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Get all applied promo codes (coupon + gift cards)
-     *
-     * @return array{coupon: array|null, giftcards: array}
+     * Render the promo block content HTML for AJAX responses
      */
-    protected function _getAppliedPromoCodes(): array
+    protected function _getPromoBlockHtml(): string
     {
-        $quote = $this->_getQuote();
-        $result = [
-            'coupon' => null,
-            'giftcards' => [],
-        ];
-
-        // Get coupon
-        $couponCode = $quote->getCouponCode();
-        if ($couponCode) {
-            $result['coupon'] = [
-                'code' => $couponCode,
-                'type' => 'coupon',
-            ];
-        }
-
-        // Get gift cards
-        if (Mage::helper('core')->isModuleEnabled('Maho_Giftcard')) {
-            $giftcardCodes = $quote->getGiftcardCodes();
-            if ($giftcardCodes) {
-                $codes = json_decode($giftcardCodes, true);
-                foreach ($codes as $code => $amount) {
-                    $result['giftcards'][] = [
-                        'code' => $code,
-                        'display_code' => $this->_maskGiftcardCode($code),
-                        'amount' => $amount,
-                        'amount_formatted' => Mage::helper('core')->currency($amount, true, false),
-                        'type' => 'giftcard',
-                    ];
-                }
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * Mask gift card code for display (show first 4 and last 4 chars)
-     */
-    protected function _maskGiftcardCode(string $code): string
-    {
-        $length = strlen($code);
-        if ($length <= 8) {
-            return $code;
-        }
-        return substr($code, 0, 4) . str_repeat('*', $length - 8) . substr($code, -4);
+        $layout = $this->getLayout();
+        $update = $layout->getUpdate();
+        $update->load('checkout_cart_coupon_ajax');
+        $layout->generateXml();
+        $layout->generateBlocks();
+        return $layout->getOutput();
     }
 
     /**

@@ -499,6 +499,13 @@ One page checkout order review block
     </checkout_onepage_review>
 
 <!--
+Promo code block AJAX update
+-->
+    <checkout_cart_coupon_ajax>
+        <block type="checkout/cart_coupon" name="root" output="toHtml" template="checkout/cart/coupon_content.phtml" />
+    </checkout_cart_coupon_ajax>
+
+<!--
 One step checkout layout (all steps visible at once)
 -->
 
@@ -520,6 +527,7 @@ One step checkout layout (all steps visible at once)
         <!-- Replace the main checkout block with one-step template -->
         <reference name="checkout.onepage">
             <action method="setTemplate"><template>checkout/onestep.phtml</template></action>
+            <block type="checkout/cart_coupon" name="checkout.onestep.coupon" as="coupon" template="checkout/cart/coupon_content.phtml" />
         </reference>
     </checkout_onepage_index_onestep>
 

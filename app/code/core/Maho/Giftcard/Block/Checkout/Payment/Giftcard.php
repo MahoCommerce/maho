@@ -57,23 +57,12 @@ class Maho_Giftcard_Block_Checkout_Payment_Giftcard extends Mage_Core_Block_Temp
                 $result[$code] = [
                     'amount' => $displayAmount,
                     'balance' => $giftcard->getBalance($quoteCurrency),
-                    'display_code' => $this->getDisplayCode($code),
+                    'display_code' => Mage::helper('giftcard')->maskCode($code),
                 ];
             }
         }
 
         return $result;
-    }
-
-    /**
-     * Get display code (masked for security)
-     */
-    public function getDisplayCode(string $code): string
-    {
-        if (strlen($code) > 10) {
-            return substr($code, 0, 4) . '...' . substr($code, -4);
-        }
-        return $code;
     }
 
     /**

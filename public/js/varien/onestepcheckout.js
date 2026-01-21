@@ -370,14 +370,13 @@ class OneStepCheckout {
             return;
         }
 
-        // Queue this request to prevent concurrent address operations
+        const formData = new FormData(this.billingForm);
+
+        // Show loading immediately for better UX
+        this.setLoading('onestep-shipping-method', true);
+
         this.queueAddressRequest(async () => {
             try {
-                this.setLoading('onestep-shipping-method', true);
-
-                // Use estimateBilling endpoint - saves billing to quote and returns shipping methods
-                const formData = new FormData(this.billingForm);
-
                 const result = await mahoFetch(this.urls.estimateBilling, {
                     method: 'POST',
                     body: formData,
@@ -400,10 +399,11 @@ class OneStepCheckout {
 
         const formData = new FormData(this.shippingForm);
 
+        // Show review loading immediately since that's what gets updated
+        this.setLoading('onestep-review', true);
+
         this.queueAddressRequest(async () => {
             try {
-                this.setLoading('onestep-shipping', true);
-
                 await mahoFetch(this.urls.saveShipping, {
                     method: 'POST',
                     body: formData,
@@ -411,8 +411,6 @@ class OneStepCheckout {
                 });
             } catch (error) {
                 // Silently handle errors
-            } finally {
-                this.setLoading('onestep-shipping', false);
             }
         });
         // Refresh review (will be queued after the above)
@@ -447,21 +445,19 @@ class OneStepCheckout {
             return;
         }
 
-        // Queue this request to prevent concurrent address operations
+        const formData = new FormData(this.shippingForm);
+
+        // Show loading immediately for better UX
+        this.setLoading('onestep-shipping-method', true);
+
         this.queueAddressRequest(async () => {
             try {
-                this.setLoading('onestep-shipping-method', true);
-
-                // Use the shipping form which includes form_key
-                const formData = new FormData(this.shippingForm);
-
                 const result = await mahoFetch(this.urls.saveShipping, {
                     method: 'POST',
                     body: formData,
                     loaderArea: false
                 });
 
-                // Update shipping methods if provided in response
                 if (result.update_section && result.update_section.name === 'shipping-method') {
                     this.updateShippingMethods(result.update_section.html);
                 }
@@ -489,33 +485,33 @@ class OneStepCheckout {
         const selected = document.querySelector('input[name="shipping_method"]:checked');
         if (!selected) return;
 
-        // Use the actual form to include form key
         const shippingMethodForm = document.getElementById('co-shipping-method-form');
         if (!shippingMethodForm) return;
 
         const formData = new FormData(shippingMethodForm);
 
+        // Show loading on both sections that will be updated
+        this.setLoading('onestep-payment', true);
+        this.setLoading('onestep-review', true);
+
         this.queueAddressRequest(async () => {
             try {
-                this.setLoading('onestep-shipping-method', true);
-
                 const result = await mahoFetch(this.urls.saveShippingMethod, {
                     method: 'POST',
                     body: formData,
                     loaderArea: false
                 });
 
-                // Update payment methods if provided
                 if (result.update_section && result.update_section.name === 'payment-method') {
                     this.updatePaymentMethods(result.update_section.html);
                 }
             } catch (error) {
                 // Silently handle errors
             } finally {
-                this.setLoading('onestep-shipping-method', false);
+                this.setLoading('onestep-payment', false);
             }
         });
-        // Refresh review (will be queued after the above)
+        // Refresh review (queued after the above, turns off review loading in its finally)
         this.loadReview();
     }
 
@@ -537,10 +533,11 @@ class OneStepCheckout {
 
         const formData = new FormData(paymentForm);
 
+        // Show review loading immediately since that's what gets updated
+        this.setLoading('onestep-review', true);
+
         this.queueAddressRequest(async () => {
             try {
-                this.setLoading('onestep-payment', true);
-
                 await mahoFetch(this.urls.savePayment, {
                     method: 'POST',
                     body: formData,
@@ -548,8 +545,6 @@ class OneStepCheckout {
                 });
             } catch (error) {
                 // Silently handle errors
-            } finally {
-                this.setLoading('onestep-payment', false);
             }
         });
         // Refresh review (will be queued after the above)
@@ -625,6 +620,29 @@ class OneStepCheckout {
         if (paymentMethods.length === 1 && paymentMethods[0].checked) {
             // payment.init() already showed the form, just trigger save to update review
             setTimeout(() => this.savePayment(), 50);
+        }
+    }
+
+    /**
+     * Refresh shipping methods, payment methods, and review after discount changes
+     */
+    refreshAfterDiscount() {
+        if (this.isVirtual) {
+            // Virtual products: just refresh review
+            this.loadReview();
+            return;
+        }
+
+        // Physical products: refresh shipping methods first
+        this.saveBilling();
+
+        // Then refresh payment and review (saveShippingMethod includes loadReview)
+        const selectedShipping = document.querySelector('input[name="shipping_method"]:checked');
+        if (selectedShipping) {
+            this.saveShippingMethod();
+        } else {
+            // No shipping selected, just refresh review for totals
+            this.loadReview();
         }
     }
 

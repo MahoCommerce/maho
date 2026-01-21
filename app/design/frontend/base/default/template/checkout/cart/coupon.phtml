@@ -10,63 +10,9 @@
  */
 
 /** @var Mage_Checkout_Block_Cart_Coupon $this */
-
-// Get currently applied promo codes
-$couponCode = $this->getCouponCode();
-$giftcardCodes = [];
-$giftcardEnabled = Mage::helper('core')->isModuleEnabled('Maho_Giftcard');
-
-if ($giftcardEnabled) {
-    $quote = Mage::getSingleton('checkout/session')->getQuote();
-    $giftcardCodesJson = $quote->getGiftcardCodes();
-    if ($giftcardCodesJson) {
-        $giftcardCodes = json_decode($giftcardCodesJson, true) ?: [];
-    }
-}
-
-$hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
 ?>
-<div class="promo-code-section" id="promo-code-section">
-    <?php if ($hasAppliedCodes): ?>
-    <div class="applied-codes" id="applied-promo-codes">
-        <?php if ($couponCode): ?>
-        <div class="applied-code applied-coupon" data-type="coupon" data-code="<?= $this->escapeHtml($couponCode) ?>">
-            <span class="code-label"><?= $this->__('Coupon:') ?></span>
-            <span class="code-value"><?= $this->escapeHtml($couponCode) ?></span>
-            <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
-        </div>
-        <?php endif ?>
-        <?php foreach ($giftcardCodes as $code => $amount): ?>
-        <?php
-            $displayCode = strlen($code) > 8
-                ? substr($code, 0, 4) . str_repeat('*', strlen($code) - 8) . substr($code, -4)
-                : $code;
-            $formattedAmount = Mage::helper('core')->currency($amount, true, false);
-        ?>
-        <div class="applied-code applied-giftcard" data-type="giftcard" data-code="<?= $this->escapeHtml($code) ?>">
-            <span class="code-label"><?= $this->__('Gift Card:') ?></span>
-            <span class="code-value"><?= $this->escapeHtml($displayCode) ?></span>
-            <span class="code-amount">-<?= $formattedAmount ?></span>
-            <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
-        </div>
-        <?php endforeach ?>
-    </div>
-    <?php endif ?>
-
-    <div class="promo-code-form">
-        <div class="coupon-input-group">
-            <label for="promo_code" class="visually-hidden"><?= $this->__('Enter promo code') ?></label>
-            <input
-                class="input-text coupon-input"
-                type="text"
-                id="promo_code"
-                name="promo_code"
-                value=""
-                placeholder="<?= $giftcardEnabled ? $this->__('Discount code or gift card') : $this->__('Enter discount code') ?>" />
-            <button type="button" id="btn-apply-promo" title="<?= $this->quoteEscape($this->__('Apply')) ?>" class="button2 btn-apply"><?= $this->__('Apply') ?></button>
-        </div>
-        <div id="promo-code-message" class="promo-message"></div>
-    </div>
+<div class="promo-code-section" id="maho-promo-section">
+    <?= $this->setTemplate('checkout/cart/coupon_content.phtml')->toHtml() ?>
 </div>
 
 <script src="<?= $this->getSkinUrl('js/mage/promocode.js') ?>"></script>
@@ -75,10 +21,10 @@ new MahoPromoCode({
     applyUrl: '<?= $this->getUrl('checkout/cart/couponPost') ?>',
     formKey: '<?= Mage::getSingleton('core/session')->getFormKey() ?>',
     elements: {
-        input: 'promo_code',
-        applyBtn: 'btn-apply-promo',
-        message: 'promo-code-message',
-        codesContainer: 'applied-promo-codes'
+        input: 'maho-promo-code',
+        applyBtn: 'maho-promo-apply',
+        message: 'maho-promo-message',
+        codesContainer: 'maho-promo-section'
     },
     messages: {
         emptyCode: <?= Mage::helper('core')->jsonEncode($this->__('Please enter a promo code.')) ?>,
