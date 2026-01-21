@@ -419,6 +419,10 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             return;
         }
 
+        if (!$this->_validateFormKey()) {
+            return;
+        }
+
         if (!$this->getRequest()->isPost()) {
             return;
         }

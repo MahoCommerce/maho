@@ -428,30 +428,18 @@ class OneStepCheckout {
         try {
             this.setLoading('onestep-shipping-method', true);
 
-            // Use cart's estimatePost for shipping address estimation
-            const estimateData = new FormData();
-            estimateData.append('country_id', country);
-            estimateData.append('estimate_postcode', postcode);
-            estimateData.append('estimate_city', city);
-            estimateData.append('region_id', regionId || '');
-            estimateData.append('region', document.getElementById('shipping:region')?.value || '');
-            estimateData.append('isAjax', '1');
+            // Use the shipping form which includes form_key
+            const formData = new FormData(this.shippingForm);
 
-            const estimateResponse = await fetch(this.urls.estimateBilling.replace('estimateBilling', 'cart/estimatePost'), {
+            const result = await mahoFetch(this.urls.saveShipping, {
                 method: 'POST',
-                body: estimateData
+                body: formData,
+                loaderArea: false
             });
 
-            const estimateResult = await estimateResponse.json();
-
-            if (estimateResult.success) {
-                // Load shipping methods from onepage checkout
-                const shippingResponse = await fetch(this.urls.saveBilling.replace('saveBilling', 'shippingMethod'));
-                const shippingHtml = await shippingResponse.text();
-
-                if (shippingHtml) {
-                    this.updateShippingMethods(shippingHtml);
-                }
+            // Update shipping methods if provided in response
+            if (result.update_section && result.update_section.name === 'shipping-method') {
+                this.updateShippingMethods(result.update_section.html);
             }
         } catch (error) {
             // Silently ignore errors during auto-save
