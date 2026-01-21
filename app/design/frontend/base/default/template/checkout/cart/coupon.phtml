@@ -69,135 +69,21 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
     </div>
 </div>
 
-<script type="module">
-const PromoCode = {
-    config: {
-        applyUrl: '<?= $this->getUrl('checkout/cart/couponPost') ?>',
-        formKey: '<?= Mage::getSingleton('core/session')->getFormKey() ?>'
+<script src="<?= $this->getSkinUrl('js/mage/promocode.js') ?>"></script>
+<script>
+new MahoPromoCode({
+    applyUrl: '<?= $this->getUrl('checkout/cart/couponPost') ?>',
+    formKey: '<?= Mage::getSingleton('core/session')->getFormKey() ?>',
+    elements: {
+        input: 'promo_code',
+        applyBtn: 'btn-apply-promo',
+        message: 'promo-code-message',
+        codesContainer: 'applied-promo-codes'
     },
-
-    init() {
-        this.bindEvents();
-    },
-
-    bindEvents() {
-        const applyBtn = document.getElementById('btn-apply-promo');
-        const codeInput = document.getElementById('promo_code');
-
-        if (applyBtn) {
-            applyBtn.addEventListener('click', () => this.applyCode());
-        }
-
-        if (codeInput) {
-            codeInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.applyCode();
-                }
-            });
-            codeInput.addEventListener('input', () => this.clearMessage());
-        }
-
-        // Bind remove buttons
-        this.bindRemoveButtons();
-    },
-
-    bindRemoveButtons() {
-        document.querySelectorAll('.btn-remove-code').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const codeEl = e.target.closest('.applied-code');
-                if (codeEl) {
-                    const type = codeEl.dataset.type;
-                    const code = codeEl.dataset.code;
-                    this.removeCode(type, code);
-                }
-            });
-        });
-    },
-
-    async applyCode() {
-        const codeInput = document.getElementById('promo_code');
-        const code = codeInput?.value.trim();
-
-        if (!code) {
-            this.showMessage(<?= Mage::helper('core')->jsonEncode($this->__('Please enter a promo code.')) ?>, 'error');
-            return;
-        }
-
-        const applyBtn = document.getElementById('btn-apply-promo');
-        const originalText = applyBtn.textContent;
-        applyBtn.disabled = true;
-        applyBtn.textContent = <?= Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>;
-
-        try {
-            const response = await mahoFetch(this.config.applyUrl, {
-                method: 'POST',
-                body: new URLSearchParams({
-                    form_key: this.config.formKey,
-                    promo_code: code,
-                    isAjax: '1'
-                })
-            });
-
-            if (response.success) {
-                this.showMessage(response.message, 'success');
-                codeInput.value = '';
-                // Reload page to update totals and applied codes display
-                setTimeout(() => window.location.reload(), 500);
-            } else {
-                this.showMessage(response.message, 'error');
-            }
-        } catch (error) {
-            this.showMessage(<?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>, 'error');
-        } finally {
-            applyBtn.disabled = false;
-            applyBtn.textContent = originalText;
-        }
-    },
-
-    async removeCode(type, code) {
-        try {
-            const response = await mahoFetch(this.config.applyUrl, {
-                method: 'POST',
-                body: new URLSearchParams({
-                    form_key: this.config.formKey,
-                    remove_type: type,
-                    remove_code: code,
-                    isAjax: '1'
-                })
-            });
-
-            if (response.success) {
-                // Reload page to update totals
-                window.location.reload();
-            } else {
-                this.showMessage(response.message, 'error');
-            }
-        } catch (error) {
-            this.showMessage(<?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>, 'error');
-        }
-    },
-
-    showMessage(message, type) {
-        const messageContainer = document.getElementById('promo-code-message');
-        if (!messageContainer) return;
-
-        messageContainer.textContent = message;
-        messageContainer.className = 'promo-message ' + type;
-
-        if (type === 'success') {
-            setTimeout(() => this.clearMessage(), 3000);
-        }
-    },
-
-    clearMessage() {
-        const messageContainer = document.getElementById('promo-code-message');
-        if (messageContainer) {
-            messageContainer.textContent = '';
-            messageContainer.className = 'promo-message';
-        }
+    messages: {
+        emptyCode: <?= Mage::helper('core')->jsonEncode($this->__('Please enter a promo code.')) ?>,
+        applying: <?= Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>,
+        error: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>
     }
-};
-
-PromoCode.init();
+});
 </script>

@@ -980,7 +980,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             if ($giftcardCodes) {
                 $codes = json_decode($giftcardCodes, true);
                 foreach ($codes as $code => $amount) {
-                    $giftcard = Mage::getModel('giftcard/giftcard')->loadByCode($code);
                     $result['giftcards'][] = [
                         'code' => $code,
                         'display_code' => $this->_maskGiftcardCode($code),

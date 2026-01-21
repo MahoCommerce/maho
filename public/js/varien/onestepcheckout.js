@@ -61,6 +61,10 @@ class OneStepCheckout {
         this.shippingMethodForm = null;
         this.paymentForm = null;
 
+        // Queue for address-related requests to prevent race conditions
+        // that could create duplicate addresses on the server
+        this.addressRequestQueue = Promise.resolve();
+
         this.init();
     }
 
@@ -318,7 +322,22 @@ class OneStepCheckout {
         };
     }
 
-    async saveBilling() {
+    /**
+     * Queue an address-related request to prevent concurrent requests
+     * that could create duplicate addresses on the server.
+     * If a request is already pending, the new request waits for it to complete.
+     * @param {Function} requestFn - Async function that performs the request
+     * @returns {Promise}
+     */
+    queueAddressRequest(requestFn) {
+        // Chain this request after any pending ones
+        this.addressRequestQueue = this.addressRequestQueue
+            .then(() => requestFn())
+            .catch(() => {}); // Ignore errors to keep queue alive
+        return this.addressRequestQueue;
+    }
+
+    saveBilling() {
         if (!this.billingForm || this.isVirtual) return;
 
         // Check if using billing address for shipping or separate shipping address
@@ -351,56 +370,59 @@ class OneStepCheckout {
             return;
         }
 
-        try {
-            this.setLoading('onestep-shipping-method', true);
+        // Queue this request to prevent concurrent address operations
+        this.queueAddressRequest(async () => {
+            try {
+                this.setLoading('onestep-shipping-method', true);
 
-            // Use estimateBilling endpoint - saves billing to quote and returns shipping methods
-            const formData = new FormData(this.billingForm);
+                // Use estimateBilling endpoint - saves billing to quote and returns shipping methods
+                const formData = new FormData(this.billingForm);
 
-            const response = await fetch(this.urls.estimateBilling, {
-                method: 'POST',
-                body: formData
-            });
+                const result = await mahoFetch(this.urls.estimateBilling, {
+                    method: 'POST',
+                    body: formData,
+                    loaderArea: false
+                });
 
-            const result = await response.json();
-
-            if (result.success && result.update_section) {
-                this.updateShippingMethods(result.update_section.html);
+                if (result.success && result.update_section) {
+                    this.updateShippingMethods(result.update_section.html);
+                }
+            } catch (error) {
+                // Silently handle errors during auto-save
+            } finally {
+                this.setLoading('onestep-shipping-method', false);
             }
-        } catch (error) {
-            // Silently ignore errors during auto-save
-        } finally {
-            this.setLoading('onestep-shipping-method', false);
-        }
+        });
     }
 
-    async saveShipping() {
+    saveShipping() {
         if (!this.shippingForm || this.isVirtual) return;
 
         const formData = new FormData(this.shippingForm);
 
-        try {
-            this.setLoading('onestep-shipping', true);
+        this.queueAddressRequest(async () => {
+            try {
+                this.setLoading('onestep-shipping', true);
 
-            const result = await mahoFetch(this.urls.saveShipping, {
-                method: 'POST',
-                body: formData,
-                loaderArea: false
-            });
-
-            // Refresh review
-            this.loadReview();
-        } catch (error) {
-            // Silently handle errors
-        } finally {
-            this.setLoading('onestep-shipping', false);
-        }
+                await mahoFetch(this.urls.saveShipping, {
+                    method: 'POST',
+                    body: formData,
+                    loaderArea: false
+                });
+            } catch (error) {
+                // Silently handle errors
+            } finally {
+                this.setLoading('onestep-shipping', false);
+            }
+        });
+        // Refresh review (will be queued after the above)
+        this.loadReview();
     }
 
     /**
      * Save shipping address estimate when using different shipping address
      */
-    async saveShippingEstimate() {
+    saveShippingEstimate() {
         if (!this.shippingForm || this.isVirtual) return;
 
         // Only run if using different shipping address
@@ -425,27 +447,30 @@ class OneStepCheckout {
             return;
         }
 
-        try {
-            this.setLoading('onestep-shipping-method', true);
+        // Queue this request to prevent concurrent address operations
+        this.queueAddressRequest(async () => {
+            try {
+                this.setLoading('onestep-shipping-method', true);
 
-            // Use the shipping form which includes form_key
-            const formData = new FormData(this.shippingForm);
+                // Use the shipping form which includes form_key
+                const formData = new FormData(this.shippingForm);
 
-            const result = await mahoFetch(this.urls.saveShipping, {
-                method: 'POST',
-                body: formData,
-                loaderArea: false
-            });
+                const result = await mahoFetch(this.urls.saveShipping, {
+                    method: 'POST',
+                    body: formData,
+                    loaderArea: false
+                });
 
-            // Update shipping methods if provided in response
-            if (result.update_section && result.update_section.name === 'shipping-method') {
-                this.updateShippingMethods(result.update_section.html);
+                // Update shipping methods if provided in response
+                if (result.update_section && result.update_section.name === 'shipping-method') {
+                    this.updateShippingMethods(result.update_section.html);
+                }
+            } catch (error) {
+                // Silently handle errors during auto-save
+            } finally {
+                this.setLoading('onestep-shipping-method', false);
             }
-        } catch (error) {
-            // Silently ignore errors during auto-save
-        } finally {
-            this.setLoading('onestep-shipping-method', false);
-        }
+        });
     }
 
     initShippingMethodAutoSave() {
@@ -460,7 +485,7 @@ class OneStepCheckout {
         });
     }
 
-    async saveShippingMethod() {
+    saveShippingMethod() {
         const selected = document.querySelector('input[name="shipping_method"]:checked');
         if (!selected) return;
 
@@ -470,26 +495,28 @@ class OneStepCheckout {
 
         const formData = new FormData(shippingMethodForm);
 
-        try {
-            this.setLoading('onestep-shipping-method', true);
+        this.queueAddressRequest(async () => {
+            try {
+                this.setLoading('onestep-shipping-method', true);
 
-            const result = await mahoFetch(this.urls.saveShippingMethod, {
-                method: 'POST',
-                body: formData,
-                loaderArea: false
-            });
+                const result = await mahoFetch(this.urls.saveShippingMethod, {
+                    method: 'POST',
+                    body: formData,
+                    loaderArea: false
+                });
 
-            // Update payment methods if provided
-            if (result.update_section && result.update_section.name === 'payment-method') {
-                this.updatePaymentMethods(result.update_section.html);
+                // Update payment methods if provided
+                if (result.update_section && result.update_section.name === 'payment-method') {
+                    this.updatePaymentMethods(result.update_section.html);
+                }
+            } catch (error) {
+                // Silently handle errors
+            } finally {
+                this.setLoading('onestep-shipping-method', false);
             }
-            // Refresh review
-            this.loadReview();
-        } catch (error) {
-            // Silently handle errors
-        } finally {
-            this.setLoading('onestep-shipping-method', false);
-        }
+        });
+        // Refresh review (will be queued after the above)
+        this.loadReview();
     }
 
     initPaymentMethodAutoSave() {
@@ -504,28 +531,29 @@ class OneStepCheckout {
         });
     }
 
-    async savePayment() {
+    savePayment() {
         const paymentForm = document.getElementById('co-payment-form');
         if (!paymentForm) return;
 
         const formData = new FormData(paymentForm);
 
-        try {
-            this.setLoading('onestep-payment', true);
+        this.queueAddressRequest(async () => {
+            try {
+                this.setLoading('onestep-payment', true);
 
-            const result = await mahoFetch(this.urls.savePayment, {
-                method: 'POST',
-                body: formData,
-                loaderArea: false
-            });
-
-            // Refresh review
-            this.loadReview();
-        } catch (error) {
-            // Silently handle errors
-        } finally {
-            this.setLoading('onestep-payment', false);
-        }
+                await mahoFetch(this.urls.savePayment, {
+                    method: 'POST',
+                    body: formData,
+                    loaderArea: false
+                });
+            } catch (error) {
+                // Silently handle errors
+            } finally {
+                this.setLoading('onestep-payment', false);
+            }
+        });
+        // Refresh review (will be queued after the above)
+        this.loadReview();
     }
 
     async loadShippingMethods() {
@@ -597,37 +625,37 @@ class OneStepCheckout {
         }
     }
 
-    async loadReview() {
+    loadReview() {
         const container = document.getElementById('checkout-review-load');
-        const loader = document.getElementById('onestep-review-please-wait');
-
         if (!container) return;
 
-        try {
-            if (loader) loader.style.display = 'flex';
+        this.queueAddressRequest(async () => {
+            try {
+                this.setLoading('onestep-review', true);
 
-            // mahoFetch returns text/html directly for non-JSON responses
-            const html = await mahoFetch(this.urls.review, {
-                method: 'GET',
-                loaderArea: false
-            });
+                // mahoFetch returns text/html directly for non-JSON responses
+                const html = await mahoFetch(this.urls.review, {
+                    method: 'GET',
+                    loaderArea: false
+                });
 
-            // Insert HTML and execute any inline scripts
-            // This allows the Review object from opcheckout.js to be created
-            if (typeof updateElementHtmlAndExecuteScripts === 'function') {
-                updateElementHtmlAndExecuteScripts(container, html);
-            } else {
-                container.innerHTML = html;
-                this.executeScripts(container);
+                // Insert HTML and execute any inline scripts
+                // This allows the Review object from opcheckout.js to be created
+                if (typeof updateElementHtmlAndExecuteScripts === 'function') {
+                    updateElementHtmlAndExecuteScripts(container, html);
+                } else {
+                    container.innerHTML = html;
+                    this.executeScripts(container);
+                }
+
+                // Wrap review.save() to add billing form validation
+                this.wrapReviewSave();
+            } catch (error) {
+                // Silently handle errors - review will load when checkout state is valid
+            } finally {
+                this.setLoading('onestep-review', false);
             }
-
-            // Wrap review.save() to add billing form validation
-            this.wrapReviewSave();
-        } catch (error) {
-            // Silently handle errors - review will load when checkout state is valid
-        } finally {
-            if (loader) loader.style.display = 'none';
-        }
+        });
     }
 
     /**
