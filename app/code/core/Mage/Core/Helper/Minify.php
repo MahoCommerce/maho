@@ -100,6 +100,14 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Check if file is already minified based on filename patterns
+     */
+    private function isAlreadyMinified(string $filePath): bool
+    {
+        return (bool) preg_match('/[._-](min|pack)\./i', $filePath);
+    }
+
+    /**
      * Check if the given path is an external URL (different domain)
      */
     private function isExternalUrl(string $filePath): bool
@@ -156,8 +164,13 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
             }
 
             try {
-                $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
-                file_put_contents($cachedFile, $minifiedContent);
+                if ($this->isAlreadyMinified($filePath)) {
+                    // Copy already-minified files to maintain consistent URL/caching
+                    copy($absolutePath, $cachedFile);
+                } else {
+                    $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
+                    file_put_contents($cachedFile, $minifiedContent);
+                }
                 return $cachedUrl;
             } finally {
                 flock($lockHandle, LOCK_UN);
