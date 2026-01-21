@@ -61,9 +61,8 @@ class OneStepCheckout {
         this.shippingMethodForm = null;
         this.paymentForm = null;
 
-        // Queue for address-related requests to prevent race conditions
-        // that could create duplicate addresses on the server
-        this.addressRequestQueue = Promise.resolve();
+        // Queue for serializing checkout requests to prevent race conditions
+        this.requestQueue = Promise.resolve();
 
         this.init();
     }
@@ -75,7 +74,6 @@ class OneStepCheckout {
             this.initBillingShippingToggle();
             this.initAutoSave();
             this.initPlaceholders();
-            this.initCoupon();
             this.loadReview();
             // Check if billing form is pre-filled and load shipping methods
             // Use setTimeout to allow dynamic region dropdowns to populate
@@ -89,20 +87,7 @@ class OneStepCheckout {
     checkPrefilledBilling() {
         if (!this.billingForm || this.isVirtual) return;
 
-        // Only require the 4 shipping-related fields
-        const country = document.getElementById('billing:country_id')?.value;
-        const postcode = document.getElementById('billing:postcode')?.value;
-        const city = document.getElementById('billing:city')?.value;
-
-        // Check if minimum required fields for shipping estimation are pre-filled
-        if (country && postcode && city) {
-            // Require region for countries that have regions (like US)
-            const regionSelect = document.getElementById('billing:region_id');
-            const regionId = document.getElementById('billing:region_id')?.value;
-            if (regionSelect && regionSelect.options.length > 1 && !regionId) {
-                return;
-            }
-            // Form has shipping address data, trigger billing save to load shipping methods
+        if (this.hasMinimumAddressData('billing')) {
             this.saveBilling();
         }
     }
@@ -123,121 +108,6 @@ class OneStepCheckout {
             if (hasPaymentMethods) {
                 paymentPlaceholder.style.display = 'none';
             }
-        }
-    }
-
-    initCoupon() {
-        const applyBtn = document.getElementById('onestep-coupon-apply');
-        const cancelBtn = document.getElementById('onestep-coupon-cancel');
-        const input = document.getElementById('onestep-coupon-code');
-
-        if (applyBtn) {
-            applyBtn.addEventListener('click', () => this.applyCoupon());
-        }
-
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', () => this.removeCoupon());
-        }
-
-        // Allow Enter key to apply coupon
-        if (input) {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.applyCoupon();
-                }
-            });
-        }
-    }
-
-    async applyCoupon() {
-        const input = document.getElementById('onestep-coupon-code');
-        const messageEl = document.getElementById('onestep-coupon-message');
-        const cancelBtn = document.getElementById('onestep-coupon-cancel');
-
-        if (!input) return;
-
-        const couponCode = input.value.trim();
-        if (!couponCode) {
-            this.showCouponMessage('Please enter a coupon code.', false);
-            return;
-        }
-
-        try {
-            this.setLoading('onestep-coupon', true);
-
-            const formData = new FormData();
-            formData.append('coupon_code', couponCode);
-            formData.append('form_key', this.formKey);
-            formData.append('isAjax', '1');
-
-            const result = await mahoFetch(this.urls.applyCoupon, {
-                method: 'POST',
-                body: formData,
-                loaderArea: false
-            });
-
-            this.showCouponMessage(result.message, result.success);
-
-            if (result.success && result.coupon_code) {
-                input.value = result.coupon_code;
-                if (cancelBtn) cancelBtn.style.display = '';
-                // Refresh the order summary to show discount
-                this.loadReview();
-            }
-        } catch (error) {
-            this.showCouponMessage(error.message || 'Failed to apply coupon.', false);
-        } finally {
-            this.setLoading('onestep-coupon', false);
-        }
-    }
-
-    async removeCoupon() {
-        const input = document.getElementById('onestep-coupon-code');
-        const cancelBtn = document.getElementById('onestep-coupon-cancel');
-
-        try {
-            this.setLoading('onestep-coupon', true);
-
-            const formData = new FormData();
-            formData.append('remove', '1');
-            formData.append('form_key', this.formKey);
-            formData.append('isAjax', '1');
-
-            const result = await mahoFetch(this.urls.applyCoupon, {
-                method: 'POST',
-                body: formData,
-                loaderArea: false
-            });
-
-            this.showCouponMessage(result.message, result.success);
-
-            if (result.success) {
-                if (input) input.value = '';
-                if (cancelBtn) cancelBtn.style.display = 'none';
-                // Refresh the order summary to remove discount
-                this.loadReview();
-            }
-        } catch (error) {
-            this.showCouponMessage(error.message || 'Failed to remove coupon.', false);
-        } finally {
-            this.setLoading('onestep-coupon', false);
-        }
-    }
-
-    showCouponMessage(message, success) {
-        const messageEl = document.getElementById('onestep-coupon-message');
-        if (!messageEl) return;
-
-        messageEl.textContent = message;
-        messageEl.className = 'coupon-message ' + (success ? 'success' : 'error');
-
-        // Auto-hide success messages after 5 seconds
-        if (success && message) {
-            setTimeout(() => {
-                messageEl.textContent = '';
-                messageEl.className = 'coupon-message';
-            }, 5000);
         }
     }
 
@@ -323,18 +193,41 @@ class OneStepCheckout {
     }
 
     /**
-     * Queue an address-related request to prevent concurrent requests
-     * that could create duplicate addresses on the server.
-     * If a request is already pending, the new request waits for it to complete.
+     * Check if address fields have minimum data for shipping estimation
+     * @param {string} prefix - 'billing' or 'shipping'
+     * @returns {boolean}
+     */
+    hasMinimumAddressData(prefix) {
+        const country = document.getElementById(`${prefix}:country_id`)?.value;
+        const postcode = document.getElementById(`${prefix}:postcode`)?.value;
+        const city = document.getElementById(`${prefix}:city`)?.value;
+
+        if (!country || !postcode || !city) {
+            return false;
+        }
+
+        // Require region for countries that have regions (like US)
+        const regionSelect = document.getElementById(`${prefix}:region_id`);
+        const regionId = regionSelect?.value;
+        if (regionSelect && regionSelect.options.length > 1 && !regionId) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Queue a request to serialize checkout operations.
+     * Prevents race conditions and ensures requests complete in order.
      * @param {Function} requestFn - Async function that performs the request
      * @returns {Promise}
      */
-    queueAddressRequest(requestFn) {
+    queueRequest(requestFn) {
         // Chain this request after any pending ones
-        this.addressRequestQueue = this.addressRequestQueue
+        this.requestQueue = this.requestQueue
             .then(() => requestFn())
             .catch(() => {}); // Ignore errors to keep queue alive
-        return this.addressRequestQueue;
+        return this.requestQueue;
     }
 
     saveBilling() {
@@ -354,19 +247,7 @@ class OneStepCheckout {
             if (!this.shippingForm) return;
         }
 
-        // Only check the 4 shipping-related fields for auto-save
-        const country = document.getElementById(`${fieldPrefix}:country_id`)?.value;
-        const postcode = document.getElementById(`${fieldPrefix}:postcode`)?.value;
-        const city = document.getElementById(`${fieldPrefix}:city`)?.value;
-
-        if (!country || !postcode || !city) {
-            return;
-        }
-
-        // Require region for countries that have regions (like US)
-        const regionSelect = document.getElementById(`${fieldPrefix}:region_id`);
-        const regionId = document.getElementById(`${fieldPrefix}:region_id`)?.value;
-        if (regionSelect && regionSelect.options.length > 1 && !regionId) {
+        if (!this.hasMinimumAddressData(fieldPrefix)) {
             return;
         }
 
@@ -375,7 +256,7 @@ class OneStepCheckout {
         // Show loading immediately for better UX
         this.setLoading('onestep-shipping-method', true);
 
-        this.queueAddressRequest(async () => {
+        this.queueRequest(async () => {
             try {
                 const result = await mahoFetch(this.urls.estimateBilling, {
                     method: 'POST',
@@ -402,7 +283,7 @@ class OneStepCheckout {
         // Show review loading immediately since that's what gets updated
         this.setLoading('onestep-review', true);
 
-        this.queueAddressRequest(async () => {
+        this.queueRequest(async () => {
             try {
                 await mahoFetch(this.urls.saveShipping, {
                     method: 'POST',
@@ -429,19 +310,7 @@ class OneStepCheckout {
             return;
         }
 
-        // Check the 4 shipping-related fields
-        const country = document.getElementById('shipping:country_id')?.value;
-        const postcode = document.getElementById('shipping:postcode')?.value;
-        const city = document.getElementById('shipping:city')?.value;
-
-        if (!country || !postcode || !city) {
-            return;
-        }
-
-        // Require region for countries that have regions
-        const regionSelect = document.getElementById('shipping:region_id');
-        const regionId = document.getElementById('shipping:region_id')?.value;
-        if (regionSelect && regionSelect.options.length > 1 && !regionId) {
+        if (!this.hasMinimumAddressData('shipping')) {
             return;
         }
 
@@ -450,7 +319,7 @@ class OneStepCheckout {
         // Show loading immediately for better UX
         this.setLoading('onestep-shipping-method', true);
 
-        this.queueAddressRequest(async () => {
+        this.queueRequest(async () => {
             try {
                 const result = await mahoFetch(this.urls.saveShipping, {
                     method: 'POST',
@@ -494,7 +363,7 @@ class OneStepCheckout {
         this.setLoading('onestep-payment', true);
         this.setLoading('onestep-review', true);
 
-        this.queueAddressRequest(async () => {
+        this.queueRequest(async () => {
             try {
                 const result = await mahoFetch(this.urls.saveShippingMethod, {
                     method: 'POST',
@@ -536,7 +405,7 @@ class OneStepCheckout {
         // Show review loading immediately since that's what gets updated
         this.setLoading('onestep-review', true);
 
-        this.queueAddressRequest(async () => {
+        this.queueRequest(async () => {
             try {
                 await mahoFetch(this.urls.savePayment, {
                     method: 'POST',
@@ -547,17 +416,8 @@ class OneStepCheckout {
                 // Silently handle errors
             }
         });
-        // Refresh review (will be queued after the above)
+        // Refresh review (queued after the above)
         this.loadReview();
-    }
-
-    async loadShippingMethods() {
-        // Shipping methods are typically loaded as part of the billing save response
-        // or we can trigger a billing save to refresh them
-        if (this.isVirtual) return;
-
-        // For now, shipping methods are updated through saveBilling response
-        // No separate loading needed
     }
 
     updateShippingMethods(html) {
@@ -650,7 +510,7 @@ class OneStepCheckout {
         const container = document.getElementById('checkout-review-load');
         if (!container) return;
 
-        this.queueAddressRequest(async () => {
+        this.queueRequest(async () => {
             try {
                 this.setLoading('onestep-review', true);
 
@@ -681,11 +541,14 @@ class OneStepCheckout {
 
     /**
      * Wrap review.save() to add billing/shipping form validation
+     * @param {number} retries - Number of retry attempts remaining
      */
-    wrapReviewSave() {
+    wrapReviewSave(retries = 50) {
         // If review object doesn't exist yet, retry after a short delay
         if (typeof review === 'undefined' || !review.save) {
-            setTimeout(() => this.wrapReviewSave(), 100);
+            if (retries > 0) {
+                setTimeout(() => this.wrapReviewSave(retries - 1), 100);
+            }
             return;
         }
 
@@ -860,6 +723,8 @@ class OneStepCheckout {
             return false;
         }
 
+        let reviewUpdated = false;
+
         // Update section content if provided
         if (response.update_section) {
             const sectionName = response.update_section.name;
@@ -872,16 +737,22 @@ class OneStepCheckout {
             } else if (sectionName === 'review') {
                 const container = document.getElementById('checkout-review-load');
                 if (container) container.innerHTML = html;
+                reviewUpdated = true;
             }
         }
 
-        // Handle section navigation
+        // Handle section navigation (gotoSection may call loadReview for review/payment)
         if (response.goto_section) {
             this.gotoSection(response.goto_section, true);
+            if (response.goto_section === 'review' || response.goto_section === 'payment') {
+                reviewUpdated = true;
+            }
         }
 
-        // Refresh review on any successful update
-        this.loadReview();
+        // Only refresh review if it wasn't already updated
+        if (!reviewUpdated) {
+            this.loadReview();
+        }
 
         return true;
     }
