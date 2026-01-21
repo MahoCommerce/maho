@@ -734,3 +734,8 @@
         }
     }
 }
+
+.onestep-checkout #checkout-step-payment .checkout-agreements {
+    margin: 0;
+    padding: 0;
+}
