@@ -79,6 +79,10 @@
         top: 1rem;
     }
 
+    .onestep-column-right {
+        min-width: 380px;
+    }
+
 
     /* Sections */
     .onestep-section {
@@ -705,6 +709,13 @@
         transform: rotate(360deg);
     }
 }
+
+@media (max-width: 940px) {
+    .onestep-checkout {
+        gap: 0.5rem;
+    }
+}
+
 
 /* Responsive: Mobile */
 @media (max-width: 768px) {
