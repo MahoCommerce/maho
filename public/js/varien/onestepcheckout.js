@@ -577,20 +577,17 @@ class OneStepCheckout {
             }
             // Re-init any scripts
             this.initShippingMethodAutoSave();
-            // Auto-select if only one shipping method
+            // If only one shipping method, trigger save to load payment methods
             this.autoSelectSingleShippingMethod();
         }
     }
 
     /**
-     * Auto-select shipping method if only one is available and trigger payment load
+     * If only one shipping method available and checked, trigger save to load payment methods
      */
     autoSelectSingleShippingMethod() {
         const shippingMethods = document.querySelectorAll('input[name="shipping_method"]');
-        if (shippingMethods.length === 1) {
-            // Ensure it's checked (may already be checked by server)
-            shippingMethods[0].checked = true;
-            // Trigger save to load payment methods
+        if (shippingMethods.length === 1 && shippingMethods[0].checked) {
             setTimeout(() => this.saveShippingMethod(), 50);
         }
     }
@@ -607,20 +604,26 @@ class OneStepCheckout {
             }
             // Re-init any scripts
             this.initPaymentMethodAutoSave();
-            // Auto-select if only one payment method
+
+            // Call payment.init() since innerHTML doesn't execute <script> tags
+            // Server already marks the selected method as checked, and init() will
+            // find it and call switchMethod() to show the form
+            if (typeof payment !== 'undefined' && payment.init) {
+                payment.init();
+            }
+
+            // If only one payment method, trigger save to update review
             this.autoSelectSinglePaymentMethod();
         }
     }
 
     /**
-     * Auto-select payment method if only one is available
+     * Auto-select payment method if only one is available and trigger save
      */
     autoSelectSinglePaymentMethod() {
         const paymentMethods = document.querySelectorAll('input[name="payment[method]"]');
-        if (paymentMethods.length === 1) {
-            // Ensure it's checked (may already be checked by server)
-            paymentMethods[0].checked = true;
-            // Trigger save to update review
+        if (paymentMethods.length === 1 && paymentMethods[0].checked) {
+            // payment.init() already showed the form, just trigger save to update review
             setTimeout(() => this.savePayment(), 50);
         }
     }
