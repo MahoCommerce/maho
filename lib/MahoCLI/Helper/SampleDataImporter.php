@@ -370,7 +370,7 @@ class SampleDataImporter
         }
 
         if ($count > 0) {
-            $this->log("Propagated system attributes to sample data attribute sets", 'info');
+            $this->log('Propagated system attributes to sample data attribute sets', 'info');
         }
     }
 
