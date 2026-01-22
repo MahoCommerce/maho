@@ -1323,6 +1323,18 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             );
         }
         if ($entityRowsIn) {
+            // Debug: Log the data being inserted
+            foreach ($entityRowsIn as $sku => $row) {
+                echo "[DEBUG INSERT] SKU: {$sku}, attribute_set_id: {$row['attribute_set_id']}, entity_type_id: {$row['entity_type_id']}\n";
+
+                // Verify the attribute_set_id exists right before insert
+                $exists = $this->_connection->fetchOne(
+                    "SELECT attribute_set_id FROM eav_attribute_set WHERE attribute_set_id = ?",
+                    [$row['attribute_set_id']]
+                );
+                echo "[DEBUG INSERT] attribute_set_id {$row['attribute_set_id']} exists in DB: " . ($exists ? 'YES' : 'NO') . "\n";
+            }
+
             $this->_connection->insertMultiple($entityTable, $entityRowsIn);
 
             $newProducts = $this->_connection->fetchPairs($this->_connection->select()
