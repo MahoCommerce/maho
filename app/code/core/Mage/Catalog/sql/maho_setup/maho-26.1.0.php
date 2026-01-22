@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,5 +45,33 @@ $installer->addAttribute('catalog_product', 'mpn', [
     'apply_to'                   => '',
     'group'                      => 'General',
 ]);
+
+// Add GTIN and MPN attributes to all existing product attribute sets
+$entityTypeId = $installer->getEntityTypeId('catalog_product');
+$attributeSetCollection = Mage::getResourceModel('eav/entity_attribute_set_collection')
+    ->setEntityTypeFilter($entityTypeId);
+
+foreach ($attributeSetCollection as $attributeSet) {
+    $attributeGroupId = $installer->getAttributeGroupId(
+        $entityTypeId,
+        (int) $attributeSet->getId(),
+        'General',
+    );
+
+    if ($attributeGroupId) {
+        $installer->addAttributeToSet(
+            'catalog_product',
+            $attributeSet->getId(),
+            $attributeGroupId,
+            'gtin',
+        );
+        $installer->addAttributeToSet(
+            'catalog_product',
+            $attributeSet->getId(),
+            $attributeGroupId,
+            'mpn',
+        );
+    }
+}
 
 $installer->endSetup();
