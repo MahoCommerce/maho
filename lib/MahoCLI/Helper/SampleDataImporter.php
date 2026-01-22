@@ -329,10 +329,9 @@ class SampleDataImporter
      */
     private function propagateSystemAttributes(): void
     {
-        /** @var Mage_Catalog_Model_Resource_Setup $setup */
-        $setup = \Mage::getResourceModel('catalog/setup', 'catalog_setup');
+        $setup = new \Mage_Catalog_Model_Resource_Setup('catalog_setup');
         $entityTypeId = $setup->getEntityTypeId('catalog_product');
-        $defaultSetId = $setup->getDefaultAttributeSetId($entityTypeId);
+        $defaultSetId = (int) $setup->getDefaultAttributeSetId($entityTypeId);
         $defaultGroupId = $setup->getAttributeGroupId($entityTypeId, $defaultSetId, 'General');
 
         // Get system attributes from Default's General group with their sort_order
