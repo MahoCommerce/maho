@@ -494,13 +494,23 @@ export default {
         this.loading = true;
         this.error = null;
         try {
+            // Convert street string to array (API expects array)
+            const addressData = {
+                ...this.newAddress,
+                street: this.newAddress.street ? this.newAddress.street.split('\n').filter(line => line.trim()) : []
+            };
+            // If only one line without newlines, wrap it in an array
+            if (addressData.street.length === 0 && this.newAddress.street) {
+                addressData.street = [this.newAddress.street.trim()];
+            }
+
             const res = await fetch('/api/customers/me/addresses', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + this.token
                 },
-                body: JSON.stringify(this.newAddress)
+                body: JSON.stringify(addressData)
             });
 
             const data = await res.json();
@@ -515,8 +525,9 @@ export default {
                 throw new Error(data.message || 'Failed to add address');
             }
 
-            if (data.address) {
-                this.addresses.push(data.address);
+            // API returns address directly (not wrapped in 'address' property)
+            if (data.id) {
+                this.addresses.push(data);
             }
             this.success = 'Address added successfully';
             this.showAddressForm = false;
@@ -600,13 +611,23 @@ export default {
         this.loading = true;
         this.error = null;
         try {
+            // Convert street string to array (API expects array)
+            const addressData = {
+                ...this.newAddress,
+                street: this.newAddress.street ? this.newAddress.street.split('\n').filter(line => line.trim()) : []
+            };
+            // If only one line without newlines, wrap it in an array
+            if (addressData.street.length === 0 && this.newAddress.street) {
+                addressData.street = [this.newAddress.street.trim()];
+            }
+
             const res = await fetch('/api/customers/me/addresses/' + this.editingAddressId, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + this.token
                 },
-                body: JSON.stringify(this.newAddress)
+                body: JSON.stringify(addressData)
             });
 
             const data = await res.json();
@@ -621,9 +642,10 @@ export default {
                 throw new Error(data.message || 'Failed to update address');
             }
 
+            // API returns address directly (not wrapped in 'address' property)
             const index = this.addresses.findIndex(a => a.id === this.editingAddressId);
-            if (index !== -1 && data.address) {
-                this.addresses[index] = data.address;
+            if (index !== -1 && data.id) {
+                this.addresses[index] = data;
             }
 
             this.success = 'Address updated successfully';

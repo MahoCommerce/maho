@@ -148,7 +148,7 @@ function store() {
             if (loadedModules.has(name)) return;
 
             try {
-                const module = await import(`/api-test/store/modules/${name}.js?v=42`);
+                const module = await import(`/api-test/store/modules/${name}.js?v=44`);
                 const methods = module.default;
 
                 // Merge module methods into store (skip state, keep methods)
