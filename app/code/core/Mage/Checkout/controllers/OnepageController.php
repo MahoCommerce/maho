@@ -199,15 +199,16 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*', ['_secure' => true]));
         $this->getOnepage()->initCheckout();
 
-        // Set checkout method to guest for non-logged-in users
-        if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
-            $this->getOnepage()->saveCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
-        }
-
         if (Mage::getStoreConfigFlag('checkout/options/onestep_checkout_enabled')) {
             $this->loadLayout(['default', 'checkout_onepage_index', 'checkout_onepage_index_onestep']);
         } else {
             $this->loadLayout();
+        }
+
+        // Set checkout method to guest for non-logged-in users
+        // Must be called AFTER loadLayout() because Billing block's _construct() overwrites step data
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
+            $this->getOnepage()->saveCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
         }
 
         $this->_initLayoutMessages('customer/session');
