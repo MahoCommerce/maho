@@ -439,8 +439,14 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         $useForShipping = $data['use_for_shipping'] ?? 1;
         if ($useForShipping && !$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
+
+            // Remove fields that should not be copied to shipping address
+            // address_id is the quote address entity ID - copying it would overwrite the shipping address identity
+            $shippingData = $data;
+            unset($shippingData['address_id']);
+
             $shippingAddress->setSameAsBilling(1)
-                ->addData($data)
+                ->addData($shippingData)
                 ->implodeStreetAddress()
                 ->setCollectShippingRates(true);
         }
