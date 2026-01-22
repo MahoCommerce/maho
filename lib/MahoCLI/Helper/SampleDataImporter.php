@@ -318,6 +318,60 @@ class SampleDataImporter
         if ($addedCount > 0) {
             $this->log("Added {$addedCount} attribute set assignments from sample data", 'info');
         }
+
+        // Propagate system attributes from Default set to all other product attribute sets
+        $this->propagateSystemAttributes();
+    }
+
+    /**
+     * Propagate system attributes from Default attribute set to all other sets
+     * This ensures new Maho attributes (like gtin, mpn) are added to sample data's attribute sets
+     */
+    private function propagateSystemAttributes(): void
+    {
+        /** @var Mage_Catalog_Model_Resource_Setup $setup */
+        $setup = \Mage::getResourceModel('catalog/setup', 'catalog_setup');
+        $entityTypeId = $setup->getEntityTypeId('catalog_product');
+        $defaultSetId = $setup->getDefaultAttributeSetId($entityTypeId);
+        $defaultGroupId = $setup->getAttributeGroupId($entityTypeId, $defaultSetId, 'General');
+
+        // Get system attributes from Default's General group with their sort_order
+        $systemAttributes = [];
+        $collection = \Mage::getResourceModel('eav/entity_attribute_collection')
+            ->setAttributeGroupFilter($defaultGroupId)
+            ->addFieldToFilter('is_user_defined', 0);
+
+        foreach ($collection as $attribute) {
+            $systemAttributes[$attribute->getAttributeCode()] = (int) $attribute->getSortOrder();
+        }
+
+        if (empty($systemAttributes)) {
+            return;
+        }
+
+        // Get all other product attribute sets
+        $attributeSets = \Mage::getResourceModel('eav/entity_attribute_set_collection')
+            ->setEntityTypeFilter($entityTypeId)
+            ->addFieldToFilter('attribute_set_id', ['neq' => $defaultSetId]);
+
+        $count = 0;
+        foreach ($attributeSets as $attributeSet) {
+            $setId = $attributeSet->getId();
+            $groupId = $setup->getAttributeGroupId($entityTypeId, $setId, 'General');
+
+            if (!$groupId) {
+                continue;
+            }
+
+            foreach ($systemAttributes as $attributeCode => $sortOrder) {
+                $setup->addAttributeToSet($entityTypeId, $setId, $groupId, $attributeCode, $sortOrder);
+                $count++;
+            }
+        }
+
+        if ($count > 0) {
+            $this->log("Propagated system attributes to sample data attribute sets", 'info');
+        }
     }
 
     /**
