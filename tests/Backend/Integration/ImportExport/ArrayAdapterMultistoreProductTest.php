@@ -29,37 +29,6 @@ describe('ImportExport Array Adapter - Multistore Product Import', function () {
                 break;
             }
         }
-
-        // Diagnostic: Verify Default attribute set exists and log its ID
-        $entityTypeId = Mage::getModel('eav/entity')->setType('catalog_product')->getTypeId();
-        $attributeSetCollection = Mage::getResourceModel('eav/entity_attribute_set_collection')
-            ->setEntityTypeFilter($entityTypeId);
-
-        $defaultSet = null;
-        $attributeSets = [];
-        foreach ($attributeSetCollection as $set) {
-            $attributeSets[$set->getAttributeSetName()] = $set->getId();
-            if ($set->getAttributeSetName() === 'Default') {
-                $defaultSet = $set;
-            }
-        }
-
-        echo "\n[DEBUG] Entity Type ID for catalog_product: {$entityTypeId}\n";
-        echo "[DEBUG] Available attribute sets: " . json_encode($attributeSets) . "\n";
-
-        if ($defaultSet) {
-            echo "[DEBUG] Default attribute set ID: {$defaultSet->getId()}\n";
-
-            // Verify this ID exists in eav_attribute_set table
-            $connection = Mage::getSingleton('core/resource')->getConnection('core_read');
-            $existsInDb = $connection->fetchOne(
-                "SELECT attribute_set_id FROM eav_attribute_set WHERE attribute_set_id = ?",
-                [$defaultSet->getId()]
-            );
-            echo "[DEBUG] ID exists in DB: " . ($existsInDb ? 'YES' : 'NO') . "\n";
-        } else {
-            echo "[DEBUG] WARNING: No 'Default' attribute set found!\n";
-        }
     });
 
     it('imports product with multistore data using array adapter', function () {
