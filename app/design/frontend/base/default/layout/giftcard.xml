@@ -70,13 +70,8 @@
         </reference>
     </default>
 
-    <!-- Checkout Payment - Add gift card form and handle payment method selection -->
+    <!-- Checkout Payment - Handle payment method visibility based on gift card coverage -->
     <checkout_onepage_index>
-        <!-- Add gift card form BEFORE the payment form (before_form is rendered before the form starts) -->
-        <reference name="checkout.onepage.payment.before_form">
-            <block type="giftcard/checkout_payment_giftcard" name="checkout.payment.giftcard" template="maho/giftcard/checkout/payment/giftcard.phtml" />
-        </reference>
-        <!-- Handle payment method visibility based on gift card coverage -->
         <reference name="checkout.onepage.payment.methods">
             <block type="core/template" name="giftcard.payment.methods" template="maho/giftcard/checkout/payment/methods.phtml" />
         </reference>

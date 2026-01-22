@@ -357,7 +357,9 @@ One page checkout main layout
                     <block type="checkout/onepage_payment_methods" name="checkout.payment.methods" as="methods" template="checkout/onepage/payment/info.phtml">
                         <action method="setMethodFormTemplate"><method>purchaseorder</method><template>payment/form/purchaseorder.phtml</template></action>
                     </block>
-                    <block type="core/template" name="checkout.onepage.payment.before_form" as="before_form" />
+                    <block type="core/text_list" name="checkout.onepage.payment.before_form" as="before_form">
+                        <block type="checkout/cart_coupon" name="checkout.payment.coupon" template="checkout/cart/coupon.phtml" />
+                    </block>
                     <block type="core/template" name="checkout.onepage.payment.additional" as="additional" />
                     <block type="core/template" name="checkout.onepage.payment.methods_additional" as="methods_additional" />
                 </block>
@@ -514,6 +516,7 @@ One step checkout layout (all steps visible at once)
         <!-- Remove the right sidebar with progress -->
         <remove name="checkout.progress.wrapper"/>
         <remove name="right"/>
+        <remove name="checkout.payment.coupon"/>
 
         <reference name="root">
             <action method="setTemplate"><template>page/1column.phtml</template></action>

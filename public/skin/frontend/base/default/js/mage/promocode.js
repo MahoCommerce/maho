@@ -139,8 +139,8 @@ class MahoPromoCode {
 
                 if (typeof this.config.onSuccess === 'function') {
                     this.config.onSuccess(response);
-                } else {
-                    // Default behavior: reload page
+                } else if (!this.isOldCheckout()) {
+                    // Default behavior: reload page (but not in old accordion checkout)
                     setTimeout(() => window.location.reload(), 500);
                 }
             } else {
@@ -179,8 +179,8 @@ class MahoPromoCode {
 
                 if (typeof this.config.onRemoveSuccess === 'function') {
                     this.config.onRemoveSuccess(response);
-                } else {
-                    // Default behavior: reload page
+                } else if (!this.isOldCheckout()) {
+                    // Default behavior: reload page (but not in old accordion checkout)
                     window.location.reload();
                 }
             } else {
@@ -189,6 +189,14 @@ class MahoPromoCode {
         } catch (error) {
             this.showMessage(this.config.messages.error, 'error');
         }
+    }
+
+    /**
+     * Detect if we're in the old accordion checkout (not cart, not one-step)
+     * In old checkout, reloading would reset to step 1, so we avoid it
+     */
+    isOldCheckout() {
+        return typeof checkout !== 'undefined' && checkout.accordion;
     }
 
     showMessage(message, type) {
