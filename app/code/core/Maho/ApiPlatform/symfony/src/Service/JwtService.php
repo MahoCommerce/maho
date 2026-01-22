@@ -1,0 +1,193 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+namespace Maho\ApiPlatform\Service;
+
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
+/**
+ * JWT Service - Centralized JWT token management
+ *
+ * Consolidates JWT generation and validation logic from AuthController
+ * and OAuth2Authenticator to ensure consistent behavior across the API.
+ */
+class JwtService
+{
+    private const CONFIG_PATH_SECRET = 'maho_apiplatform/oauth2/secret';
+    private const CONFIG_PATH_LEGACY = 'maho_api/settings/jwt_secret';
+    private const TOKEN_EXPIRY_SECONDS = 86400 * 7; // 7 days
+    private const ALGORITHM = 'HS256';
+
+    private ?string $cachedSecret = null;
+
+    /**
+     * Generate JWT token for a customer
+     *
+     * @param \Mage_Customer_Model_Customer $customer
+     * @return string The JWT token
+     * @throws \RuntimeException If JWT secret is not configured
+     */
+    public function generateCustomerToken(\Mage_Customer_Model_Customer $customer): string
+    {
+        $secret = $this->getSecret();
+        $now = time();
+
+        $payload = [
+            'iss' => $this->getIssuer(),
+            'sub' => 'customer_' . $customer->getId(),
+            'iat' => $now,
+            'exp' => $now + self::TOKEN_EXPIRY_SECONDS,
+            'customer_id' => (int) $customer->getId(),
+            'email' => $customer->getEmail(),
+            'type' => 'customer',
+            'roles' => ['ROLE_USER'],
+        ];
+
+        return JWT::encode($payload, $secret, self::ALGORITHM);
+    }
+
+    /**
+     * Generate JWT token for an admin user
+     *
+     * @param \Mage_Admin_Model_User $admin
+     * @return string The JWT token
+     * @throws \RuntimeException If JWT secret is not configured
+     */
+    public function generateAdminToken(\Mage_Admin_Model_User $admin): string
+    {
+        $secret = $this->getSecret();
+        $now = time();
+
+        $payload = [
+            'iss' => $this->getIssuer(),
+            'sub' => 'admin_' . $admin->getId(),
+            'iat' => $now,
+            'exp' => $now + self::TOKEN_EXPIRY_SECONDS,
+            'admin_id' => (int) $admin->getId(),
+            'email' => $admin->getEmail(),
+            'type' => 'admin',
+            'roles' => ['ROLE_ADMIN'],
+        ];
+
+        return JWT::encode($payload, $secret, self::ALGORITHM);
+    }
+
+    /**
+     * Decode and validate a JWT token
+     *
+     * @param string $token The JWT token to decode
+     * @return object The decoded payload
+     * @throws \Firebase\JWT\ExpiredException If token is expired
+     * @throws \Firebase\JWT\SignatureInvalidException If signature is invalid
+     * @throws \UnexpectedValueException If token format is invalid
+     * @throws \RuntimeException If JWT secret is not configured
+     */
+    public function decodeToken(string $token): object
+    {
+        $secret = $this->getSecret();
+        return JWT::decode($token, new Key($secret, self::ALGORITHM));
+    }
+
+    /**
+     * Check if a token is valid without throwing exceptions
+     *
+     * @param string $token The JWT token to validate
+     * @return bool True if valid, false otherwise
+     */
+    public function isValidToken(string $token): bool
+    {
+        try {
+            $this->decodeToken($token);
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Extract customer ID from token if present
+     *
+     * @param string $token The JWT token
+     * @return int|null Customer ID or null if not a customer token
+     */
+    public function getCustomerIdFromToken(string $token): ?int
+    {
+        try {
+            $payload = $this->decodeToken($token);
+            return isset($payload->customer_id) ? (int) $payload->customer_id : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Extract admin ID from token if present
+     *
+     * @param string $token The JWT token
+     * @return int|null Admin ID or null if not an admin token
+     */
+    public function getAdminIdFromToken(string $token): ?int
+    {
+        try {
+            $payload = $this->decodeToken($token);
+            return isset($payload->admin_id) ? (int) $payload->admin_id : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get JWT secret from Maho configuration
+     *
+     * @return string The JWT secret
+     * @throws \RuntimeException If secret is not configured
+     */
+    public function getSecret(): string
+    {
+        if ($this->cachedSecret !== null) {
+            return $this->cachedSecret;
+        }
+
+        // Try API Platform specific secret first
+        $secret = \Mage::getStoreConfig(self::CONFIG_PATH_SECRET);
+
+        // Fall back to legacy API JWT secret
+        if (empty($secret)) {
+            $secret = \Mage::getStoreConfig(self::CONFIG_PATH_LEGACY);
+        }
+
+        if (empty($secret)) {
+            throw new \RuntimeException('JWT secret not configured. Please set maho_apiplatform/oauth2/secret in configuration.');
+        }
+
+        $this->cachedSecret = $secret;
+        return $secret;
+    }
+
+    /**
+     * Get token expiry in seconds
+     */
+    public function getTokenExpiry(): int
+    {
+        return self::TOKEN_EXPIRY_SECONDS;
+    }
+
+    /**
+     * Get the issuer URL for tokens
+     */
+    private function getIssuer(): string
+    {
+        return \Mage::getBaseUrl();
+    }
+}

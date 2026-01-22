@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customers API Test - Maho</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div x-data="customersTest()" x-init="init()" class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <a href="index.html" class="text-blue-400 hover:text-blue-300 text-sm">&larr; Back to Dashboard</a>
+            <h1 class="text-3xl font-bold text-white mt-2">Customers API Test</h1>
+            <p class="text-gray-400">Test customer search, CRUD, and address operations</p>
+        </header>
+
+        <!-- Authentication Panel -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div :class="auth.token ? 'bg-green-500' : 'bg-red-500'" class="w-3 h-3 rounded-full"></div>
+                    <span class="font-medium" x-text="auth.token ? 'Authenticated' : 'Not Authenticated'"></span>
+                    <span x-show="auth.email" class="text-gray-400 text-sm">(<span x-text="auth.email"></span>)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button x-show="!auth.token" @click="auth.showLogin = !auth.showLogin"
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium">
+                        Login
+                    </button>
+                    <button x-show="auth.token" @click="logout()"
+                            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div x-show="auth.showLogin && !auth.token" x-transition class="mt-4 pt-4 border-t border-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Email</label>
+                        <input type="email" x-model="auth.loginEmail" placeholder="customer@example.com"
+                               @keyup.enter="login()"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password</label>
+                        <input type="password" x-model="auth.loginPassword" placeholder="Password"
+                               @keyup.enter="login()"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <button @click="login()" :disabled="auth.loading"
+                                class="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-medium w-full">
+                            <span x-show="!auth.loading">Login</span>
+                            <span x-show="auth.loading">Authenticating...</span>
+                        </button>
+                    </div>
+                </div>
+                <div x-show="auth.error" class="mt-3 text-red-400 text-sm" x-text="auth.error"></div>
+                <p class="mt-3 text-gray-500 text-xs">
+                    Authentication uses OAuth2. POST to <code class="text-blue-400">/api/auth/token</code> with credentials to receive a JWT.
+                </p>
+            </div>
+
+            <!-- Authenticated User Info -->
+            <div x-show="auth.token" class="mt-4 flex items-center gap-4">
+                <button @click="getMyProfile()"
+                        class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-medium">
+                    Get My Profile
+                </button>
+                <div x-show="auth.customerId" class="text-sm">
+                    Your Customer ID: <span class="text-green-400 font-mono" x-text="auth.customerId"></span>
+                </div>
+                <div x-show="auth.isAdmin" class="text-xs px-2 py-1 bg-purple-900 text-purple-300 rounded">
+                    ADMIN
+                </div>
+            </div>
+
+            <!-- My Profile Result -->
+            <div x-show="auth.profile" class="mt-4 bg-gray-900 rounded p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-sm font-medium text-green-400">My Profile</span>
+                    <button @click="auth.profile = null" class="text-gray-500 hover:text-gray-300 text-xs">Clear</button>
+                </div>
+                <pre class="text-xs overflow-auto max-h-48"><code x-text="JSON.stringify(auth.profile, null, 2)"></code></pre>
+            </div>
+
+            <!-- Token Info (collapsed by default) -->
+            <details x-show="auth.token" class="mt-4">
+                <summary class="text-sm text-gray-500 cursor-pointer">Token Details</summary>
+                <div class="mt-2 bg-gray-900 rounded p-3">
+                    <div class="text-xs text-gray-400 mb-1">Bearer Token (stored in localStorage):</div>
+                    <code class="text-xs text-green-300 break-all" x-text="auth.token?.substring(0, 50) + '...'"></code>
+                    <div x-show="auth.expiresAt" class="text-xs text-gray-500 mt-2">
+                        Expires: <span x-text="auth.expiresAt"></span>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- Admin Access Note -->
+        <div class="bg-purple-900/30 border border-purple-700 rounded-lg p-4 mb-6">
+            <div class="flex items-center gap-2 text-purple-400 font-medium text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                Admin Access
+            </div>
+            <p class="text-purple-300/70 text-xs mt-1">
+                To test admin endpoints (e.g., listing all customers), log into the
+                <a href="/admin" target="_blank" class="underline hover:text-purple-200">Maho Admin Panel</a> first.
+                Admin uses session-based auth, not JWT tokens.
+            </p>
+        </div>
+
+        <!-- Security Notice -->
+        <div x-show="!auth.token" class="bg-yellow-900/30 border border-yellow-700 rounded-lg p-4 mb-6">
+            <div class="flex items-center gap-2 text-yellow-400 font-medium">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                </svg>
+                Authentication Required
+            </div>
+            <p class="text-yellow-300/70 text-sm mt-1">Most customer endpoints require authentication. Login above to test protected endpoints. Customer registration (POST) is public.</p>
+        </div>
+
+        <!-- Test Sections as Tabs -->
+        <div class="flex gap-2 mb-6 border-b border-gray-700">
+            <button @click="activeTab = 'search'"
+                    :class="activeTab === 'search' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Search</button>
+            <button @click="activeTab = 'get'"
+                    :class="activeTab === 'get' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Get by ID</button>
+            <button @click="activeTab = 'create'"
+                    :class="activeTab === 'create' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Create</button>
+            <button @click="activeTab = 'addresses'"
+                    :class="activeTab === 'addresses' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Addresses</button>
+        </div>
+
+        <!-- Search Tab -->
+        <div x-show="activeTab === 'search'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Search Customers</h2>
+
+                <!-- Search Controls -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Search Query</label>
+                        <input type="text" x-model="search.query" placeholder="Email, name, or phone"
+                               @keyup.enter="searchCustomers()"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Page Size</label>
+                        <select x-model="search.pageSize" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                            <option value="5">5</option>
+                            <option value="10">10</option>
+                            <option value="15">15</option>
+                            <option value="25">25</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Page</label>
+                        <input type="number" x-model="search.page" min="1"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Sort By</label>
+                        <select x-model="search.sortBy" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                            <option value="">Default</option>
+                            <option value="email">Email</option>
+                            <option value="created_at">Created Date</option>
+                            <option value="firstname">First Name</option>
+                            <option value="lastname">Last Name</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Filters (Layered Nav equivalent) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Customer Group</label>
+                        <select x-model="search.filters.groupId" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                            <option value="">All Groups</option>
+                            <option value="1">General</option>
+                            <option value="2">Wholesale</option>
+                            <option value="3">Retailer</option>
+                            <option value="4">VIP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Created After</label>
+                        <input type="date" x-model="search.filters.createdAfter"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Created Before</label>
+                        <input type="date" x-model="search.filters.createdBefore"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button @click="searchCustomers()"
+                            :disabled="search.loading"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-medium">
+                        <span x-show="!search.loading">Search</span>
+                        <span x-show="search.loading">Searching...</span>
+                    </button>
+                    <button @click="searchCustomersGraphQL()"
+                            :disabled="search.loading"
+                            class="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-medium">
+                        GraphQL
+                    </button>
+                    <button @click="resetSearch()"
+                            class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded text-sm font-medium">
+                        Reset
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-semibold">Results</h3>
+                    <div class="flex items-center gap-4 text-sm text-gray-400">
+                        <span x-show="search.total !== null">Total: <span x-text="search.total" class="text-white"></span></span>
+                        <span x-show="search.time !== null">Time: <span x-text="search.time + 'ms'" class="text-white"></span></span>
+                        <span x-show="search.statusCode" :class="search.statusCode >= 200 && search.statusCode < 300 ? 'text-green-400' : 'text-red-400'" x-text="search.statusCode"></span>
+                    </div>
+                </div>
+
+                <!-- Request Info -->
+                <div x-show="search.lastRequest" class="mb-4 bg-gray-900 rounded p-3">
+                    <div class="text-xs text-gray-500 mb-1">Request:</div>
+                    <code class="text-xs text-blue-300" x-text="search.lastRequest"></code>
+                </div>
+
+                <!-- Results Table -->
+                <div x-show="search.results.length > 0" class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-gray-400 border-b border-gray-700">
+                                <th class="pb-2 pr-4">ID</th>
+                                <th class="pb-2 pr-4">Email</th>
+                                <th class="pb-2 pr-4">Name</th>
+                                <th class="pb-2 pr-4">Group</th>
+                                <th class="pb-2 pr-4">Phone</th>
+                                <th class="pb-2 pr-4">City</th>
+                                <th class="pb-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="customer in search.results" :key="customer.id">
+                                <tr class="border-b border-gray-700/50">
+                                    <td class="py-2 pr-4 text-gray-400" x-text="customer.id"></td>
+                                    <td class="py-2 pr-4" x-text="customer.email"></td>
+                                    <td class="py-2 pr-4" x-text="customer.fullName || (customer.firstName + ' ' + customer.lastName)"></td>
+                                    <td class="py-2 pr-4 text-gray-400" x-text="customer.groupId"></td>
+                                    <td class="py-2 pr-4 text-gray-400" x-text="customer.defaultBillingAddress?.telephone || '-'"></td>
+                                    <td class="py-2 pr-4 text-gray-400" x-text="customer.defaultBillingAddress?.city || '-'"></td>
+                                    <td class="py-2">
+                                        <button @click="loadCustomer(customer.id)" class="text-blue-400 hover:text-blue-300 text-xs">View</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div x-show="search.total > search.pageSize" class="flex items-center justify-between mt-4 pt-4 border-t border-gray-700">
+                    <button @click="search.page--; searchCustomers()" :disabled="search.page <= 1"
+                            class="px-3 py-1 bg-gray-700 rounded text-sm disabled:opacity-50">&larr; Previous</button>
+                    <span class="text-sm text-gray-400">Page <span x-text="search.page"></span> of <span x-text="Math.ceil(search.total / search.pageSize)"></span></span>
+                    <button @click="search.page++; searchCustomers()" :disabled="search.page >= Math.ceil(search.total / search.pageSize)"
+                            class="px-3 py-1 bg-gray-700 rounded text-sm disabled:opacity-50">Next &rarr;</button>
+                </div>
+
+                <!-- Empty State -->
+                <div x-show="search.results.length === 0 && !search.loading && search.lastRequest" class="text-center py-8 text-gray-500">
+                    No customers found
+                </div>
+
+                <!-- Error -->
+                <div x-show="search.error" class="bg-red-900/50 border border-red-700 rounded p-4 mt-4">
+                    <div class="text-red-300 font-medium">Error</div>
+                    <div class="text-red-400 text-sm" x-text="search.error"></div>
+                </div>
+
+                <!-- Raw Response -->
+                <details class="mt-4">
+                    <summary class="text-sm text-gray-500 cursor-pointer">Raw Response</summary>
+                    <pre class="mt-2 bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="search.rawResponse"></code></pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- Get by ID Tab -->
+        <div x-show="activeTab === 'get'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Get Customer by ID</h2>
+                <div class="flex gap-4 mb-4">
+                    <input type="number" x-model="getById.customerId" placeholder="Customer ID"
+                           class="bg-gray-700 rounded px-3 py-2 text-sm w-40">
+                    <button @click="getCustomerById()"
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium">
+                        GET (REST)
+                    </button>
+                    <button @click="getCustomerByIdGraphQL()"
+                            class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-medium">
+                        GraphQL
+                    </button>
+                </div>
+
+                <div x-show="getById.result" class="bg-gray-900 rounded p-4">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="font-semibold" x-text="getById.result?.fullName || getById.result?.email"></h3>
+                        <span class="text-xs px-2 py-1 rounded"
+                              :class="getById.statusCode >= 200 && getById.statusCode < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                              x-text="getById.statusCode + ' - ' + getById.time + 'ms'"></span>
+                    </div>
+                    <pre class="text-xs overflow-auto max-h-96"><code x-text="JSON.stringify(getById.result, null, 2)"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Tab -->
+        <div x-show="activeTab === 'create'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Create Customer</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">First Name *</label>
+                        <input type="text" x-model="create.firstName" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Last Name *</label>
+                        <input type="text" x-model="create.lastName" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Email *</label>
+                        <input type="email" x-model="create.email" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password * (min 8 chars)</label>
+                        <input type="password" x-model="create.password" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Phone</label>
+                        <input type="tel" x-model="create.telephone" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Customer Group</label>
+                        <select x-model="create.groupId" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                            <option value="1">General</option>
+                            <option value="2">Wholesale</option>
+                            <option value="3">Retailer</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2">
+                    <button @click="createCustomer()"
+                            class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-medium">
+                        Create (REST)
+                    </button>
+                    <button @click="createCustomerGraphQL()"
+                            class="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-medium">
+                        Create (GraphQL)
+                    </button>
+                </div>
+
+                <div x-show="create.result" class="mt-4 bg-gray-900 rounded p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs px-2 py-1 rounded"
+                              :class="create.statusCode >= 200 && create.statusCode < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                              x-text="create.statusCode"></span>
+                        <span class="text-xs text-gray-500" x-text="create.time + 'ms'"></span>
+                    </div>
+                    <pre class="text-xs overflow-auto max-h-64"><code x-text="JSON.stringify(create.result, null, 2)"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Addresses Tab -->
+        <div x-show="activeTab === 'addresses'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-lg font-semibold mb-4">Customer Addresses</h2>
+
+                <!-- Load Customer Addresses -->
+                <div class="mb-6">
+                    <div class="flex gap-4 items-end flex-wrap">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Customer ID</label>
+                            <input type="number" x-model="addresses.customerId" placeholder="Customer ID"
+                                   class="bg-gray-700 rounded px-3 py-2 text-sm w-40">
+                        </div>
+                        <button @click="loadAddresses()"
+                                :disabled="!addresses.customerId"
+                                class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-medium">
+                            Load Addresses
+                        </button>
+                        <button x-show="auth.customerId && addresses.customerId != auth.customerId"
+                                @click="addresses.customerId = auth.customerId; loadAddresses()"
+                                class="bg-green-600 hover:bg-green-700 px-4 py-2 rounded text-sm font-medium">
+                            Use My ID (<span x-text="auth.customerId"></span>)
+                        </button>
+                    </div>
+                    <p x-show="!auth.token" class="text-yellow-400 text-xs mt-2">
+                        Login first to get your customer ID, then you can load your addresses.
+                    </p>
+                </div>
+
+                <!-- Address List -->
+                <div x-show="addresses.list.length > 0" class="mb-6">
+                    <h3 class="font-medium mb-3">Current Addresses</h3>
+                    <div class="space-y-3">
+                        <template x-for="addr in addresses.list" :key="addr.id">
+                            <div class="bg-gray-900 rounded p-4 flex justify-between items-start">
+                                <div>
+                                    <div class="font-medium" x-text="addr.firstName + ' ' + addr.lastName"></div>
+                                    <div class="text-sm text-gray-400" x-text="(addr.street || []).join(', ')"></div>
+                                    <div class="text-sm text-gray-400" x-text="addr.city + ', ' + (addr.region || '') + ' ' + addr.postcode"></div>
+                                    <div class="text-sm text-gray-400" x-text="addr.telephone"></div>
+                                    <div class="flex gap-2 mt-2">
+                                        <span x-show="addr.isDefaultBilling" class="text-xs px-2 py-0.5 bg-blue-900 text-blue-300 rounded">Default Billing</span>
+                                        <span x-show="addr.isDefaultShipping" class="text-xs px-2 py-0.5 bg-green-900 text-green-300 rounded">Default Shipping</span>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button @click="editAddress(addr)" class="text-blue-400 hover:text-blue-300 text-xs">Edit</button>
+                                    <button @click="deleteAddress(addr.id)" class="text-red-400 hover:text-red-300 text-xs">Delete</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <!-- Add/Edit Address Form -->
+                <div class="border border-gray-700 rounded p-4">
+                    <h3 class="font-medium mb-4" x-text="addresses.editing ? 'Edit Address' : 'Add New Address'"></h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">First Name *</label>
+                            <input type="text" x-model="addresses.form.firstName" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Last Name *</label>
+                            <input type="text" x-model="addresses.form.lastName" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Company</label>
+                            <input type="text" x-model="addresses.form.company" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Telephone *</label>
+                            <input type="tel" x-model="addresses.form.telephone" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block text-sm text-gray-400 mb-1">Street Address *</label>
+                            <input type="text" x-model="addresses.form.street[0]" placeholder="Street Line 1" class="w-full bg-gray-700 rounded px-3 py-2 text-sm mb-2">
+                            <input type="text" x-model="addresses.form.street[1]" placeholder="Street Line 2 (optional)" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">City *</label>
+                            <input type="text" x-model="addresses.form.city" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Region/State</label>
+                            <template x-if="addresses.regions.length > 0">
+                                <select x-model="addresses.form.regionId" @change="selectRegion($event)" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                                    <option value="">Select State...</option>
+                                    <template x-for="r in addresses.regions" :key="r.id">
+                                        <option :value="r.id" x-text="r.name"></option>
+                                    </template>
+                                </select>
+                            </template>
+                            <template x-if="addresses.regions.length === 0">
+                                <input type="text" x-model="addresses.form.region" class="w-full bg-gray-700 rounded px-3 py-2 text-sm" placeholder="State/Province">
+                            </template>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Postcode *</label>
+                            <input type="text" x-model="addresses.form.postcode" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">Country *</label>
+                            <select x-model="addresses.form.countryId" @change="loadRegions()" class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                                <option value="AU">Australia</option>
+                                <option value="NZ">New Zealand</option>
+                                <option value="US">United States</option>
+                                <option value="GB">United Kingdom</option>
+                            </select>
+                        </div>
+                        <div class="md:col-span-2 flex gap-4">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" x-model="addresses.form.isDefaultBilling" class="rounded">
+                                <span class="text-sm">Default Billing</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" x-model="addresses.form.isDefaultShipping" class="rounded">
+                                <span class="text-sm">Default Shipping</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button @click="saveAddress()"
+                                :disabled="!addresses.customerId"
+                                class="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-medium"
+                                x-text="addresses.editing ? 'Update Address' : 'Add Address'">
+                        </button>
+                        <button x-show="addresses.editing" @click="cancelEdit()"
+                                class="bg-gray-600 hover:bg-gray-500 px-4 py-2 rounded text-sm font-medium">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result -->
+                <div x-show="addresses.result" class="mt-4 bg-gray-900 rounded p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="text-xs px-2 py-1 rounded"
+                              :class="addresses.statusCode >= 200 && addresses.statusCode < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                              x-text="addresses.statusCode"></span>
+                        <span class="text-xs text-gray-500" x-text="addresses.lastRequest"></span>
+                    </div>
+                    <pre class="text-xs overflow-auto max-h-64"><code x-text="JSON.stringify(addresses.result, null, 2)"></code></pre>
+                </div>
+            </div>
+
+            <!-- API Endpoints Reference -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="font-semibold mb-4">Address API Endpoints</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 bg-gray-900 rounded">
+                        <div>
+                            <code class="text-blue-400">GET</code>
+                            <code class="text-gray-300 ml-2">/api/customers/{id}/addresses</code>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-900 text-green-300 rounded">Implemented</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-900 rounded">
+                        <div>
+                            <code class="text-blue-400">GET</code>
+                            <code class="text-gray-300 ml-2">/api/customers/{id}/addresses/{addressId}</code>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-900 text-green-300 rounded">Implemented</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-900 rounded">
+                        <div>
+                            <code class="text-green-400">POST</code>
+                            <code class="text-gray-300 ml-2">/api/customers/{id}/addresses</code>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-900 text-green-300 rounded">Implemented</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-900 rounded">
+                        <div>
+                            <code class="text-yellow-400">PUT</code>
+                            <code class="text-gray-300 ml-2">/api/customers/{id}/addresses/{addressId}</code>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-900 text-green-300 rounded">Implemented</span>
+                    </div>
+                    <div class="flex items-center justify-between p-3 bg-gray-900 rounded">
+                        <div>
+                            <code class="text-red-400">DELETE</code>
+                            <code class="text-gray-300 ml-2">/api/customers/{id}/addresses/{addressId}</code>
+                        </div>
+                        <span class="text-xs px-2 py-1 bg-green-900 text-green-300 rounded">Implemented</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Endpoint Reference -->
+        <div class="mt-8 bg-gray-800 rounded-lg p-6">
+            <h2 class="text-lg font-semibold mb-4">Customer API Status</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <h3 class="font-medium text-gray-300 mb-2">Queries (Read)</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Search customers</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Get customer by ID</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Get current customer (me)</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> List customer addresses</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Get single address</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Customer orders history</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-medium text-gray-300 mb-2">Mutations (Write)</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Create customer (register)</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Create address</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Update address</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Delete address</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Update customer profile</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Change password</li>
+                        <li class="flex items-center gap-2"><span class="text-green-400">&#10003;</span> Reset password (forgot/reset)</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function customersTest() {
+            return {
+                activeTab: 'search',
+                auth: {
+                    token: null,
+                    email: null,
+                    customerId: null,
+                    isAdmin: false,
+                    expiresAt: null,
+                    showLogin: false,
+                    loading: false,
+                    error: null,
+                    loginEmail: '',
+                    loginPassword: '',
+                    profile: null
+                },
+                search: {
+                    query: '',
+                    page: 1,
+                    pageSize: 10,
+                    sortBy: '',
+                    filters: {
+                        groupId: '',
+                        createdAfter: '',
+                        createdBefore: ''
+                    },
+                    results: [],
+                    total: null,
+                    loading: false,
+                    error: null,
+                    lastRequest: null,
+                    rawResponse: null,
+                    statusCode: null,
+                    time: null
+                },
+                getById: {
+                    customerId: '',
+                    result: null,
+                    statusCode: null,
+                    time: null
+                },
+                create: {
+                    firstName: '',
+                    lastName: '',
+                    email: '',
+                    password: '',
+                    telephone: '',
+                    groupId: '1',
+                    result: null,
+                    statusCode: null,
+                    time: null
+                },
+                addresses: {
+                    customerId: '',
+                    list: [],
+                    form: {
+                        id: null,
+                        firstName: '',
+                        lastName: '',
+                        company: '',
+                        street: ['', ''],
+                        city: '',
+                        region: '',
+                        regionId: null,
+                        postcode: '',
+                        countryId: 'AU',
+                        telephone: '',
+                        isDefaultBilling: false,
+                        isDefaultShipping: false
+                    },
+                    editing: false,
+                    result: null,
+                    statusCode: null,
+                    lastRequest: null,
+                    countries: {},  // Cache of country data with regions
+                    regions: []     // Current regions for selected country
+                },
+
+                // Initialize - load token from localStorage
+                init() {
+                    const stored = localStorage.getItem('maho_api_auth');
+                    if (stored) {
+                        try {
+                            const data = JSON.parse(stored);
+                            this.auth.token = data.token;
+                            this.auth.email = data.email;
+                            this.auth.customerId = data.customerId;
+                            this.auth.isAdmin = data.isAdmin || false;
+                            this.auth.expiresAt = data.expiresAt;
+                        } catch (e) {
+                            localStorage.removeItem('maho_api_auth');
+                        }
+                    }
+                },
+
+                // Get authorization headers for API requests
+                getAuthHeaders() {
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (this.auth.token) {
+                        headers['Authorization'] = 'Bearer ' + this.auth.token;
+                    }
+                    return headers;
+                },
+
+                // Login via OAuth2 token endpoint
+                async login() {
+                    if (!this.auth.loginEmail || !this.auth.loginPassword) {
+                        this.auth.error = 'Email and password are required';
+                        return;
+                    }
+
+                    this.auth.loading = true;
+                    this.auth.error = null;
+
+                    try {
+                        const res = await fetch('/api/auth/token', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: this.auth.loginEmail,
+                                password: this.auth.loginPassword
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (res.ok && (data.token || data.access_token)) {
+                            this.auth.token = data.token || data.access_token;
+                            this.auth.email = data.customer?.email || this.auth.loginEmail;
+                            this.auth.customerId = data.customer?.id || null;
+                            this.auth.isAdmin = false; // Customer login is not admin
+                            this.auth.expiresAt = data.expires_in
+                                ? new Date(Date.now() + data.expires_in * 1000).toLocaleString()
+                                : null;
+                            this.auth.showLogin = false;
+                            this.auth.loginPassword = '';
+
+                            // Store in localStorage
+                            localStorage.setItem('maho_api_auth', JSON.stringify({
+                                token: this.auth.token,
+                                email: this.auth.email,
+                                customerId: this.auth.customerId,
+                                isAdmin: this.auth.isAdmin,
+                                expiresAt: this.auth.expiresAt
+                            }));
+                        } else {
+                            this.auth.error = data.error_description || data.message || data.detail || 'Authentication failed';
+                        }
+                    } catch (e) {
+                        this.auth.error = 'Network error: ' + e.message;
+                    } finally {
+                        this.auth.loading = false;
+                    }
+                },
+
+                // Logout - clear token
+                logout() {
+                    this.auth.token = null;
+                    this.auth.email = null;
+                    this.auth.customerId = null;
+                    this.auth.isAdmin = false;
+                    this.auth.expiresAt = null;
+                    this.auth.profile = null;
+                    localStorage.removeItem('maho_api_auth');
+                },
+
+                // Get current user's profile
+                async getMyProfile() {
+                    try {
+                        const res = await fetch('/api/auth/me', {
+                            headers: this.getAuthHeaders()
+                        });
+
+                        const data = await res.json();
+
+                        if (res.ok) {
+                            this.auth.profile = data;
+                            // Update customerId if we didn't have it
+                            if (data.id && !this.auth.customerId) {
+                                this.auth.customerId = data.id;
+                                // Update localStorage
+                                const stored = JSON.parse(localStorage.getItem('maho_api_auth') || '{}');
+                                stored.customerId = data.id;
+                                localStorage.setItem('maho_api_auth', JSON.stringify(stored));
+                            }
+                        } else {
+                            this.auth.profile = { error: data.message || data.detail || 'Failed to get profile' };
+                        }
+                    } catch (e) {
+                        this.auth.profile = { error: e.message };
+                    }
+                },
+
+                resetSearch() {
+                    this.search.query = '';
+                    this.search.page = 1;
+                    this.search.filters = { groupId: '', createdAfter: '', createdBefore: '' };
+                    this.search.results = [];
+                    this.search.total = null;
+                    this.search.error = null;
+                    this.search.lastRequest = null;
+                },
+
+                async searchCustomers() {
+                    this.search.loading = true;
+                    this.search.error = null;
+                    const start = Date.now();
+
+                    const params = new URLSearchParams();
+                    if (this.search.query) params.append('search', this.search.query);
+                    params.append('page', this.search.page);
+                    params.append('pageSize', this.search.pageSize);
+                    if (this.search.sortBy) params.append('sort', this.search.sortBy);
+                    if (this.search.filters.groupId) params.append('groupId', this.search.filters.groupId);
+
+                    const url = '/api/customers?' + params.toString();
+                    this.search.lastRequest = 'GET ' + url;
+
+                    try {
+                        const res = await fetch(url, {
+                            headers: this.getAuthHeaders()
+                        });
+                        this.search.statusCode = res.status;
+                        this.search.time = Date.now() - start;
+                        const data = await res.json();
+                        this.search.rawResponse = JSON.stringify(data, null, 2);
+
+                        if (res.ok) {
+                            this.search.results = data.member || data.items || data.data || data || [];
+                            this.search.total = data.totalItems || data.total || data.totalCount || this.search.results.length;
+                        } else {
+                            this.search.error = data.message || data.detail || data.error || 'Request failed (requires auth)';
+                        }
+                    } catch (e) {
+                        this.search.error = e.message;
+                        this.search.time = Date.now() - start;
+                    } finally {
+                        this.search.loading = false;
+                    }
+                },
+
+                async searchCustomersGraphQL() {
+                    this.search.loading = true;
+                    this.search.error = null;
+                    const start = Date.now();
+
+                    const query = `
+                        query SearchCustomers($search: String, $pageSize: Int, $page: Int) {
+                            customers(search: $search, pageSize: $pageSize, page: $page) {
+                                edges {
+                                    node {
+                                        id
+                                        email
+                                        firstName
+                                        lastName
+                                        fullName
+                                        groupId
+                                        defaultBillingAddress {
+                                            telephone
+                                            street
+                                            city
+                                            postcode
+                                        }
+                                    }
+                                }
+                                totalCount
+                            }
+                        }
+                    `;
+
+                    this.search.lastRequest = 'POST /admin/graphql/index (GraphQL)';
+
+                    try {
+                        const res = await fetch('/admin/graphql/index', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                query,
+                                variables: {
+                                    search: this.search.query || null,
+                                    pageSize: parseInt(this.search.pageSize),
+                                    page: parseInt(this.search.page)
+                                }
+                            })
+                        });
+
+                        this.search.statusCode = res.status;
+                        this.search.time = Date.now() - start;
+                        const data = await res.json();
+                        this.search.rawResponse = JSON.stringify(data, null, 2);
+
+                        if (data.data?.customers) {
+                            this.search.results = data.data.customers.edges?.map(e => e.node) || data.data.customers.items || [];
+                            this.search.total = data.data.customers.totalCount || data.data.customers.total || this.search.results.length;
+                        } else if (data.errors) {
+                            this.search.error = data.errors[0]?.message || 'GraphQL error';
+                        }
+                    } catch (e) {
+                        this.search.error = e.message;
+                        this.search.time = Date.now() - start;
+                    } finally {
+                        this.search.loading = false;
+                    }
+                },
+
+                async getCustomerById() {
+                    if (!this.getById.customerId) return;
+                    const start = Date.now();
+
+                    try {
+                        const res = await fetch('/api/customers/' + this.getById.customerId, {
+                            headers: this.getAuthHeaders()
+                        });
+                        this.getById.statusCode = res.status;
+                        this.getById.time = Date.now() - start;
+                        this.getById.result = await res.json();
+                    } catch (e) {
+                        this.getById.result = { error: e.message };
+                        this.getById.time = Date.now() - start;
+                    }
+                },
+
+                async getCustomerByIdGraphQL() {
+                    if (!this.getById.customerId) return;
+                    const start = Date.now();
+
+                    const query = `
+                        query GetCustomer($id: ID!) {
+                            customer(id: $id) {
+                                id
+                                email
+                                firstName
+                                lastName
+                                fullName
+                                groupId
+                                createdAt
+                                addresses {
+                                    id
+                                    firstName
+                                    lastName
+                                    street
+                                    city
+                                    postcode
+                                    telephone
+                                    isDefaultBilling
+                                    isDefaultShipping
+                                }
+                            }
+                        }
+                    `;
+
+                    try {
+                        const res = await fetch('/admin/graphql/index', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                query,
+                                variables: { id: this.getById.customerId }
+                            })
+                        });
+
+                        this.getById.statusCode = res.status;
+                        this.getById.time = Date.now() - start;
+                        const data = await res.json();
+                        this.getById.result = data.data?.customer || data;
+                    } catch (e) {
+                        this.getById.result = { error: e.message };
+                        this.getById.time = Date.now() - start;
+                    }
+                },
+
+                loadCustomer(id) {
+                    this.activeTab = 'get';
+                    this.getById.customerId = id;
+                    this.getCustomerById();
+                },
+
+                async createCustomer() {
+                    const start = Date.now();
+
+                    try {
+                        const res = await fetch('/api/customers', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                firstName: this.create.firstName,
+                                lastName: this.create.lastName,
+                                email: this.create.email,
+                                password: this.create.password,
+                                groupId: parseInt(this.create.groupId)
+                            })
+                        });
+
+                        this.create.statusCode = res.status;
+                        this.create.time = Date.now() - start;
+                        this.create.result = await res.json();
+                    } catch (e) {
+                        this.create.result = { error: e.message };
+                        this.create.time = Date.now() - start;
+                    }
+                },
+
+                async createCustomerGraphQL() {
+                    const start = Date.now();
+
+                    const mutation = `
+                        mutation CreateCustomer($input: CreateCustomerQuickInput!) {
+                            createCustomerQuick(input: $input) {
+                                customer {
+                                    id
+                                    email
+                                    firstName
+                                    lastName
+                                }
+                            }
+                        }
+                    `;
+
+                    try {
+                        const res = await fetch('/admin/graphql/index', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                query: mutation,
+                                variables: {
+                                    input: {
+                                        firstName: this.create.firstName,
+                                        lastName: this.create.lastName,
+                                        email: this.create.email,
+                                        telephone: this.create.telephone
+                                    }
+                                }
+                            })
+                        });
+
+                        this.create.statusCode = res.status;
+                        this.create.time = Date.now() - start;
+                        this.create.result = await res.json();
+                    } catch (e) {
+                        this.create.result = { error: e.message };
+                        this.create.time = Date.now() - start;
+                    }
+                },
+
+                // Address methods
+                async loadAddresses() {
+                    if (!this.addresses.customerId) return;
+
+                    const url = `/api/customers/${this.addresses.customerId}/addresses`;
+                    this.addresses.lastRequest = 'GET ' + url;
+
+                    try {
+                        const res = await fetch(url, {
+                            headers: this.getAuthHeaders()
+                        });
+                        this.addresses.statusCode = res.status;
+                        const data = await res.json();
+                        this.addresses.result = data;
+
+                        if (res.ok) {
+                            this.addresses.list = data.member || data || [];
+                        }
+                    } catch (e) {
+                        this.addresses.result = { error: e.message };
+                    }
+                    // Load regions for default country
+                    this.loadRegions();
+                },
+
+                async loadRegions() {
+                    const countryId = this.addresses.form.countryId;
+                    if (!countryId) {
+                        this.addresses.regions = [];
+                        return;
+                    }
+
+                    // Check cache first
+                    if (this.addresses.countries[countryId]) {
+                        this.addresses.regions = this.addresses.countries[countryId].available_regions || [];
+                        return;
+                    }
+
+                    try {
+                        const res = await fetch(`/api/countries/${countryId}`);
+                        if (res.ok) {
+                            const data = await res.json();
+                            this.addresses.countries[countryId] = data;
+                            this.addresses.regions = data.available_regions || [];
+                        }
+                    } catch (e) {
+                        console.error('Failed to load regions:', e);
+                        this.addresses.regions = [];
+                    }
+                },
+
+                selectRegion(event) {
+                    const regionId = parseInt(event.target.value);
+                    const region = this.addresses.regions.find(r => r.id === regionId);
+                    this.addresses.form.regionId = regionId || null;
+                    this.addresses.form.region = region ? region.name : '';
+                },
+
+                editAddress(addr) {
+                    this.addresses.editing = true;
+                    this.addresses.form = {
+                        id: addr.id,
+                        firstName: addr.firstName,
+                        lastName: addr.lastName,
+                        company: addr.company || '',
+                        street: addr.street || ['', ''],
+                        city: addr.city,
+                        region: addr.region || '',
+                        regionId: addr.regionId,
+                        postcode: addr.postcode,
+                        countryId: addr.countryId,
+                        telephone: addr.telephone,
+                        isDefaultBilling: addr.isDefaultBilling,
+                        isDefaultShipping: addr.isDefaultShipping
+                    };
+                    // Load regions for this country so dropdown works
+                    this.loadRegions();
+                },
+
+                cancelEdit() {
+                    this.addresses.editing = false;
+                    this.resetAddressForm();
+                },
+
+                resetAddressForm() {
+                    this.addresses.form = {
+                        id: null,
+                        firstName: '',
+                        lastName: '',
+                        company: '',
+                        street: ['', ''],
+                        city: '',
+                        region: '',
+                        regionId: null,
+                        postcode: '',
+                        countryId: 'AU',
+                        telephone: '',
+                        isDefaultBilling: false,
+                        isDefaultShipping: false
+                    };
+                    this.loadRegions();
+                },
+
+                async saveAddress() {
+                    if (!this.addresses.customerId) return;
+
+                    const isUpdate = this.addresses.editing && this.addresses.form.id;
+                    // PUT uses /api/addresses/{id}, POST uses /api/customers/{customerId}/addresses
+                    const url = isUpdate
+                        ? `/api/addresses/${this.addresses.form.id}`
+                        : `/api/customers/${this.addresses.customerId}/addresses`;
+
+                    const method = isUpdate ? 'PUT' : 'POST';
+                    this.addresses.lastRequest = method + ' ' + url;
+
+                    const body = {
+                        firstName: this.addresses.form.firstName,
+                        lastName: this.addresses.form.lastName,
+                        company: this.addresses.form.company || null,
+                        street: this.addresses.form.street.filter(s => s),
+                        city: this.addresses.form.city,
+                        region: this.addresses.form.region || null,
+                        regionId: this.addresses.form.regionId,
+                        postcode: this.addresses.form.postcode,
+                        countryId: this.addresses.form.countryId,
+                        telephone: this.addresses.form.telephone,
+                        isDefaultBilling: this.addresses.form.isDefaultBilling,
+                        isDefaultShipping: this.addresses.form.isDefaultShipping
+                    };
+
+                    try {
+                        const res = await fetch(url, {
+                            method,
+                            headers: this.getAuthHeaders(),
+                            body: JSON.stringify(body)
+                        });
+
+                        this.addresses.statusCode = res.status;
+                        this.addresses.result = await res.json();
+
+                        if (res.ok) {
+                            this.addresses.editing = false;
+                            this.resetAddressForm();
+                            this.loadAddresses();
+                        }
+                    } catch (e) {
+                        this.addresses.result = { error: e.message };
+                    }
+                },
+
+                async deleteAddress(addressId) {
+                    if (!confirm('Are you sure you want to delete this address?')) return;
+
+                    // DELETE uses /api/addresses/{id}
+                    const url = `/api/addresses/${addressId}`;
+                    this.addresses.lastRequest = 'DELETE ' + url;
+
+                    try {
+                        const res = await fetch(url, {
+                            method: 'DELETE',
+                            headers: this.getAuthHeaders()
+                        });
+                        this.addresses.statusCode = res.status;
+
+                        if (res.ok || res.status === 204) {
+                            this.addresses.result = { message: 'Address deleted successfully' };
+                            this.loadAddresses();
+                        } else {
+                            this.addresses.result = await res.json();
+                        }
+                    } catch (e) {
+                        this.addresses.result = { error: e.message };
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

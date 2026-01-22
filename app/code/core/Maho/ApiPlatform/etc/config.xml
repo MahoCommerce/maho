@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_ApiPlatform>
+            <version>1.0.0</version>
+        </Maho_ApiPlatform>
+    </modules>
+    <global>
+        <helpers>
+            <maho_apiplatform>
+                <class>Maho_ApiPlatform_Helper</class>
+            </maho_apiplatform>
+        </helpers>
+        <models>
+            <maho_apiplatform>
+                <class>Maho_ApiPlatform_Model</class>
+            </maho_apiplatform>
+        </models>
+        <events>
+            <!-- Add deprecation headers to legacy API responses -->
+            <controller_front_send_response_before>
+                <observers>
+                    <maho_apiplatform_deprecation>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>addDeprecationHeaders</method>
+                    </maho_apiplatform_deprecation>
+                </observers>
+            </controller_front_send_response_before>
+
+            <!-- Invalidate API products cache when products change -->
+            <catalog_product_save_after>
+                <observers>
+                    <maho_apiplatform_product_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateProductCache</method>
+                    </maho_apiplatform_product_cache>
+                </observers>
+            </catalog_product_save_after>
+            <catalog_product_delete_after>
+                <observers>
+                    <maho_apiplatform_product_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateProductCache</method>
+                    </maho_apiplatform_product_cache>
+                </observers>
+            </catalog_product_delete_after>
+
+            <!-- Invalidate API products cache when categories change -->
+            <catalog_category_save_after>
+                <observers>
+                    <maho_apiplatform_category_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateCategoryCache</method>
+                    </maho_apiplatform_category_cache>
+                </observers>
+            </catalog_category_save_after>
+
+            <!-- Invalidate API products cache when stock changes -->
+            <cataloginventory_stock_item_save_after>
+                <observers>
+                    <maho_apiplatform_stock_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateStockCache</method>
+                    </maho_apiplatform_stock_cache>
+                </observers>
+            </cataloginventory_stock_item_save_after>
+
+            <!-- Invalidate API products cache when catalog price rules are applied -->
+            <catalogrule_after_apply>
+                <observers>
+                    <maho_apiplatform_price_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidatePriceCache</method>
+                    </maho_apiplatform_price_cache>
+                </observers>
+            </catalogrule_after_apply>
+        </events>
+    </global>
+    <frontend>
+        <routers>
+            <maho_apiplatform>
+                <use>standard</use>
+                <args>
+                    <module>Maho_ApiPlatform</module>
+                    <frontName>api</frontName>
+                </args>
+            </maho_apiplatform>
+        </routers>
+    </frontend>
+    <default>
+        <maho_apiplatform>
+            <general>
+                <enabled>1</enabled>
+                <legacy_sunset_date>2028-01-01</legacy_sunset_date>
+            </general>
+            <graphql>
+                <naming_convention>graphql</naming_convention>
+            </graphql>
+            <oauth2>
+                <token_lifetime>3600</token_lifetime>
+                <refresh_token_lifetime>86400</refresh_token_lifetime>
+            </oauth2>
+        </maho_apiplatform>
+    </default>
+</config>

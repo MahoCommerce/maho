@@ -1,0 +1,17 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Maho\ApiPlatform\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+
+    # API Exception Listener - converts exceptions to standardized JSON responses
+    Maho\ApiPlatform\EventListener\ApiExceptionListener:
+        arguments:
+            $debug: '%kernel.debug%'
+        tags:
+            - { name: kernel.event_subscriber }

@@ -1,0 +1,2188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maho Headless Store</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen" x-data="store()" x-cloak>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <a href="#" @click.prevent="navigate('home')" class="text-xl font-bold text-gray-900">
+                    Maho Store
+                </a>
+
+                <div class="flex items-center gap-4">
+                    <!-- Search with Instant Results -->
+                    <div class="relative">
+                        <input type="text" x-model="searchQuery"
+                               @input="onSearchInput()"
+                               @keyup.enter="submitSearch()"
+                               @focus="searchQuery.length >= 2 && (instantSearchOpen = true)"
+                               @blur="closeInstantSearch()"
+                               placeholder="Search..."
+                               class="w-64 px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <button @click="submitSearch()" class="absolute right-2 top-2 text-gray-400 hover:text-gray-600">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </button>
+                    </div>
+
+                    <!-- Instant Search Panel (fixed, centered, 60% width) -->
+                    <div x-show="instantSearchOpen"
+                         x-transition:enter="transition ease-out duration-150"
+                         x-transition:enter-start="opacity-0 -translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-100"
+                         x-transition:leave-start="opacity-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 -translate-y-2"
+                         @mousedown.outside="instantSearchOpen = false"
+                         class="fixed left-1/2 -translate-x-1/2 top-16 w-[60vw] max-w-4xl bg-white rounded-xl shadow-2xl border z-[100] overflow-hidden">
+
+                        <!-- Search Header -->
+                        <div class="bg-gray-50 px-4 py-3 border-b flex items-center justify-between">
+                            <span class="text-sm text-gray-600">
+                                Results for "<span class="font-medium text-gray-900" x-text="searchQuery"></span>"
+                            </span>
+                            <button @click="instantSearchOpen = false" class="text-gray-400 hover:text-gray-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Loading -->
+                        <div x-show="instantSearchLoading" class="p-8 text-center text-gray-500">
+                            <svg class="animate-spin h-8 w-8 mx-auto text-blue-500" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            <p class="mt-2 text-sm">Searching...</p>
+                        </div>
+
+                        <!-- Results Content -->
+                        <div x-show="!instantSearchLoading && (instantSearchResults.length > 0 || instantSearchCategories.length > 0 || instantSearchPages.length > 0)"
+                             class="flex max-h-[70vh]">
+
+                            <!-- Left Column: Categories & Pages (1/3) -->
+                            <div class="w-1/3 border-r bg-gray-50 p-4 overflow-y-auto">
+                                <!-- Categories -->
+                                <template x-if="instantSearchCategories.length > 0">
+                                    <div class="mb-4">
+                                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Categories</h3>
+                                        <div class="space-y-1">
+                                            <template x-for="cat in instantSearchCategories.slice(0, 6)" :key="cat.id">
+                                                <a href="#" @mousedown.prevent="selectCategory(cat)"
+                                                   class="block px-3 py-2 text-sm text-gray-700 hover:bg-white hover:text-blue-600 rounded-lg transition">
+                                                    <span x-text="cat.name"></span>
+                                                    <span x-show="cat.productCount > 0" class="text-xs text-gray-400 ml-1" x-text="'(' + cat.productCount + ')'"></span>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- Pages -->
+                                <template x-if="instantSearchPages.length > 0">
+                                    <div>
+                                        <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Pages</h3>
+                                        <div class="space-y-1">
+                                            <template x-for="page in instantSearchPages.slice(0, 4)" :key="page.id">
+                                                <a href="#" @mousedown.prevent="selectPage(page)"
+                                                   class="block px-3 py-2 text-sm text-gray-700 hover:bg-white hover:text-blue-600 rounded-lg transition">
+                                                    <span x-text="page.title"></span>
+                                                </a>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+
+                                <!-- No categories/pages -->
+                                <div x-show="instantSearchCategories.length === 0 && instantSearchPages.length === 0"
+                                     class="text-sm text-gray-400 text-center py-4">
+                                    No categories or pages found
+                                </div>
+                            </div>
+
+                            <!-- Right Column: Products Grid (2/3) -->
+                            <div class="w-2/3 p-4 overflow-y-auto">
+                                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Products</h3>
+
+                                <template x-if="instantSearchResults.length > 0">
+                                    <div>
+                                        <!-- Product Grid: 3-4 per row, 2-3 rows -->
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <template x-for="product in instantSearchResults.slice(0, 9)" :key="product.id">
+                                                <a href="#" @mousedown.prevent="selectSearchResult(product)"
+                                                   class="group block bg-white border rounded-lg p-2 hover:shadow-md hover:border-blue-300 transition">
+                                                    <div class="aspect-square bg-gray-100 rounded overflow-hidden mb-2">
+                                                        <img x-show="product.thumbnailUrl || product.smallImageUrl"
+                                                             :src="product.thumbnailUrl || product.smallImageUrl"
+                                                             :alt="product.name"
+                                                             class="w-full h-full object-cover group-hover:scale-105 transition">
+                                                    </div>
+                                                    <p class="text-xs font-medium text-gray-900 line-clamp-2 leading-tight mb-1" x-text="product.name"></p>
+                                                    <p class="text-sm font-semibold text-blue-600" x-text="formatPrice(product.finalPrice || product.price)"></p>
+                                                </a>
+                                            </template>
+                                        </div>
+
+                                        <!-- View All Button -->
+                                        <a href="#" @mousedown.prevent="submitSearch()"
+                                           class="block mt-4 py-2 text-center text-sm text-blue-600 hover:text-blue-800 font-medium bg-blue-50 hover:bg-blue-100 rounded-lg transition">
+                                            View all results for "<span x-text="searchQuery"></span>"
+                                        </a>
+                                    </div>
+                                </template>
+
+                                <div x-show="instantSearchResults.length === 0" class="text-sm text-gray-400 text-center py-8">
+                                    No products found
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- No Results at All -->
+                        <div x-show="!instantSearchLoading && instantSearchResults.length === 0 && instantSearchCategories.length === 0 && instantSearchPages.length === 0 && searchQuery.length >= 2"
+                             class="p-8 text-center text-gray-500">
+                            <svg class="w-12 h-12 mx-auto text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p class="text-sm">No results found for "<span class="font-medium" x-text="searchQuery"></span>"</p>
+                            <p class="text-xs text-gray-400 mt-1">Try a different search term</p>
+                        </div>
+                    </div>
+
+                    <!-- Store Switcher (icon only, text on expand) -->
+                    <div x-show="stores.length > 1" class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-gray-600 hover:text-gray-900" title="Switch Store">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false"
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <div class="px-4 py-2 text-xs text-gray-500 uppercase tracking-wide border-b">Select Store</div>
+                            <template x-for="store in stores" :key="store.code">
+                                <button @click="switchStore(store.code); open = false"
+                                        class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100"
+                                        :class="store.code === currentStoreCode ? 'text-blue-600 font-medium' : 'text-gray-700'"
+                                        x-text="store.name"></button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Account -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" class="text-gray-600 hover:text-gray-900">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                        </button>
+                        <div x-show="open" @click.away="open = false"
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <template x-if="!customer">
+                                <div>
+                                    <a href="#" @click.prevent="navigate('login'); open = false"
+                                       class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sign In</a>
+                                    <a href="#" @click.prevent="navigate('register'); open = false"
+                                       class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Create Account</a>
+                                </div>
+                            </template>
+                            <template x-if="customer">
+                                <div>
+                                    <div class="px-4 py-2 text-sm text-gray-500" x-text="'Hi, ' + customer.firstName"></div>
+                                    <a href="#" @click.prevent="navigate('account'); open = false"
+                                       class="block px-4 py-2 text-gray-700 hover:bg-gray-100">My Account</a>
+                                    <a href="#" @click.prevent="logout(); open = false"
+                                       class="block px-4 py-2 text-gray-700 hover:bg-gray-100">Sign Out</a>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Wishlist -->
+                    <button @click="navigate('wishlist')" class="relative text-gray-600 hover:text-gray-900" title="Wishlist">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                        <span x-show="(token ? wishlist.length : guestWishlist.length) > 0"
+                              class="absolute -top-2 -right-2 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center"
+                              x-text="token ? wishlist.length : guestWishlist.length"></span>
+                    </button>
+
+                    <!-- Cart -->
+                    <button @click="navigate('cart')" class="relative text-gray-600 hover:text-gray-900" title="Cart">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span x-show="cartCount > 0"
+                              class="absolute -top-2 -right-2 bg-blue-600 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center"
+                              x-text="cartCount"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Category Navigation -->
+        <nav class="border-t bg-gray-50">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex items-center gap-6 py-2 overflow-x-auto">
+                    <a href="#" @click.prevent="navigate('home')"
+                       :class="!currentCategory && view === 'home' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
+                       class="whitespace-nowrap text-sm">All Products</a>
+                    <template x-for="cat in topCategories" :key="cat.id">
+                        <a href="#" @click.prevent="loadCategory(cat.id)"
+                           :class="currentTopCategory == cat.id ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
+                           class="whitespace-nowrap text-sm" x-text="cat.name"></a>
+                    </template>
+                    <span class="text-gray-300">|</span>
+                    <a href="/api-test/store/blog" @click.prevent="navigateTo('blog')"
+                       :class="view === 'blog' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
+                       class="whitespace-nowrap text-sm">Blog</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Loading Overlay -->
+        <div x-show="loading" class="fixed inset-0 bg-black/20 z-50 flex items-center justify-center">
+            <div class="bg-white rounded-lg p-6 shadow-xl">
+                <div class="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto"></div>
+                <p class="mt-3 text-gray-600">Loading...</p>
+            </div>
+        </div>
+
+        <!-- Error Message -->
+        <div x-show="error" x-transition class="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <span x-text="error"></span>
+            <button @click="error = null" class="float-right text-red-500">&times;</button>
+        </div>
+
+        <!-- Success Message -->
+        <div x-show="success" x-transition class="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+            <span x-text="success"></span>
+            <button @click="success = null" class="float-right text-green-500">&times;</button>
+        </div>
+
+        <!-- Home / Product Listing -->
+        <template x-if="view === 'home' || view === 'category' || view === 'search'">
+            <div>
+                <!-- Homepage CMS Content Banner -->
+                <template x-if="view === 'home' && cmsPage && cmsPage.content">
+                    <div class="bg-white rounded-lg shadow mb-6 p-6 prose prose-lg max-w-none" x-html="cmsPage.content"></div>
+                </template>
+
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold text-gray-900" x-text="pageTitle"></h1>
+                    <div class="flex items-center gap-4">
+                        <!-- Pagination -->
+                        <div x-show="totalPages > 1" class="flex items-center gap-2">
+                            <button @click="page > 1 && (page--, loadProducts())" :disabled="page <= 1"
+                                    class="px-3 py-2 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Prev</button>
+                            <span class="text-sm text-gray-600">
+                                Page <span x-text="page"></span> / <span x-text="totalPages"></span>
+                            </span>
+                            <button @click="page < totalPages && (page++, loadProducts())" :disabled="page >= totalPages"
+                                    class="px-3 py-2 border rounded-lg text-sm disabled:opacity-50 hover:bg-gray-50">Next</button>
+                        </div>
+                        <!-- Per Page -->
+                        <select x-model="pageSize" @change="page = 1; loadProducts()" class="border rounded-lg px-3 py-2 text-sm">
+                            <option value="12">12 per page</option>
+                            <option value="24">24 per page</option>
+                            <option value="48">48 per page</option>
+                            <option value="96">96 per page</option>
+                        </select>
+                        <!-- Sort -->
+                        <select x-model="sortBy" @change="loadProducts()" class="border rounded-lg px-3 py-2 text-sm">
+                            <option value="">Sort by</option>
+                            <option value="name-asc">Name (A-Z)</option>
+                            <option value="name-desc">Name (Z-A)</option>
+                            <option value="price-asc">Price (Low-High)</option>
+                            <option value="price-desc">Price (High-Low)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-8">
+                    <!-- Sidebar Filters -->
+                    <aside class="w-64 flex-shrink-0 hidden lg:block">
+                        <div class="bg-white rounded-lg shadow p-4">
+                            <!-- Show subcategories if viewing a category with subcategories -->
+                            <template x-if="currentTopCategory && subcategories.length > 0">
+                                <div>
+                                    <h3 class="font-semibold mb-3" x-text="categories.find(c => c.id == currentTopCategory)?.name || 'Subcategories'"></h3>
+                                    <ul class="space-y-2">
+                                        <li>
+                                            <a href="#" @click.prevent="currentCategory = currentTopCategory; loadProducts()"
+                                               class="text-sm" :class="currentCategory == currentTopCategory ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'">
+                                                All in this category
+                                            </a>
+                                        </li>
+                                        <template x-for="sub in subcategories" :key="sub.id">
+                                            <li>
+                                                <a href="#" @click.prevent="loadCategory(sub.id, true)"
+                                                   class="text-sm" :class="currentCategory == sub.id ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
+                                                   x-text="sub.name"></a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                    <div class="mt-4 pt-4 border-t">
+                                        <a href="#" @click.prevent="currentTopCategory = null; subcategories = []; currentCategory = null; loadProducts()"
+                                           class="text-sm text-blue-600 hover:text-blue-700">&larr; All Categories</a>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <!-- Show main categories when not viewing subcategories -->
+                            <template x-if="!currentTopCategory || subcategories.length === 0">
+                                <div>
+                                    <h3 class="font-semibold mb-3">Categories</h3>
+                                    <ul class="space-y-2">
+                                        <li>
+                                            <a href="#" @click.prevent="currentCategory = null; currentTopCategory = null; subcategories = []; loadProducts()"
+                                               class="text-sm" :class="!currentCategory ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'">
+                                                All Products
+                                            </a>
+                                        </li>
+                                        <template x-for="cat in categories" :key="cat.id">
+                                            <li>
+                                                <a href="#" @click.prevent="loadCategory(cat.id)"
+                                                   class="text-sm" :class="currentCategory == cat.id ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
+                                                   x-text="cat.name"></a>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                </div>
+                            </template>
+
+                            <h3 class="font-semibold mt-6 mb-3">Price</h3>
+                            <div class="space-y-3">
+                                <!-- Price Range Slider -->
+                                <div class="relative h-6 flex items-center">
+                                    <!-- Track background -->
+                                    <div class="absolute w-full h-2 bg-gray-200 rounded-full"></div>
+                                    <!-- Active range highlight -->
+                                    <div class="absolute h-2 bg-blue-500 rounded-full"
+                                         :style="`left: ${(priceMin / priceSliderMax) * 100}%; right: ${100 - (priceMax / priceSliderMax) * 100}%`"></div>
+                                    <!-- Min slider -->
+                                    <input type="range"
+                                           :min="priceSliderMin"
+                                           :max="priceSliderMax"
+                                           x-model.number="priceMin"
+                                           @input="if(priceMin > priceMax - 10) priceMin = priceMax - 10; priceFilterActive = true"
+                                           @change="loadProducts()"
+                                           class="absolute w-full h-2 appearance-none bg-transparent pointer-events-none z-10 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white">
+                                    <!-- Max slider -->
+                                    <input type="range"
+                                           :min="priceSliderMin"
+                                           :max="priceSliderMax"
+                                           x-model.number="priceMax"
+                                           @input="if(priceMax < priceMin + 10) priceMax = priceMin + 10; priceFilterActive = true"
+                                           @change="loadProducts()"
+                                           class="absolute w-full h-2 appearance-none bg-transparent pointer-events-none z-20 [&::-webkit-slider-thumb]:pointer-events-auto [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer [&::-webkit-slider-thumb]:shadow-md [&::-webkit-slider-thumb]:border-2 [&::-webkit-slider-thumb]:border-white [&::-moz-range-thumb]:pointer-events-auto [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:bg-blue-600 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:cursor-pointer [&::-moz-range-thumb]:border-2 [&::-moz-range-thumb]:border-white">
+                                </div>
+                                <!-- Price labels -->
+                                <div class="flex justify-between text-sm text-gray-600">
+                                    <span>$<span x-text="priceMin"></span></span>
+                                    <span>$<span x-text="priceMax"></span><span x-show="priceMax >= priceSliderMax">+</span></span>
+                                </div>
+                                <!-- Clear filter -->
+                                <button x-show="priceFilterActive"
+                                        @click="priceMin = priceSliderMin; priceMax = priceSliderMax; priceFilterActive = false; loadProducts()"
+                                        class="text-xs text-blue-600 hover:text-blue-700">
+                                    Clear price filter
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+
+                    <!-- Products Grid -->
+                    <div class="flex-1">
+                        <div x-show="products.length === 0 && !loading" class="text-center py-12 text-gray-500">
+                            No products found
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <template x-for="(product, idx) in products" :key="product.id">
+                                <div class="bg-white rounded-lg shadow overflow-hidden group">
+                                    <a href="#" @click.prevent="viewProduct(product.id)">
+                                        <div class="aspect-square bg-gray-100 relative overflow-hidden">
+                                            <img x-show="product.smallImageUrl || product.imageUrl || product.thumbnailUrl"
+                                                 :src="product.smallImageUrl || product.imageUrl || product.thumbnailUrl"
+                                                 :alt="product.name"
+                                                 :loading="idx < 6 ? 'eager' : 'lazy'"
+                                                 :fetchpriority="idx < 3 ? 'high' : 'auto'"
+                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                            <div x-show="!product.smallImageUrl && !product.imageUrl && !product.thumbnailUrl" class="w-full h-full flex items-center justify-center text-gray-400">
+                                                No image
+                                            </div>
+                                            <span x-show="product.specialPrice"
+                                                  class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                                Sale
+                                            </span>
+                                            <!-- Wishlist Heart -->
+                                            <button @click.prevent.stop="loadModule('wishlist').then(() => toggleWishlist(product.id))"
+                                                    class="absolute top-2 right-2 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow transition"
+                                                    :class="isInWishlist && isInWishlist(product.id) ? 'text-red-500' : 'text-gray-400 hover:text-red-500'">
+                                                <svg class="w-5 h-5" :fill="isInWishlist && isInWishlist(product.id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </a>
+                                    <div class="p-4">
+                                        <a href="#" @click.prevent="viewProduct(product.id)"
+                                           class="block font-medium text-gray-900 hover:text-blue-600 line-clamp-2 min-h-[3rem]" x-text="product.name"></a>
+                                        <!-- Star Rating (fixed height for consistent layout) -->
+                                        <div class="flex items-center gap-1 mt-1 h-4">
+                                            <div class="flex">
+                                                <template x-for="i in 5">
+                                                    <svg class="w-4 h-4" :class="product.reviewCount > 0 && i <= Math.round(product.averageRating || 0) ? 'text-yellow-400 fill-current' : 'text-gray-200 fill-current'" viewBox="0 0 20 20">
+                                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                                                    </svg>
+                                                </template>
+                                            </div>
+                                            <span class="text-xs text-gray-500" x-show="product.reviewCount > 0" x-text="'(' + product.reviewCount + ')'"></span>
+                                        </div>
+                                        <div class="flex items-baseline gap-2 mt-2">
+                                            <span class="text-lg font-bold text-gray-900" x-text="formatPrice(product.finalPrice || product.price)"></span>
+                                            <span x-show="product.specialPrice && product.specialPrice < product.price" class="text-sm text-gray-400 line-through"
+                                                  x-text="formatPrice(product.price)"></span>
+                                        </div>
+                                        <!-- Products needing options: configurable or has required options -->
+                                        <template x-if="product.type === 'configurable' || product.hasRequiredOptions">
+                                            <button @click="viewProduct(product.id)"
+                                                    :disabled="product.stockStatus === 'out_of_stock'"
+                                                    class="w-full mt-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 rounded-lg text-sm font-medium transition">
+                                                <span x-text="product.stockStatus !== 'out_of_stock' ? 'Select Options' : 'Out of Stock'"></span>
+                                            </button>
+                                        </template>
+                                        <!-- Simple products without required options: direct add to cart -->
+                                        <template x-if="product.type !== 'configurable' && !product.hasRequiredOptions">
+                                            <button @click="addToCart(product.sku)"
+                                                    :disabled="product.stockStatus === 'out_of_stock'"
+                                                    class="w-full mt-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 rounded-lg text-sm font-medium transition">
+                                                <span x-text="product.stockStatus !== 'out_of_stock' ? 'Add to Cart' : 'Out of Stock'"></span>
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div x-show="totalPages > 1" class="mt-8 flex justify-center gap-2">
+                            <button @click="page > 1 && (page--, loadProducts())" :disabled="page <= 1"
+                                    class="px-4 py-2 border rounded-lg disabled:opacity-50">Previous</button>
+                            <span class="px-4 py-2">Page <span x-text="page"></span> of <span x-text="totalPages"></span></span>
+                            <button @click="page < totalPages && (page++, loadProducts())" :disabled="page >= totalPages"
+                                    class="px-4 py-2 border rounded-lg disabled:opacity-50">Next</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Product Detail -->
+        <template x-if="view === 'product'">
+            <div class="bg-white rounded-lg shadow p-6">
+                <button @click="navigate('home')" class="text-blue-600 hover:text-blue-700 mb-4">&larr; Back to Shop</button>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                        <img x-show="currentProduct.imageUrl" :src="currentProduct.imageUrl" :alt="currentProduct.name"
+                             class="w-full h-full object-contain">
+                        <div x-show="!currentProduct.imageUrl" class="w-full h-full flex items-center justify-center text-gray-400">
+                            No image available
+                        </div>
+                    </div>
+
+                    <div>
+                        <h1 class="text-3xl font-bold text-gray-900" x-text="currentProduct.name"></h1>
+                        <p class="text-gray-500 mt-1" x-text="'SKU: ' + currentProduct.sku"></p>
+
+                        <div class="flex items-baseline gap-3 mt-4">
+                            <span class="text-3xl font-bold text-gray-900" x-text="formatPrice(currentProduct.finalPrice || currentProduct.price)"></span>
+                            <span x-show="currentProduct.specialPrice && currentProduct.specialPrice < currentProduct.price" class="text-xl text-gray-400 line-through"
+                                  x-text="formatPrice(currentProduct.price)"></span>
+                        </div>
+
+                        <div class="mt-4">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm"
+                                  :class="isSelectedVariantInStock() ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                                  x-text="isSelectedVariantInStock() ? 'In Stock' : 'Out of Stock'"></span>
+                            <template x-if="currentProduct.type === 'configurable' && getSelectedVariant()">
+                                <span class="ml-2 text-sm text-gray-500" x-text="'(' + (getSelectedVariant()?.stockQty || 0) + ' available)'"></span>
+                            </template>
+                        </div>
+
+                        <!-- Configurable Options -->
+                        <template x-if="currentProduct.configurableOptions?.length > 0">
+                            <div class="mt-6 space-y-4">
+                                <template x-for="option in currentProduct.configurableOptions" :key="option.id">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2" x-text="option.label"></label>
+                                        <div class="flex flex-wrap gap-2">
+                                            <template x-for="value in option.values" :key="value.id">
+                                                <button @click="isOptionValueAvailable(option.code, value.id) && (selectedOptions[option.code] = value.id)"
+                                                        class="px-4 py-2 border rounded-lg text-sm font-medium transition-colors relative"
+                                                        :class="{
+                                                            'border-blue-600 bg-blue-50 text-blue-600': selectedOptions[option.code] == value.id,
+                                                            'border-gray-300 hover:border-gray-400': selectedOptions[option.code] != value.id && isOptionValueAvailable(option.code, value.id),
+                                                            'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed line-through': !isOptionValueAvailable(option.code, value.id)
+                                                        }"
+                                                        :disabled="!isOptionValueAvailable(option.code, value.id)"
+                                                        x-text="value.label">
+                                                </button>
+                                            </template>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Custom Options (e.g., String, Tension, Cover) -->
+                        <template x-if="currentProduct.customOptions?.length > 0">
+                            <div class="mt-6 space-y-4 border-t pt-6">
+                                <template x-for="option in currentProduct.customOptions" :key="option.id">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            <span x-text="option.title"></span>
+                                            <span x-show="option.required" class="text-red-500">*</span>
+                                        </label>
+                                        <!-- Dropdown type -->
+                                        <template x-if="option.type === 'drop_down'">
+                                            <select x-model="selectedCustomOptions[option.id]"
+                                                    class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <option value="">Select...</option>
+                                                <template x-for="value in option.values" :key="value.id">
+                                                    <option :value="value.id"
+                                                            x-text="value.title + (value.price > 0 ? ' (+$' + value.price.toFixed(2) + ')' : '')">
+                                                    </option>
+                                                </template>
+                                            </select>
+                                        </template>
+                                        <!-- Radio type -->
+                                        <template x-if="option.type === 'radio'">
+                                            <div class="space-y-2">
+                                                <template x-for="value in option.values" :key="value.id">
+                                                    <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                                           :class="selectedCustomOptions[option.id] == value.id ? 'border-blue-500 bg-blue-50' : ''">
+                                                        <input type="radio" :name="'option_' + option.id" :value="value.id"
+                                                               x-model="selectedCustomOptions[option.id]" class="text-blue-600">
+                                                        <span class="flex-1" x-text="value.title"></span>
+                                                        <span x-show="value.price > 0" class="text-sm text-gray-500" x-text="'+$' + value.price.toFixed(2)"></span>
+                                                    </label>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <div class="mt-6" x-show="currentProduct.shortDescription" x-html="currentProduct.shortDescription"></div>
+
+                        <div class="mt-6 flex items-center gap-4">
+                            <div class="flex items-center border rounded-lg">
+                                <button @click="qty > 1 && qty--" class="px-3 py-2 hover:bg-gray-100">-</button>
+                                <input type="number" x-model.number="qty" min="1" class="w-16 text-center border-x py-2">
+                                <button @click="qty++" class="px-3 py-2 hover:bg-gray-100">+</button>
+                            </div>
+                            <button @click="addToCart(getCartSku(), qty, getCartCustomOptions())"
+                                    :disabled="!allOptionsSelected() || !isSelectedVariantInStock()"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition">
+                                <span x-show="!allOptionsSelected()">Select Options</span>
+                                <span x-show="allOptionsSelected()">Add to Cart</span>
+                            </button>
+                            <!-- Wishlist Button -->
+                            <button @click="loadModule('wishlist').then(() => toggleWishlist(currentProduct.id))"
+                                    class="p-3 border rounded-lg hover:bg-gray-50 transition"
+                                    :class="isInWishlist && isInWishlist(currentProduct.id) ? 'border-red-300 text-red-500' : 'border-gray-300 text-gray-400 hover:text-red-500'">
+                                <svg class="w-6 h-6" :fill="isInWishlist && isInWishlist(currentProduct.id) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div class="mt-8 prose prose-sm" x-show="currentProduct.description">
+                            <h3>Description</h3>
+                            <div x-html="currentProduct.description"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="mt-8 bg-white rounded-lg shadow p-6" x-init="loadModule('reviews').then(() => loadProductReviews(currentProduct.id))">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-900">Customer Reviews</h2>
+                        <button @click="showReviewForm = !showReviewForm; if(showReviewForm && customer) reviewForm.nickname = customer.firstName"
+                                class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                            Write a Review
+                        </button>
+                    </div>
+
+                    <!-- Review Form -->
+                    <div x-show="showReviewForm" x-transition class="mb-6 bg-gray-50 rounded-lg p-4">
+                        <template x-if="!token">
+                            <div class="text-center py-4">
+                                <p class="text-gray-600 mb-3">Please sign in to write a review</p>
+                                <button @click="navigate('login')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm">
+                                    Sign In
+                                </button>
+                            </div>
+                        </template>
+                        <template x-if="token">
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Rating</label>
+                                    <div class="flex gap-1">
+                                        <template x-for="star in [1,2,3,4,5]" :key="star">
+                                            <button @click="reviewForm.rating = star"
+                                                    class="text-2xl transition"
+                                                    :class="star <= reviewForm.rating ? 'text-yellow-400' : 'text-gray-300'">
+                                                ★
+                                            </button>
+                                        </template>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Nickname</label>
+                                    <input type="text" x-model="reviewForm.nickname" placeholder="Your name"
+                                           class="w-full border rounded-lg px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Review Title</label>
+                                    <input type="text" x-model="reviewForm.title" placeholder="Summary of your review"
+                                           class="w-full border rounded-lg px-3 py-2 text-sm">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Review</label>
+                                    <textarea x-model="reviewForm.detail" rows="4" placeholder="Tell us about your experience..."
+                                              class="w-full border rounded-lg px-3 py-2 text-sm"></textarea>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button @click="submitReview(currentProduct.id)" :disabled="reviewsLoading"
+                                            class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg text-sm">
+                                        Submit Review
+                                    </button>
+                                    <button @click="showReviewForm = false"
+                                            class="border border-gray-300 hover:bg-gray-50 px-4 py-2 rounded-lg text-sm">
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <!-- Reviews List -->
+                    <div x-show="reviewsLoading" class="text-center py-8 text-gray-500">
+                        Loading reviews...
+                    </div>
+
+                    <div x-show="!reviewsLoading && productReviews.length === 0" class="text-center py-8 text-gray-500">
+                        <p>No reviews yet. Be the first to review this product!</p>
+                    </div>
+
+                    <div x-show="!reviewsLoading && productReviews.length > 0" class="space-y-4">
+                        <template x-for="review in productReviews" :key="review.id">
+                            <div class="border-b pb-4 last:border-b-0">
+                                <div class="flex items-start justify-between">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <span class="text-yellow-400 text-sm" x-text="'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)"></span>
+                                            <span class="font-medium text-gray-900" x-text="review.title"></span>
+                                        </div>
+                                        <p class="text-sm text-gray-500 mt-1">
+                                            By <span x-text="review.nickname"></span> on
+                                            <span x-text="new Date(review.createdAt).toLocaleDateString()"></span>
+                                        </p>
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-gray-700" x-text="review.detail"></p>
+                            </div>
+                        </template>
+
+                        <!-- Reviews Pagination -->
+                        <div x-show="reviewsTotalPages > 1" class="flex justify-center gap-2 pt-4">
+                            <button @click="reviewsPage > 1 && loadProductReviews(currentProduct.id, reviewsPage - 1)"
+                                    :disabled="reviewsPage <= 1"
+                                    class="px-3 py-1 border rounded text-sm disabled:opacity-50">
+                                Previous
+                            </button>
+                            <span class="px-3 py-1 text-sm text-gray-600">
+                                Page <span x-text="reviewsPage"></span> of <span x-text="reviewsTotalPages"></span>
+                            </span>
+                            <button @click="reviewsPage < reviewsTotalPages && loadProductReviews(currentProduct.id, reviewsPage + 1)"
+                                    :disabled="reviewsPage >= reviewsTotalPages"
+                                    class="px-3 py-1 border rounded text-sm disabled:opacity-50">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Cart -->
+        <template x-if="view === 'cart'">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Shopping Cart</h1>
+
+                <div x-show="!cart || cart.items?.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
+                    <div class="max-w-md mx-auto">
+                        <!-- Cart Icon -->
+                        <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+
+                        <h2 class="text-2xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
+                        <p class="text-gray-500 mb-6">Looks like you haven't added any items to your cart yet. Start shopping to find great products!</p>
+
+                        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                            <button @click="navigate('home')" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">
+                                Start Shopping
+                            </button>
+                            <button @click="searchQuery = ''; document.querySelector('input[type=search]')?.focus()" class="border border-gray-300 hover:border-gray-400 text-gray-700 px-8 py-3 rounded-lg font-medium transition">
+                                Search Products
+                            </button>
+                        </div>
+
+                        <!-- Quick category links -->
+                        <div class="mt-8 pt-6 border-t">
+                            <p class="text-sm text-gray-500 mb-3">Popular Categories</p>
+                            <div class="flex flex-wrap justify-center gap-2">
+                                <template x-for="cat in categories.slice(0, 5)" :key="cat.id">
+                                    <button @click="loadCategory(cat.id)"
+                                            class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition"
+                                            x-text="cat.name">
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="cart && cart.items?.length > 0" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 bg-white rounded-lg shadow">
+                        <template x-for="item in cart.items || []" :key="item.id">
+                            <div class="flex gap-4 p-4 border-b last:border-b-0">
+                                <div class="w-20 h-20 bg-gray-100 rounded flex-shrink-0">
+                                    <img x-show="item.thumbnailUrl" :src="item.thumbnailUrl" class="w-full h-full object-cover rounded">
+                                </div>
+                                <div class="flex-1">
+                                    <h3 class="font-medium" x-text="item.name"></h3>
+                                    <p class="text-sm text-gray-500" x-text="item.sku"></p>
+                                    <p class="text-blue-600 font-medium mt-1" x-text="formatPrice(item.priceInclTax || item.price)"></p>
+                                </div>
+                                <div class="flex flex-col items-end gap-2">
+                                    <div class="flex items-center border rounded">
+                                        <button @click="updateCartItem(item.id, item.qty - 1)" class="px-2 py-1 hover:bg-gray-100">-</button>
+                                        <span class="px-3 py-1" x-text="item.qty"></span>
+                                        <button @click="updateCartItem(item.id, item.qty + 1)" class="px-2 py-1 hover:bg-gray-100">+</button>
+                                    </div>
+                                    <button @click="removeCartItem(item.id)" class="text-red-500 hover:text-red-700 text-sm">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow p-6 h-fit">
+                        <h3 class="font-semibold text-lg mb-4">Order Summary</h3>
+                        <div class="space-y-2 text-sm">
+                            <div class="flex justify-between">
+                                <span>Subtotal</span>
+                                <span x-text="formatPrice(cart.totals?.subtotal || 0)"></span>
+                            </div>
+                            <div x-show="cart.totals?.discount" class="flex justify-between text-green-600">
+                                <span>Discount</span>
+                                <span x-text="'-' + formatPrice(Math.abs(cart.totals?.discount || 0))"></span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Shipping</span>
+                                <span x-text="cart.totals?.shipping ? formatPrice(cart.totals.shipping) : 'Calculated at checkout'"></span>
+                            </div>
+                            <div x-show="cart.totals?.tax" class="flex justify-between">
+                                <span>GST</span>
+                                <span x-text="formatPrice(cart.totals?.tax || 0)"></span>
+                            </div>
+                            <div class="border-t pt-2 mt-2 flex justify-between font-semibold text-lg">
+                                <span>Total <span class="text-xs font-normal text-gray-500">(inc. GST)</span></span>
+                                <span x-text="formatPrice(cart.totals?.grandTotal || cart.totals?.subtotal || 0)"></span>
+                            </div>
+                        </div>
+
+                        <!-- Coupon -->
+                        <div class="mt-4">
+                            <div class="flex gap-2">
+                                <input type="text" x-model="couponCode" placeholder="Coupon code"
+                                       class="flex-1 border rounded px-3 py-2 text-sm">
+                                <button @click="applyCoupon()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-sm">
+                                    Apply
+                                </button>
+                            </div>
+                        </div>
+
+                        <button @click="navigate('checkout')"
+                                class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium">
+                            Proceed to Checkout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Wishlist -->
+        <template x-if="view === 'wishlist'">
+            <div x-init="loadModule('wishlist').then(() => token && loadWishlist())">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">My Wishlist</h1>
+
+                <!-- Guest wishlist info -->
+                <div x-show="!token && guestWishlist.length > 0" class="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg mb-6">
+                    <p class="text-sm">
+                        <a href="#" @click.prevent="navigate('login')" class="font-medium underline">Sign in</a> to save your wishlist and access it from any device.
+                    </p>
+                </div>
+
+                <!-- Empty wishlist -->
+                <div x-show="(token ? wishlist.length : guestWishlist.length) === 0" class="bg-white rounded-lg shadow p-12 text-center">
+                    <div class="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Your wishlist is empty</h2>
+                    <p class="text-gray-500 mb-6">Save items you love by clicking the heart icon on products.</p>
+                    <button @click="navigate('home')" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-medium transition">
+                        Start Shopping
+                    </button>
+                </div>
+
+                <!-- Wishlist items (logged in) -->
+                <div x-show="token && wishlist.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <template x-for="item in wishlist" :key="item.id">
+                        <div class="bg-white rounded-lg shadow overflow-hidden group">
+                            <a href="#" @click.prevent="viewProduct(item.productId)">
+                                <div class="aspect-square bg-gray-100 relative overflow-hidden">
+                                    <img x-show="item.productImageUrl" :src="item.productImageUrl" :alt="item.productName"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <div x-show="!item.productImageUrl" class="w-full h-full flex items-center justify-center text-gray-400">
+                                        No image
+                                    </div>
+                                    <span x-show="!item.inStock" class="absolute top-2 left-2 bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                        Out of Stock
+                                    </span>
+                                    <!-- Remove button -->
+                                    <button @click.prevent.stop="removeFromWishlist(item.productId)"
+                                            class="absolute top-2 right-2 w-8 h-8 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow text-red-500 hover:text-red-600 transition">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </a>
+                            <div class="p-4">
+                                <a href="#" @click.prevent="viewProduct(item.productId)"
+                                   class="block font-medium text-gray-900 hover:text-blue-600 line-clamp-2 min-h-[3rem]" x-text="item.productName"></a>
+                                <p class="text-sm text-gray-500 mt-1" x-text="item.productSku"></p>
+                                <p class="text-lg font-bold text-gray-900 mt-2" x-text="formatPrice(item.productPrice)"></p>
+                                <div class="flex gap-2 mt-3">
+                                    <template x-if="item.productType === 'configurable'">
+                                        <button @click="viewProduct(item.productId)"
+                                                class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition">
+                                            Select Options
+                                        </button>
+                                    </template>
+                                    <template x-if="item.productType !== 'configurable'">
+                                        <button @click="moveWishlistToCart(item.id)"
+                                                :disabled="!item.inStock"
+                                                class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 rounded-lg text-sm font-medium transition">
+                                            <span x-text="item.inStock ? 'Add to Cart' : 'Out of Stock'"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Wishlist items (guest - show product IDs to look up) -->
+                <div x-show="!token && guestWishlist.length > 0" class="bg-white rounded-lg shadow p-6">
+                    <p class="text-gray-600 mb-4">You have <span class="font-medium" x-text="guestWishlist.length"></span> item(s) in your wishlist.</p>
+                    <p class="text-sm text-gray-500 mb-4">Sign in to see full product details and move items to your cart.</p>
+                    <div class="flex gap-3">
+                        <button @click="navigate('login')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium">
+                            Sign In
+                        </button>
+                        <button @click="navigate('register')" class="border border-gray-300 hover:bg-gray-50 px-6 py-2 rounded-lg font-medium">
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Checkout -->
+        <template x-if="view === 'checkout'">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Checkout</h1>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Shipping Address -->
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Shipping Address</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">First Name</label>
+                                    <input type="text" x-model="checkout.shipping.firstName" class="w-full border rounded-lg px-3 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Last Name</label>
+                                    <input type="text" x-model="checkout.shipping.lastName" class="w-full border rounded-lg px-3 py-2">
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="block text-sm text-gray-600 mb-1">Street Address</label>
+                                    <input type="text" x-model="checkout.shipping.street" @input="onShippingAddressChange()" class="w-full border rounded-lg px-3 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">City</label>
+                                    <input type="text" x-model="checkout.shipping.city" @input="onShippingAddressChange()" class="w-full border rounded-lg px-3 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Postcode</label>
+                                    <input type="text" x-model="checkout.shipping.postcode" @input="onShippingAddressChange()" class="w-full border rounded-lg px-3 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Country</label>
+                                    <select x-model="checkout.shipping.countryId" @change="onCountryChange(); onShippingAddressChange()" class="w-full border rounded-lg px-3 py-2">
+                                        <template x-for="country in countries" :key="country.id">
+                                            <option :value="country.id" :selected="country.id === checkout.shipping.countryId" x-text="country.name"></option>
+                                        </template>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Region/State</label>
+                                    <!-- Show dropdown if regions available, otherwise text input -->
+                                    <select x-show="currentCountryRegions.length > 0"
+                                            @change="onRegionChange($event); onShippingAddressChange()"
+                                            class="w-full border rounded-lg px-3 py-2">
+                                        <option value="">Select Region...</option>
+                                        <template x-for="region in currentCountryRegions" :key="region.id">
+                                            <option :value="region.id" x-text="region.name" :selected="checkout.shipping.regionId === region.id"></option>
+                                        </template>
+                                    </select>
+                                    <input x-show="currentCountryRegions.length === 0"
+                                           type="text"
+                                           x-model="checkout.shipping.region"
+                                           @input="onShippingAddressChange()"
+                                           class="w-full border rounded-lg px-3 py-2"
+                                           placeholder="Enter region/state">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Phone</label>
+                                    <input type="tel" x-model="checkout.shipping.telephone" class="w-full border rounded-lg px-3 py-2">
+                                </div>
+                                <div>
+                                    <label class="block text-sm text-gray-600 mb-1">Email</label>
+                                    <input type="email" x-model="checkout.email" class="w-full border rounded-lg px-3 py-2">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shipping Method -->
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Shipping Method</h3>
+                            <div class="space-y-2">
+                                <template x-for="method in shippingMethods" :key="method.code">
+                                    <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                           :class="checkout.shippingMethod === method.code ? 'border-blue-500 bg-blue-50' : ''">
+                                        <input type="radio" :value="method.code" x-model="checkout.shippingMethod" class="text-blue-600">
+                                        <div class="flex-1">
+                                            <span class="font-medium" x-text="method.title"></span>
+                                            <span class="text-gray-500 text-sm ml-2" x-text="method.description"></span>
+                                        </div>
+                                        <span class="font-medium" x-text="formatPrice(method.price)"></span>
+                                    </label>
+                                </template>
+                                <div x-show="shippingMethods.length === 0 && !loading" class="text-gray-500 text-sm">
+                                    Complete your shipping address above to see available methods
+                                </div>
+                                <div x-show="shippingMethods.length === 0 && loading" class="text-gray-500 text-sm flex items-center gap-2">
+                                    <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                                    </svg>
+                                    Calculating shipping rates...
+                                </div>
+                            </div>
+                            <button @click="getShippingMethods()" class="mt-3 text-blue-600 hover:text-blue-700 text-sm" x-show="isAddressCompleteForShipping()">
+                                Refresh Shipping Methods
+                            </button>
+                        </div>
+
+                        <!-- Payment -->
+                        <div class="bg-white rounded-lg shadow p-6">
+                            <h3 class="font-semibold text-lg mb-4">Payment Method</h3>
+                            <div x-show="!paymentMethodsLoaded && !paymentMethods.length" class="text-gray-500 text-sm">
+                                Loading payment methods...
+                            </div>
+                            <div x-show="paymentMethodsLoaded && !paymentMethods.length" class="text-yellow-600 text-sm">
+                                No payment methods available
+                            </div>
+                            <div class="space-y-2">
+                                <template x-for="method in paymentMethods" :key="method.code">
+                                    <label class="flex items-center justify-between p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                           :class="checkout.paymentMethod === method.code ? 'border-blue-500 bg-blue-50' : ''">
+                                        <div class="flex items-center gap-3">
+                                            <input type="radio" :value="method.code" x-model="checkout.paymentMethod" class="text-blue-600">
+                                            <div>
+                                                <span class="font-medium" x-text="method.title"></span>
+                                                <p x-show="method.description" class="text-sm text-gray-500" x-text="method.description"></p>
+                                            </div>
+                                        </div>
+                                        <span x-show="method.isOffline" class="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded">Offline</span>
+                                    </label>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Summary (Shopify-style) -->
+                    <div class="bg-gray-50 rounded-lg h-fit sticky top-24">
+                        <!-- Mobile toggle -->
+                        <div class="lg:hidden border-b">
+                            <button @click="orderSummaryOpen = !orderSummaryOpen"
+                                    class="w-full px-6 py-4 flex items-center justify-between text-blue-600">
+                                <span class="flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    <span x-text="orderSummaryOpen ? 'Hide order summary' : 'Show order summary'"></span>
+                                    <svg class="w-4 h-4 transition-transform" :class="orderSummaryOpen ? 'rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                                    </svg>
+                                </span>
+                                <span class="font-semibold text-gray-900" x-text="formatPrice(cart.totals?.grandTotal || ((cart.totals?.subtotal || 0) + getSelectedShippingPrice()))"></span>
+                            </button>
+                        </div>
+
+                        <!-- Summary content -->
+                        <div class="p-6" :class="{ 'hidden lg:block': !orderSummaryOpen }">
+                            <!-- Cart items with thumbnails -->
+                            <div class="space-y-4 mb-6">
+                                <template x-for="item in cart.items || []" :key="item.id">
+                                    <div class="flex gap-4">
+                                        <!-- Thumbnail with qty badge -->
+                                        <div class="relative flex-shrink-0">
+                                            <div class="w-16 h-16 bg-white rounded-lg border overflow-hidden">
+                                                <img x-show="item.thumbnailUrl" :src="item.thumbnailUrl" :alt="item.name"
+                                                     class="w-full h-full object-cover">
+                                                <div x-show="!item.thumbnailUrl" class="w-full h-full flex items-center justify-center text-gray-300">
+                                                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                                    </svg>
+                                                </div>
+                                            </div>
+                                            <!-- Quantity badge -->
+                                            <span class="absolute -top-2 -right-2 w-5 h-5 bg-gray-500 text-white text-xs rounded-full flex items-center justify-center font-medium"
+                                                  x-text="item.qty"></span>
+                                        </div>
+                                        <!-- Item details -->
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-medium text-gray-900 truncate" x-text="item.name"></p>
+                                            <p class="text-xs text-gray-500" x-text="item.sku"></p>
+                                        </div>
+                                        <!-- Price -->
+                                        <div class="text-sm font-medium text-gray-900" x-text="formatPrice(item.rowTotalInclTax || item.rowTotal || item.price * item.qty)"></div>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Discount code -->
+                            <div class="flex gap-2 mb-6">
+                                <input type="text" x-model="couponCode" placeholder="Discount code"
+                                       class="flex-1 border rounded-lg px-3 py-2 text-sm bg-white">
+                                <button @click="applyCoupon()"
+                                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition">
+                                    Apply
+                                </button>
+                            </div>
+
+                            <!-- Totals -->
+                            <div class="border-t pt-4 space-y-3">
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Subtotal</span>
+                                    <span class="text-gray-900" x-text="formatPrice(cart.totals?.subtotal || 0)"></span>
+                                </div>
+                                <template x-if="cart.totals?.discount">
+                                    <div class="flex justify-between text-sm text-green-600">
+                                        <span class="flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                                            </svg>
+                                            Discount
+                                        </span>
+                                        <span x-text="'-' + formatPrice(Math.abs(cart.totals?.discount || 0))"></span>
+                                    </div>
+                                </template>
+                                <div class="flex justify-between text-sm">
+                                    <span class="text-gray-600">Shipping</span>
+                                    <span class="text-gray-900" x-text="checkout.shippingMethod ? formatPrice(getSelectedShippingPrice()) : 'Calculated next'"></span>
+                                </div>
+                                <template x-if="cart.totals?.tax">
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-gray-600">GST</span>
+                                        <span class="text-gray-900" x-text="formatPrice(cart.totals?.tax || 0)"></span>
+                                    </div>
+                                </template>
+                            </div>
+
+                            <!-- Grand total -->
+                            <div class="border-t mt-4 pt-4 flex justify-between items-center">
+                                <span class="text-base text-gray-600">Total <span class="text-xs">(inc. GST)</span></span>
+                                <span class="text-2xl font-semibold text-gray-900" x-text="formatPrice(cart.totals?.grandTotal || ((cart.totals?.subtotal || 0) + getSelectedShippingPrice()))"></span>
+                            </div>
+
+                            <!-- Place order button -->
+                            <button @click="placeOrder()"
+                                    :disabled="!canPlaceOrder()"
+                                    class="w-full mt-6 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-4 rounded-lg font-medium text-lg transition">
+                                Place Order
+                            </button>
+
+                            <!-- Security note -->
+                            <p class="mt-4 text-xs text-gray-500 text-center flex items-center justify-center gap-1">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                </svg>
+                                Secure checkout
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- Login -->
+        <template x-if="view === 'login'">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Sign In</h1>
+                <form @submit.prevent="login()">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Email</label>
+                            <input type="email" x-model="loginForm.email" required
+                                   class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Password</label>
+                            <input type="password" x-model="loginForm.password" required
+                                   class="w-full border rounded-lg px-3 py-2">
+                            <p class="text-right mt-1">
+                                <a href="#" @click.prevent="navigate('forgot-password')" class="text-sm text-blue-600 hover:text-blue-700">Forgot password?</a>
+                            </p>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-4 text-center text-sm text-gray-600">
+                    Don't have an account?
+                    <a href="#" @click.prevent="navigate('register')" class="text-blue-600 hover:text-blue-700">Create one</a>
+                </p>
+            </div>
+        </template>
+
+        <!-- Forgot Password -->
+        <template x-if="view === 'forgot-password'">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Reset Password</h1>
+                <p class="text-gray-600 mb-6">Enter your email and we'll send you a reset link.</p>
+                <form @submit.prevent="forgotPassword()">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Email</label>
+                            <input type="email" x-model="forgotPasswordEmail" required
+                                   class="w-full border rounded-lg px-3 py-2"
+                                   placeholder="your@email.com">
+                        </div>
+                        <button type="submit" :disabled="loading"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium disabled:opacity-50">
+                            <span x-show="!loading">Send Reset Link</span>
+                            <span x-show="loading">Sending...</span>
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-4 text-center text-sm text-gray-600">
+                    Remember your password?
+                    <a href="#" @click.prevent="navigate('login')" class="text-blue-600 hover:text-blue-700">Sign in</a>
+                </p>
+            </div>
+        </template>
+
+        <!-- Reset Password (with token from email) -->
+        <template x-if="view === 'reset-password'">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Set New Password</h1>
+                <p class="text-gray-600 mb-6">Enter your email and the reset token from your email.</p>
+                <form @submit.prevent="resetPassword()">
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Email</label>
+                            <input type="email" x-model="resetForm.email" required
+                                   class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Reset Token</label>
+                            <input type="text" x-model="resetForm.token" required
+                                   class="w-full border rounded-lg px-3 py-2"
+                                   placeholder="Token from email">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">New Password</label>
+                            <input type="password" x-model="resetForm.newPassword" required minlength="8"
+                                   class="w-full border rounded-lg px-3 py-2"
+                                   placeholder="Min 8 characters">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Confirm Password</label>
+                            <input type="password" x-model="resetForm.confirmPassword" required
+                                   class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                        <button type="submit" :disabled="loading"
+                                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium disabled:opacity-50">
+                            <span x-show="!loading">Reset Password</span>
+                            <span x-show="loading">Resetting...</span>
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-4 text-center text-sm text-gray-600">
+                    <a href="#" @click.prevent="navigate('login')" class="text-blue-600 hover:text-blue-700">Back to Sign In</a>
+                </p>
+            </div>
+        </template>
+
+        <!-- Register -->
+        <template x-if="view === 'register'">
+            <div class="max-w-md mx-auto bg-white rounded-lg shadow p-6">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Create Account</h1>
+                <form @submit.prevent="register()">
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">First Name</label>
+                                <input type="text" x-model="registerForm.firstName" required
+                                       class="w-full border rounded-lg px-3 py-2">
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-600 mb-1">Last Name</label>
+                                <input type="text" x-model="registerForm.lastName" required
+                                       class="w-full border rounded-lg px-3 py-2">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Email</label>
+                            <input type="email" x-model="registerForm.email" required
+                                   class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Password</label>
+                            <input type="password" x-model="registerForm.password" required minlength="8"
+                                   class="w-full border rounded-lg px-3 py-2">
+                            <p class="text-xs text-gray-500 mt-1">Minimum 8 characters</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-600 mb-1">Confirm Password</label>
+                            <input type="password" x-model="registerForm.confirmPassword" required
+                                   class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium">
+                            Create Account
+                        </button>
+                    </div>
+                </form>
+                <p class="mt-4 text-center text-sm text-gray-600">
+                    Already have an account?
+                    <a href="#" @click.prevent="navigate('login')" class="text-blue-600 hover:text-blue-700">Sign in</a>
+                </p>
+            </div>
+        </template>
+
+        <!-- Blog List -->
+        <template x-if="view === 'blog'">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">Blog</h1>
+                <div x-show="blogPosts.length === 0 && !loading" class="text-center py-12 text-gray-500">
+                    No blog posts found
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <template x-for="post in blogPosts" :key="post.id">
+                        <article class="bg-white rounded-lg shadow overflow-hidden group">
+                            <a href="#" @click.prevent="viewBlogPost(post.urlKey || post.id)">
+                                <div class="aspect-video bg-gray-100 relative overflow-hidden">
+                                    <img x-show="post.imageUrl" :src="post.imageUrl" :alt="post.title"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+                                    <div x-show="!post.imageUrl" class="w-full h-full flex items-center justify-center text-gray-400">
+                                        <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </a>
+                            <div class="p-4">
+                                <p class="text-sm text-gray-500 mb-2" x-text="formatDate(post.publishDate)"></p>
+                                <a href="#" @click.prevent="viewBlogPost(post.urlKey || post.id)"
+                                   class="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2" x-text="post.title"></a>
+                                <p class="text-sm text-gray-600 mt-2 line-clamp-3" x-text="post.excerpt"></p>
+                                <a href="#" @click.prevent="viewBlogPost(post.urlKey || post.id)"
+                                   class="inline-block mt-3 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                    Read more &rarr;
+                                </a>
+                            </div>
+                        </article>
+                    </template>
+                </div>
+            </div>
+        </template>
+
+        <!-- Blog Post Detail -->
+        <template x-if="view === 'blog_post' && currentBlogPost">
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-8">
+                    <button @click="navigate('blog')" class="text-blue-600 hover:text-blue-700 mb-4">&larr; Back to Blog</button>
+                    <p class="text-sm text-gray-500 mb-2" x-text="formatDate(currentBlogPost.publishDate)"></p>
+                    <h1 class="text-3xl font-bold text-gray-900 mb-6" x-text="currentBlogPost.title"></h1>
+                    <div x-show="currentBlogPost.imageUrl" class="mb-6">
+                        <img :src="currentBlogPost.imageUrl" :alt="currentBlogPost.title" class="w-full max-h-96 object-cover rounded-lg">
+                    </div>
+                    <div class="prose prose-lg max-w-none" x-html="currentBlogPost.content"></div>
+                </div>
+            </div>
+        </template>
+
+        <!-- My Account -->
+        <template x-if="view === 'account'">
+            <div class="max-w-4xl mx-auto">
+                <!-- Not logged in (need both token AND customer) -->
+                <template x-if="!token || !customer">
+                    <div class="bg-white rounded-lg shadow p-6 text-center">
+                        <h1 class="text-2xl font-bold text-gray-900 mb-4">My Account</h1>
+                        <p class="text-gray-600 mb-6">Please sign in to view your account.</p>
+                        <button @click="navigate('login')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                            Sign In
+                        </button>
+                    </div>
+                </template>
+
+                <!-- Logged in (both token AND customer present) -->
+                <template x-if="token && customer">
+                    <div x-init="loadAccountData(); loadCountries(); loadOrders()">
+                        <!-- Header -->
+                        <div class="bg-white rounded-lg shadow p-6 mb-6">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
+                                        <span class="text-xl font-bold text-blue-600" x-text="(customer.firstName || 'U').charAt(0).toUpperCase()"></span>
+                                    </div>
+                                    <div>
+                                        <h1 class="text-xl font-semibold text-gray-900" x-text="(customer.firstName || '') + ' ' + (customer.lastName || '')"></h1>
+                                        <p class="text-sm text-gray-600" x-text="customer.email"></p>
+                                    </div>
+                                </div>
+                                <button @click="logout()" class="text-sm text-red-600 hover:text-red-700">Sign Out</button>
+                            </div>
+                        </div>
+
+                        <!-- Tabs -->
+                        <div class="bg-white rounded-lg shadow">
+                            <div class="border-b">
+                                <nav class="flex -mb-px">
+                                    <button @click="accountTab = 'info'"
+                                            :class="accountTab === 'info' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="flex-1 py-4 px-4 text-center border-b-2 font-medium text-sm">
+                                        Account Info
+                                    </button>
+                                    <button @click="accountTab = 'addresses'; if(addresses.length === 0) loadAccountData()"
+                                            :class="accountTab === 'addresses' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="flex-1 py-4 px-4 text-center border-b-2 font-medium text-sm">
+                                        Addresses
+                                    </button>
+                                    <button @click="accountTab = 'orders'; if(orders.length === 0) loadOrders()"
+                                            :class="accountTab === 'orders' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="flex-1 py-4 px-4 text-center border-b-2 font-medium text-sm">
+                                        Orders
+                                    </button>
+                                    <button @click="accountTab = 'wishlist'; loadModule('wishlist').then(() => loadWishlist())"
+                                            :class="accountTab === 'wishlist' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="flex-1 py-4 px-4 text-center border-b-2 font-medium text-sm">
+                                        Wishlist
+                                    </button>
+                                    <button @click="accountTab = 'reviews'; loadModule('reviews').then(() => loadMyReviews())"
+                                            :class="accountTab === 'reviews' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="flex-1 py-4 px-4 text-center border-b-2 font-medium text-sm">
+                                        Reviews
+                                    </button>
+                                </nav>
+                            </div>
+
+                            <div class="p-6">
+                                <!-- Account Info Tab -->
+                                <div x-show="accountTab === 'info'" class="space-y-6" x-init="initProfileForm()">
+                                    <!-- Profile Section -->
+                                    <div>
+                                        <h3 class="font-medium text-gray-900 mb-4">Profile Information</h3>
+                                        <form @submit.prevent="updateProfile()" class="space-y-4">
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm text-gray-600 mb-1">First Name</label>
+                                                    <input type="text" x-model="profileForm.firstName"
+                                                           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm text-gray-600 mb-1">Last Name</label>
+                                                    <input type="text" x-model="profileForm.lastName"
+                                                           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                </div>
+                                                <div class="col-span-2">
+                                                    <label class="block text-sm text-gray-600 mb-1">Email</label>
+                                                    <input type="email" x-model="profileForm.email"
+                                                           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-between items-center pt-2">
+                                                <p class="text-sm text-gray-500">Member since: <span x-text="customer.createdAt ? new Date(customer.createdAt).toLocaleDateString() : '-'"></span></p>
+                                                <button type="submit" :disabled="loading"
+                                                        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                                                    Save Changes
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Password Section -->
+                                    <div class="border-t pt-6">
+                                        <h3 class="font-medium text-gray-900 mb-4">Change Password</h3>
+                                        <form @submit.prevent="changePassword()" class="space-y-4">
+                                            <div>
+                                                <label class="block text-sm text-gray-600 mb-1">Current Password</label>
+                                                <input type="password" x-model="passwordForm.currentPassword"
+                                                       class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                       placeholder="Enter current password">
+                                            </div>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <label class="block text-sm text-gray-600 mb-1">New Password</label>
+                                                    <input type="password" x-model="passwordForm.newPassword"
+                                                           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                           placeholder="Min 8 characters">
+                                                </div>
+                                                <div>
+                                                    <label class="block text-sm text-gray-600 mb-1">Confirm Password</label>
+                                                    <input type="password" x-model="passwordForm.confirmPassword"
+                                                           class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                                           placeholder="Confirm new password">
+                                                </div>
+                                            </div>
+                                            <div class="flex justify-end">
+                                                <button type="submit" :disabled="loading || !passwordForm.currentPassword || !passwordForm.newPassword"
+                                                        class="bg-gray-800 text-white px-4 py-2 rounded-lg hover:bg-gray-900 disabled:opacity-50">
+                                                    Update Password
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+
+                                    <!-- Newsletter Subscription Section -->
+                                    <div class="border-t pt-6">
+                                        <h3 class="font-medium text-gray-900 mb-4">Newsletter Subscription</h3>
+                                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                                            <div>
+                                                <p class="text-gray-700">Receive news, updates, and special offers</p>
+                                                <p class="text-sm text-gray-500 mt-1" x-text="customer?.isSubscribed ? 'You are currently subscribed' : 'You are not subscribed'"></p>
+                                            </div>
+                                            <div class="flex items-center gap-3">
+                                                <label class="relative inline-flex items-center cursor-pointer">
+                                                    <input type="checkbox"
+                                                           :checked="customer?.isSubscribed"
+                                                           @change="toggleNewsletter($event.target.checked)"
+                                                           :disabled="loading"
+                                                           class="sr-only peer">
+                                                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500"></div>
+                                                </label>
+                                                <span class="text-sm font-medium" x-text="customer?.isSubscribed ? 'Subscribed' : 'Subscribe'"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Addresses Tab -->
+                                <div x-show="accountTab === 'addresses'">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <h3 class="font-medium text-gray-900">Saved Addresses</h3>
+                                        <button @click="editingAddressId = null; resetAddressForm(); showAddressForm = !showAddressForm"
+                                                class="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                                            </svg>
+                                            Add Address
+                                        </button>
+                                    </div>
+
+                                    <!-- Add/Edit Address Form -->
+                                    <div x-show="showAddressForm" x-transition class="bg-gray-50 rounded-lg p-4 mb-4">
+                                        <h4 class="font-medium mb-3" x-text="editingAddressId ? 'Edit Address' : 'New Address'"></h4>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <input type="text" x-model="newAddress.firstName" placeholder="First Name"
+                                                   class="border rounded-lg px-3 py-2 text-sm">
+                                            <input type="text" x-model="newAddress.lastName" placeholder="Last Name"
+                                                   class="border rounded-lg px-3 py-2 text-sm">
+                                            <input type="text" x-model="newAddress.street" placeholder="Street Address"
+                                                   class="col-span-2 border rounded-lg px-3 py-2 text-sm">
+                                            <input type="text" x-model="newAddress.city" placeholder="City"
+                                                   class="border rounded-lg px-3 py-2 text-sm">
+                                            <input type="text" x-model="newAddress.postcode" placeholder="Postcode"
+                                                   class="border rounded-lg px-3 py-2 text-sm">
+                                            <select x-model="newAddress.countryId" class="border rounded-lg px-3 py-2 text-sm">
+                                                <template x-for="c in countries" :key="c.id">
+                                                    <option :value="c.id" x-text="c.name"></option>
+                                                </template>
+                                            </select>
+                                            <template x-if="newAddressRegions.length > 0">
+                                                <select x-model="newAddress.regionId" class="border rounded-lg px-3 py-2 text-sm">
+                                                    <option value="">Select State</option>
+                                                    <template x-for="r in newAddressRegions" :key="r.id">
+                                                        <option :value="r.id" x-text="r.name"></option>
+                                                    </template>
+                                                </select>
+                                            </template>
+                                            <template x-if="newAddressRegions.length === 0">
+                                                <input type="text" x-model="newAddress.region" placeholder="State/Region"
+                                                       class="border rounded-lg px-3 py-2 text-sm">
+                                            </template>
+                                            <input type="tel" x-model="newAddress.telephone" placeholder="Phone"
+                                                   class="col-span-2 border rounded-lg px-3 py-2 text-sm">
+                                            <div class="col-span-2 flex items-center gap-4">
+                                                <label class="flex items-center gap-2 text-sm">
+                                                    <input type="checkbox" x-model="newAddress.isDefaultBilling" class="rounded">
+                                                    Default Billing
+                                                </label>
+                                                <label class="flex items-center gap-2 text-sm">
+                                                    <input type="checkbox" x-model="newAddress.isDefaultShipping" class="rounded">
+                                                    Default Shipping
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2 mt-4">
+                                            <button @click="saveAddress()" :disabled="loading"
+                                                    class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-4 py-2 rounded-lg text-sm">
+                                                <span x-text="editingAddressId ? 'Update Address' : 'Save Address'"></span>
+                                            </button>
+                                            <button @click="showAddressForm = false; editingAddressId = null"
+                                                    class="border border-gray-300 px-4 py-2 rounded-lg text-sm hover:bg-gray-50">
+                                                Cancel
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Address List -->
+                                    <div x-show="addresses.length === 0 && !loading" class="text-center py-8 text-gray-500">
+                                        No saved addresses yet.
+                                    </div>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <template x-for="addr in addresses" :key="addr.id">
+                                            <div class="border rounded-lg p-4 relative">
+                                                <div class="flex gap-2 mb-2">
+                                                    <span x-show="addr.isDefaultBilling" class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">Billing</span>
+                                                    <span x-show="addr.isDefaultShipping" class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded">Shipping</span>
+                                                </div>
+                                                <p class="font-medium" x-text="addr.firstName + ' ' + addr.lastName"></p>
+                                                <p class="text-sm text-gray-600" x-text="Array.isArray(addr.street) ? addr.street.join(', ') : addr.street"></p>
+                                                <p class="text-sm text-gray-600" x-text="addr.city + ', ' + (addr.region || '') + ' ' + addr.postcode"></p>
+                                                <p class="text-sm text-gray-600" x-text="addr.countryId"></p>
+                                                <p class="text-sm text-gray-600" x-text="addr.telephone"></p>
+                                                <div class="flex gap-3 mt-3">
+                                                    <button @click="useAddressForCheckout(addr)"
+                                                            class="text-sm text-blue-600 hover:text-blue-700">
+                                                        Use for Checkout
+                                                    </button>
+                                                    <button @click="editAddress(addr)"
+                                                            class="text-sm text-gray-600 hover:text-gray-700">
+                                                        Edit
+                                                    </button>
+                                                    <button @click="deleteAddress(addr.id)"
+                                                            class="text-sm text-red-600 hover:text-red-700">
+                                                        Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Orders Tab -->
+                                <div x-show="accountTab === 'orders'">
+                                    <h3 class="font-medium text-gray-900 mb-4">Order History</h3>
+
+                                    <div x-show="orders.length === 0 && !loading" class="text-center py-8 text-gray-500">
+                                        No orders yet.
+                                    </div>
+
+                                    <!-- Order List - Table View -->
+                                    <div x-show="!selectedOrder" class="overflow-x-auto">
+                                        <table class="w-full text-sm">
+                                            <thead>
+                                                <tr class="border-b bg-gray-50 text-left">
+                                                    <th class="px-4 py-3 font-semibold text-gray-600">Order #</th>
+                                                    <th class="px-4 py-3 font-semibold text-gray-600">Date</th>
+                                                    <th class="px-4 py-3 font-semibold text-gray-600 hidden sm:table-cell">Ship To</th>
+                                                    <th class="px-4 py-3 font-semibold text-gray-600 text-right">Total</th>
+                                                    <th class="px-4 py-3 font-semibold text-gray-600">Status</th>
+                                                    <th class="px-4 py-3 font-semibold text-gray-600">Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="divide-y">
+                                                <template x-for="order in orders" :key="order.id">
+                                                    <tr class="hover:bg-gray-50">
+                                                        <td class="px-4 py-3 font-medium text-gray-900" x-text="order.incrementId"></td>
+                                                        <td class="px-4 py-3 text-gray-600" x-text="new Date(order.createdAt).toLocaleDateString('en-AU', {day: 'numeric', month: 'short', year: 'numeric'})"></td>
+                                                        <td class="px-4 py-3 text-gray-600 hidden sm:table-cell" x-text="(order.shippingAddress?.firstName ? order.shippingAddress.firstName + ' ' + order.shippingAddress.lastName : null) || (order.customerFirstname + ' ' + order.customerLastname) || 'N/A'"></td>
+                                                        <td class="px-4 py-3 text-gray-900 font-medium text-right" x-text="formatPrice(order.prices?.grandTotal || 0)"></td>
+                                                        <td class="px-4 py-3">
+                                                            <span class="text-xs px-2 py-1 rounded-full"
+                                                                  :class="{
+                                                                      'bg-green-100 text-green-700': order.state === 'complete',
+                                                                      'bg-blue-100 text-blue-700': order.state === 'processing',
+                                                                      'bg-yellow-100 text-yellow-700': order.state === 'pending',
+                                                                      'bg-red-100 text-red-700': order.state === 'canceled' || order.state === 'closed',
+                                                                      'bg-gray-100 text-gray-700': !['complete','processing','pending','canceled','closed'].includes(order.state)
+                                                                  }"
+                                                                  x-text="order.status"></span>
+                                                        </td>
+                                                        <td class="px-4 py-3">
+                                                            <div class="flex items-center gap-2 text-sm">
+                                                                <button @click="viewOrderDetail(order)" class="text-blue-600 hover:text-blue-800 hover:underline">View Order</button>
+                                                                <span class="text-gray-300">|</span>
+                                                                <button @click="reorder(order)" :disabled="loading" class="text-blue-600 hover:text-blue-800 hover:underline disabled:text-gray-400">Reorder</button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                </template>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <!-- Order Detail View -->
+                                    <div x-show="selectedOrder" class="bg-white">
+                                        <button @click="closeOrderDetail()" class="flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-4">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                            </svg>
+                                            Back to Orders
+                                        </button>
+
+                                        <template x-if="selectedOrder">
+                                            <div class="space-y-6">
+                                                <!-- Order Header -->
+                                                <div class="flex flex-wrap justify-between items-start gap-4 pb-4 border-b">
+                                                    <div>
+                                                        <h4 class="text-xl font-bold text-gray-900">Order #<span x-text="selectedOrder.incrementId"></span></h4>
+                                                        <p class="text-sm text-gray-500 mt-1">
+                                                            Order Date: <span x-text="new Date(selectedOrder.createdAt).toLocaleDateString('en-AU', {day: 'numeric', month: 'long', year: 'numeric'})"></span>
+                                                        </p>
+                                                    </div>
+                                                    <div class="flex items-center gap-3">
+                                                        <span class="px-3 py-1 rounded-full text-sm font-medium"
+                                                              :class="{
+                                                                  'bg-green-100 text-green-700': selectedOrder.state === 'complete',
+                                                                  'bg-blue-100 text-blue-700': selectedOrder.state === 'processing',
+                                                                  'bg-yellow-100 text-yellow-700': selectedOrder.state === 'pending',
+                                                                  'bg-red-100 text-red-700': selectedOrder.state === 'canceled' || selectedOrder.state === 'closed',
+                                                                  'bg-gray-100 text-gray-700': !['complete','processing','pending','canceled','closed'].includes(selectedOrder.state)
+                                                              }"
+                                                              x-text="selectedOrder.status"></span>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Action Buttons -->
+                                                <div class="flex gap-3 flex-wrap">
+                                                    <button @click="reorder(selectedOrder)" :disabled="loading"
+                                                            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-4 py-2 rounded-lg text-sm font-medium transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                                        </svg>
+                                                        Reorder
+                                                    </button>
+                                                    <button @click="printOrder(selectedOrder)"
+                                                            class="flex items-center gap-2 border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                                        </svg>
+                                                        Print Order
+                                                    </button>
+                                                </div>
+
+                                                <!-- Addresses -->
+                                                <div class="grid md:grid-cols-2 gap-4">
+                                                    <div class="border rounded-lg p-4">
+                                                        <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Shipping Address</h5>
+                                                        <template x-if="selectedOrder.shippingAddress">
+                                                            <div class="text-sm text-gray-700">
+                                                                <p class="font-medium" x-text="selectedOrder.shippingAddress.firstName + ' ' + selectedOrder.shippingAddress.lastName"></p>
+                                                                <template x-for="line in (Array.isArray(selectedOrder.shippingAddress.street) ? selectedOrder.shippingAddress.street : [selectedOrder.shippingAddress.street])">
+                                                                    <p x-text="line"></p>
+                                                                </template>
+                                                                <p><span x-text="selectedOrder.shippingAddress.city"></span>, <span x-text="selectedOrder.shippingAddress.region || ''"></span> <span x-text="selectedOrder.shippingAddress.postcode"></span></p>
+                                                                <p x-text="selectedOrder.shippingAddress.countryId"></p>
+                                                                <p x-show="selectedOrder.shippingAddress.telephone" class="mt-1">T: <span x-text="selectedOrder.shippingAddress.telephone"></span></p>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="!selectedOrder.shippingAddress">
+                                                            <p class="text-sm text-gray-500">N/A</p>
+                                                        </template>
+                                                    </div>
+                                                    <div class="border rounded-lg p-4">
+                                                        <h5 class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Billing Address</h5>
+                                                        <template x-if="selectedOrder.billingAddress">
+                                                            <div class="text-sm text-gray-700">
+                                                                <p class="font-medium" x-text="selectedOrder.billingAddress.firstName + ' ' + selectedOrder.billingAddress.lastName"></p>
+                                                                <template x-for="line in (Array.isArray(selectedOrder.billingAddress.street) ? selectedOrder.billingAddress.street : [selectedOrder.billingAddress.street])">
+                                                                    <p x-text="line"></p>
+                                                                </template>
+                                                                <p><span x-text="selectedOrder.billingAddress.city"></span>, <span x-text="selectedOrder.billingAddress.region || ''"></span> <span x-text="selectedOrder.billingAddress.postcode"></span></p>
+                                                                <p x-text="selectedOrder.billingAddress.countryId"></p>
+                                                                <p x-show="selectedOrder.billingAddress.telephone" class="mt-1">T: <span x-text="selectedOrder.billingAddress.telephone"></span></p>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="!selectedOrder.billingAddress">
+                                                            <p class="text-sm text-gray-500">N/A</p>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Order Items -->
+                                                <div>
+                                                    <h5 class="font-semibold text-gray-900 mb-3">Items Ordered</h5>
+                                                    <div class="border rounded-lg divide-y">
+                                                        <template x-for="item in selectedOrder.items.filter(i => i.productType !== 'configurable')" :key="item.id">
+                                                            <div class="p-4 flex gap-4">
+                                                                <div class="w-16 h-16 bg-gray-100 rounded flex-shrink-0 flex items-center justify-center">
+                                                                    <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                                                                    </svg>
+                                                                </div>
+                                                                <div class="flex-1 min-w-0">
+                                                                    <p class="font-medium text-gray-900" x-text="item.name"></p>
+                                                                    <p class="text-sm text-gray-500">SKU: <span x-text="item.sku"></span></p>
+                                                                    <div class="flex flex-wrap gap-4 mt-1 text-sm">
+                                                                        <span>Qty: <span class="font-medium" x-text="item.qtyOrdered"></span></span>
+                                                                        <template x-if="item.qtyShipped > 0">
+                                                                            <span class="text-green-600">Shipped: <span x-text="item.qtyShipped"></span></span>
+                                                                        </template>
+                                                                        <template x-if="item.qtyRefunded > 0">
+                                                                            <span class="text-red-600">Refunded: <span x-text="item.qtyRefunded"></span></span>
+                                                                        </template>
+                                                                        <template x-if="item.qtyCanceled > 0">
+                                                                            <span class="text-gray-500">Canceled: <span x-text="item.qtyCanceled"></span></span>
+                                                                        </template>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="text-right">
+                                                                    <p class="font-semibold text-gray-900" x-text="formatPrice(item.rowTotalInclTax || item.rowTotal)"></p>
+                                                                    <p class="text-sm text-gray-500" x-text="formatPrice(item.priceInclTax || item.price) + ' each'"></p>
+                                                                </div>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Order Summary & Addresses -->
+                                                <div class="grid md:grid-cols-2 gap-6">
+                                                    <!-- Order Totals -->
+                                                    <div>
+                                                        <h5 class="font-semibold text-gray-900 mb-3">Order Summary</h5>
+                                                        <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                                                            <div class="flex justify-between text-sm">
+                                                                <span class="text-gray-600">Subtotal</span>
+                                                                <span x-text="formatPrice(selectedOrder.prices?.subtotalInclTax || selectedOrder.prices?.subtotal || 0)"></span>
+                                                            </div>
+                                                            <template x-if="selectedOrder.prices?.discountAmount && selectedOrder.prices.discountAmount != 0">
+                                                                <div class="flex justify-between text-sm text-green-600">
+                                                                    <span>Discount</span>
+                                                                    <span x-text="'-' + formatPrice(Math.abs(selectedOrder.prices.discountAmount))"></span>
+                                                                </div>
+                                                            </template>
+                                                            <div class="flex justify-between text-sm">
+                                                                <span class="text-gray-600">Shipping</span>
+                                                                <span x-text="formatPrice(selectedOrder.prices?.shippingAmountInclTax || selectedOrder.prices?.shippingAmount || 0)"></span>
+                                                            </div>
+                                                            <template x-if="selectedOrder.prices?.giftcardAmount && selectedOrder.prices.giftcardAmount > 0">
+                                                                <div class="flex justify-between text-sm text-purple-600">
+                                                                    <span>Gift Card</span>
+                                                                    <span x-text="'-' + formatPrice(selectedOrder.prices.giftcardAmount)"></span>
+                                                                </div>
+                                                            </template>
+                                                            <div class="flex justify-between text-sm">
+                                                                <span class="text-gray-600">Tax (GST)</span>
+                                                                <span x-text="formatPrice(selectedOrder.prices?.taxAmount || 0)"></span>
+                                                            </div>
+                                                            <div class="flex justify-between font-semibold text-lg pt-2 border-t">
+                                                                <span>Total</span>
+                                                                <span x-text="formatPrice(selectedOrder.prices?.grandTotal || 0)"></span>
+                                                            </div>
+                                                            <template x-if="selectedOrder.prices?.totalPaid > 0">
+                                                                <div class="flex justify-between text-sm text-green-600 pt-1">
+                                                                    <span>Paid</span>
+                                                                    <span x-text="formatPrice(selectedOrder.prices.totalPaid)"></span>
+                                                                </div>
+                                                            </template>
+                                                            <template x-if="selectedOrder.prices?.totalRefunded > 0">
+                                                                <div class="flex justify-between text-sm text-red-600">
+                                                                    <span>Refunded</span>
+                                                                    <span x-text="formatPrice(selectedOrder.prices.totalRefunded)"></span>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+
+                                                    <!-- Shipping & Payment Info -->
+                                                    <div class="space-y-4">
+                                                        <div>
+                                                            <h5 class="font-semibold text-gray-900 mb-2">Shipping Method</h5>
+                                                            <p class="text-sm text-gray-600" x-text="selectedOrder.shippingDescription || 'N/A'"></p>
+                                                        </div>
+                                                        <div>
+                                                            <h5 class="font-semibold text-gray-900 mb-2">Payment Method</h5>
+                                                            <p class="text-sm text-gray-600" x-text="selectedOrder.paymentMethodTitle || selectedOrder.paymentMethod || 'N/A'"></p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Invoices Section -->
+                                                <div>
+                                                    <h5 class="font-semibold text-gray-900 mb-3">Invoices</h5>
+                                                    <div x-show="loadingInvoices" class="text-sm text-gray-500">Loading invoices...</div>
+                                                    <div x-show="!loadingInvoices && selectedOrderInvoices.length === 0" class="text-sm text-gray-500">
+                                                        No invoices available for this order.
+                                                    </div>
+                                                    <div x-show="!loadingInvoices && selectedOrderInvoices.length > 0" class="space-y-2">
+                                                        <template x-for="invoice in selectedOrderInvoices" :key="invoice.id">
+                                                            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                                                <div>
+                                                                    <span class="font-medium">Invoice #<span x-text="invoice.incrementId"></span></span>
+                                                                    <span class="text-sm text-gray-500 ml-2" x-text="new Date(invoice.createdAt).toLocaleDateString('en-AU')"></span>
+                                                                    <span class="text-sm font-medium ml-2" x-text="formatPrice(invoice.grandTotal)"></span>
+                                                                </div>
+                                                                <button @click="downloadInvoice(selectedOrder.id, invoice.id)"
+                                                                        class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition">
+                                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                                    </svg>
+                                                                    Download PDF
+                                                                </button>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Order Status History -->
+                                                <template x-if="selectedOrder.statusHistory && selectedOrder.statusHistory.length > 0">
+                                                    <div>
+                                                        <h5 class="font-semibold text-gray-900 mb-3">Order Updates</h5>
+                                                        <div class="border rounded-lg divide-y max-h-48 overflow-y-auto">
+                                                            <template x-for="(history, idx) in selectedOrder.statusHistory.filter(h => h.isVisibleOnFront || h.note)" :key="idx">
+                                                                <div class="p-3 text-sm">
+                                                                    <div class="flex justify-between">
+                                                                        <span class="text-gray-500" x-text="new Date(history.createdAt).toLocaleString('en-AU')"></span>
+                                                                    </div>
+                                                                    <p x-show="history.note" class="text-gray-700 mt-1" x-text="history.note"></p>
+                                                                </div>
+                                                            </template>
+                                                        </div>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+
+                                    <!-- Orders Pagination -->
+                                    <div x-show="!selectedOrder && orders.length > 0" class="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6 pt-4 border-t">
+                                        <p class="text-sm text-gray-600">
+                                            Showing <span x-text="((ordersPage - 1) * 10) + 1"></span>-<span x-text="Math.min(ordersPage * 10, ordersTotalItems || orders.length)"></span>
+                                            <span x-show="ordersTotalItems > 0"> of <span x-text="ordersTotalItems"></span></span> orders
+                                        </p>
+                                        <div x-show="ordersTotalPages > 1" class="flex items-center gap-2">
+                                            <button @click="loadOrders(ordersPage - 1)" :disabled="ordersPage <= 1 || loading"
+                                                    class="px-3 py-1.5 border rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white transition">
+                                                <span class="flex items-center gap-1">
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                                    </svg>
+                                                    Previous
+                                                </span>
+                                            </button>
+                                            <span class="px-3 py-1.5 text-sm text-gray-600">
+                                                Page <span x-text="ordersPage"></span> of <span x-text="ordersTotalPages"></span>
+                                            </span>
+                                            <button @click="loadOrders(ordersPage + 1)" :disabled="ordersPage >= ordersTotalPages || loading"
+                                                    class="px-3 py-1.5 border rounded-lg text-sm font-medium hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white transition">
+                                                <span class="flex items-center gap-1">
+                                                    Next
+                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                                                    </svg>
+                                                </span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Wishlist Tab -->
+                                <div x-show="accountTab === 'wishlist'">
+                                    <h3 class="font-medium text-gray-900 mb-4">My Wishlist</h3>
+
+                                    <div x-show="wishlistLoading" class="text-center py-8 text-gray-500">
+                                        Loading...
+                                    </div>
+
+                                    <div x-show="!wishlistLoading && wishlist.length === 0" class="text-center py-8 text-gray-500">
+                                        Your wishlist is empty.
+                                        <a href="#" @click.prevent="navigate('home')" class="text-blue-600 hover:text-blue-700 ml-1">Start shopping</a>
+                                    </div>
+
+                                    <div x-show="!wishlistLoading && wishlist.length > 0" class="space-y-3">
+                                        <template x-for="item in wishlist" :key="item.id">
+                                            <div class="flex items-center gap-4 p-3 border rounded-lg">
+                                                <div class="w-16 h-16 bg-gray-100 rounded flex-shrink-0">
+                                                    <img x-show="item.productImageUrl" :src="item.productImageUrl" :alt="item.productName"
+                                                         class="w-full h-full object-cover rounded">
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <a href="#" @click.prevent="viewProduct(item.productId)"
+                                                       class="font-medium text-gray-900 hover:text-blue-600 line-clamp-1" x-text="item.productName"></a>
+                                                    <p class="text-sm text-gray-500" x-text="item.productSku"></p>
+                                                    <p class="text-sm font-semibold text-gray-900" x-text="formatPrice(item.productPrice)"></p>
+                                                </div>
+                                                <div class="flex items-center gap-2">
+                                                    <template x-if="item.productType === 'configurable'">
+                                                        <button @click="viewProduct(item.productId)"
+                                                                class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm">
+                                                            Select Options
+                                                        </button>
+                                                    </template>
+                                                    <template x-if="item.productType !== 'configurable'">
+                                                        <button @click="moveWishlistToCart(item.id)"
+                                                                :disabled="!item.inStock"
+                                                                class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-3 py-1.5 rounded text-sm">
+                                                            Add to Cart
+                                                        </button>
+                                                    </template>
+                                                    <button @click="removeFromWishlist(item.productId)"
+                                                            class="text-red-500 hover:text-red-600 p-1.5">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <!-- Reviews Tab -->
+                                <div x-show="accountTab === 'reviews'">
+                                    <h3 class="font-medium text-gray-900 mb-4">My Reviews</h3>
+
+                                    <div x-show="myReviews.length === 0" class="text-center py-8 text-gray-500">
+                                        You haven't written any reviews yet.
+                                    </div>
+
+                                    <div x-show="myReviews.length > 0" class="space-y-4">
+                                        <template x-for="review in myReviews" :key="review.id">
+                                            <div class="border rounded-lg p-4">
+                                                <div class="flex items-start justify-between">
+                                                    <div>
+                                                        <p class="font-medium text-gray-900" x-text="review.productName || 'Product'"></p>
+                                                        <div class="flex items-center gap-2 mt-1">
+                                                            <span class="text-yellow-400 text-sm" x-text="'★'.repeat(review.rating) + '☆'.repeat(5 - review.rating)"></span>
+                                                            <span class="text-sm text-gray-500" x-text="new Date(review.createdAt).toLocaleDateString()"></span>
+                                                        </div>
+                                                    </div>
+                                                    <span class="text-xs px-2 py-1 rounded"
+                                                          :class="{
+                                                              'bg-green-100 text-green-700': review.status === 'approved',
+                                                              'bg-yellow-100 text-yellow-700': review.status === 'pending',
+                                                              'bg-red-100 text-red-700': review.status === 'not_approved'
+                                                          }"
+                                                          x-text="review.status === 'approved' ? 'Published' : review.status === 'pending' ? 'Pending' : 'Not Approved'"></span>
+                                                </div>
+                                                <p class="font-medium text-gray-900 mt-2" x-text="review.title"></p>
+                                                <p class="text-gray-600 mt-1 text-sm" x-text="review.detail"></p>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- Order Success -->
+        <template x-if="view === 'success'">
+            <div class="max-w-lg mx-auto text-center bg-white rounded-lg shadow p-8">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Order Placed!</h1>
+                <p class="text-gray-600 mb-2">Thank you for your order.</p>
+                <p class="text-gray-600 mb-6">Order #: <span class="font-mono font-medium" x-text="lastOrderId"></span></p>
+                <button @click="navigate('home')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                    Continue Shopping
+                </button>
+            </div>
+        </template>
+
+        <!-- CMS Page -->
+        <template x-if="view === 'cms_page' && cmsPage">
+            <div class="bg-white rounded-lg shadow">
+                <div class="p-8">
+                    <h1 x-show="cmsPage.contentHeading" class="text-3xl font-bold text-gray-900 mb-6" x-text="cmsPage.contentHeading || cmsPage.title"></h1>
+                    <div class="prose prose-lg max-w-none" x-html="cmsPage.content"></div>
+                </div>
+            </div>
+        </template>
+
+        <!-- 404 Not Found -->
+        <template x-if="view === 'not_found'">
+            <div class="max-w-lg mx-auto text-center bg-white rounded-lg shadow p-8">
+                <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-900 mb-2">Page Not Found</h1>
+                <p class="text-gray-600 mb-6">The page you're looking for doesn't exist or has been moved.</p>
+                <button @click="navigate('home')" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                    Go to Homepage
+                </button>
+            </div>
+        </template>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-gray-300 mt-12 py-10">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- About -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Maho Headless Store</h3>
+                    <p class="text-sm text-gray-400">A modern headless storefront powered by Maho Commerce API Platform.</p>
+                </div>
+
+                <!-- CMS Pages -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Information</h3>
+                    <ul class="space-y-2 text-sm">
+                        <template x-for="page in footerPages" :key="page.id">
+                            <li>
+                                <a :href="'/api-test/store/' + page.identifier"
+                                   @click.prevent="navigateTo(page.identifier)"
+                                   class="hover:text-white transition-colors"
+                                   x-text="page.title"></a>
+                            </li>
+                        </template>
+                        <li x-show="footerPages.length === 0" class="text-gray-500 italic">Loading...</li>
+                    </ul>
+                </div>
+
+                <!-- Blog Posts (if available) -->
+                <div x-show="blogPosts.length > 0">
+                    <h3 class="text-white font-semibold mb-4">Latest Blog Posts</h3>
+                    <ul class="space-y-2 text-sm">
+                        <template x-for="post in blogPosts" :key="post.id">
+                            <li>
+                                <a :href="'/api-test/store/blog/' + (post.urlKey || post.id)"
+                                   @click.prevent="viewBlogPost(post.urlKey || post.id)"
+                                   class="hover:text-white transition-colors"
+                                   x-text="post.title"></a>
+                            </li>
+                        </template>
+                    </ul>
+                </div>
+
+                <!-- Quick Links -->
+                <div>
+                    <h3 class="text-white font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#" @click.prevent="navigate('home')" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#" @click.prevent="navigate('cart')" class="hover:text-white transition-colors">Cart</a></li>
+                        <li><a href="#" @click.prevent="navigate('login')" class="hover:text-white transition-colors">My Account</a></li>
+                        <li><a href="../index.html" class="hover:text-white transition-colors">API Dashboard</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Newsletter Signup -->
+            <div class="border-t border-gray-700 mt-8 pt-6">
+                <div class="max-w-md mx-auto text-center">
+                    <h3 class="text-white font-semibold mb-2">Subscribe to our Newsletter</h3>
+                    <p class="text-sm text-gray-400 mb-4">Get the latest updates, deals, and news delivered to your inbox.</p>
+
+                    <!-- Guest signup form -->
+                    <template x-if="!token">
+                        <form @submit.prevent="subscribeNewsletter()" class="flex gap-2">
+                            <input type="email"
+                                   x-model="newsletterEmail"
+                                   placeholder="Enter your email"
+                                   required
+                                   class="flex-1 px-4 py-2 rounded-lg bg-gray-700 border border-gray-600 text-white placeholder-gray-400 focus:outline-none focus:border-blue-500 text-sm">
+                            <button type="submit"
+                                    :disabled="loading"
+                                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium">
+                                Subscribe
+                            </button>
+                        </form>
+                    </template>
+
+                    <!-- Logged in user status -->
+                    <template x-if="token">
+                        <div class="flex items-center justify-center gap-3">
+                            <span class="text-sm" x-text="customer?.isSubscribed ? '✓ You are subscribed' : 'Not subscribed'"></span>
+                            <button @click="toggleNewsletter(!customer?.isSubscribed)"
+                                    :disabled="loading"
+                                    class="px-4 py-2 rounded-lg text-sm font-medium"
+                                    :class="customer?.isSubscribed ? 'bg-gray-600 hover:bg-gray-500 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'"
+                                    x-text="customer?.isSubscribed ? 'Unsubscribe' : 'Subscribe'">
+                            </button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-500">
+                <p>&copy; 2025-2026 Maho Commerce. Headless Storefront Demo.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/api-test/store/store.js?v=42"></script>
+    <!-- Store function is defined in store.js -->
+</body>
+</html>

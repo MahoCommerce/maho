@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMS API Tests - Maho API Test Harness</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div x-data="cmsTests()" class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <a href="index.html" class="text-blue-400 hover:text-blue-300 text-sm">&larr; Back to Dashboard</a>
+            <h1 class="text-3xl font-bold text-white mt-2">CMS API Tests</h1>
+            <p class="text-gray-400">Test CMS pages and static blocks endpoints</p>
+        </header>
+
+        <!-- API Endpoints Reference -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-3">API Endpoints</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-mono">
+                <div>
+                    <span class="text-yellow-400">CMS Pages:</span>
+                    <ul class="mt-1 space-y-1 text-gray-300">
+                        <li>GET /api/cms-pages</li>
+                        <li>GET /api/cms-pages/{id}</li>
+                        <li>GET /api/cms-pages?identifier=...</li>
+                    </ul>
+                </div>
+                <div>
+                    <span class="text-yellow-400">CMS Blocks:</span>
+                    <ul class="mt-1 space-y-1 text-gray-300">
+                        <li>GET /api/cms-blocks</li>
+                        <li>GET /api/cms-blocks/{id}</li>
+                        <li>GET /api/cms-blocks?identifier=...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 border-b border-gray-700">
+            <button @click="activeTab = 'pages'"
+                    :class="activeTab === 'pages' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">CMS Pages</button>
+            <button @click="activeTab = 'blocks'"
+                    :class="activeTab === 'blocks' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">CMS Blocks</button>
+            <button @click="activeTab = 'urlResolver'"
+                    :class="activeTab === 'urlResolver' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">URL Resolver</button>
+        </div>
+
+        <!-- CMS Pages Tab -->
+        <div x-show="activeTab === 'pages'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">CMS Pages</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-400 mb-1">Page ID or Identifier</label>
+                        <input type="text" x-model="pages.identifier" placeholder="about-us or 4"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div class="flex items-end">
+                        <button @click="getPage()"
+                                :disabled="loading || !pages.identifier"
+                                class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            Get Page
+                        </button>
+                    </div>
+                    <div class="flex items-end">
+                        <button @click="listPages()"
+                                :disabled="loading"
+                                class="w-full bg-gray-700 hover:bg-gray-600 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            List All Pages
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" x-model="pages.activeOnly" class="rounded bg-gray-700">
+                        <span class="text-sm text-gray-400">Active Only</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Page Detail -->
+            <div x-show="pages.data" class="bg-gray-800 rounded-lg p-6">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold" x-text="pages.data?.title"></h2>
+                    <p class="text-gray-400 text-sm">
+                        <span class="font-mono" x-text="'/' + (pages.data?.identifier || pages.data?.urlKey)"></span>
+                        <span class="ml-2 text-xs px-2 py-0.5 rounded"
+                              :class="pages.data?.isActive !== false ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                              x-text="pages.data?.isActive !== false ? 'Active' : 'Inactive'"></span>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                    <div><span class="text-gray-400">ID:</span> <span x-text="pages.data?.id"></span></div>
+                    <div><span class="text-gray-400">Store:</span> <span x-text="pages.data?.storeId || 'All'"></span></div>
+                    <div><span class="text-gray-400">Layout:</span> <span x-text="pages.data?.pageLayout || pages.data?.rootTemplate || '-'"></span></div>
+                    <div><span class="text-gray-400">Created:</span> <span x-text="pages.data?.creationTime || pages.data?.createdAt || '-'"></span></div>
+                </div>
+
+                <div x-show="pages.data?.contentHeading" class="mb-4">
+                    <span class="text-gray-400 text-sm">Content Heading:</span>
+                    <p class="font-medium" x-text="pages.data?.contentHeading"></p>
+                </div>
+
+                <div x-show="pages.data?.content" class="mb-4">
+                    <span class="text-gray-400 text-sm">Content Preview:</span>
+                    <div class="bg-gray-900 rounded p-4 mt-1 prose prose-invert max-w-none text-sm overflow-auto max-h-64"
+                         x-html="pages.data?.content"></div>
+                </div>
+
+                <div x-show="pages.data?.metaTitle || pages.data?.metaDescription" class="text-sm">
+                    <span class="text-gray-400">SEO:</span>
+                    <div class="mt-1 space-y-1">
+                        <p x-show="pages.data?.metaTitle"><span class="text-gray-500">Title:</span> <span x-text="pages.data?.metaTitle"></span></p>
+                        <p x-show="pages.data?.metaDescription"><span class="text-gray-500">Description:</span> <span x-text="pages.data?.metaDescription"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pages List -->
+            <div x-show="pages.list" class="bg-gray-800 rounded-lg p-6">
+                <div class="mb-4">
+                    <span class="text-gray-400">Found</span>
+                    <span class="font-semibold" x-text="pages.total"></span>
+                    <span class="text-gray-400">pages</span>
+                </div>
+
+                <table class="w-full text-sm">
+                    <thead class="text-left text-gray-400 border-b border-gray-700">
+                        <tr>
+                            <th class="py-2">ID</th>
+                            <th class="py-2">Title</th>
+                            <th class="py-2">Identifier</th>
+                            <th class="py-2">Status</th>
+                            <th class="py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="page in pages.list" :key="page.id">
+                            <tr class="border-b border-gray-700/50">
+                                <td class="py-2" x-text="page.id"></td>
+                                <td class="py-2" x-text="page.title"></td>
+                                <td class="py-2 font-mono text-xs" x-text="page.identifier || page.urlKey"></td>
+                                <td class="py-2">
+                                    <span class="text-xs px-2 py-0.5 rounded"
+                                          :class="page.isActive !== false ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                                          x-text="page.isActive !== false ? 'Active' : 'Inactive'"></span>
+                                </td>
+                                <td class="py-2">
+                                    <button @click="pages.identifier = page.id; getPage()" class="text-blue-400 hover:text-blue-300 text-xs">View</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Raw Response -->
+            <div x-show="pages.response" class="bg-gray-800 rounded-lg p-6">
+                <details>
+                    <summary class="cursor-pointer text-sm text-gray-400 mb-2">Raw Response</summary>
+                    <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="pages.response"></code></pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- CMS Blocks Tab -->
+        <div x-show="activeTab === 'blocks'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">CMS Blocks</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-sm text-gray-400 mb-1">Block ID or Identifier</label>
+                        <input type="text" x-model="blocks.identifier" placeholder="footer_links or 1"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div class="flex items-end">
+                        <button @click="getBlock()"
+                                :disabled="loading || !blocks.identifier"
+                                class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            Get Block
+                        </button>
+                    </div>
+                    <div class="flex items-end">
+                        <button @click="listBlocks()"
+                                :disabled="loading"
+                                class="w-full bg-gray-700 hover:bg-gray-600 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            List All Blocks
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Block Detail -->
+            <div x-show="blocks.data" class="bg-gray-800 rounded-lg p-6">
+                <div class="mb-4">
+                    <h2 class="text-2xl font-bold" x-text="blocks.data?.title"></h2>
+                    <p class="text-gray-400 text-sm">
+                        <span class="font-mono" x-text="blocks.data?.identifier"></span>
+                        <span class="ml-2 text-xs px-2 py-0.5 rounded"
+                              :class="blocks.data?.isActive !== false ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                              x-text="blocks.data?.isActive !== false ? 'Active' : 'Inactive'"></span>
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
+                    <div><span class="text-gray-400">ID:</span> <span x-text="blocks.data?.id"></span></div>
+                    <div><span class="text-gray-400">Store:</span> <span x-text="blocks.data?.storeId || 'All'"></span></div>
+                    <div><span class="text-gray-400">Created:</span> <span x-text="blocks.data?.creationTime || blocks.data?.createdAt || '-'"></span></div>
+                    <div><span class="text-gray-400">Updated:</span> <span x-text="blocks.data?.updateTime || blocks.data?.updatedAt || '-'"></span></div>
+                </div>
+
+                <div x-show="blocks.data?.content" class="mb-4">
+                    <span class="text-gray-400 text-sm">Content:</span>
+                    <div class="bg-gray-900 rounded p-4 mt-1 prose prose-invert max-w-none text-sm overflow-auto max-h-64"
+                         x-html="blocks.data?.content"></div>
+                </div>
+            </div>
+
+            <!-- Blocks List -->
+            <div x-show="blocks.list" class="bg-gray-800 rounded-lg p-6">
+                <div class="mb-4">
+                    <span class="text-gray-400">Found</span>
+                    <span class="font-semibold" x-text="blocks.total"></span>
+                    <span class="text-gray-400">blocks</span>
+                </div>
+
+                <table class="w-full text-sm">
+                    <thead class="text-left text-gray-400 border-b border-gray-700">
+                        <tr>
+                            <th class="py-2">ID</th>
+                            <th class="py-2">Title</th>
+                            <th class="py-2">Identifier</th>
+                            <th class="py-2">Status</th>
+                            <th class="py-2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="block in blocks.list" :key="block.id">
+                            <tr class="border-b border-gray-700/50">
+                                <td class="py-2" x-text="block.id"></td>
+                                <td class="py-2" x-text="block.title"></td>
+                                <td class="py-2 font-mono text-xs" x-text="block.identifier"></td>
+                                <td class="py-2">
+                                    <span class="text-xs px-2 py-0.5 rounded"
+                                          :class="block.isActive !== false ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                                          x-text="block.isActive !== false ? 'Active' : 'Inactive'"></span>
+                                </td>
+                                <td class="py-2">
+                                    <button @click="blocks.identifier = block.id; getBlock()" class="text-blue-400 hover:text-blue-300 text-xs">View</button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Raw Response -->
+            <div x-show="blocks.response" class="bg-gray-800 rounded-lg p-6">
+                <details>
+                    <summary class="cursor-pointer text-sm text-gray-400 mb-2">Raw Response</summary>
+                    <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="blocks.response"></code></pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- URL Resolver Tab -->
+        <div x-show="activeTab === 'urlResolver'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">URL Resolver</h3>
+                <p class="text-gray-400 text-sm mb-4">Resolve a URL path to its underlying entity (product, category, or CMS page)</p>
+
+                <div class="flex gap-2 mb-4">
+                    <input type="text" x-model="resolver.path" placeholder="about-us or tennis-rackets.html"
+                           @keyup.enter="resolveUrl()"
+                           class="flex-1 bg-gray-700 rounded px-3 py-2">
+                    <button @click="resolveUrl()"
+                            :disabled="loading || !resolver.path"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        Resolve
+                    </button>
+                </div>
+
+                <div class="flex gap-2 flex-wrap text-sm">
+                    <span class="text-gray-400">Try:</span>
+                    <button @click="resolver.path = 'about-us'; resolveUrl()" class="text-blue-400 hover:text-blue-300">about-us</button>
+                    <button @click="resolver.path = 'customer-service'; resolveUrl()" class="text-blue-400 hover:text-blue-300">customer-service</button>
+                    <button @click="resolver.path = 'privacy-policy'; resolveUrl()" class="text-blue-400 hover:text-blue-300">privacy-policy</button>
+                </div>
+            </div>
+
+            <!-- Resolver Result -->
+            <div x-show="resolver.data" class="bg-gray-800 rounded-lg p-6">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <div>
+                        <span class="text-gray-400">Type:</span>
+                        <span class="ml-2 px-2 py-0.5 rounded text-xs"
+                              :class="resolver.data?.type === 'CMS_PAGE' ? 'bg-blue-900 text-blue-300' :
+                                      resolver.data?.type === 'PRODUCT' ? 'bg-green-900 text-green-300' :
+                                      resolver.data?.type === 'CATEGORY' ? 'bg-purple-900 text-purple-300' : 'bg-gray-700'"
+                              x-text="resolver.data?.type"></span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400">ID:</span>
+                        <span class="font-mono" x-text="resolver.data?.id"></span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400">Redirect:</span>
+                        <span x-text="resolver.data?.redirectCode || 'None'"></span>
+                    </div>
+                    <div>
+                        <span class="text-gray-400">Relative URL:</span>
+                        <span class="font-mono text-xs" x-text="resolver.data?.relativeUrl || resolver.data?.relative_url || '-'"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Raw Response -->
+            <div x-show="resolver.response" class="bg-gray-800 rounded-lg p-6">
+                <details open>
+                    <summary class="cursor-pointer text-sm text-gray-400 mb-2">Raw Response</summary>
+                    <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="resolver.response"></code></pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div x-show="loading" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 flex items-center gap-3">
+                <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cmsTests() {
+            return {
+                activeTab: 'pages',
+                loading: false,
+
+                pages: {
+                    identifier: '',
+                    activeOnly: true,
+                    data: null,
+                    list: null,
+                    total: 0,
+                    response: null
+                },
+
+                blocks: {
+                    identifier: '',
+                    data: null,
+                    list: null,
+                    total: 0,
+                    response: null
+                },
+
+                resolver: {
+                    path: '',
+                    data: null,
+                    response: null
+                },
+
+                async getPage() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch(`/api/cms-pages/${this.pages.identifier}`);
+                        const data = await res.json();
+                        this.pages.response = JSON.stringify(data, null, 2);
+                        this.pages.data = data;
+                        this.pages.list = null;
+                    } catch (e) {
+                        this.pages.response = 'Error: ' + e.message;
+                    }
+                    this.loading = false;
+                },
+
+                async listPages() {
+                    this.loading = true;
+                    try {
+                        const params = new URLSearchParams();
+                        if (this.pages.activeOnly) params.append('isActive', '1');
+
+                        const res = await fetch('/api/cms-pages?' + params.toString());
+                        const data = await res.json();
+                        this.pages.response = JSON.stringify(data, null, 2);
+                        this.pages.list = data.member || data['hydra:member'] || data.items || data;
+                        this.pages.total = data.totalItems || data['hydra:totalItems'] || this.pages.list?.length || 0;
+                        this.pages.data = null;
+                    } catch (e) {
+                        this.pages.response = 'Error: ' + e.message;
+                    }
+                    this.loading = false;
+                },
+
+                async getBlock() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch(`/api/cms-blocks/${this.blocks.identifier}`);
+                        const data = await res.json();
+                        this.blocks.response = JSON.stringify(data, null, 2);
+                        this.blocks.data = data;
+                        this.blocks.list = null;
+                    } catch (e) {
+                        this.blocks.response = 'Error: ' + e.message;
+                    }
+                    this.loading = false;
+                },
+
+                async listBlocks() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('/api/cms-blocks');
+                        const data = await res.json();
+                        this.blocks.response = JSON.stringify(data, null, 2);
+                        this.blocks.list = data.member || data['hydra:member'] || data.items || data;
+                        this.blocks.total = data.totalItems || data['hydra:totalItems'] || this.blocks.list?.length || 0;
+                        this.blocks.data = null;
+                    } catch (e) {
+                        this.blocks.response = 'Error: ' + e.message;
+                    }
+                    this.loading = false;
+                },
+
+                async resolveUrl() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch(`/api/url-resolver?path=${encodeURIComponent(this.resolver.path)}`);
+                        const data = await res.json();
+                        this.resolver.response = JSON.stringify(data, null, 2);
+                        this.resolver.data = data;
+                    } catch (e) {
+                        this.resolver.response = 'Error: ' + e.message;
+                        this.resolver.data = null;
+                    }
+                    this.loading = false;
+                }
+            };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories API Tests - Maho API Test Harness</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div x-data="categoryTests()" class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <a href="index.html" class="text-blue-400 hover:text-blue-300 text-sm">&larr; Back to Dashboard</a>
+            <h1 class="text-3xl font-bold text-white mt-2">Categories API Tests</h1>
+            <p class="text-gray-400">Test category tree, hierarchy, and individual category endpoints</p>
+        </header>
+
+        <!-- M2 Parity Checklist -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-3">M2 Feature Parity Checklist</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>List Categories</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Get Category</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Category Tree</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Search Categories</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Parent/Children</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Products Count</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Breadcrumbs</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>URL Path</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Endpoints Reference -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-3">API Endpoints</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm font-mono">
+                <div>
+                    <span class="text-yellow-400">REST:</span>
+                    <ul class="mt-1 space-y-1 text-gray-300">
+                        <li>GET /api/categories</li>
+                        <li>GET /api/categories/{id}</li>
+                        <li>GET /api/categories?search=...</li>
+                        <li>GET /api/categories?parentId=...</li>
+                    </ul>
+                </div>
+                <div>
+                    <span class="text-purple-400">GraphQL:</span>
+                    <ul class="mt-1 space-y-1 text-gray-300">
+                        <li>categories { ... }</li>
+                        <li>category(id: ID!) { ... }</li>
+                        <li>categoryTree { ... }</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 border-b border-gray-700">
+            <button @click="activeTab = 'list'"
+                    :class="activeTab === 'list' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">List / Tree</button>
+            <button @click="activeTab = 'detail'"
+                    :class="activeTab === 'detail' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Get Category</button>
+            <button @click="activeTab = 'search'"
+                    :class="activeTab === 'search' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Search</button>
+            <button @click="activeTab = 'graphql'"
+                    :class="activeTab === 'graphql' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">GraphQL</button>
+        </div>
+
+        <!-- List / Tree Tab -->
+        <div x-show="activeTab === 'list'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Category List</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Parent ID</label>
+                        <input type="number" x-model="list.parentId" placeholder="Root (empty)"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Depth</label>
+                        <select x-model="list.depth" class="w-full bg-gray-700 rounded px-3 py-2">
+                            <option value="">All</option>
+                            <option value="1">1 Level</option>
+                            <option value="2">2 Levels</option>
+                            <option value="3">3 Levels</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Page Size</label>
+                        <select x-model="list.pageSize" class="w-full bg-gray-700 rounded px-3 py-2">
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button @click="loadCategories()"
+                                :disabled="loading"
+                                class="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            Load Categories
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" x-model="list.activeOnly" class="rounded bg-gray-700">
+                        <span class="text-sm text-gray-400">Active Only</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" x-model="list.includeProducts" class="rounded bg-gray-700">
+                        <span class="text-sm text-gray-400">Include Product Count</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div x-show="list.results" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <span class="text-gray-400">Found</span>
+                        <span class="font-semibold" x-text="list.total"></span>
+                        <span class="text-gray-400">categories</span>
+                        <span class="text-xs text-gray-500 ml-2" x-text="list.time + 'ms'"></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <button @click="list.viewMode = 'tree'"
+                                :class="list.viewMode === 'tree' ? 'bg-blue-600' : 'bg-gray-700'"
+                                class="px-3 py-1 rounded text-sm">Tree</button>
+                        <button @click="list.viewMode = 'table'"
+                                :class="list.viewMode === 'table' ? 'bg-blue-600' : 'bg-gray-700'"
+                                class="px-3 py-1 rounded text-sm">Table</button>
+                    </div>
+                </div>
+
+                <!-- Tree View -->
+                <div x-show="list.viewMode === 'tree'" class="space-y-1">
+                    <template x-for="cat in list.results" :key="cat.id">
+                        <div class="category-tree-item">
+                            <div class="flex items-center gap-2 p-2 bg-gray-900 rounded hover:bg-gray-700 cursor-pointer"
+                                 :style="'margin-left: ' + ((cat.level || 1) - 1) * 20 + 'px'"
+                                 @click="viewCategory(cat.id)">
+                                <span class="text-gray-500 text-xs w-8" x-text="'#' + cat.id"></span>
+                                <span class="font-medium" x-text="cat.name"></span>
+                                <span x-show="cat.productCount !== undefined" class="text-xs text-gray-500" x-text="'(' + cat.productCount + ' products)'"></span>
+                                <span x-show="!cat.isActive" class="text-xs bg-red-900 text-red-300 px-1 rounded">Inactive</span>
+                                <span x-show="cat.includeInMenu" class="text-xs bg-green-900 text-green-300 px-1 rounded">Menu</span>
+                            </div>
+                            <!-- Nested children would go here if API returns tree structure -->
+                        </div>
+                    </template>
+                </div>
+
+                <!-- Table View -->
+                <div x-show="list.viewMode === 'table'" class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="text-left text-gray-400 border-b border-gray-700">
+                            <tr>
+                                <th class="py-2 px-2">ID</th>
+                                <th class="py-2 px-2">Name</th>
+                                <th class="py-2 px-2">URL Key</th>
+                                <th class="py-2 px-2">Level</th>
+                                <th class="py-2 px-2">Products</th>
+                                <th class="py-2 px-2">Status</th>
+                                <th class="py-2 px-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="cat in list.results" :key="cat.id">
+                                <tr class="border-b border-gray-700/50 hover:bg-gray-700/30">
+                                    <td class="py-2 px-2 font-mono text-xs" x-text="cat.id"></td>
+                                    <td class="py-2 px-2">
+                                        <span :style="'margin-left: ' + ((cat.level || 1) - 1) * 10 + 'px'" x-text="cat.name"></span>
+                                    </td>
+                                    <td class="py-2 px-2 text-gray-400 text-xs" x-text="cat.urlKey || cat.url_key || '-'"></td>
+                                    <td class="py-2 px-2 text-center" x-text="cat.level || '-'"></td>
+                                    <td class="py-2 px-2 text-center" x-text="cat.productCount ?? '-'"></td>
+                                    <td class="py-2 px-2">
+                                        <span class="text-xs px-2 py-0.5 rounded"
+                                              :class="cat.isActive !== false ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                                              x-text="cat.isActive !== false ? 'Active' : 'Inactive'"></span>
+                                    </td>
+                                    <td class="py-2 px-2">
+                                        <button @click="viewCategory(cat.id)" class="text-blue-400 hover:text-blue-300 text-xs">View</button>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Raw Response -->
+            <div x-show="list.response" class="bg-gray-800 rounded-lg p-6">
+                <details>
+                    <summary class="cursor-pointer text-sm text-gray-400 mb-2">Raw Response</summary>
+                    <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="list.response"></code></pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- Get Category Tab -->
+        <div x-show="activeTab === 'detail'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Get Category</h3>
+
+                <div class="flex gap-2 mb-4">
+                    <input type="text" x-model="detail.id" placeholder="Category ID (e.g., 2)"
+                           @keyup.enter="getCategory('rest')"
+                           class="flex-1 bg-gray-700 rounded px-3 py-2">
+                    <button @click="getCategory('rest')"
+                            :disabled="loading || !detail.id"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        REST
+                    </button>
+                    <button @click="getCategory('graphql')"
+                            :disabled="loading || !detail.id"
+                            class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        GraphQL
+                    </button>
+                </div>
+
+                <!-- Options -->
+                <div class="flex items-center gap-4 text-sm text-gray-400">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" x-model="detail.includeChildren" class="rounded bg-gray-700">
+                        <span>Include Children</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" x-model="detail.includeBreadcrumbs" class="rounded bg-gray-700">
+                        <span>Include Breadcrumbs</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" x-model="detail.includeProducts" class="rounded bg-gray-700">
+                        <span>Include Products</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Category Details -->
+            <div x-show="detail.data" class="bg-gray-800 rounded-lg p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Image -->
+                    <div>
+                        <div class="bg-gray-900 rounded aspect-video flex items-center justify-center">
+                            <template x-if="detail.data?.image || detail.data?.imageUrl">
+                                <img :src="detail.data.imageUrl || detail.data.image" class="max-w-full max-h-full object-contain rounded">
+                            </template>
+                            <template x-if="!detail.data?.image && !detail.data?.imageUrl">
+                                <span class="text-gray-600">No Image</span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Info -->
+                    <div class="md:col-span-2 space-y-4">
+                        <div>
+                            <h2 class="text-2xl font-bold" x-text="detail.data?.name"></h2>
+                            <p class="text-gray-400">ID: <span class="font-mono" x-text="detail.data?.id"></span></p>
+                        </div>
+
+                        <!-- Breadcrumbs -->
+                        <div x-show="detail.data?.breadcrumbs || detail.data?.path" class="flex items-center gap-2 text-sm">
+                            <template x-if="detail.data?.breadcrumbs">
+                                <template x-for="(crumb, i) in detail.data?.breadcrumbs" :key="crumb.id || i">
+                                    <span class="flex items-center gap-2">
+                                        <span x-show="i > 0" class="text-gray-500">/</span>
+                                        <button @click="viewCategory(crumb.id)" class="text-blue-400 hover:text-blue-300" x-text="crumb.name"></button>
+                                    </span>
+                                </template>
+                            </template>
+                            <template x-if="!detail.data?.breadcrumbs && detail.data?.path">
+                                <span class="text-gray-400" x-text="detail.data?.path"></span>
+                            </template>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <span class="text-gray-400">Status:</span>
+                                <span :class="detail.data?.isActive !== false ? 'text-green-400' : 'text-red-400'"
+                                      x-text="detail.data?.isActive !== false ? 'Active' : 'Inactive'"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">Level:</span>
+                                <span x-text="detail.data?.level || '-'"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">URL Key:</span>
+                                <span class="font-mono text-xs" x-text="detail.data?.urlKey || detail.data?.url_key || '-'"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">URL Path:</span>
+                                <span class="font-mono text-xs" x-text="detail.data?.urlPath || detail.data?.url_path || '-'"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">In Menu:</span>
+                                <span :class="detail.data?.includeInMenu ? 'text-green-400' : 'text-gray-500'"
+                                      x-text="detail.data?.includeInMenu ? 'Yes' : 'No'"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">Position:</span>
+                                <span x-text="detail.data?.position || '-'"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">Products:</span>
+                                <span x-text="detail.data?.productCount ?? '-'"></span>
+                            </div>
+                            <div>
+                                <span class="text-gray-400">Parent ID:</span>
+                                <button x-show="detail.data?.parentId" @click="viewCategory(detail.data?.parentId)"
+                                        class="text-blue-400 hover:text-blue-300" x-text="detail.data?.parentId"></button>
+                                <span x-show="!detail.data?.parentId" class="text-gray-500">None</span>
+                            </div>
+                        </div>
+
+                        <div x-show="detail.data?.description">
+                            <span class="text-gray-400 text-sm">Description:</span>
+                            <p class="text-sm mt-1" x-html="detail.data?.description"></p>
+                        </div>
+
+                        <!-- Children -->
+                        <div x-show="detail.data?.children && detail.data?.children.length > 0">
+                            <span class="text-gray-400 text-sm">Children:</span>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                <template x-for="child in detail.data?.children" :key="child.id">
+                                    <button @click="viewCategory(child.id)"
+                                            class="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded">
+                                        <span x-text="child.name"></span>
+                                        <span class="text-gray-500" x-text="'#' + child.id"></span>
+                                    </button>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Raw Response -->
+            <div x-show="detail.response" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm font-medium">Response</span>
+                    <span class="text-xs px-2 py-0.5 rounded"
+                          :class="detail.status >= 200 && detail.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="detail.status"></span>
+                    <span class="text-xs text-gray-500" x-text="detail.time + 'ms'"></span>
+                </div>
+                <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="detail.response"></code></pre>
+            </div>
+        </div>
+
+        <!-- Search Tab -->
+        <div x-show="activeTab === 'search'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Search Categories</h3>
+
+                <div class="flex gap-2 mb-4">
+                    <input type="text" x-model="search.query" placeholder="Search by name..."
+                           @keyup.enter="searchCategories()"
+                           class="flex-1 bg-gray-700 rounded px-3 py-2">
+                    <button @click="searchCategories()"
+                            :disabled="loading"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        Search
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" x-model="search.activeOnly" class="rounded bg-gray-700">
+                        <span class="text-sm text-gray-400">Active Only</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Search Results -->
+            <div x-show="search.results" class="bg-gray-800 rounded-lg p-6">
+                <div class="mb-4">
+                    <span class="text-gray-400">Found</span>
+                    <span class="font-semibold" x-text="search.total"></span>
+                    <span class="text-gray-400">categories</span>
+                    <span class="text-xs text-gray-500 ml-2" x-text="search.time + 'ms'"></span>
+                </div>
+
+                <div class="space-y-2">
+                    <template x-for="cat in search.results" :key="cat.id">
+                        <div class="flex items-center justify-between p-3 bg-gray-900 rounded hover:bg-gray-700 cursor-pointer"
+                             @click="viewCategory(cat.id)">
+                            <div>
+                                <span class="font-medium" x-text="cat.name"></span>
+                                <span class="text-gray-500 text-xs ml-2" x-text="cat.urlPath || cat.url_path || ''"></span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="text-xs text-gray-500" x-text="'Level ' + (cat.level || '?')"></span>
+                                <span class="text-xs px-2 py-0.5 rounded"
+                                      :class="cat.isActive !== false ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                                      x-text="cat.isActive !== false ? 'Active' : 'Inactive'"></span>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Raw Response -->
+            <div x-show="search.response" class="bg-gray-800 rounded-lg p-6">
+                <details>
+                    <summary class="cursor-pointer text-sm text-gray-400 mb-2">Raw Response</summary>
+                    <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="search.response"></code></pre>
+                </details>
+            </div>
+        </div>
+
+        <!-- GraphQL Tab -->
+        <div x-show="activeTab === 'graphql'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">GraphQL Query</h3>
+
+                <!-- Endpoint Selection -->
+                <div class="mb-4 p-3 bg-gray-900 rounded">
+                    <label class="block text-sm text-gray-400 mb-2">Endpoint</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" x-model="graphql.endpoint" value="public" class="text-blue-600">
+                            <span><code class="text-blue-400">/api/graphql</code> <span class="text-gray-500">(Public)</span></span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" x-model="graphql.endpoint" value="admin" class="text-purple-600">
+                            <span><code class="text-purple-400">/admin/graphql/index</code> <span class="text-gray-500">(Admin session)</span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">Query</label>
+                    <textarea x-model="graphql.query" rows="12"
+                              class="w-full bg-gray-700 rounded px-3 py-2 font-mono text-sm"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">Variables (JSON)</label>
+                    <textarea x-model="graphql.variables" rows="3"
+                              class="w-full bg-gray-700 rounded px-3 py-2 font-mono text-sm"></textarea>
+                </div>
+
+                <div class="flex gap-2 flex-wrap">
+                    <button @click="runGraphQL()"
+                            :disabled="loading"
+                            class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        Execute Query
+                    </button>
+                    <button @click="loadGraphQLExample('categories')"
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+                        List Categories
+                    </button>
+                    <button @click="loadGraphQLExample('category')"
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+                        Get Category
+                    </button>
+                    <button @click="loadGraphQLExample('tree')"
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+                        Category Tree
+                    </button>
+                    <button @click="loadGraphQLExample('navigation')"
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+                        Navigation Menu
+                    </button>
+                </div>
+            </div>
+
+            <!-- Response -->
+            <div x-show="graphql.response" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm font-medium">Response</span>
+                    <span class="text-xs px-2 py-0.5 rounded"
+                          :class="graphql.status >= 200 && graphql.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="graphql.status"></span>
+                    <span class="text-xs text-gray-500" x-text="graphql.time + 'ms'"></span>
+                </div>
+                <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-96"><code x-text="graphql.response"></code></pre>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div x-show="loading" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-6 flex items-center gap-3">
+                <svg class="animate-spin h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function categoryTests() {
+            return {
+                activeTab: 'list',
+                loading: false,
+
+                list: {
+                    parentId: '',
+                    depth: '',
+                    pageSize: '50',
+                    activeOnly: true,
+                    includeProducts: true,
+                    viewMode: 'table',
+                    results: null,
+                    total: 0,
+                    time: null,
+                    response: null
+                },
+
+                detail: {
+                    id: '',
+                    includeChildren: true,
+                    includeBreadcrumbs: true,
+                    includeProducts: false,
+                    data: null,
+                    response: null,
+                    status: null,
+                    time: null
+                },
+
+                search: {
+                    query: '',
+                    activeOnly: true,
+                    results: null,
+                    total: 0,
+                    time: null,
+                    response: null
+                },
+
+                graphql: {
+                    endpoint: 'admin',
+                    query: `query Categories {
+    categories {
+        id
+        name
+        urlKey
+        urlPath
+        level
+        isActive
+        includeInMenu
+        productCount
+        children {
+            id
+            name
+        }
+    }
+}`,
+                    variables: '{}',
+                    response: null,
+                    status: null,
+                    time: null
+                },
+
+                async loadCategories() {
+                    this.loading = true;
+                    const start = Date.now();
+
+                    try {
+                        const params = new URLSearchParams();
+                        if (this.list.parentId) params.append('parentId', this.list.parentId);
+                        if (this.list.depth) params.append('depth', this.list.depth);
+                        if (this.list.activeOnly) params.append('isActive', '1');
+                        params.append('pageSize', this.list.pageSize);
+
+                        const res = await fetch('/api/categories?' + params.toString());
+                        const data = await res.json();
+
+                        this.list.time = Date.now() - start;
+                        this.list.response = JSON.stringify(data, null, 2);
+                        this.list.results = data.member || data['hydra:member'] || data.items || data;
+                        this.list.total = data.totalItems || data['hydra:totalItems'] || this.list.results?.length || 0;
+                    } catch (e) {
+                        this.list.time = Date.now() - start;
+                        this.list.response = 'Error: ' + e.message;
+                        this.list.results = null;
+                    }
+
+                    this.loading = false;
+                },
+
+                async getCategory(method) {
+                    this.loading = true;
+                    const start = Date.now();
+
+                    try {
+                        let res, data;
+
+                        if (method === 'rest') {
+                            res = await fetch(`/api/categories/${this.detail.id}`);
+                            data = await res.json();
+                        } else {
+                            const query = `
+                                query GetCategory($id: ID!) {
+                                    category(id: $id) {
+                                        id
+                                        name
+                                        urlKey
+                                        urlPath
+                                        level
+                                        position
+                                        isActive
+                                        includeInMenu
+                                        description
+                                        image
+                                        productCount
+                                        parentId
+                                        path
+                                        breadcrumbs {
+                                            id
+                                            name
+                                            urlKey
+                                        }
+                                        children {
+                                            id
+                                            name
+                                            urlKey
+                                            isActive
+                                            productCount
+                                        }
+                                    }
+                                }
+                            `;
+                            res = await fetch('/admin/graphql/index', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    query,
+                                    variables: { id: this.detail.id }
+                                })
+                            });
+                            const result = await res.json();
+                            data = result.data?.category || result;
+                        }
+
+                        this.detail.status = res.status;
+                        this.detail.time = Date.now() - start;
+                        this.detail.response = JSON.stringify(data, null, 2);
+                        this.detail.data = data;
+                    } catch (e) {
+                        this.detail.status = 0;
+                        this.detail.time = Date.now() - start;
+                        this.detail.response = 'Error: ' + e.message;
+                        this.detail.data = null;
+                    }
+
+                    this.loading = false;
+                },
+
+                viewCategory(id) {
+                    this.detail.id = String(id);
+                    this.activeTab = 'detail';
+                    this.getCategory('rest');
+                },
+
+                async searchCategories() {
+                    this.loading = true;
+                    const start = Date.now();
+
+                    try {
+                        const params = new URLSearchParams();
+                        if (this.search.query) params.append('search', this.search.query);
+                        if (this.search.activeOnly) params.append('isActive', '1');
+
+                        const res = await fetch('/api/categories?' + params.toString());
+                        const data = await res.json();
+
+                        this.search.time = Date.now() - start;
+                        this.search.response = JSON.stringify(data, null, 2);
+                        this.search.results = data.member || data['hydra:member'] || data.items || data;
+                        this.search.total = data.totalItems || data['hydra:totalItems'] || this.search.results?.length || 0;
+                    } catch (e) {
+                        this.search.time = Date.now() - start;
+                        this.search.response = 'Error: ' + e.message;
+                        this.search.results = null;
+                    }
+
+                    this.loading = false;
+                },
+
+                loadGraphQLExample(type) {
+                    const examples = {
+                        categories: {
+                            query: `query Categories($pageSize: Int, $page: Int, $isActive: Boolean) {
+    categories(pageSize: $pageSize, page: $page, isActive: $isActive) {
+        id
+        name
+        urlKey
+        urlPath
+        level
+        position
+        isActive
+        includeInMenu
+        productCount
+        parentId
+    }
+}`,
+                            variables: JSON.stringify({ pageSize: 50, page: 1, isActive: true }, null, 2)
+                        },
+                        category: {
+                            query: `query GetCategory($id: ID!) {
+    category(id: $id) {
+        id
+        name
+        urlKey
+        urlPath
+        level
+        position
+        isActive
+        includeInMenu
+        description
+        metaTitle
+        metaDescription
+        metaKeywords
+        image
+        productCount
+        parentId
+        path
+        breadcrumbs {
+            id
+            name
+            urlKey
+        }
+        children {
+            id
+            name
+            urlKey
+            isActive
+            productCount
+            children {
+                id
+                name
+            }
+        }
+    }
+}`,
+                            variables: JSON.stringify({ id: '2' }, null, 2)
+                        },
+                        tree: {
+                            query: `query CategoryTree($rootId: ID) {
+    categoryTree(rootId: $rootId) {
+        id
+        name
+        urlKey
+        level
+        isActive
+        productCount
+        children {
+            id
+            name
+            urlKey
+            level
+            isActive
+            productCount
+            children {
+                id
+                name
+                urlKey
+                level
+                isActive
+                productCount
+            }
+        }
+    }
+}`,
+                            variables: JSON.stringify({ rootId: null }, null, 2)
+                        },
+                        navigation: {
+                            query: `query NavigationMenu {
+    categories(includeInMenu: true, isActive: true) {
+        id
+        name
+        urlKey
+        urlPath
+        level
+        position
+        children {
+            id
+            name
+            urlKey
+            urlPath
+            level
+            position
+        }
+    }
+}`,
+                            variables: '{}'
+                        }
+                    };
+
+                    if (examples[type]) {
+                        this.graphql.query = examples[type].query;
+                        this.graphql.variables = examples[type].variables;
+                    }
+                },
+
+                async runGraphQL() {
+                    this.loading = true;
+                    const start = Date.now();
+
+                    try {
+                        let variables = {};
+                        try {
+                            variables = JSON.parse(this.graphql.variables || '{}');
+                        } catch (e) {}
+
+                        const url = this.graphql.endpoint === 'public' ? '/api/graphql' : '/admin/graphql/index';
+
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                query: this.graphql.query,
+                                variables
+                            })
+                        });
+                        const data = await res.json();
+
+                        this.graphql.status = res.status;
+                        this.graphql.time = Date.now() - start;
+                        this.graphql.response = JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        this.graphql.status = 0;
+                        this.graphql.time = Date.now() - start;
+                        this.graphql.response = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                }
+            };
+        }
+    </script>
+</body>
+</html>

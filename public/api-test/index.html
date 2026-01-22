@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maho API Platform Dashboard</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div x-data="apiDashboard()" class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-white mb-2">Maho API Platform</h1>
+                    <p class="text-gray-400">REST API v2 powered by Symfony API Platform</p>
+                </div>
+                <a href="store/" class="bg-blue-600 hover:bg-blue-700 px-6 py-3 rounded-lg font-medium flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                    </svg>
+                    Demo Storefront
+                </a>
+            </div>
+        </header>
+
+        <!-- API Status -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="bg-gray-800 rounded-lg p-4">
+                <h2 class="text-lg font-semibold mb-3">REST API</h2>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full" :class="restStatus === 'ok' ? 'bg-green-500' : restStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'"></span>
+                    <span x-text="restStatus === 'ok' ? 'Connected' : restStatus === 'error' ? 'Error' : 'Checking...'"></span>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">/api/*</p>
+            </div>
+            <div class="bg-gray-800 rounded-lg p-4">
+                <h2 class="text-lg font-semibold mb-3">Admin GraphQL</h2>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full" :class="graphqlStatus === 'ok' ? 'bg-green-500' : graphqlStatus === 'error' ? 'bg-red-500' : 'bg-yellow-500'"></span>
+                    <span x-text="graphqlStatus === 'ok' ? 'Connected' : graphqlStatus === 'error' ? 'Error' : 'Checking...'"></span>
+                </div>
+                <p class="text-gray-500 text-sm mt-1">/admin/graphql/</p>
+            </div>
+        </div>
+
+        <!-- Feature Coverage -->
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold">API Endpoints</h2>
+            <a href="/api/docs" target="_blank" class="text-blue-400 hover:text-blue-300 text-sm flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+                OpenAPI Docs
+            </a>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+            <template x-for="feature in features" :key="feature.name">
+                <a :href="feature.testPage" class="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition block">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="font-semibold" x-text="feature.name"></h3>
+                        <span class="text-xs px-2 py-1 rounded"
+                              :class="feature.status === 'complete' ? 'bg-green-900 text-green-300' :
+                                      feature.status === 'partial' ? 'bg-yellow-900 text-yellow-300' :
+                                      'bg-red-900 text-red-300'"
+                              x-text="feature.status"></span>
+                    </div>
+                    <p class="text-gray-400 text-sm" x-text="feature.description"></p>
+                    <div class="mt-2 text-xs text-gray-500">
+                        <span x-text="feature.endpoints.length + ' endpoints'"></span>
+                    </div>
+                </a>
+            </template>
+        </div>
+
+        <!-- Quick Test -->
+        <h2 class="text-xl font-semibold mb-4">Quick API Test</h2>
+        <div class="bg-gray-800 rounded-lg p-4">
+            <div class="flex gap-2 mb-4">
+                <select x-model="quickTest.method" class="bg-gray-700 rounded px-3 py-2 text-sm">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>PUT</option>
+                    <option>DELETE</option>
+                </select>
+                <input type="text" x-model="quickTest.url" placeholder="/api/customers/1"
+                       class="flex-1 bg-gray-700 rounded px-3 py-2 text-sm">
+                <button @click="runQuickTest()"
+                        class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium">
+                    Send
+                </button>
+            </div>
+            <div x-show="quickTest.method === 'POST' || quickTest.method === 'PUT'" class="mb-4">
+                <textarea x-model="quickTest.body" placeholder='{"key": "value"}'
+                          class="w-full bg-gray-700 rounded px-3 py-2 text-sm font-mono h-24"></textarea>
+            </div>
+            <div x-show="quickTest.response" class="bg-gray-900 rounded p-3">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs px-2 py-1 rounded"
+                          :class="quickTest.statusCode >= 200 && quickTest.statusCode < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="quickTest.statusCode"></span>
+                    <span class="text-xs text-gray-500" x-text="quickTest.time + 'ms'"></span>
+                </div>
+                <pre class="text-xs overflow-auto max-h-64 text-gray-300"><code x-text="quickTest.response"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function apiDashboard() {
+            return {
+                restStatus: 'checking',
+                graphqlStatus: 'checking',
+                features: [
+                    {
+                        name: 'Customers',
+                        status: 'complete',
+                        description: 'Account management, profile, password',
+                        testPage: 'customers.html',
+                        endpoints: ['GET /customers', 'POST /customers', 'PUT /customers/me', 'POST /customers/me/password', 'GET /customers/me/orders', 'addresses']
+                    },
+                    {
+                        name: 'Products',
+                        status: 'complete',
+                        description: 'Product catalog with search & filters',
+                        testPage: 'products.html',
+                        endpoints: ['GET /products', 'GET /products/{id}', 'search', 'category filter', 'price filter']
+                    },
+                    {
+                        name: 'Categories',
+                        status: 'complete',
+                        description: 'Category tree with search',
+                        testPage: 'categories.html',
+                        endpoints: ['GET /categories', 'GET /categories/{id}', 'search']
+                    },
+                    {
+                        name: 'Cart',
+                        status: 'complete',
+                        description: 'Guest & customer cart operations',
+                        testPage: 'cart.html',
+                        endpoints: ['POST /guest-carts', 'GET /carts/{id}', 'POST /carts/{id}/items', 'configurables', 'custom options']
+                    },
+                    {
+                        name: 'Checkout',
+                        status: 'complete',
+                        description: 'Shipping, payment, order placement',
+                        testPage: 'checkout.html',
+                        endpoints: ['shipping-methods', 'payment-methods', 'place-order', 'guest checkout', 'customer checkout', 'coupons']
+                    },
+                    {
+                        name: 'CMS',
+                        status: 'complete',
+                        description: 'CMS pages and blocks',
+                        testPage: 'cms.html',
+                        endpoints: ['GET /cms-pages', 'GET /cms-pages/{id}', 'GET /cms-blocks', 'GET /cms-blocks/{id}']
+                    },
+                    {
+                        name: 'Stores & Countries',
+                        status: 'complete',
+                        description: 'Multi-store, countries, regions',
+                        testPage: 'store/',
+                        endpoints: ['GET /stores', 'POST /stores', 'GET /countries', 'GET /countries/{id}']
+                    },
+                    {
+                        name: 'Blog',
+                        status: 'complete',
+                        description: 'Blog posts and articles',
+                        testPage: 'blog.html',
+                        endpoints: ['GET /blog-posts', 'GET /blog-posts/{id}']
+                    },
+                    {
+                        name: 'URL Resolver',
+                        status: 'complete',
+                        description: 'Resolve paths to products/categories/pages',
+                        testPage: 'cms.html',
+                        endpoints: ['GET /url-resolver?path=...']
+                    },
+                    {
+                        name: 'Auth & OAuth2',
+                        status: 'complete',
+                        description: 'Login, password reset, JWT tokens',
+                        testPage: 'store/login',
+                        endpoints: ['POST /auth/token', 'POST /auth/refresh', 'GET /auth/me', 'POST /auth/forgot-password', 'POST /auth/reset-password']
+                    },
+                    {
+                        name: 'Wishlist',
+                        status: 'complete',
+                        description: 'Customer wishlists with guest sync',
+                        testPage: 'wishlist.html',
+                        endpoints: ['GET /customers/me/wishlist', 'POST /customers/me/wishlist', 'DELETE /customers/me/wishlist/{id}', 'POST /customers/me/wishlist/{id}/move-to-cart', 'POST /customers/me/wishlist/sync']
+                    },
+                    {
+                        name: 'Reviews',
+                        status: 'complete',
+                        description: 'Product reviews & ratings',
+                        testPage: 'reviews.html',
+                        endpoints: ['GET /products/{id}/reviews', 'POST /products/{id}/reviews', 'GET /reviews/{id}', 'GET /customers/me/reviews']
+                    },
+                    {
+                        name: 'Gift Cards',
+                        status: 'complete',
+                        description: 'Gift card balance lookup',
+                        testPage: 'giftcards.html',
+                        endpoints: ['GET /giftcards/{code}']
+                    },
+                    {
+                        name: 'Orders (Admin)',
+                        status: 'complete',
+                        description: 'Order management for POS/Admin',
+                        testPage: '#',
+                        endpoints: ['GET /orders', 'GET /orders/{id}', 'POST /orders', 'invoices', 'shipments']
+                    },
+                    {
+                        name: 'Newsletter',
+                        status: 'complete',
+                        description: 'Newsletter subscription management',
+                        testPage: 'newsletter.html',
+                        endpoints: ['POST /newsletter/subscribe', 'POST /newsletter/unsubscribe', 'GET /newsletter/status']
+                    }
+                ],
+                quickTest: {
+                    method: 'GET',
+                    url: '/api/customers',
+                    body: '',
+                    response: null,
+                    statusCode: null,
+                    time: null
+                },
+
+                init() {
+                    this.checkRestApi();
+                    this.checkGraphqlApi();
+                },
+
+                async checkRestApi() {
+                    try {
+                        const start = Date.now();
+                        // Check /api/products endpoint (works reliably, /api/ entrypoint has issues)
+                        const res = await fetch('/api/products?pageSize=1', { method: 'GET' });
+                        this.restStatus = res.ok ? 'ok' : 'error';
+                    } catch (e) {
+                        this.restStatus = 'error';
+                    }
+                },
+
+                async checkGraphqlApi() {
+                    try {
+                        const res = await fetch('/admin/graphql/', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ query: '{ __typename }' })
+                        });
+                        this.graphqlStatus = res.ok ? 'ok' : 'error';
+                    } catch (e) {
+                        this.graphqlStatus = 'error';
+                    }
+                },
+
+                async runQuickTest() {
+                    const start = Date.now();
+                    try {
+                        const options = {
+                            method: this.quickTest.method,
+                            headers: { 'Content-Type': 'application/json' }
+                        };
+                        if (this.quickTest.body && (this.quickTest.method === 'POST' || this.quickTest.method === 'PUT')) {
+                            options.body = this.quickTest.body;
+                        }
+                        const res = await fetch(this.quickTest.url, options);
+                        this.quickTest.statusCode = res.status;
+                        this.quickTest.time = Date.now() - start;
+                        const text = await res.text();
+                        try {
+                            this.quickTest.response = JSON.stringify(JSON.parse(text), null, 2);
+                        } catch {
+                            this.quickTest.response = text;
+                        }
+                    } catch (e) {
+                        this.quickTest.statusCode = 0;
+                        this.quickTest.time = Date.now() - start;
+                        this.quickTest.response = 'Error: ' + e.message;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+security:
+    password_hashers:
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+
+    providers:
+        maho_customer:
+            id: Maho\ApiPlatform\Security\CustomerUserProvider
+        maho_admin:
+            id: Maho\ApiPlatform\Security\AdminUserProvider
+        maho_chain:
+            chain:
+                providers: [maho_admin, maho_customer]
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        api_docs:
+            pattern: ^/api/docs
+            security: false
+
+        # Admin GraphQL endpoint - handled by custom controller, no Symfony auth
+        api_admin_graphql:
+            pattern: ^/api/admin/graphql
+            security: false
+
+        # Public GraphQL endpoint - OAuth2 auth
+        api_graphql:
+            pattern: ^/api/graphql
+            stateless: true
+            provider: maho_customer
+            custom_authenticators:
+                - Maho\ApiPlatform\Security\OAuth2Authenticator
+
+        # REST API - OAuth2 authenticated
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: maho_customer
+            custom_authenticators:
+                - Maho\ApiPlatform\Security\OAuth2Authenticator
+
+    access_control:
+        - { path: ^/api/docs, roles: PUBLIC_ACCESS }
+        - { path: ^/api/admin/graphql, roles: ROLE_ADMIN }
+        - { path: ^/api/graphql$, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/graphql$, roles: IS_AUTHENTICATED_FULLY, methods: [POST] }
+        # Public read access for storefront (products, categories, CMS, blog, stores, URL resolver, countries)
+        - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/cms-pages, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/cms-blocks, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/blog-posts, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/url-resolver, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/stores, roles: PUBLIC_ACCESS, methods: [GET, POST] }
+        - { path: ^/api/countries, roles: PUBLIC_ACCESS, methods: [GET] }
+        # Token/auth endpoints are public
+        - { path: ^/api/auth, roles: PUBLIC_ACCESS }
+        # Guest cart creation
+        - { path: ^/api/guest-carts, roles: PUBLIC_ACCESS }
+        # Customer registration (POST only - creating new account)
+        - { path: ^/api/customers$, roles: PUBLIC_ACCESS, methods: [POST] }
+        # Newsletter subscribe/unsubscribe (guests allowed)
+        - { path: ^/api/newsletter/subscribe, roles: PUBLIC_ACCESS, methods: [POST] }
+        - { path: ^/api/newsletter/unsubscribe, roles: PUBLIC_ACCESS, methods: [POST] }
+        # Everything else requires auth
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
