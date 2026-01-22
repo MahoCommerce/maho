@@ -57,13 +57,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Invoice_Totals_Giftcard extends 
         if ($order && $order->getGiftcardCodes()) {
             $codesArray = json_decode($order->getGiftcardCodes(), true);
             if (is_array($codesArray)) {
-                foreach (array_keys($codesArray) as $code) {
-                    if (strlen($code) > 10) {
-                        $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                    } else {
-                        $codes[] = $code;
-                    }
-                }
+                $codes = array_keys($codesArray);
             }
         }
 

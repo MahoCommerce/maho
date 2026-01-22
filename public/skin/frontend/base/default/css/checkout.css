@@ -31,7 +31,8 @@
 .cart-totals,
 .cart-forms .discount,
 .cart-forms .giftcard,
-.cart-forms .shipping {
+.cart-forms .shipping,
+.promo-code-section {
     margin-bottom: 20px;
 }
 
@@ -838,6 +839,141 @@ td.product-cart-remove a {
     }
 }
 
+/* Unified Promo Code Section (handles both coupons and gift cards) */
+.promo-code-section {
+    padding: 10px;
+    background-color: var(--maho-color-background-alt);
+    border: 1px solid var(--maho-color-border);
+
+    h2 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: 0 0 10px;
+        text-transform: uppercase;
+        color: var(--maho-color-text-secondary);
+    }
+
+    .coupon-input-group {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .coupon-input {
+        flex: 1;
+        min-width: 0;
+        height: 40px;
+        padding: 8px 12px;
+        border: 1px solid var(--maho-color-border);
+        font-size: 0.875rem;
+
+        &:focus {
+            outline: none;
+            border-color: var(--maho-color-primary);
+        }
+
+        &::placeholder {
+            color: var(--maho-color-text-secondary);
+        }
+    }
+
+    .btn-apply {
+        height: 40px;
+        padding: 8px 20px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+}
+
+.applied-codes {
+    margin-top: 1rem;
+    margin-bottom: 12px;
+}
+
+.applied-code {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background: var(--maho-color-background);
+    border: 1px solid var(--maho-color-border);
+    font-size: 0.8125rem;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .code-label {
+        color: var(--maho-color-text-secondary);
+    }
+
+    .code-value {
+        font-weight: 600;
+        font-family: monospace;
+    }
+
+    .code-amount {
+        color: var(--maho-color-success);
+        font-weight: 500;
+        margin-left: auto;
+    }
+
+    .btn-remove-code {
+        background: none;
+        border: none;
+        color: var(--maho-color-text-secondary);
+        cursor: pointer;
+        font-size: 1.25rem;
+        line-height: 1;
+        padding: 0 4px;
+        margin-left: auto;
+
+        &:hover {
+            color: var(--maho-color-error);
+        }
+    }
+
+    /* If there's an amount, move remove button after it */
+    &:has(.code-amount) .btn-remove-code {
+        margin-left: 8px;
+    }
+}
+
+.promo-message {
+    margin-top: 8px;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+
+    &:empty {
+        display: none;
+    }
+
+    &.success {
+        color: var(--maho-color-success);
+    }
+
+    &.error {
+        color: var(--maho-color-error);
+    }
+}
+
+/* Responsive styles for promo code section */
+@media only screen and (max-width: 770px) {
+    .promo-code-section .coupon-input-group {
+        flex-wrap: wrap;
+    }
+
+    .promo-code-section .coupon-input {
+        flex: 1 1 100%;
+    }
+
+    .promo-code-section .btn-apply {
+        flex: 1 1 auto;
+        height: 44px;
+    }
+}
+
 /* Responsive styles for discount coupon form and gift card form */
 @media only screen and (max-width: 770px) {
     #discount-coupon-form .coupon-input-group,
@@ -951,6 +1087,12 @@ td.product-cart-remove a {
         padding-left: 0;
     }
 }
+/* Constrain width in minimal checkout layout (old onepage checkout only) */
+body.checkout-onepage-index:has(.page-header-minimal):not(:has(.onestep-checkout)) .main-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 .opc select {
     width: 365px;
 }
@@ -1018,7 +1160,7 @@ td.product-cart-remove a {
 }
 
 .opc .section .step {
-    padding: 20px;
+    padding-block: 20px;
 }
 .opc .section .step:after {
     content: '';
@@ -1070,64 +1212,8 @@ td.product-cart-remove a {
         margin-left: 0;
     }
 }
-.opc #opc-login .step {
-    padding: 0px;
-}
-.opc #opc-login .buttons-set {
-    border-top: 0;
-    padding-top: 5px;
-}
-
-@media only screen and (max-width: 770px) {
-    .opc #opc-login .description,
-    .opc #opc-login p.required {
-        display: none;
-    }
-}
 #opc-payment .note {
     padding: 10px;
-}
-
-/* -------------------------------------------- *
- * This section hides everything but the "Checkout Method" step of the checkout process and fades in the content
- * once the customer progresses to the next step. The purpose of this is to simplify what the customer has to focus on.
- * It is limited to larger viewports since smaller devices are inherently going to be focused solely on the
- * "Checkout Method" step.
- */
-.opc.opc-firststep-login .section:not(#opc-login) .step-title,
-.opc-block-progress-step-login {
-    transition: opacity 300ms linear 0;
-}
-
-/* When a user progresses from the "Checkout Method" to "Billing Information" for the first time, the              */
-/* "opc-has-progressed-from-login" class gets added to the body. Also, the .opc element will only have the         */
-/* "opc-firststep-login" class if the first step of the checkout is the "Checkout Method" (eg, not when logged in) */
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section:not(#opc-login) .step-title,
-body:not(.opc-has-progressed-from-login) .opc-block-progress-step-login {
-    opacity: 0;
-}
-
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title h2 {
-    margin-left: 0px;
-}
-
-/* Hide the "Checkout Method" title and center content before login */
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title {
-    display: none;
-}
-
-@media only screen and (min-width: 980px) {
-    body:not(.opc-has-progressed-from-login).checkout-onepage-index .col-main {
-        float: none;
-        width: auto;
-        max-width: 960px;
-        margin: 0 auto;
-        padding-right: 0;
-    }
-
-    body:not(.opc-has-progressed-from-login).checkout-onepage-index .col-right {
-        display: none;
-    }
 }
 
 /* -------------------------------------------- *
@@ -1278,10 +1364,6 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
 
 #checkout-review-table td.a-right {
     white-space: nowrap;
-}
-
-#checkout-review-table-wrapper {
-    clear: both;
 }
 
 #review-buttons-container {
