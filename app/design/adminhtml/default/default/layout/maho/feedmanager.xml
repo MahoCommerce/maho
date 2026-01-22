@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <!-- FeedManager Default: Load CSS on all FeedManager pages -->
+    <feedmanager_default>
+        <reference name="head">
+            <action method="addCss"><name>feedmanager.css</name></action>
+        </reference>
+    </feedmanager_default>
+
+    <!-- Feed Grid -->
+    <adminhtml_feedmanager_feed_index>
+        <update handle="feedmanager_default"/>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Manage Feeds</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_feed" name="feedmanager_feed"/>
+        </reference>
+    </adminhtml_feedmanager_feed_index>
+
+    <!-- Feed Edit -->
+    <adminhtml_feedmanager_feed_edit>
+        <update handle="feedmanager_default"/>
+        <update handle="editor"/>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_feed_edit" name="feedmanager_feed_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="feedmanager/adminhtml_feed_edit_tabs" name="feedmanager_feed_edit_tabs"/>
+        </reference>
+    </adminhtml_feedmanager_feed_edit>
+
+    <!-- Feed Logs Grid (AJAX) -->
+    <adminhtml_feedmanager_feed_logsgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="feedmanager/adminhtml_feed_edit_tab_logs_grid" name="feedmanager_feed_logs_grid"/>
+        </block>
+    </adminhtml_feedmanager_feed_logsgrid>
+
+    <!-- Destination Grid -->
+    <adminhtml_feedmanager_destination_index>
+        <update handle="feedmanager_default"/>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Manage Destinations</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_destination" name="feedmanager_destination"/>
+        </reference>
+    </adminhtml_feedmanager_destination_index>
+
+    <!-- Destination Edit -->
+    <adminhtml_feedmanager_destination_edit>
+        <update handle="feedmanager_default"/>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_destination_edit" name="feedmanager_destination_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="feedmanager/adminhtml_destination_edit_tabs" name="feedmanager_destination_edit_tabs">
+                <block type="feedmanager/adminhtml_destination_edit_tab_general" name="feedmanager_destination_edit_tab_general"/>
+            </block>
+        </reference>
+    </adminhtml_feedmanager_destination_edit>
+
+    <!-- Category Mapping -->
+    <adminhtml_feedmanager_category_index>
+        <update handle="feedmanager_default"/>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Category Mapping</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_category" name="feedmanager_category"/>
+        </reference>
+    </adminhtml_feedmanager_category_index>
+
+    <!-- Dynamic Rules Grid -->
+    <adminhtml_feedmanager_dynamicrule_index>
+        <update handle="feedmanager_default"/>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Dynamic Attribute Rules</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_dynamicrule" name="feedmanager_dynamicrule"/>
+        </reference>
+    </adminhtml_feedmanager_dynamicrule_index>
+
+    <!-- Dynamic Rules Edit -->
+    <adminhtml_feedmanager_dynamicrule_edit>
+        <update handle="feedmanager_default"/>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_dynamicrule_edit" name="feedmanager_dynamicrule_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="feedmanager/adminhtml_dynamicrule_edit_tabs" name="feedmanager_dynamicrule_edit_tabs">
+                <block type="feedmanager/adminhtml_dynamicrule_edit_tab_general" name="feedmanager_dynamicrule_edit_tab_general"/>
+                <block type="feedmanager/adminhtml_dynamicrule_edit_tab_conditions" name="feedmanager_dynamicrule_edit_tab_conditions"/>
+            </block>
+        </reference>
+    </adminhtml_feedmanager_dynamicrule_edit>
+</layout>
