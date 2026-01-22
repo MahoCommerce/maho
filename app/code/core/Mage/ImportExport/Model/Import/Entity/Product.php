@@ -1325,17 +1325,39 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         if ($entityRowsIn) {
             // Debug: Log the data being inserted
             foreach ($entityRowsIn as $sku => $row) {
-                echo "[DEBUG INSERT] SKU: {$sku}, attribute_set_id: {$row['attribute_set_id']}, entity_type_id: {$row['entity_type_id']}\n";
+                $attrSetId = $row['attribute_set_id'];
+                $attrSetIdType = gettype($attrSetId);
+                echo "[DEBUG INSERT] SKU: {$sku}, attribute_set_id: {$attrSetId} (type: {$attrSetIdType}), entity_type_id: {$row['entity_type_id']}\n";
 
                 // Verify the attribute_set_id exists right before insert
                 $exists = $this->_connection->fetchOne(
                     "SELECT attribute_set_id FROM eav_attribute_set WHERE attribute_set_id = ?",
-                    [$row['attribute_set_id']]
+                    [$attrSetId]
                 );
-                echo "[DEBUG INSERT] attribute_set_id {$row['attribute_set_id']} exists in DB: " . ($exists ? 'YES' : 'NO') . "\n";
+                echo "[DEBUG INSERT] attribute_set_id {$attrSetId} exists in DB: " . ($exists ? 'YES' : 'NO') . "\n";
+
+                // Also verify entity_type_id
+                $entityTypeExists = $this->_connection->fetchOne(
+                    "SELECT entity_type_id FROM eav_entity_type WHERE entity_type_id = ?",
+                    [$row['entity_type_id']]
+                );
+                echo "[DEBUG INSERT] entity_type_id {$row['entity_type_id']} exists in DB: " . ($entityTypeExists ? 'YES' : 'NO') . "\n";
+
+                // Check the FK relationship - does this attribute_set belong to this entity_type?
+                $fkValid = $this->_connection->fetchOne(
+                    "SELECT attribute_set_id FROM eav_attribute_set WHERE attribute_set_id = ? AND entity_type_id = ?",
+                    [$attrSetId, $row['entity_type_id']]
+                );
+                echo "[DEBUG INSERT] FK valid (attr_set {$attrSetId} belongs to entity_type {$row['entity_type_id']}): " . ($fkValid ? 'YES' : 'NO') . "\n";
             }
 
-            $this->_connection->insertMultiple($entityTable, $entityRowsIn);
+            try {
+                $this->_connection->insertMultiple($entityTable, $entityRowsIn);
+            } catch (\Exception $e) {
+                echo "[DEBUG INSERT ERROR] " . $e->getMessage() . "\n";
+                echo "[DEBUG INSERT ERROR] Data: " . json_encode($entityRowsIn) . "\n";
+                throw $e;
+            }
 
             $newProducts = $this->_connection->fetchPairs($this->_connection->select()
                 ->from($entityTable, ['sku', 'entity_id'])
