@@ -1374,8 +1374,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row
                         $entityRowsUp[] = [
-                            'updated_at' => $now,
-                            'entity_id'  => $this->_oldSku[$rowSku]['entity_id'],
+                            'updated_at'       => $now,
+                            'entity_id'        => $this->_oldSku[$rowSku]['entity_id'],
+                            'entity_type_id'   => $this->_entityTypeId,
+                            'attribute_set_id' => $this->_oldSku[$rowSku]['attr_set_id'],
                         ];
                     } else { // new row
                         if (!$productLimit || $productsQty < $productLimit) {
