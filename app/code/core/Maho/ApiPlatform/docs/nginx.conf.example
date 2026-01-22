@@ -1,0 +1,38 @@
+# Maho API Platform - Nginx Configuration Example
+#
+# This configuration is OPTIONAL. The default Maho nginx config already
+# routes /api/* requests through index.php, which the module handles.
+#
+# Add this block if you need:
+# - Explicit CORS headers at nginx level (API Platform already handles CORS)
+# - Rate limiting for API endpoints
+# - Custom caching headers
+#
+# Add this block BEFORE the main "location /" block in your nginx config:
+
+# API Platform v2 endpoints (REST, GraphQL)
+location /api/v2 {
+    # CORS headers for API access (optional - API Platform handles this)
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With' always;
+    add_header 'Access-Control-Expose-Headers' 'Link, Deprecation, Sunset' always;
+
+    # Handle preflight requests
+    if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, X-Requested-With';
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain; charset=utf-8';
+        add_header 'Content-Length' 0;
+        return 204;
+    }
+
+    # Route to Maho front controller
+    try_files $uri /index.php?$args;
+}
+
+# Legacy API endpoints (deprecated, maintained for backwards compatibility)
+# Deprecation headers are added by Maho_ApiPlatform_Model_Observer
+# /api/soap/* and /api/rest/* continue to work normally through default routing

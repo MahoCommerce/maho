@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Newsletter API Tests - Maho API Test Harness</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div x-data="newsletterTests()" class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <a href="index.html" class="text-blue-400 hover:text-blue-300 text-sm">&larr; Back to Dashboard</a>
+            <h1 class="text-3xl font-bold text-white mt-2">Newsletter API Tests</h1>
+            <p class="text-gray-400">Test newsletter subscription endpoints</p>
+        </header>
+
+        <!-- Feature Checklist -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-3">Feature Checklist</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Subscribe (Guest)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Subscribe (Auth)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Unsubscribe</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Check Status</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Endpoints Reference -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-3">API Endpoints</h2>
+            <div class="space-y-2 text-sm font-mono">
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-blue-600 rounded text-xs">POST</span>
+                    <span class="text-gray-300">/api/newsletter/subscribe</span>
+                    <span class="text-gray-500">- Subscribe (guest or authenticated)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-blue-600 rounded text-xs">POST</span>
+                    <span class="text-gray-300">/api/newsletter/unsubscribe</span>
+                    <span class="text-gray-500">- Unsubscribe</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 bg-green-600 rounded text-xs">GET</span>
+                    <span class="text-gray-300">/api/newsletter/status</span>
+                    <span class="text-gray-500">- Get status (authenticated only)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Test Form -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-4">Test Newsletter Operations</h2>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Guest Subscribe -->
+                <div class="space-y-3">
+                    <h3 class="font-medium text-gray-300">Guest Subscribe/Unsubscribe</h3>
+                    <input type="email"
+                           x-model="email"
+                           placeholder="Enter email address"
+                           class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+                    <div class="flex gap-2">
+                        <button @click="subscribe()"
+                                :disabled="loading || !email"
+                                class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium">
+                            Subscribe
+                        </button>
+                        <button @click="unsubscribe()"
+                                :disabled="loading || !email"
+                                class="flex-1 px-4 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium">
+                            Unsubscribe
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Authenticated Status -->
+                <div class="space-y-3">
+                    <h3 class="font-medium text-gray-300">Authenticated User</h3>
+                    <input type="text"
+                           x-model="authToken"
+                           placeholder="Bearer token (optional)"
+                           class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500">
+                    <button @click="checkStatus()"
+                            :disabled="loading || !authToken"
+                            class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg font-medium">
+                        Check Status
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Response Log -->
+        <div class="bg-gray-800 rounded-lg p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h2 class="text-lg font-semibold">Response Log</h2>
+                <button @click="logs = []" class="text-sm text-gray-400 hover:text-white">Clear</button>
+            </div>
+            <div class="bg-gray-900 rounded-lg p-4 font-mono text-sm max-h-96 overflow-y-auto">
+                <template x-if="logs.length === 0">
+                    <p class="text-gray-500">API responses will appear here...</p>
+                </template>
+                <template x-for="(log, index) in logs" :key="index">
+                    <div class="mb-4 last:mb-0">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="text-gray-500 text-xs" x-text="log.time"></span>
+                            <span class="px-2 py-0.5 rounded text-xs"
+                                  :class="log.success ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                                  x-text="log.status"></span>
+                            <span class="text-gray-400" x-text="log.endpoint"></span>
+                        </div>
+                        <pre class="text-xs overflow-x-auto whitespace-pre-wrap"
+                             :class="log.success ? 'text-green-400' : 'text-red-400'"
+                             x-text="log.response"></pre>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div x-show="loading" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+            <div class="bg-gray-800 rounded-lg p-4 flex items-center gap-3">
+                <svg class="animate-spin h-5 w-5 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Loading...</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function newsletterTests() {
+            return {
+                email: '',
+                authToken: '',
+                loading: false,
+                logs: [],
+
+                log(endpoint, status, response, success) {
+                    this.logs.unshift({
+                        time: new Date().toLocaleTimeString(),
+                        endpoint,
+                        status,
+                        response: typeof response === 'object' ? JSON.stringify(response, null, 2) : response,
+                        success
+                    });
+                },
+
+                async subscribe() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('/api/newsletter/subscribe', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                ...(this.authToken && { 'Authorization': 'Bearer ' + this.authToken })
+                            },
+                            body: JSON.stringify({ email: this.email })
+                        });
+                        const data = await res.json();
+                        this.log('POST /api/newsletter/subscribe', res.status, data, res.ok);
+                    } catch (e) {
+                        this.log('POST /api/newsletter/subscribe', 'Error', e.message, false);
+                    }
+                    this.loading = false;
+                },
+
+                async unsubscribe() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('/api/newsletter/unsubscribe', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Accept': 'application/json',
+                                ...(this.authToken && { 'Authorization': 'Bearer ' + this.authToken })
+                            },
+                            body: JSON.stringify({ email: this.email })
+                        });
+                        const data = await res.json();
+                        this.log('POST /api/newsletter/unsubscribe', res.status, data, res.ok);
+                    } catch (e) {
+                        this.log('POST /api/newsletter/unsubscribe', 'Error', e.message, false);
+                    }
+                    this.loading = false;
+                },
+
+                async checkStatus() {
+                    this.loading = true;
+                    try {
+                        const res = await fetch('/api/newsletter/status', {
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Authorization': 'Bearer ' + this.authToken
+                            }
+                        });
+                        const data = await res.json();
+                        this.log('GET /api/newsletter/status', res.status, data, res.ok);
+                    } catch (e) {
+                        this.log('GET /api/newsletter/status', 'Error', e.message, false);
+                    }
+                    this.loading = false;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

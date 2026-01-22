@@ -1,0 +1,47 @@
+api_platform:
+    title: 'Maho Commerce API'
+    version: '2.0.0'
+    description: 'Modern REST and GraphQL API for Maho Commerce'
+
+    # Enable documentation UIs
+    enable_swagger_ui: true
+    enable_re_doc: true
+    enable_entrypoint: true
+    enable_docs: true
+
+    formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+
+    docs_formats:
+        jsonld: ['application/ld+json']
+        json: ['application/json']
+        html: ['text/html']
+
+    defaults:
+        pagination_enabled: true
+        pagination_items_per_page: 20
+        pagination_maximum_items_per_page: 100
+        cache_headers:
+            vary: ['Accept', 'Authorization']
+
+    graphql:
+        enabled: true
+        graphql_playground: true
+        introspection: true
+        max_query_depth: 20
+        max_query_complexity: 500
+
+    swagger:
+        versions: [3]
+        api_keys:
+            Bearer:
+                name: Authorization
+                type: header
+
+    mapping:
+        paths:
+            - '%kernel.project_dir%/src/ApiResource'
+
+    patch_formats:
+        json: ['application/merge-patch+json']

@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart API Tests - Maho API Test Harness</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div x-data="cartTests()" x-init="init()" class="container mx-auto px-4 py-8 max-w-6xl">
+        <header class="mb-8">
+            <a href="index.html" class="text-blue-400 hover:text-blue-300 text-sm">&larr; Back to Dashboard</a>
+            <h1 class="text-3xl font-bold text-white mt-2">Cart API Tests</h1>
+            <p class="text-gray-400">Test shopping cart operations - create, read, update, delete items</p>
+        </header>
+
+        <!-- Authentication Panel -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div :class="auth.token ? 'bg-green-500' : 'bg-red-500'" class="w-3 h-3 rounded-full"></div>
+                    <span class="font-medium" x-text="auth.token ? 'Authenticated' : 'Not Authenticated'"></span>
+                    <span x-show="auth.email" class="text-gray-400 text-sm">(<span x-text="auth.email"></span>)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button x-show="!auth.token" @click="auth.showLogin = !auth.showLogin"
+                            class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded text-sm font-medium">
+                        Login
+                    </button>
+                    <button x-show="auth.token" @click="logout()"
+                            class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded text-sm font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div x-show="auth.showLogin && !auth.token" x-transition class="mt-4 pt-4 border-t border-gray-700">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Email</label>
+                        <input type="email" x-model="auth.loginEmail" placeholder="customer@example.com"
+                               @keyup.enter="login()"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Password</label>
+                        <input type="password" x-model="auth.loginPassword" placeholder="Password"
+                               @keyup.enter="login()"
+                               class="w-full bg-gray-700 rounded px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <button @click="login()" :disabled="auth.loading"
+                                class="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 px-4 py-2 rounded text-sm font-medium w-full">
+                            <span x-show="!auth.loading">Login</span>
+                            <span x-show="auth.loading">Authenticating...</span>
+                        </button>
+                    </div>
+                </div>
+                <div x-show="auth.error" class="mt-3 text-red-400 text-sm" x-text="auth.error"></div>
+                <p class="mt-3 text-gray-500 text-xs">
+                    Authentication uses OAuth2. POST to <code class="text-blue-400">/api/auth/token</code> with credentials to receive a JWT.
+                </p>
+            </div>
+
+            <!-- Token Info (collapsed by default) -->
+            <details x-show="auth.token" class="mt-4">
+                <summary class="text-sm text-gray-500 cursor-pointer">Token Details</summary>
+                <div class="mt-2 bg-gray-900 rounded p-3">
+                    <div class="text-xs text-gray-400 mb-1">Bearer Token:</div>
+                    <code class="text-xs text-green-300 break-all" x-text="auth.token?.substring(0, 50) + '...'"></code>
+                    <div x-show="auth.expiresAt" class="text-xs text-gray-500 mt-2">
+                        Expires: <span x-text="auth.expiresAt"></span>
+                    </div>
+                </div>
+            </details>
+        </div>
+
+        <!-- API Endpoints Reference -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-3">API Endpoints</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-mono">
+                <div>
+                    <span class="text-gray-400">REST (Guest):</span>
+                    <ul class="mt-1 space-y-1 text-gray-300">
+                        <li>POST /api/guest-carts</li>
+                        <li>GET /api/guest-carts/{id}</li>
+                        <li>POST /api/guest-carts/{id}/items</li>
+                        <li>PUT /api/guest-carts/{id}/items/{itemId}</li>
+                        <li>DELETE /api/guest-carts/{id}/items/{itemId}</li>
+                        <li>POST /api/guest-carts/{id}/shipping-methods</li>
+                    </ul>
+                </div>
+                <div>
+                    <span class="text-gray-400">GraphQL (Public):</span>
+                    <ul class="mt-1 space-y-1 text-gray-300">
+                        <li>GET /api/graphql <span class="text-gray-500">(playground)</span></li>
+                        <li>POST /api/graphql <span class="text-gray-500">(JWT auth)</span></li>
+                    </ul>
+                </div>
+                <div>
+                    <span class="text-gray-400">GraphQL (Admin):</span>
+                    <ul class="mt-1 space-y-1 text-gray-300">
+                        <li>POST /admin/graphql/index</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Status -->
+        <div class="bg-gray-800 rounded-lg p-4 mb-8">
+            <h2 class="text-lg font-semibold mb-3">Feature Status</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Create Cart</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Get Cart</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Add Items</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Update Qty</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Remove Item</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Shipping Methods</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Place Order</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                    <span>Apply Coupon</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex gap-2 mb-6 border-b border-gray-700">
+            <button @click="activeTab = 'create'"
+                    :class="activeTab === 'create' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Create Cart</button>
+            <button @click="activeTab = 'get'"
+                    :class="activeTab === 'get' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Get Cart</button>
+            <button @click="activeTab = 'items'"
+                    :class="activeTab === 'items' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Manage Items</button>
+            <button @click="activeTab = 'totals'"
+                    :class="activeTab === 'totals' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">Totals</button>
+            <button @click="activeTab = 'graphql'"
+                    :class="activeTab === 'graphql' ? 'border-blue-500 text-blue-400' : 'border-transparent text-gray-400'"
+                    class="px-4 py-2 border-b-2 font-medium">GraphQL</button>
+        </div>
+
+        <!-- Current Cart Display -->
+        <div x-show="currentCartId" class="bg-blue-900/30 border border-blue-700 rounded-lg p-3 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <span class="text-blue-300 text-sm">Active Cart:</span>
+                    <span class="font-mono text-white ml-2" x-text="currentCartId"></span>
+                    <span class="text-gray-400 text-sm ml-4" x-text="cartItemCount + ' items'"></span>
+                </div>
+                <button @click="clearCurrentCart()" class="text-red-400 hover:text-red-300 text-sm">Clear</button>
+            </div>
+        </div>
+
+        <!-- Create Cart Tab -->
+        <div x-show="activeTab === 'create'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Create New Cart</h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Customer ID (optional - leave empty for guest)</label>
+                        <input type="number" x-model="createCart.customerId" placeholder="Leave empty for guest cart"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button @click="createNewCart('rest')"
+                                :disabled="loading"
+                                class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            Create via REST
+                        </button>
+                        <button @click="createNewCart('graphql')"
+                                :disabled="loading"
+                                class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            Create via GraphQL
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response -->
+            <div x-show="createCart.response" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm font-medium">Response</span>
+                    <span class="text-xs px-2 py-0.5 rounded"
+                          :class="createCart.status >= 200 && createCart.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="createCart.status"></span>
+                    <span class="text-xs text-gray-500" x-text="createCart.time + 'ms'"></span>
+                </div>
+                <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="createCart.response"></code></pre>
+            </div>
+        </div>
+
+        <!-- Get Cart Tab -->
+        <div x-show="activeTab === 'get'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Get Cart by ID</h3>
+
+                <div class="flex gap-2">
+                    <input type="text" x-model="getCart.cartId" placeholder="Cart ID or Quote ID"
+                           class="flex-1 bg-gray-700 rounded px-3 py-2">
+                    <button @click="fetchCart('rest')"
+                            :disabled="loading || !getCart.cartId"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        REST
+                    </button>
+                    <button @click="fetchCart('graphql')"
+                            :disabled="loading || !getCart.cartId"
+                            class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        GraphQL
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cart Details -->
+            <div x-show="getCart.data" class="bg-gray-800 rounded-lg p-6">
+                <h4 class="font-semibold mb-4">Cart Details</h4>
+
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div>
+                        <span class="text-gray-400 text-sm">Cart ID</span>
+                        <p class="font-mono" x-text="getCart.data?.id || getCart.data?.cartId"></p>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 text-sm">Customer</span>
+                        <p x-text="getCart.data?.customer?.email || getCart.data?.customerEmail || 'Guest'"></p>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 text-sm">Items</span>
+                        <p x-text="getCart.data?.items?.length || getCart.data?.itemsCount || 0"></p>
+                    </div>
+                    <div>
+                        <span class="text-gray-400 text-sm">Grand Total</span>
+                        <p class="text-green-400" x-text="'$' + (getCart.data?.grandTotal || getCart.data?.totals?.grandTotal || 0).toFixed(2)"></p>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div x-show="getCart.data?.items?.length > 0">
+                    <h5 class="text-sm font-medium text-gray-400 mb-2">Items</h5>
+                    <table class="w-full text-sm">
+                        <thead class="text-left text-gray-400 border-b border-gray-700">
+                            <tr>
+                                <th class="py-2">SKU</th>
+                                <th class="py-2">Name</th>
+                                <th class="py-2 text-right">Price</th>
+                                <th class="py-2 text-right">Qty</th>
+                                <th class="py-2 text-right">Subtotal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template x-for="item in getCart.data?.items || []" :key="item.id || item.itemId">
+                                <tr class="border-b border-gray-700/50">
+                                    <td class="py-2 font-mono text-xs" x-text="item.sku"></td>
+                                    <td class="py-2" x-text="item.name"></td>
+                                    <td class="py-2 text-right" x-text="'$' + (item.price || 0).toFixed(2)"></td>
+                                    <td class="py-2 text-right" x-text="item.qty || item.quantity"></td>
+                                    <td class="py-2 text-right" x-text="'$' + (item.rowTotal || (item.price * item.qty) || 0).toFixed(2)"></td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Raw Response -->
+            <div x-show="getCart.response" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm font-medium">Raw Response</span>
+                    <span class="text-xs px-2 py-0.5 rounded"
+                          :class="getCart.status >= 200 && getCart.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="getCart.status"></span>
+                    <span class="text-xs text-gray-500" x-text="getCart.time + 'ms'"></span>
+                </div>
+                <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="getCart.response"></code></pre>
+            </div>
+        </div>
+
+        <!-- Manage Items Tab -->
+        <div x-show="activeTab === 'items'" class="space-y-6">
+            <!-- Add Item -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Add Item to Cart</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Cart ID</label>
+                        <input type="text" x-model="addItem.cartId" :placeholder="currentCartId || 'Cart ID'"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">SKU</label>
+                        <input type="text" x-model="addItem.sku" placeholder="e.g., TEST-001"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Quantity</label>
+                        <input type="number" x-model="addItem.qty" min="1" value="1"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div class="flex items-end">
+                        <button @click="addItemToCart()"
+                                :disabled="loading || !addItem.sku"
+                                class="w-full bg-green-600 hover:bg-green-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                            Add Item
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick SKU Buttons -->
+                <div class="flex gap-2 flex-wrap">
+                    <span class="text-gray-400 text-sm">Quick add:</span>
+                    <button @click="addItem.sku = 'TEST-001'" class="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded">TEST-001</button>
+                    <button @click="addItem.sku = 'SAMPLE-SKU'" class="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded">SAMPLE-SKU</button>
+                </div>
+            </div>
+
+            <!-- Update/Remove Item -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Update/Remove Item</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Cart ID</label>
+                        <input type="text" x-model="updateItem.cartId" :placeholder="currentCartId || 'Cart ID'"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">Item ID</label>
+                        <input type="number" x-model="updateItem.itemId" placeholder="Item ID from cart"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">New Quantity</label>
+                        <input type="number" x-model="updateItem.qty" min="0" placeholder="0 to remove"
+                               class="w-full bg-gray-700 rounded px-3 py-2">
+                    </div>
+                    <div class="flex items-end gap-2">
+                        <button @click="updateCartItem()"
+                                :disabled="loading || !updateItem.itemId"
+                                class="flex-1 bg-yellow-600 hover:bg-yellow-700 disabled:opacity-50 px-4 py-2 rounded font-medium">
+                            Update
+                        </button>
+                        <button @click="removeCartItem()"
+                                :disabled="loading || !updateItem.itemId"
+                                class="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 px-4 py-2 rounded font-medium">
+                            Remove
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Response -->
+            <div x-show="itemsResponse" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm font-medium">Response</span>
+                    <span class="text-xs px-2 py-0.5 rounded"
+                          :class="itemsStatus >= 200 && itemsStatus < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="itemsStatus"></span>
+                </div>
+                <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="itemsResponse"></code></pre>
+            </div>
+        </div>
+
+        <!-- Totals Tab -->
+        <div x-show="activeTab === 'totals'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Cart Totals</h3>
+
+                <div class="flex gap-2 mb-4">
+                    <input type="text" x-model="totals.cartId" :placeholder="currentCartId || 'Cart ID'"
+                           class="flex-1 bg-gray-700 rounded px-3 py-2">
+                    <button @click="fetchTotals()"
+                            :disabled="loading || !totals.cartId"
+                            class="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        Get Totals
+                    </button>
+                </div>
+
+                <!-- Totals Display -->
+                <div x-show="totals.data" class="space-y-2 bg-gray-900 rounded p-4">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Subtotal</span>
+                        <span x-text="'$' + (totals.data?.subtotal || 0).toFixed(2)"></span>
+                    </div>
+                    <div class="flex justify-between" x-show="totals.data?.discount">
+                        <span class="text-gray-400">Discount</span>
+                        <span class="text-red-400" x-text="'-$' + Math.abs(totals.data?.discount || 0).toFixed(2)"></span>
+                    </div>
+                    <div class="flex justify-between" x-show="totals.data?.shipping">
+                        <span class="text-gray-400">Shipping</span>
+                        <span x-text="'$' + (totals.data?.shipping || 0).toFixed(2)"></span>
+                    </div>
+                    <div class="flex justify-between" x-show="totals.data?.tax">
+                        <span class="text-gray-400">Tax</span>
+                        <span x-text="'$' + (totals.data?.tax || 0).toFixed(2)"></span>
+                    </div>
+                    <div class="flex justify-between border-t border-gray-700 pt-2 font-semibold">
+                        <span>Grand Total</span>
+                        <span class="text-green-400" x-text="'$' + (totals.data?.grandTotal || 0).toFixed(2)"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Apply Coupon -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">Apply Coupon</h3>
+
+                <div class="flex gap-2">
+                    <input type="text" x-model="coupon.code" placeholder="Coupon code"
+                           class="flex-1 bg-gray-700 rounded px-3 py-2">
+                    <button @click="applyCoupon()"
+                            :disabled="loading || !coupon.code"
+                            class="bg-green-600 hover:bg-green-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        Apply
+                    </button>
+                    <button @click="removeCoupon()"
+                            :disabled="loading"
+                            class="bg-red-600 hover:bg-red-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        Remove
+                    </button>
+                </div>
+            </div>
+
+            <!-- Response -->
+            <div x-show="totals.response" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm font-medium">Response</span>
+                    <span class="text-xs px-2 py-0.5 rounded"
+                          :class="totals.status >= 200 && totals.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="totals.status"></span>
+                </div>
+                <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-64"><code x-text="totals.response"></code></pre>
+            </div>
+        </div>
+
+        <!-- GraphQL Tab -->
+        <div x-show="activeTab === 'graphql'" class="space-y-6">
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h3 class="text-lg font-semibold mb-4">GraphQL Query</h3>
+
+                <!-- Endpoint Selection -->
+                <div class="mb-4 p-3 bg-gray-900 rounded">
+                    <label class="block text-sm text-gray-400 mb-2">Endpoint</label>
+                    <div class="flex gap-4">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" x-model="graphql.endpoint" value="public" class="text-blue-600">
+                            <span><code class="text-blue-400">/api/graphql</code> <span class="text-gray-500">(Public - JWT auth)</span></span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" x-model="graphql.endpoint" value="admin" class="text-purple-600">
+                            <span><code class="text-purple-400">/admin/graphql/index</code> <span class="text-gray-500">(Admin session)</span></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Auth status for public endpoint -->
+                <div x-show="graphql.endpoint === 'public'" class="mb-4 p-3 rounded"
+                     :class="auth.token ? 'bg-green-900/30 border border-green-700' : 'bg-yellow-900/30 border border-yellow-700'">
+                    <p x-show="auth.token" class="text-green-300 text-sm">
+                        Authenticated as <span x-text="auth.email"></span>. Token will be sent with request.
+                    </p>
+                    <p x-show="!auth.token" class="text-yellow-300 text-sm">
+                        Not authenticated. Login above to use the public GraphQL endpoint.
+                    </p>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">Query</label>
+                    <textarea x-model="graphql.query" rows="10"
+                              class="w-full bg-gray-700 rounded px-3 py-2 font-mono text-sm"></textarea>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm text-gray-400 mb-1">Variables (JSON)</label>
+                    <textarea x-model="graphql.variables" rows="3"
+                              class="w-full bg-gray-700 rounded px-3 py-2 font-mono text-sm"></textarea>
+                </div>
+
+                <div class="flex gap-2 flex-wrap">
+                    <button @click="runGraphQL()"
+                            :disabled="loading"
+                            class="bg-purple-600 hover:bg-purple-700 disabled:opacity-50 px-6 py-2 rounded font-medium">
+                        Execute Query
+                    </button>
+                    <button @click="loadGraphQLExample('getCart')"
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+                        Get Cart
+                    </button>
+                    <button @click="loadGraphQLExample('addItem')"
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+                        Add Item
+                    </button>
+                    <button @click="loadGraphQLExample('createCart')"
+                            class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded text-sm">
+                        Create Cart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Response -->
+            <div x-show="graphql.response" class="bg-gray-800 rounded-lg p-6">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="text-sm font-medium">Response</span>
+                    <span class="text-xs px-2 py-0.5 rounded"
+                          :class="graphql.status >= 200 && graphql.status < 300 ? 'bg-green-900 text-green-300' : 'bg-red-900 text-red-300'"
+                          x-text="graphql.status"></span>
+                    <span class="text-xs text-gray-500" x-text="graphql.time + 'ms'"></span>
+                </div>
+                <pre class="bg-gray-900 rounded p-3 text-xs overflow-auto max-h-96"><code x-text="graphql.response"></code></pre>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function cartTests() {
+            return {
+                activeTab: 'create',
+                loading: false,
+                currentCartId: localStorage.getItem('testCartId') || null,
+                cartItemCount: 0,
+
+                // Authentication
+                auth: {
+                    token: null,
+                    email: null,
+                    customerId: null,
+                    expiresAt: null,
+                    showLogin: false,
+                    loading: false,
+                    error: null,
+                    loginEmail: '',
+                    loginPassword: ''
+                },
+
+                createCart: {
+                    customerId: '',
+                    response: null,
+                    status: null,
+                    time: null
+                },
+
+                getCart: {
+                    cartId: '',
+                    response: null,
+                    status: null,
+                    time: null,
+                    data: null
+                },
+
+                addItem: {
+                    cartId: '',
+                    sku: '',
+                    qty: 1
+                },
+
+                updateItem: {
+                    cartId: '',
+                    itemId: '',
+                    qty: 1
+                },
+
+                itemsResponse: null,
+                itemsStatus: null,
+
+                totals: {
+                    cartId: '',
+                    response: null,
+                    status: null,
+                    data: null
+                },
+
+                coupon: {
+                    code: ''
+                },
+
+                graphql: {
+                    endpoint: 'admin',
+                    query: `query GetCart($cartId: ID!) {
+    cart(id: $cartId) {
+        id
+        customerEmail
+        itemsCount
+        items {
+            id
+            sku
+            name
+            qty
+            price
+            rowTotal
+        }
+        totals {
+            subtotal
+            discount
+            shipping
+            tax
+            grandTotal
+        }
+    }
+}`,
+                    variables: '{"cartId": ""}',
+                    response: null,
+                    status: null,
+                    time: null
+                },
+
+                init() {
+                    if (this.currentCartId) {
+                        this.getCart.cartId = this.currentCartId;
+                        this.addItem.cartId = this.currentCartId;
+                        this.updateItem.cartId = this.currentCartId;
+                        this.totals.cartId = this.currentCartId;
+                    }
+                },
+
+                setCurrentCart(cartId) {
+                    this.currentCartId = cartId;
+                    localStorage.setItem('testCartId', cartId);
+                    this.getCart.cartId = cartId;
+                    this.addItem.cartId = cartId;
+                    this.updateItem.cartId = cartId;
+                    this.totals.cartId = cartId;
+                },
+
+                clearCurrentCart() {
+                    this.currentCartId = null;
+                    localStorage.removeItem('testCartId');
+                    this.cartItemCount = 0;
+                },
+
+                async createNewCart(method) {
+                    this.loading = true;
+                    const start = Date.now();
+
+                    try {
+                        let res, data;
+
+                        if (method === 'rest') {
+                            const body = {};
+                            if (this.createCart.customerId) {
+                                body.customerId = parseInt(this.createCart.customerId);
+                            }
+
+                            res = await fetch('/api/guest-carts', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(body)
+                            });
+                            data = await res.json();
+                        } else {
+                            const mutation = `
+                                mutation CreateCart($customerId: Int) {
+                                    createCart(customerId: $customerId) {
+                                        id
+                                        customerEmail
+                                    }
+                                }
+                            `;
+                            res = await fetch('/admin/graphql/index', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    query: mutation,
+                                    variables: {
+                                        customerId: this.createCart.customerId ? parseInt(this.createCart.customerId) : null
+                                    }
+                                })
+                            });
+                            data = await res.json();
+                        }
+
+                        this.createCart.status = res.status;
+                        this.createCart.time = Date.now() - start;
+                        this.createCart.response = JSON.stringify(data, null, 2);
+
+                        // Set as current cart
+                        const cartId = data.id || data.cartId || data.data?.createCart?.id;
+                        if (cartId) {
+                            this.setCurrentCart(cartId);
+                        }
+                    } catch (e) {
+                        this.createCart.status = 0;
+                        this.createCart.time = Date.now() - start;
+                        this.createCart.response = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                },
+
+                async fetchCart(method) {
+                    this.loading = true;
+                    const start = Date.now();
+                    const cartId = this.getCart.cartId || this.currentCartId;
+
+                    try {
+                        let res, data;
+
+                        if (method === 'rest') {
+                            res = await fetch(`/api/guest-carts/${cartId}`);
+                            data = await res.json();
+                        } else {
+                            const query = `
+                                query GetCart($cartId: ID!) {
+                                    cart(id: $cartId) {
+                                        id
+                                        customerEmail
+                                        itemsCount
+                                        items {
+                                            id
+                                            sku
+                                            name
+                                            qty
+                                            price
+                                            rowTotal
+                                        }
+                                        totals {
+                                            subtotal
+                                            discount
+                                            shipping
+                                            tax
+                                            grandTotal
+                                        }
+                                    }
+                                }
+                            `;
+                            res = await fetch('/admin/graphql/index', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ query, variables: { cartId } })
+                            });
+                            const result = await res.json();
+                            data = result.data?.cart || result;
+                        }
+
+                        this.getCart.status = res.status;
+                        this.getCart.time = Date.now() - start;
+                        this.getCart.response = JSON.stringify(data, null, 2);
+                        this.getCart.data = data;
+
+                        // Update item count
+                        this.cartItemCount = data.items?.length || data.itemsCount || 0;
+
+                        // Set as current if not set
+                        if (!this.currentCartId && cartId) {
+                            this.setCurrentCart(cartId);
+                        }
+                    } catch (e) {
+                        this.getCart.status = 0;
+                        this.getCart.time = Date.now() - start;
+                        this.getCart.response = 'Error: ' + e.message;
+                        this.getCart.data = null;
+                    }
+
+                    this.loading = false;
+                },
+
+                async addItemToCart() {
+                    this.loading = true;
+                    const cartId = this.addItem.cartId || this.currentCartId;
+
+                    try {
+                        const res = await fetch(`/api/guest-carts/${cartId}/items`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                sku: this.addItem.sku,
+                                qty: parseInt(this.addItem.qty) || 1
+                            })
+                        });
+                        const data = await res.json();
+
+                        this.itemsStatus = res.status;
+                        this.itemsResponse = JSON.stringify(data, null, 2);
+
+                        if (res.ok) {
+                            this.addItem.sku = '';
+                            this.addItem.qty = 1;
+                        }
+                    } catch (e) {
+                        this.itemsStatus = 0;
+                        this.itemsResponse = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                },
+
+                async updateCartItem() {
+                    this.loading = true;
+                    const cartId = this.updateItem.cartId || this.currentCartId;
+
+                    try {
+                        const res = await fetch(`/api/guest-carts/${cartId}/items/${this.updateItem.itemId}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                qty: parseInt(this.updateItem.qty) || 1
+                            })
+                        });
+                        const data = await res.json();
+
+                        this.itemsStatus = res.status;
+                        this.itemsResponse = JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        this.itemsStatus = 0;
+                        this.itemsResponse = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                },
+
+                async removeCartItem() {
+                    this.loading = true;
+                    const cartId = this.updateItem.cartId || this.currentCartId;
+
+                    try {
+                        const res = await fetch(`/api/guest-carts/${cartId}/items/${this.updateItem.itemId}`, {
+                            method: 'DELETE'
+                        });
+
+                        this.itemsStatus = res.status;
+                        if (res.ok) {
+                            this.itemsResponse = JSON.stringify({ success: true, message: 'Item removed' }, null, 2);
+                            this.updateItem.itemId = '';
+                        } else {
+                            const data = await res.json();
+                            this.itemsResponse = JSON.stringify(data, null, 2);
+                        }
+                    } catch (e) {
+                        this.itemsStatus = 0;
+                        this.itemsResponse = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                },
+
+                async fetchTotals() {
+                    this.loading = true;
+                    const cartId = this.totals.cartId || this.currentCartId;
+
+                    try {
+                        // Get full cart which includes totals
+                        const res = await fetch(`/api/guest-carts/${cartId}`);
+                        const data = await res.json();
+
+                        this.totals.status = res.status;
+                        this.totals.response = JSON.stringify(data, null, 2);
+                        this.totals.data = data.totals || data;
+                    } catch (e) {
+                        this.totals.status = 0;
+                        this.totals.response = 'Error: ' + e.message;
+                        this.totals.data = null;
+                    }
+
+                    this.loading = false;
+                },
+
+                async applyCoupon() {
+                    this.loading = true;
+                    const cartId = this.totals.cartId || this.currentCartId;
+
+                    try {
+                        const res = await fetch(`/api/guest-carts/${cartId}/coupon`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ couponCode: this.coupon.code })
+                        });
+                        const data = await res.json();
+
+                        this.totals.status = res.status;
+                        this.totals.response = JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        this.totals.status = 0;
+                        this.totals.response = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                },
+
+                async removeCoupon() {
+                    this.loading = true;
+                    const cartId = this.totals.cartId || this.currentCartId;
+
+                    try {
+                        const res = await fetch(`/api/guest-carts/${cartId}/coupon`, {
+                            method: 'DELETE'
+                        });
+                        const data = await res.json();
+
+                        this.totals.status = res.status;
+                        this.totals.response = JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        this.totals.status = 0;
+                        this.totals.response = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                },
+
+                loadGraphQLExample(type) {
+                    const examples = {
+                        getCart: {
+                            query: `query GetCart($cartId: ID!) {
+    cart(id: $cartId) {
+        id
+        customerEmail
+        itemsCount
+        items {
+            id
+            sku
+            name
+            qty
+            price
+            rowTotal
+        }
+        totals {
+            subtotal
+            discount
+            shipping
+            tax
+            grandTotal
+        }
+    }
+}`,
+                            variables: JSON.stringify({ cartId: this.currentCartId || '' }, null, 2)
+                        },
+                        addItem: {
+                            query: `mutation AddToCart($cartId: ID!, $sku: String!, $qty: Int!) {
+    addCartItem(cartId: $cartId, sku: $sku, qty: $qty) {
+        id
+        itemsCount
+        items {
+            id
+            sku
+            name
+            qty
+            price
+        }
+    }
+}`,
+                            variables: JSON.stringify({
+                                cartId: this.currentCartId || '',
+                                sku: 'TEST-001',
+                                qty: 1
+                            }, null, 2)
+                        },
+                        createCart: {
+                            query: `mutation CreateCart($customerId: Int) {
+    createCart(customerId: $customerId) {
+        id
+        customerEmail
+    }
+}`,
+                            variables: JSON.stringify({ customerId: null }, null, 2)
+                        }
+                    };
+
+                    if (examples[type]) {
+                        this.graphql.query = examples[type].query;
+                        this.graphql.variables = examples[type].variables;
+                    }
+                },
+
+                async runGraphQL() {
+                    this.loading = true;
+                    const start = Date.now();
+
+                    try {
+                        let variables = {};
+                        try {
+                            variables = JSON.parse(this.graphql.variables || '{}');
+                        } catch (e) {
+                            // ignore parse errors
+                        }
+
+                        const url = this.graphql.endpoint === 'public' ? '/api/graphql' : '/admin/graphql/index';
+                        const headers = { 'Content-Type': 'application/json' };
+
+                        // Add JWT token for public endpoint
+                        if (this.graphql.endpoint === 'public' && this.auth.token) {
+                            headers['Authorization'] = 'Bearer ' + this.auth.token;
+                        }
+
+                        const res = await fetch(url, {
+                            method: 'POST',
+                            headers,
+                            body: JSON.stringify({
+                                query: this.graphql.query,
+                                variables
+                            })
+                        });
+                        const data = await res.json();
+
+                        this.graphql.status = res.status;
+                        this.graphql.time = Date.now() - start;
+                        this.graphql.response = JSON.stringify(data, null, 2);
+                    } catch (e) {
+                        this.graphql.status = 0;
+                        this.graphql.time = Date.now() - start;
+                        this.graphql.response = 'Error: ' + e.message;
+                    }
+
+                    this.loading = false;
+                },
+
+                // Initialize - load auth from localStorage
+                init() {
+                    const stored = localStorage.getItem('maho_api_auth');
+                    if (stored) {
+                        try {
+                            const data = JSON.parse(stored);
+                            this.auth.token = data.token;
+                            this.auth.email = data.email;
+                            this.auth.customerId = data.customerId;
+                            this.auth.expiresAt = data.expiresAt;
+                        } catch (e) {
+                            localStorage.removeItem('maho_api_auth');
+                        }
+                    }
+                },
+
+                // Login via OAuth2 token endpoint
+                async login() {
+                    if (!this.auth.loginEmail || !this.auth.loginPassword) {
+                        this.auth.error = 'Email and password are required';
+                        return;
+                    }
+
+                    this.auth.loading = true;
+                    this.auth.error = null;
+
+                    try {
+                        const res = await fetch('/api/auth/token', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                email: this.auth.loginEmail,
+                                password: this.auth.loginPassword
+                            })
+                        });
+
+                        const data = await res.json();
+
+                        if (res.ok && (data.token || data.access_token)) {
+                            this.auth.token = data.token || data.access_token;
+                            this.auth.email = data.customer?.email || this.auth.loginEmail;
+                            this.auth.customerId = data.customer?.id || null;
+                            this.auth.expiresAt = data.expires_in
+                                ? new Date(Date.now() + data.expires_in * 1000).toLocaleString()
+                                : null;
+                            this.auth.showLogin = false;
+                            this.auth.loginPassword = '';
+
+                            // Store in localStorage
+                            localStorage.setItem('maho_api_auth', JSON.stringify({
+                                token: this.auth.token,
+                                email: this.auth.email,
+                                customerId: this.auth.customerId,
+                                expiresAt: this.auth.expiresAt
+                            }));
+                        } else {
+                            this.auth.error = data.error_description || data.message || data.detail || 'Authentication failed';
+                        }
+                    } catch (e) {
+                        this.auth.error = 'Network error: ' + e.message;
+                    } finally {
+                        this.auth.loading = false;
+                    }
+                },
+
+                // Logout - clear token
+                logout() {
+                    this.auth.token = null;
+                    this.auth.email = null;
+                    this.auth.customerId = null;
+                    this.auth.expiresAt = null;
+                    localStorage.removeItem('maho_api_auth');
+                }
+            };
+        }
+    </script>
+</body>
+</html>

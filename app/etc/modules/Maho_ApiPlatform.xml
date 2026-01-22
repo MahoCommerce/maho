@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_ApiPlatform>
+            <active>true</active>
+            <codePool>core</codePool>
+            <depends>
+                <Mage_Core/>
+                <Mage_Customer/>
+                <Mage_Catalog/>
+                <Mage_Sales/>
+            </depends>
+        </Maho_ApiPlatform>
+    </modules>
+</config>
