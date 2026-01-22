@@ -1373,9 +1373,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row
-                        // Include entity_type_id and attribute_set_id to satisfy FK constraints
-                        // during the INSERT part of INSERT ... ON DUPLICATE KEY UPDATE.
-                        // MySQL 9.6+ validates FK constraints even when using default column values.
                         $entityRowsUp[] = [
                             'updated_at'       => $now,
                             'entity_id'        => $this->_oldSku[$rowSku]['entity_id'],
