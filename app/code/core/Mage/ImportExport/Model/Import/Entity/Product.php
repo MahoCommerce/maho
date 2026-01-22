@@ -1323,41 +1323,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             );
         }
         if ($entityRowsIn) {
-            // Debug: Log the data being inserted
-            foreach ($entityRowsIn as $sku => $row) {
-                $attrSetId = $row['attribute_set_id'];
-                $attrSetIdType = gettype($attrSetId);
-                echo "[DEBUG INSERT] SKU: {$sku}, attribute_set_id: {$attrSetId} (type: {$attrSetIdType}), entity_type_id: {$row['entity_type_id']}\n";
-
-                // Verify the attribute_set_id exists right before insert
-                $exists = $this->_connection->fetchOne(
-                    "SELECT attribute_set_id FROM eav_attribute_set WHERE attribute_set_id = ?",
-                    [$attrSetId]
-                );
-                echo "[DEBUG INSERT] attribute_set_id {$attrSetId} exists in DB: " . ($exists ? 'YES' : 'NO') . "\n";
-
-                // Also verify entity_type_id
-                $entityTypeExists = $this->_connection->fetchOne(
-                    "SELECT entity_type_id FROM eav_entity_type WHERE entity_type_id = ?",
-                    [$row['entity_type_id']]
-                );
-                echo "[DEBUG INSERT] entity_type_id {$row['entity_type_id']} exists in DB: " . ($entityTypeExists ? 'YES' : 'NO') . "\n";
-
-                // Check the FK relationship - does this attribute_set belong to this entity_type?
-                $fkValid = $this->_connection->fetchOne(
-                    "SELECT attribute_set_id FROM eav_attribute_set WHERE attribute_set_id = ? AND entity_type_id = ?",
-                    [$attrSetId, $row['entity_type_id']]
-                );
-                echo "[DEBUG INSERT] FK valid (attr_set {$attrSetId} belongs to entity_type {$row['entity_type_id']}): " . ($fkValid ? 'YES' : 'NO') . "\n";
-            }
-
-            try {
-                $this->_connection->insertMultiple($entityTable, $entityRowsIn);
-            } catch (\Exception $e) {
-                echo "[DEBUG INSERT ERROR] " . $e->getMessage() . "\n";
-                echo "[DEBUG INSERT ERROR] Data: " . json_encode($entityRowsIn) . "\n";
-                throw $e;
-            }
+            $this->_connection->insertMultiple($entityTable, $entityRowsIn);
 
             $newProducts = $this->_connection->fetchPairs($this->_connection->select()
                 ->from($entityTable, ['sku', 'entity_id'])
@@ -1407,9 +1373,14 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
 
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row
+                        // Include entity_type_id and attribute_set_id to satisfy FK constraints
+                        // during the INSERT part of INSERT ... ON DUPLICATE KEY UPDATE.
+                        // MySQL 9.6+ validates FK constraints even when using default column values.
                         $entityRowsUp[] = [
-                            'updated_at' => $now,
-                            'entity_id'  => $this->_oldSku[$rowSku]['entity_id'],
+                            'updated_at'       => $now,
+                            'entity_id'        => $this->_oldSku[$rowSku]['entity_id'],
+                            'entity_type_id'   => $this->_entityTypeId,
+                            'attribute_set_id' => $this->_oldSku[$rowSku]['attr_set_id'],
                         ];
                     } else { // new row
                         if (!$productLimit || $productsQty < $productLimit) {
