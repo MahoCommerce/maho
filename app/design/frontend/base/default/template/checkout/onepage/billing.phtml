@@ -118,7 +118,7 @@
                     </div>
                 </li>
                 <?php if(!$this->isCustomerLoggedIn()): ?>
-
+                <input type="hidden" name="checkout_method" value="guest" />
         <?php $_dob = $this->getLayout()->createBlock('customer/widget_dob') ?>
         <?php $_gender = $this->getLayout()->createBlock('customer/widget_gender') ?>
             <?php if ($_dob->isEnabled() || $_gender->isEnabled()): ?>
@@ -139,31 +139,6 @@
             <?php if ($this->isTaxvatEnabled()):?>
                 <li><?= $this->getTaxvatHtml() ?></li>
             <?php endif ?>
-
-                <li class="fields" id="register-customer-password">
-                    <div class="field">
-                        <label for="billing:customer_password" class="required"><?= $this->__('Password') ?></label>
-                        <div class="input-box">
-                            <?php $minPasswordLength = $this->getQuote()->getCustomer()->getMinPasswordLength(); ?>
-                            <input type="password"
-                                   name="billing[customer_password]"
-                                   id="billing:customer_password"
-                                   title="<?= $this->quoteEscape($this->__('Password')) ?>"
-                                   class="input-text required-entry validate-password min-pass-length-<?= $minPasswordLength ?>"
-                                   autocomplete="new-password" />
-                            <p class="form-instructions">
-                                <?= Mage::helper('customer')->__('The minimum password length is %s', $minPasswordLength) ?>
-                            </p>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <label for="billing:confirm_password" class="required"><?= $this->__('Confirm Password') ?></label>
-                        <div class="input-box">
-                            <input type="password" name="billing[confirm_password]" title="<?= $this->quoteEscape($this->__('Confirm Password')) ?>" id="billing:confirm_password" class="input-text required-entry validate-cpassword" autocomplete="new-password" />
-                        </div>
-                    </div>
-                </li>
-                <?= $this->getChildHtml('remember.me') ?>
                 <?php endif ?>
                 <?php if ($this->isCustomerLoggedIn() && $this->customerHasAddresses()):?>
                     <li class="control">
@@ -211,21 +186,4 @@
         'billing:country_id', 'billing:region', 'billing:region_id',
         <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'billing:postcode'
     );
-
-    const guestRegisterButton = document.getElementById('onepage-guest-register-button');
-    if (guestRegisterButton) {
-        guestRegisterButton.addEventListener('click', function(event) {
-            const billingForm = document.getElementById('co-billing-form');
-            const billingRememberMe = billingForm.querySelectorAll('.remember-me-box');
-
-            if (billingRememberMe.length > 0) {
-                const method = document.querySelector('input[name=checkout_method]:is(:checked,[type=hidden])')?.value;
-                if (method === 'guest') {
-                    billingRememberMe[0].style.display = 'none';
-                } else if (method === 'register') {
-                    billingRememberMe[0].style.display = 'block';
-                }
-            }
-        });
-    }
 </script>

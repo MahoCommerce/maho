@@ -46,7 +46,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Giftcard extends Mage_Adm
                 $balance = $giftcard->getBalance($baseCurrency);
                 $giftcards[] = [
                     'code' => $code,
-                    'display_code' => $this->_getDisplayCode($code),
+                    'display_code' => $code,
                     'applied_amount' => (float) $appliedAmount,
                     'applied_amount_formatted' => $this->formatPrice($appliedAmount),
                     'balance' => $balance,
@@ -81,17 +81,6 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Giftcard extends Mage_Adm
     public function hasAppliedGiftcards(): bool
     {
         return !empty($this->getAppliedGiftcards());
-    }
-
-    /**
-     * Get truncated display code
-     */
-    protected function _getDisplayCode(string $code): string
-    {
-        if (strlen($code) > 16) {
-            return substr($code, 0, 6) . '...' . substr($code, -6);
-        }
-        return $code;
     }
 
     /**

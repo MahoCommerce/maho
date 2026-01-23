@@ -185,10 +185,32 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $this->_redirect('checkout/cart');
             return;
         }
+
+        // Redirect to login if guest checkout is disabled and customer is not logged in
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()
+            && !Mage::helper('checkout')->isAllowedGuestCheckout($quote)
+        ) {
+            Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('checkout/onepage', ['_secure' => true]));
+            $this->_redirect('customer/account/login');
+            return;
+        }
+
         Mage::getSingleton('checkout/session')->setCartWasUpdated(false);
         Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*', ['_secure' => true]));
         $this->getOnepage()->initCheckout();
-        $this->loadLayout();
+
+        if (Mage::getStoreConfigFlag('checkout/options/onestep_checkout_enabled')) {
+            $this->loadLayout(['default', 'checkout_onepage_index', 'checkout_onepage_index_onestep']);
+        } else {
+            $this->loadLayout();
+        }
+
+        // Set checkout method to guest for non-logged-in users
+        // Must be called AFTER loadLayout() because Billing block's _construct() overwrites step data
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
+            $this->getOnepage()->saveCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
+        }
+
         $this->_initLayoutMessages('customer/session');
         $this->getLayout()->getBlock('head')->setTitle($this->__('Checkout'));
         $this->renderLayout();
@@ -384,6 +406,65 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
 
             $this->_prepareDataJSON($result);
         }
+    }
+
+    /**
+     * Save partial billing address for shipping estimation (one-step checkout)
+     *
+     * This action saves billing address fields to the quote without requiring
+     * all fields to be valid. Used for shipping rate estimation in one-step checkout.
+     */
+    public function estimateBillingAction(): void
+    {
+        if ($this->_expireAjax()) {
+            return;
+        }
+
+        if (!$this->_validateFormKey()) {
+            return;
+        }
+
+        if (!$this->getRequest()->isPost()) {
+            return;
+        }
+
+        $data = $this->getRequest()->getPost('billing', []);
+        $quote = $this->getOnepage()->getQuote();
+
+        // Save to billing address
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddress->addData($data);
+        $billingAddress->implodeStreetAddress();
+
+        // If using billing for shipping, also set shipping address
+        $useForShipping = $data['use_for_shipping'] ?? 1;
+        if ($useForShipping && !$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+
+            // Remove fields that should not be copied to shipping address
+            // address_id is the quote address entity ID - copying it would overwrite the shipping address identity
+            $shippingData = $data;
+            unset($shippingData['address_id']);
+
+            $shippingAddress->setSameAsBilling(1)
+                ->addData($shippingData)
+                ->implodeStreetAddress()
+                ->setCollectShippingRates(true);
+        }
+
+        // collectTotals() runs all total collectors including shipping,
+        // which properly calculates item qty before collecting rates
+        $quote->collectTotals()->save();
+
+        $result = [
+            'success' => true,
+            'update_section' => [
+                'name' => 'shipping-method',
+                'html' => $this->_getShippingMethodsHtml(),
+            ],
+        ];
+
+        $this->_prepareDataJSON($result);
     }
 
     /**
@@ -658,8 +739,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     {
         return Mage::getSingleton('customer/session')->isLoggedIn()
             || $this->getRequest()->getActionName() == 'index'
-            || Mage::helper('checkout')->isAllowedGuestCheckout($this->getOnepage()->getQuote())
-            || !Mage::helper('checkout')->isRedirectRegisterStep();
+            || Mage::helper('checkout')->isAllowedGuestCheckout($this->getOnepage()->getQuote());
     }
 
     /**

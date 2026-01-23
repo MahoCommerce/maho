@@ -13,7 +13,6 @@
 class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_GUEST_CHECKOUT = 'checkout/options/guest_checkout';
-    public const XML_PATH_REDIRECT_REGISTER = 'checkout/options/redirect_register';
 
     protected $_moduleName = 'Mage_Checkout';
 
@@ -346,13 +345,4 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     {
         return (Mage::app()->getRequest()->getParam('context') == 'checkout');
     }
-
-    /**
-     * Check if we should redirect the user to a separate register step during checkout
-     */
-    public function isRedirectRegisterStep(): bool
-    {
-        return Mage::getStoreConfigFlag(self::XML_PATH_REDIRECT_REGISTER);
-    }
-
 }

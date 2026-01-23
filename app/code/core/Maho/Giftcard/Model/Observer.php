@@ -237,6 +237,18 @@ class Maho_Giftcard_Model_Observer
             return;
         }
 
+        // Check if cart already has giftcard codes applied
+        $quote = $quoteItem->getQuote();
+        $giftcardCodes = $quote->getGiftcardCodes();
+        if ($giftcardCodes !== null && $giftcardCodes !== '') {
+            $codes = json_decode($giftcardCodes, true);
+            if (is_array($codes) && $codes !== []) {
+                throw new Mage_Core_Exception(
+                    Mage::helper('giftcard')->__('Gift card products cannot be added when a gift card code is applied. Please remove the gift card code first.'),
+                );
+            }
+        }
+
         // Get the gift card amount from buy request
         $buyRequest = $quoteItem->getBuyRequest();
         if ($buyRequest && $buyRequest->getGiftcardAmount()) {
@@ -386,12 +398,7 @@ class Maho_Giftcard_Model_Observer
             // Format codes for display
             $displayCodes = [];
             foreach (array_keys($codes) as $code) {
-                // Show partial code for security
-                if (strlen($code) > 10) {
-                    $displayCodes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                } else {
-                    $displayCodes[] = $code;
-                }
+                $displayCodes[] = Mage::helper('giftcard')->maskCode($code);
             }
 
             $additionalInfo['gift_cards_used'] = implode(', ', $displayCodes);

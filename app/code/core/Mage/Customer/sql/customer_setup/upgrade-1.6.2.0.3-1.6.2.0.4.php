@@ -17,7 +17,7 @@ $middlenameAttributeCode = 'middlename';
 
 $installer->addAttribute('customer', $middlenameAttributeCode, [
     'type'       => 'varchar',
-    'label'      => 'Middle Name/Initial',
+    'label'      => 'Middle Name',
     'input'      => 'text',
     'required'   => 0,
     'sort_order' => 50,
@@ -39,7 +39,7 @@ $middlenameAttribute->save();
 
 $installer->addAttribute('customer_address', $middlenameAttributeCode, [
     'type'       => 'varchar',
-    'label'      => 'Middle Name/Initial',
+    'label'      => 'Middle Name',
     'input'      => 'text',
     'required'   => 0,
     'sort_order' => 30,

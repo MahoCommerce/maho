@@ -35,14 +35,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Invoice_Totals extends Mage_Admi
             if ($giftcardCodes) {
                 $codesArray = json_decode($giftcardCodes, true);
                 if (is_array($codesArray)) {
-                    // Show partial codes for security
-                    foreach (array_keys($codesArray) as $code) {
-                        if (strlen($code) > 10) {
-                            $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                        } else {
-                            $codes[] = $code;
-                        }
-                    }
+                    $codes = array_keys($codesArray);
                 }
             }
 

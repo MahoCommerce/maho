@@ -70,13 +70,8 @@
         </reference>
     </default>
 
-    <!-- Checkout Payment - Add gift card form and handle payment method selection -->
+    <!-- Checkout Payment - Handle payment method visibility based on gift card coverage -->
     <checkout_onepage_index>
-        <!-- Add gift card form BEFORE the payment form (before_form is rendered before the form starts) -->
-        <reference name="checkout.onepage.payment.before_form">
-            <block type="giftcard/checkout_payment_giftcard" name="checkout.payment.giftcard" template="maho/giftcard/checkout/payment/giftcard.phtml" />
-        </reference>
-        <!-- Handle payment method visibility based on gift card coverage -->
         <reference name="checkout.onepage.payment.methods">
             <block type="core/template" name="giftcard.payment.methods" template="maho/giftcard/checkout/payment/methods.phtml" />
         </reference>
@@ -89,15 +84,12 @@
         </reference>
     </checkout_onepage_paymentmethod>
 
-    <!-- Checkout Cart - Add Gift Card Form, Custom Renderer, and Price Block -->
+    <!-- Checkout Cart - Custom Renderer and Price Block -->
+    <!-- Note: Gift card input is now integrated into the unified promo code section (checkout/cart/coupon.phtml) -->
     <checkout_cart_index>
         <!-- Use custom renderer for gift card items to format dates -->
         <reference name="checkout.cart">
             <action method="addItemRender"><type>giftcard</type><block>giftcard/checkout_cart_item_renderer</block><template>checkout/cart/item/default.phtml</template></action>
-        </reference>
-        <!-- Add to the extra section where discount codes appear -->
-        <reference name="checkout.cart.extra">
-            <block type="giftcard/checkout_cart_giftcard" name="checkout.cart.giftcard" as="giftcard" template="maho/giftcard/checkout/cart/giftcard.phtml" />
         </reference>
         <!-- Add gift card price block for crosssell products -->
         <reference name="checkout.cart.crosssell">

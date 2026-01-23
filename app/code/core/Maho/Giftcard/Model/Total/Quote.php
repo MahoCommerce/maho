@@ -58,28 +58,29 @@ class Maho_Giftcard_Model_Total_Quote extends Mage_Sales_Model_Quote_Address_Tot
             return $this;
         }
 
-        // Calculate eligible total (excluding gift card products to prevent circular purchases)
-        $baseEligibleTotal = 0;
-        $eligibleTotal = 0;
+        // Calculate eligible total from address totals (subtotal + discount + shipping + tax)
+        // Note: discount amount is already negative, so we ADD it
+        $baseGrandTotal = $address->getBaseSubtotal()
+            + $address->getBaseDiscountAmount()
+            + $address->getBaseShippingAmount()
+            + $address->getBaseTaxAmount();
 
+        $grandTotal = $address->getSubtotal()
+            + $address->getDiscountAmount()
+            + $address->getShippingAmount()
+            + $address->getTaxAmount();
+
+        // Exclude gift card products from gift card payment (to prevent circular purchases)
         foreach ($address->getAllItems() as $item) {
             if ($item->getParentItemId()) {
                 continue;
             }
-            // Exclude gift card products from gift card payment
             if ($item->getProductType() === 'giftcard') {
-                continue;
+                // Remove this item's contribution to the eligible total
+                $baseGrandTotal -= ($item->getBaseRowTotal() - $item->getBaseDiscountAmount() + $item->getBaseTaxAmount());
+                $grandTotal -= ($item->getRowTotal() - $item->getDiscountAmount() + $item->getTaxAmount());
             }
-            $baseEligibleTotal += $item->getBaseRowTotalInclTax() - $item->getBaseDiscountAmount();
-            $eligibleTotal += $item->getRowTotalInclTax() - $item->getDiscountAmount();
         }
-
-        // Add shipping if applicable
-        $baseEligibleTotal += $address->getBaseShippingInclTax() - $address->getBaseShippingDiscountAmount();
-        $eligibleTotal += $address->getShippingInclTax() - $address->getShippingDiscountAmount();
-
-        $baseGrandTotal = $baseEligibleTotal;
-        $grandTotal = $eligibleTotal;
 
         $baseTotalDiscount = 0;
         $totalDiscount = 0;

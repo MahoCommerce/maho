@@ -5,9 +5,16 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+
+/** @var Mage_Checkout_Block_Onepage_Payment_Methods $this */
 ?>
 <dl class="sp-methods" id="checkout-payment-method-load">
-   <!-- Content dynamically loaded. Content from the methods.phtml is loaded during the ajax call -->
+<?php if ($this->getQuote()->isVirtual()): ?>
+<?= $this->getLayout()->createBlock('checkout/onepage_payment_methods')
+    ->setTemplate('checkout/onepage/payment/methods.phtml')
+    ->toHtml() ?>
+<?php endif ?>
 </dl>

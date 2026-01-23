@@ -264,7 +264,9 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
         $dir = Mage::getBaseDir() . '/' . self::CACHE_DIR;
 
         if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            if (!@mkdir($dir, 0755, true) && !is_dir($dir)) {
+                throw new Mage_Core_Exception("Failed to create minify cache directory: {$dir}");
+            }
         }
     }
 
@@ -340,8 +342,11 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                     $fileMtime = (int) $matches[2];
                     // Remove if older than cutoff time
                     if ($fileMtime < $cutoffTime) {
-                        unlink($file);
-                        Mage::log("Cleaned up old minified file: {$filename}", Mage::LOG_INFO);
+                        if (@unlink($file)) {
+                            Mage::log("Cleaned up old minified file: {$filename}", Mage::LOG_INFO);
+                        } else {
+                            Mage::log("Failed to delete old minified file: {$filename}", Mage::LOG_WARNING);
+                        }
                     }
                 }
             }

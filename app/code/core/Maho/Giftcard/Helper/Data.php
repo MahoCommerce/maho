@@ -108,6 +108,17 @@ class Maho_Giftcard_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Mask gift card code for secure display (show first 4 and last 4 chars)
+     */
+    public function maskCode(string $code): string
+    {
+        if (strlen($code) > 8) {
+            return substr($code, 0, 4) . '****' . substr($code, -4);
+        }
+        return $code;
+    }
+
+    /**
      * Check if gift card module is enabled
      */
     public function isEnabled(): bool

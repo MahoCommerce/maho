@@ -6,7 +6,7 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.13';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.16';
 
 /**
  * Column presets configuration

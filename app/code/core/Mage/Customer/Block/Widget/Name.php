@@ -155,10 +155,12 @@ class Mage_Customer_Block_Widget_Name extends Mage_Customer_Block_Widget_Abstrac
     public function getContainerClassName()
     {
         $class = $this->getClassName();
-        $class .= $this->showPrefix() ? '-prefix' : '';
-        $class .= $this->showMiddlename() ? '-middlename' : '';
-        $class .= $this->showSuffix() ? '-suffix' : '';
-        return $class;
+        $suffix = '';
+        $suffix .= $this->showPrefix() ? '-prefix' : '';
+        $suffix .= $this->showMiddlename() ? '-middlename' : '';
+        $suffix .= $this->showSuffix() ? '-suffix' : '';
+
+        return $suffix ? $class . ' ' . $class . $suffix : $class;
     }
 
     /**

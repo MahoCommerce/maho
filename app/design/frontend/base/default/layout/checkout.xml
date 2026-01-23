@@ -20,13 +20,6 @@ Default layout, loads most of the pages
     <default>
 
         <!-- Mage_Checkout -->
-        <reference name="top.links">
-            <block type="checkout/links" name="checkout_cart_link">
-                <action method="addCartLink"></action>
-                <action method="addCheckoutLink"></action>
-            </block>
-        </reference>
-
         <reference name="header">
             <block type="checkout/cart_minicart" name="minicart_head" template="checkout/cart/minicart.phtml" before="-">
                 <block type="checkout/cart_sidebar" name="minicart_content" template="checkout/cart/minicart/items.phtml">
@@ -43,17 +36,6 @@ Default layout, loads most of the pages
                     </block>
                 </block>
             </block>
-        </reference>
-
-        <reference name="right">
-            <!--<block type="checkout/cart_sidebar" name="cart_sidebar" template="checkout/cart/sidebar.phtml" before="-">-->
-                <!--<action method="addItemRender"><type>simple</type><block>checkout/cart_item_renderer</block><template>checkout/cart/sidebar/default.phtml</template></action>-->
-                <!--<action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>checkout/cart/sidebar/default.phtml</template></action>-->
-                <!--<action method="addItemRender"><type>configurable</type><block>checkout/cart_item_renderer_configurable</block><template>checkout/cart/sidebar/default.phtml</template></action>-->
-                <!--<block type="core/text_list" name="cart_sidebar.extra_actions" as="extra_actions" translate="label" module="checkout">-->
-                    <!--<label>Shopping Cart Sidebar Extra Actions</label>-->
-                <!--</block>-->
-            <!--</block>-->
         </reference>
     </default>
 
@@ -363,13 +345,6 @@ One page checkout main layout
         </reference>
         <reference name="content">
             <block type="checkout/onepage" name="checkout.onepage" template="checkout/onepage.phtml">
-                <block type="checkout/onepage_login" name="checkout.onepage.login" as="login" template="checkout/onepage/login.phtml">
-                    <block type="customer/form_remember" name="remember.me" template="customer/form/remember.phtml" />
-                    <block type="page/html_wrapper" name="checkout.onepage.login.before" as="login_before" translate="label">
-                        <label>Login/Registration Before</label>
-                        <action method="setMayBeInvisible"><value>1</value></action>
-                    </block>
-                </block>
                 <block type="checkout/onepage_billing" name="checkout.onepage.billing" as="billing" template="checkout/onepage/billing.phtml">
                     <block type="customer/form_remember" name="remember.me" template="customer/form/remember.phtml" />
                 </block>
@@ -382,7 +357,9 @@ One page checkout main layout
                     <block type="checkout/onepage_payment_methods" name="checkout.payment.methods" as="methods" template="checkout/onepage/payment/info.phtml">
                         <action method="setMethodFormTemplate"><method>purchaseorder</method><template>payment/form/purchaseorder.phtml</template></action>
                     </block>
-                    <block type="core/template" name="checkout.onepage.payment.before_form" as="before_form" />
+                    <block type="core/text_list" name="checkout.onepage.payment.before_form" as="before_form">
+                        <block type="checkout/cart_coupon" name="checkout.payment.coupon" template="checkout/cart/coupon.phtml" />
+                    </block>
                     <block type="core/template" name="checkout.onepage.payment.additional" as="additional" />
                     <block type="core/template" name="checkout.onepage.payment.methods_additional" as="methods_additional" />
                 </block>
@@ -522,6 +499,40 @@ One page checkout order review block
             <label>Additional Product Info</label>
         </block>
     </checkout_onepage_review>
+
+<!--
+Promo code block AJAX update
+-->
+    <checkout_cart_coupon_ajax>
+        <block type="checkout/cart_coupon" name="root" output="toHtml" template="checkout/cart/coupon_content.phtml" />
+    </checkout_cart_coupon_ajax>
+
+<!--
+One step checkout layout (all steps visible at once)
+-->
+
+    <checkout_onepage_index_onestep translate="label">
+        <label>One Step Checkout</label>
+        <!-- Remove the right sidebar with progress -->
+        <remove name="checkout.progress.wrapper"/>
+        <remove name="right"/>
+        <remove name="checkout.payment.coupon"/>
+
+        <reference name="root">
+            <action method="setTemplate"><template>page/1column.phtml</template></action>
+        </reference>
+
+        <reference name="head">
+            <action method="addItem"><type>skin_css</type><name>css/onestep-checkout.css</name></action>
+            <action method="addJs"><script>varien/onestepcheckout.js</script></action>
+        </reference>
+
+        <!-- Replace the main checkout block with one-step template -->
+        <reference name="checkout.onepage">
+            <action method="setTemplate"><template>checkout/onestep.phtml</template></action>
+            <block type="checkout/cart_coupon" name="checkout.onestep.coupon" as="coupon" template="checkout/cart/coupon_content.phtml" />
+        </reference>
+    </checkout_onepage_index_onestep>
 
     <checkout_onepage_success translate="label">
         <label>One Page Checkout Success</label>

@@ -1,0 +1,746 @@
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/* Override default checkout layout - make col-main full width and centered */
+.checkout-onepage-index:has(.onestep-checkout) {
+    .col-main {
+        float: none;
+        inline-size: 100%;
+        max-inline-size: 1100px;
+        margin-inline: auto;
+        padding: 0;
+    }
+
+    .col-right {
+        display: none;
+    }
+}
+
+.onestep-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block-end: 0.5rem;
+
+    h1 {
+        margin: 0;
+    }
+}
+
+.onestep-login-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .onestep-login-text {
+        color: var(--maho-color-text-secondary);
+        font-size: 0.9rem;
+
+        @media (width <= 768px) {
+            display: none;
+        }
+    }
+
+    .button {
+        padding: 0.5rem 1rem;
+        font-size: 0.875rem;
+    }
+
+    .button-secondary {
+        background: transparent;
+        color: var(--maho-color-primary);
+        border: 1px solid var(--maho-color-primary);
+
+        &:hover,
+        &:focus-visible {
+            background: var(--maho-color-primary);
+            color: var(--maho-color-background);
+        }
+    }
+}
+
+/* Main checkout container - two-column layout */
+.onestep-checkout {
+    --_gap: 1.75rem;
+    --_section-padding: 1.25rem;
+    --_input-padding: 0.5rem 0.75rem;
+    --_input-font-size: 0.9375rem;
+    --_border-radius: 0;
+
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: var(--_gap);
+    align-items: start;
+
+    @media (width <= 940px) {
+        --_gap: 0.5rem;
+    }
+
+    @media (width <= 768px) {
+        grid-template-columns: 1fr;
+        --_gap: 0;
+        --_input-padding: 0.75rem;
+        --_input-font-size: 1rem; /* Prevent zoom on iOS */
+    }
+}
+
+.onestep-column {
+    display: flex;
+    flex-direction: column;
+    min-inline-size: 0;
+    position: sticky;
+    inset-block-start: 1rem;
+
+    @media (width <= 768px) {
+        position: static;
+    }
+}
+
+.onestep-column-right {
+    min-inline-size: 380px;
+
+    @media (width <= 768px) {
+        min-inline-size: 0;
+    }
+}
+
+.onestep-section {
+    overflow: hidden;
+}
+
+.onestep-section-header {
+    padding-block-start: 1rem;
+
+    h2 {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin: 0;
+        padding-inline-end: 0.75rem;
+        padding-block-end: 0.25rem;
+        border-block-end: 2px solid var(--maho-color-primary);
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--maho-color-text-primary);
+        text-transform: none;
+
+        svg {
+            flex-shrink: 0;
+            inline-size: 24px;
+            block-size: 24px;
+            color: var(--maho-color-text-secondary);
+        }
+    }
+}
+
+.onestep-section-content {
+    position: relative;
+    padding: var(--_section-padding);
+    margin-block-start: 1rem;
+
+    /* Loading overlay - hidden by default */
+    &::before,
+    &::after {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.15s ease;
+
+        @media (prefers-reduced-motion: reduce) {
+            transition: none;
+        }
+    }
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: color-mix(in srgb, var(--maho-color-background) 70%, transparent);
+        z-index: 1;
+    }
+
+    &::after {
+        content: '';
+        position: absolute;
+        inset-block-start: 50%;
+        inset-inline-start: 50%;
+        inline-size: 24px;
+        aspect-ratio: 1;
+        margin-block-start: -12px;
+        margin-inline-start: -12px;
+        background: url('../images/loading.svg') no-repeat center / contain;
+        z-index: 2;
+    }
+
+    .loading > & {
+        pointer-events: none;
+
+        &::before,
+        &::after {
+            opacity: 1;
+        }
+    }
+}
+
+#onestep-review .onestep-section-content {
+    padding: 0;
+}
+
+/* Spacing before shipping address radio buttons */
+.onestep-checkout #co-billing-form ul.form-list > li:not(.control) + li.control,
+.onestep-checkout #co-shipping-form ul.form-list > li:not(.control) + li.control {
+    margin-block-start: 0.75rem;
+}
+
+/* Hidden elements not needed in one-step checkout */
+.onestep-checkout {
+    #billing-buttons-container,
+    #shipping-buttons-container,
+    #shipping-method-buttons-container,
+    #payment-buttons-container,
+    .buttons-set .button:not(.btn-checkout),
+    .buttons-set a.continue-shopping,
+    .step-title,
+    .opc,
+    p.required,
+    #onestep-payment #checkout-giftcard-container,
+    #checkout-shipping-method-load:empty,
+    #checkout-payment-method-load:empty,
+    #onepage-checkout-shipping-method-additional-load:empty,
+    #co-shipping-method-form:has(#checkout-shipping-method-load:empty) {
+        display: none;
+    }
+}
+
+.onestep-checkout {
+    #billing-address-select,
+    #shipping-address-select {
+        margin-block-end: 1rem;
+    }
+}
+
+/* Form styling - !important needed to override legacy Magento float-based layouts */
+.onestep-checkout .form-list {
+    margin: 0;
+    padding: 0;
+
+    fieldset,
+    ul,
+    .field,
+    .input-box {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        float: none !important;
+    }
+
+    fieldset > ul {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem 1rem;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+
+        @media (width <= 768px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    li {
+        margin: 0;
+    }
+
+    li.wide {
+        grid-column: 1 / -1;
+    }
+
+    li.fields {
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem 1rem;
+
+        @media (width <= 768px) {
+            grid-template-columns: 1fr;
+        }
+
+        .field {
+            margin: 0;
+        }
+
+        .field:only-child,
+        & > .fields:only-child {
+            grid-column: 1 / -1;
+        }
+    }
+
+    .customer-name {
+        display: flex;
+        gap: 0.75rem 1rem;
+
+        .field {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .name-prefix,
+        .name-suffix {
+            flex: 0 0 6rem;
+        }
+    }
+
+    li.fields:has(.customer-name) {
+        display: block;
+    }
+
+    .field,
+    .input-box {
+        margin-block-end: 0;
+    }
+
+    label {
+        display: block;
+        font-size: 0.8125rem;
+        font-weight: 500;
+        color: var(--maho-color-text-secondary);
+    }
+
+    .required em {
+        color: var(--maho-color-error);
+        font-style: normal;
+    }
+}
+
+/* Form inputs - !important needed to override legacy Magento inline styles */
+.onestep-checkout .form-list :is(
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    select,
+    textarea,
+    .input-text
+) {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    padding: var(--_input-padding);
+    font-size: var(--_input-font-size);
+    color: var(--maho-color-text-primary);
+    background: var(--maho-color-background);
+    border: 1px solid var(--maho-color-border);
+    border-radius: var(--_border-radius);
+    box-sizing: border-box;
+
+    &:focus {
+        border: 1px solid var(--maho-color-primary);
+    }
+}
+
+.onestep-checkout .form-list :is(select, select.validate-select) {
+    cursor: pointer;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-color: var(--maho-color-background) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e") !important;
+    background-position: right 0.5rem center !important;
+    background-repeat: no-repeat !important;
+    background-size: 1.5em 1.5em !important;
+    padding-right: 2.5rem !important;
+}
+
+.onestep-checkout .sp-methods {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    dt {
+        margin-block-end: 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    dd {
+        margin: 0 0 0.5rem;
+
+        label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding-block: 0.5rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        input[type="radio"] {
+            accent-color: var(--maho-color-primary);
+            inline-size: 16px;
+            block-size: 16px;
+            margin: 0;
+        }
+
+        input[type="radio"]:checked + label,
+        label:has(input[type="radio"]:checked) {
+            color: var(--maho-color-primary);
+        }
+    }
+}
+
+.onestep-checkout .payment-methods {
+    margin: 0;
+    padding: 0;
+
+    dt {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-block-end: 0.5rem;
+        padding: 0.75rem 1rem;
+        background: var(--maho-color-background);
+        border: 1px solid var(--maho-color-border-light);
+        border-radius: var(--_border-radius);
+        cursor: pointer;
+        font-weight: 500;
+
+        &:hover {
+            border-color: var(--maho-color-primary);
+        }
+
+        &:has(input[type="radio"]:checked) {
+            border-color: var(--maho-color-primary);
+            background: var(--maho-color-background-alt);
+        }
+
+        input[type="radio"] {
+            accent-color: var(--maho-color-primary);
+            inline-size: 16px;
+            block-size: 16px;
+            margin: 0;
+        }
+    }
+
+    dd {
+        margin: 0;
+        padding: 0 0 1rem;
+    }
+}
+
+.onestep-checkout #payment-method-form .input-box {
+    display: flex;
+    gap: 0.75rem;
+    margin-block-start: 0.75rem;
+
+    input {
+        flex: 1;
+    }
+
+    .button {
+        white-space: nowrap;
+    }
+}
+
+.onestep-checkout .checkout-review-table {
+    inline-size: 100%;
+    border-collapse: collapse;
+
+    thead th {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.625rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        border-block-end: 1px solid var(--maho-color-border-light);
+        white-space: nowrap;
+
+        &:first-child {
+            inline-size: 100%;
+        }
+    }
+
+    tbody td {
+        padding: 0.75rem 0.5rem;
+        font-size: 0.875rem;
+        vertical-align: top;
+        border-block-end: 1px solid var(--maho-color-border-light);
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        &:nth-child(2),
+        &:nth-child(3),
+        &:last-child {
+            white-space: nowrap;
+            overflow: visible;
+        }
+
+        &:last-child {
+            font-weight: 600;
+        }
+
+        .product-name {
+            display: block;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 500;
+            color: var(--maho-color-text-primary);
+        }
+    }
+
+    tfoot {
+        tr:first-child td {
+            border-block-start: 1px solid var(--maho-color-border-light);
+        }
+
+        td {
+            padding: 0.5rem;
+            font-size: 0.875rem;
+            border-block-end: none;
+
+            &:last-child {
+                text-align: end;
+                font-weight: 600;
+            }
+        }
+
+        tr:last-child {
+            background: transparent;
+
+            td {
+                padding-block-start: 0.75rem;
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--maho-color-text-primary);
+                border-block-start: 1px solid var(--maho-color-border-light);
+            }
+        }
+    }
+}
+
+.onestep-checkout .buttons-set {
+    margin-block-start: 0;
+}
+
+.onestep-checkout #onestep-review .buttons-set,
+.onestep-checkout #onestep-review #review-buttons-container {
+    margin: 0 !important;
+    padding: var(--_section-padding);
+    border-block-start: none;
+    gap: 0;
+}
+
+.onestep-checkout :is(.btn-checkout, #onestep-place-order) {
+    inline-size: 100%;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--maho-color-background);
+    background: var(--maho-color-primary);
+    border: none;
+    border-radius: var(--_border-radius);
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+
+    &:hover:not(:disabled),
+    &:focus-visible:not(:disabled) {
+        background: var(--maho-color-primary-dark);
+    }
+
+    &:is(:disabled, .disabled) {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+}
+
+.onestep-checkout .please-wait {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: var(--_section-padding);
+    font-size: 0.875rem;
+    color: var(--maho-color-text-secondary);
+
+    img {
+        inline-size: 20px;
+        block-size: 20px;
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+    }
+}
+
+.onestep-checkout .onestep-placeholder {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--maho-color-text-secondary);
+
+    p {
+        margin: 0;
+        font-size: 0.875rem;
+        font-style: italic;
+    }
+}
+
+#onestep-promo {
+    .applied-codes {
+        margin-block-start: 1rem;
+    }
+
+    .applied-code {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-block-end: 0.375rem;
+        padding: 0.5rem 0.625rem;
+        background: var(--maho-color-background-alt);
+        border: 1px solid var(--maho-color-border);
+        border-radius: var(--_border-radius, 0);
+        font-size: 0.8125rem;
+
+        &:last-child {
+            margin-block-end: 0;
+        }
+
+        .code-value {
+            font-family: ui-monospace, monospace;
+            font-weight: 600;
+        }
+
+        .code-amount {
+            margin-inline-start: auto;
+            font-weight: 500;
+            color: var(--maho-color-success);
+        }
+
+        .btn-remove-code {
+            margin-inline-start: auto;
+            padding: 0 0.25rem;
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            line-height: 1;
+            color: var(--maho-color-text-secondary);
+            cursor: pointer;
+            transition: color 0.15s ease;
+
+            @media (prefers-reduced-motion: reduce) {
+                transition: none;
+            }
+
+            &:hover,
+            &:focus-visible {
+                color: var(--maho-color-error);
+            }
+        }
+
+        &:has(.code-amount) .btn-remove-code {
+            margin-inline-start: 0.5rem;
+        }
+    }
+
+    .coupon-input-group {
+        display: flex;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .coupon-input {
+        flex: 1;
+        min-inline-size: 0;
+        block-size: 40px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.875rem;
+        border: 1px solid var(--maho-color-border);
+        border-radius: var(--_border-radius, 0);
+
+        &::placeholder {
+            color: var(--maho-color-text-secondary);
+        }
+
+        &:focus {
+            border: 1px solid var(--maho-color-primary);
+        }
+    }
+
+    .btn-apply {
+        flex-shrink: 0;
+        block-size: 40px;
+        padding-inline: 1.25rem;
+        white-space: nowrap;
+    }
+
+    .promo-message {
+        margin-block-start: 0.5rem;
+        font-size: 0.8125rem;
+        line-height: 1.4;
+
+        &:empty {
+            display: none;
+        }
+
+        &.success {
+            color: var(--maho-color-success);
+        }
+
+        &.error {
+            color: var(--maho-color-error);
+        }
+    }
+}
+
+.onestep-checkout .checkout-agreements {
+    margin-block: 1.25rem;
+    padding-inline: 1.5rem;
+
+    li {
+        margin-block-end: 1rem;
+    }
+
+    .agreement-content {
+        max-block-size: 120px;
+        overflow-y: auto;
+        padding: 0.25rem 0.75rem;
+        background: var(--maho-color-background);
+        border: 1px solid var(--maho-color-border-light);
+        border-radius: var(--_border-radius, 0);
+        font-size: 0.8125rem;
+        color: var(--maho-color-text-secondary);
+    }
+
+    .agree {
+        display: flex;
+        align-items: flex-start;
+
+        input[type="checkbox"] {
+            margin-block-start: 0.125rem;
+            accent-color: var(--maho-color-primary);
+            inline-size: 16px;
+            block-size: 16px;
+        }
+
+        label {
+            font-size: 0.875rem;
+            color: var(--maho-color-text-primary);
+        }
+    }
+}
+
+.onestep-checkout #checkout-step-payment .checkout-agreements {
+    margin: 0;
+    padding: 0;
+}
