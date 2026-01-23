@@ -46,6 +46,14 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Sales_Block_Order_Pdf_A
         return $this->_creditmemo ? $this->_creditmemo->getIncrementId() : '';
     }
 
+    public function getInvoiceNumber(): string
+    {
+        if ($this->_creditmemo && $this->_creditmemo->getInvoice()) {
+            return $this->_creditmemo->getInvoice()->getIncrementId();
+        }
+        return '';
+    }
+
     public function getCreditmemoDate(): string
     {
         if ($this->_creditmemo) {
@@ -187,6 +195,22 @@ class Mage_Sales_Block_Order_Pdf_Creditmemo extends Mage_Sales_Block_Order_Pdf_A
             $totals[] = [
                 'label' => $this->__('Tax'),
                 'value' => $this->formatPrice($this->_creditmemo->getTaxAmount()),
+            ];
+        }
+
+        // Gift Card
+        if (abs((float) $this->_creditmemo->getGiftcardAmount()) >= 0.01) {
+            $label = $this->__('Gift Card');
+            $giftcardCodes = $this->_order->getGiftcardCodes();
+            if ($giftcardCodes) {
+                $codesArray = json_decode($giftcardCodes, true);
+                if (is_array($codesArray) && $codesArray !== []) {
+                    $label .= ' (' . implode(', ', array_keys($codesArray)) . ')';
+                }
+            }
+            $totals[] = [
+                'label' => $label,
+                'value' => $this->formatPrice(-abs($this->_creditmemo->getGiftcardAmount())),
             ];
         }
 
