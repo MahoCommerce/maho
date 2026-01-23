@@ -186,4 +186,11 @@
         'billing:country_id', 'billing:region', 'billing:region_id',
         <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'billing:postcode'
     );
+    <?php if ($this->helper('customer/address')->isVatAttributeVisible()): ?>
+    new VatValidator({
+        vatFieldId: 'billing:vat_id',
+        countryFieldId: 'billing:country_id',
+        validateUrl: '<?= $this->getUrl('customer/vat/validate') ?>'
+    });
+    <?php endif ?>
 </script>

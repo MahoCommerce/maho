@@ -32,6 +32,17 @@ $_validateButton = $this->getValidateButton();
         <div class="validate-vat">
             <?= $_validateButton->toHtml() ?>
         </div>
+        <script type="text/javascript">
+            document.addEventListener('DOMContentLoaded', function() {
+                if (typeof VatValidator !== 'undefined') {
+                    new VatValidator({
+                        vatFieldId: '<?= $this->jsQuoteEscape($this->getVatFieldId()) ?>',
+                        countryFieldId: '<?= $this->jsQuoteEscape($this->getCountryFieldId()) ?>',
+                        validateUrl: '<?= $this->jsQuoteEscape($this->getAjaxValidateUrl()) ?>'
+                    });
+                }
+            });
+        </script>
     </td>
     <?php endif ?>
 

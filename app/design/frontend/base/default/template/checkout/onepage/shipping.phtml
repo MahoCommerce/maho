@@ -141,4 +141,11 @@
     }
 
     var shippingRegionUpdater = new RegionUpdater('shipping:country_id', 'shipping:region', 'shipping:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'shipping:postcode');
+    <?php if ($this->helper('customer/address')->isVatAttributeVisible()): ?>
+    new VatValidator({
+        vatFieldId: 'shipping:vat_id',
+        countryFieldId: 'shipping:country_id',
+        validateUrl: '<?= $this->getUrl('customer/vat/validate') ?>'
+    });
+    <?php endif ?>
 </script>

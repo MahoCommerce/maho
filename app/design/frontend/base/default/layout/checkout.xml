@@ -188,6 +188,9 @@ Multi address shipping checkout selection of address per item page
 
     <checkout_multishipping_customer_address translate="label">
         <label>Multishipping Checkout Customer Address Edit Form</label>
+        <reference name="head">
+            <action method="addJs"><script>mage/customer/vat-validation.js</script></action>
+                    </reference>
         <reference name="content">
             <block type="customer/address_edit" name="customer_address_edit" template="customer/address/edit.phtml"/>
         </reference>
@@ -329,7 +332,8 @@ One page checkout main layout
             <action method="addJs"><script>varien/accordion.js</script></action>
             <action method="addJs"><script>varien/opcheckout.js</script></action>
             <action method="removeItem"><type>skin_js</type><name>js/app.js</name></action>
-        </reference>
+            <action method="addJs"><script>mage/customer/vat-validation.js</script></action>
+                    </reference>
         <reference name="right">
             <action method="unsetChildren"></action>
             <block type="page/html_wrapper" name="checkout.progress.wrapper" translate="label">

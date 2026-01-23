@@ -82,7 +82,70 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     public const VAT_CLASS_INVALID     = 'invalid';
     public const VAT_CLASS_ERROR       = 'error';
 
+    /**
+     * VAT validation cache tag
+     */
+    public const VAT_CACHE_TAG = 'vat_validation';
+
+    /**
+     * Default VAT cache lifetime in seconds (24 hours)
+     */
+    public const VAT_DEFAULT_CACHE_LIFETIME = 86400;
+
+    /**
+     * Config paths for VAT validation
+     */
+    public const XML_PATH_VAT_CACHE_LIFETIME = 'customer/vat_validation/cache_lifetime';
+    public const XML_PATH_VAT_OFFLINE_FALLBACK = 'customer/vat_validation/offline_fallback';
+
     protected $_moduleName = 'Mage_Customer';
+
+    /**
+     * VAT format regex patterns by country
+     * @var array<string, string>
+     */
+    protected array $_vatPatterns = [
+        'AT' => '/^ATU\d{8}$/',
+        'BE' => '/^BE[01]\d{9}$/',
+        'BG' => '/^BG\d{9,10}$/',
+        'CY' => '/^CY[0-59]\d{7}[A-Z]$/',
+        'CZ' => '/^CZ\d{8,10}$/',
+        'DE' => '/^DE[1-9]\d{8}$/',
+        'DK' => '/^DK\d{8}$/',
+        'EE' => '/^EE10\d{7}$/',
+        'EL' => '/^EL\d{9}$/',
+        'ES' => '/^ES[A-Z0-9]\d{7}[A-Z0-9]$/',
+        'FI' => '/^FI\d{8}$/',
+        'FR' => '/^FR[A-HJ-NP-Z0-9]{2}\d{9}$/',
+        'HR' => '/^HR\d{11}$/',
+        'HU' => '/^HU\d{8}$/',
+        'IE' => '/^IE[0-9A-Z+*]{7}[A-Z]{1,2}$/',
+        'IT' => '/^IT\d{11}$/',
+        'LT' => '/^LT(\d{9}|\d{12})$/',
+        'LU' => '/^LU\d{8}$/',
+        'LV' => '/^LV\d{11}$/',
+        'MT' => '/^MT[1-9]\d{7}$/',
+        'NL' => '/^NL\d{9}B\d{2}$/',
+        'PL' => '/^PL\d{10}$/',
+        'PT' => '/^PT\d{9}$/',
+        'RO' => '/^RO[1-9]\d{1,9}$/',
+        'SE' => '/^SE\d{10}01$/',
+        'SI' => '/^SI[1-9]\d{7}$/',
+        'SK' => '/^SK[1-9]\d{9}$/',
+        'GB' => '/^GB(\d{9}|\d{12}|GD\d{3}|HA\d{3})$/',
+        'CH' => '/^CHE\d{9}(MWST|TVA|IVA)?$/',
+        'NO' => '/^NO\d{9}MVA$/',
+    ];
+
+    /**
+     * Countries that can be validated via VIES
+     * @var array<string>
+     */
+    protected array $_viesCountries = [
+        'AT', 'BE', 'BG', 'CY', 'CZ', 'DE', 'DK', 'EE', 'EL', 'ES',
+        'FI', 'FR', 'HR', 'HU', 'IE', 'IT', 'LT', 'LU', 'LV', 'MT',
+        'NL', 'PL', 'PT', 'RO', 'SE', 'SI', 'SK',
+    ];
 
     /**
      * @var Mage_Customer_Model_Customer
@@ -829,5 +892,177 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         // If confirmation is required, check if customer is confirmed
         // Customer is confirmed when confirmation field is null
         return !$customer->getConfirmation();
+    }
+
+    /**
+     * Normalize VAT number by removing spaces, dashes, and converting to uppercase
+     */
+    public function normalizeVatNumber(string $vatNumber): string
+    {
+        return strtoupper(preg_replace('/[\s\-\.]/', '', $vatNumber));
+    }
+
+    /**
+     * Check if a country supports VIES validation
+     */
+    public function isViesCountry(string $countryCode): bool
+    {
+        $vatCountryCode = $this->_getCountryCodeForVatNumber($countryCode);
+        return in_array($vatCountryCode, $this->_viesCountries, true);
+    }
+
+    /**
+     * Check if we have a format pattern for the country
+     */
+    public function hasVatFormatPattern(string $countryCode): bool
+    {
+        $vatCountryCode = $this->_getCountryCodeForVatNumber($countryCode);
+        return isset($this->_vatPatterns[$vatCountryCode]);
+    }
+
+    /**
+     * Validate VAT number format using regex
+     *
+     * @return array{valid: bool, message: string}
+     */
+    public function validateVatFormat(string $countryCode, string $vatNumber): array
+    {
+        $vatCountryCode = $this->_getCountryCodeForVatNumber($countryCode);
+        $normalizedVat = $this->normalizeVatNumber($vatNumber);
+
+        if (!str_starts_with($normalizedVat, $vatCountryCode)) {
+            $normalizedVat = $vatCountryCode . $normalizedVat;
+        }
+
+        $pattern = $this->_vatPatterns[$vatCountryCode] ?? null;
+        if ($pattern === null) {
+            return [
+                'valid' => false,
+                'message' => $this->__('VAT validation is not available for this country.'),
+            ];
+        }
+
+        if (preg_match($pattern, $normalizedVat)) {
+            return [
+                'valid' => true,
+                'message' => $this->__('VAT number format is valid.'),
+            ];
+        }
+
+        return [
+            'valid' => false,
+            'message' => $this->__('Invalid VAT number format for %s.', $vatCountryCode),
+        ];
+    }
+
+    /**
+     * Check VAT number with caching and format pre-validation
+     */
+    public function checkVatNumberWithCache(string $countryCode, string $vatNumber): \Maho\DataObject
+    {
+        $vatCountryCode = $this->_getCountryCodeForVatNumber($countryCode);
+        $normalizedVat = $this->normalizeVatNumber($vatNumber);
+
+        $vatNumberWithoutPrefix = $normalizedVat;
+        if (str_starts_with($normalizedVat, $vatCountryCode)) {
+            $vatNumberWithoutPrefix = substr($normalizedVat, strlen($vatCountryCode));
+        }
+
+        // Check format first
+        $formatResult = $this->validateVatFormat($countryCode, $vatNumber);
+        if (!$formatResult['valid']) {
+            return new \Maho\DataObject([
+                'is_valid' => false,
+                'request_success' => true,
+                'request_date' => Mage_Core_Model_Locale::now(),
+                'request_identifier' => '',
+                'format_valid' => false,
+                'format_only' => true,
+                'cached' => false,
+                'message' => $formatResult['message'],
+            ]);
+        }
+
+        // For non-VIES countries, return format-only validation
+        if (!$this->isViesCountry($countryCode)) {
+            return new \Maho\DataObject([
+                'is_valid' => true,
+                'request_success' => true,
+                'request_date' => Mage_Core_Model_Locale::now(),
+                'request_identifier' => '',
+                'format_valid' => true,
+                'format_only' => true,
+                'cached' => false,
+                'message' => $this->__('VAT number format is valid. VIES validation is not available for this country.'),
+            ]);
+        }
+
+        // Check cache
+        $cacheKey = 'vat_validation_' . md5($vatCountryCode . $normalizedVat);
+        $cachedResult = Mage::app()->getCache()->load($cacheKey);
+
+        if ($cachedResult !== false) {
+            $result = new \Maho\DataObject(Mage::helper('core')->jsonDecode($cachedResult));
+            $result->setCached(true);
+            return $result;
+        }
+
+        // Call VIES service
+        try {
+            $viesResult = $this->checkVatNumber($vatCountryCode, $vatNumberWithoutPrefix);
+
+            $result = new \Maho\DataObject([
+                'is_valid' => (bool) $viesResult->getIsValid(),
+                'request_success' => (bool) $viesResult->getRequestSuccess(),
+                'request_date' => $viesResult->getRequestDate() ?: Mage_Core_Model_Locale::now(),
+                'request_identifier' => $viesResult->getRequestIdentifier() ?: '',
+                'format_valid' => true,
+                'format_only' => false,
+                'cached' => false,
+                'message' => $viesResult->getIsValid()
+                    ? $this->__('VAT number is valid.')
+                    : $this->__('VAT number is not valid.'),
+            ]);
+
+            // Cache the result
+            $cacheLifetime = (int) Mage::getStoreConfig(self::XML_PATH_VAT_CACHE_LIFETIME);
+            $cacheLifetime = $cacheLifetime > 0 ? $cacheLifetime * 3600 : self::VAT_DEFAULT_CACHE_LIFETIME;
+
+            Mage::app()->getCache()->save(
+                Mage::helper('core')->jsonEncode($result->getData()),
+                $cacheKey,
+                [self::VAT_CACHE_TAG],
+                $cacheLifetime,
+            );
+
+            return $result;
+        } catch (Exception $e) {
+            Mage::log('VIES validation error: ' . $e->getMessage(), Mage::LOG_ERROR);
+
+            // Offline fallback
+            if (Mage::getStoreConfigFlag(self::XML_PATH_VAT_OFFLINE_FALLBACK)) {
+                return new \Maho\DataObject([
+                    'is_valid' => true,
+                    'request_success' => false,
+                    'request_date' => Mage_Core_Model_Locale::now(),
+                    'request_identifier' => '',
+                    'format_valid' => true,
+                    'format_only' => true,
+                    'cached' => false,
+                    'message' => $this->__('VIES service is unavailable. VAT format is valid.'),
+                ]);
+            }
+
+            return new \Maho\DataObject([
+                'is_valid' => false,
+                'request_success' => false,
+                'request_date' => Mage_Core_Model_Locale::now(),
+                'request_identifier' => '',
+                'format_valid' => true,
+                'format_only' => false,
+                'cached' => false,
+                'message' => $this->__('Unable to validate VAT number. Please try again later.'),
+            ]);
+        }
     }
 }

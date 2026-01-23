@@ -144,4 +144,11 @@
 <script type="text/javascript">
     var dataForm = new VarienForm('form-validate', true);
     new RegionUpdater('country', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'zip');
+    <?php if ($this->helper('customer/address')->isVatAttributeVisible()): ?>
+    new VatValidator({
+        vatFieldId: 'vat_id',
+        countryFieldId: 'country',
+        validateUrl: '<?= $this->getUrl('customer/vat/validate') ?>'
+    });
+    <?php endif ?>
 </script>
