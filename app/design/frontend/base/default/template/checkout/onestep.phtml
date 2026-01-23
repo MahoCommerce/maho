@@ -79,9 +79,11 @@ $isLoggedIn = $this->isCustomerLoggedIn();
             </div>
             <div class="onestep-section-content" id="checkout-step-payment">
                 <?= $this->getChildHtml('payment') ?>
+                <?php if (!$isVirtual): ?>
                 <div class="onestep-placeholder" id="payment-method-placeholder">
                     <p><?= $this->__('Waiting for shipping method...') ?></p>
                 </div>
+                <?php endif ?>
             </div>
         </div>
 
