@@ -29,10 +29,10 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tabs extends Mage_Adminh
             'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_dynamicrule_edit_tab_general')->toHtml(),
         ]);
 
-        $this->addTab('conditions', [
+        $this->addTab('cases', [
             'label' => $this->__('Output Rules'),
             'title' => $this->__('Output Rules'),
-            'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_dynamicrule_edit_tab_conditions')->toHtml(),
+            'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_dynamicrule_edit_tab_cases')->toHtml(),
         ]);
 
         return parent::_beforeToHtml();

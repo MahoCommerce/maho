@@ -260,11 +260,11 @@ class Maho_FeedManager_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
                     ['value' => 1, 'label' => Mage::helper('feedmanager')->__('In Stock')],
                     ['value' => 0, 'label' => Mage::helper('feedmanager')->__('Out of Stock')],
                 ],
-                default => parent::getValueSelectOptions(),
+                default => parent::getValueSelectOptions() ?? [],
             };
             $this->setData('value_select_options', $options);
         }
-        return $this->getData('value_select_options');
+        return $this->getData('value_select_options') ?? [];
     }
 
     /**

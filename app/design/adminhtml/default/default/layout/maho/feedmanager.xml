@@ -95,13 +95,16 @@
     <!-- Dynamic Rules Edit -->
     <adminhtml_feedmanager_dynamicrule_edit>
         <update handle="feedmanager_default"/>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+            <action method="addJs"><name>mage/adminhtml/rules.js</name></action>
+        </reference>
         <reference name="content">
             <block type="feedmanager/adminhtml_dynamicrule_edit" name="feedmanager_dynamicrule_edit"/>
         </reference>
         <reference name="left">
             <block type="feedmanager/adminhtml_dynamicrule_edit_tabs" name="feedmanager_dynamicrule_edit_tabs">
                 <block type="feedmanager/adminhtml_dynamicrule_edit_tab_general" name="feedmanager_dynamicrule_edit_tab_general"/>
-                <block type="feedmanager/adminhtml_dynamicrule_edit_tab_conditions" name="feedmanager_dynamicrule_edit_tab_conditions"/>
             </block>
         </reference>
     </adminhtml_feedmanager_dynamicrule_edit>
