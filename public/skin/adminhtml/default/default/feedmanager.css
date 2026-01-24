@@ -1,0 +1,194 @@
+/**
+ * Maho FeedManager Admin Styles
+ */
+
+/* Feed Grid */
+.feedmanager-grid .grid-actions {
+    margin-bottom: 15px;
+}
+
+/* Field Mapping */
+.feedmanager-mapping-container {
+    display: flex;
+    gap: 20px;
+}
+
+.feedmanager-mapping-source,
+.feedmanager-mapping-target {
+    flex: 1;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    padding: 15px;
+    background: #fafafa;
+}
+
+.feedmanager-mapping-source h4,
+.feedmanager-mapping-target h4 {
+    margin: 0 0 10px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Drag and Drop */
+.feedmanager-draggable {
+    padding: 8px 12px;
+    margin: 5px 0;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    cursor: move;
+}
+
+.feedmanager-draggable:hover {
+    background: #f5f5f5;
+    border-color: #ccc;
+}
+
+.feedmanager-drop-zone {
+    min-height: 100px;
+    border: 2px dashed #ccc;
+    border-radius: 4px;
+    padding: 10px;
+}
+
+.feedmanager-drop-zone.drag-over {
+    border-color: #1979c3;
+    background: #e6f2ff;
+}
+
+/* Feed Status */
+.feedmanager-status {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.feedmanager-status-enabled {
+    background: #d4edda;
+    color: #155724;
+}
+
+.feedmanager-status-disabled {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.feedmanager-status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+/* Filter Conditions */
+.feedmanager-conditions {
+    padding: 15px;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 4px;
+}
+
+.feedmanager-condition-group {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+}
+
+/* Preview */
+.feedmanager-preview {
+    max-height: 400px;
+    overflow: auto;
+    background: #2d2d2d;
+    color: #f8f8f2;
+    padding: 15px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 12px;
+}
+
+.feedmanager-preview pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+/* Tabs Enhancement */
+.feedmanager-tabs .tabs {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+/* Upload Status */
+.feedmanager-upload-status {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+}
+
+.feedmanager-upload-success {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+}
+
+.feedmanager-upload-error {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+}
+
+/* Category Mapping */
+.feedmanager-category-tree {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    background: #fff;
+}
+
+.feedmanager-category-item {
+    padding: 5px 0;
+}
+
+.feedmanager-category-item label {
+    cursor: pointer;
+}
+
+/* Responsive Tables */
+.feedmanager-responsive-table {
+    overflow-x: auto;
+}
+
+/* Action Buttons */
+.feedmanager-actions {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0;
+}
+
+.feedmanager-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.feedmanager-btn-primary {
+    background: #1979c3;
+    color: #fff;
+    border: none;
+}
+
+.feedmanager-btn-primary:hover {
+    background: #006bb4;
+}
+
+.feedmanager-btn-secondary {
+    background: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.feedmanager-btn-secondary:hover {
+    background: #f5f5f5;
+}
