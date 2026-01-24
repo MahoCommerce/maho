@@ -16,6 +16,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
 
     public const ADMIN_RESOURCE = 'catalog/feedmanager/dynamicrules';
 
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['delete', 'save', 'massDelete', 'massStatus']);
+        return parent::preDispatch();
+    }
+
     protected function _initAction(): self
     {
         $this->loadLayout()
@@ -96,19 +103,19 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
         }
 
         try {
-            // Handle rule_data from conditions tab
-            if (isset($data['rule_data']) && is_string($data['rule_data'])) {
-                $ruleData = Mage::helper('core')->jsonDecode($data['rule_data']);
-                $rule->setRuleDataArray($ruleData);
-                unset($data['rule_data']);
+            // Process cases data
+            if (isset($data['cases']) && is_array($data['cases'])) {
+                $cases = $this->_processCasesData($data['cases']);
+                $rule->setCases($cases);
+                unset($data['cases']);
             }
 
             $rule->addData($data);
 
             // Validate
-            $errors = $rule->validate();
-            if (!empty($errors)) {
-                foreach ($errors as $error) {
+            $validateResult = $rule->validateData(new \Maho\DataObject($data));
+            if ($validateResult !== true) {
+                foreach ($validateResult as $error) {
                     $this->_getSession()->addError($error);
                 }
                 $this->_getSession()->setFormData($this->getRequest()->getPost());
@@ -134,6 +141,158 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
             $this->_redirect('*/*/edit', ['id' => $id]);
             return;
         }
+    }
+
+    /**
+     * Process cases data from form submission
+     */
+    protected function _processCasesData(array $casesData): array
+    {
+        $cases = [];
+        $ruleData = $this->getRequest()->getPost('rule', []);
+
+        foreach ($casesData as $index => $caseData) {
+            $case = [
+                'output_type' => $caseData['output_type'] ?? 'static',
+                'output_value' => $caseData['output_value'] ?? null,
+                'output_attribute' => $caseData['output_attribute'] ?? null,
+                'combined_position' => $caseData['combined_position'] ?? 'prefix',
+                'is_default' => !empty($caseData['is_default']),
+                'conditions' => null,
+            ];
+
+            // Process conditions if present (for non-default cases)
+            // Conditions come in as rule[case_X_conditions] format
+            if (!$case['is_default']) {
+                $conditionsKey = 'case_' . $index . '_conditions';
+                if (isset($ruleData[$conditionsKey]) && is_array($ruleData[$conditionsKey])) {
+                    $case['conditions'] = $this->_buildConditionsArray($ruleData[$conditionsKey], $conditionsKey);
+                }
+            }
+
+            $cases[] = $case;
+        }
+
+        return $cases;
+    }
+
+    /**
+     * Build conditions array from form post data
+     */
+    protected function _buildConditionsArray(array $conditionsData, string $prefix = 'conditions'): array
+    {
+        // Convert flat form data to recursive structure (same logic as Mage_Rule_Model_Abstract)
+        $arr = $this->_convertFlatToRecursive($conditionsData);
+
+        if (empty($arr) || !isset($arr[1])) {
+            return [];
+        }
+
+        // Create a temporary combine model to parse the data
+        $conditionsModel = Mage::getModel('feedmanager/rule_condition_combine');
+        $conditionsModel->setPrefix($prefix);
+        $conditionsModel->setConditions([]);
+        $conditionsModel->loadArray($arr[1], 'conditions');
+
+        return $conditionsModel->asArray();
+    }
+
+    /**
+     * Convert flat form conditions data to recursive array structure
+     * This mirrors Mage_Rule_Model_Abstract::_convertFlatToRecursive
+     *
+     * @return array<int|string, mixed>
+     */
+    protected function _convertFlatToRecursive(array $data): array
+    {
+        /** @var array<string, mixed> $arr */
+        $arr = ['conditions' => []];
+        foreach ($data as $id => $itemData) {
+            $path = explode('--', (string) $id);
+            $node = &$arr;
+            for ($i = 0, $l = count($path); $i < $l; $i++) {
+                if (!array_key_exists('conditions', $node)) {
+                    $node['conditions'] = [];
+                }
+                if (!array_key_exists($path[$i], $node['conditions'])) {
+                    $node['conditions'][$path[$i]] = [];
+                }
+                $node = &$node['conditions'][$path[$i]];
+            }
+            foreach ($itemData as $k => $v) {
+                $node[$k] = $v;
+            }
+        }
+        return $arr['conditions'];
+    }
+
+    /**
+     * Get initial conditions HTML for a new case (AJAX)
+     */
+    public function caseConditionsHtmlAction(): void
+    {
+        $caseIndex = max(0, (int) $this->getRequest()->getParam('case_index', 0));
+        $formId = 'case_' . $caseIndex . '_conditions_fieldset';
+        $prefix = 'case_' . $caseIndex . '_conditions';
+
+        // Create a form for the conditions
+        $form = new \Maho\Data\Form();
+
+        // Create the rule and set its form
+        $rule = Mage::getModel('feedmanager/dynamicRule');
+        $rule->setForm($form);
+
+        // Create the Combine condition model
+        /** @var Maho_FeedManager_Model_Rule_Condition_Combine $combine */
+        $combine = Mage::getModel('feedmanager/rule_condition_combine');
+        $combine->setPrefix($prefix);
+        $combine->setId('1');
+        $combine->setJsFormObject($formId);
+        $combine->setRule($rule);
+        $combine->setForm($form);
+
+        $html = $combine->asHtmlRecursive();
+
+        $this->getResponse()->setBody($html);
+    }
+
+    /**
+     * New condition HTML for AJAX (standard Maho rules engine)
+     */
+    public function newConditionHtmlAction(): void
+    {
+        $id = $this->getRequest()->getParam('id');
+        $formId = $this->getRequest()->getParam('form');
+        $typeArr = explode('|', str_replace('-', '/', $this->getRequest()->getParam('type')));
+        $type = $typeArr[0];
+
+        // Determine prefix based on form ID (e.g., case_0_conditions_fieldset -> case_0_conditions)
+        $prefix = 'conditions';
+        if (preg_match('/^case_(\d+)_conditions_fieldset$/', $formId, $matches)) {
+            $caseIndex = $matches[1];
+            $prefix = 'case_' . $caseIndex . '_conditions';
+        }
+
+        $model = Mage::getModel($type);
+
+        if (!$model instanceof Mage_Rule_Model_Condition_Abstract) {
+            $this->getResponse()->setBody('');
+            return;
+        }
+
+        $model->setId($id)
+            ->setType($type)
+            ->setRule(Mage::getModel('feedmanager/dynamicRule'))
+            ->setPrefix($prefix);
+
+        if (!empty($typeArr[1])) {
+            $model->setAttribute($typeArr[1]);
+        }
+
+        $model->setJsFormObject($formId);
+        $html = $model->asHtmlRecursive();
+
+        $this->getResponse()->setBody($html);
     }
 
     public function deleteAction(): void

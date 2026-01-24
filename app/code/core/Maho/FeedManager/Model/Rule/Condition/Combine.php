@@ -12,11 +12,49 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condition_Combine
 {
+    /**
+     * Local form instance (since DynamicRule doesn't extend Mage_Rule_Model_Abstract)
+     */
+    protected ?\Maho\Data\Form $_form = null;
+
     public function __construct()
     {
         parent::__construct();
         $this->setType('feedmanager/rule_condition_combine');
     }
+
+    /**
+     * Override getForm to use local form instance
+     * (DynamicRule no longer extends Mage_Rule_Model_Abstract)
+     */
+    #[\Override]
+    public function getForm(): \Maho\Data\Form
+    {
+        if ($this->_form === null) {
+            $this->_form = new \Maho\Data\Form();
+        }
+        return $this->_form;
+    }
+
+    /**
+     * Set the form instance
+     */
+    public function setForm(\Maho\Data\Form $form): self
+    {
+        $this->_form = $form;
+        return $this;
+    }
+
+    /**
+     * Special attributes that are not EAV attributes
+     */
+    protected array $_specialAttributes = [
+        'qty',
+        'is_in_stock',
+        'type_id',
+        'category_ids',
+        'attribute_set_id',
+    ];
 
     /**
      * Get available conditions for adding new child
@@ -26,12 +64,21 @@ class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Cond
     {
         $productCondition = Mage::getModel('feedmanager/rule_condition_product');
         $productAttributes = $productCondition->loadAttributeOptions()->getAttributeOption();
-        $attributes = [];
+
+        $specialAttributes = [];
+        $productAttrs = [];
+
         foreach ($productAttributes as $code => $label) {
-            $attributes[] = [
+            $option = [
                 'value' => 'feedmanager/rule_condition_product|' . $code,
                 'label' => $label,
             ];
+
+            if (in_array($code, $this->_specialAttributes)) {
+                $specialAttributes[] = $option;
+            } else {
+                $productAttrs[] = $option;
+            }
         }
 
         $conditions = parent::getNewChildSelectOptions();
@@ -41,8 +88,12 @@ class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Cond
                 'label' => Mage::helper('feedmanager')->__('Conditions Combination'),
             ],
             [
+                'label' => Mage::helper('feedmanager')->__('Special Attributes'),
+                'value' => $specialAttributes,
+            ],
+            [
                 'label' => Mage::helper('feedmanager')->__('Product Attribute'),
-                'value' => $attributes,
+                'value' => $productAttrs,
             ],
         ]);
 

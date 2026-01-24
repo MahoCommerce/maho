@@ -1,0 +1,363 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_Cases $this */
+$cases = $this->getCases();
+$outputTypes = $this->getOutputTypeOptions();
+$combinedPositions = $this->getCombinedPositionOptions();
+$attributes = $this->getAttributeOptions();
+?>
+
+<div id="dynamicrule-cases-container">
+    <div id="cases-list">
+        <?php $caseNumber = 1; ?>
+        <?php foreach ($cases as $index => $case): ?>
+            <?php $isDefault = !empty($case['is_default']); ?>
+            <div class="case-card <?= $isDefault ? 'case-default' : '' ?>" data-case-index="<?= $index ?>">
+                <div class="case-header">
+                    <span class="case-title">
+                        <?php if ($isDefault): ?>
+                            <?= $this->__('Fallback') ?>
+                        <?php else: ?>
+                            <?= $this->__('Case %s', $caseNumber++) ?>
+                        <?php endif; ?>
+                    </span>
+                    <?php if (!$isDefault): ?>
+                        <button type="button" class="scalable delete case-remove" title="<?= $this->escapeHtml($this->__('Remove Case')) ?>">
+                            <span><?= $this->__('Remove') ?></span>
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <div class="case-body">
+                    <input type="hidden" name="cases[<?= $index ?>][is_default]" value="<?= $isDefault ? '1' : '0' ?>">
+
+                    <?php if (!$isDefault): ?>
+                        <?php
+                        $formId = $this->getFormObjectId($index);
+                        $prefix = $this->getConditionsPrefix($index);
+                        $newChildUrl = $this->getUrl('*/*/newConditionHtml', ['form' => $formId]);
+                        $conditionsData = $case['conditions'] ?? null;
+                        ?>
+                        <div class="case-conditions">
+                            <fieldset id="<?= $formId ?>" class="conditions-fieldset">
+                                <?= $this->renderConditionsHtml($index, $conditionsData) ?>
+                            </fieldset>
+                            <script>
+                                var <?= $formId ?> = new VarienRulesForm('<?= $formId ?>', '<?= $newChildUrl ?>');
+                            </script>
+                        </div>
+                    <?php else: ?>
+                        <div class="default-note">
+                            <?= $this->__('(Used when no other case matches)') ?>
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="case-output">
+                        <span class="output-label"><?= $this->__('THEN Output:') ?></span>
+
+                        <select name="cases[<?= $index ?>][output_type]" class="output-type-select">
+                            <?php foreach ($outputTypes as $value => $label): ?>
+                                <option value="<?= $this->escapeHtml($value) ?>"
+                                    <?= ($case['output_type'] ?? '') === $value ? 'selected' : '' ?>>
+                                    <?= $this->escapeHtml($label) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <span class="output-value-wrapper">
+                            <input type="text"
+                                   name="cases[<?= $index ?>][output_value]"
+                                   class="input-text output-value"
+                                   value="<?= $this->escapeHtml($case['output_value'] ?? '') ?>"
+                                   placeholder="<?= $this->escapeHtml($this->__('Value')) ?>">
+                        </span>
+
+                        <span class="output-position-wrapper">
+                            <select name="cases[<?= $index ?>][combined_position]" class="output-position-select">
+                                <?php foreach ($combinedPositions as $value => $label): ?>
+                                    <option value="<?= $this->escapeHtml($value) ?>"
+                                        <?= ($case['combined_position'] ?? 'prefix') === $value ? 'selected' : '' ?>>
+                                        <?= $this->escapeHtml($label) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </span>
+
+                        <span class="output-attribute-wrapper">
+                            <span class="attribute-label"><?= $this->__('Attribute:') ?></span>
+                            <select name="cases[<?= $index ?>][output_attribute]" class="output-attribute-select">
+                                <?php foreach ($attributes as $value => $label): ?>
+                                    <option value="<?= $this->escapeHtml($value) ?>"
+                                        <?= ($case['output_attribute'] ?? '') === $value ? 'selected' : '' ?>>
+                                        <?= $this->escapeHtml($label) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
+    <div class="case-actions">
+        <button type="button" class="scalable add" id="add-case-btn">
+            <span><?= $this->__('Add Case') ?></span>
+        </button>
+    </div>
+</div>
+
+<script>
+(function() {
+    const config = <?= $this->getJsonConfig() ?>;
+    const casesList = document.getElementById('cases-list');
+    const addCaseBtn = document.getElementById('add-case-btn');
+
+    // Track case count
+    let caseCount = <?= count($cases) ?>;
+
+    // Initialize output type visibility for all cases
+    casesList.querySelectorAll('.case-card').forEach(initCaseOutputVisibility);
+
+    // Add case button
+    addCaseBtn.addEventListener('click', function() {
+        addNewCase();
+    });
+
+    // Event delegation for remove buttons and output type changes
+    casesList.addEventListener('click', function(e) {
+        if (e.target.closest('.case-remove')) {
+            const card = e.target.closest('.case-card');
+            if (card && !card.classList.contains('case-default')) {
+                card.remove();
+                renumberCases();
+            }
+        }
+    });
+
+    casesList.addEventListener('change', function(e) {
+        if (e.target.classList.contains('output-type-select')) {
+            const card = e.target.closest('.case-card');
+            if (card) {
+                updateOutputVisibility(card);
+            }
+        }
+    });
+
+    function initCaseOutputVisibility(card) {
+        updateOutputVisibility(card);
+    }
+
+    function updateOutputVisibility(card) {
+        const outputType = card.querySelector('.output-type-select').value;
+        const valueWrapper = card.querySelector('.output-value-wrapper');
+        const positionWrapper = card.querySelector('.output-position-wrapper');
+        const attributeWrapper = card.querySelector('.output-attribute-wrapper');
+
+        // Reset
+        valueWrapper.style.display = 'none';
+        positionWrapper.style.display = 'none';
+        attributeWrapper.style.display = 'none';
+
+        switch (outputType) {
+            case 'static':
+                valueWrapper.style.display = 'inline-block';
+                break;
+            case 'attribute':
+                attributeWrapper.style.display = 'inline-block';
+                break;
+            case 'combined':
+                valueWrapper.style.display = 'inline-block';
+                positionWrapper.style.display = 'inline-block';
+                attributeWrapper.style.display = 'inline-block';
+                break;
+        }
+    }
+
+    async function addNewCase() {
+        // Find the default case and insert new case before it
+        const defaultCase = casesList.querySelector('.case-default');
+        const newIndex = caseCount++;
+        const formId = 'case_' + newIndex + '_conditions_fieldset';
+        const newChildUrl = config.newConditionUrl.replace('FORM_PLACEHOLDER', formId);
+
+        const card = document.createElement('div');
+        card.className = 'case-card';
+        card.dataset.caseIndex = newIndex;
+
+        // Fetch the conditions HTML from the server
+        let conditionsHtml = '';
+        try {
+            conditionsHtml = await mahoFetch(config.caseConditionsUrl + '?case_index=' + newIndex);
+        } catch (e) {
+            console.error('Failed to load conditions HTML:', e);
+        }
+
+        card.innerHTML = `
+            <div class="case-header">
+                <span class="case-title">${config.translations.case} ${newIndex + 1}</span>
+                <button type="button" class="scalable delete case-remove" title="${config.translations.removeCase}">
+                    <span>${config.translations.removeCase}</span>
+                </button>
+            </div>
+            <div class="case-body">
+                <input type="hidden" name="cases[${newIndex}][is_default]" value="0">
+                <div class="case-conditions">
+                    <fieldset id="${formId}" class="conditions-fieldset">
+                        ${conditionsHtml}
+                    </fieldset>
+                </div>
+                <div class="case-output">
+                    <span class="output-label">${config.translations.thenOutput}</span>
+                    <select name="cases[${newIndex}][output_type]" class="output-type-select">
+                        ${Object.entries(config.outputTypes).map(([val, label]) =>
+                            `<option value="${val}">${label}</option>`
+                        ).join('')}
+                    </select>
+                    <span class="output-value-wrapper">
+                        <input type="text" name="cases[${newIndex}][output_value]" class="input-text output-value" placeholder="${config.translations.value}">
+                    </span>
+                    <span class="output-position-wrapper">
+                        <select name="cases[${newIndex}][combined_position]" class="output-position-select">
+                            ${Object.entries(config.combinedPositions).map(([val, label]) =>
+                                `<option value="${val}">${label}</option>`
+                            ).join('')}
+                        </select>
+                    </span>
+                    <span class="output-attribute-wrapper">
+                        <span class="attribute-label">${config.translations.attribute}</span>
+                        <select name="cases[${newIndex}][output_attribute]" class="output-attribute-select">
+                            ${Object.entries(config.attributes).map(([val, label]) =>
+                                `<option value="${val}">${label}</option>`
+                            ).join('')}
+                        </select>
+                    </span>
+                </div>
+            </div>
+        `;
+
+        if (defaultCase) {
+            casesList.insertBefore(card, defaultCase);
+        } else {
+            casesList.appendChild(card);
+        }
+
+        // Initialize the new case output visibility
+        initCaseOutputVisibility(card);
+
+        // Initialize VarienRulesForm for the new case
+        window[formId] = new VarienRulesForm(formId, newChildUrl);
+    }
+
+    function renumberCases() {
+        let caseNum = 1;
+        casesList.querySelectorAll('.case-card').forEach(function(card) {
+            if (!card.classList.contains('case-default')) {
+                card.querySelector('.case-title').textContent = config.translations.case + ' ' + caseNum;
+                caseNum++;
+            }
+        });
+    }
+})();
+</script>
+
+<style>
+#dynamicrule-cases-container {
+    padding: 10px;
+}
+
+.case-card {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 15px;
+    background: #fff;
+}
+
+.case-card.case-default {
+    background: #f5f5f5;
+    border-style: dashed;
+}
+
+.case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+}
+
+.case-default .case-header {
+    background: #e8e8e8;
+}
+
+.case-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.case-body {
+    padding: 15px;
+}
+
+.case-conditions {
+    margin-bottom: 15px;
+}
+
+.conditions-fieldset {
+    padding: 10px;
+    background: #fafafa;
+    border: 1px solid #e0e0e0;
+    border-radius: 3px;
+}
+
+.default-note {
+    color: #666;
+    font-style: italic;
+    margin-bottom: 15px;
+}
+
+.case-output {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 10px;
+    background: #e8f4e8;
+    border-radius: 3px;
+    border: 1px solid #c0d8c0;
+}
+
+.output-label {
+    font-weight: bold;
+    color: #2a5f2a;
+}
+
+.output-type-select,
+.output-position-select,
+.output-attribute-select {
+    padding: 4px 8px;
+}
+
+.output-value {
+    width: 150px;
+    padding: 4px 8px;
+}
+
+.attribute-label {
+    color: #666;
+    margin-left: 5px;
+}
+
+.case-actions {
+    margin-top: 10px;
+}
+</style>
