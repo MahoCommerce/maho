@@ -1,0 +1,93 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * API v2 Category Tests
+ *
+ * Tests for category endpoints - PUBLIC ACCESS (no auth required).
+ * All tests are READ-ONLY (safe for synced database).
+ *
+ * @group read
+ */
+
+describe('API v2 Categories', function () {
+
+    describe('public access (no auth)', function () {
+
+        it('allows listing categories without authentication', function () {
+            $response = apiGet('/api/categories');
+
+            expect($response['status'])->toBeSuccessful();
+        });
+
+        it('returns category collection in JSON-LD format', function () {
+            $response = apiGet('/api/categories');
+
+            expect($response['status'])->toBe(200);
+            expect($response['json'])->toBeArray();
+            // Should have collection format with 'member' or 'hydra:member'
+            expect($response['json'])->toHaveKey('member')
+                ->or->toHaveKey('hydra:member');
+        });
+
+        it('allows getting single category without authentication', function () {
+            // Get the list first to find a valid ID
+            $list = apiGet('/api/categories');
+            $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
+
+            if (!empty($members) && isset($members[0]['id'])) {
+                $categoryId = $members[0]['id'];
+                $response = apiGet("/api/categories/{$categoryId}");
+
+                expect($response['status'])->toBeSuccessful();
+            } else {
+                // Skip if no categories exist
+                expect(true)->toBeTrue();
+            }
+        });
+
+        it('returns 404 for non-existent category', function () {
+            $response = apiGet('/api/categories/999999');
+
+            expect($response['status'])->toBe(404);
+        });
+
+    });
+
+    describe('with authentication', function () {
+
+        it('allows listing categories with valid token', function () {
+            $response = apiGet('/api/categories', customerToken());
+
+            expect($response['status'])->toBeSuccessful();
+        });
+
+        it('allows listing categories with admin token', function () {
+            $response = apiGet('/api/categories', adminToken());
+
+            expect($response['status'])->toBeSuccessful();
+        });
+
+    });
+
+    describe('response format', function () {
+
+        it('includes expected category fields', function () {
+            $response = apiGet('/api/categories');
+            $members = $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
+
+            if (!empty($members) && isset($members[0])) {
+                $category = $members[0];
+
+                // Categories should have these basic fields
+                expect($category)->toHaveKey('id');
+                expect($category)->toHaveKey('name');
+            } else {
+                expect(true)->toBeTrue(); // Skip if no data
+            }
+        });
+
+    });
+
+});
