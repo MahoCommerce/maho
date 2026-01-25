@@ -299,7 +299,6 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     /**
      * Evaluate this rule against a product (first match wins)
      *
-     * @param Mage_Catalog_Model_Product $product
      * @return mixed The output value from the first matching case, or null
      */
     public function evaluate(Mage_Catalog_Model_Product $product): mixed
