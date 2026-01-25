@@ -116,7 +116,9 @@ class Maho_FeedManager_Model_Uploader
     }
 
     /**
-     * Upload via SFTP using phpseclib
+     * Upload via SFTP using phpseclib (optional dependency)
+     *
+     * @phpstan-ignore class.notFound
      */
     protected function _uploadSftpPhpseclib(string $localPath, string $remoteName): bool
     {
@@ -131,7 +133,7 @@ class Maho_FeedManager_Model_Uploader
         // Authenticate
         if ($authType === 'key') {
             $privateKey = $this->_config['private_key'] ?? '';
-            /** @var \phpseclib3\Crypt\Common\PrivateKey $key @phpstan-ignore varTag.type */
+            /** @var \phpseclib3\Crypt\Common\PrivateKey $key */
             $key = \phpseclib3\Crypt\PublicKeyLoader::load($privateKey);
             if (!$sftp->login($username, $key)) {
                 throw new RuntimeException("SFTP key authentication failed for user: {$username}");
@@ -365,7 +367,10 @@ class Maho_FeedManager_Model_Uploader
     }
 
     /**
-     * Test SFTP connection using phpseclib
+     * Test SFTP connection using phpseclib (optional dependency)
+     *
+     * @return array{success: bool, message: string}
+     * @phpstan-ignore class.notFound
      */
     protected function _testSftpConnectionPhpseclib(): array
     {
@@ -385,7 +390,7 @@ class Maho_FeedManager_Model_Uploader
                     return ['success' => false, 'message' => 'Private key is required for key authentication'];
                 }
                 try {
-                    /** @var \phpseclib3\Crypt\Common\PrivateKey $key @phpstan-ignore varTag.type */
+                    /** @var \phpseclib3\Crypt\Common\PrivateKey $key */
                     $key = \phpseclib3\Crypt\PublicKeyLoader::load($privateKey);
                 } catch (\Exception $e) {
                     return ['success' => false, 'message' => 'Invalid private key format: ' . $e->getMessage()];
