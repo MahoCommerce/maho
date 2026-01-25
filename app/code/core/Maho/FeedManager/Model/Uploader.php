@@ -117,8 +117,6 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Upload via SFTP using phpseclib (optional dependency)
-     *
-     * @phpstan-ignore class.notFound
      */
     protected function _uploadSftpPhpseclib(string $localPath, string $remoteName): bool
     {
@@ -128,18 +126,21 @@ class Maho_FeedManager_Model_Uploader
         $authType = $this->_config['auth_type'] ?? 'password';
         $remotePath = rtrim($this->_config['remote_path'] ?? '/', '/');
 
+        /** @phpstan-ignore-next-line */
         $sftp = new \phpseclib3\Net\SFTP($host, $port);
 
         // Authenticate
         if ($authType === 'key') {
             $privateKey = $this->_config['private_key'] ?? '';
-            /** @var \phpseclib3\Crypt\Common\PrivateKey $key */
+            /** @phpstan-ignore-next-line */
             $key = \phpseclib3\Crypt\PublicKeyLoader::load($privateKey);
+            /** @phpstan-ignore-next-line */
             if (!$sftp->login($username, $key)) {
                 throw new RuntimeException("SFTP key authentication failed for user: {$username}");
             }
         } else {
             $password = $this->_config['password'] ?? '';
+            /** @phpstan-ignore-next-line */
             if (!$sftp->login($username, $password)) {
                 throw new RuntimeException("SFTP password authentication failed for user: {$username}");
             }
@@ -147,13 +148,16 @@ class Maho_FeedManager_Model_Uploader
 
         // Upload file
         $remoteFile = "{$remotePath}/{$remoteName}";
+        /** @phpstan-ignore-next-line */
         if (!$sftp->put($remoteFile, $localPath, \phpseclib3\Net\SFTP::SOURCE_LOCAL_FILE)) {
+            /** @phpstan-ignore-next-line */
             $error = $sftp->getLastSFTPError() ?: 'Unknown SFTP error';
             throw new RuntimeException("Failed to upload file to: {$remoteFile} - {$error}");
         }
 
         // Verify upload by checking file exists and size matches
         $localSize = filesize($localPath);
+        /** @phpstan-ignore-next-line */
         $stat = $sftp->stat($remoteFile);
         if ($stat === false) {
             throw new RuntimeException('Upload verification failed: file not found on server after upload');
@@ -370,7 +374,6 @@ class Maho_FeedManager_Model_Uploader
      * Test SFTP connection using phpseclib (optional dependency)
      *
      * @return array{success: bool, message: string}
-     * @phpstan-ignore class.notFound
      */
     protected function _testSftpConnectionPhpseclib(): array
     {
@@ -381,7 +384,8 @@ class Maho_FeedManager_Model_Uploader
         $remotePath = $this->_config['remote_path'] ?? '/';
 
         try {
-            $sftp = new \phpseclib3\Net\SFTP($host, $port, 10); // 10 second timeout
+            /** @phpstan-ignore-next-line */
+            $sftp = new \phpseclib3\Net\SFTP($host, $port, 10);
 
             // Authenticate
             if ($authType === 'key') {
@@ -390,22 +394,25 @@ class Maho_FeedManager_Model_Uploader
                     return ['success' => false, 'message' => 'Private key is required for key authentication'];
                 }
                 try {
-                    /** @var \phpseclib3\Crypt\Common\PrivateKey $key */
+                    /** @phpstan-ignore-next-line */
                     $key = \phpseclib3\Crypt\PublicKeyLoader::load($privateKey);
                 } catch (\Exception $e) {
                     return ['success' => false, 'message' => 'Invalid private key format: ' . $e->getMessage()];
                 }
+                /** @phpstan-ignore-next-line */
                 if (!$sftp->login($username, $key)) {
                     return ['success' => false, 'message' => "Key authentication failed for user '{$username}'"];
                 }
             } else {
                 $password = $this->_config['password'] ?? '';
+                /** @phpstan-ignore-next-line */
                 if (!$sftp->login($username, $password)) {
                     return ['success' => false, 'message' => "Password authentication failed for user '{$username}'"];
                 }
             }
 
             // Check if remote path exists
+            /** @phpstan-ignore-next-line */
             $stat = $sftp->stat($remotePath);
             if ($stat === false) {
                 return ['success' => false, 'message' => "Remote path does not exist: {$remotePath}"];
