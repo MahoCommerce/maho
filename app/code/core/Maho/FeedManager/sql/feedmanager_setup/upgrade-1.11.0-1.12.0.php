@@ -28,11 +28,17 @@ if (!$connection->tableColumnExists($tableName, 'cases')) {
 }
 
 // Migrate existing single-output data to cases array format
-$select = $connection->select()
-    ->from($tableName, ['rule_id', 'conditions_serialized', 'output_type', 'output_value', 'output_attribute'])
-    ->where('cases IS NULL');
+// Only run migration if the old columns exist (they won't on fresh installs)
+if ($connection->tableColumnExists($tableName, 'conditions_serialized')) {
+    $select = $connection->select()
+        ->from($tableName, ['rule_id', 'conditions_serialized', 'output_type', 'output_value', 'output_attribute'])
+        ->where('cases IS NULL');
 
-$existingRules = $connection->fetchAll($select);
+    $existingRules = $connection->fetchAll($select);
+} else {
+    // Fresh install - no data to migrate
+    $existingRules = [];
+}
 
 foreach ($existingRules as $rule) {
     // Build the case from existing data
