@@ -114,7 +114,7 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
                 ->where('filter_source_table.order_id = source_table.order_id');
 
             if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
             $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));
@@ -236,7 +236,7 @@ class Mage_Sales_Model_Resource_Report_Invoiced extends Mage_Sales_Model_Resourc
                 ->where('state <> ?', Mage_Sales_Model_Order::STATE_CANCELED);
 
         if ($subSelect !== null) {
-            $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
         }
 
         $select->group([

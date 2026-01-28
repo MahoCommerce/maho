@@ -94,7 +94,7 @@ class Mage_Tax_Model_Resource_Report_Tax_Createdat extends Mage_Reports_Model_Re
             ]);
 
             if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
             $select->group([$periodExpr, 'e.store_id', 'code', 'tax.percent', 'e.status']);

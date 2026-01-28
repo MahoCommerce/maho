@@ -210,7 +210,7 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                 ]);
 
             if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
             $select->group([

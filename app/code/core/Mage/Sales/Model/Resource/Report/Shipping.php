@@ -89,7 +89,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 ->where('is_virtual = 0');
 
             if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
             $select->group([
@@ -212,7 +212,7 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 ->where('filter_source_table.order_id = source_table.order_id');
 
             if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
             $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));

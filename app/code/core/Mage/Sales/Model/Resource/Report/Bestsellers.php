@@ -190,7 +190,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
             );
 
             if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
             $select->useStraightJoin();  // important!

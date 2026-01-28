@@ -113,7 +113,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
                  ->where('coupon_code IS NOT NULL');
 
             if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
             }
 
             $select->group([
