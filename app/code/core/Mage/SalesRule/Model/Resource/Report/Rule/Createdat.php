@@ -126,6 +126,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
                 'store_id',
                 'status',
                 'coupon_code',
+                'coupon_rule_name',
             ]);
 
             $select->having('COUNT(entity_id) > 0');
@@ -162,6 +163,7 @@ class Mage_SalesRule_Model_Resource_Report_Rule_Createdat extends Mage_Reports_M
                 'period',
                 'order_status',
                 'coupon_code',
+                'rule_name',
             ]);
 
             $adapter->query($select->insertFromSelect($table, array_keys($columns)));
