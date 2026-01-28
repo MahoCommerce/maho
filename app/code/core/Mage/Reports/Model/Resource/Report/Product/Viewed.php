@@ -171,14 +171,15 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             [],
         );
 
-        $havingPart = [$adapter->prepareSqlCondition($viewsNumExpr, ['gt' => 0])];
-        if (!is_null($subSelect)) {
-            $subSelectHavingPart = $this->_makeConditionFromDateRangeSelect($subSelect, 'period');
-            if ($subSelectHavingPart) {
-                $havingPart[] = '(' . $subSelectHavingPart . ')';
-            }
+        // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+        // so we can't use the 'period' alias here - it doesn't exist yet)
+        if ($from !== null) {
+            $select->where('source_table.logged_at >= ?', $from);
         }
-        $select->having(implode(' AND ', $havingPart));
+        if ($to !== null) {
+            $select->where('source_table.logged_at <= ?', $to);
+        }
+        $select->having($adapter->prepareSqlCondition($viewsNumExpr, ['gt' => 0]));
 
         $select->useStraightJoin();
         $insertQuery = $helper->getInsertFromSelectUsingAnalytic(
