@@ -83,8 +83,13 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
                 ->where('state != ?', Mage_Sales_Model_Order::STATE_CANCELED)
                 ->where('base_total_refunded > ?', 0);
 
-            if ($subSelect !== null) {
-                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('created_at >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('created_at <= ?', $to);
             }
 
             $select->group([
@@ -210,8 +215,13 @@ class Mage_Sales_Model_Resource_Report_Refunded extends Mage_Sales_Model_Resourc
                 )
                 ->where('filter_source_table.order_id = source_table.order_id');
 
-            if ($subSelect !== null) {
-                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('source_table.created_at >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('source_table.created_at <= ?', $to);
             }
 
             $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));

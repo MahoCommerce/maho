@@ -209,8 +209,13 @@ class Mage_Sales_Model_Resource_Report_Order_Createdat extends Mage_Sales_Model_
                     Mage_Sales_Model_Order::STATE_NEW,
                 ]);
 
-            if ($subSelect !== null) {
-                $select->where($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('o.' . $aggregationField . ' >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('o.' . $aggregationField . ' <= ?', $to);
             }
 
             $select->group([

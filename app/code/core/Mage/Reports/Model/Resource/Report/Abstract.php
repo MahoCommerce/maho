@@ -217,18 +217,16 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             return false;
         }
 
-        $whereCondition = [];
-        $adapter = $this->_getReadAdapter();
-        foreach ($selectResult as $date) {
-            $date = substr($date, 0, 10); // to fix differences in oracle
-            $whereCondition[] = $adapter->prepareSqlCondition($periodColumn, ['like' => $date]);
-        }
-        $whereCondition = implode(' OR ', $whereCondition);
-        if ($whereCondition == '') {
-            $whereCondition = '1=0';  // FALSE condition!
+        if (empty($selectResult)) {
+            return '1=0';  // FALSE condition!
         }
 
-        return $whereCondition;
+        // Use IN clause instead of multiple LIKE conditions for better performance
+        // and cross-database compatibility (LIKE doesn't work on DATE columns in PostgreSQL)
+        $adapter = $this->_getReadAdapter();
+        $dates = array_map(fn($date) => substr($date, 0, 10), $selectResult);
+
+        return $adapter->quoteInto("$periodColumn IN (?)", $dates);
     }
 
     /**

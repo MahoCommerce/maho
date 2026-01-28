@@ -20,6 +20,9 @@ uses(Tests\MahoBackendTestCase::class);
  * reference SELECT aliases, GROUP BY columns, or aggregate functions. Date range filtering
  * should use WHERE (evaluated before GROUP BY) rather than HAVING (evaluated after GROUP BY).
  *
+ * The fix also ensures cross-database compatibility by filtering on source date columns
+ * directly rather than using LIKE on DATE columns (which doesn't work in PostgreSQL).
+ *
  * @see https://github.com/MahoCommerce/maho/issues/532
  */
 describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
@@ -32,11 +35,9 @@ describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
         $select = $this->adapter->select();
         $select->from(['t' => 'some_table'], ['period', 'store_id', 'total' => new Maho\Db\Expr('SUM(amount)')]);
 
-        // Simulate what _makeConditionFromDateRangeSelect returns
-        $dateCondition = "period IN ('2025-01-01', '2025-01-02', '2025-01-03')";
-
-        // The fix: use where() instead of having() for date conditions
-        $select->where($dateCondition);
+        // The fix: use where() with direct date column filtering
+        $select->where('t.created_at >= ?', '2025-01-01');
+        $select->where('t.created_at <= ?', '2025-01-03');
         $select->group(['period', 'store_id']);
 
         // Get the full SQL to verify structure
@@ -44,7 +45,7 @@ describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
 
         // Verify date condition is in WHERE clause (appears before GROUP BY)
         expect($sql)->toContain('WHERE');
-        expect($sql)->toContain('period IN');
+        expect($sql)->toContain('created_at');
 
         // WHERE should come before GROUP BY
         $wherePos = strpos($sql, 'WHERE');
@@ -64,8 +65,9 @@ describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
             'orders_count' => new Maho\Db\Expr('COUNT(*)'),
         ]);
 
-        // Date range condition goes in WHERE
-        $select->where("period IN ('2025-01-01', '2025-01-02')");
+        // Date range condition goes in WHERE on source column
+        $select->where('t.created_at >= ?', '2025-01-01');
+        $select->where('t.created_at <= ?', '2025-01-02');
 
         // Aggregate condition goes in HAVING (this is correct usage)
         $select->having('COUNT(*) > 0');
@@ -80,7 +82,7 @@ describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
         expect($sql)->toContain('HAVING');
 
         // Date condition in WHERE
-        expect($sql)->toContain('period IN');
+        expect($sql)->toContain('created_at');
 
         // Aggregate condition in HAVING
         expect($sql)->toContain('COUNT(*) > 0');
@@ -103,9 +105,9 @@ describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
             'total_amount' => new Maho\Db\Expr('SUM(grand_total)'),
         ]);
 
-        // Date condition in WHERE (the fix)
-        $select->where("DATE(created_at) >= '2025-01-01'");
-        $select->where("DATE(created_at) <= '2025-01-31'");
+        // Date condition in WHERE on source column (the fix)
+        $select->where('o.created_at >= ?', '2025-01-01');
+        $select->where('o.created_at <= ?', '2025-01-31');
 
         $select->group([new Maho\Db\Expr('DATE(created_at)'), 'store_id']);
 
@@ -113,7 +115,7 @@ describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
 
         // Verify SQL structure
         expect($sql)->toContain('WHERE');
-        expect($sql)->toContain("DATE(created_at) >= '2025-01-01'");
+        expect($sql)->toContain('created_at >=');
         expect($sql)->toContain('GROUP BY');
 
         // The date conditions should appear BEFORE GROUP BY in the SQL
@@ -123,94 +125,96 @@ describe('Report Date Range Condition - MySQL 8.0+ Compatibility', function () {
     });
 });
 
-describe('Report Resource _makeConditionFromDateRangeSelect Usage', function () {
-    it('Order Createdat report uses where() for date range', function () {
+describe('Report Resource uses direct date filtering', function () {
+    it('Order Createdat report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('sales/report_order_createdat');
 
-        // Use reflection to check the aggregate method's query building
+        // Use reflection to check the source file
         $reflection = new ReflectionClass($reportResource);
+        $sourceCode = file_get_contents($reflection->getFileName());
 
-        // Read the source file to verify the fix is in place
-        $sourceFile = $reflection->getFileName();
-        $sourceCode = file_get_contents($sourceFile);
+        // The fix: should filter by source date column directly
+        expect($sourceCode)->toContain("->where('o.' . \$aggregationField . ' >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('o.' . \$aggregationField . ' <= ?', \$to)");
 
-        // The fix: should use ->where() not ->having() for _makeConditionFromDateRangeSelect
-        expect($sourceCode)->toContain('$select->where($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
-        expect($sourceCode)->not->toContain('$select->having($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
+        // Should NOT use _makeConditionFromDateRangeSelect for the first query on source table
+        // (it's still used for the second query on aggregated table where period is a real column)
     });
 
-    it('Bestsellers report uses where() for date range', function () {
+    it('Bestsellers report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('sales/report_bestsellers');
         $reflection = new ReflectionClass($reportResource);
         $sourceCode = file_get_contents($reflection->getFileName());
 
-        expect($sourceCode)->toContain('$select->where($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
-        expect($sourceCode)->not->toContain('$select->having($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
+        expect($sourceCode)->toContain("->where('source_table.created_at >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('source_table.created_at <= ?', \$to)");
     });
 
-    it('Invoiced report uses where() for date range', function () {
+    it('Invoiced report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('sales/report_invoiced');
         $reflection = new ReflectionClass($reportResource);
         $sourceCode = file_get_contents($reflection->getFileName());
 
-        // Should have where() calls, not having() calls for date range
-        $whereCount = substr_count($sourceCode, '$select->where($this->_makeConditionFromDateRangeSelect');
-        $havingCount = substr_count($sourceCode, '$select->having($this->_makeConditionFromDateRangeSelect');
-
-        expect($whereCount)->toBeGreaterThan(0, 'Should use where() for date range conditions');
-        expect($havingCount)->toBe(0, 'Should NOT use having() for date range conditions');
+        // Should have direct date filtering in WHERE
+        expect($sourceCode)->toContain("->where('source_table.created_at >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('created_at >= ?', \$from)");
     });
 
-    it('Refunded report uses where() for date range', function () {
+    it('Refunded report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('sales/report_refunded');
         $reflection = new ReflectionClass($reportResource);
         $sourceCode = file_get_contents($reflection->getFileName());
 
-        $whereCount = substr_count($sourceCode, '$select->where($this->_makeConditionFromDateRangeSelect');
-        $havingCount = substr_count($sourceCode, '$select->having($this->_makeConditionFromDateRangeSelect');
-
-        expect($whereCount)->toBeGreaterThan(0);
-        expect($havingCount)->toBe(0);
+        expect($sourceCode)->toContain("->where('created_at >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('source_table.created_at >= ?', \$from)");
     });
 
-    it('Shipping report uses where() for date range', function () {
+    it('Shipping report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('sales/report_shipping');
         $reflection = new ReflectionClass($reportResource);
         $sourceCode = file_get_contents($reflection->getFileName());
 
-        $whereCount = substr_count($sourceCode, '$select->where($this->_makeConditionFromDateRangeSelect');
-        $havingCount = substr_count($sourceCode, '$select->having($this->_makeConditionFromDateRangeSelect');
-
-        expect($whereCount)->toBeGreaterThan(0);
-        expect($havingCount)->toBe(0);
+        expect($sourceCode)->toContain("->where('created_at >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('source_table.created_at >= ?', \$from)");
     });
 
-    it('Tax report uses where() for date range', function () {
+    it('Tax report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('tax/report_tax_createdat');
         $reflection = new ReflectionClass($reportResource);
         $sourceCode = file_get_contents($reflection->getFileName());
 
-        expect($sourceCode)->toContain('$select->where($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
-        expect($sourceCode)->not->toContain('$select->having($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
+        expect($sourceCode)->toContain("->where('e.' . \$aggregationField . ' >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('e.' . \$aggregationField . ' <= ?', \$to)");
     });
 
-    it('SalesRule report uses where() for date range', function () {
+    it('SalesRule report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('salesrule/report_rule_createdat');
         $reflection = new ReflectionClass($reportResource);
         $sourceCode = file_get_contents($reflection->getFileName());
 
-        expect($sourceCode)->toContain('$select->where($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
-        expect($sourceCode)->not->toContain('$select->having($this->_makeConditionFromDateRangeSelect($subSelect, \'period\'))');
+        expect($sourceCode)->toContain("->where('source_table.' . \$aggregationField . ' >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('source_table.' . \$aggregationField . ' <= ?', \$to)");
     });
 
-    it('Product Viewed report uses where() for date range', function () {
+    it('Product Viewed report uses direct date filtering in WHERE', function () {
         $reportResource = Mage::getResourceModel('reports/report_product_viewed');
         $reflection = new ReflectionClass($reportResource);
         $sourceCode = file_get_contents($reflection->getFileName());
 
-        // Product Viewed has special handling - date condition should be in where()
-        expect($sourceCode)->toContain('$select->where($subSelectWherePart)');
-        // And aggregate condition (views_num > 0) should remain in having()
-        expect($sourceCode)->toContain('$select->having($adapter->prepareSqlCondition($viewsNumExpr');
+        expect($sourceCode)->toContain("->where('source_table.logged_at >= ?', \$from)");
+        expect($sourceCode)->toContain("->where('source_table.logged_at <= ?', \$to)");
+    });
+});
+
+describe('_makeConditionFromDateRangeSelect uses IN instead of LIKE', function () {
+    it('generates IN clause instead of multiple LIKE conditions', function () {
+        $reflection = new ReflectionClass(Mage_Reports_Model_Resource_Report_Abstract::class);
+        $sourceCode = file_get_contents($reflection->getFileName());
+
+        // Should use IN clause for better performance and cross-database compatibility
+        expect($sourceCode)->toContain('IN (?)');
+
+        // Should NOT use LIKE for date conditions
+        expect($sourceCode)->not->toContain("['like' => \$date]");
     });
 });
