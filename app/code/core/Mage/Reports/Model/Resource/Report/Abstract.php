@@ -403,8 +403,15 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             if ($to instanceof DateTime) {
                 $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
+            } elseif (!empty($to)) {
+                $toOriginal = $to;
+                $to = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $to);
+                $to = $to ?: new DateTime($toOriginal);
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+                $to = $to->getTimestamp();
             } else {
-                $to = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $to) ?: new DateTime($to);
+                // $to is null - use current time as the end period
+                $to = new DateTime();
                 $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
             }
