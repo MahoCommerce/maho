@@ -1,0 +1,64 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Adminhtml_Block_System_Config_Form_Field_TestEmail $this */
+?>
+<style>
+    #<?= $this->getHtmlId() ?>.success {
+        background-color: #d4edda;
+        border-color: #28a745;
+    }
+    #<?= $this->getHtmlId() ?>.fail {
+        background-color: #f8d7da;
+        border-color: #dc3545;
+    }
+    #test_email_recipient {
+        margin-right: 10px;
+        padding: 4px 8px;
+        width: 250px;
+    }
+</style>
+<script>
+    function sendTestEmail() {
+        const button = document.getElementById('<?= $this->getHtmlId() ?>');
+        const resultSpan = document.getElementById('test_email_result');
+        const recipient = document.getElementById('test_email_recipient').value;
+
+        button.classList.remove('success', 'fail');
+        resultSpan.textContent = '<?= $this->jsQuoteEscape($this->__('Sending...')) ?>';
+        button.disabled = true;
+
+        const formData = new FormData();
+        formData.append('recipient', recipient);
+
+        mahoFetch('<?= $this->getAjaxUrl() ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.success) {
+                button.classList.add('success');
+            } else {
+                button.classList.add('fail');
+            }
+            resultSpan.textContent = response.message;
+            button.disabled = false;
+        })
+        .catch(error => {
+            console.error('Test email error:', error);
+            button.classList.add('fail');
+            resultSpan.textContent = '<?= $this->jsQuoteEscape($this->__('An error occurred while sending the test email.')) ?>';
+            button.disabled = false;
+        });
+    }
+</script>
+<input type="email" id="test_email_recipient" value="<?= $this->escapeHtml($this->getDefaultEmail()) ?>" placeholder="<?= $this->escapeHtml($this->__('Recipient email address')) ?>">
+<button onclick="sendTestEmail(); return false;" class="scalable" type="button" id="<?= $this->getHtmlId() ?>">
+    <span id="test_email_result"><?= $this->escapeHtml($this->getButtonLabel()) ?></span>
+</button>
