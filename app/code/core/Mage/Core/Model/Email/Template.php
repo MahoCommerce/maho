@@ -387,7 +387,12 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             default => null,
         };
 
-        if ($this->hasQueue() && $this->getQueue() instanceof Mage_Core_Model_Email_Queue) {
+        $useQueue = $this->hasQueue()
+            && $this->getQueue() instanceof Mage_Core_Model_Email_Queue
+            && !Mage::getIsDeveloperMode()
+            && !Mage::getStoreConfigFlag('system/smtp/disable_queue');
+
+        if ($useQueue) {
             $emailQueue = $this->getQueue();
             $emailQueue->clearRecipients();
             $emailQueue->setMessageBody($text);
