@@ -944,19 +944,19 @@
                             <show_in_store>1</show_in_store>
                             <depends><enabled separator=",">ses+smtp,ses+https,ses+api,azure+api,scaleway+smtp,scaleway+api,mailgun+smtp,mailgun+https,mailgun+api</enabled></depends>
                         </region>
-                        <disable_queue translate="label comment">
-                            <label>Disable Email Queue</label>
-                            <comment>When enabled, emails send immediately instead of being queued. Automatically bypassed in developer mode.</comment>
+                        <enable_queue translate="label comment">
+                            <label>Enable Email Queue</label>
+                            <comment>When enabled, emails are queued for background sending. Automatically disabled in developer mode for immediate feedback.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <sort_order>95</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
-                        </disable_queue>
-                        <test_email translate="button_label">
-                            <label></label>
-                            <button_label>Send Test Email</button_label>
+                        </enable_queue>
+                        <test_email translate="label button_label">
+                            <label>Test Email Settings</label>
+                            <button_label>Send</button_label>
                             <frontend_model>adminhtml/system_config_form_field_testEmail</frontend_model>
                             <sort_order>100</sort_order>
                             <show_in_default>1</show_in_default>

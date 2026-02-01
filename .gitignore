@@ -34,3 +34,6 @@
 .phpstan*.neon
 phpstan*.neon
 !.phpstan.dist*.neon
+
+# GSD planning files (local only)
+.planning/
