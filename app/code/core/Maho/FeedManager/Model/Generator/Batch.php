@@ -300,6 +300,10 @@ class Maho_FeedManager_Model_Generator_Batch
                 ->setLastFileSize($fileSize)
                 ->save();
 
+            // Reset notification flag on success
+            $notifier = new Maho_FeedManager_Model_Notifier();
+            $notifier->resetNotificationFlag($this->_feed);
+
             // Handle upload if configured
             $uploadResult = $this->_handleUpload();
 
@@ -629,6 +633,12 @@ class Maho_FeedManager_Model_Generator_Batch
                 $this->_log->addError($error);
             }
             $this->_log->save();
+        }
+
+        // Send failure notification
+        if ($this->_feed && $this->_feed->getId()) {
+            $notifier = new Maho_FeedManager_Model_Notifier();
+            $notifier->notify($this->_feed, $this->_state['errors'], 'generation');
         }
 
         return [
