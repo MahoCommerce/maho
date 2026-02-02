@@ -120,9 +120,9 @@ class Maho_FeedManager_Model_Notifier
         $storeName = Mage::getStoreConfig('general/store_information/name', $storeId)
             ?: Mage::app()->getStore($storeId)->getName();
 
-        // Build admin log URL
-        $logUrl = Mage::helper('adminhtml')->getUrl('adminhtml/feedmanager_log/index', [
-            'feed_id' => $feed->getId(),
+        // Build admin feed edit URL (logs are in a tab)
+        $logUrl = Mage::helper('adminhtml')->getUrl('adminhtml/feedmanager_feed/edit', [
+            'id' => $feed->getId(),
         ]);
 
         // Send email
@@ -183,8 +183,8 @@ class Maho_FeedManager_Model_Notifier
             );
         }
 
-        $url = Mage::helper('adminhtml')->getUrl('adminhtml/feedmanager_log/index', [
-            'feed_id' => $feed->getId(),
+        $url = Mage::helper('adminhtml')->getUrl('adminhtml/feedmanager_feed/edit', [
+            'id' => $feed->getId(),
         ]);
 
         /** @var Mage_AdminNotification_Model_Inbox $inbox */
