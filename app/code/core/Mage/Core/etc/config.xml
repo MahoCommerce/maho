@@ -304,6 +304,7 @@
             </cache>
             <smtp>
                 <enabled>sendmail</enabled>
+                <enable_queue>1</enable_queue>
             </smtp>
             <media_storage_configuration>
                 <image_file_type>18</image_file_type>

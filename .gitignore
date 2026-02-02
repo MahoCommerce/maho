@@ -8,6 +8,7 @@
 !.vscode/*.code-snippets
 .history/
 *.vsix
+.planning/
 
 # Maho stuff
 /app/etc/local.xml*
