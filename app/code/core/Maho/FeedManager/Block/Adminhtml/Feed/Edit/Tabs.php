@@ -63,4 +63,29 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tabs extends Mage_Adminhtml_Blo
 
         return parent::_beforeToHtml();
     }
+
+    #[\Override]
+    protected function _afterToHtml($html)
+    {
+        $html = parent::_afterToHtml($html);
+
+        // Add JavaScript to switch to tab from query parameter
+        $script = <<<'JS'
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const tabParam = params.get('tab');
+    if (tabParam) {
+        const tabId = 'feed_tabs_' + tabParam;
+        const tabElement = document.getElementById(tabId);
+        if (tabElement) {
+            tabElement.click();
+        }
+    }
+});
+</script>
+JS;
+
+        return $html . $script;
+    }
 }
