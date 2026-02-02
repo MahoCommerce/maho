@@ -184,6 +184,34 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
             ]);
         }
 
+        // Notification Settings
+        $notificationFieldset = $form->addFieldset('notification_fieldset', [
+            'legend' => $this->__('Notifications'),
+        ]);
+
+        $notificationFieldset->addField('notification_mode', 'select', [
+            'name' => 'notification_mode',
+            'label' => $this->__('Notification Method'),
+            'title' => $this->__('Notification Method'),
+            'values' => Maho_FeedManager_Model_Notifier::getModeOptions(),
+            'note' => $this->__('How to notify when feed generation or upload fails'),
+        ]);
+
+        $notificationFieldset->addField('notification_frequency', 'select', [
+            'name' => 'notification_frequency',
+            'label' => $this->__('Notification Frequency'),
+            'title' => $this->__('Notification Frequency'),
+            'values' => Maho_FeedManager_Model_Notifier::getFrequencyOptions(),
+            'note' => $this->__('"Once Until Success" prevents repeated emails until the feed generates successfully'),
+        ]);
+
+        $notificationFieldset->addField('notification_email', 'text', [
+            'name' => 'notification_email',
+            'label' => $this->__('Notification Email'),
+            'title' => $this->__('Notification Email'),
+            'note' => $this->__('Leave empty to use store general contact. Separate multiple emails with commas.'),
+        ]);
+
         $form->setValues($feed->getData());
 
         // Set template_selector value AFTER setValues to ensure it's not overwritten
