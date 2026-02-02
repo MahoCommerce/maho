@@ -250,6 +250,10 @@ class Maho_FeedManager_Model_Cron
         } catch (Exception $e) {
             Mage::logException($e);
             $log?->recordUploadFailure($destinationId, $e->getMessage());
+
+            // Send failure notification
+            $notifier = new Maho_FeedManager_Model_Notifier();
+            $notifier->notify($feed, [$e->getMessage()], 'upload');
         }
     }
 

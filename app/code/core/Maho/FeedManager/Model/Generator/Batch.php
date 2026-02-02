@@ -732,6 +732,11 @@ class Maho_FeedManager_Model_Generator_Batch
             Mage::logException($e);
             $message = $e->getMessage();
             $this->_log->recordUploadFailure($destinationId, $message);
+
+            // Send failure notification
+            $notifier = new Maho_FeedManager_Model_Notifier();
+            $notifier->notify($this->_feed, [$message], 'upload');
+
             return [
                 'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
                 'message' => $message,
