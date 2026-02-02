@@ -130,6 +130,10 @@ class Maho_FeedManager_Model_Generator
                 ->setLastFileSize($fileSize)
                 ->save();
 
+            // Reset notification flag on success
+            $notifier = new Maho_FeedManager_Model_Notifier();
+            $notifier->resetNotificationFlag($feed);
+
             Mage::log(
                 "FeedManager: Generated feed '{$feed->getName()}' with {$this->_productCount} products",
                 Mage::LOG_INFO,
@@ -149,6 +153,10 @@ class Maho_FeedManager_Model_Generator
                 "FeedManager: Failed to generate feed '{$feed->getName()}': {$e->getMessage()}",
                 Mage::LOG_ERROR,
             );
+
+            // Send failure notification
+            $notifier = new Maho_FeedManager_Model_Notifier();
+            $notifier->notify($feed, $this->_errors, 'generation');
         }
 
         // Save errors to log
