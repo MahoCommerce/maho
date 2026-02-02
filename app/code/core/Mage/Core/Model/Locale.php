@@ -543,13 +543,16 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      *
      * @param string             $part
      */
-    public function date(string|int|DateTime|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
+    public function date(string|int|DateTime|DateTimeImmutable|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
     {
         if (!is_int($date) && empty($date)) {
             // $date may be false, but DateTime uses strict compare
             $date = null;
         }
-        if ($part === null && is_numeric($date)) {
+        if ($date instanceof DateTimeInterface) {
+            // If already a DateTime/DateTimeImmutable, convert to mutable DateTime
+            $date = $date instanceof DateTime ? clone $date : DateTime::createFromInterface($date);
+        } elseif ($part === null && is_numeric($date)) {
             $date = new DateTime('@' . $date);
             // DateTime created from timestamp always has +00:00 timezone, convert to UTC
             $date->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
