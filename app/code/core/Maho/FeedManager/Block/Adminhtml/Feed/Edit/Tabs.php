@@ -72,17 +72,30 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tabs extends Mage_Adminhtml_Blo
         // Add JavaScript to switch to tab from query parameter
         $script = <<<'JS'
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+(function() {
     const params = new URLSearchParams(window.location.search);
     const tabParam = params.get('tab');
-    if (tabParam) {
+    if (!tabParam) return;
+
+    function activateTab() {
         const tabId = 'feed_tabs_' + tabParam;
         const tabElement = document.getElementById(tabId);
         if (tabElement) {
+            // Try clicking the tab link
             tabElement.click();
+            return true;
         }
+        return false;
     }
-});
+
+    // Try immediately, then with delays for tabs that initialize late
+    if (!activateTab()) {
+        setTimeout(activateTab, 100);
+        setTimeout(activateTab, 300);
+    }
+    // Also try on window load as fallback
+    window.addEventListener('load', activateTab);
+})();
 </script>
 JS;
 
