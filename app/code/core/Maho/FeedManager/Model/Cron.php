@@ -98,6 +98,13 @@ class Maho_FeedManager_Model_Cron
                 "FeedManager: Marked hung feed log #{$log->getId()} as failed",
                 Mage::LOG_WARNING,
             );
+
+            // Send failure notification for hung feed
+            $feed = Mage::getModel('feedmanager/feed')->load($log->getFeedId());
+            if ($feed->getId()) {
+                $notifier = new Maho_FeedManager_Model_Notifier();
+                $notifier->notify($feed, ['Feed generation timed out'], 'timeout');
+            }
         }
     }
 
