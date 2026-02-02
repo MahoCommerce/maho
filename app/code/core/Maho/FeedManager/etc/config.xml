@@ -65,6 +65,17 @@
                 <class>Maho_FeedManager_Helper</class>
             </feedmanager>
         </helpers>
+
+        <template>
+            <email>
+                <feedmanager_feed_failure>
+                    <label>FeedManager: Feed Failure Notification</label>
+                    <file>feed_failure.html</file>
+                    <type>html</type>
+                    <module>Maho_FeedManager</module>
+                </feedmanager_feed_failure>
+            </email>
+        </template>
     </global>
 
     <admin>
