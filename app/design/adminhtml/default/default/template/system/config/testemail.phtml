@@ -50,6 +50,7 @@
         button.disabled = true;
 
         const formData = new FormData();
+        formData.append('form_key', FORM_KEY);
         formData.append('recipient', recipient);
 
         mahoFetch('<?= $this->getAjaxUrl() ?>', {
