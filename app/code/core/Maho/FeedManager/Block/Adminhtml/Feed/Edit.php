@@ -399,6 +399,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                                 cursor: pointer;
                                 font-size: 14px;
                                 transition: background 0.2s;
+                                display: inline-flex;
+                                align-items: center;
+                                justify-content: center;
+                                text-decoration: none;
+                                line-height: 1;
                             }
                             #feed-generator-modal .btn-cancel {
                                 background: #f5f5f5;
