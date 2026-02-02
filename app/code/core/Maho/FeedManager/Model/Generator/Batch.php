@@ -636,7 +636,7 @@ class Maho_FeedManager_Model_Generator_Batch
         }
 
         // Send failure notification
-        if ($this->_feed && $this->_feed->getId()) {
+        if ($this->_feed->getId()) {
             $notifier = new Maho_FeedManager_Model_Notifier();
             $notifier->notify($this->_feed, $this->_state['errors'], 'generation');
         }

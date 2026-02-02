@@ -28,7 +28,6 @@ class Maho_FeedManager_Model_Notifier
     /**
      * Send failure notification for a feed
      *
-     * @param Maho_FeedManager_Model_Feed $feed
      * @param array $errors List of error messages
      * @param string $failureType Type of failure (generation, upload, timeout)
      * @return bool Whether notification was sent
@@ -36,7 +35,7 @@ class Maho_FeedManager_Model_Notifier
     public function notify(
         Maho_FeedManager_Model_Feed $feed,
         array $errors,
-        string $failureType = 'generation'
+        string $failureType = 'generation',
     ): bool {
         $mode = $feed->getNotificationMode() ?: self::MODE_NONE;
 
@@ -98,7 +97,7 @@ class Maho_FeedManager_Model_Notifier
     protected function _sendEmail(
         Maho_FeedManager_Model_Feed $feed,
         array $errors,
-        string $failureType
+        string $failureType,
     ): void {
         $storeId = (int) $feed->getStoreId();
 
@@ -163,24 +162,24 @@ class Maho_FeedManager_Model_Notifier
     protected function _addAdminNotification(
         Maho_FeedManager_Model_Feed $feed,
         array $errors,
-        string $failureType
+        string $failureType,
     ): void {
         $title = Mage::helper('feedmanager')->__(
             'Feed Failed: %s',
-            $feed->getName()
+            $feed->getName(),
         );
 
         $description = Mage::helper('feedmanager')->__(
             '%s failed for feed "%s". Errors: %s',
             ucfirst($failureType),
             $feed->getName(),
-            implode('; ', array_slice($errors, 0, 3))
+            implode('; ', array_slice($errors, 0, 3)),
         );
 
         if (count($errors) > 3) {
             $description .= Mage::helper('feedmanager')->__(
                 ' ... and %d more errors.',
-                count($errors) - 3
+                count($errors) - 3,
             );
         }
 
