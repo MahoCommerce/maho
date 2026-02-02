@@ -58,8 +58,6 @@ namespace PHPSTORM_META {
         current_variable,
         current_widget_instance,
         custom_admin_path_redirect,
-        datasync_import_mode,
-        datasync_suppress_emails,
         design,
         email_template,
         entityId,

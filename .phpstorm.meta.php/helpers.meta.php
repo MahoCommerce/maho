@@ -41,7 +41,6 @@ namespace PHPSTORM_META {
         'currencysymbol/data' => \Mage_CurrencySymbol_Helper_Data::class,
         'customersegmentation/coupon' => \Maho_CustomerSegmentation_Helper_Coupon::class,
         'customersegmentation/data' => \Maho_CustomerSegmentation_Helper_Data::class,
-        'datasync/data' => \Maho_DataSync_Helper_Data::class,
         'feedmanager/data' => \Maho_FeedManager_Helper_Data::class,
         'giftcard/data' => \Maho_Giftcard_Helper_Data::class,
         'giftmessage/data' => \Mage_GiftMessage_Helper_Data::class,
