@@ -115,7 +115,12 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
                     var fieldset = document.getElementById('destination_' + type + '_fieldset');
                     if (fieldset) {
                         var isVisible = (type === selectedType);
+
                         fieldset.style.display = isVisible ? '' : 'none';
+                        var header = fieldset.previousElementSibling;
+                        if (header && header.classList.contains('entry-edit-head')) {
+                            header.style.display = isVisible ? '' : 'none';
+                        }
 
                         // Disable/enable all inputs in fieldset to prevent hidden fields from submitting
                         var inputs = fieldset.querySelectorAll('input, select, textarea');

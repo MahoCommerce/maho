@@ -651,6 +651,16 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             var xmlFieldset = document.getElementById('mapping_xml_builder_fieldset');
             var mappingFieldset = document.getElementById('mapping_mapping_fieldset');
 
+            // Helper to show/hide fieldset along with its collapsible header
+            function toggleFieldsetWithHeader(fieldset, visible) {
+                if (!fieldset) return;
+                fieldset.style.display = visible ? 'block' : 'none';
+                var header = fieldset.previousElementSibling;
+                if (header && header.classList.contains('entry-edit-head')) {
+                    header.style.display = visible ? '' : 'none';
+                }
+            }
+
             function updateContentMode() {
                 if (!fileFormatSelect) return;
 
@@ -659,24 +669,16 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                 var jsonFieldset = document.getElementById('mapping_json_builder_fieldset');
 
                 // XML Builder
-                if (xmlFieldset) {
-                    xmlFieldset.style.display = format === 'xml' ? 'block' : 'none';
-                }
+                toggleFieldsetWithHeader(xmlFieldset, format === 'xml');
 
                 // CSV Builder
-                if (csvFieldset) {
-                    csvFieldset.style.display = format === 'csv' ? 'block' : 'none';
-                }
+                toggleFieldsetWithHeader(csvFieldset, format === 'csv');
 
                 // JSON Builder (also used for JSONL format)
-                if (jsonFieldset) {
-                    jsonFieldset.style.display = (format === 'json' || format === 'jsonl') ? 'block' : 'none';
-                }
+                toggleFieldsetWithHeader(jsonFieldset, format === 'json' || format === 'jsonl');
 
                 // Mapping fieldset (hide for all builder-based formats)
-                if (mappingFieldset) {
-                    mappingFieldset.style.display = 'none';
-                }
+                toggleFieldsetWithHeader(mappingFieldset, false);
             }
 
             // Initialize on page load
