@@ -91,9 +91,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs extends Mage_Adminhtml
             'renderer' => Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Upload::class,
         ]);
 
-        $this->addColumn('error_messages', [
+        $this->addColumn('errors', [
             'header' => $this->__('Errors'),
-            'index' => 'error_messages',
+            'index' => 'errors',
             'renderer' => Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Logs_Renderer_Errors::class,
         ]);
 
