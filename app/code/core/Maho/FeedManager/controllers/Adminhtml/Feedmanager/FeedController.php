@@ -109,12 +109,18 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 $data['include_product_types'] = implode(',', $data['include_product_types']);
             }
 
+            // Handle condition groups (new AND/OR format) before addData to avoid array-to-string warning
+            $conditionGroups = null;
+            if (isset($data['condition_groups'])) {
+                $conditionGroups = $this->_processConditionGroups($data['condition_groups']);
+                unset($data['condition_groups']);
+            }
+
             // Save main feed data
             $feed->addData($data);
 
-            // Handle condition groups (new AND/OR format)
-            if (isset($data['condition_groups'])) {
-                $conditionGroups = $this->_processConditionGroups($data['condition_groups']);
+            // Set condition groups as JSON
+            if ($conditionGroups !== null) {
                 $feed->setConditionGroupsArray($conditionGroups);
             }
 
