@@ -397,6 +397,12 @@ class Maho_FeedManager_Model_Generator_Batch
         $collection->setPageSize($this->_state['batch_size']);
         $collection->setCurPage($this->_state['current_page']);
 
+        // Preload parent mappings for this batch to avoid N+1 queries
+        $productIds = $collection->getAllIds();
+        if (!empty($productIds)) {
+            $this->_mapper->preloadParentMappings($productIds);
+        }
+
         $tempPath = $this->_state['temp_path'];
         $processedInBatch = 0;
         $format = $this->_feed->getFileFormat();

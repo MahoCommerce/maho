@@ -121,8 +121,10 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
             ''                    => '-- Select Type --',
             self::TYPE_SFTP       => 'SFTP',
             self::TYPE_FTP        => 'FTP',
-            self::TYPE_GOOGLE_API => 'Google Merchant Centre API',
-            self::TYPE_FACEBOOK_API => 'Facebook/Meta Catalog API',
+            // TODO: Implement Google Merchant Centre API upload
+            // self::TYPE_GOOGLE_API => 'Google Merchant Centre API',
+            // TODO: Implement Facebook/Meta Catalog API upload
+            // self::TYPE_FACEBOOK_API => 'Facebook/Meta Catalog API',
         ];
     }
 

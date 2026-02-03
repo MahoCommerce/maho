@@ -41,6 +41,7 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
     public const SOURCE_TYPE_STATIC = 'static';
     public const SOURCE_TYPE_RULE = 'rule';
     public const SOURCE_TYPE_COMBINED = 'combined';
+    public const SOURCE_TYPE_TAXONOMY = 'taxonomy';
 
     protected $_eventPrefix = 'feedmanager_attribute_mapping';
     protected $_eventObject = 'attribute_mapping';
@@ -103,6 +104,7 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
             self::SOURCE_TYPE_STATIC => 'Static Value',
             self::SOURCE_TYPE_RULE => 'Conditional Rule',
             self::SOURCE_TYPE_COMBINED => 'Combined Template',
+            self::SOURCE_TYPE_TAXONOMY => 'Category Taxonomy',
         ];
     }
 }

@@ -62,14 +62,15 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public function getPlatformOptions(): array
     {
         return [
-            ''           => '-- Select Platform --',
-            'google'     => 'Google Shopping',
-            'facebook'   => 'Facebook / Meta',
-            'bing'       => 'Bing Shopping',
-            'pinterest'  => 'Pinterest',
-            'idealo'     => 'Idealo',
+            ''            => '-- Select Platform --',
+            'google'      => 'Google Shopping',
+            'facebook'    => 'Facebook / Meta',
+            'bing'        => 'Bing Shopping',
+            'pinterest'   => 'Pinterest',
+            'idealo'      => 'Idealo',
             'trovaprezzi' => 'Trovaprezzi',
-            'custom'     => 'Custom',
+            'openai'      => 'OpenAI Commerce',
+            'custom'      => 'Custom',
         ];
     }
 

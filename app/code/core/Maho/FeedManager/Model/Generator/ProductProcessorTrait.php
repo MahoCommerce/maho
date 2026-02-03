@@ -390,8 +390,14 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         return '';
     }
 
+    /** @var array<int, string> Cached category names by ID */
+    protected static array $_categoryNameCache = [];
+
+    /** @var array<int, string> Cached category paths by ID */
+    protected static array $_categoryPathCache = [];
+
     /**
-     * Get product category path
+     * Get product category path (optimized with caching)
      */
     protected function _getProductCategoryPath(Mage_Catalog_Model_Product $product): string
     {
@@ -400,27 +406,74 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
             return '';
         }
 
-        $categoryId = end($categoryIds);
-        $category = Mage::getModel('catalog/category')->load($categoryId);
+        $categoryId = (int) end($categoryIds);
 
-        if (!$category->getId()) {
+        // Return cached path if available
+        if (isset(self::$_categoryPathCache[$categoryId])) {
+            return self::$_categoryPathCache[$categoryId];
+        }
+
+        // Get the category's path string (e.g., "1/2/5/12")
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $table = $resource->getTableName('catalog/category');
+
+        $categoryPath = $adapter->fetchOne(
+            $adapter->select()
+                ->from($table, ['path'])
+                ->where('entity_id = ?', $categoryId),
+        );
+
+        if (!$categoryPath) {
+            self::$_categoryPathCache[$categoryId] = '';
             return '';
         }
 
-        $path = [];
-        $pathIds = explode('/', $category->getPath());
+        $pathIds = explode('/', $categoryPath);
+        $pathIds = array_filter($pathIds, fn($id) => (int) $id > 2);
 
-        foreach ($pathIds as $pathId) {
-            if ($pathId <= 2) {
-                continue;
-            }
-            $pathCategory = Mage::getModel('catalog/category')->load($pathId);
-            if ($pathCategory->getId()) {
-                $path[] = $pathCategory->getName();
+        if (empty($pathIds)) {
+            self::$_categoryPathCache[$categoryId] = '';
+            return '';
+        }
+
+        // Find which category names we need to load
+        $missingIds = array_diff($pathIds, array_keys(self::$_categoryNameCache));
+
+        if (!empty($missingIds)) {
+            // Load missing category names in a single query
+            $nameAttrId = Mage::getSingleton('eav/config')
+                ->getAttribute('catalog_category', 'name')
+                ->getAttributeId();
+
+            $varcharTable = $resource->getTableName('catalog_category_entity_varchar');
+
+            $select = $adapter->select()
+                ->from($varcharTable, ['entity_id', 'value'])
+                ->where('entity_id IN (?)', $missingIds)
+                ->where('attribute_id = ?', $nameAttrId)
+                ->where('store_id = 0');
+
+            $names = $adapter->fetchPairs($select);
+
+            foreach ($names as $id => $name) {
+                self::$_categoryNameCache[(int) $id] = $name;
             }
         }
 
-        return implode(' > ', $path);
+        // Build the path from cached names
+        $pathNames = [];
+        foreach ($pathIds as $pathId) {
+            $pathId = (int) $pathId;
+            if (isset(self::$_categoryNameCache[$pathId])) {
+                $pathNames[] = self::$_categoryNameCache[$pathId];
+            }
+        }
+
+        $result = implode(' > ', $pathNames);
+        self::$_categoryPathCache[$categoryId] = $result;
+
+        return $result;
     }
 
     /**

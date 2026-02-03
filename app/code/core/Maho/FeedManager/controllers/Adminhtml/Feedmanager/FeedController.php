@@ -756,7 +756,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                         'source_type' => $mapping['source_type'],
                         'source_value' => $mapping['source_value'],
                         'transformers' => $mapping['transformers'] ?? '',
-                        'cdata' => in_array($key, ['g:title', 'g:description', 'title', 'description']),
+                        'cdata' => in_array($key, ['title', 'description', 'google_product_category', 'product_category', 'product_type']),
                         'optional' => !($attr['required'] ?? false),
                         'use_parent' => $mapping['use_parent'] ?? '',
                     ];

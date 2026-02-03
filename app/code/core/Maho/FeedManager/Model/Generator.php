@@ -195,6 +195,12 @@ class Maho_FeedManager_Model_Generator
             $collection->setPageSize($this->_batchSize);
             $collection->setCurPage($page);
 
+            // Preload parent mappings for this batch to avoid N+1 queries
+            $productIds = $collection->getAllIds();
+            if (!empty($productIds)) {
+                $this->_mapper->preloadParentMappings($productIds);
+            }
+
             foreach ($collection as $product) {
                 try {
                     // Validate against Rule conditions (legacy Mage_Rule system)
@@ -448,6 +454,12 @@ class Maho_FeedManager_Model_Generator
                 $collection->setPageSize($this->_batchSize);
                 $collection->setCurPage($page);
 
+                // Preload parent mappings for this batch to avoid N+1 queries
+                $productIds = $collection->getAllIds();
+                if (!empty($productIds)) {
+                    $this->_mapper->preloadParentMappings($productIds);
+                }
+
                 foreach ($collection as $product) {
                     try {
                         // Validate against Rule conditions (legacy Mage_Rule system)
@@ -552,6 +564,12 @@ class Maho_FeedManager_Model_Generator
                 $collection = $this->_getProductCollection();
                 $collection->setPageSize($this->_batchSize);
                 $collection->setCurPage($page);
+
+                // Preload parent mappings for this batch to avoid N+1 queries
+                $productIds = $collection->getAllIds();
+                if (!empty($productIds)) {
+                    $this->_mapper->preloadParentMappings($productIds);
+                }
 
                 foreach ($collection as $product) {
                     try {

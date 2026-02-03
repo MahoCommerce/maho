@@ -28,6 +28,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
         $attributeOptions = $this->_getProductAttributeOptionsForEditor();
         $ruleOptions = $this->_getDynamicRuleOptionsArray();
         $platformOptions = $this->_getPlatformPresetOptions();
+        $taxonomyPlatforms = Maho_FeedManager_Model_Mapper::getTaxonomyPlatformOptions();
 
         return '
         <div id="csv-builder-container">
@@ -106,6 +107,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',
             attributeOptionsHtml: ' . Mage::helper('core')->jsonEncode($attributeOptions) . ',
             ruleOptions: ' . Mage::helper('core')->jsonEncode($ruleOptions) . ',
+            taxonomyPlatforms: ' . Mage::helper('core')->jsonEncode($taxonomyPlatforms) . ',
             previewUrl: "' . $this->getUrl('*/*/csvPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
             feedId: ' . (int) $feed->getId() . ',
@@ -168,6 +170,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                     }
                     ruleSelectHtml += "</select>";
                     tdValue.innerHTML = ruleSelectHtml;
+                } else if (col.source_type === "taxonomy") {
+                    var taxSelectHtml = "<select class=\"fm-input-full\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\">";
+                    for (var platform in this.taxonomyPlatforms) {
+                        var selected = (col.source_value === platform) ? " selected" : "";
+                        taxSelectHtml += "<option value=\"" + this.escapeHtml(platform) + "\"" + selected + ">" + this.escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
+                    }
+                    taxSelectHtml += "</select>";
+                    tdValue.innerHTML = taxSelectHtml;
                 } else {
                     var placeholder = col.source_type === "combined" ? "{{manufacturer}} - {{name}}" : "";
                     tdValue.innerHTML = "<input type=\"text\" class=\"input-text fm-input-full\" value=\"" + this.escapeHtml(col.source_value || "") + "\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\" placeholder=\"" + placeholder + "\">";

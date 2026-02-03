@@ -27,6 +27,7 @@ class Maho_FeedManager_Model_Mapper
     public const SOURCE_TYPE_STATIC = 'static';
     public const SOURCE_TYPE_RULE = 'rule';
     public const SOURCE_TYPE_COMBINED = 'combined';
+    public const SOURCE_TYPE_TAXONOMY = 'taxonomy';
 
     /**
      * Known price fields that should be auto-formatted
@@ -48,7 +49,20 @@ class Maho_FeedManager_Model_Mapper
     protected ?Maho_FeedManager_Model_Platform_AdapterInterface $_platform = null;
     protected array $_mappings = [];
     protected array $_categoryMappings = [];
+    protected array $_taxonomyMappingsByPlatform = [];
     protected ?int $_storeId = null;
+
+    /** @var array<int, int|null> Cache of child ID => parent ID mappings */
+    protected array $_childParentMap = [];
+
+    /** @var array<int, array|null> Cache of parent product data by parent ID */
+    protected array $_parentDataCache = [];
+
+    /** @var array<int, array{name: string, path: string}> Static cache of category data (id => [name, path]) */
+    protected static array $_categoryCache = [];
+
+    /** @var bool Flag to indicate if all categories have been loaded */
+    protected static bool $_categoriesCacheLoaded = false;
 
     /**
      * Price formatting settings from feed
@@ -293,26 +307,73 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
+     * Preload child-to-parent ID mappings for a batch of product IDs
+     *
+     * This avoids N+1 queries when processing simple products that belong to configurables.
+     *
+     * @param array<int> $productIds Product IDs to preload parent mappings for
+     */
+    public function preloadParentMappings(array $productIds): void
+    {
+        if (empty($productIds)) {
+            return;
+        }
+
+        // Query catalog_product_super_link to get all child->parent mappings
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $table = $resource->getTableName('catalog/product_super_link');
+
+        $select = $adapter->select()
+            ->from($table, ['product_id', 'parent_id'])
+            ->where('product_id IN (?)', $productIds);
+
+        $rows = $adapter->fetchPairs($select);
+
+        foreach ($productIds as $productId) {
+            // Mark all as checked (null = no parent, int = has parent)
+            $this->_childParentMap[$productId] = isset($rows[$productId]) ? (int) $rows[$productId] : null;
+        }
+    }
+
+    /**
      * Extract parent product data for child products
+     *
+     * Uses caching to avoid loading the same parent multiple times.
      *
      * @return array<string, mixed>|null Parent data or null if no parent
      */
     protected function _extractParentProductData(Mage_Catalog_Model_Product $product): ?array
     {
-        // Find parent configurable product
-        $parentIds = Mage::getModel('catalog/product_type_configurable')
-            ->getParentIdsByChild($product->getId());
+        $childId = (int) $product->getId();
 
-        if (empty($parentIds)) {
+        // Get parent ID - use cached mapping if available
+        if (array_key_exists($childId, $this->_childParentMap)) {
+            $parentId = $this->_childParentMap[$childId];
+        } else {
+            // Fall back to individual lookup if not preloaded
+            $parentIds = Mage::getModel('catalog/product_type_configurable')
+                ->getParentIdsByChild($childId);
+            $parentId = !empty($parentIds) ? (int) $parentIds[0] : null;
+            $this->_childParentMap[$childId] = $parentId;
+        }
+
+        if ($parentId === null) {
             return null;
         }
 
-        $parentId = (int) $parentIds[0];
+        // Return cached parent data if available
+        if (array_key_exists($parentId, $this->_parentDataCache)) {
+            return $this->_parentDataCache[$parentId];
+        }
+
+        // Load and cache parent product data
         $parent = Mage::getModel('catalog/product')
             ->setStoreId($this->_storeId)
             ->load($parentId);
 
         if (!$parent->getId()) {
+            $this->_parentDataCache[$parentId] = null;
             return null;
         }
 
@@ -349,6 +410,9 @@ class Maho_FeedManager_Model_Mapper
             }
         }
 
+        // Cache the extracted data
+        $this->_parentDataCache[$parentId] = $data;
+
         return $data;
     }
 
@@ -366,6 +430,7 @@ class Maho_FeedManager_Model_Mapper
             self::SOURCE_TYPE_STATIC => $sourceValue,
             self::SOURCE_TYPE_RULE => $this->_evaluateRule($sourceValue, $rawData, $product),
             self::SOURCE_TYPE_COMBINED => $this->_evaluateCombined($sourceValue, $rawData),
+            self::SOURCE_TYPE_TAXONOMY => $this->_getTaxonomyForProduct($sourceValue, $product),
             default => null,
         };
     }
@@ -504,17 +569,94 @@ class Maho_FeedManager_Model_Mapper
     }
 
     /**
+     * Load all categories into static cache (one-time operation)
+     *
+     * This is called once per feed generation and caches all category data
+     * to avoid loading individual category models.
+     */
+    protected function _ensureCategoryCache(): void
+    {
+        if (self::$_categoriesCacheLoaded) {
+            return;
+        }
+
+        // Load all categories with a single query
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+
+        // Get category entity_id, name (from varchar table), and path
+        $categoryTable = $resource->getTableName('catalog/category');
+        $varcharTable = $resource->getTableName('catalog_category_entity_varchar');
+        $eavAttribute = Mage::getSingleton('eav/config')
+            ->getAttribute(Mage_Catalog_Model_Category::ENTITY, 'name');
+        $nameAttributeId = $eavAttribute->getId();
+
+        $storeId = $this->_storeId ?: 0;
+
+        // Query category data with name (prefer store-specific, fall back to default)
+        $select = $adapter->select()
+            ->from(['c' => $categoryTable], ['entity_id', 'path'])
+            ->joinLeft(
+                ['cv_store' => $varcharTable],
+                $adapter->quoteInto(
+                    'cv_store.entity_id = c.entity_id AND cv_store.attribute_id = ? AND cv_store.store_id = ' . (int) $storeId,
+                    $nameAttributeId,
+                ),
+                [],
+            )
+            ->joinLeft(
+                ['cv_default' => $varcharTable],
+                $adapter->quoteInto(
+                    'cv_default.entity_id = c.entity_id AND cv_default.attribute_id = ? AND cv_default.store_id = 0',
+                    $nameAttributeId,
+                ),
+                [],
+            )
+            ->columns(['name' => new Maho\Db\Expr('COALESCE(cv_store.value, cv_default.value)')]);
+
+        $rows = $adapter->fetchAll($select);
+
+        foreach ($rows as $row) {
+            self::$_categoryCache[(int) $row['entity_id']] = [
+                'name' => (string) ($row['name'] ?? ''),
+                'path' => (string) $row['path'],
+            ];
+        }
+
+        self::$_categoriesCacheLoaded = true;
+    }
+
+    /**
+     * Get category name from cache
+     */
+    protected function _getCategoryName(int $categoryId): string
+    {
+        $this->_ensureCategoryCache();
+        return self::$_categoryCache[$categoryId]['name'] ?? '';
+    }
+
+    /**
+     * Get category path from cache
+     */
+    protected function _getCategoryPathData(int $categoryId): string
+    {
+        $this->_ensureCategoryCache();
+        return self::$_categoryCache[$categoryId]['path'] ?? '';
+    }
+
+    /**
      * Get category names for product
      */
     protected function _getCategoryNames(Mage_Catalog_Model_Product $product): array
     {
+        $this->_ensureCategoryCache();
         $names = [];
         $categoryIds = $product->getCategoryIds();
 
         foreach ($categoryIds as $categoryId) {
-            $category = Mage::getModel('catalog/category')->load($categoryId);
-            if ($category->getId()) {
-                $names[] = $category->getName();
+            $catId = (int) $categoryId;
+            if (isset(self::$_categoryCache[$catId]) && self::$_categoryCache[$catId]['name'] !== '') {
+                $names[] = self::$_categoryCache[$catId]['name'];
             }
         }
 
@@ -526,6 +668,7 @@ class Maho_FeedManager_Model_Mapper
      */
     protected function _getCategoryPath(Mage_Catalog_Model_Product $product): string
     {
+        $this->_ensureCategoryCache();
         $categoryIds = $product->getCategoryIds();
         if (empty($categoryIds)) {
             return '';
@@ -535,17 +678,21 @@ class Maho_FeedManager_Model_Mapper
         $maxDepth = 0;
 
         foreach ($categoryIds as $categoryId) {
-            $category = Mage::getModel('catalog/category')->load($categoryId);
-            $pathIds = explode('/', $category->getPath());
+            $catId = (int) $categoryId;
+            if (!isset(self::$_categoryCache[$catId])) {
+                continue;
+            }
+
+            $pathIds = explode('/', self::$_categoryCache[$catId]['path']);
             $depth = count($pathIds);
 
             if ($depth > $maxDepth) {
                 $maxDepth = $depth;
                 $pathNames = [];
                 foreach ($pathIds as $pathId) {
-                    if ($pathId > 1) { // Skip root category
-                        $pathCategory = Mage::getModel('catalog/category')->load($pathId);
-                        $pathNames[] = $pathCategory->getName();
+                    $pId = (int) $pathId;
+                    if ($pId > 1 && isset(self::$_categoryCache[$pId])) { // Skip root category
+                        $pathNames[] = self::$_categoryCache[$pId]['name'];
                     }
                 }
                 $deepestPath = implode(' > ', $pathNames);
@@ -560,6 +707,7 @@ class Maho_FeedManager_Model_Mapper
      */
     protected function _getMappedCategory(Mage_Catalog_Model_Product $product): ?string
     {
+        $this->_ensureCategoryCache();
         $categoryIds = $product->getCategoryIds();
 
         // Try to find a mapped category, preferring deeper categories
@@ -567,13 +715,90 @@ class Maho_FeedManager_Model_Mapper
         $bestDepth = 0;
 
         foreach ($categoryIds as $categoryId) {
-            if (isset($this->_categoryMappings[$categoryId])) {
-                $category = Mage::getModel('catalog/category')->load($categoryId);
-                $depth = count(explode('/', $category->getPath()));
+            $catId = (int) $categoryId;
+            if (isset($this->_categoryMappings[$catId]) && isset(self::$_categoryCache[$catId])) {
+                $depth = count(explode('/', self::$_categoryCache[$catId]['path']));
 
                 if ($depth > $bestDepth) {
                     $bestDepth = $depth;
-                    $bestMatch = $this->_categoryMappings[$categoryId];
+                    $bestMatch = $this->_categoryMappings[$catId];
+                }
+            }
+        }
+
+        return $bestMatch;
+    }
+
+    /**
+     * Get taxonomy path for a product from a specific platform's mappings
+     *
+     * @param string $platform Platform code (google, facebook, pinterest, bing)
+     * @param Mage_Catalog_Model_Product $product Product to get taxonomy for
+     * @return string|null Taxonomy path or null if no mapping found
+     */
+    protected function _getTaxonomyForProduct(string $platform, Mage_Catalog_Model_Product $product): ?string
+    {
+        if (empty($platform)) {
+            return null;
+        }
+
+        // Load mappings for this platform if not cached (with depths for performance)
+        if (!isset($this->_taxonomyMappingsByPlatform[$platform])) {
+            $this->_taxonomyMappingsByPlatform[$platform] = [];
+
+            $collection = Mage::getResourceModel('feedmanager/categoryMapping_collection')
+                ->addFieldToFilter('platform', $platform);
+
+            // Get all category IDs that have mappings
+            $categoryIds = [];
+            $mappingData = [];
+            foreach ($collection as $mapping) {
+                $catId = $mapping->getCategoryId();
+                $categoryIds[] = $catId;
+                $mappingData[$catId] = $mapping->getPlatformCategoryPath();
+            }
+
+            // Load category depths in a single query instead of per-product
+            if (!empty($categoryIds)) {
+                $resource = Mage::getSingleton('core/resource');
+                $adapter = $resource->getConnection('core_read');
+                $table = $resource->getTableName('catalog/category');
+
+                $select = $adapter->select()
+                    ->from($table, ['entity_id', 'path'])
+                    ->where('entity_id IN (?)', $categoryIds);
+
+                $categoryPaths = $adapter->fetchPairs($select);
+
+                foreach ($mappingData as $catId => $taxonomyPath) {
+                    $depth = isset($categoryPaths[$catId])
+                        ? count(explode('/', $categoryPaths[$catId]))
+                        : 0;
+                    $this->_taxonomyMappingsByPlatform[$platform][$catId] = [
+                        'path' => $taxonomyPath,
+                        'depth' => $depth,
+                    ];
+                }
+            }
+        }
+
+        $mappings = $this->_taxonomyMappingsByPlatform[$platform];
+        if (empty($mappings)) {
+            return null;
+        }
+
+        $categoryIds = $product->getCategoryIds();
+
+        // Find deepest mapped category (no model loading - depths are pre-cached)
+        $bestMatch = null;
+        $bestDepth = 0;
+
+        foreach ($categoryIds as $categoryId) {
+            if (isset($mappings[$categoryId])) {
+                $mapping = $mappings[$categoryId];
+                if ($mapping['depth'] > $bestDepth) {
+                    $bestDepth = $mapping['depth'];
+                    $bestMatch = $mapping['path'];
                 }
             }
         }
@@ -617,7 +842,41 @@ class Maho_FeedManager_Model_Mapper
             self::SOURCE_TYPE_STATIC => 'Static Value',
             self::SOURCE_TYPE_RULE => 'Dynamic Rule',
             self::SOURCE_TYPE_COMBINED => 'Combined Fields',
+            self::SOURCE_TYPE_TAXONOMY => 'Category Taxonomy',
         ];
+    }
+
+    /**
+     * Get available taxonomy platforms for dropdown
+     * Uses Platform model for consistency with Category Mapping screen,
+     * plus any custom platforms from existing category mappings
+     */
+    public static function getTaxonomyPlatformOptions(): array
+    {
+        // Get platforms from registered adapters (same as Category Mapping screen)
+        $options = Maho_FeedManager_Model_Platform::getPlatformOptions();
+
+        // Add any custom platforms from existing category mappings
+        try {
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_read');
+            $table = $resource->getTableName('feedmanager/category_mapping');
+
+            $customPlatforms = $adapter->fetchCol(
+                $adapter->select()
+                    ->distinct()
+                    ->from($table, ['platform'])
+                    ->where('platform NOT IN (?)', array_keys($options)),
+            );
+
+            foreach ($customPlatforms as $platform) {
+                $options[$platform] = ucfirst($platform);
+            }
+        } catch (Exception $e) {
+            // Silently fail if table doesn't exist yet
+        }
+
+        return $options;
     }
 
     /**

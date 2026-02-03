@@ -107,7 +107,8 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
         return <<<SCRIPT
         <script type="text/javascript">
         (function() {
-            var types = ['sftp', 'ftp', 'google_api', 'facebook_api'];
+            // TODO: Add 'google_api', 'facebook_api' back when API upload is implemented
+            var types = ['sftp', 'ftp'];
             var typeSelect = document.getElementById('destination_type');
 
             function toggleFieldsets(selectedType) {

@@ -34,6 +34,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
         $attributeOptions = $this->_getProductAttributeOptionsForEditor();
         $ruleOptions = $this->_getDynamicRuleOptionsArray();
         $platformOptions = $this->_getPlatformPresetOptions();
+        $taxonomyPlatforms = Maho_FeedManager_Model_Mapper::getTaxonomyPlatformOptions();
 
         return '
         <div id="xml-builder-container">
@@ -112,6 +113,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',
             attributeOptionsHtml: ' . Mage::helper('core')->jsonEncode($attributeOptions) . ',
             ruleOptions: ' . Mage::helper('core')->jsonEncode($ruleOptions) . ',
+            taxonomyPlatforms: ' . Mage::helper('core')->jsonEncode($taxonomyPlatforms) . ',
             selectedPath: null,
             previewUrl: "' . $this->getUrl('*/*/xmlPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
@@ -200,6 +202,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         for (var ruleCode in this.ruleOptions) {
                             var selected = (node.source_value === ruleCode) ? " selected" : "";
                             html += "<option value=\"" + this.escapeHtml(ruleCode) + "\"" + selected + ">" + this.escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
+                        }
+                        html += "</select>";
+                    } else if (node.source_type === "taxonomy") {
+                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
+                        for (var platform in this.taxonomyPlatforms) {
+                            var selected = (node.source_value === platform) ? " selected" : "";
+                            html += "<option value=\"" + this.escapeHtml(platform) + "\"" + selected + ">" + this.escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
                         }
                         html += "</select>";
                     } else {
