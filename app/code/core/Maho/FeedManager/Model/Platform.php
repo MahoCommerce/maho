@@ -74,7 +74,7 @@ class Maho_FeedManager_Model_Platform
      */
     public static function getPlatformOptions(): array
     {
-        $options = ['' => '-- Select Platform --'];
+        $options = ['' => Mage::helper('feedmanager')->__('-- Select Platform --')];
 
         foreach (array_keys(self::$_adapters) as $code) {
             $adapter = self::getAdapter($code);

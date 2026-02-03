@@ -99,12 +99,13 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
      */
     public static function getSourceTypeOptions(): array
     {
+        $helper = Mage::helper('feedmanager');
         return [
-            self::SOURCE_TYPE_ATTRIBUTE => 'Product Attribute',
-            self::SOURCE_TYPE_STATIC => 'Static Value',
-            self::SOURCE_TYPE_RULE => 'Conditional Rule',
-            self::SOURCE_TYPE_COMBINED => 'Combined Template',
-            self::SOURCE_TYPE_TAXONOMY => 'Category Taxonomy',
+            self::SOURCE_TYPE_ATTRIBUTE => $helper->__('Product Attribute'),
+            self::SOURCE_TYPE_STATIC => $helper->__('Static Value'),
+            self::SOURCE_TYPE_RULE => $helper->__('Conditional Rule'),
+            self::SOURCE_TYPE_COMBINED => $helper->__('Combined Template'),
+            self::SOURCE_TYPE_TAXONOMY => $helper->__('Category Taxonomy'),
         ];
     }
 }

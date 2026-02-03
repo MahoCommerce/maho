@@ -354,7 +354,7 @@ class Maho_FeedManager_Model_Mapper
             // Fall back to individual lookup if not preloaded
             $parentIds = Mage::getModel('catalog/product_type_configurable')
                 ->getParentIdsByChild($childId);
-            $parentId = !empty($parentIds) ? (int) $parentIds[0] : null;
+            $parentId = empty($parentIds) ? null : (int) $parentIds[0];
             $this->_childParentMap[$childId] = $parentId;
         }
 
@@ -836,13 +836,14 @@ class Maho_FeedManager_Model_Mapper
      */
     public static function getSourceTypeOptions(): array
     {
+        $helper = Mage::helper('feedmanager');
         return [
-            '' => '-- Select Type --',
-            self::SOURCE_TYPE_ATTRIBUTE => 'Product Attribute',
-            self::SOURCE_TYPE_STATIC => 'Static Value',
-            self::SOURCE_TYPE_RULE => 'Dynamic Rule',
-            self::SOURCE_TYPE_COMBINED => 'Combined Fields',
-            self::SOURCE_TYPE_TAXONOMY => 'Category Taxonomy',
+            '' => $helper->__('-- Select Type --'),
+            self::SOURCE_TYPE_ATTRIBUTE => $helper->__('Product Attribute'),
+            self::SOURCE_TYPE_STATIC => $helper->__('Static Value'),
+            self::SOURCE_TYPE_RULE => $helper->__('Dynamic Rule'),
+            self::SOURCE_TYPE_COMBINED => $helper->__('Combined Fields'),
+            self::SOURCE_TYPE_TAXONOMY => $helper->__('Category Taxonomy'),
         ];
     }
 
