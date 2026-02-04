@@ -54,9 +54,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
         // Preview output area
         $fieldset->addField('preview_output', 'note', [
             'text' => '<div id="preview-output-container" class="fm-preview-panel">' .
-                '<pre id="preview-output" class="fm-preview-content">' .
-                $this->__('Click "Generate Preview" to see sample output...') .
-                '</pre>' .
+                '<pre id="preview-output" class="fm-preview-content"></pre>' .
                 '</div>',
         ]);
 
@@ -84,6 +82,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
         document.addEventListener('DOMContentLoaded', function() {
             var previewBtn = document.getElementById('generate-preview-btn');
             var previewOutput = document.getElementById('preview-output');
+            var previewContainer = document.getElementById('preview-output-container');
             var previewCount = document.getElementById('preview_preview_count');
 
             if (previewBtn) {
@@ -93,6 +92,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
             }
 
             async function generatePreview() {
+                previewContainer.classList.add('visible');
                 previewOutput.textContent = 'Generating preview...';
                 previewOutput.style.color = '#888';
 

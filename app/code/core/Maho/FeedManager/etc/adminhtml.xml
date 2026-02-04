@@ -17,7 +17,7 @@
                     <sort_order>100</sort_order>
                     <children>
                         <feeds translate="title" module="feedmanager">
-                            <title>Manage Feeds</title>
+                            <title>Feeds</title>
                             <action>adminhtml/feedmanager_feed</action>
                             <sort_order>10</sort_order>
                         </feeds>
@@ -64,7 +64,7 @@
                                 <sort_order>100</sort_order>
                                 <children>
                                     <feeds translate="title" module="feedmanager">
-                                        <title>Manage Feeds</title>
+                                        <title>Feeds</title>
                                         <sort_order>10</sort_order>
                                     </feeds>
                                     <destinations translate="title" module="feedmanager">

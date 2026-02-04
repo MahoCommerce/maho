@@ -96,20 +96,34 @@
     border-radius: 3px;
 }
 
-/* Preview */
-.feedmanager-preview {
-    max-height: 400px;
-    overflow: auto;
-    background: #2d2d2d;
-    color: #f8f8f2;
-    padding: 15px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-size: 12px;
+/* Preview - full width layout */
+#feed_tabs_preview_content .form-list td.label {
+    display: none;
 }
 
-.feedmanager-preview pre {
+#feed_tabs_preview_content .form-list td.value {
+    width: 100%;
+}
+
+.fm-preview-panel {
+    display: none;
+    max-height: 500px;
+    overflow: auto;
+    background: #1e1e1e;
+    padding: 15px;
+    border-radius: 4px;
+}
+
+.fm-preview-panel.visible {
+    display: block;
+}
+
+.fm-preview-content {
     margin: 0;
+    color: #d4d4d4;
+    font-family: monospace;
+    font-size: 13px;
+    line-height: 1.5;
     white-space: pre-wrap;
     word-wrap: break-word;
 }

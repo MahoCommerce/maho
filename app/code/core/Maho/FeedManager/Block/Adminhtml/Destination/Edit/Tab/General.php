@@ -62,8 +62,9 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
         // Add config fields for each type
         $this->_addSftpFields($form, $destination);
         $this->_addFtpFields($form, $destination);
-        $this->_addGoogleApiFields($form, $destination);
-        $this->_addFacebookApiFields($form, $destination);
+        // TODO: Uncomment when API upload is implemented
+        // $this->_addGoogleApiFields($form, $destination);
+        // $this->_addFacebookApiFields($form, $destination);
 
         $form->setValues($destination->getData());
 
@@ -364,7 +365,6 @@ SCRIPT;
         $fieldset->addField('config_business_id', 'text', [
             'name' => 'config[business_id]',
             'label' => $this->__('Business ID'),
-            'note' => $this->__('Optional'),
         ]);
 
         $fieldset->addField('config_catalog_id', 'text', [
