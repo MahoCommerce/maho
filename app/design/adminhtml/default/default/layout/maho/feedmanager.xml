@@ -20,7 +20,7 @@
     <adminhtml_feedmanager_feed_index>
         <update handle="feedmanager_default"/>
         <reference name="head">
-            <action method="setTitle" translate="title"><title>Manage Feeds</title></action>
+            <action method="setTitle" translate="title"><title>Feeds</title></action>
         </reference>
         <reference name="content">
             <block type="feedmanager/adminhtml_feed" name="feedmanager_feed"/>

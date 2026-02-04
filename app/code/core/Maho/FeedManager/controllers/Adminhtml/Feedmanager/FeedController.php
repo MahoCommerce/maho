@@ -29,7 +29,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     {
         $this->_title($this->__('Catalog'))
             ->_title($this->__('Feed Manager'))
-            ->_title($this->__('Manage Feeds'));
+            ->_title($this->__('Feeds'));
 
         $this->_initAction();
         $this->renderLayout();
