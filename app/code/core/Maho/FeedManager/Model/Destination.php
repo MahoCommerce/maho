@@ -218,4 +218,19 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
 
         return $errors;
     }
+
+    /**
+     * Set timestamps before save
+     */
+    #[\Override]
+    protected function _beforeSave(): self
+    {
+        $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        if (!$this->getCreatedAt()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+
+        return parent::_beforeSave();
+    }
 }

@@ -54,11 +54,13 @@ if (!$connection->isTableExists($tableName)) {
             'nullable' => false,
             'default' => 0,
         ], 'Sort Order')
-        ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
+        ->addColumn('created_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable' => false,
+            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT,
         ], 'Created At')
-        ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_DATETIME, null, [
+        ->addColumn('updated_at', Maho\Db\Ddl\Table::TYPE_TIMESTAMP, null, [
             'nullable' => false,
+            'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
         ], 'Updated At')
         ->addIndex(
             $installer->getIdxName('feedmanager/dynamic_rule', ['code'], 'unique'),

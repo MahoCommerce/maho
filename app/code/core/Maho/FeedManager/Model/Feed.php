@@ -313,6 +313,12 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
             $this->_conditions = null;
         }
 
+        $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        if (!$this->getCreatedAt()) {
+            $this->setCreatedAt($now);
+        }
+        $this->setUpdatedAt($now);
+
         return parent::_beforeSave();
     }
 
