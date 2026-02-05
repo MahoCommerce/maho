@@ -27,11 +27,11 @@ use Maho\ApiPlatform\State\Provider\CmsBlockProvider;
     operations: [
         new Get(
             uriTemplate: '/cms-blocks/{id}',
-            description: 'Get a CMS block by ID'
+            description: 'Get a CMS block by ID',
         ),
         new GetCollection(
             uriTemplate: '/cms-blocks',
-            description: 'Get CMS block collection'
+            description: 'Get CMS block collection',
         ),
     ],
     graphQlOperations: [
@@ -40,9 +40,9 @@ use Maho\ApiPlatform\State\Provider\CmsBlockProvider;
         new Query(
             name: 'cmsBlockByIdentifier',
             args: ['identifier' => ['type' => 'String!']],
-            description: 'Get a CMS block by identifier'
+            description: 'Get a CMS block by identifier',
         ),
-    ]
+    ],
 )]
 class CmsBlock
 {

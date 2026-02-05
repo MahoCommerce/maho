@@ -105,7 +105,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -145,7 +145,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -173,7 +173,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -208,7 +208,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -284,7 +284,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -311,7 +311,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -335,7 +335,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -361,7 +361,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -387,7 +387,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -416,7 +416,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -470,7 +470,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -543,7 +543,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {

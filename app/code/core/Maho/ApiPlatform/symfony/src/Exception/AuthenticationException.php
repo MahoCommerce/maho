@@ -24,14 +24,14 @@ class AuthenticationException extends ApiException
         string $message = 'Authentication required',
         string $errorCode = 'authentication_required',
         array $details = [],
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct(
             message: $message,
             errorCode: $errorCode,
             httpStatusCode: 401,
             details: $details,
-            previous: $previous
+            previous: $previous,
         );
     }
 
@@ -50,7 +50,7 @@ class AuthenticationException extends ApiException
     {
         return new self(
             message: 'Invalid email or password',
-            errorCode: 'invalid_credentials'
+            errorCode: 'invalid_credentials',
         );
     }
 
@@ -61,7 +61,7 @@ class AuthenticationException extends ApiException
     {
         return new self(
             message: 'Invalid or expired token',
-            errorCode: 'invalid_token'
+            errorCode: 'invalid_token',
         );
     }
 
@@ -72,7 +72,7 @@ class AuthenticationException extends ApiException
     {
         return new self(
             message: 'Token has expired',
-            errorCode: 'expired_token'
+            errorCode: 'expired_token',
         );
     }
 
@@ -83,7 +83,7 @@ class AuthenticationException extends ApiException
     {
         return new self(
             message: 'Invalid form key',
-            errorCode: 'invalid_form_key'
+            errorCode: 'invalid_form_key',
         );
     }
 }

@@ -37,7 +37,7 @@ class CustomerUserProvider implements UserProviderInterface
 
         if ($customerId === null) {
             throw new UserNotFoundException(
-                sprintf('Customer identifier "%s" is not valid.', $identifier)
+                sprintf('Customer identifier "%s" is not valid.', $identifier),
             );
         }
 
@@ -45,7 +45,7 @@ class CustomerUserProvider implements UserProviderInterface
 
         if ($customer === null) {
             throw new UserNotFoundException(
-                sprintf('Customer with ID "%d" not found.', $customerId)
+                sprintf('Customer with ID "%d" not found.', $customerId),
             );
         }
 
@@ -64,7 +64,7 @@ class CustomerUserProvider implements UserProviderInterface
     {
         if (!$user instanceof ApiUser) {
             throw new UnsupportedUserException(
-                sprintf('Instances of "%s" are not supported.', get_class($user))
+                sprintf('Instances of "%s" are not supported.', get_class($user)),
             );
         }
 

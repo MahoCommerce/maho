@@ -31,25 +31,25 @@ use Maho\ApiPlatform\State\Processor\PaymentProcessor;
     operations: [
         new Get(
             uriTemplate: '/pos-payments/{id}',
-            description: 'Get a POS payment by ID'
+            description: 'Get a POS payment by ID',
         ),
         new GetCollection(
             uriTemplate: '/pos-payments',
-            description: 'Get POS payments collection'
+            description: 'Get POS payments collection',
         ),
     ],
     graphQlOperations: [
         new Query(
             name: 'posPayment',
             args: ['id' => ['type' => 'ID!']],
-            description: 'Get POS payment by ID'
+            description: 'Get POS payment by ID',
         ),
         new QueryCollection(
             name: 'orderPosPayments',
             args: ['orderId' => ['type' => 'ID!']],
-            description: 'Get all POS payments for an order'
+            description: 'Get all POS payments for an order',
         ),
-    ]
+    ],
 )]
 class PosPayment
 {

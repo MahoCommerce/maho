@@ -75,7 +75,7 @@ class CustomerService
         ?string $email = null,
         ?string $telephone = null,
         int $page = 1,
-        int $pageSize = 20
+        int $pageSize = 20,
     ): array {
         $search = trim($search);
 
@@ -147,7 +147,7 @@ class CustomerService
         ?string $email,
         ?string $telephone,
         int $page,
-        int $pageSize
+        int $pageSize,
     ): array {
         $resource = \Mage::getSingleton('core/resource');
         $read = $resource->getConnection('core_read');
@@ -315,7 +315,7 @@ class CustomerService
         string $lastName,
         ?string $email = null,
         ?string $telephone = null,
-        ?int $groupId = null
+        ?int $groupId = null,
     ): \Mage_Customer_Model_Customer {
         $customer = \Mage::getModel('customer/customer');
 
@@ -366,7 +366,7 @@ class CustomerService
         string $lastName,
         string $email,
         string $password,
-        bool $isSubscribed = false
+        bool $isSubscribed = false,
     ): \Mage_Customer_Model_Customer {
         // Check if email already exists
         if ($this->getCustomerByEmail($email)) {
@@ -393,7 +393,7 @@ class CustomerService
      */
     public function updateCustomer(
         \Mage_Customer_Model_Customer $customer,
-        array $data
+        array $data,
     ): \Mage_Customer_Model_Customer {
         if (isset($data['firstName'])) {
             $customer->setFirstname($data['firstName']);
@@ -427,7 +427,7 @@ class CustomerService
     public function changePassword(
         \Mage_Customer_Model_Customer $customer,
         string $currentPassword,
-        string $newPassword
+        string $newPassword,
     ): bool {
         // Validate current password
         if (!$customer->validatePassword($currentPassword)) {

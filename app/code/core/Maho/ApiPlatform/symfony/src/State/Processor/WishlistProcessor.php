@@ -56,7 +56,7 @@ final class WishlistProcessor implements ProcessorInterface
             return $this->addToWishlist(
                 (int) $args['productId'],
                 (int) ($args['qty'] ?? 1),
-                $args['description'] ?? null
+                $args['description'] ?? null,
             );
         }
 
@@ -69,7 +69,7 @@ final class WishlistProcessor implements ProcessorInterface
             $args = $context['args'] ?? [];
             return $this->moveToCart(
                 (int) $args['itemId'],
-                (int) ($args['qty'] ?? 1)
+                (int) ($args['qty'] ?? 1),
             );
         }
 
@@ -102,7 +102,7 @@ final class WishlistProcessor implements ProcessorInterface
             return $this->addToWishlist(
                 $data->productId,
                 $data->qty ?? 1,
-                $data->description
+                $data->description,
             );
         }
 

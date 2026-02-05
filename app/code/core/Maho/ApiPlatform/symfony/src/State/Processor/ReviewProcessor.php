@@ -52,7 +52,7 @@ final class ReviewProcessor implements ProcessorInterface
                 $args['title'],
                 $args['detail'],
                 $args['nickname'],
-                (int) $args['rating']
+                (int) $args['rating'],
             );
         }
 
@@ -64,7 +64,7 @@ final class ReviewProcessor implements ProcessorInterface
                 $data->title,
                 $data->detail,
                 $data->nickname,
-                $data->rating
+                $data->rating,
             );
         }
 
@@ -79,7 +79,7 @@ final class ReviewProcessor implements ProcessorInterface
         string $title,
         string $detail,
         string $nickname,
-        int $rating
+        int $rating,
     ): Review {
         $customerId = $this->requireAuthentication();
 
@@ -160,7 +160,7 @@ final class ReviewProcessor implements ProcessorInterface
         int $rating,
         int $productId,
         int $customerId,
-        int $storeId
+        int $storeId,
     ): void {
         // Get the default rating entity (usually "Quality" or "Rating")
         /** @var \Mage_Rating_Model_Resource_Rating_Collection $ratingCollection */

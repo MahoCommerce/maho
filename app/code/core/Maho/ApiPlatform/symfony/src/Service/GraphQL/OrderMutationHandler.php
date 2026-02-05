@@ -138,7 +138,7 @@ class OrderMutationHandler
             $variables['guestEmail'] ?? null,
             $variables['orderNote'] ?? null,
             $variables['cashTendered'] ?? null,
-            $context['admin_user_id'] ?? null
+            $context['admin_user_id'] ?? null,
         );
 
         $order = $result['order'];
@@ -490,7 +490,7 @@ class OrderMutationHandler
                     ['like' => "%{$search}%"],
                     ['like' => "%{$search}%"],
                     ['like' => "%{$search}%"],
-                ]
+                ],
             );
 
             $result = [];
@@ -582,7 +582,7 @@ class OrderMutationHandler
                 $this->createStoreCredit(
                     (int) $order->getCustomerId(),
                     (float) $creditmemo->getGrandTotal(),
-                    'Refund from Order #' . $order->getIncrementId()
+                    'Refund from Order #' . $order->getIncrementId(),
                 );
             }
 

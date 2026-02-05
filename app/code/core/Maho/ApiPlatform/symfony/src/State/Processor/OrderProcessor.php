@@ -77,7 +77,7 @@ final class OrderProcessor implements ProcessorInterface
         // Get cart/quote
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -90,7 +90,7 @@ final class OrderProcessor implements ProcessorInterface
             $guestEmail,
             $orderNote,
             $cashTendered,
-            $employeeId
+            $employeeId,
         );
 
         $order = $result['order'];
@@ -113,7 +113,7 @@ final class OrderProcessor implements ProcessorInterface
         // Get order
         $order = $this->orderService->getOrder(
             $orderId ? (int) $orderId : null,
-            $incrementId
+            $incrementId,
         );
 
         if (!$order) {
@@ -138,7 +138,7 @@ final class OrderProcessor implements ProcessorInterface
     private function mapOrderToDto(
         \Mage_Sales_Model_Order $order,
         ?string $accessToken = null,
-        ?float $changeAmount = null
+        ?float $changeAmount = null,
     ): Order {
         $dto = new Order();
         $dto->id = (int) $order->getId();
@@ -316,7 +316,7 @@ final class OrderProcessor implements ProcessorInterface
         // Get quote
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
         if (!$quote) {
@@ -387,7 +387,7 @@ final class OrderProcessor implements ProcessorInterface
         $grandTotal = (float) $quote->getGrandTotal();
         if ($totalPayment < $grandTotal - 0.01) {
             throw new \RuntimeException(
-                "Insufficient payment: total payment ({$totalPayment}) is less than order total ({$grandTotal})"
+                "Insufficient payment: total payment ({$totalPayment}) is less than order total ({$grandTotal})",
             );
         }
 
@@ -397,7 +397,7 @@ final class OrderProcessor implements ProcessorInterface
             null,
             null,
             null,
-            $employeeId
+            $employeeId,
         );
 
         $order = $result['order'];
@@ -536,7 +536,7 @@ final class OrderProcessor implements ProcessorInterface
             $transactionId,
             $cardType,
             $cardLast4,
-            $authCode
+            $authCode,
         );
 
         return $this->mapPosPaymentToDto($posPayment);

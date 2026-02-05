@@ -29,7 +29,7 @@ class ApiException extends \RuntimeException
         string $errorCode = 'api_error',
         int $httpStatusCode = 500,
         array $details = [],
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct($message, $httpStatusCode, $previous);
         $this->errorCode = $errorCode;

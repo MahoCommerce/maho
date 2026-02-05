@@ -25,16 +25,16 @@ use Maho\ApiPlatform\State\Provider\GiftCardProvider;
     operations: [
         new Get(
             uriTemplate: '/giftcards/{code}',
-            description: 'Get a gift card by code'
+            description: 'Get a gift card by code',
         ),
     ],
     graphQlOperations: [
         new Query(
             name: 'checkGiftcardBalance',
             args: ['code' => ['type' => 'String!']],
-            description: 'Check gift card balance by code'
+            description: 'Check gift card balance by code',
         ),
-    ]
+    ],
 )]
 class GiftCard
 {

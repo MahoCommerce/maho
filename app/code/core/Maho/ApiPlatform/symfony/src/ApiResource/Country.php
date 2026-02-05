@@ -25,13 +25,13 @@ use Maho\ApiPlatform\State\Provider\CountryProvider;
     operations: [
         new Get(
             uriTemplate: '/countries/{id}',
-            description: 'Get a country by ISO code'
+            description: 'Get a country by ISO code',
         ),
         new GetCollection(
             uriTemplate: '/countries',
-            description: 'Get all available countries'
+            description: 'Get all available countries',
         ),
-    ]
+    ],
 )]
 class Country
 {

@@ -76,12 +76,13 @@ describe('GET /api/guest-carts/{id} (Get Cart)', function () {
 
         // This is the key test - items array should NOT be empty
         expect($cart['items'])->not->toBeEmpty(
-            'Items array should contain the added item, but was empty'
+            'Items array should contain the added item, but was empty',
         );
 
         // itemsCount should match items array length
-        expect(count($cart['items']))->toBe((int) $cart['itemsCount'],
-            'Items array length should match itemsCount'
+        expect(count($cart['items']))->toBe(
+            (int) $cart['itemsCount'],
+            'Items array length should match itemsCount',
         );
 
         // Verify item structure
@@ -279,11 +280,13 @@ describe('Cart Totals Consistency', function () {
 
         // Subtotal should be > 0 when items exist
         if (count($cart['items']) > 0) {
-            expect($totals['subtotal'])->toBeGreaterThan(0,
-                'Subtotal should be > 0 when cart has items'
+            expect($totals['subtotal'])->toBeGreaterThan(
+                0,
+                'Subtotal should be > 0 when cart has items',
             );
-            expect($totals['grandTotal'])->toBeGreaterThan(0,
-                'Grand total should be > 0 when cart has items'
+            expect($totals['grandTotal'])->toBeGreaterThan(
+                0,
+                'Grand total should be > 0 when cart has items',
             );
 
             // Row total should equal price * qty

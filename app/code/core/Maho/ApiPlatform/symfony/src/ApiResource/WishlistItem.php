@@ -32,31 +32,31 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
     operations: [
         new GetCollection(
             uriTemplate: '/customers/me/wishlist',
-            description: 'Get current customer wishlist items'
+            description: 'Get current customer wishlist items',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist',
-            description: 'Add product to wishlist'
+            description: 'Add product to wishlist',
         ),
         new Delete(
             uriTemplate: '/customers/me/wishlist/{id}',
-            description: 'Remove item from wishlist'
+            description: 'Remove item from wishlist',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist/{id}/move-to-cart',
             name: 'move_to_cart',
-            description: 'Move wishlist item to cart'
+            description: 'Move wishlist item to cart',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist/sync',
             name: 'sync_wishlist',
-            description: 'Sync guest wishlist (localStorage) with customer wishlist'
+            description: 'Sync guest wishlist (localStorage) with customer wishlist',
         ),
     ],
     graphQlOperations: [
         new QueryCollection(
             name: 'myWishlist',
-            description: 'Get current customer wishlist items'
+            description: 'Get current customer wishlist items',
         ),
         new Mutation(
             name: 'addToWishlist',
@@ -65,14 +65,14 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID to add'],
                 'qty' => ['type' => 'Int', 'description' => 'Quantity (default 1)'],
                 'description' => ['type' => 'String', 'description' => 'Optional note'],
-            ]
+            ],
         ),
         new Mutation(
             name: 'removeFromWishlist',
             description: 'Remove item from wishlist',
             args: [
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
-            ]
+            ],
         ),
         new Mutation(
             name: 'moveWishlistItemToCart',
@@ -80,16 +80,16 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
             args: [
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
                 'qty' => ['type' => 'Int', 'description' => 'Quantity to add to cart'],
-            ]
+            ],
         ),
         new Mutation(
             name: 'syncWishlist',
             description: 'Sync guest wishlist with customer account',
             args: [
                 'productIds' => ['type' => '[Int!]!', 'description' => 'Product IDs from localStorage'],
-            ]
+            ],
         ),
-    ]
+    ],
 )]
 class WishlistItem
 {

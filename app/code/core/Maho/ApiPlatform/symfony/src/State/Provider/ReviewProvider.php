@@ -50,7 +50,7 @@ final class ReviewProvider implements ProviderInterface
             return $this->getProductReviews(
                 (int) $args['productId'],
                 (int) ($args['page'] ?? 1),
-                (int) ($args['pageSize'] ?? 10)
+                (int) ($args['pageSize'] ?? 10),
             );
         }
 
@@ -72,7 +72,7 @@ final class ReviewProvider implements ProviderInterface
                 return $this->getProductReviews(
                     $productId,
                     (int) ($filters['page'] ?? 1),
-                    (int) ($filters['pageSize'] ?? 10)
+                    (int) ($filters['pageSize'] ?? 10),
                 );
             }
             return [];

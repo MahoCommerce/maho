@@ -183,7 +183,7 @@ class ProductService
         array $filters = [],
         ?array $sort = null,
         bool $usePosIndex = false,
-        ?int $storeId = null
+        ?int $storeId = null,
     ): array {
         // If filtering by category and no explicit sort, use category's default sort order
         if (!$sort && isset($filters['categoryId'])) {
@@ -237,7 +237,7 @@ class ProductService
         array $filters,
         ?array $sort,
         bool $usePosIndex = false,
-        ?int $storeId = null
+        ?int $storeId = null,
     ): array {
         $searchParams = [
             'limit' => $pageSize,
@@ -348,7 +348,7 @@ class ProductService
             $currencyCode = \Mage::app()->getStore()->getCurrentCurrencyCode();
             $price = $hit['price'][$currencyCode]['default'] ?? 0.0;
         } elseif (isset($hit['price'])) {
-            $price = (float)$hit['price'];
+            $price = (float) $hit['price'];
         }
 
         // Handle SKU - for configurable products, it's an array of variant SKUs
@@ -414,7 +414,7 @@ class ProductService
         int $pageSize,
         array $filters,
         ?array $sort,
-        bool $includeDisabled = false
+        bool $includeDisabled = false,
     ): array {
         // Get barcode attribute to include in selection
         $barcodeAttr = $this->getBarcodeAttributeCode();
@@ -464,7 +464,7 @@ class ProductService
                     'cataloginventory/stock_item',
                     'is_in_stock',
                     'product_id=entity_id',
-                    ['is_in_stock' => 1]
+                    ['is_in_stock' => 1],
                 );
             }
         }
@@ -670,12 +670,12 @@ class ProductService
             'name' => $product->getName(),
             'description' => strip_tags($product->getDescription() ?? ''),
             'type' => $product->getTypeId(), // Product type (simple, configurable, grouped, etc.)
-            'price' => (float)$product->getPrice(),
-            'special_price' => $product->getSpecialPrice() ? (float)$product->getSpecialPrice() : null,
-            'final_price' => (float)$product->getFinalPrice(),
+            'price' => (float) $product->getPrice(),
+            'special_price' => $product->getSpecialPrice() ? (float) $product->getSpecialPrice() : null,
+            'final_price' => (float) $product->getFinalPrice(),
             'status' => $product->getStatus() == \Mage_Catalog_Model_Product_Status::STATUS_ENABLED ? 'enabled' : 'disabled',
             'stock_status' => $stockStatus,
-            'stock_qty' => $stockItem ? (float)$stockItem->getQty() : 0,
+            'stock_qty' => $stockItem ? (float) $stockItem->getQty() : 0,
             'categories' => $product->getCategoryIds(),
             $barcodeAttributeCode => $barcodeValue, // Dynamic barcode attribute
             'image_url' => $imageUrl,

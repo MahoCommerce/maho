@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Maho REST API v2 Entry Point
  *
