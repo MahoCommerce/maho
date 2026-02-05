@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <system>
+            <children>
+                <api>
+                    <children>
+                        <api2_users translate="title" module="maho_apiplatform">
+                            <title>REST/GraphQL - Users</title>
+                            <action>adminhtml/apiplatform_user</action>
+                            <sort_order>1</sort_order>
+                        </api2_users>
+                        <api2_roles translate="title" module="maho_apiplatform">
+                            <title>REST/GraphQL - Roles</title>
+                            <action>adminhtml/apiplatform_role</action>
+                            <sort_order>2</sort_order>
+                        </api2_roles>
+                    </children>
+                </api>
+            </children>
+        </system>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <system>
+                        <children>
+                            <api>
+                                <children>
+                                    <api2_users translate="title" module="maho_apiplatform">
+                                        <title>REST/GraphQL - Users</title>
+                                        <sort_order>1</sort_order>
+                                    </api2_users>
+                                    <api2_roles translate="title" module="maho_apiplatform">
+                                        <title>REST/GraphQL - Roles</title>
+                                        <sort_order>2</sort_order>
+                                    </api2_roles>
+                                </children>
+                            </api>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

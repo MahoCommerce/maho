@@ -25,8 +25,9 @@ class ApiUser implements UserInterface
         private readonly array $roles,
         private readonly ?int $customerId = null,
         private readonly ?int $adminId = null,
-    ) {
-    }
+        private readonly ?int $apiUserId = null,
+        private readonly array $permissions = [],
+    ) {}
 
     /**
      * Get the user's roles
@@ -93,5 +94,42 @@ class ApiUser implements UserInterface
     public function hasRole(string $role): bool
     {
         return in_array($role, $this->roles, true);
+    }
+
+    /**
+     * Get the API user ID if this is a dedicated API user
+     */
+    public function getApiUserId(): ?int
+    {
+        return $this->apiUserId;
+    }
+
+    /**
+     * Check if this user is a dedicated API user
+     */
+    public function isApiUser(): bool
+    {
+        return $this->apiUserId !== null;
+    }
+
+    /**
+     * Get API resource permissions
+     *
+     * @return array<string>
+     */
+    public function getPermissions(): array
+    {
+        return $this->permissions;
+    }
+
+    /**
+     * Check if user has a specific permission
+     */
+    public function hasPermission(string $permission): bool
+    {
+        if (in_array('all', $this->permissions, true)) {
+            return true;
+        }
+        return in_array($permission, $this->permissions, true);
     }
 }

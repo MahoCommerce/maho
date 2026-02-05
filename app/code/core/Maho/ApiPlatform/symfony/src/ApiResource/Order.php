@@ -32,37 +32,37 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
     operations: [
         new Get(
             uriTemplate: '/orders/{id}',
-            description: 'Get an order by ID'
+            description: 'Get an order by ID',
         ),
         new GetCollection(
             uriTemplate: '/orders',
-            description: 'Get order collection (admin only)'
+            description: 'Get order collection (admin only)',
         ),
         new GetCollection(
             uriTemplate: '/customers/me/orders',
             name: 'my_orders',
-            description: 'Get current customer order history'
+            description: 'Get current customer order history',
         ),
         new Post(
             uriTemplate: '/orders',
-            description: 'Place a new order from cart'
+            description: 'Place a new order from cart',
         ),
     ],
     graphQlOperations: [
         new Query(
             name: 'order',
             args: ['id' => ['type' => 'ID!']],
-            description: 'Get order by ID'
+            description: 'Get order by ID',
         ),
         new Query(
             name: 'guestOrder',
             args: ['incrementId' => ['type' => 'String!'], 'accessToken' => ['type' => 'String!']],
-            description: 'Get guest order by increment ID and access token'
+            description: 'Get guest order by increment ID and access token',
         ),
         new QueryCollection(
             name: 'customerOrders',
             args: ['page' => ['type' => 'Int'], 'pageSize' => ['type' => 'Int'], 'status' => ['type' => 'String']],
-            description: 'Get orders for authenticated customer'
+            description: 'Get orders for authenticated customer',
         ),
         new Mutation(
             name: 'placeOrder',
@@ -73,11 +73,11 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
                 'shippingMethod' => ['type' => 'String'],
                 'customerId' => ['type' => 'ID'],
             ],
-            description: 'Place order from cart'
+            description: 'Place order from cart',
         ),
         new Mutation(
             name: 'cancelOrder',
-            description: 'Cancel an order'
+            description: 'Cancel an order',
         ),
         new Mutation(
             name: 'placeOrderWithSplitPayments',
@@ -87,23 +87,23 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
                 'registerId' => ['type' => 'Int'],
                 'payments' => ['type' => '[PaymentInput!]!'],
             ],
-            description: 'Place order with split payment methods (POS)'
+            description: 'Place order with split payment methods (POS)',
         ),
         new Mutation(
             name: 'recordPayment',
-            description: 'Record a payment against an order'
+            description: 'Record a payment against an order',
         ),
         new Query(
             name: 'orderPayments',
             args: ['orderId' => ['type' => 'ID!']],
-            description: 'Get all POS payments for an order'
+            description: 'Get all POS payments for an order',
         ),
         new Query(
             name: 'orderPaymentSummary',
             args: ['orderId' => ['type' => 'ID!']],
-            description: 'Get payment summary grouped by method'
+            description: 'Get payment summary grouped by method',
         ),
-    ]
+    ],
 )]
 class Order
 {
@@ -137,6 +137,8 @@ class Order
     public ?string $updatedAt = null;
     /** @var array<array{note: string|null, createdAt: string, isCustomerNotified: bool, isVisibleOnFront: bool}> */
     public array $statusHistory = [];
+    /** @var Shipment[] */
+    public array $shipments = [];
 
     public function __construct()
     {

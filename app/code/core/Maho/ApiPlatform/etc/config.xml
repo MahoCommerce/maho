@@ -16,6 +16,18 @@
                 <class>Maho_ApiPlatform_Model</class>
             </maho_apiplatform>
         </models>
+        <blocks>
+            <maho_apiplatform>
+                <class>Maho_ApiPlatform_Block</class>
+            </maho_apiplatform>
+        </blocks>
+        <resources>
+            <maho_apiplatform_setup>
+                <setup>
+                    <module>Maho_ApiPlatform</module>
+                </setup>
+            </maho_apiplatform_setup>
+        </resources>
         <events>
             <!-- Add deprecation headers to legacy API responses -->
             <controller_front_send_response_before>
@@ -87,6 +99,26 @@
             </maho_apiplatform>
         </routers>
     </frontend>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <maho_apiplatform before="Mage_Adminhtml">Maho_ApiPlatform_Adminhtml</maho_apiplatform>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    <adminhtml>
+        <layout>
+            <updates>
+                <maho_apiplatform>
+                    <file>maho_apiplatform.xml</file>
+                </maho_apiplatform>
+            </updates>
+        </layout>
+    </adminhtml>
     <default>
         <maho_apiplatform>
             <general>

@@ -49,7 +49,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
         return $request->headers->has(self::AUTHORIZATION_HEADER)
             && str_starts_with(
                 $request->headers->get(self::AUTHORIZATION_HEADER, ''),
-                self::BEARER_PREFIX
+                self::BEARER_PREFIX,
             );
     }
 
@@ -69,7 +69,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
             $payload = $this->jwtService->decodeToken($token);
         } catch (\Exception $e) {
             throw new CustomUserMessageAuthenticationException(
-                'Invalid or expired token: ' . $e->getMessage()
+                'Invalid or expired token: ' . $e->getMessage(),
             );
         }
 
@@ -83,7 +83,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
             $payload->sub,
             function (string $userIdentifier) use ($payload): ApiUser {
                 return $this->createUserFromPayload($payload);
-            }
+            },
         );
 
         return new SelfValidatingPassport($userBadge);
@@ -119,8 +119,9 @@ class OAuth2Authenticator extends AbstractAuthenticator
         $roles = $this->extractRoles($payload);
         $customerId = null;
         $adminId = null;
+        $apiUserId = null;
+        $permissions = [];
 
-        // Determine user type from payload
         if (isset($payload->customer_id)) {
             $customerId = (int) $payload->customer_id;
         }
@@ -129,11 +130,21 @@ class OAuth2Authenticator extends AbstractAuthenticator
             $adminId = (int) $payload->admin_id;
         }
 
+        if (isset($payload->api_user_id)) {
+            $apiUserId = (int) $payload->api_user_id;
+        }
+
+        if (isset($payload->permissions) && is_array($payload->permissions)) {
+            $permissions = $payload->permissions;
+        }
+
         return new ApiUser(
             identifier: $payload->sub,
             roles: $roles,
             customerId: $customerId,
             adminId: $adminId,
+            apiUserId: $apiUserId,
+            permissions: $permissions,
         );
     }
 
@@ -162,6 +173,11 @@ class OAuth2Authenticator extends AbstractAuthenticator
                 case 'pos':
                     if (!in_array('ROLE_POS', $roles, true)) {
                         $roles[] = 'ROLE_POS';
+                    }
+                    break;
+                case 'api_user':
+                    if (!in_array('ROLE_API_USER', $roles, true)) {
+                        $roles[] = 'ROLE_API_USER';
                     }
                     break;
                 case 'customer':

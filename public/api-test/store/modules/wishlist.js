@@ -79,11 +79,8 @@ export default {
 
         this.wishlistLoading = true;
         try {
-            await fetch('/api/customers/me/wishlist/' + item.id, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': 'Bearer ' + this.token
-                }
+            await this.api('/customers/me/wishlist/' + item.id, {
+                method: 'DELETE'
             });
 
             // Remove from local state

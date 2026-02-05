@@ -34,16 +34,32 @@ class AuthController extends AbstractController
         $this->jwtService = new JwtService();
     }
     /**
-     * Customer login - returns JWT token
+     * Token endpoint - supports customer, client_credentials, and api_user grant types
      */
     #[Route('/api/auth/token', name: 'api_auth_token', methods: ['POST'])]
     public function getToken(Request $request): JsonResponse
     {
-        // Ensure store context is initialized
         StoreContext::ensureStore();
 
         $data = json_decode($request->getContent(), true);
+        $grantType = $data['grant_type'] ?? 'customer';
 
+        return match ($grantType) {
+            'customer' => $this->handleCustomerGrant($data),
+            'client_credentials' => $this->handleClientCredentialsGrant($data),
+            'api_user' => $this->handleApiUserGrant($data),
+            default => new JsonResponse([
+                'error' => 'unsupported_grant_type',
+                'message' => "Grant type '{$grantType}' is not supported. Use: customer, client_credentials, api_user",
+            ], Response::HTTP_BAD_REQUEST),
+        };
+    }
+
+    /**
+     * Handle customer email/password authentication
+     */
+    private function handleCustomerGrant(array $data): JsonResponse
+    {
         $email = $data['email'] ?? $data['username'] ?? '';
         $password = $data['password'] ?? '';
 
@@ -84,7 +100,6 @@ class AuthController extends AbstractController
                 ], Response::HTTP_UNAUTHORIZED);
             }
 
-            // Generate JWT token
             $token = $this->jwtService->generateCustomerToken($customer);
 
             // Handle cart merge if guest cart ID provided
@@ -92,14 +107,9 @@ class AuthController extends AbstractController
             $cartId = null;
 
             if ($guestCartId) {
-                // Merge guest cart into customer cart
                 try {
-                    /** @var \Mage_Sales_Model_Quote $guestCart */
                     $guestCart = \Mage::getModel('sales/quote')->loadByIdWithoutStore((int) $guestCartId);
-
                     if ($guestCart->getId() && !$guestCart->getCustomerId()) {
-                        // Get or create customer's cart
-                        /** @var \Mage_Sales_Model_Quote $customerCart */
                         $customerCart = \Mage::getModel('sales/quote')
                             ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
                             ->loadByCustomer((int) $customer->getId());
@@ -112,12 +122,10 @@ class AuthController extends AbstractController
                             $customerCart->save();
                         }
 
-                        // Merge items from guest cart
                         $customerCart->merge($guestCart);
                         $customerCart->collectTotals();
                         $customerCart->save();
 
-                        // Deactivate guest cart
                         $guestCart->setIsActive(false);
                         $guestCart->save();
 
@@ -128,9 +136,7 @@ class AuthController extends AbstractController
                 }
             }
 
-            // If no merge happened, get customer's existing cart
             if (!$cartId) {
-                /** @var \Mage_Sales_Model_Quote $customerCart */
                 $customerCart = \Mage::getModel('sales/quote')
                     ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
                     ->loadByCustomer((int) $customer->getId());
@@ -156,6 +162,132 @@ class AuthController extends AbstractController
                 'message' => 'An error occurred during authentication',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * Handle OAuth2 client_credentials grant (client_id + client_secret)
+     */
+    private function handleClientCredentialsGrant(array $data): JsonResponse
+    {
+        $clientId = $data['client_id'] ?? '';
+        $clientSecret = $data['client_secret'] ?? '';
+
+        if (empty($clientId) || empty($clientSecret)) {
+            return new JsonResponse([
+                'error' => 'invalid_request',
+                'message' => 'client_id and client_secret are required',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $resource = \Mage::getSingleton('core/resource');
+            $read = $resource->getConnection('core_read');
+            $table = $resource->getTableName('api/user');
+
+            $row = $read->fetchRow(
+                $read->select()->from($table)->where('client_id = ?', $clientId),
+            );
+
+            if (!$row) {
+                return new JsonResponse([
+                    'error' => 'invalid_client',
+                    'message' => 'Invalid client credentials',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            if (!(int) $row['is_active']) {
+                return new JsonResponse([
+                    'error' => 'invalid_client',
+                    'message' => 'API user account is inactive',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            if (!password_verify($clientSecret, $row['client_secret'])) {
+                return new JsonResponse([
+                    'error' => 'invalid_client',
+                    'message' => 'Invalid client credentials',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            $apiUser = \Mage::getModel('api/user')->load($row['user_id']);
+
+            return $this->generateApiUserTokenResponse($apiUser);
+        } catch (\Exception $e) {
+            \Mage::logException($e);
+            return new JsonResponse([
+                'error' => 'server_error',
+                'message' => 'An error occurred during authentication',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Handle legacy api_user grant (username + api_key)
+     */
+    private function handleApiUserGrant(array $data): JsonResponse
+    {
+        $username = $data['username'] ?? '';
+        $apiKey = $data['api_key'] ?? '';
+
+        if (empty($username) || empty($apiKey)) {
+            return new JsonResponse([
+                'error' => 'invalid_request',
+                'message' => 'username and api_key are required',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        try {
+            $apiUser = \Mage::getModel('api/user')->loadByUsername($username);
+
+            if (!$apiUser->getId()) {
+                return new JsonResponse([
+                    'error' => 'invalid_credentials',
+                    'message' => 'Invalid API credentials',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            if (!(int) $apiUser->getIsActive()) {
+                return new JsonResponse([
+                    'error' => 'invalid_credentials',
+                    'message' => 'API user account is inactive',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            if (!\Mage::helper('core')->validateHash($apiKey, $apiUser->getApiKey())) {
+                return new JsonResponse([
+                    'error' => 'invalid_credentials',
+                    'message' => 'Invalid API credentials',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            return $this->generateApiUserTokenResponse($apiUser);
+        } catch (\Exception $e) {
+            \Mage::logException($e);
+            return new JsonResponse([
+                'error' => 'server_error',
+                'message' => 'An error occurred during authentication',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Generate JWT response for an authenticated API user
+     */
+    private function generateApiUserTokenResponse(\Mage_Api_Model_User $apiUser): JsonResponse
+    {
+        $permissions = $this->jwtService->loadApiUserPermissions($apiUser);
+        $token = $this->jwtService->generateApiUserToken($apiUser, $permissions);
+
+        return new JsonResponse([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_in' => $this->jwtService->getTokenExpiry(),
+            'api_user' => [
+                'id' => (int) $apiUser->getId(),
+                'username' => $apiUser->getUsername(),
+            ],
+            'permissions' => $permissions,
+        ]);
     }
 
     /**

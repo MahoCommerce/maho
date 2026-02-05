@@ -345,9 +345,9 @@
                             </div>
                         </div>
 
-                        <div x-show="detail.data?.description">
+                        <div x-show="detail.data?.description || detail.data?.shortDescription">
                             <span class="text-gray-400 text-sm">Description:</span>
-                            <p class="text-sm mt-1" x-html="detail.data?.shortDescription || detail.data?.description?.substring(0, 200)"></p>
+                            <p class="text-sm mt-1" x-text="(detail.data?.shortDescription || detail.data?.description || '').replace(/<[^>]*>/g, '').substring(0, 200)"></p>
                         </div>
 
                         <!-- Categories (handle both formats) -->
@@ -488,26 +488,15 @@
             <div class="bg-gray-800 rounded-lg p-6">
                 <h3 class="text-lg font-semibold mb-4">GraphQL Query</h3>
 
-                <!-- Endpoint Selection -->
+                <!-- Endpoint -->
                 <div class="mb-4 p-3 bg-gray-900 rounded">
                     <label class="block text-sm text-gray-400 mb-2">Endpoint</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="graphql.endpoint" value="public" class="text-blue-600">
-                            <span><code class="text-blue-400">/api/graphql</code> <span class="text-gray-500">(Public - JWT auth)</span></span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="graphql.endpoint" value="admin" class="text-purple-600">
-                            <span><code class="text-purple-400">/admin/graphql/index</code> <span class="text-gray-500">(Admin session)</span></span>
+                        <label class="flex items-center gap-2">
+                            <code class="text-purple-400">/admin/graphql/index</code>
+                            <span class="text-gray-500">(Admin session auth)</span>
                         </label>
                     </div>
-                </div>
-
-                <!-- JWT Token for public endpoint -->
-                <div x-show="graphql.endpoint === 'public'" class="mb-4">
-                    <label class="block text-sm text-gray-400 mb-1">JWT Token (from /api/auth/token)</label>
-                    <input type="text" x-model="graphql.token" placeholder="Bearer token..."
-                           class="w-full bg-gray-700 rounded px-3 py-2 font-mono text-sm">
                 </div>
 
                 <div class="mb-4">
@@ -947,13 +936,8 @@
                             // ignore parse errors
                         }
 
-                        const url = this.graphql.endpoint === 'public' ? '/api/graphql' : '/admin/graphql/index';
+                        const url = '/admin/graphql/index';
                         const headers = { 'Content-Type': 'application/json' };
-
-                        // Add JWT token for public endpoint
-                        if (this.graphql.endpoint === 'public' && this.graphql.token) {
-                            headers['Authorization'] = 'Bearer ' + this.graphql.token;
-                        }
 
                         const res = await fetch(url, {
                             method: 'POST',

@@ -37,7 +37,7 @@ security:
         api:
             pattern: ^/api
             stateless: true
-            provider: maho_customer
+            provider: maho_chain
             custom_authenticators:
                 - Maho\ApiPlatform\Security\OAuth2Authenticator
 
@@ -53,7 +53,7 @@ security:
         - { path: ^/api/cms-blocks, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/blog-posts, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/url-resolver, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/stores, roles: PUBLIC_ACCESS, methods: [GET, POST] }
+        - { path: ^/api/stores, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/countries, roles: PUBLIC_ACCESS, methods: [GET] }
         # Token/auth endpoints are public
         - { path: ^/api/auth, roles: PUBLIC_ACCESS }
@@ -64,5 +64,5 @@ security:
         # Newsletter subscribe/unsubscribe (guests allowed)
         - { path: ^/api/newsletter/subscribe, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/api/newsletter/unsubscribe, roles: PUBLIC_ACCESS, methods: [POST] }
-        # Everything else requires auth
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
+        # Everything else requires auth + resource-level permission check
+        - { path: ^/api, roles: [IS_AUTHENTICATED_FULLY, API_USER_PERMISSION] }

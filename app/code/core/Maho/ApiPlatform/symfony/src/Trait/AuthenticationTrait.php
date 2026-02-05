@@ -98,6 +98,23 @@ trait AuthenticationTrait
     }
 
     /**
+     * Check if the current user is a dedicated API user
+     *
+     * API users have resource-level permissions enforced by ApiUserVoter.
+     *
+     * @return bool True if user is a dedicated API user
+     */
+    protected function isApiUser(): bool
+    {
+        if ($this->security === null) {
+            return false;
+        }
+
+        $user = $this->security->getUser();
+        return $user instanceof ApiUser && $user->isApiUser();
+    }
+
+    /**
      * Require authentication - throw exception if not authenticated
      *
      * @return int The authenticated customer ID
