@@ -75,6 +75,17 @@
                 </feedmanager_feed_failure>
             </email>
         </template>
+
+        <events>
+            <encryption_key_regenerated>
+                <observers>
+                    <feedmanager_encryption_key_regenerated>
+                        <class>feedmanager/observer</class>
+                        <method>encryptionKeyRegenerated</method>
+                    </feedmanager_encryption_key_regenerated>
+                </observers>
+            </encryption_key_regenerated>
+        </events>
     </global>
 
     <admin>

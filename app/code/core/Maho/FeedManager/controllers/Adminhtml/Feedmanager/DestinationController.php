@@ -96,8 +96,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         }
 
         try {
-            // Extract config fields based on type
-            $configFields = $this->_extractConfigFields($data);
+            // Extract config fields based on type, preserving sensitive fields if empty
+            $configFields = $this->_extractConfigFields($data, $destination);
             $destination->setConfigArray($configFields);
 
             // Remove config fields from main data
@@ -152,15 +152,29 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
     }
 
     /**
+     * Sensitive config fields that should preserve old values when submitted empty
+     */
+    private const SENSITIVE_CONFIG_FIELDS = [
+        'password',
+        'private_key',
+        'service_account_json',
+        'access_token',
+    ];
+
+    /**
      * Extract config fields from POST data based on destination type
      * Form sends data as config[field] which becomes $data['config']['field']
+     *
+     * For existing destinations, sensitive fields (passwords, keys, tokens) preserve
+     * their old values when submitted empty, since password fields don't show existing values.
      */
-    protected function _extractConfigFields(array $data): array
+    protected function _extractConfigFields(array $data, Maho_FeedManager_Model_Destination $destination): array
     {
         $type = $data['type'] ?? '';
         $configData = $data['config'] ?? [];
+        $oldConfig = $destination->getId() ? $destination->getConfigArray() : [];
 
-        return match ($type) {
+        $config = match ($type) {
             Maho_FeedManager_Model_Destination::TYPE_SFTP => [
                 'host' => $configData['host'] ?? '',
                 'port' => $configData['port'] ?? '22',
@@ -191,6 +205,15 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
             ],
             default => [],
         };
+
+        // Preserve old values for sensitive fields when submitted empty
+        foreach (self::SENSITIVE_CONFIG_FIELDS as $field) {
+            if (isset($config[$field]) && $config[$field] === '' && isset($oldConfig[$field])) {
+                $config[$field] = $oldConfig[$field];
+            }
+        }
+
+        return $config;
     }
 
     public function deleteAction(): void

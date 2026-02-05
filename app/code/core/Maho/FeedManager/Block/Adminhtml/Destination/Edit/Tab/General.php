@@ -68,12 +68,16 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Edit_Tab_General extends Mage
 
         $form->setValues($destination->getData());
 
-        // Set config values
+        // Set config values on form elements
+        // Elements may have different prefixes per type (config_host vs config_ftp_host)
         $config = $destination->getConfigArray();
         foreach ($config as $key => $value) {
-            $element = $form->getElement("config_{$key}");
-            if ($element) {
-                $element->setValue($value);
+            // Try standard prefix first, then type-specific prefixes
+            foreach (["config_{$key}", "config_ftp_{$key}"] as $elementId) {
+                $element = $form->getElement($elementId);
+                if ($element) {
+                    $element->setValue($value);
+                }
             }
         }
 

@@ -56,7 +56,9 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get config as array
+     * Get config as decrypted array
+     *
+     * Handles both encrypted config (from database) and plaintext JSON (before save).
      */
     public function getConfigArray(): array
     {
@@ -64,14 +66,25 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         if (empty($config)) {
             return [];
         }
-        return Mage::helper('core')->jsonDecode($config) ?: [];
+
+        $helper = Mage::helper('core');
+
+        // Try to decrypt (config from database is encrypted)
+        $decrypted = $helper->decrypt($config);
+        if ($decrypted !== '') {
+            return $helper->jsonDecode($decrypted) ?: [];
+        }
+
+        // If decryption failed, config might be plaintext JSON (before save)
+        return $helper->jsonDecode($config) ?: [];
     }
 
     /**
-     * Set config from array
+     * Set config from array (will be encrypted on save)
      */
     public function setConfigArray(array $config): self
     {
+        // Store as JSON, encryption happens in _beforeSave
         $this->setConfig(Mage::helper('core')->jsonEncode($config));
         return $this;
     }
@@ -220,11 +233,13 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Set timestamps before save
+     * Encrypt config and set timestamps before save
      */
     #[\Override]
     protected function _beforeSave(): self
     {
+        $this->_encryptConfig();
+
         $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         if (!$this->getCreatedAt()) {
             $this->setCreatedAt($now);
@@ -232,5 +247,36 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         $this->setUpdatedAt($now);
 
         return parent::_beforeSave();
+    }
+
+    /**
+     * Encrypt the entire config JSON before saving
+     */
+    protected function _encryptConfig(): void
+    {
+        $config = $this->getConfig();
+        if (empty($config)) {
+            return;
+        }
+
+        $helper = Mage::helper('core');
+
+        // Check if config is already encrypted (re-saving without changes)
+        // If decryption succeeds, we have JSON to work with
+        $decrypted = $helper->decrypt($config);
+        if ($decrypted !== '') {
+            $configArray = $helper->jsonDecode($decrypted);
+        } else {
+            // Config is plaintext JSON (new or modified)
+            $configArray = $helper->jsonDecode($config);
+        }
+
+        if (!is_array($configArray)) {
+            return;
+        }
+
+        // Encrypt the entire config JSON
+        $json = $helper->jsonEncode($configArray);
+        $this->setData('config', $helper->encrypt($json));
     }
 }
