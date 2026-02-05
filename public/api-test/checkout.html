@@ -554,17 +554,13 @@
             <div class="bg-gray-800 rounded-lg p-6">
                 <h3 class="text-lg font-semibold mb-4">GraphQL Checkout Mutations</h3>
 
-                <!-- Endpoint Selection -->
+                <!-- Endpoint -->
                 <div class="mb-4 p-3 bg-gray-900 rounded">
                     <label class="block text-sm text-gray-400 mb-2">Endpoint</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="graphql.endpoint" value="public" class="text-blue-600">
-                            <span><code class="text-blue-400">/api/graphql</code></span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="graphql.endpoint" value="admin" class="text-purple-600">
-                            <span><code class="text-purple-400">/admin/graphql/index</code></span>
+                        <label class="flex items-center gap-2">
+                            <code class="text-purple-400">/admin/graphql/index</code>
+                            <span class="text-gray-500">(Admin session auth)</span>
                         </label>
                     </div>
                 </div>
@@ -1203,12 +1199,8 @@
                             variables = JSON.parse(this.graphql.variables || '{}');
                         } catch (e) {}
 
-                        const url = this.graphql.endpoint === 'public' ? '/api/graphql' : '/admin/graphql/index';
+                        const url = '/admin/graphql/index';
                         const headers = { 'Content-Type': 'application/json' };
-
-                        if (this.graphql.endpoint === 'public' && this.auth.token) {
-                            headers['Authorization'] = 'Bearer ' + this.auth.token;
-                        }
 
                         const res = await fetch(url, {
                             method: 'POST',

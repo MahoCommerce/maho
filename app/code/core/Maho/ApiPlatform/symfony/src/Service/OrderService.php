@@ -33,7 +33,7 @@ class OrderService
         ?string $guestEmail = null,
         ?string $orderNote = null,
         ?float $cashTendered = null,
-        ?int $employeeId = null
+        ?int $employeeId = null,
     ): array {
         // Validate quote
         if (!$quote->getId() || !$quote->getIsActive()) {
@@ -188,15 +188,30 @@ class OrderService
      * @param int $page Page number
      * @param int $pageSize Page size
      * @param string|null $status Filter by status
+     * @param string|null $email Filter by customer email (exact or partial match)
+     * @param string|null $incrementId Filter by order increment ID (exact match)
      * @return array [orders, total]
      */
-    public function getAllOrders(int $page = 1, int $pageSize = 20, ?string $status = null): array
-    {
+    public function getAllOrders(
+        int $page = 1,
+        int $pageSize = 20,
+        ?string $status = null,
+        ?string $email = null,
+        ?string $incrementId = null,
+    ): array {
         $collection = \Mage::getModel('sales/order')->getCollection()
             ->setOrder('created_at', 'DESC');
 
         if ($status) {
             $collection->addFieldToFilter('status', $status);
+        }
+
+        if ($email) {
+            $collection->addFieldToFilter('customer_email', ['like' => '%' . $email . '%']);
+        }
+
+        if ($incrementId) {
+            $collection->addFieldToFilter('increment_id', $incrementId);
         }
 
         $total = $collection->getSize();
@@ -299,7 +314,7 @@ class OrderService
         \Mage_Sales_Model_Order $order,
         string $note,
         bool $notifyCustomer = false,
-        bool $visibleOnFront = false
+        bool $visibleOnFront = false,
     ): \Mage_Sales_Model_Order {
         $order->addStatusHistoryComment($note, false)
             ->setIsCustomerNotified($notifyCustomer)
@@ -324,8 +339,8 @@ class OrderService
             $notes[] = [
                 'note' => $status->getComment(),
                 'createdAt' => $status->getCreatedAt(),
-                'isCustomerNotified' => (bool)$status->getIsCustomerNotified(),
-                'isVisibleOnFront' => (bool)$status->getIsVisibleOnFront(),
+                'isCustomerNotified' => (bool) $status->getIsCustomerNotified(),
+                'isVisibleOnFront' => (bool) $status->getIsVisibleOnFront(),
             ];
         }
 

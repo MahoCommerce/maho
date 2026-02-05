@@ -6,6 +6,8 @@
             <codePool>core</codePool>
             <depends>
                 <Mage_Core/>
+                <Mage_Adminhtml/>
+                <Mage_Api/>
                 <Mage_Customer/>
                 <Mage_Catalog/>
                 <Mage_Sales/>

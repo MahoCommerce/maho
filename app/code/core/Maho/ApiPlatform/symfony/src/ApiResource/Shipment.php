@@ -14,13 +14,16 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\ApiResource;
 
 /**
- * Shipment DTO
+ * Shipment DTO - Embedded in Order response
  */
 class Shipment
 {
     public ?int $id = null;
     public ?string $incrementId = null;
-    public ?int $orderId = null;
     public int $totalQty = 0;
     public ?string $createdAt = null;
+    /** @var ShipmentTrack[] */
+    public array $tracks = [];
+    /** @var ShipmentItem[] */
+    public array $items = [];
 }

@@ -93,17 +93,11 @@
                     </ul>
                 </div>
                 <div>
-                    <span class="text-gray-400">GraphQL (Public):</span>
-                    <ul class="mt-1 space-y-1 text-gray-300">
-                        <li>GET /api/graphql <span class="text-gray-500">(playground)</span></li>
-                        <li>POST /api/graphql <span class="text-gray-500">(JWT auth)</span></li>
-                    </ul>
-                </div>
-                <div>
                     <span class="text-gray-400">GraphQL (Admin):</span>
                     <ul class="mt-1 space-y-1 text-gray-300">
-                        <li>POST /admin/graphql/index</li>
+                        <li>POST /admin/graphql/index <span class="text-gray-500">(session auth)</span></li>
                     </ul>
+                    <p class="text-xs text-gray-500 mt-1">Requires admin session</p>
                 </div>
             </div>
         </div>
@@ -466,30 +460,15 @@
             <div class="bg-gray-800 rounded-lg p-6">
                 <h3 class="text-lg font-semibold mb-4">GraphQL Query</h3>
 
-                <!-- Endpoint Selection -->
+                <!-- Endpoint -->
                 <div class="mb-4 p-3 bg-gray-900 rounded">
                     <label class="block text-sm text-gray-400 mb-2">Endpoint</label>
                     <div class="flex gap-4">
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="graphql.endpoint" value="public" class="text-blue-600">
-                            <span><code class="text-blue-400">/api/graphql</code> <span class="text-gray-500">(Public - JWT auth)</span></span>
-                        </label>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" x-model="graphql.endpoint" value="admin" class="text-purple-600">
-                            <span><code class="text-purple-400">/admin/graphql/index</code> <span class="text-gray-500">(Admin session)</span></span>
+                        <label class="flex items-center gap-2">
+                            <code class="text-purple-400">/admin/graphql/index</code>
+                            <span class="text-gray-500">(Admin session auth)</span>
                         </label>
                     </div>
-                </div>
-
-                <!-- Auth status for public endpoint -->
-                <div x-show="graphql.endpoint === 'public'" class="mb-4 p-3 rounded"
-                     :class="auth.token ? 'bg-green-900/30 border border-green-700' : 'bg-yellow-900/30 border border-yellow-700'">
-                    <p x-show="auth.token" class="text-green-300 text-sm">
-                        Authenticated as <span x-text="auth.email"></span>. Token will be sent with request.
-                    </p>
-                    <p x-show="!auth.token" class="text-yellow-300 text-sm">
-                        Not authenticated. Login above to use the public GraphQL endpoint.
-                    </p>
                 </div>
 
                 <div class="mb-4">
@@ -632,6 +611,10 @@
                 },
 
                 init() {
+                    // Load auth state from localStorage
+                    this.initAuth();
+
+                    // Pre-fill cart ID fields from saved state
                     if (this.currentCartId) {
                         this.getCart.cartId = this.currentCartId;
                         this.addItem.cartId = this.currentCartId;
@@ -999,13 +982,8 @@
                             // ignore parse errors
                         }
 
-                        const url = this.graphql.endpoint === 'public' ? '/api/graphql' : '/admin/graphql/index';
+                        const url = '/admin/graphql/index';
                         const headers = { 'Content-Type': 'application/json' };
-
-                        // Add JWT token for public endpoint
-                        if (this.graphql.endpoint === 'public' && this.auth.token) {
-                            headers['Authorization'] = 'Bearer ' + this.auth.token;
-                        }
 
                         const res = await fetch(url, {
                             method: 'POST',
@@ -1029,8 +1007,8 @@
                     this.loading = false;
                 },
 
-                // Initialize - load auth from localStorage
-                init() {
+                // Initialize auth - load from localStorage
+                initAuth() {
                     const stored = localStorage.getItem('maho_api_auth');
                     if (stored) {
                         try {

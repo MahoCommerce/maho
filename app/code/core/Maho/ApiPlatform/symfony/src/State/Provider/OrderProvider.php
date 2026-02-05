@@ -22,6 +22,9 @@ use Maho\ApiPlatform\ApiResource\OrderPrices;
 use Maho\ApiPlatform\ApiResource\Address;
 use Maho\ApiPlatform\ApiResource\PosPayment;
 use Maho\ApiPlatform\ApiResource\PaymentSummary;
+use Maho\ApiPlatform\ApiResource\Shipment;
+use Maho\ApiPlatform\ApiResource\ShipmentTrack;
+use Maho\ApiPlatform\ApiResource\ShipmentItem;
 use Maho\ApiPlatform\Service\OrderService;
 use Maho\ApiPlatform\Service\PaymentService;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
@@ -128,13 +131,51 @@ final class OrderProvider implements ProviderInterface
 
         $order = $this->orderService->getOrder((int) $orderId);
 
-        // Verify customer access for non-admin requests
-        $customerId = $context['customer_id'] ?? null;
-        if ($order && $customerId && $order->getCustomerId() != $customerId) {
+        if (!$order) {
             return null;
         }
 
-        return $order ? $this->mapToDto($order) : null;
+        // Verify access to this order
+        // - Admins can access any order
+        // - API users with orders/read permission can access any order (for integrations)
+        // - Customers can only access their own orders
+        if (!$this->canAccessOrder($order)) {
+            return null;
+        }
+
+        return $this->mapToDto($order);
+    }
+
+    /**
+     * Check if current user can access the given order
+     *
+     * - Admins: full access
+     * - API users (ROLE_API_USER): full access (permission already checked by security.yaml)
+     * - Customers: own orders only
+     */
+    private function canAccessOrder(\Mage_Sales_Model_Order $order): bool
+    {
+        // Admins can access any order
+        if ($this->isAdmin()) {
+            return true;
+        }
+
+        // API users with orders/read permission can access any order
+        // (permission enforcement is handled by security.yaml + ApiUserVoter)
+        $user = $this->security->getUser();
+        if ($user instanceof \Maho\ApiPlatform\Security\ApiUser && $user->isApiUser()) {
+            return true;
+        }
+
+        // Customers can only access their own orders
+        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
+        if ($authenticatedCustomerId !== null) {
+            $orderCustomerId = $order->getCustomerId();
+            return $orderCustomerId && (int) $orderCustomerId === $authenticatedCustomerId;
+        }
+
+        // No valid authentication context
+        return false;
     }
 
     /**
@@ -175,8 +216,10 @@ final class OrderProvider implements ProviderInterface
         $page = (int) ($filters['page'] ?? 1);
         $pageSize = min((int) ($filters['pageSize'] ?? 20), 100);
         $status = $filters['status'] ?? null;
+        $email = $filters['email'] ?? null;
+        $incrementId = $filters['incrementId'] ?? null;
 
-        $result = $this->orderService->getAllOrders($page, $pageSize, $status);
+        $result = $this->orderService->getAllOrders($page, $pageSize, $status, $email, $incrementId);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -257,6 +300,9 @@ final class OrderProvider implements ProviderInterface
 
         // Map status history
         $dto->statusHistory = $this->orderService->getOrderNotes($order);
+
+        // Map shipments with tracking
+        $dto->shipments = $this->mapShipmentsToDto($order);
 
         return $dto;
     }
@@ -342,6 +388,47 @@ final class OrderProvider implements ProviderInterface
         $dto->telephone = $address->getTelephone() ?? '';
 
         return $dto;
+    }
+
+    /**
+     * Map order shipments to Shipment DTOs
+     *
+     * @return Shipment[]
+     */
+    private function mapShipmentsToDto(\Mage_Sales_Model_Order $order): array
+    {
+        $shipments = [];
+
+        foreach ($order->getShipmentsCollection() as $shipment) {
+            $dto = new Shipment();
+            $dto->id = (int) $shipment->getId();
+            $dto->incrementId = $shipment->getIncrementId();
+            $dto->totalQty = (int) $shipment->getTotalQty();
+            $dto->createdAt = $shipment->getCreatedAt();
+
+            // Map tracking numbers
+            foreach ($shipment->getTracksCollection() as $track) {
+                $trackDto = new ShipmentTrack();
+                $trackDto->id = (int) $track->getId();
+                $trackDto->carrier = $track->getCarrierCode();
+                $trackDto->title = $track->getTitle();
+                $trackDto->trackNumber = $track->getTrackNumber();
+                $dto->tracks[] = $trackDto;
+            }
+
+            // Map shipped items
+            foreach ($shipment->getItemsCollection() as $item) {
+                $itemDto = new ShipmentItem();
+                $itemDto->sku = $item->getSku();
+                $itemDto->name = $item->getName();
+                $itemDto->qty = (float) $item->getQty();
+                $dto->items[] = $itemDto;
+            }
+
+            $shipments[] = $dto;
+        }
+
+        return $shipments;
     }
 
     /**

@@ -84,6 +84,73 @@ class JwtService
     }
 
     /**
+     * Generate JWT token for a dedicated API user
+     *
+     * @param \Mage_Api_Model_User $apiUser
+     * @param array<string> $permissions Resource permissions from api_rule
+     * @return string The JWT token
+     * @throws \RuntimeException If JWT secret is not configured
+     */
+    public function generateApiUserToken(\Mage_Api_Model_User $apiUser, array $permissions = []): string
+    {
+        $secret = $this->getSecret();
+        $now = time();
+
+        $payload = [
+            'iss' => $this->getIssuer(),
+            'sub' => 'api_user_' . $apiUser->getId(),
+            'iat' => $now,
+            'exp' => $now + $this->getTokenExpiry(),
+            'api_user_id' => (int) $apiUser->getId(),
+            'username' => $apiUser->getUsername(),
+            'type' => 'api_user',
+            'roles' => ['ROLE_API_USER'],
+            'permissions' => $permissions,
+        ];
+
+        return JWT::encode($payload, $secret, self::ALGORITHM);
+    }
+
+    /**
+     * Load permissions for an API user from api_role + api_rule tables
+     *
+     * @return array<string> e.g. ['orders/read', 'shipments/write', 'products/all']
+     */
+    public function loadApiUserPermissions(\Mage_Api_Model_User $apiUser): array
+    {
+        $permissions = [];
+        $roleIds = $apiUser->getRoles();
+
+        if (empty($roleIds)) {
+            return $permissions;
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $ruleTable = $resource->getTableName('api/rule');
+
+        foreach ($roleIds as $roleId) {
+            $rules = $read->fetchAll(
+                $read->select()
+                    ->from($ruleTable, ['resource_id', 'api_permission'])
+                    ->where('role_id = ?', $roleId)
+                    ->where('role_type = ?', 'G')
+                    ->where('api_permission = ?', 'allow'),
+            );
+
+            foreach ($rules as $rule) {
+                $resourceId = $rule['resource_id'];
+                if ($resourceId === 'all') {
+                    return ['all'];
+                }
+                $permissions[] = $resourceId;
+            }
+        }
+
+        return array_unique($permissions);
+    }
+
+    /**
      * Decode and validate a JWT token
      *
      * @param string $token The JWT token to decode

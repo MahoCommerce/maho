@@ -376,6 +376,16 @@ export default {
             return;
         }
 
+        // Escape HTML to prevent XSS from user-controlled data (names, addresses, etc.)
+        const esc = (str) => {
+            if (str == null) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        };
+
         const formatPrice = (price) => '$' + (parseFloat(price) || 0).toFixed(2);
         const formatDate = (date) => new Date(date).toLocaleDateString('en-AU', {
             day: 'numeric', month: 'long', year: 'numeric'
@@ -383,24 +393,25 @@ export default {
 
         const formatAddress = (addr) => {
             if (!addr) return 'N/A';
-            return `${addr.firstName} ${addr.lastName}<br>
-                ${addr.street?.join(', ') || addr.street || ''}<br>
-                ${addr.city}, ${addr.region || ''} ${addr.postcode}<br>
-                ${addr.countryId}${addr.telephone ? '<br>T: ' + addr.telephone : ''}`;
+            const street = Array.isArray(addr.street) ? addr.street.join(', ') : (addr.street || '');
+            return `${esc(addr.firstName)} ${esc(addr.lastName)}<br>
+                ${esc(street)}<br>
+                ${esc(addr.city)}, ${esc(addr.region || '')} ${esc(addr.postcode)}<br>
+                ${esc(addr.countryId)}${addr.telephone ? '<br>T: ' + esc(addr.telephone) : ''}`;
         };
 
         const items = order.items.filter(i => i.productType !== 'configurable').map(item => `
             <tr>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd;">
-                    ${item.name}<br>
-                    <small style="color: #666;">SKU: ${item.sku}</small>
+                    ${esc(item.name)}<br>
+                    <small style="color: #666;">SKU: ${esc(item.sku)}</small>
                 </td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">
                     ${formatPrice(item.priceInclTax || item.price)}
                 </td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: center;">
-                    ${item.qtyOrdered}
-                    ${item.qtyRefunded > 0 ? `<br><small style="color: #dc2626;">Refunded: ${item.qtyRefunded}</small>` : ''}
+                    ${esc(item.qtyOrdered)}
+                    ${item.qtyRefunded > 0 ? `<br><small style="color: #dc2626;">Refunded: ${esc(item.qtyRefunded)}</small>` : ''}
                 </td>
                 <td style="padding: 8px; border-bottom: 1px solid #ddd; text-align: right;">
                     ${formatPrice(item.rowTotalInclTax || item.rowTotal)}
@@ -429,9 +440,9 @@ export default {
                 </style>
             </head>
             <body>
-                <h1>Order #${order.incrementId}</h1>
+                <h1>Order #${esc(order.incrementId)}</h1>
                 <p style="color: #666;">Order Date: ${formatDate(order.createdAt)}</p>
-                <span class="status">${order.status}</span>
+                <span class="status">${esc(order.status)}</span>
 
                 <div class="grid">
                     <div class="box">
@@ -447,11 +458,11 @@ export default {
                 <div class="grid">
                     <div class="box">
                         <h3>SHIPPING METHOD</h3>
-                        ${order.shippingDescription || 'N/A'}
+                        ${esc(order.shippingDescription || 'N/A')}
                     </div>
                     <div class="box">
                         <h3>PAYMENT METHOD</h3>
-                        ${order.paymentMethodTitle || order.paymentMethod || 'N/A'}
+                        ${esc(order.paymentMethodTitle || order.paymentMethod || 'N/A')}
                     </div>
                 </div>
 

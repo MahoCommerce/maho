@@ -180,7 +180,7 @@
                         status: 'complete',
                         description: 'Login, password reset, JWT tokens',
                         testPage: 'store/login',
-                        endpoints: ['POST /auth/token', 'POST /auth/refresh', 'GET /auth/me', 'POST /auth/forgot-password', 'POST /auth/reset-password']
+                        endpoints: ['POST /auth/token', 'POST /auth/forgot-password', 'POST /auth/reset-password']
                     },
                     {
                         name: 'Wishlist',
@@ -209,13 +209,6 @@
                         description: 'Order management for POS/Admin',
                         testPage: '#',
                         endpoints: ['GET /orders', 'GET /orders/{id}', 'POST /orders', 'invoices', 'shipments']
-                    },
-                    {
-                        name: 'Newsletter',
-                        status: 'complete',
-                        description: 'Newsletter subscription management',
-                        testPage: 'newsletter.html',
-                        endpoints: ['POST /newsletter/subscribe', 'POST /newsletter/unsubscribe', 'GET /newsletter/status']
                     }
                 ],
                 quickTest: {

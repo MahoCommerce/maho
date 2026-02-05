@@ -20,6 +20,9 @@ use Maho\ApiPlatform\ApiResource\CartItem;
 use Maho\ApiPlatform\ApiResource\CartPrices;
 use Maho\ApiPlatform\ApiResource\Address;
 use Maho\ApiPlatform\Service\CartService;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Cart State Provider - Fetches cart data for API Platform
@@ -28,10 +31,13 @@ use Maho\ApiPlatform\Service\CartService;
  */
 final class CartProvider implements ProviderInterface
 {
+    use AuthenticationTrait;
+
     private CartService $cartService;
 
-    public function __construct()
+    public function __construct(Security $security)
     {
+        $this->security = $security;
         $this->cartService = new CartService();
     }
 
@@ -46,6 +52,8 @@ final class CartProvider implements ProviderInterface
         if ($operationName === 'customerCart') {
             $customerId = $context['customer_id'] ?? null;
             if ($customerId) {
+                // Verify the authenticated user matches the requested customer
+                $this->authorizeCustomerAccess((int) $customerId);
                 $quote = $this->cartService->getCustomerCart((int) $customerId);
                 return $quote ? $this->mapToDto($quote) : null;
             }
@@ -58,10 +66,45 @@ final class CartProvider implements ProviderInterface
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
-            $maskedId
+            $maskedId,
         );
 
-        return $quote ? $this->mapToDto($quote) : null;
+        if (!$quote) {
+            return null;
+        }
+
+        // Verify cart ownership for authenticated customers
+        $this->verifyCartAccess($quote);
+
+        return $this->mapToDto($quote);
+    }
+
+    /**
+     * Verify the current user has access to the cart
+     *
+     * - Admins can access any cart
+     * - Customers can only access their own cart
+     * - Guest carts (no customer_id) are accessible via maskedId through public endpoints
+     *
+     * @throws AccessDeniedHttpException If access denied
+     */
+    private function verifyCartAccess(\Mage_Sales_Model_Quote $quote): void
+    {
+        // Admins can access any cart
+        if ($this->isAdmin()) {
+            return;
+        }
+
+        $cartCustomerId = $quote->getCustomerId();
+        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
+
+        // If cart belongs to a customer, verify ownership
+        if ($cartCustomerId) {
+            if ($authenticatedCustomerId === null || (int) $cartCustomerId !== $authenticatedCustomerId) {
+                throw new AccessDeniedHttpException('You can only access your own cart');
+            }
+        }
+        // Guest carts (no customer_id) are allowed - they're accessed via public /guest-carts routes
     }
 
     /**

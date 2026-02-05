@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<layout>
+    <!-- User Management -->
+    <adminhtml_apiplatform_user_index>
+        <reference name="content">
+            <block type="maho_apiplatform/adminhtml_apiplatform_user" name="apiplatform.user"/>
+        </reference>
+    </adminhtml_apiplatform_user_index>
+
+    <adminhtml_apiplatform_user_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="maho_apiplatform/adminhtml_apiplatform_user_grid" name="apiplatform.user.grid"/>
+        </block>
+    </adminhtml_apiplatform_user_grid>
+
+    <adminhtml_apiplatform_user_edit>
+        <reference name="content">
+            <block type="maho_apiplatform/adminhtml_apiplatform_user_edit" name="apiplatform.user.edit"/>
+        </reference>
+        <reference name="left">
+            <block type="maho_apiplatform/adminhtml_apiplatform_user_edit_tabs" name="apiplatform.user.edit.tabs">
+                <block type="maho_apiplatform/adminhtml_apiplatform_user_edit_tab_main" name="apiplatform.user.edit.tab.main"/>
+                <block type="maho_apiplatform/adminhtml_apiplatform_user_edit_tab_role" name="apiplatform.user.edit.tab.role"/>
+                <action method="addTab">
+                    <name>main</name>
+                    <block>apiplatform.user.edit.tab.main</block>
+                </action>
+                <action method="addTab">
+                    <name>role</name>
+                    <block>apiplatform.user.edit.tab.role</block>
+                </action>
+            </block>
+        </reference>
+    </adminhtml_apiplatform_user_edit>
+
+    <!-- Role Management -->
+    <adminhtml_apiplatform_role_index>
+        <reference name="content">
+            <block type="maho_apiplatform/adminhtml_apiplatform_role" name="apiplatform.role"/>
+        </reference>
+    </adminhtml_apiplatform_role_index>
+
+    <adminhtml_apiplatform_role_grid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="maho_apiplatform/adminhtml_apiplatform_role_grid" name="apiplatform.role.grid"/>
+        </block>
+    </adminhtml_apiplatform_role_grid>
+
+    <adminhtml_apiplatform_role_edit>
+        <reference name="content">
+            <block type="maho_apiplatform/adminhtml_apiplatform_role_edit" name="apiplatform.role.edit"/>
+        </reference>
+        <reference name="left">
+            <block type="maho_apiplatform/adminhtml_apiplatform_role_edit_tabs" name="apiplatform.role.edit.tabs">
+                <block type="maho_apiplatform/adminhtml_apiplatform_role_edit_tab_main" name="apiplatform.role.edit.tab.main"/>
+                <block type="maho_apiplatform/adminhtml_apiplatform_role_edit_tab_permissions" name="apiplatform.role.edit.tab.permissions"/>
+                <action method="addTab">
+                    <name>main</name>
+                    <block>apiplatform.role.edit.tab.main</block>
+                </action>
+                <action method="addTab">
+                    <name>permissions</name>
+                    <block>apiplatform.role.edit.tab.permissions</block>
+                </action>
+            </block>
+        </reference>
+    </adminhtml_apiplatform_role_edit>
+</layout>

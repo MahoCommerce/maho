@@ -58,14 +58,18 @@ final class CustomerProvider implements ProviderInterface
         }
 
         if ($operation instanceof CollectionOperationInterface) {
-            // SECURITY: Only admins can list all customers
-            $this->requireAdmin('Listing all customers requires admin access');
+            // SECURITY: Only admins and API users with customers/read can list customers
+            if (!$this->isAdmin() && !$this->isApiUser()) {
+                $this->requireAdmin('Listing all customers requires admin or API user access');
+            }
             return $this->getCollection($context);
         }
 
-        // Single customer lookup - check authorization
+        // Single customer lookup - admins and API users can access any, customers only their own
         $requestedId = (int) $uriVariables['id'];
-        $this->authorizeCustomerAccess($requestedId);
+        if (!$this->isApiUser()) {
+            $this->authorizeCustomerAccess($requestedId);
+        }
 
         return $this->getItem($requestedId);
     }
@@ -99,7 +103,7 @@ final class CustomerProvider implements ProviderInterface
             email: $email,
             telephone: $telephone,
             page: $page,
-            pageSize: $pageSize
+            pageSize: $pageSize,
         );
 
         if (empty($result['customers'])) {
@@ -184,7 +188,7 @@ final class CustomerProvider implements ProviderInterface
     private function mapToDtoForSearch(
         \Mage_Customer_Model_Customer $customer,
         array $defaultBillingIds,
-        array $addressMap
+        array $addressMap,
     ): Customer {
         $dto = new Customer();
         $dto->id = (int) $customer->getId();

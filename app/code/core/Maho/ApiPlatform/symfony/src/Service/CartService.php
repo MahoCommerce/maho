@@ -43,13 +43,15 @@ class CartService
         }
 
         $quote->setIsActive(true);
-        $quote->save();
 
-        // Generate masked ID for guest carts
+        // Generate and set masked ID for guest carts (before save to include in same transaction)
         $maskedId = null;
         if (!$customerId) {
-            $maskedId = $this->generateMaskedId((int)$quote->getId());
+            $maskedId = $this->generateSecureMaskedId();
+            $quote->setData('masked_quote_id', $maskedId);
         }
+
+        $quote->save();
 
         return ['quote' => $quote, 'maskedId' => $maskedId];
     }
@@ -106,11 +108,11 @@ class CartService
             // Calculate discount from coupon if applied
             $discountAmount = 0;
             foreach ($quote->getAllVisibleItems() as $item) {
-                $discountAmount += (float)$item->getDiscountAmount();
+                $discountAmount += (float) $item->getDiscountAmount();
             }
 
             // Calculate grand total
-            $grandTotal = $subtotal - $discountAmount + (float)$quote->getShippingAddress()->getShippingAmount();
+            $grandTotal = $subtotal - $discountAmount + (float) $quote->getShippingAddress()->getShippingAmount();
             $quote->setGrandTotal($grandTotal);
             $quote->setBaseGrandTotal($grandTotal);
         }
@@ -174,7 +176,7 @@ class CartService
         // Add custom options if provided
         if (!empty($options)) {
             $buyRequest->setData('options', $options);
-            \Mage::log("Adding custom options: " . json_encode($options));
+            \Mage::log('Adding custom options: ' . json_encode($options));
         }
 
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
@@ -271,7 +273,7 @@ class CartService
             }
         }
 
-        \Mage::log("Before collectTotals - quote items: " . count($quote->getAllItems()));
+        \Mage::log('Before collectTotals - quote items: ' . count($quote->getAllItems()));
 
         $quote->collectTotals();
 
@@ -281,7 +283,7 @@ class CartService
         // This should NOT be necessary - collectTotals() should handle this automatically
         // If collectTotals didn't work (subtotal still 0), manually calculate totals
         if ($quote->getSubtotal() == 0 || !$quote->getSubtotal()) {
-            \Mage::log("collectTotals failed, manually calculating quote totals");
+            \Mage::log('collectTotals failed, manually calculating quote totals');
             $subtotal = 0;
             foreach ($quote->getAllVisibleItems() as $item) {
                 // Ensure row_total is set
@@ -338,7 +340,7 @@ class CartService
 
         // TODO: HACK - Manually calculate totals if collectTotals() failed
         if ($quote->getSubtotal() == 0 || !$quote->getSubtotal()) {
-            \Mage::log("collectTotals failed after updateItem, manually calculating quote totals");
+            \Mage::log('collectTotals failed after updateItem, manually calculating quote totals');
             $subtotal = 0;
             foreach ($quote->getAllVisibleItems() as $quoteItem) {
                 // Ensure row_total is set
@@ -378,7 +380,7 @@ class CartService
         // Same workaround as addItem() and updateItem()
         // See: CART_PRICING_WORKAROUND.md for more details
         if ($quote->getItemsCount() > 0 && ($quote->getSubtotal() == 0 || !$quote->getSubtotal())) {
-            \Mage::log("collectTotals failed after removeItem, manually calculating quote totals");
+            \Mage::log('collectTotals failed after removeItem, manually calculating quote totals');
             $subtotal = 0;
             foreach ($quote->getAllVisibleItems() as $quoteItem) {
                 // Ensure row_total is set
@@ -538,7 +540,7 @@ class CartService
         $guestCart = \Mage::getModel('sales/quote')->load($guestCartId);
 
         if (!$guestCart->getId()) {
-            throw new \RuntimeException("Guest cart not found");
+            throw new \RuntimeException('Guest cart not found');
         }
 
         $customerCart = $this->getCustomerCart($customerId);
@@ -556,32 +558,46 @@ class CartService
     }
 
     /**
-     * Generate masked ID for cart
+     * Generate cryptographically secure masked ID for cart
      *
-     * @param int $cartId Cart ID
-     * @return string Masked ID
+     * @return string 32-character hex string
      */
-    private function generateMaskedId(int $cartId): string
+    private function generateSecureMaskedId(): string
     {
-        // Simple implementation - in production, use a more secure method
-        return base64_encode("cart_{$cartId}_" . uniqid());
+        return bin2hex(random_bytes(16));
     }
 
     /**
-     * Get cart ID from masked ID
+     * Get cart ID from masked ID via database lookup
      *
      * @param string $maskedId Masked ID
-     * @return int|null Cart ID or null if invalid
+     * @return int|null Cart ID or null if not found
      */
     private function getCartIdFromMaskedId(string $maskedId): ?int
     {
-        // Simple implementation - in production, use database lookup
-        $decoded = base64_decode($maskedId);
-        if (preg_match('/^cart_(\d+)_/', $decoded, $matches)) {
-            return (int)$matches[1];
+        // Security: Only lookup if maskedId looks like a valid hex string
+        if (!preg_match('/^[a-f0-9]{32}$/i', $maskedId)) {
+            // Backwards compatibility: try legacy base64 format
+            $decoded = base64_decode($maskedId, true);
+            if ($decoded && preg_match('/^cart_(\d+)_/', $decoded, $matches)) {
+                return (int) $matches[1];
+            }
+            return null;
         }
 
-        return null;
+        // Database lookup for new secure format
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $quoteTable = $resource->getTableName('sales/quote');
+
+        $quoteId = $read->fetchOne(
+            $read->select()
+                ->from($quoteTable, ['entity_id'])
+                ->where('masked_quote_id = ?', $maskedId)
+                ->where('is_active = ?', 1),
+        );
+
+        return $quoteId ? (int) $quoteId : null;
     }
 
     /**
@@ -646,7 +662,7 @@ class CartService
             // Collect totals before order creation
             $quote->setTotalsCollectedFlag(false);
             $quote->collectTotals()->save();
-            \Mage::log("PlaceOrder - Totals collected and quote saved");
+            \Mage::log('PlaceOrder - Totals collected and quote saved');
 
             // Use adminhtml order create model (allows disabled products, stock overrides, etc.)
             /** @var \Mage_Adminhtml_Model_Sales_Order_Create $orderCreateModel */
@@ -675,7 +691,7 @@ class CartService
                         $billingAddress = $quote->getBillingAddress();
                         $billingAddress->importCustomerAddress($defaultBillingAddress);
                         $billingAddress->setSaveInAddressBook(false);
-                        \Mage::log("PlaceOrder - Set billing address from customer default");
+                        \Mage::log('PlaceOrder - Set billing address from customer default');
                     }
 
                     // Set shipping address from customer's default
@@ -684,21 +700,21 @@ class CartService
                         $shippingAddress = $quote->getShippingAddress();
                         $shippingAddress->importCustomerAddress($defaultShippingAddress);
                         $shippingAddress->setSaveInAddressBook(false);
-                        \Mage::log("PlaceOrder - Set shipping address from customer default");
+                        \Mage::log('PlaceOrder - Set shipping address from customer default');
                     }
                 }
             } else {
                 // Guest checkout
                 $session->setCustomerId(-1);
                 $quote->setCustomerIsGuest(true);
-                \Mage::log("PlaceOrder - Guest checkout mode");
+                \Mage::log('PlaceOrder - Guest checkout mode');
             }
 
             // Initialize with existing quote
             $orderCreateModel->setQuote($quote);
             $orderCreateModel->getQuote()->setTotalsCollectedFlag(true);
             $orderCreateModel->setRecollect(true);
-            \Mage::log("PlaceOrder - OrderCreateModel initialized");
+            \Mage::log('PlaceOrder - OrderCreateModel initialized');
 
             // Import payment data using orderCreateModel to ensure proper availability
             $paymentData = ['method' => $paymentMethod];
@@ -719,10 +735,10 @@ class CartService
             $quote->setBaseToQuoteRate(1);
 
             $orderCreateModel->saveQuote();
-            \Mage::log("PlaceOrder - Quote saved via orderCreateModel");
+            \Mage::log('PlaceOrder - Quote saved via orderCreateModel');
 
             // Create order via admin model
-            \Mage::log("PlaceOrder - About to call createOrder()");
+            \Mage::log('PlaceOrder - About to call createOrder()');
             try {
                 $order = $orderCreateModel->createOrder();
             } catch (\Exception $e) {
@@ -738,13 +754,13 @@ class CartService
                 }
 
                 $errorText = empty($errorMessages) ? $e->getMessage() : implode('; ', $errorMessages);
-                \Mage::log("PlaceOrder - createOrder() failed: " . $errorText);
+                \Mage::log('PlaceOrder - createOrder() failed: ' . $errorText);
                 throw new \RuntimeException('Order creation failed: ' . $errorText);
             }
-            \Mage::log("PlaceOrder - createOrder() returned, checking order...");
+            \Mage::log('PlaceOrder - createOrder() returned, checking order...');
 
             if (!$order || !$order->getId()) {
-                \Mage::log("PlaceOrder - FAILED: Order is null or has no ID");
+                \Mage::log('PlaceOrder - FAILED: Order is null or has no ID');
                 throw new \RuntimeException('Failed to create order');
             }
             \Mage::log("PlaceOrder - Order created successfully: {$order->getIncrementId()} (ID: {$order->getId()})");
@@ -755,10 +771,10 @@ class CartService
             \Mage::log("Order created: {$order->getIncrementId()} (ID: {$order->getId()})");
 
             $result = [
-                'order_id' => (int)$order->getId(),
+                'order_id' => (int) $order->getId(),
                 'increment_id' => $order->getIncrementId(),
                 'status' => $order->getStatus(),
-                'grand_total' => (float)$order->getGrandTotal(),
+                'grand_total' => (float) $order->getGrandTotal(),
                 'invoice' => null,
                 'shipment' => null,
             ];
@@ -768,7 +784,7 @@ class CartService
                 $invoice = $this->createInvoice($order);
 
                 $result['invoice'] = [
-                    'invoice_id' => (int)$invoice->getId(),
+                    'invoice_id' => (int) $invoice->getId(),
                     'increment_id' => $invoice->getIncrementId(),
                 ];
             }
@@ -778,11 +794,11 @@ class CartService
                 $shipment = $this->createShipment($order);
 
                 $result['shipment'] = [
-                    'shipment_id' => (int)$shipment->getId(),
+                    'shipment_id' => (int) $shipment->getId(),
                     'increment_id' => $shipment->getIncrementId(),
                 ];
 
-                \Mage::log("Shipment created - order will auto-transition to complete");
+                \Mage::log('Shipment created - order will auto-transition to complete');
             }
 
             return $result;
@@ -901,7 +917,7 @@ class CartService
      */
     private function getSuperAttributesForSimple(
         \Mage_Catalog_Model_Product $configurableProduct,
-        \Mage_Catalog_Model_Product $simpleProduct
+        \Mage_Catalog_Model_Product $simpleProduct,
     ): array {
         $superAttributes = [];
 
@@ -962,13 +978,13 @@ class CartService
 
             if ($rulePrice !== false && $rulePrice !== null) {
                 \Mage::log("Found catalog rule price {$rulePrice} for product {$productId}, customer group {$customerGroupId}, date {$date}");
-                return (float)$rulePrice;
+                return (float) $rulePrice;
             }
 
             \Mage::log("No catalog rule price found for product {$productId}, customer group {$customerGroupId}, date {$date} (checked rules <= {$date})");
             return null;
         } catch (\Exception $e) {
-            \Mage::log("Error getting catalog rule price: " . $e->getMessage());
+            \Mage::log('Error getting catalog rule price: ' . $e->getMessage());
             return null;
         }
     }
@@ -983,7 +999,7 @@ class CartService
     public function reapplyCatalogRulePrices(\Mage_Sales_Model_Quote $quote): void
     {
         if (!$quote->getCustomerGroupId()) {
-            \Mage::log("No customer group on quote, skipping catalog rule reapplication");
+            \Mage::log('No customer group on quote, skipping catalog rule reapplication');
             return;
         }
 
@@ -1012,7 +1028,7 @@ class CartService
                 $productId,
                 $quote->getCustomerGroupId(),
                 $websiteId,
-                $quote->getStoreId()
+                $quote->getStoreId(),
             );
 
             // Use catalog rule price if it exists and is lower than base price
@@ -1043,12 +1059,12 @@ class CartService
         }
 
         if ($hasChanges) {
-            \Mage::log("Recollecting quote totals after price changes");
+            \Mage::log('Recollecting quote totals after price changes');
             $quote->collectTotals();
 
             // HACK: If collectTotals didn't work (subtotal still 0), manually calculate
             if ($quote->getSubtotal() == 0 || !$quote->getSubtotal()) {
-                \Mage::log("collectTotals failed after reapplying prices, manually calculating totals");
+                \Mage::log('collectTotals failed after reapplying prices, manually calculating totals');
                 $subtotal = 0;
                 foreach ($quote->getAllVisibleItems() as $item) {
                     if (!$item->getRowTotal() || $item->getRowTotal() == 0) {
