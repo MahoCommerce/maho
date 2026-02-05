@@ -31,6 +31,9 @@
     <adminhtml_feedmanager_feed_edit>
         <update handle="feedmanager_default"/>
         <update handle="editor"/>
+        <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/feedmanager-mapping.js</name></action>
+        </reference>
         <reference name="content">
             <block type="feedmanager/adminhtml_feed_edit" name="feedmanager_feed_edit"/>
         </reference>
