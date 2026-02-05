@@ -30,9 +30,9 @@ class Maho_ApiPlatform_Model_Observer
     /**
      * Add deprecation headers to legacy API responses (RFC 8594)
      *
-     * @param Varien_Event_Observer $_observer Observer instance (required by framework)
+     * @param \Maho\Event\Observer $_observer Observer instance (required by framework)
      */
-    public function addDeprecationHeaders(Varien_Event_Observer $_observer): void
+    public function addDeprecationHeaders(\Maho\Event\Observer $_observer): void
     {
         $app = Mage::app();
         if (!$app) {
@@ -51,7 +51,7 @@ class Maho_ApiPlatform_Model_Observer
         // Check if this is a legacy API request
         $isLegacyApi = false;
         foreach (self::LEGACY_API_PATHS as $pattern) {
-            if (strpos($path, $pattern) === 0) {
+            if (str_starts_with($path, $pattern)) {
                 $isLegacyApi = true;
                 break;
             }
@@ -73,8 +73,8 @@ class Maho_ApiPlatform_Model_Observer
         if ($sunsetTimestamp === false) {
             Mage::log(
                 'Invalid legacy_sunset_date configuration: ' . $sunsetDate,
-                Zend_Log::ERR,
-                'maho_apiplatform.log',
+                Mage::LOG_ERROR,
+                'apiplatform.log',
             );
             $sunsetTimestamp = strtotime(Maho_ApiPlatform_Helper_Data::DEFAULT_LEGACY_SUNSET_DATE);
         }
@@ -101,9 +101,9 @@ class Maho_ApiPlatform_Model_Observer
      * Map legacy paths to new API Platform paths
      *
      * @param string $legacyPath The legacy API path
-     * @return string|null The successor API path, or null for unmapped paths
+     * @return string The successor API path
      */
-    private function getSuccessorPath(string $legacyPath): ?string
+    private function getSuccessorPath(string $legacyPath): string
     {
         $mappings = [
             '/api/rest/products' => 'api/v2/products',
@@ -113,7 +113,7 @@ class Maho_ApiPlatform_Model_Observer
         ];
 
         foreach ($mappings as $legacy => $new) {
-            if (strpos($legacyPath, $legacy) === 0) {
+            if (str_starts_with($legacyPath, $legacy)) {
                 return $new;
             }
         }
@@ -124,10 +124,8 @@ class Maho_ApiPlatform_Model_Observer
 
     /**
      * Invalidate API products cache when a product is saved
-     *
-     * @param Varien_Event_Observer $observer
      */
-    public function invalidateProductCache(Varien_Event_Observer $observer): void
+    public function invalidateProductCache(\Maho\Event\Observer $observer): void
     {
         $this->cleanApiProductsCache();
     }
@@ -135,30 +133,24 @@ class Maho_ApiPlatform_Model_Observer
     /**
      * Invalidate API products cache when a category is saved
      * (category changes affect which products appear in listings)
-     *
-     * @param Varien_Event_Observer $observer
      */
-    public function invalidateCategoryCache(Varien_Event_Observer $observer): void
+    public function invalidateCategoryCache(\Maho\Event\Observer $observer): void
     {
         $this->cleanApiProductsCache();
     }
 
     /**
      * Invalidate API products cache when stock is updated
-     *
-     * @param Varien_Event_Observer $observer
      */
-    public function invalidateStockCache(Varien_Event_Observer $observer): void
+    public function invalidateStockCache(\Maho\Event\Observer $observer): void
     {
         $this->cleanApiProductsCache();
     }
 
     /**
      * Invalidate API products cache when prices are updated (catalog rules, etc.)
-     *
-     * @param Varien_Event_Observer $observer
      */
-    public function invalidatePriceCache(Varien_Event_Observer $observer): void
+    public function invalidatePriceCache(\Maho\Event\Observer $observer): void
     {
         $this->cleanApiProductsCache();
     }

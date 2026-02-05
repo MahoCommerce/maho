@@ -89,6 +89,15 @@
         </events>
     </global>
     <frontend>
+        <translate>
+            <modules>
+                <Maho_ApiPlatform>
+                    <files>
+                        <default>Maho_ApiPlatform.csv</default>
+                    </files>
+                </Maho_ApiPlatform>
+            </modules>
+        </translate>
         <routers>
             <maho_apiplatform>
                 <use>standard</use>
@@ -111,6 +120,15 @@
         </routers>
     </admin>
     <adminhtml>
+        <translate>
+            <modules>
+                <Maho_ApiPlatform>
+                    <files>
+                        <default>Maho_ApiPlatform.csv</default>
+                    </files>
+                </Maho_ApiPlatform>
+            </modules>
+        </translate>
         <layout>
             <updates>
                 <maho_apiplatform>
