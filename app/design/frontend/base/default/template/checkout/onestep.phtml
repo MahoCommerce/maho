@@ -1,0 +1,153 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    base_default
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Checkout_Block_Onepage $this */
+$isVirtual = $this->getQuote()->isVirtual();
+$isLoggedIn = $this->isCustomerLoggedIn();
+?>
+<div class="onestep-header">
+    <div class="page-title">
+        <h1><?= $this->__('Checkout') ?></h1>
+    </div>
+    <?php if (!$isLoggedIn): ?>
+    <div class="onestep-login-bar">
+        <span class="onestep-login-text"><?= $this->__('Have an account?') ?></span>
+        <a href="<?= $this->getUrl('customer/account/login', ['_secure' => true, 'referer' => base64_encode($this->getUrl('checkout/onepage'))]) ?>" class="button"><?= $this->__('Login') ?></a>
+        <a href="<?= $this->getUrl('customer/account/create', ['_secure' => true]) ?>" class="button button-secondary"><?= $this->__('Register') ?></a>
+    </div>
+    <?php endif ?>
+</div>
+
+<div class="onestep-checkout" id="onestep-checkout">
+    <!-- Column 1: Address -->
+    <div class="onestep-column onestep-column-address">
+        <div class="onestep-section" id="onestep-billing">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('map-pin') ?><?= $this->__('Billing Address') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-billing">
+                <?= $this->getChildHtml('billing') ?>
+            </div>
+        </div>
+
+        <?php if (!$isVirtual): ?>
+        <div class="onestep-section" id="onestep-shipping" style="display:none;">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('truck') ?><?= $this->__('Shipping Address') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-shipping">
+                <?= $this->getChildHtml('shipping') ?>
+            </div>
+        </div>
+        <?php endif ?>
+    </div>
+
+    <!-- Column 2: Promo Code, Shipping & Payment Methods + Order Summary -->
+    <div class="onestep-column onestep-column-right">
+        <div class="onestep-section" id="onestep-promo">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('tag') ?><?= $this->__('Discounts') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="maho-promo-section">
+                <?= $this->getChildHtml('coupon') ?>
+            </div>
+        </div>
+
+        <?php if (!$isVirtual): ?>
+        <div class="onestep-section" id="onestep-shipping-method">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('package') ?><?= $this->__('Shipping Method') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-shipping_method">
+                <div class="onestep-placeholder" id="shipping-method-placeholder">
+                    <p><?= $this->__('Waiting for address...') ?></p>
+                </div>
+                <?= $this->getChildHtml('shipping_method') ?>
+            </div>
+        </div>
+        <?php endif ?>
+
+        <div class="onestep-section" id="onestep-payment">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('credit-card') ?><?= $this->__('Payment Method') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-payment">
+                <?= $this->getChildHtml('payment') ?>
+                <?php if (!$isVirtual): ?>
+                <div class="onestep-placeholder" id="payment-method-placeholder">
+                    <p><?= $this->__('Waiting for shipping method...') ?></p>
+                </div>
+                <?php endif ?>
+            </div>
+        </div>
+
+        <div class="onestep-section" id="onestep-review">
+            <div class="onestep-section-header">
+                <h2><?= $this->getIconSvg('receipt') ?><?= $this->__('Summary') ?></h2>
+            </div>
+            <div class="onestep-section-content" id="checkout-step-review">
+                <div id="checkout-review-load">
+                    <!-- Review content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="<?= $this->getSkinUrl('js/mage/promocode.js') ?>"></script>
+<script type="text/javascript">
+    // Initialize the one-step checkout
+    const onestepCheckout = new OneStepCheckout({
+        progress: '<?= $this->getUrl('checkout/onepage/progress') ?>',
+        review: '<?= $this->getUrl('checkout/onepage/review') ?>',
+        saveBilling: '<?= $this->getUrl('checkout/onepage/saveBilling') ?>',
+        saveShipping: '<?= $this->getUrl('checkout/onepage/saveShipping') ?>',
+        saveShippingMethod: '<?= $this->getUrl('checkout/onepage/saveShippingMethod') ?>',
+        savePayment: '<?= $this->getUrl('checkout/onepage/savePayment') ?>',
+        saveOrder: '<?= $this->getUrl('checkout/onepage/saveOrder') ?>',
+        successUrl: '<?= $this->getUrl('checkout/onepage/success') ?>',
+        failure: '<?= $this->getUrl('checkout/cart') ?>',
+        estimateBilling: '<?= $this->getUrl('checkout/onepage/estimateBilling') ?>',
+        applyCoupon: '<?= $this->getUrl('checkout/cart/couponPost') ?>',
+        formKey: '<?= Mage::getSingleton('core/session')->getFormKey() ?>',
+        isVirtual: <?= $isVirtual ? 'true' : 'false' ?>,
+        isLoggedIn: <?= $isLoggedIn ? 'true' : 'false' ?>,
+        messages: {
+            agreementsError: <?= Mage::helper('core')->jsonEncode($this->__('Please agree to all the terms and conditions before placing the order.')) ?>,
+            selectMethodsError: <?= Mage::helper('core')->jsonEncode($this->__('Please select shipping and payment methods before placing your order.')) ?>,
+            selectShippingMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a shipping method.')) ?>,
+            selectPaymentMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a payment method.')) ?>,
+            genericError: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred while placing your order. Please try again.')) ?>
+        }
+    });
+
+    // Initialize promo code handling
+    new MahoPromoCode({
+        applyUrl: onestepCheckout.urls.applyCoupon,
+        formKey: onestepCheckout.formKey,
+        elements: {
+            input: 'maho-promo-code',
+            applyBtn: 'maho-promo-apply',
+            message: 'maho-promo-message',
+            codesContainer: 'maho-promo-section'
+        },
+        messages: {
+            emptyCode: <?= Mage::helper('core')->jsonEncode($this->__('Please enter a promo code.')) ?>,
+            applying: <?= Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>,
+            error: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>
+        },
+        successMessageTimeout: 2000,
+        onSuccess: () => {
+            onestepCheckout.refreshAfterDiscount();
+        },
+        onRemoveSuccess: () => {
+            onestepCheckout.refreshAfterDiscount();
+        }
+    });
+</script>

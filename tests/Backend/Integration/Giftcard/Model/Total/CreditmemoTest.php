@@ -267,4 +267,68 @@ describe('Creditmemo Total - Grand Total Boundaries', function () {
         expect((float) $creditmemo->getGrandTotal())->toBeGreaterThanOrEqual(0);
         expect((float) $creditmemo->getBaseGrandTotal())->toBeGreaterThanOrEqual(0);
     });
+
+    test('caps gift card refund at original amount used when creditmemo total exceeds it', function () {
+        // Scenario: Order had $192.60 total, paid partially with $100 gift card
+        // but grand_total was 0 (bug in original order - perhaps discount was applied)
+        // Creditmemo for full order ($192.60) should NOT refund more than $100 to gift card
+        $order = Mage::getModel('sales/order');
+        $order->setGiftcardAmount(100.00);  // Only $100 was used from gift card
+        $order->setBaseGiftcardAmount(100.00);
+        $order->setGrandTotal(0.00);  // Order grand total was 0
+        $order->setBaseSubtotal(160.00);
+        $order->setBaseShippingAmount(5.00);
+        $order->setBaseTaxAmount(27.60);
+
+        $creditmemo = Mage::getModel('sales/order_creditmemo');
+        $creditmemo->setOrder($order);
+        // Full refund of order totals
+        $creditmemo->setGrandTotal(192.60);
+        $creditmemo->setBaseGrandTotal(192.60);
+        $creditmemo->setSubtotal(160.00);
+        $creditmemo->setBaseSubtotal(160.00);
+        $creditmemo->setShippingAmount(5.00);
+        $creditmemo->setBaseShippingAmount(5.00);
+        $creditmemo->setTaxAmount(27.60);
+        $creditmemo->setBaseTaxAmount(27.60);
+
+        $total = Mage::getModel('giftcard/total_creditmemo');
+        $total->collect($creditmemo);
+
+        // Gift card refund must be capped at $100 (the original amount used)
+        // NOT $192.60 (the full creditmemo amount)
+        $giftcardRefund = abs((float) $creditmemo->getBaseGiftcardAmount());
+        expect($giftcardRefund)->toBe(100.00);
+    });
+
+    test('caps gift card refund when order fully paid by gift card with remaining balance', function () {
+        // Gift card with $150 balance, $100 used on order, $50 remaining
+        // Creditmemo should refund max $100, not the full creditmemo amount
+        $order = Mage::getModel('sales/order');
+        $order->setGiftcardAmount(100.00);
+        $order->setBaseGiftcardAmount(100.00);
+        $order->setGrandTotal(0.00);
+        $order->setBaseSubtotal(80.00);
+        $order->setBaseShippingAmount(10.00);
+        $order->setBaseTaxAmount(10.00);
+
+        $creditmemo = Mage::getModel('sales/order_creditmemo');
+        $creditmemo->setOrder($order);
+        // Full refund
+        $creditmemo->setGrandTotal(100.00);
+        $creditmemo->setBaseGrandTotal(100.00);
+        $creditmemo->setSubtotal(80.00);
+        $creditmemo->setBaseSubtotal(80.00);
+        $creditmemo->setShippingAmount(10.00);
+        $creditmemo->setBaseShippingAmount(10.00);
+        $creditmemo->setTaxAmount(10.00);
+        $creditmemo->setBaseTaxAmount(10.00);
+
+        $total = Mage::getModel('giftcard/total_creditmemo');
+        $total->collect($creditmemo);
+
+        // Gift card refund should be exactly $100
+        $giftcardRefund = abs((float) $creditmemo->getBaseGiftcardAmount());
+        expect($giftcardRefund)->toBe(100.00);
+    });
 });

@@ -6,13 +6,13 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.13';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.13';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.13';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.13';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.13';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.13';
-import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.13';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.16';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.16';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.16';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.16';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.16';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.16';
+import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.16';
 import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
 
 export {

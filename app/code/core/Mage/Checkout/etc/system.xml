@@ -44,6 +44,15 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </minimal_layout>
+                        <onestep_checkout_enabled translate="label comment">
+                            <label>Enable One-Step Checkout</label>
+                            <comment>Displays all checkout steps on a single page in a 2-column layout</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </onestep_checkout_enabled>
                         <guest_checkout translate="label">
                             <label>Allow Guest Checkout</label>
                             <frontend_type>boolean</frontend_type>
@@ -52,15 +61,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </guest_checkout>
-                        <redirect_register translate="label">
-                            <label>Use Separate Register Step</label>
-                            <comment><![CDATA["If enabled, customers choosing to register during checkout will be redirected to the customer/account/create page.<br />Note: If email confirmation is required, users won't be able to complete the order before confirming their email."]]></comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>15</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </redirect_register>
                         <enable_agreements translate="label">
                             <label>Enable Terms and Conditions</label>
                             <frontend_type>boolean</frontend_type>
@@ -117,14 +117,15 @@
                 </cart>
 
                 <cart_link translate="label">
-                    <label>My Cart Link</label>
+                    <label>Cart Item Counter</label>
                     <sort_order>3</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
-                        <use_qty translate="label">
-                            <label>Display Cart Summary</label>
+                        <use_qty translate="label comment">
+                            <label>Count Method</label>
+                            <comment>Controls how the item count is calculated in the cart icon badge.</comment>
                             <frontend_type>select</frontend_type>
                             <source_model>checkout/config_source_cart_summary</source_model>
                             <sort_order>1</sort_order>
@@ -134,32 +135,6 @@
                         </use_qty>
                     </fields>
                 </cart_link>
-
-                <sidebar translate="label">
-                    <label>Shopping Cart Sidebar</label>
-                    <sort_order>4</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <display translate="label">
-                            <label>Display Shopping Cart Sidebar</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </display>
-                        <count translate="label">
-                            <label>Maximum Display Recently Added Item(s)</label>
-                            <sort_order>2</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><display>1</display></depends>
-                        </count>
-                    </fields>
-                </sidebar>
 
                 <payment_failed translate="label">
                     <label>Payment Failed Emails</label>

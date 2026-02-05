@@ -14,7 +14,7 @@
          <sales>
             <children>
                 <checkoutagreement translate="title" module="checkout">
-                    <sort_order>100</sort_order>
+                    <sort_order>510</sort_order>
                     <title>Terms and Conditions</title>
                     <action>adminhtml/checkout_agreement/</action>
                 </checkoutagreement>
