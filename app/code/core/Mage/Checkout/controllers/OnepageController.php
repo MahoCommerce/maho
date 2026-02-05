@@ -185,10 +185,32 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
             $this->_redirect('checkout/cart');
             return;
         }
+
+        // Redirect to login if guest checkout is disabled and customer is not logged in
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()
+            && !Mage::helper('checkout')->isAllowedGuestCheckout($quote)
+        ) {
+            Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('checkout/onepage', ['_secure' => true]));
+            $this->_redirect('customer/account/login');
+            return;
+        }
+
         Mage::getSingleton('checkout/session')->setCartWasUpdated(false);
         Mage::getSingleton('customer/session')->setBeforeAuthUrl(Mage::getUrl('*/*/*', ['_secure' => true]));
         $this->getOnepage()->initCheckout();
-        $this->loadLayout();
+
+        if (Mage::getStoreConfigFlag('checkout/options/onestep_checkout_enabled')) {
+            $this->loadLayout(['default', 'checkout_onepage_index', 'checkout_onepage_index_onestep']);
+        } else {
+            $this->loadLayout();
+        }
+
+        // Set checkout method to guest for non-logged-in users
+        // Must be called AFTER loadLayout() because Billing block's _construct() overwrites step data
+        if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
+            $this->getOnepage()->saveCheckoutMethod(Mage_Checkout_Model_Type_Onepage::METHOD_GUEST);
+        }
+
         $this->_initLayoutMessages('customer/session');
         $this->getLayout()->getBlock('head')->setTitle($this->__('Checkout'));
         $this->renderLayout();
@@ -387,6 +409,65 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     }
 
     /**
+     * Save partial billing address for shipping estimation (one-step checkout)
+     *
+     * This action saves billing address fields to the quote without requiring
+     * all fields to be valid. Used for shipping rate estimation in one-step checkout.
+     */
+    public function estimateBillingAction(): void
+    {
+        if ($this->_expireAjax()) {
+            return;
+        }
+
+        if (!$this->_validateFormKey()) {
+            return;
+        }
+
+        if (!$this->getRequest()->isPost()) {
+            return;
+        }
+
+        $data = $this->getRequest()->getPost('billing', []);
+        $quote = $this->getOnepage()->getQuote();
+
+        // Save to billing address
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddress->addData($data);
+        $billingAddress->implodeStreetAddress();
+
+        // If using billing for shipping, also set shipping address
+        $useForShipping = $data['use_for_shipping'] ?? 1;
+        if ($useForShipping && !$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+
+            // Remove fields that should not be copied to shipping address
+            // address_id is the quote address entity ID - copying it would overwrite the shipping address identity
+            $shippingData = $data;
+            unset($shippingData['address_id']);
+
+            $shippingAddress->setSameAsBilling(1)
+                ->addData($shippingData)
+                ->implodeStreetAddress()
+                ->setCollectShippingRates(true);
+        }
+
+        // collectTotals() runs all total collectors including shipping,
+        // which properly calculates item qty before collecting rates
+        $quote->collectTotals()->save();
+
+        $result = [
+            'success' => true,
+            'update_section' => [
+                'name' => 'shipping-method',
+                'html' => $this->_getShippingMethodsHtml(),
+            ],
+        ];
+
+        $this->_prepareDataJSON($result);
+    }
+
+    /**
      * Shipping address save action
      */
     public function saveShippingAction(): void
@@ -556,82 +637,97 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         }
 
         $result = [];
+        $redirectUrl = null;
+
         try {
-            $requiredAgreements = Mage::helper('checkout')->getRequiredAgreementIds();
-            if ($requiredAgreements) {
-                $postedAgreements = array_keys($this->getRequest()->getPost('agreement', []));
-                $diff = array_diff($requiredAgreements, $postedAgreements);
-                if ($diff) {
-                    $result['success'] = false;
-                    $result['error'] = true;
-                    $result['error_messages'] = $this->__('Please agree to all the terms and conditions before placing the order.');
-                    $this->_prepareDataJSON($result);
-                    return;
+            try {
+                $requiredAgreements = Mage::helper('checkout')->getRequiredAgreementIds();
+                if ($requiredAgreements) {
+                    $postedAgreements = array_keys($this->getRequest()->getPost('agreement', []));
+                    $diff = array_diff($requiredAgreements, $postedAgreements);
+                    if ($diff) {
+                        $result['success'] = false;
+                        $result['error'] = true;
+                        $result['error_messages'] = $this->__('Please agree to all the terms and conditions before placing the order.');
+                        $this->_prepareDataJSON($result);
+                        return;
+                    }
                 }
+
+                $data = $this->getRequest()->getPost('payment', []);
+                if ($data) {
+                    $data['checks'] = Mage_Payment_Model_Method_Abstract::CHECK_USE_CHECKOUT
+                        | Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_COUNTRY
+                        | Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_CURRENCY
+                        | Mage_Payment_Model_Method_Abstract::CHECK_ORDER_TOTAL_MIN_MAX
+                        | Mage_Payment_Model_Method_Abstract::CHECK_ZERO_TOTAL;
+                    $this->getOnepage()->getQuote()->getPayment()->importData($data);
+                }
+
+                $this->getOnepage()->saveOrder();
+
+                $redirectUrl = $this->getOnepage()->getCheckout()->getRedirectUrl();
+                $result['success'] = true;
+                $result['error']   = false;
+            } catch (Mage_Payment_Model_Info_Exception $e) {
+                $message = $e->getMessage();
+                if (!empty($message)) {
+                    $result['error_messages'] = $message;
+                }
+                $result['goto_section'] = 'payment';
+                $result['update_section'] = [
+                    'name' => 'payment-method',
+                    'html' => $this->_getPaymentMethodsHtml(),
+                ];
+            } catch (Mage_Core_Exception $e) {
+                Mage::logException($e);
+                Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
+                $result['success'] = false;
+                $result['error'] = true;
+                $result['error_messages'] = $e->getMessage();
+
+                $gotoSection = $this->getOnepage()->getCheckout()->getGotoSection();
+                if ($gotoSection) {
+                    $result['goto_section'] = $gotoSection;
+                    $this->getOnepage()->getCheckout()->setGotoSection(null);
+                }
+                $updateSection = $this->getOnepage()->getCheckout()->getUpdateSection();
+                if ($updateSection) {
+                    if (isset($this->_sectionUpdateFunctions[$updateSection])) {
+                        $updateSectionFunction = $this->_sectionUpdateFunctions[$updateSection];
+                        $result['update_section'] = [
+                            'name' => $updateSection,
+                            'html' => $this->$updateSectionFunction(),
+                        ];
+                    }
+                    $this->getOnepage()->getCheckout()->setUpdateSection(null);
+                }
+            } catch (Exception $e) {
+                Mage::logException($e);
+                Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
+                $result['success']  = false;
+                $result['error']    = true;
+                $result['error_messages'] = $this->__('There was an error processing your order. Please contact us or try again later.');
             }
 
-            $data = $this->getRequest()->getPost('payment', []);
-            if ($data) {
-                $data['checks'] = Mage_Payment_Model_Method_Abstract::CHECK_USE_CHECKOUT
-                    | Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_COUNTRY
-                    | Mage_Payment_Model_Method_Abstract::CHECK_USE_FOR_CURRENCY
-                    | Mage_Payment_Model_Method_Abstract::CHECK_ORDER_TOTAL_MIN_MAX
-                    | Mage_Payment_Model_Method_Abstract::CHECK_ZERO_TOTAL;
-                $this->getOnepage()->getQuote()->getPayment()->importData($data);
+            try {
+                $this->getOnepage()->getQuote()->save();
+            } catch (Throwable $e) {
+                Mage::logException($e);
             }
 
-            $this->getOnepage()->saveOrder();
-
-            $redirectUrl = $this->getOnepage()->getCheckout()->getRedirectUrl();
-            $result['success'] = true;
-            $result['error']   = false;
-        } catch (Mage_Payment_Model_Info_Exception $e) {
-            $message = $e->getMessage();
-            if (!empty($message)) {
-                $result['error_messages'] = $message;
+            /**
+             * when there is redirect to third party, we don't want to save order yet.
+             * we will save the order in return action.
+             */
+            if ($redirectUrl) {
+                $result['redirect'] = $redirectUrl;
             }
-            $result['goto_section'] = 'payment';
-            $result['update_section'] = [
-                'name' => 'payment-method',
-                'html' => $this->_getPaymentMethodsHtml(),
-            ];
-        } catch (Mage_Core_Exception $e) {
+        } catch (Throwable $e) {
             Mage::logException($e);
-            Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
             $result['success'] = false;
             $result['error'] = true;
-            $result['error_messages'] = $e->getMessage();
-
-            $gotoSection = $this->getOnepage()->getCheckout()->getGotoSection();
-            if ($gotoSection) {
-                $result['goto_section'] = $gotoSection;
-                $this->getOnepage()->getCheckout()->setGotoSection(null);
-            }
-            $updateSection = $this->getOnepage()->getCheckout()->getUpdateSection();
-            if ($updateSection) {
-                if (isset($this->_sectionUpdateFunctions[$updateSection])) {
-                    $updateSectionFunction = $this->_sectionUpdateFunctions[$updateSection];
-                    $result['update_section'] = [
-                        'name' => $updateSection,
-                        'html' => $this->$updateSectionFunction(),
-                    ];
-                }
-                $this->getOnepage()->getCheckout()->setUpdateSection(null);
-            }
-        } catch (Exception $e) {
-            Mage::logException($e);
-            Mage::helper('checkout')->sendPaymentFailedEmail($this->getOnepage()->getQuote(), $e->getMessage());
-            $result['success']  = false;
-            $result['error']    = true;
             $result['error_messages'] = $this->__('There was an error processing your order. Please contact us or try again later.');
-        }
-        $this->getOnepage()->getQuote()->save();
-        /**
-         * when there is redirect to third party, we don't want to save order yet.
-         * we will save the order in return action.
-         */
-        if (isset($redirectUrl)) {
-            $result['redirect'] = $redirectUrl;
         }
 
         $this->_prepareDataJSON($result);
@@ -658,8 +754,7 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     {
         return Mage::getSingleton('customer/session')->isLoggedIn()
             || $this->getRequest()->getActionName() == 'index'
-            || Mage::helper('checkout')->isAllowedGuestCheckout($this->getOnepage()->getQuote())
-            || !Mage::helper('checkout')->isRedirectRegisterStep();
+            || Mage::helper('checkout')->isAllowedGuestCheckout($this->getOnepage()->getQuote());
     }
 
     /**

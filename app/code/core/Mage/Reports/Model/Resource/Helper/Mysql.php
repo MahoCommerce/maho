@@ -95,13 +95,13 @@ class Mage_Reports_Model_Resource_Helper_Mysql extends Mage_Core_Model_Resource_
         );
         $cols['prevStoreId'] = new Maho\Db\Expr('(@prevStoreId := t.`store_id`)');
         $cols['prevPeriod']  = new Maho\Db\Expr("(@prevPeriod := {$periodCol})");
-        $ratingSubSelect->from($periodSubSelect, $cols);
+        $ratingSubSelect->from(['t' => $periodSubSelect], $cols);
 
         $cols               = $columns;
         $cols['period']     = $periodCol;
         $cols[$column]      = 't.' . $column;
         $cols['rating_pos'] = 't.rating_pos';
-        $ratingSelect->from($ratingSubSelect, $cols);
+        $ratingSelect->from(['t' => $ratingSubSelect], $cols);
 
         $sql = $ratingSelect->insertFromSelect($aggregationTable, array_keys($cols));
         $adapter->query("SET @pos = 0, @prevStoreId = -1, @prevPeriod = '0000-00-00'");

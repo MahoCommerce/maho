@@ -33,32 +33,32 @@ class Maho_Giftcard_Model_Total_Creditmemo extends Mage_Sales_Model_Order_Credit
         $baseGrandTotal = (float) $creditmemo->getBaseGrandTotal();
         $grandTotal = (float) $creditmemo->getGrandTotal();
 
+        // Calculate how much gift card has already been refunded in previous credit memos
+        $baseGiftcardRefunded = 0;
+        $giftcardRefunded = 0;
+        foreach ($order->getCreditmemosCollection() as $previousCreditmemo) {
+            if ($previousCreditmemo->getId() && $previousCreditmemo->getId() != $creditmemo->getId()) {
+                $baseGiftcardRefunded += abs((float) $previousCreditmemo->getBaseGiftcardAmount());
+                $giftcardRefunded += abs((float) $previousCreditmemo->getGiftcardAmount());
+            }
+        }
+
+        // Calculate remaining gift card amount that can be refunded
+        $baseGiftcardRemaining = $orderBaseGiftcardAmount - $baseGiftcardRefunded;
+        $giftcardRemaining = $orderGiftcardAmount - $giftcardRefunded;
+
+        if ($baseGiftcardRemaining <= 0) {
+            return $this;
+        }
+
         if ($orderWasFullyPaidByGiftcard) {
-            // For orders fully paid by gift card, the ENTIRE credit memo amount
-            // goes back to the gift card since there's no other payment method
-            $baseGiftcardToRefund = $baseGrandTotal;
-            $giftcardToRefund = $grandTotal;
+            // For orders fully paid by gift card, refund the credit memo amount
+            // but never more than what remains of the original gift card amount
+            $baseGiftcardToRefund = min($baseGrandTotal, $baseGiftcardRemaining);
+            $giftcardToRefund = min($grandTotal, $giftcardRemaining);
         } else {
             // For partial gift card orders, calculate proportional refund
             // based on how much of the order total is being refunded
-
-            // Calculate how much gift card has already been refunded in previous credit memos
-            $baseGiftcardRefunded = 0;
-            $giftcardRefunded = 0;
-            foreach ($order->getCreditmemosCollection() as $previousCreditmemo) {
-                if ($previousCreditmemo->getId() && $previousCreditmemo->getId() != $creditmemo->getId()) {
-                    $baseGiftcardRefunded += abs((float) $previousCreditmemo->getBaseGiftcardAmount());
-                    $giftcardRefunded += abs((float) $previousCreditmemo->getGiftcardAmount());
-                }
-            }
-
-            // Calculate remaining gift card amount that can be refunded
-            $baseGiftcardRemaining = $orderBaseGiftcardAmount - $baseGiftcardRefunded;
-            $giftcardRemaining = $orderGiftcardAmount - $giftcardRefunded;
-
-            if ($baseGiftcardRemaining <= 0) {
-                return $this;
-            }
 
             // Calculate ratio based on order total (before gift card)
             $orderBaseTotal = abs((float) $order->getBaseSubtotal())

@@ -110,7 +110,8 @@ class Mage_Checkout_Model_Type_Onepage
         $customerSession = $this->getCustomerSession();
         if (is_array($checkout->getStepData())) {
             foreach (array_keys($checkout->getStepData()) as $step) {
-                if (!($step === 'login' || $customerSession->isLoggedIn() && $step === 'billing')) {
+                // Only billing is allowed initially, other steps unlock as checkout progresses
+                if ($step !== 'billing') {
                     $checkout->setStepData($step, 'allow', false);
                 }
             }

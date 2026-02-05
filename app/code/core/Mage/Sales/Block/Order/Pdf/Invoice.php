@@ -174,6 +174,22 @@ class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Sales_Block_Order_Pdf_Abst
             ];
         }
 
+        // Gift Card
+        if (abs((float) $this->_invoice->getGiftcardAmount()) >= 0.01) {
+            $label = $this->__('Gift Card');
+            $giftcardCodes = $this->_order->getGiftcardCodes();
+            if ($giftcardCodes) {
+                $codesArray = json_decode($giftcardCodes, true);
+                if (is_array($codesArray) && $codesArray !== []) {
+                    $label .= ' (' . implode(', ', array_keys($codesArray)) . ')';
+                }
+            }
+            $totals[] = [
+                'label' => $label,
+                'value' => $this->formatPrice(-abs($this->_invoice->getGiftcardAmount())),
+            ];
+        }
+
         // Grand Total
         $totals[] = [
             'label' => $this->__('Grand Total'),

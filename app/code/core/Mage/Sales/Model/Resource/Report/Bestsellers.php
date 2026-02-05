@@ -189,8 +189,13 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 [],
             );
 
-            if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('source_table.created_at >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('source_table.created_at <= ?', $to);
             }
 
             $select->useStraightJoin();  // important!
