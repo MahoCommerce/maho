@@ -331,8 +331,10 @@ class Maho_FeedManager_Model_Uploader
         $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 300]);
 
         $response = $client->request('POST', $url, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $accessToken,
+            ],
             'body' => [
-                'access_token' => $accessToken,
                 'update_type' => 'CREATE_OR_UPDATE',
                 'file' => $feedContent,
             ],
@@ -555,9 +557,13 @@ class Maho_FeedManager_Model_Uploader
         }
 
         try {
-            $url = "https://graph.facebook.com/v18.0/{$catalogId}?access_token={$accessToken}";
+            $url = "https://graph.facebook.com/v18.0/{$catalogId}";
             $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
-            $response = $client->request('GET', $url);
+            $response = $client->request('GET', $url, [
+                'headers' => [
+                    'Authorization' => 'Bearer ' . $accessToken,
+                ],
+            ]);
 
             if ($response->getStatusCode() === 200) {
                 $data = $response->toArray();
