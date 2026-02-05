@@ -206,3 +206,44 @@
 .feedmanager-btn-secondary:hover {
     background: #f5f5f5;
 }
+
+/* Feed Generator Dialog */
+.feed-generator-dialog {
+    width: 450px;
+    height: auto;
+
+    .status {
+        margin-bottom: 16px;
+    }
+
+    .progress-container {
+        margin-bottom: 8px;
+    }
+
+    .progress-bar-bg {
+        height: 8px;
+        background: #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #8BC34A);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+        width: 0%;
+    }
+
+    .progress-text {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #666;
+    }
+
+    .error-msg,
+    .success-msg,
+    .notice-msg {
+        margin: 0;
+    }
+}

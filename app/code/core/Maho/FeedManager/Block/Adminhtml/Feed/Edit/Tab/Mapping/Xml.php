@@ -147,7 +147,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     if (node.children && node.children.length > 0) {
                         html += "<div class=\"" + nodeClass + "\" style=\"padding-left: " + indent + "px;\" onclick=\"XmlBuilder.selectNode(\'" + itemPath + "\')\" data-path=\"" + itemPath + "\">";
                         html += "<span class=\"xml-toggle\" onclick=\"XmlBuilder.toggleNode(event, \'" + itemPath + "\')\">&blacktriangledown;</span> ";
-                        html += "<span class=\"xml-tag\">&lt;" + this.escapeHtml(node.tag) + "&gt;</span>";
+                        html += "<span class=\"xml-tag\">&lt;" + escapeHtml(node.tag) + "&gt;</span>";
                         if (node.cdata) html += " <span class=\"xml-badge\">CDATA</span>";
                         html += "</div>";
                         html += "<div class=\"xml-children\" id=\"xml-children-" + itemPath.replace(/\./g, "-") + "\">";
@@ -155,7 +155,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         html += "</div>";
                     } else {
                         html += "<div class=\"" + nodeClass + "\" style=\"padding-left: " + indent + "px;\" onclick=\"XmlBuilder.selectNode(\'" + itemPath + "\')\" data-path=\"" + itemPath + "\">";
-                        html += "<span class=\"xml-tag\">&lt;" + this.escapeHtml(node.tag) + "&gt;</span>";
+                        html += "<span class=\"xml-tag\">&lt;" + escapeHtml(node.tag) + "&gt;</span>";
                         if (node.cdata) html += " <span class=\"xml-badge\">CDATA</span>";
                         if (node.optional) html += " <span class=\"xml-badge optional\">optional</span>";
                         html += "</div>";
@@ -179,7 +179,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
 
                 var html = "<div style=\"margin-bottom: 15px;\">" +
                     "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Tag Name') . '</label>" +
-                    "<input type=\"text\" class=\"input-text\" value=\"" + this.escapeHtml(node.tag) + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'tag\', this.value)\" style=\"width: 100%;\" placeholder=\"g:id\">" +
+                    "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(node.tag, true) + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'tag\', this.value)\" style=\"width: 100%;\" placeholder=\"g:id\">" +
                     "</div>";
 
                 // Show element properties if no children array, group properties if children array exists (even if empty)
@@ -194,26 +194,26 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Source Value') . '</label>";
 
                     if (node.source_type === "attribute" || !node.source_type) {
-                        var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + this.escapeHtml(node.source_value || "") + "\""), "value=\"" + this.escapeHtml(node.source_value || "") + "\" selected");
+                        var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + escapeHtml(node.source_value || "", true) + "\""), "value=\"" + escapeHtml(node.source_value || "", true) + "\" selected");
                         html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">" + selectHtml + "</select>";
                     } else if (node.source_type === "rule") {
                         html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
                         html += "<option value=\"\">' . $this->__('-- Select Rule --') . '</option>";
                         for (var ruleCode in this.ruleOptions) {
                             var selected = (node.source_value === ruleCode) ? " selected" : "";
-                            html += "<option value=\"" + this.escapeHtml(ruleCode) + "\"" + selected + ">" + this.escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
+                            html += "<option value=\"" + escapeHtml(ruleCode, true) + "\"" + selected + ">" + escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
                         }
                         html += "</select>";
                     } else if (node.source_type === "taxonomy") {
                         html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
                         for (var platform in this.taxonomyPlatforms) {
                             var selected = (node.source_value === platform) ? " selected" : "";
-                            html += "<option value=\"" + this.escapeHtml(platform) + "\"" + selected + ">" + this.escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
+                            html += "<option value=\"" + escapeHtml(platform, true) + "\"" + selected + ">" + escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
                         }
                         html += "</select>";
                     } else {
                         var placeholder = node.source_type === "combined" ? "{{name}} - {{sku}}" : "";
-                        html += "<input type=\"text\" class=\"input-text\" value=\"" + this.escapeHtml(node.source_value || "") + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"width: 100%;\">";
+                        html += "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(node.source_value || "", true) + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"width: 100%;\">";
                     }
 
                     html += "</div>" +
@@ -564,14 +564,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     // Extract just the error message, not the full verbose output
                     var match = errorText.match(/error[^:]*:\s*(.+?)(?:\n|$)/i);
                     var shortError = match ? match[1].trim() : "' . $this->__('Invalid XML structure') . '";
-                    status.innerHTML = \'<span style="color: #c62828;">&#10008; \' + this.escapeHtml(shortError) + \'</span>\';
+                    status.innerHTML = \'<span style="color: #c62828;">&#10008; \' + escapeHtml(shortError) + \'</span>\';
                 } else {
                     status.innerHTML = \'<span style="color: #2e7d32;">&#10004; ' . $this->__('Valid XML') . '</span>\';
                 }
-            },
-
-            escapeHtml: function(str) {
-                return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
             }
         };
 

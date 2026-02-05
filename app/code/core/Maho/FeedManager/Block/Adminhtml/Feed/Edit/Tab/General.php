@@ -262,11 +262,11 @@ const FeedUploader = {
             }
             if (data.success) {
                 if (status) {
-                    status.innerHTML = '<span class="fm-status-success">✓ ' + this.escapeHtml(data.message || '{$success}') + '</span>';
+                    status.innerHTML = '<span class="fm-status-success">✓ ' + escapeHtml(data.message || '{$success}') + '</span>';
                 }
             } else {
                 if (status) {
-                    status.innerHTML = '<span class="fm-status-error">✗ ' + this.escapeHtml(data.message || '{$failed}') + '</span>';
+                    status.innerHTML = '<span class="fm-status-error">✗ ' + escapeHtml(data.message || '{$failed}') + '</span>';
                 }
             }
         })
@@ -276,14 +276,9 @@ const FeedUploader = {
                 btn.querySelector('span span span').textContent = '{$uploadNow}';
             }
             if (status) {
-                status.innerHTML = '<span class="fm-status-error">✗ ' + this.escapeHtml(error.message || '{$failed}') + '</span>';
+                status.innerHTML = '<span class="fm-status-error">✗ ' + escapeHtml(error.message || '{$failed}') + '</span>';
             }
         });
-    },
-    escapeHtml: function(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 };
 </script>

@@ -142,7 +142,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
 
                 // Column name
                 var tdName = document.createElement("td");
-                tdName.innerHTML = "<input type=\"text\" class=\"input-text fm-input-full\" value=\"" + this.escapeHtml(col.name || "") + "\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'name\', this.value)\">";
+                tdName.innerHTML = "<input type=\"text\" class=\"input-text fm-input-full\" value=\"" + escapeHtml(col.name || "", true) + "\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'name\', this.value)\">";
                 tr.appendChild(tdName);
 
                 // Source type
@@ -159,14 +159,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 // Source value
                 var tdValue = document.createElement("td");
                 if (col.source_type === "attribute" || col.source_type === "custom_field" || !col.source_type) {
-                    var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + this.escapeHtml(col.source_value || "") + "\""), "value=\"" + this.escapeHtml(col.source_value || "") + "\" selected");
+                    var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + escapeHtml(col.source_value || "", true) + "\""), "value=\"" + escapeHtml(col.source_value || "", true) + "\" selected");
                     tdValue.innerHTML = "<select class=\"fm-input-full\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\">" + selectHtml + "</select>";
                 } else if (col.source_type === "rule") {
                     var ruleSelectHtml = "<select class=\"fm-input-full\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\">";
                     ruleSelectHtml += "<option value=\"\">' . addslashes($this->__('-- Select Rule --')) . '</option>";
                     for (var ruleCode in this.ruleOptions) {
                         var selected = (col.source_value === ruleCode) ? " selected" : "";
-                        ruleSelectHtml += "<option value=\"" + this.escapeHtml(ruleCode) + "\"" + selected + ">" + this.escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
+                        ruleSelectHtml += "<option value=\"" + escapeHtml(ruleCode, true) + "\"" + selected + ">" + escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
                     }
                     ruleSelectHtml += "</select>";
                     tdValue.innerHTML = ruleSelectHtml;
@@ -174,13 +174,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                     var taxSelectHtml = "<select class=\"fm-input-full\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\">";
                     for (var platform in this.taxonomyPlatforms) {
                         var selected = (col.source_value === platform) ? " selected" : "";
-                        taxSelectHtml += "<option value=\"" + this.escapeHtml(platform) + "\"" + selected + ">" + this.escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
+                        taxSelectHtml += "<option value=\"" + escapeHtml(platform, true) + "\"" + selected + ">" + escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
                     }
                     taxSelectHtml += "</select>";
                     tdValue.innerHTML = taxSelectHtml;
                 } else {
                     var placeholder = col.source_type === "combined" ? "{{manufacturer}} - {{name}}" : "";
-                    tdValue.innerHTML = "<input type=\"text\" class=\"input-text fm-input-full\" value=\"" + this.escapeHtml(col.source_value || "") + "\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\" placeholder=\"" + placeholder + "\">";
+                    tdValue.innerHTML = "<input type=\"text\" class=\"input-text fm-input-full\" value=\"" + escapeHtml(col.source_value || "", true) + "\" onchange=\"CsvBuilder.updateColumn(" + index + ", \'source_value\', this.value)\" placeholder=\"" + placeholder + "\">";
                 }
                 tr.appendChild(tdValue);
 
@@ -394,11 +394,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             copyPreview: function() {
                 var content = document.getElementById("csv-preview-content").textContent;
                 navigator.clipboard.writeText(content);
-            },
-
-            escapeHtml: function(str) {
-                if (!str) return "";
-                return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
             }
         };
 

@@ -73,7 +73,7 @@ const FeedGenerator = {
     currentJobId: null,
     currentJobs: [],
     cancelled: false,
-    modal: null,
+    dialog: null,
 
     start: function(feedId) {
         if (!confirm(this.translations.confirm)) {
@@ -81,7 +81,7 @@ const FeedGenerator = {
         }
 
         this.cancelled = false;
-        this.showModal();
+        this.showDialog(false);
         this.updateProgress(0, 0, this.translations.initializing);
 
         mahoFetch(this.urls.init, {
@@ -119,7 +119,7 @@ const FeedGenerator = {
         this.cancelled = false;
         this.currentJobs = [];
         this.currentJobIndex = 0;
-        this.showModal(true);
+        this.showDialog(true);
         this.updateProgress(0, feedIds.length, this.translations.initializing);
 
         mahoFetch(this.urls.massBatch, {
@@ -302,145 +302,45 @@ const FeedGenerator = {
                 loaderArea: false
             }).catch(() => {});
         }
-        this.hideModal();
+        this.closeDialog();
     },
 
-    showModal: function(isMultiple) {
-        if (!this.modal) {
-            this.createModal();
-        }
-        const titleEl = this.modal.querySelector('.modal-title');
-        if (titleEl) {
-            titleEl.textContent = isMultiple ? this.translations.generating_multiple : this.translations.generating;
-        }
-        this.modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
+    showDialog: function(isMultiple) {
+        const self = this;
+        const title = isMultiple ? this.translations.generating_multiple : this.translations.generating;
+        this.dialog = Dialog.info(this.getDialogContent(), {
+            title: title,
+            className: 'feed-generator-dialog',
+            width: 450,
+            height: 'auto',
+            extraButtons: [
+                { id: 'gen-cancel-btn', class: 'cancel', label: this.translations.cancel }
+            ],
+            onOpen: function(dialog) {
+                dialog.style.height = 'auto';
+                dialog.querySelector('#gen-cancel-btn')?.addEventListener('click', () => self.cancel());
+            }
+        });
     },
 
-    hideModal: function() {
-        if (this.modal) {
-            this.modal.style.display = 'none';
+    closeDialog: function() {
+        if (this.dialog) {
+            this.dialog.remove();
+            this.dialog = null;
         }
-        document.body.style.overflow = '';
         this.currentJobId = null;
     },
 
-    createModal: function() {
-        const modal = document.createElement('div');
-        modal.id = 'feed-generator-modal';
-        modal.innerHTML = \`
-            <style>
-                #feed-generator-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(0,0,0,0.6);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 10000;
-                }
-                #feed-generator-modal .modal-content {
-                    background: #fff;
-                    border-radius: 8px;
-                    padding: 24px;
-                    min-width: 400px;
-                    max-width: 500px;
-                    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-                }
-                #feed-generator-modal .modal-title {
-                    font-size: 18px;
-                    font-weight: 600;
-                    margin-bottom: 16px;
-                    color: #333;
-                }
-                #feed-generator-modal .progress-container {
-                    margin-bottom: 16px;
-                }
-                #feed-generator-modal .progress-bar-bg {
-                    height: 8px;
-                    background: #e0e0e0;
-                    border-radius: 4px;
-                    overflow: hidden;
-                }
-                #feed-generator-modal .progress-bar {
-                    height: 100%;
-                    background: linear-gradient(90deg, #4CAF50, #8BC34A);
-                    border-radius: 4px;
-                    transition: width 0.3s ease;
-                    width: 0%;
-                }
-                #feed-generator-modal .progress-text {
-                    margin-top: 8px;
-                    font-size: 13px;
-                    color: #666;
-                }
-                #feed-generator-modal .status-message {
-                    font-size: 14px;
-                    color: #333;
-                    margin-bottom: 16px;
-                }
-                #feed-generator-modal .error-message {
-                    color: #d32f2f;
-                    background: #ffebee;
-                    padding: 12px;
-                    border-radius: 4px;
-                    margin-bottom: 16px;
-                }
-                #feed-generator-modal .success-message {
-                    color: #2e7d32;
-                    background: #e8f5e9;
-                    padding: 12px;
-                    border-radius: 4px;
-                    margin-bottom: 16px;
-                }
-                #feed-generator-modal .modal-buttons {
-                    display: flex;
-                    gap: 8px;
-                    justify-content: flex-end;
-                }
-                #feed-generator-modal .modal-btn {
-                    padding: 8px 16px;
-                    border: none;
-                    border-radius: 4px;
-                    cursor: pointer;
-                    font-size: 14px;
-                    transition: background 0.2s;
-                    text-decoration: none;
-                }
-                #feed-generator-modal .btn-cancel {
-                    background: #f5f5f5;
-                    color: #333;
-                }
-                #feed-generator-modal .btn-cancel:hover {
-                    background: #e0e0e0;
-                }
-                #feed-generator-modal .btn-success {
-                    background: #4CAF50;
-                    color: #fff;
-                }
-                #feed-generator-modal .btn-success:hover {
-                    background: #43A047;
-                }
-            </style>
-            <div class="modal-content">
-                <div class="modal-title">\${this.translations.generating}</div>
-                <div class="status-message" id="gen-status"></div>
-                <div class="progress-container">
-                    <div class="progress-bar-bg">
-                        <div class="progress-bar" id="gen-progress-bar"></div>
-                    </div>
-                    <div class="progress-text" id="gen-progress-text"></div>
+    getDialogContent: function() {
+        return \`
+            <div class="status" id="gen-status"></div>
+            <div class="progress-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar" id="gen-progress-bar"></div>
                 </div>
-                <div class="modal-buttons" id="gen-buttons">
-                    <button class="modal-btn btn-cancel" onclick="FeedGenerator.cancel()">\${this.translations.cancel}</button>
-                </div>
+                <div class="progress-text" id="gen-progress-text"></div>
             </div>
         \`;
-        document.body.appendChild(modal);
-        this.modal = modal;
     },
 
     updateProgress: function(current, total, message) {
@@ -467,25 +367,25 @@ const FeedGenerator = {
 
     showError: function(message) {
         const statusEl = document.getElementById('gen-status');
-        const buttonsEl = document.getElementById('gen-buttons');
+        const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
 
         if (statusEl) {
-            statusEl.innerHTML = '<div class="error-message">' + this.escapeHtml(message) + '</div>';
+            statusEl.innerHTML = '<div class="error-msg">' + escapeHtml(message) + '</div>';
         }
         if (buttonsEl) {
-            buttonsEl.innerHTML = '<button class="modal-btn btn-cancel" onclick="FeedGenerator.hideModal()">' +
+            buttonsEl.innerHTML = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog()">' +
                 this.translations.close + '</button>';
         }
     },
 
     showSuccess: function(data) {
         const statusEl = document.getElementById('gen-status');
-        const buttonsEl = document.getElementById('gen-buttons');
+        const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
         const progressBar = document.getElementById('gen-progress-bar');
 
         if (progressBar) progressBar.style.width = '100%';
 
-        let successHtml = '<div class="success-message">' +
+        let successHtml = '<div class="success-msg">' +
             this.translations.completed + '<br>' +
             this.translations.products.replace('%s', data.product_count || 0);
         if (data.file_size_formatted) {
@@ -495,11 +395,11 @@ const FeedGenerator = {
 
         if (statusEl) statusEl.innerHTML = successHtml;
 
-        let buttonsHtml = '<button class="modal-btn btn-cancel" onclick="FeedGenerator.hideModal(); window.location.reload();">' +
+        let buttonsHtml = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog(); window.location.reload();">' +
             this.translations.close + '</button>';
         if (data.file_url) {
             const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
-            buttonsHtml += ' <a href="' + data.file_url + cacheBuster + Date.now() + '" class="modal-btn btn-success" target="_blank">' +
+            buttonsHtml += ' <a href="' + data.file_url + cacheBuster + Date.now() + '" class="form-button" target="_blank">' +
                 this.translations.download + '</a>';
         }
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
@@ -507,7 +407,7 @@ const FeedGenerator = {
 
     showMultipleSuccess: function() {
         const statusEl = document.getElementById('gen-status');
-        const buttonsEl = document.getElementById('gen-buttons');
+        const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
         const progressBar = document.getElementById('gen-progress-bar');
 
         if (progressBar) progressBar.style.width = '100%';
@@ -517,18 +417,12 @@ const FeedGenerator = {
             message += ' (' + this.failedJobs + ' failed)';
         }
 
-        let successHtml = '<div class="success-message">' + message + '</div>';
+        let successHtml = '<div class="success-msg">' + message + '</div>';
         if (statusEl) statusEl.innerHTML = successHtml;
 
-        let buttonsHtml = '<button class="modal-btn btn-cancel" onclick="FeedGenerator.hideModal(); window.location.reload();">' +
+        let buttonsHtml = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog(); window.location.reload();">' +
             this.translations.close + '</button>';
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
-    },
-
-    escapeHtml: function(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
     }
 };
 

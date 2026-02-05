@@ -982,9 +982,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                                 }
                                 html += '</select>';
                             } else if (opt.type === 'textarea') {
-                                html += '<textarea onchange="TransformerModal.updateOption(' + i + ', \\'' + optKey + '\\', this.value)">' + this.escapeHtml(currentVal) + '</textarea>';
+                                html += '<textarea onchange="TransformerModal.updateOption(' + i + ', \\'' + optKey + '\\', this.value)">' + escapeHtml(currentVal) + '</textarea>';
                             } else {
-                                html += '<input type="text" value="' + this.escapeHtml(currentVal) + '" onchange="TransformerModal.updateOption(' + i + ', \\'' + optKey + '\\', this.value)">';
+                                html += '<input type="text" value="' + escapeHtml(currentVal) + '" onchange="TransformerModal.updateOption(' + i + ', \\'' + optKey + '\\', this.value)">';
                             }
 
                             if (opt.note) {
@@ -1068,12 +1068,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                 if (this.chain[index]) {
                     this.chain[index].options[key] = value;
                 }
-            },
-
-            escapeHtml: function(text) {
-                var div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
             }
         };
 

@@ -144,7 +144,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                     if (item.type === "object" && item.properties) {
                         html += "<div class=\"" + nodeClass + "\" style=\"padding-left: " + indent + "px;\" onclick=\"JsonBuilder.selectNode(\'" + itemPath + "\')\" data-path=\"" + itemPath + "\">";
                         html += "<span class=\"json-toggle\" onclick=\"JsonBuilder.toggleNode(event, \'" + itemPath + "\')\">&blacktriangledown;</span> ";
-                        html += "<span class=\"json-key\">" + this.escapeHtml(key) + "</span> <span class=\"json-type\">(object)</span>";
+                        html += "<span class=\"json-key\">" + escapeHtml(key) + "</span> <span class=\"json-type\">(object)</span>";
                         html += "</div>";
                         html += "<div class=\"json-children\" id=\"json-children-" + itemPath.replace(/\./g, "-") + "\">";
                         html += this.renderNode(item.properties, itemPath + ".properties", depth + 1);
@@ -152,7 +152,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                     } else if (item.type === "array") {
                         html += "<div class=\"" + nodeClass + "\" style=\"padding-left: " + indent + "px;\" onclick=\"JsonBuilder.selectNode(\'" + itemPath + "\')\" data-path=\"" + itemPath + "\">";
                         html += "<span class=\"json-toggle\" onclick=\"JsonBuilder.toggleNode(event, \'" + itemPath + "\')\">&blacktriangledown;</span> ";
-                        html += "<span class=\"json-key\">" + this.escapeHtml(key) + "</span> <span class=\"json-type\">(array)</span>";
+                        html += "<span class=\"json-key\">" + escapeHtml(key) + "</span> <span class=\"json-type\">(array)</span>";
                         html += "</div>";
                         if (item.items) {
                             html += "<div class=\"json-children\" id=\"json-children-" + itemPath.replace(/\./g, "-") + "\">";
@@ -163,7 +163,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                         }
                     } else {
                         html += "<div class=\"" + nodeClass + "\" style=\"padding-left: " + indent + "px;\" onclick=\"JsonBuilder.selectNode(\'" + itemPath + "\')\" data-path=\"" + itemPath + "\">";
-                        html += "<span class=\"json-key\">" + this.escapeHtml(key) + "</span> <span class=\"json-type\">(" + (item.type || "string") + ")</span>";
+                        html += "<span class=\"json-key\">" + escapeHtml(key) + "</span> <span class=\"json-type\">(" + (item.type || "string") + ")</span>";
                         html += "</div>";
                     }
                 }
@@ -186,7 +186,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
 
                 var html = "<div style=\"margin-bottom: 15px;\">" +
                     "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Key') . '</label>" +
-                    "<input type=\"text\" class=\"input-text\" value=\"" + this.escapeHtml(keyName) + "\" onchange=\"JsonBuilder.updateKey(\'" + path + "\', this.value)\" style=\"width: 100%;\">" +
+                    "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(keyName, true) + "\" onchange=\"JsonBuilder.updateKey(\'" + path + "\', this.value)\" style=\"width: 100%;\">" +
                     "</div>" +
                     "<div style=\"margin-bottom: 15px;\">" +
                     "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Type') . '</label>" +
@@ -211,26 +211,26 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
 
                     // Show attribute dropdown, rule dropdown, taxonomy dropdown, or text input based on source type
                     if (node.source_type === "attribute") {
-                        var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + this.escapeHtml(node.source_value || "") + "\""), "value=\"" + this.escapeHtml(node.source_value || "") + "\" selected");
+                        var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + escapeHtml(node.source_value || "", true) + "\""), "value=\"" + escapeHtml(node.source_value || "", true) + "\" selected");
                         html += "<select onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">" + selectHtml + "</select>";
                     } else if (node.source_type === "rule") {
                         html += "<select onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
                         html += "<option value=\"\">' . $this->__('-- Select Rule --') . '</option>";
                         for (var ruleCode in this.ruleOptions) {
                             var selected = (node.source_value === ruleCode) ? " selected" : "";
-                            html += "<option value=\"" + this.escapeHtml(ruleCode) + "\"" + selected + ">" + this.escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
+                            html += "<option value=\"" + escapeHtml(ruleCode, true) + "\"" + selected + ">" + escapeHtml(this.ruleOptions[ruleCode]) + "</option>";
                         }
                         html += "</select>";
                     } else if (node.source_type === "taxonomy") {
                         html += "<select onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
                         for (var platform in this.taxonomyPlatforms) {
                             var selected = (node.source_value === platform) ? " selected" : "";
-                            html += "<option value=\"" + this.escapeHtml(platform) + "\"" + selected + ">" + this.escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
+                            html += "<option value=\"" + escapeHtml(platform, true) + "\"" + selected + ">" + escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
                         }
                         html += "</select>";
                     } else {
                         var placeholder = node.source_type === "combined" ? "{{name}} - {{sku}}" : "";
-                        html += "<input type=\"text\" class=\"input-text\" value=\"" + this.escapeHtml(node.source_value || "") + "\" onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"width: 100%;\">";
+                        html += "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(node.source_value || "", true) + "\" onchange=\"JsonBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"width: 100%;\">";
                     }
 
                     html += "</div>" +
@@ -262,11 +262,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                     html += "<option value=\"" + key + "\"" + (selected === key ? " selected" : "") + ">" + this.sourceTypes[key] + "</option>";
                 }
                 return html;
-            },
-
-            escapeHtml: function(str) {
-                if (!str) return "";
-                return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
             },
 
             getNodeByPath: function(path) {
@@ -544,12 +539,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                     status.innerHTML = \'<span style="color: #2e7d32;">&#10004; ' . $this->__('Valid JSON') . '</span>\';
                 } catch (e) {
                     var errorMsg = e.message || "' . $this->__('Invalid JSON') . '";
-                    status.innerHTML = \'<span style="color: #c62828;">&#10008; \' + this.escapeHtml(errorMsg) + \'</span>\';
+                    status.innerHTML = \'<span style="color: #c62828;">&#10008; \' + escapeHtml(errorMsg) + \'</span>\';
                 }
-            },
-
-            escapeHtml: function(str) {
-                return String(str || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
             }
         };
 

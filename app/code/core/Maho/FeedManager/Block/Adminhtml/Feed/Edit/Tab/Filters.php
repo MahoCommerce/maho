@@ -724,9 +724,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][attribute]" class="attr-select" onchange="FMConditions.onAttributeChange(this)">';
                 html += '<option value="">-- Select Attribute --</option>';
                 for (var groupLabel in this.attributeGroups) {
-                    html += '<optgroup label="' + this.escapeHtml(groupLabel) + '">';
+                    html += '<optgroup label="' + escapeHtml(groupLabel, true) + '">';
                     for (var code in this.attributeGroups[groupLabel]) {
-                        html += '<option value="' + this.escapeHtml(code) + '">' + this.escapeHtml(this.attributeGroups[groupLabel][code]) + '</option>';
+                        html += '<option value="' + escapeHtml(code, true) + '">' + escapeHtml(this.attributeGroups[groupLabel][code]) + '</option>';
                     }
                     html += '</optgroup>';
                 }
@@ -735,7 +735,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 // Operator select
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][operator]" class="op-select" onchange="FMConditions.onOperatorChange(this)">';
                 for (var op in this.operators) {
-                    html += '<option value="' + this.escapeHtml(op) + '">' + this.escapeHtml(this.operators[op]) + '</option>';
+                    html += '<option value="' + escapeHtml(op, true) + '">' + escapeHtml(this.operators[op]) + '</option>';
                 }
                 html += '</select>';
 
@@ -746,14 +746,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 // Product type select (hidden by default)
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][type_value]" class="type-select" style="display:none" onchange="FMConditions.onTypeChange(this)">';
                 for (var typeCode in this.productTypes) {
-                    html += '<option value="' + this.escapeHtml(typeCode) + '">' + this.escapeHtml(this.productTypes[typeCode]) + '</option>';
+                    html += '<option value="' + escapeHtml(typeCode, true) + '">' + escapeHtml(this.productTypes[typeCode]) + '</option>';
                 }
                 html += '</select>';
 
                 // Visibility select (hidden by default)
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][visibility_value]" class="visibility-select" style="display:none" onchange="FMConditions.onVisibilityChange(this)">';
                 for (var visCode in this.visibilityOptions) {
-                    html += '<option value="' + this.escapeHtml(visCode) + '">' + this.escapeHtml(this.visibilityOptions[visCode]) + '</option>';
+                    html += '<option value="' + escapeHtml(visCode, true) + '">' + escapeHtml(this.visibilityOptions[visCode]) + '</option>';
                 }
                 html += '</select>';
 
@@ -762,7 +762,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 html += '<input type="text" class="input-text" placeholder="Filter categories..." onkeyup="FMConditions.filterCategories(this)" />';
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][category_value]" class="category-select" multiple="multiple" onchange="FMConditions.onCategoryChange(this)">';
                 for (var catId in this.categories) {
-                    html += '<option value="' + this.escapeHtml(catId) + '">' + this.escapeHtml(this.categories[catId]) + '</option>';
+                    html += '<option value="' + escapeHtml(catId, true) + '">' + escapeHtml(this.categories[catId]) + '</option>';
                 }
                 html += '</select></div>';
 
@@ -775,15 +775,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 html += '</div>';
 
                 return html;
-            },
-
-            escapeHtml: function(str) {
-                if (!str) return '';
-                return String(str)
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;');
             }
         };
 
