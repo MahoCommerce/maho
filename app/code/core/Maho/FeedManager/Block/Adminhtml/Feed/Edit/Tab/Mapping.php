@@ -214,12 +214,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'value' => $feed->getJsonStructure(),
         ]);
 
-        // Add transformer modal as a global element (always in DOM, not hidden)
-        // Uses height:0 overflow:visible so modal can show while fieldset takes no space
+        // Add transformer data as hidden element
         $globalFieldset = $form->addFieldset('global_elements', [
             'legend' => '',
-            'class' => 'fieldset-wide',
-            'style' => 'height: 0; overflow: visible; padding: 0; margin: 0; border: none;',
+            'class' => 'fieldset-wide no-display',
         ]);
         $globalFieldset->addField('transformer_modal_container', 'note', [
             'text' => '<input type="hidden" id="editor_transformers" value="">' .
@@ -394,70 +392,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
         .editor-mode-update #editor_update_btn { display: inline-block !important; }
 
         /* Transformer Modal Styles - Compact */
-        .transformer-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .transformer-modal-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.6);
-        }
-        .transformer-modal-content {
-            position: relative;
-            background: #fff;
-            border-radius: 6px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            width: 600px;
-            max-width: 90vw;
-            min-height: 500px;
-            max-height: 90vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .transformer-modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        .transformer-modal-header h3 {
-            margin: 0;
-            font-size: 15px;
-            font-weight: 600;
-        }
-        .transformer-modal-close {
-            background: none;
-            border: none;
-            font-size: 20px;
-            cursor: pointer;
-            color: #666;
-            padding: 0;
-            line-height: 1;
-        }
-        .transformer-modal-close:hover { color: #333; }
-        .transformer-modal-body {
-            padding: 12px 15px;
-            overflow-y: auto;
-            flex: 1;
-        }
-        .transformer-modal-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 8px;
-            padding: 10px 15px;
-            border-top: 1px solid #e0e0e0;
+        #transformer-modal .dialog-content {
+            min-height: 400px;
         }
         .transformer-pipeline {
             display: flex;
@@ -703,7 +639,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                         CsvBuilder.columns[CsvBuilder.currentColumnIndex].transformers = chainStr;
                         CsvBuilder.render();
                         delete CsvBuilder.currentColumnIndex;
-                        TransformerModal.close();
                         return;
                     }
 
@@ -716,7 +651,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                         JsonBuilder.render();
                         JsonBuilder.showProperties(JsonBuilder.currentNodePath);
                         delete JsonBuilder.currentNodePath;
-                        TransformerModal.close();
                         return;
                     }
 
@@ -729,7 +663,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                         XmlBuilder.render();
                         XmlBuilder.showProperties(XmlBuilder.currentNodePath);
                         delete XmlBuilder.currentNodePath;
-                        TransformerModal.close();
                         return;
                     }
 
@@ -854,25 +787,37 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
         // Transformer Modal Object
         var TransformerModal = {
             chain: [],
+            dialog: null,
 
             open: function() {
+                var self = this;
+
                 // Parse current transformers from hidden field
                 var transformersStr = document.getElementById('editor_transformers').value;
                 this.chain = this.parseChain(transformersStr);
 
-                // Render the modal
-                this.renderChainList();
-                this.renderDropdown();
-
-                // Show modal
-                document.getElementById('transformer-modal').style.display = 'flex';
-                document.body.style.overflow = 'hidden';
+                // Show modal using Dialog.confirm
+                this.dialog = Dialog.confirm(this.getContent(), {
+                    id: 'transformer-modal',
+                    title: TransformerData.translations.configure_transformers,
+                    width: 600,
+                    okLabel: TransformerData.translations.apply_transformers,
+                    onOk: function() {
+                        self.apply();
+                    },
+                    onOpen: function() {
+                        self.renderChainList();
+                        self.renderDropdown();
+                    },
+                    onClose: function() {
+                        self.hideDropdown();
+                        self.dialog = null;
+                    }
+                });
             },
 
             close: function() {
-                document.getElementById('transformer-modal').style.display = 'none';
-                document.body.style.overflow = '';
-                this.hideDropdown();
+                Dialog.close();
             },
 
             apply: function() {
@@ -880,7 +825,27 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                 var chainStr = this.buildChainString();
                 document.getElementById('editor_transformers').value = chainStr;
                 updateTransformersButtonLabel(chainStr);
-                this.close();
+            },
+
+            getContent: function() {
+                return '<div class="transformer-pipeline">' +
+                    '<span class="pipeline-label">' + TransformerData.translations.input + '</span>' +
+                    '<span class="pipeline-arrow">→</span>' +
+                    '<span class="pipeline-label">' + TransformerData.translations.transformers + '</span>' +
+                    '<span class="pipeline-arrow">→</span>' +
+                    '<span class="pipeline-label">' + TransformerData.translations.output + '</span>' +
+                '</div>' +
+                '<div id="transformer-chain-list" class="transformer-chain-list">' +
+                    '<p class="no-transformers">' + TransformerData.translations.no_transformers + '</p>' +
+                '</div>' +
+                '<div class="transformer-add-section">' +
+                    '<div class="transformer-dropdown-wrapper">' +
+                        '<button type="button" id="add-transformer-btn" class="scalable add" onclick="TransformerModal.toggleDropdown()">' +
+                            '<span>' + TransformerData.translations.add_transformer + '</span>' +
+                        '</button>' +
+                        '<div id="transformer-dropdown" class="transformer-dropdown" style="display: none;"></div>' +
+                    '</div>' +
+                '</div>';
             },
 
             parseChain: function(str) {
@@ -1105,56 +1070,24 @@ SCRIPT;
     }
 
     /**
-     * Get transformer modal HTML
+     * Get transformer modal JavaScript data
      */
     protected function _getTransformerModalHtml(): string
     {
-        $transformerData = Mage::helper('core')->jsonEncode(
-            Maho_FeedManager_Model_Transformer::getTransformerDataForJs(),
-        );
+        $data = Maho_FeedManager_Model_Transformer::getTransformerDataForJs();
+        $data['translations'] = [
+            'configure_transformers' => $this->__('Configure Transformers'),
+            'apply_transformers' => $this->__('Apply Transformers'),
+            'input' => $this->__('Input'),
+            'transformers' => $this->__('Transformers'),
+            'output' => $this->__('Output'),
+            'no_transformers' => $this->__('No transformers added. Click "Add Transformer" to start.'),
+            'add_transformer' => $this->__('+ Add Transformer'),
+        ];
 
-        return '
-        <div id="transformer-modal" class="transformer-modal" style="display: none;">
-            <div class="transformer-modal-overlay" onclick="TransformerModal.close()"></div>
-            <div class="transformer-modal-content">
-                <div class="transformer-modal-header">
-                    <h3>' . $this->__('Configure Transformers') . '</h3>
-                    <button type="button" class="transformer-modal-close" onclick="TransformerModal.close()">&times;</button>
-                </div>
-                <div class="transformer-modal-body">
-                    <div class="transformer-pipeline">
-                        <span class="pipeline-label">' . $this->__('Input') . '</span>
-                        <span class="pipeline-arrow">→</span>
-                        <span class="pipeline-label">' . $this->__('Transformers') . '</span>
-                        <span class="pipeline-arrow">→</span>
-                        <span class="pipeline-label">' . $this->__('Output') . '</span>
-                    </div>
-                    <div id="transformer-chain-list" class="transformer-chain-list">
-                        <p class="no-transformers">' . $this->__('No transformers added. Click "Add Transformer" to start.') . '</p>
-                    </div>
-                    <div class="transformer-add-section">
-                        <div class="transformer-dropdown-wrapper">
-                            <button type="button" id="add-transformer-btn" class="scalable add" onclick="TransformerModal.toggleDropdown()">
-                                <span>' . $this->__('+ Add Transformer') . '</span>
-                            </button>
-                            <div id="transformer-dropdown" class="transformer-dropdown" style="display: none;">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="transformer-modal-footer">
-                    <button type="button" class="scalable back" onclick="TransformerModal.close()">
-                        <span>' . $this->__('Cancel') . '</span>
-                    </button>
-                    <button type="button" class="scalable save" onclick="TransformerModal.apply()">
-                        <span>' . $this->__('Apply Transformers') . '</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <script type="text/javascript">
-            var TransformerData = ' . $transformerData . ';
-        </script>';
+        $transformerData = Mage::helper('core')->jsonEncode($data);
+
+        return '<script type="text/javascript">var TransformerData = ' . $transformerData . ';</script>';
     }
 
     /**
