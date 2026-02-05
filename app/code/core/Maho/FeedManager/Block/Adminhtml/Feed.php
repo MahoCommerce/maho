@@ -16,7 +16,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed extends Mage_Adminhtml_Block_Widget_
     {
         $this->_controller = 'adminhtml_feed';
         $this->_blockGroup = 'feedmanager';
-        $this->_headerText = Mage::helper('feedmanager')->__('Manage Product Feeds');
+        $this->_headerText = Mage::helper('feedmanager')->__('Product Feeds');
         $this->_addButtonLabel = Mage::helper('feedmanager')->__('Add New Feed');
         parent::__construct();
     }
