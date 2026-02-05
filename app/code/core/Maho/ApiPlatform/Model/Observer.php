@@ -74,7 +74,7 @@ class Maho_ApiPlatform_Model_Observer
             Mage::log(
                 'Invalid legacy_sunset_date configuration: ' . $sunsetDate,
                 Zend_Log::ERR,
-                'maho_apiplatform.log'
+                'maho_apiplatform.log',
             );
             $sunsetTimestamp = strtotime(Maho_ApiPlatform_Helper_Data::DEFAULT_LEGACY_SUNSET_DATE);
         }
@@ -93,7 +93,7 @@ class Maho_ApiPlatform_Model_Observer
         $response->setHeader(
             'Warning',
             '299 - "This API is deprecated. Please migrate to /api/v2/. See documentation at /api/v2/docs"',
-            true
+            true,
         );
     }
 

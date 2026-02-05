@@ -29,27 +29,27 @@ use Maho\ApiPlatform\State\Processor\CartProcessor;
     operations: [
         new Get(
             uriTemplate: '/carts/{id}',
-            description: 'Get a cart by ID'
+            description: 'Get a cart by ID',
         ),
         new Post(
             uriTemplate: '/carts',
-            description: 'Create a new cart'
+            description: 'Create a new cart',
         ),
     ],
     graphQlOperations: [
         new Query(
             name: 'cart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String']],
-            description: 'Get cart by ID or masked ID'
+            description: 'Get cart by ID or masked ID',
         ),
         new Query(
             name: 'customerCart',
             args: [],
-            description: 'Get current customer active cart'
+            description: 'Get current customer active cart',
         ),
         new Mutation(
             name: 'createCart',
-            description: 'Create an empty cart'
+            description: 'Create an empty cart',
         ),
         new Mutation(
             name: 'addToCart',
@@ -57,71 +57,71 @@ use Maho\ApiPlatform\State\Processor\CartProcessor;
                 'cartId' => ['type' => 'ID!'],
                 'sku' => ['type' => 'String!'],
                 'qty' => ['type' => 'Float!'],
-                'fulfillmentType' => ['type' => 'String', 'description' => 'SHIP (default) or PICKUP']
+                'fulfillmentType' => ['type' => 'String', 'description' => 'SHIP (default) or PICKUP'],
             ],
-            description: 'Add item to cart'
+            description: 'Add item to cart',
         ),
         new Mutation(
             name: 'updateCartItemQty',
             args: ['cartId' => ['type' => 'ID!'], 'itemId' => ['type' => 'ID!'], 'qty' => ['type' => 'Float!']],
-            description: 'Update cart item quantity'
+            description: 'Update cart item quantity',
         ),
         new Mutation(
             name: 'setCartItemFulfillment',
             args: [
                 'cartId' => ['type' => 'ID!'],
                 'itemId' => ['type' => 'ID!'],
-                'fulfillmentType' => ['type' => 'String!', 'description' => 'SHIP or PICKUP']
+                'fulfillmentType' => ['type' => 'String!', 'description' => 'SHIP or PICKUP'],
             ],
-            description: 'Set fulfillment type for a cart item (SHIP or PICKUP for BOPIS)'
+            description: 'Set fulfillment type for a cart item (SHIP or PICKUP for BOPIS)',
         ),
         new Mutation(
             name: 'removeCartItem',
             args: ['cartId' => ['type' => 'ID!'], 'itemId' => ['type' => 'ID!']],
-            description: 'Remove item from cart'
+            description: 'Remove item from cart',
         ),
         new Mutation(
             name: 'applyCouponToCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'couponCode' => ['type' => 'String!']],
-            description: 'Apply coupon code to cart'
+            description: 'Apply coupon code to cart',
         ),
         new Mutation(
             name: 'removeCouponFromCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String']],
-            description: 'Remove coupon code from cart'
+            description: 'Remove coupon code from cart',
         ),
         new Mutation(
             name: 'setShippingAddressOnCart',
-            description: 'Set shipping address on cart'
+            description: 'Set shipping address on cart',
         ),
         new Mutation(
             name: 'setBillingAddressOnCart',
-            description: 'Set billing address on cart'
+            description: 'Set billing address on cart',
         ),
         new Mutation(
             name: 'setShippingMethodOnCart',
-            description: 'Set shipping method on cart'
+            description: 'Set shipping method on cart',
         ),
         new Mutation(
             name: 'setPaymentMethodOnCart',
-            description: 'Set payment method on cart'
+            description: 'Set payment method on cart',
         ),
         new Mutation(
             name: 'assignCustomerToCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'customerId' => ['type' => 'ID!']],
-            description: 'Assign customer to cart'
+            description: 'Assign customer to cart',
         ),
         new Mutation(
             name: 'applyGiftcardToCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
-            description: 'Apply gift card to cart'
+            description: 'Apply gift card to cart',
         ),
         new Mutation(
             name: 'removeGiftcardFromCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'giftcardCode' => ['type' => 'String!']],
-            description: 'Remove gift card from cart'
+            description: 'Remove gift card from cart',
         ),
-    ]
+    ],
 )]
 class Cart
 {

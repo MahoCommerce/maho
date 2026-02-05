@@ -24,14 +24,14 @@ class NotFoundException extends ApiException
         string $message = 'Resource not found',
         string $errorCode = 'not_found',
         array $details = [],
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct(
             message: $message,
             errorCode: $errorCode,
             httpStatusCode: 404,
             details: $details,
-            previous: $previous
+            previous: $previous,
         );
     }
 
@@ -47,7 +47,7 @@ class NotFoundException extends ApiException
         return new self(
             message: $message,
             errorCode: "{$type}_not_found",
-            details: $id !== null ? ['id' => $id] : []
+            details: $id !== null ? ['id' => $id] : [],
         );
     }
 
@@ -91,7 +91,7 @@ class NotFoundException extends ApiException
         return new self(
             message: 'Gift card not found',
             errorCode: 'giftcard_not_found',
-            details: ['code' => $code]
+            details: ['code' => $code],
         );
     }
 
@@ -103,7 +103,7 @@ class NotFoundException extends ApiException
         return new self(
             message: 'Cart item not found',
             errorCode: 'cart_item_not_found',
-            details: ['itemId' => $itemId]
+            details: ['itemId' => $itemId],
         );
     }
 }

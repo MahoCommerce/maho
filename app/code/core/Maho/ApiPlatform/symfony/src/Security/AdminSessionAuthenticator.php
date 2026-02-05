@@ -59,7 +59,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
             new UserBadge('admin_' . $adminId, function (string $identifier) {
                 $adminId = (int) substr($identifier, strlen('admin_'));
                 return $this->loadAdminUser($adminId);
-            })
+            }),
         );
     }
 

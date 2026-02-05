@@ -27,11 +27,11 @@ use Maho\ApiPlatform\State\Provider\BlogPostProvider;
     operations: [
         new Get(
             uriTemplate: '/blog-posts/{id}',
-            description: 'Get a blog post by ID'
+            description: 'Get a blog post by ID',
         ),
         new GetCollection(
             uriTemplate: '/blog-posts',
-            description: 'Get blog post collection'
+            description: 'Get blog post collection',
         ),
     ],
     graphQlOperations: [
@@ -40,9 +40,9 @@ use Maho\ApiPlatform\State\Provider\BlogPostProvider;
         new Query(
             name: 'blogPostByUrlKey',
             args: ['urlKey' => ['type' => 'String!']],
-            description: 'Get a blog post by URL key'
+            description: 'Get a blog post by URL key',
         ),
-    ]
+    ],
 )]
 class BlogPost
 {

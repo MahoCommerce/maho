@@ -25,7 +25,7 @@ class ValidationException extends ApiException
         ?string $field = null,
         ?string $constraint = null,
         array $additionalDetails = [],
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         $details = $additionalDetails;
 
@@ -42,7 +42,7 @@ class ValidationException extends ApiException
             errorCode: 'validation_error',
             httpStatusCode: 400,
             details: $details,
-            previous: $previous
+            previous: $previous,
         );
     }
 
@@ -54,7 +54,7 @@ class ValidationException extends ApiException
         return new self(
             message: ucfirst($field) . ' is required',
             field: $field,
-            constraint: 'NotBlank'
+            constraint: 'NotBlank',
         );
     }
 
@@ -66,7 +66,7 @@ class ValidationException extends ApiException
         return new self(
             message: "Invalid {$field}: {$reason}",
             field: $field,
-            constraint: 'Invalid'
+            constraint: 'Invalid',
         );
     }
 
@@ -78,7 +78,7 @@ class ValidationException extends ApiException
         return new self(
             message: 'Invalid email address',
             field: 'email',
-            constraint: 'Email'
+            constraint: 'Email',
         );
     }
 
@@ -91,7 +91,7 @@ class ValidationException extends ApiException
             message: "Password must be at least {$minLength} characters",
             field: 'password',
             constraint: 'MinLength',
-            additionalDetails: ['minLength' => $minLength]
+            additionalDetails: ['minLength' => $minLength],
         );
     }
 }

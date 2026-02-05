@@ -28,7 +28,7 @@ class Maho_ApiPlatform_V2Controller extends Mage_Core_Controller_Front_Action
                 ->setHeader('Content-Type', 'application/json')
                 ->setBody(json_encode([
                     'error' => 'API Platform is not enabled',
-                    'message' => 'Please enable API Platform in System > Configuration > Services > API Platform'
+                    'message' => 'Please enable API Platform in System > Configuration > Services > API Platform',
                 ]));
             return;
         }

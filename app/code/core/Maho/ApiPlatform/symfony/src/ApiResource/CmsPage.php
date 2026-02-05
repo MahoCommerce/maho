@@ -27,11 +27,11 @@ use Maho\ApiPlatform\State\Provider\CmsPageProvider;
     operations: [
         new Get(
             uriTemplate: '/cms-pages/{id}',
-            description: 'Get a CMS page by ID'
+            description: 'Get a CMS page by ID',
         ),
         new GetCollection(
             uriTemplate: '/cms-pages',
-            description: 'Get CMS page collection'
+            description: 'Get CMS page collection',
         ),
     ],
     graphQlOperations: [
@@ -40,9 +40,9 @@ use Maho\ApiPlatform\State\Provider\CmsPageProvider;
         new Query(
             name: 'cmsPageByIdentifier',
             args: ['identifier' => ['type' => 'String!']],
-            description: 'Get a CMS page by URL identifier'
+            description: 'Get a CMS page by URL identifier',
         ),
-    ]
+    ],
 )]
 class CmsPage
 {

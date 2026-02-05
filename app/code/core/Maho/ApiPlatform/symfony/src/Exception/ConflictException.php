@@ -24,14 +24,14 @@ class ConflictException extends ApiException
         string $message = 'Conflict with current state',
         string $errorCode = 'conflict',
         array $details = [],
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct(
             message: $message,
             errorCode: $errorCode,
             httpStatusCode: 409,
             details: $details,
-            previous: $previous
+            previous: $previous,
         );
     }
 
@@ -43,7 +43,7 @@ class ConflictException extends ApiException
         return new self(
             message: 'An account with this email already exists',
             errorCode: 'duplicate_email',
-            details: ['email' => $email]
+            details: ['email' => $email],
         );
     }
 
@@ -55,7 +55,7 @@ class ConflictException extends ApiException
         return new self(
             message: ucfirst($type) . " with this {$field} already exists",
             errorCode: "duplicate_{$type}",
-            details: [$field => $value]
+            details: [$field => $value],
         );
     }
 
@@ -67,7 +67,7 @@ class ConflictException extends ApiException
         return new self(
             message: "Cannot transition from '{$from}' to '{$to}'",
             errorCode: 'invalid_state_transition',
-            details: ['from' => $from, 'to' => $to]
+            details: ['from' => $from, 'to' => $to],
         );
     }
 
@@ -78,7 +78,7 @@ class ConflictException extends ApiException
     {
         return new self(
             message: 'A coupon is already applied to this cart',
-            errorCode: 'coupon_already_applied'
+            errorCode: 'coupon_already_applied',
         );
     }
 
@@ -90,7 +90,7 @@ class ConflictException extends ApiException
         return new self(
             message: 'This gift card is already applied to the cart',
             errorCode: 'giftcard_already_applied',
-            details: ['code' => $code]
+            details: ['code' => $code],
         );
     }
 }

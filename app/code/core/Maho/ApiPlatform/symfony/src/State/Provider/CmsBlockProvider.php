@@ -112,7 +112,7 @@ final class CmsBlockProvider implements ProviderInterface
                     ['like' => "%{$search}%"],
                     ['like' => "%{$search}%"],
                     ['like' => "%{$search}%"],
-                ]
+                ],
             );
         }
 
@@ -165,7 +165,7 @@ final class CmsBlockProvider implements ProviderInterface
                 $url = $matches[1];
                 return $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_MEDIA) . $url;
             },
-            $content
+            $content,
         );
 
         // Process {{config path="..."}} directive
@@ -174,7 +174,7 @@ final class CmsBlockProvider implements ProviderInterface
             function ($matches) use ($storeId) {
                 return \Mage::getStoreConfig($matches[1], $storeId) ?? '';
             },
-            $content
+            $content,
         );
 
         // Process {{store url="..."}} directive
@@ -183,7 +183,7 @@ final class CmsBlockProvider implements ProviderInterface
             function ($matches) use ($store) {
                 return $store->getUrl($matches[1]);
             },
-            $content
+            $content,
         );
 
         // Process {{skin url="..."}} directive
@@ -192,14 +192,14 @@ final class CmsBlockProvider implements ProviderInterface
             function ($matches) use ($store) {
                 return $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_SKIN) . $matches[1];
             },
-            $content
+            $content,
         );
 
         // Strip {{widget ...}} directives - they require full page context
         $content = preg_replace(
             '/\{\{widget[^}]*\}\}/i',
             '<!-- widget removed for API -->',
-            $content
+            $content,
         );
 
         return $content;

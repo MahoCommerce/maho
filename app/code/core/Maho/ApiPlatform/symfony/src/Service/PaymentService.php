@@ -61,7 +61,7 @@ class PaymentService
         ?string $cardLast4 = null,
         ?string $authCode = null,
         ?array $receiptData = null,
-        string $status = \Maho_Pos_Model_Payment::STATUS_CAPTURED
+        string $status = \Maho_Pos_Model_Payment::STATUS_CAPTURED,
     ): \Maho_Pos_Model_Payment {
         // Load order
         $order = \Mage::getModel('sales/order')->load($orderId);
@@ -117,15 +117,15 @@ class PaymentService
         // Validate total amount matches order total
         $totalPaid = 0.0;
         foreach ($payments as $paymentData) {
-            $totalPaid += (float)$paymentData['amount'];
+            $totalPaid += (float) $paymentData['amount'];
         }
 
-        $orderTotal = (float)$order->getGrandTotal();
+        $orderTotal = (float) $order->getGrandTotal();
         $tolerance = 0.01; // Allow 1 cent tolerance for rounding
 
         if (abs($totalPaid - $orderTotal) > $tolerance) {
             throw new \Mage_Core_Exception(
-                "Total payment amount ({$totalPaid}) does not match order total ({$orderTotal})"
+                "Total payment amount ({$totalPaid}) does not match order total ({$orderTotal})",
             );
         }
 
@@ -135,14 +135,14 @@ class PaymentService
                 $orderId,
                 $registerId,
                 $paymentData['methodCode'],
-                (float)$paymentData['amount'],
+                (float) $paymentData['amount'],
                 $paymentData['terminalId'] ?? null,
                 $paymentData['transactionId'] ?? null,
                 $paymentData['cardType'] ?? null,
                 $paymentData['cardLast4'] ?? null,
                 $paymentData['authCode'] ?? null,
                 $paymentData['receiptData'] ?? null,
-                \Maho_Pos_Model_Payment::STATUS_CAPTURED
+                \Maho_Pos_Model_Payment::STATUS_CAPTURED,
             );
 
             $createdPayments[] = $payment;
@@ -177,7 +177,7 @@ class PaymentService
         }
 
         $totalPaid = $this->getTotalPaidAmount($orderId);
-        $orderTotal = (float)$order->getGrandTotal();
+        $orderTotal = (float) $order->getGrandTotal();
 
         return abs($totalPaid - $orderTotal) < 0.01; // 1 cent tolerance
     }

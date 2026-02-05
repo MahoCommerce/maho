@@ -36,23 +36,23 @@ use Maho\ApiPlatform\State\Processor\ReviewProcessor;
             uriVariables: [
                 'productId' => new Link(toProperty: 'productId'),
             ],
-            description: 'Get reviews for a product'
+            description: 'Get reviews for a product',
         ),
         new Get(
             uriTemplate: '/reviews/{id}',
-            description: 'Get a single review'
+            description: 'Get a single review',
         ),
         new Post(
             uriTemplate: '/products/{productId}/reviews',
             uriVariables: [
                 'productId' => new Link(toProperty: 'productId'),
             ],
-            description: 'Submit a review for a product (requires authentication)'
+            description: 'Submit a review for a product (requires authentication)',
         ),
         new GetCollection(
             uriTemplate: '/customers/me/reviews',
             name: 'my_reviews',
-            description: 'Get current customer submitted reviews'
+            description: 'Get current customer submitted reviews',
         ),
     ],
     graphQlOperations: [
@@ -63,15 +63,15 @@ use Maho\ApiPlatform\State\Processor\ReviewProcessor;
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Reviews per page'],
-            ]
+            ],
         ),
         new Query(
             name: 'review',
-            description: 'Get a single review by ID'
+            description: 'Get a single review by ID',
         ),
         new QueryCollection(
             name: 'myReviews',
-            description: 'Get current customer submitted reviews'
+            description: 'Get current customer submitted reviews',
         ),
         new Mutation(
             name: 'submitReview',
@@ -82,9 +82,9 @@ use Maho\ApiPlatform\State\Processor\ReviewProcessor;
                 'detail' => ['type' => 'String!', 'description' => 'Review content'],
                 'nickname' => ['type' => 'String!', 'description' => 'Reviewer nickname'],
                 'rating' => ['type' => 'Int!', 'description' => 'Rating 1-5'],
-            ]
+            ],
         ),
-    ]
+    ],
 )]
 class Review
 {

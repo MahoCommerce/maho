@@ -25,16 +25,16 @@ use Maho\ApiPlatform\State\Provider\UrlResolverProvider;
     operations: [
         new GetCollection(
             uriTemplate: '/url-resolver',
-            description: 'Resolve a URL path to its target (use ?path=your-url)'
+            description: 'Resolve a URL path to its target (use ?path=your-url)',
         ),
     ],
     graphQlOperations: [
         new Query(
             name: 'resolveUrl',
             args: ['path' => ['type' => 'String!']],
-            description: 'Resolve a URL path to its target'
+            description: 'Resolve a URL path to its target',
         ),
-    ]
+    ],
 )]
 class UrlResolveResult
 {

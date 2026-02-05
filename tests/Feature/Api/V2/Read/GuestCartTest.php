@@ -107,8 +107,9 @@ describe('Guest Cart Response Structure', function () {
         $itemsArrayLength = count($cart['items']);
         $itemsCount = (int) $cart['itemsCount'];
 
-        expect($itemsArrayLength)->toBe($itemsCount,
-            "Items array length ({$itemsArrayLength}) should match itemsCount ({$itemsCount})"
+        expect($itemsArrayLength)->toBe(
+            $itemsCount,
+            "Items array length ({$itemsArrayLength}) should match itemsCount ({$itemsCount})",
         );
     });
 
@@ -150,7 +151,7 @@ describe('POST /api/guest-carts/{id}/shipping-methods', function () {
                 'countryId' => 'AU',
                 'postcode' => '3000',
                 'city' => 'Melbourne',
-            ]
+            ],
         ]);
 
         expect($response['status'])->toBeNotFound();
@@ -172,7 +173,7 @@ describe('POST /api/guest-carts/{id}/shipping-methods', function () {
                 'postcode' => '3000',
                 'countryId' => 'AU',
                 'region' => 'Victoria',
-            ]
+            ],
         ]);
 
         if ($response['status'] === 404) {

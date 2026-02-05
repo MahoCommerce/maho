@@ -35,7 +35,7 @@ class ServiceFactory
             try {
                 $meilisearchClient = new \Meilisearch\Client(
                     \Mage::getStoreConfig('maho_api/meilisearch/host'),
-                    \Mage::getStoreConfig('maho_api/meilisearch/api_key')
+                    \Mage::getStoreConfig('maho_api/meilisearch/api_key'),
                 );
             } catch (\Exception $e) {
                 \Mage::log('Meilisearch initialization failed: ' . $e->getMessage());

@@ -24,14 +24,14 @@ class AuthorizationException extends ApiException
         string $message = 'Access denied',
         string $errorCode = 'access_denied',
         array $details = [],
-        ?\Throwable $previous = null
+        ?\Throwable $previous = null,
     ) {
         parent::__construct(
             message: $message,
             errorCode: $errorCode,
             httpStatusCode: 403,
             details: $details,
-            previous: $previous
+            previous: $previous,
         );
     }
 
@@ -47,7 +47,7 @@ class AuthorizationException extends ApiException
         return new self(
             message: $message,
             errorCode: 'insufficient_permissions',
-            details: $resource ? ['resource' => $resource] : []
+            details: $resource ? ['resource' => $resource] : [],
         );
     }
 
@@ -58,7 +58,7 @@ class AuthorizationException extends ApiException
     {
         return new self(
             message: 'Admin access required',
-            errorCode: 'admin_required'
+            errorCode: 'admin_required',
         );
     }
 
@@ -70,7 +70,7 @@ class AuthorizationException extends ApiException
         return new self(
             message: "You can only access your own {$resource}",
             errorCode: 'not_owner',
-            details: ['resource' => $resource]
+            details: ['resource' => $resource],
         );
     }
 }

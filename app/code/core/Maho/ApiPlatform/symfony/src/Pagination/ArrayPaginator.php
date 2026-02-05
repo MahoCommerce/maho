@@ -30,7 +30,7 @@ final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
         private readonly array $items,
         private readonly int $currentPage,
         private readonly int $itemsPerPage,
-        private readonly int $totalItems
+        private readonly int $totalItems,
     ) {}
 
     public function count(): int

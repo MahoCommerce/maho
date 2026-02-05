@@ -27,11 +27,11 @@ use Maho\ApiPlatform\State\Provider\CategoryProvider;
     operations: [
         new Get(
             uriTemplate: '/categories/{id}',
-            description: 'Get a category by ID'
+            description: 'Get a category by ID',
         ),
         new GetCollection(
             uriTemplate: '/categories',
-            description: 'Get category tree'
+            description: 'Get category tree',
         ),
     ],
     graphQlOperations: [
@@ -42,14 +42,14 @@ use Maho\ApiPlatform\State\Provider\CategoryProvider;
                 'parentId' => ['type' => 'Int', 'description' => 'Filter by parent category ID'],
                 'includeInMenu' => ['type' => 'Boolean', 'description' => 'Only include categories in menu'],
             ],
-            description: 'Get category tree'
+            description: 'Get category tree',
         ),
         new Query(
             name: 'categoryByUrlKey',
             args: ['urlKey' => ['type' => 'String!']],
-            description: 'Get a category by URL key'
+            description: 'Get a category by URL key',
         ),
-    ]
+    ],
 )]
 class Category
 {

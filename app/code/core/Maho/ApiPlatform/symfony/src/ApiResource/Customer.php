@@ -33,25 +33,25 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
     operations: [
         new Get(
             uriTemplate: '/customers/{id}',
-            description: 'Get a customer by ID'
+            description: 'Get a customer by ID',
         ),
         new GetCollection(
             uriTemplate: '/customers',
-            description: 'Get customer collection'
+            description: 'Get customer collection',
         ),
         new Post(
             uriTemplate: '/customers',
-            description: 'Create a new customer (register)'
+            description: 'Create a new customer (register)',
         ),
         new Put(
             uriTemplate: '/customers/me',
             name: 'update_profile',
-            description: 'Update current customer profile'
+            description: 'Update current customer profile',
         ),
         new Post(
             uriTemplate: '/customers/me/password',
             name: 'change_password',
-            description: 'Change current customer password'
+            description: 'Change current customer password',
         ),
     ],
     graphQlOperations: [
@@ -65,26 +65,26 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
                 'telephone' => ['type' => 'String', 'description' => 'Filter by phone number'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Number of results per page'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
-            ]
+            ],
         ),
         new Query(
             name: 'me',
             args: [],
-            description: 'Get current authenticated customer'
+            description: 'Get current authenticated customer',
         ),
         new Mutation(
             name: 'createCustomerQuick',
-            description: 'Quick customer creation for POS'
+            description: 'Quick customer creation for POS',
         ),
         new Mutation(
             name: 'customerLogin',
-            description: 'Customer login'
+            description: 'Customer login',
         ),
         new Mutation(
             name: 'customerLogout',
-            description: 'Customer logout'
+            description: 'Customer logout',
         ),
-    ]
+    ],
 )]
 class Customer
 {

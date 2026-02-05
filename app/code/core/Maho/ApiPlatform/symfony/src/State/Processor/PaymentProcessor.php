@@ -99,7 +99,7 @@ final class PaymentProcessor implements ProcessorInterface
             $cardType,
             $cardLast4,
             $authCode,
-            $receiptData
+            $receiptData,
         );
 
         return $this->mapToDto($payment);
@@ -129,7 +129,7 @@ final class PaymentProcessor implements ProcessorInterface
         $createdPayments = $this->paymentService->recordMultiplePayments(
             (int) $orderId,
             (int) $registerId,
-            $payments
+            $payments,
         );
 
         $dtos = [];

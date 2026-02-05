@@ -170,7 +170,7 @@ describe('GET /api/products - Sorting by Price', function () {
         // Filter out any products with null or 0 prices for comparison
         $prices = array_filter(
             array_map(fn($p) => (float) ($p['price'] ?? 0), $items),
-            fn($p) => $p > 0
+            fn($p) => $p > 0,
         );
         $prices = array_values($prices);
 
@@ -290,7 +290,7 @@ describe('GET /api/products - Category Filtering', function () {
         // Check price sorting
         $prices = array_filter(
             array_map(fn($p) => (float) ($p['price'] ?? 0), $items),
-            fn($p) => $p > 0
+            fn($p) => $p > 0,
         );
         $prices = array_values($prices);
         for ($i = 1; $i < count($prices); $i++) {

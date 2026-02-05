@@ -179,7 +179,7 @@ final class ProductProvider implements ProviderInterface
                         items: $products,
                         currentPage: $cachedData['page'],
                         itemsPerPage: $cachedData['pageSize'],
-                        totalItems: $cachedData['total']
+                        totalItems: $cachedData['total'],
                     );
                 }
             }
@@ -215,7 +215,7 @@ final class ProductProvider implements ProviderInterface
             filters: $serviceFilters,
             sort: $sort,
             usePosIndex: false,
-            storeId: StoreContext::getStoreId()
+            storeId: StoreContext::getStoreId(),
         );
 
         // Collect product IDs for batch operations
@@ -247,7 +247,7 @@ final class ProductProvider implements ProviderInterface
                     forListing: true,
                     reviewSummary: $reviewSummaries[$productId] ?? null,
                     categoryIds: $categoryIdsByProduct[$productId] ?? [],
-                    stockItem: $stockItemsByProduct[$productId] ?? null
+                    stockItem: $stockItemsByProduct[$productId] ?? null,
                 );
             } elseif (is_array($product)) {
                 $products[] = $this->mapArrayToDto($product);
@@ -266,7 +266,7 @@ final class ProductProvider implements ProviderInterface
                 json_encode($cacheData),
                 $cacheKey,
                 ['API_PRODUCTS'],
-                self::CACHE_TTL
+                self::CACHE_TTL,
             );
         }
 
@@ -275,7 +275,7 @@ final class ProductProvider implements ProviderInterface
             items: $products,
             currentPage: $page,
             itemsPerPage: $pageSize,
-            totalItems: (int) $result['total']
+            totalItems: (int) $result['total'],
         );
     }
 
@@ -359,9 +359,8 @@ final class ProductProvider implements ProviderInterface
         bool $forListing = false,
         ?array $reviewSummary = null,
         ?array $categoryIds = null,
-        ?\Mage_CatalogInventory_Model_Stock_Item $stockItem = null
-    ): Product
-    {
+        ?\Mage_CatalogInventory_Model_Stock_Item $stockItem = null,
+    ): Product {
         $dto = new Product();
         $dto->id = (int) $product->getId();
         $dto->sku = $product->getSku() ?? '';

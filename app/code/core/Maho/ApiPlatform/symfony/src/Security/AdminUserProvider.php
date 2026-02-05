@@ -37,7 +37,7 @@ class AdminUserProvider implements UserProviderInterface
 
         if ($adminId === null) {
             throw new UserNotFoundException(
-                sprintf('Admin identifier "%s" is not valid.', $identifier)
+                sprintf('Admin identifier "%s" is not valid.', $identifier),
             );
         }
 
@@ -45,14 +45,14 @@ class AdminUserProvider implements UserProviderInterface
 
         if ($admin === null) {
             throw new UserNotFoundException(
-                sprintf('Admin with ID "%d" not found.', $adminId)
+                sprintf('Admin with ID "%d" not found.', $adminId),
             );
         }
 
         // Check if admin is active
         if (!$admin->getIsActive()) {
             throw new UserNotFoundException(
-                sprintf('Admin with ID "%d" is not active.', $adminId)
+                sprintf('Admin with ID "%d" is not active.', $adminId),
             );
         }
 
@@ -74,7 +74,7 @@ class AdminUserProvider implements UserProviderInterface
     {
         if (!$user instanceof ApiUser) {
             throw new UnsupportedUserException(
-                sprintf('Instances of "%s" are not supported.', get_class($user))
+                sprintf('Instances of "%s" are not supported.', get_class($user)),
             );
         }
 

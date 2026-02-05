@@ -31,37 +31,37 @@ use Maho\ApiPlatform\State\Processor\NewsletterProcessor;
         new Get(
             uriTemplate: '/newsletter/status',
             name: 'status',
-            description: 'Get subscription status for authenticated customer'
+            description: 'Get subscription status for authenticated customer',
         ),
         // Subscribe to newsletter (guest or authenticated)
         new Post(
             uriTemplate: '/newsletter/subscribe',
             name: 'subscribe',
-            description: 'Subscribe to newsletter'
+            description: 'Subscribe to newsletter',
         ),
         // Unsubscribe from newsletter
         new Post(
             uriTemplate: '/newsletter/unsubscribe',
             name: 'unsubscribe',
-            description: 'Unsubscribe from newsletter'
+            description: 'Unsubscribe from newsletter',
         ),
     ],
     graphQlOperations: [
         new Query(
             name: 'newsletterStatus',
-            description: 'Get subscription status for authenticated customer'
+            description: 'Get subscription status for authenticated customer',
         ),
         new Mutation(
             name: 'subscribeNewsletter',
             args: ['email' => ['type' => 'String']],
-            description: 'Subscribe to newsletter'
+            description: 'Subscribe to newsletter',
         ),
         new Mutation(
             name: 'unsubscribeNewsletter',
             args: ['email' => ['type' => 'String']],
-            description: 'Unsubscribe from newsletter'
+            description: 'Unsubscribe from newsletter',
         ),
-    ]
+    ],
 )]
 class NewsletterSubscription
 {

@@ -27,11 +27,11 @@ use Maho\ApiPlatform\State\Provider\ProductProvider;
     operations: [
         new Get(
             uriTemplate: '/products/{id}',
-            description: 'Get a product by ID'
+            description: 'Get a product by ID',
         ),
         new GetCollection(
             uriTemplate: '/products',
-            description: 'Get product collection'
+            description: 'Get product collection',
         ),
     ],
     graphQlOperations: [
@@ -40,14 +40,14 @@ use Maho\ApiPlatform\State\Provider\ProductProvider;
         new Query(
             name: 'productBySku',
             args: ['sku' => ['type' => 'String!']],
-            description: 'Get a product by SKU'
+            description: 'Get a product by SKU',
         ),
         new Query(
             name: 'productByBarcode',
             args: ['barcode' => ['type' => 'String!']],
-            description: 'Get a product by barcode'
+            description: 'Get a product by barcode',
         ),
-    ]
+    ],
 )]
 class Product
 {
