@@ -74,7 +74,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 </table>
             </div>
 
-            <div id="csv-preview-panel" class="fm-preview-panel" style="display:none">
+            <div id="csv-preview-panel" class="fm-preview-panel">
                 <div class="fm-preview-header">
                     <span class="fm-preview-title">' . $this->__('Preview') . '</span>
                     <span class="fm-preview-meta">(<span id="csv-preview-count">0</span> ' . $this->__('sample products') . ')</span>
@@ -85,7 +85,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             </div>
         </div>
 
-        <div id="csv-import-modal" class="fm-modal-overlay" style="display:none">
+        <div id="csv-import-modal" class="fm-modal-overlay">
             <div class="fm-modal">
                 <h3 class="fm-modal-title">' . $this->__('Import CSV Structure') . '</h3>
                 <p>' . $this->__('Paste a header row or sample CSV:') . '</p>

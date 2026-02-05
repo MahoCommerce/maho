@@ -77,7 +77,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 </div>
             </div>
 
-            <div id="xml-preview-panel" class="fm-preview-panel" style="display:none">
+            <div id="xml-preview-panel" class="fm-preview-panel">
                 <div class="fm-preview-header">
                     <span class="fm-preview-title">' . $this->__('Preview') . '</span>
                     <button type="button" class="scalable" onclick="XmlBuilder.refreshPreview()"><span>' . $this->__('Refresh') . '</span></button>
@@ -95,7 +95,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             </div>
         </div>
 
-        <div id="xml-import-modal" class="fm-modal-overlay" style="display:none">
+        <div id="xml-import-modal" class="fm-modal-overlay">
             <div class="fm-modal">
                 <h3 class="fm-modal-title">' . $this->__('Import XML Structure') . '</h3>
                 <p>' . $this->__('Paste a sample XML item:') . '</p>
@@ -545,7 +545,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 var status = document.getElementById("xml-validation-status");
 
                 if (!content || content.trim() === "") {
-                    status.innerHTML = \'<span style="color: #666;">' . $this->__('No content to validate') . '</span>\';
+                    status.innerHTML = \'<span style="color:#666">' . $this->__('No content to validate') . '</span>\';
                     return;
                 }
 
@@ -564,9 +564,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     // Extract just the error message, not the full verbose output
                     var match = errorText.match(/error[^:]*:\s*(.+?)(?:\n|$)/i);
                     var shortError = match ? match[1].trim() : "' . $this->__('Invalid XML structure') . '";
-                    status.innerHTML = \'<span style="color: #c62828;">&#10008; \' + escapeHtml(shortError) + \'</span>\';
+                    status.innerHTML = \'<span style="color:#963535">&#10008; \' + escapeHtml(shortError) + \'</span>\';
                 } else {
-                    status.innerHTML = \'<span style="color: #2e7d32;">&#10004; ' . $this->__('Valid XML') . '</span>\';
+                    status.innerHTML = \'<span style="color:#185b00">&#10004; ' . $this->__('Valid XML') . '</span>\';
                 }
             }
         };
@@ -575,17 +575,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             XmlBuilder.init();
         });
         </script>
-
-        <style>
-        .xml-node { padding: 5px 10px; cursor: pointer; border-radius: 3px; margin: 2px 0; }
-        .xml-node:hover { background: #f5f5f5; }
-        .xml-node.selected { background: #e8f5e9; }
-        .xml-tag { font-weight: 600; color: #2e7d32; }
-        .xml-badge { font-size: 10px; padding: 2px 5px; background: #e0e0e0; border-radius: 3px; color: #666; }
-        .xml-badge.optional { background: #fff3e0; color: #e65100; }
-        .xml-toggle { cursor: pointer; color: #666; }
-        .xml-children { margin-left: 10px; }
-        </style>
         ';
     }
 

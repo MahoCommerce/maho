@@ -382,7 +382,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                             (data.upload_status === 'failed' ? 'error-msg' : 'notice-msg');
                         const uploadIcon = data.upload_status === 'success' ? '✓' :
                             (data.upload_status === 'failed' ? '✗' : '⊘');
-                        successHtml += '<div class="' + uploadStatusClass + '" style="margin-top:8px">' +
+                        successHtml += '<div class="' + uploadStatusClass + ' fm-upload-status">' +
                             uploadIcon + ' Upload: ' + (data.upload_message || data.upload_status) + '</div>';
                     }
 
@@ -422,11 +422,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                         if (data.success) {
                             // Update status area with success
                             const existingContent = statusEl ? statusEl.innerHTML : '';
-                            const uploadHtml = '<div class="success-msg" style="margin-top:8px">✓ ' +
+                            const uploadHtml = '<div class="success-msg fm-upload-status">✓ ' +
                                 escapeHtml(data.message) + '</div>';
                             if (statusEl) {
                                 // Remove any existing upload status and add new one
-                                statusEl.innerHTML = existingContent.replace(/<div class="(success|error|notice)-msg" style="margin-top:8px">.*?<\\/div>/g, '') + uploadHtml;
+                                statusEl.innerHTML = existingContent.replace(/<div class="(success|error|notice)-msg fm-upload-status">.*?<\\/div>/g, '') + uploadHtml;
                             }
                             if (btn) btn.remove();
                         } else {

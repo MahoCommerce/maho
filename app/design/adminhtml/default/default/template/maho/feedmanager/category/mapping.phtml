@@ -16,7 +16,7 @@ $categories = $this->getCategoriesTree();
     <table cellspacing="0" width="100%">
         <tr>
             <td><h3 class="icon-head head-products"><?php echo $this->__('Category Mapping') ?></h3></td>
-            <td class="form-buttons" style="text-align: right;">
+            <td class="form-buttons">
                 <button type="button" class="scalable back" onclick="setLocation('<?php echo $this->getUrl('*/feedmanager_feed/') ?>')">
                     <span><span><span><?php echo $this->__('Back') ?></span></span></span>
                 </button>
@@ -31,10 +31,10 @@ $categories = $this->getCategoriesTree();
     </table>
 </div>
 
-<div class="category-mapping-container" style="margin-top: 20px;">
-    <div class="platform-selector" style="margin-bottom: 20px;">
+<div class="category-mapping-container">
+    <div class="platform-selector">
         <label for="platform-select"><strong><?php echo $this->__('Platform:') ?></strong></label>
-        <select id="platform-select" onchange="CategoryMapping.loadCategories()" style="margin-left: 10px; padding: 5px;">
+        <select id="platform-select" onchange="CategoryMapping.loadCategories()">
             <?php foreach ($platforms as $code => $name): ?>
                 <?php if ($code): ?>
                     <option value="<?php echo $this->escapeHtml($code) ?>"><?php echo $this->escapeHtml($name) ?></option>
@@ -44,15 +44,15 @@ $categories = $this->getCategoriesTree();
     </div>
 
     <!-- Bulk Mode Indicator (hidden by default) -->
-    <div id="bulk-mode-bar" style="display: none; background: #1e88e5; color: white; padding: 12px 20px; margin-bottom: 20px; border-radius: 4px; position: sticky; top: 0; z-index: 100;">
-        <div style="display: flex; align-items: center; justify-content: space-between;">
+    <div id="bulk-mode-bar" class="bulk-mode-bar">
+        <div class="bulk-mode-bar-content">
             <div>
                 <strong><?php echo $this->__('Bulk Mode Active') ?></strong>
-                <span style="margin-left: 15px;"><?php echo $this->__('Click to apply, Shift+Click for range:') ?></span>
-                <span id="bulk-category-display" style="margin-left: 10px; background: rgba(255,255,255,0.2); padding: 4px 12px; border-radius: 3px;"></span>
+                <span class="bulk-mode-info"><?php echo $this->__('Click to apply, Shift+Click for range:') ?></span>
+                <span id="bulk-category-display" class="bulk-category-display"></span>
             </div>
             <div>
-                <button type="button" onclick="CategoryMapping.exitBulkMode()" style="background: white; color: #1e88e5; border: none; padding: 6px 16px; border-radius: 3px; cursor: pointer; font-weight: bold;">
+                <button type="button" class="bulk-exit-btn" onclick="CategoryMapping.exitBulkMode()">
                     <?php echo $this->__('Exit Bulk Mode') ?> (ESC)
                 </button>
             </div>
@@ -60,19 +60,19 @@ $categories = $this->getCategoriesTree();
     </div>
 
     <div class="category-mapping-table">
-        <table class="data" id="category-mapping-grid" style="width: 100%;">
+        <table class="data" id="category-mapping-grid">
             <thead>
                 <tr class="headings">
-                    <th style="width: 35%;"><?php echo $this->__('Store Category') ?></th>
-                    <th style="width: 45%;"><?php echo $this->__('Platform Category') ?></th>
-                    <th style="width: 20%;"><?php echo $this->__('Actions') ?></th>
+                    <th><?php echo $this->__('Store Category') ?></th>
+                    <th><?php echo $this->__('Platform Category') ?></th>
+                    <th><?php echo $this->__('Actions') ?></th>
                 </tr>
             </thead>
             <tbody id="category-rows">
                 <?php foreach ($categories as $category): ?>
                     <tr data-category-id="<?php echo (int) $category['id'] ?>">
                         <td>
-                            <span style="padding-left: <?php echo (($category['level'] - 1) * 20) ?>px;">
+                            <span class="category-indent" style="padding-left: <?php echo (($category['level'] - 1) * 20) ?>px;">
                                 <?php echo $this->escapeHtml($category['path']) ?>
                             </span>
                         </td>
@@ -82,14 +82,13 @@ $categories = $this->getCategoriesTree();
                                    id="category-<?php echo (int) $category['id'] ?>-path"
                                    data-category-id="<?php echo (int) $category['id'] ?>"
                                    placeholder="<?php echo $this->__('Search or enter platform category...') ?>"
-                                   style="width: 90%;"
                                    autocomplete="off" />
                             <input type="hidden"
                                    id="category-<?php echo (int) $category['id'] ?>-id"
                                    data-category-id="<?php echo (int) $category['id'] ?>" />
-                            <div class="autocomplete-results" id="autocomplete-<?php echo (int) $category['id'] ?>" style="display: none;"></div>
+                            <div class="autocomplete-results" id="autocomplete-<?php echo (int) $category['id'] ?>"></div>
                         </td>
-                        <td style="white-space: nowrap;">
+                        <td>
                             <button type="button" class="scalable copy-btn" onclick="CategoryMapping.copyMapping(<?php echo (int) $category['id'] ?>)" title="<?php echo $this->__('Copy this mapping for bulk apply') ?>">
                                 <span><span><span><?php echo $this->__('Copy') ?></span></span></span>
                             </button>
@@ -103,49 +102,6 @@ $categories = $this->getCategoriesTree();
         </table>
     </div>
 </div>
-
-<style>
-.category-mapping-table { position: relative; }
-.autocomplete-results {
-    position: absolute;
-    background: #fff;
-    border: 1px solid #ccc;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 1000;
-    width: 400px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-.autocomplete-results .autocomplete-item {
-    padding: 8px 12px;
-    cursor: pointer;
-    border-bottom: 1px solid #eee;
-}
-.autocomplete-results .autocomplete-item:hover {
-    background: #f0f0f0;
-}
-.autocomplete-results .autocomplete-item .category-id {
-    color: #999;
-    font-size: 0.85em;
-}
-.platform-category-input.mapped {
-    background-color: #e8f5e9;
-}
-.platform-category-input.bulk-target {
-    cursor: pointer;
-    box-shadow: 0 0 0 2px #1e88e5;
-}
-.platform-category-input.bulk-target:hover {
-    background-color: #e3f2fd;
-}
-.bulk-mode-active .copy-btn {
-    opacity: 0.5;
-    pointer-events: none;
-}
-tr.bulk-source td {
-    background-color: #bbdefb;
-}
-</style>
 
 <script>
 const CategoryMapping = {

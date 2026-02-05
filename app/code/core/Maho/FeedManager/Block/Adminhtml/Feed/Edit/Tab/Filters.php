@@ -308,108 +308,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
     }
 
     /**
-     * Get CSS styles
+     * Get CSS styles - styles are now in feedmanager.css
      */
     protected function _getStyles(): string
     {
-        return '<style>
-            /* Layout adjustments for condition groups fieldset */
-            #feed_condition_groups_fieldset .form-list td.label:has(label[for="feed_condition_groups_note"]) { display: none; }
-            #feed_condition_groups_fieldset .form-list td.value { width: 100%; }
-
-            /* Empty state */
-            .cond-empty {
-                padding: 30px;
-                text-align: center;
-                color: #888;
-                background: #fafafa;
-                border: 1px dashed #ccc;
-            }
-
-            /* Condition group box */
-            .cond-group {
-                background: #fff;
-                border: 1px solid #ccc;
-                margin-bottom: 0;
-            }
-            .cond-group-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 10px 12px;
-                background: #f6f6f6;
-                border-bottom: 1px solid #ccc;
-            }
-            .cond-group-title { font-weight: bold; }
-            .cond-group-body { padding: 12px; }
-            .cond-list { margin-bottom: 10px; }
-
-            /* Condition row */
-            .cond-row {
-                display: flex;
-                gap: 6px;
-                align-items: center;
-                margin-bottom: 6px;
-            }
-            .cond-row:last-child { margin-bottom: 0; }
-
-            /* Form element widths */
-            .cond-row select.attr-select { width: 200px; }
-            .cond-row select.op-select { width: 140px; }
-            .cond-row select.stock-select { width: 120px; }
-            .cond-row select.type-select { width: 180px; min-height: auto; }
-            .cond-row select.type-select[multiple] { min-height: 80px; height: auto; }
-            .cond-row select.visibility-select { width: 180px; min-height: auto; }
-            .cond-row select.visibility-select[multiple] { min-height: 80px; height: auto; }
-            .cond-row .input-text.value-input { flex: 1; min-width: 120px; }
-
-            /* Category container */
-            .cond-category-wrap {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
-                flex: 1;
-                min-width: 220px;
-            }
-            .cond-category-wrap .input-text { height: 28px; font-size: 12px; }
-            .cond-category-wrap select {
-                width: 100%;
-                min-height: 100px;
-                height: auto;
-            }
-            .cond-category-wrap select:not([multiple]) {
-                min-height: auto;
-                height: 28px;
-            }
-            .cond-category-wrap select option.hidden { display: none; }
-
-            /* Logic separators */
-            .logic-sep {
-                display: flex;
-                align-items: center;
-                margin: 10px 0;
-            }
-            .logic-sep::before, .logic-sep::after {
-                content: "";
-                flex: 1;
-                height: 1px;
-                background: #ddd;
-            }
-            .logic-label {
-                padding: 3px 10px;
-                font-size: 10px;
-                font-weight: bold;
-                text-transform: uppercase;
-                border-radius: 3px;
-            }
-            .logic-and .logic-label { background: #e3f2fd; color: #1565c0; }
-            .logic-or { margin: 6px 0; }
-            .logic-or::before, .logic-or::after { background: #f3e5f5; }
-            .logic-or .logic-label { background: #f3e5f5; color: #7b1fa2; }
-
-            /* Add group button container */
-            .cond-add-group { margin-top: 12px; }
-        </style>';
+        return '';
     }
 
     /**
@@ -739,26 +642,26 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 }
                 html += '</select>';
 
-                // Stock select (hidden by default)
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][stock_value]" class="stock-select" style="display:none" onchange="FMConditions.onStockChange(this)">';
+                // Stock select (hidden by default via CSS)
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][stock_value]" class="stock-select" onchange="FMConditions.onStockChange(this)">';
                 html += '<option value="1">In Stock</option><option value="0">Out of Stock</option></select>';
 
-                // Product type select (hidden by default)
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][type_value]" class="type-select" style="display:none" onchange="FMConditions.onTypeChange(this)">';
+                // Product type select (hidden by default via CSS)
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][type_value]" class="type-select" onchange="FMConditions.onTypeChange(this)">';
                 for (var typeCode in this.productTypes) {
                     html += '<option value="' + escapeHtml(typeCode, true) + '">' + escapeHtml(this.productTypes[typeCode]) + '</option>';
                 }
                 html += '</select>';
 
-                // Visibility select (hidden by default)
-                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][visibility_value]" class="visibility-select" style="display:none" onchange="FMConditions.onVisibilityChange(this)">';
+                // Visibility select (hidden by default via CSS)
+                html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][visibility_value]" class="visibility-select" onchange="FMConditions.onVisibilityChange(this)">';
                 for (var visCode in this.visibilityOptions) {
                     html += '<option value="' + escapeHtml(visCode, true) + '">' + escapeHtml(this.visibilityOptions[visCode]) + '</option>';
                 }
                 html += '</select>';
 
-                // Category container (hidden by default)
-                html += '<div class="cond-category-wrap" style="display:none">';
+                // Category container (hidden by default via CSS)
+                html += '<div class="cond-category-wrap">';
                 html += '<input type="text" class="input-text" placeholder="Filter categories..." onkeyup="FMConditions.filterCategories(this)" />';
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][category_value]" class="category-select" multiple="multiple" onchange="FMConditions.onCategoryChange(this)">';
                 for (var catId in this.categories) {

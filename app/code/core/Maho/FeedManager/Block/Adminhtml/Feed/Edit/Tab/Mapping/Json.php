@@ -80,7 +80,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 </div>
             </div>
 
-            <div id="json-preview-panel" class="fm-preview-panel" style="display:none">
+            <div id="json-preview-panel" class="fm-preview-panel">
                 <div class="fm-preview-header">
                     <span class="fm-preview-title">' . $this->__('Preview') . '</span>
                     <button type="button" class="scalable" onclick="JsonBuilder.refreshPreview()"><span>' . $this->__('Refresh') . '</span></button>
@@ -92,7 +92,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
             </div>
         </div>
 
-        <div id="json-import-modal" class="fm-modal-overlay" style="display:none">
+        <div id="json-import-modal" class="fm-modal-overlay">
             <div class="fm-modal">
                 <h3 class="fm-modal-title">' . $this->__('Import JSON Structure') . '</h3>
                 <p>' . $this->__('Paste a sample JSON object:') . '</p>
@@ -530,16 +530,16 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 var status = document.getElementById("json-validation-status");
 
                 if (!content || content.trim() === "") {
-                    status.innerHTML = \'<span style="color: #666;">' . $this->__('No content to validate') . '</span>\';
+                    status.innerHTML = \'<span style="color:#666">' . $this->__('No content to validate') . '</span>\';
                     return;
                 }
 
                 try {
                     JSON.parse(content);
-                    status.innerHTML = \'<span style="color: #2e7d32;">&#10004; ' . $this->__('Valid JSON') . '</span>\';
+                    status.innerHTML = \'<span style="color:#185b00">&#10004; ' . $this->__('Valid JSON') . '</span>\';
                 } catch (e) {
                     var errorMsg = e.message || "' . $this->__('Invalid JSON') . '";
-                    status.innerHTML = \'<span style="color: #c62828;">&#10008; \' + escapeHtml(errorMsg) + \'</span>\';
+                    status.innerHTML = \'<span style="color:#963535">&#10008; \' + escapeHtml(errorMsg) + \'</span>\';
                 }
             }
         };
@@ -548,16 +548,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
             JsonBuilder.init();
         });
         </script>
-
-        <style>
-        .json-node { padding: 5px 10px; cursor: pointer; border-radius: 3px; margin: 2px 0; }
-        .json-node:hover { background: #f5f5f5; }
-        .json-node.selected { background: #e3f2fd; }
-        .json-key { font-weight: 600; color: #1976d2; }
-        .json-type { color: #666; font-size: 11px; }
-        .json-toggle { cursor: pointer; color: #666; }
-        .json-children { margin-left: 10px; }
-        </style>
         ';
     }
 }

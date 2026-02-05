@@ -157,22 +157,22 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
         ]);
 
         $csvFieldset->addField('csv_settings_note', 'note', [
-            'text' => '<div id="csv-settings-row" style="display: flex; gap: 20px; margin-bottom: 15px;">' .
+            'text' => '<div id="csv-settings-row" class="fm-csv-settings-row">' .
                 '<div><label>' . $this->__('Delimiter') . '</label>' .
-                '<select id="csv_delimiter" name="csv_delimiter" style="width: 100px;">' .
+                '<select id="csv_delimiter" name="csv_delimiter">' .
                 '<option value=","' . ($feed->getCsvDelimiter() === ',' || $feed->getCsvDelimiter() === null ? ' selected' : '') . '>' . $this->__('Comma (,)') . '</option>' .
                 '<option value="&#9;"' . ($feed->getCsvDelimiter() === "\t" ? ' selected' : '') . '>' . $this->__('Tab') . '</option>' .
                 '<option value="|"' . ($feed->getCsvDelimiter() === '|' ? ' selected' : '') . '>' . $this->__('Pipe (|)') . '</option>' .
                 '<option value=";"' . ($feed->getCsvDelimiter() === ';' ? ' selected' : '') . '>' . $this->__('Semicolon (;)') . '</option>' .
                 '</select></div>' .
                 '<div><label>' . $this->__('Enclosure') . '</label>' .
-                '<select id="csv_enclosure" name="csv_enclosure" style="width: 100px;">' .
+                '<select id="csv_enclosure" name="csv_enclosure">' .
                 '<option value="&quot;"' . ($feed->getCsvEnclosure() === '"' || $feed->getCsvEnclosure() === null ? ' selected' : '') . '>' . $this->__('Double Quote (")') . '</option>' .
                 '<option value="&#39;"' . ($feed->getCsvEnclosure() === "'" ? ' selected' : '') . '>' . $this->__("Single Quote (')") . '</option>' .
                 '<option value=""' . ($feed->getCsvEnclosure() === '' ? ' selected' : '') . '>' . $this->__('None') . '</option>' .
                 '</select></div>' .
                 '<div><label>' . $this->__('Include Header') . '</label>' .
-                '<select id="csv_include_header" name="csv_include_header" style="width: 100px;">' .
+                '<select id="csv_include_header" name="csv_include_header">' .
                 '<option value="1"' . ($feed->getCsvIncludeHeader() != 0 ? ' selected' : '') . '>' . $this->__('Yes') . '</option>' .
                 '<option value="0"' . ($feed->getCsvIncludeHeader() == 0 && $feed->getCsvIncludeHeader() !== null ? ' selected' : '') . '>' . $this->__('No') . '</option>' .
                 '</select></div>' .
@@ -843,7 +843,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                         '<button type="button" id="add-transformer-btn" class="scalable add" onclick="TransformerModal.toggleDropdown()">' +
                             '<span>' + TransformerData.translations.add_transformer + '</span>' +
                         '</button>' +
-                        '<div id="transformer-dropdown" class="transformer-dropdown" style="display: none;"></div>' +
+                        '<div id="transformer-dropdown" class="transformer-dropdown"></div>' +
                     '</div>' +
                 '</div>';
             },
@@ -958,7 +958,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
                             html += '</div>';
                         }
                     } else {
-                        html += '<p style="color: #6c757d; font-size: 12px; margin: 0;">No options for this transformer.</p>';
+                        html += '<p class="fm-no-options">No options for this transformer.</p>';
                     }
                     html += '</div></div>';
                 }
