@@ -24,6 +24,7 @@ class Maho_FeedManager_Model_Platform
      */
     protected static array $_adapters = [
         'google' => Maho_FeedManager_Model_Platform_Google::class,
+        'google_local_inventory' => Maho_FeedManager_Model_Platform_GoogleLocalInventory::class,
         'facebook' => Maho_FeedManager_Model_Platform_Facebook::class,
         'bing' => Maho_FeedManager_Model_Platform_Bing::class,
         'pinterest' => Maho_FeedManager_Model_Platform_Pinterest::class,

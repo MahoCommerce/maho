@@ -62,15 +62,16 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public function getPlatformOptions(): array
     {
         return [
-            ''            => $this->__('-- Select Platform --'),
-            'google'      => $this->__('Google Shopping'),
-            'facebook'    => $this->__('Facebook / Meta'),
-            'bing'        => $this->__('Bing Shopping'),
-            'pinterest'   => $this->__('Pinterest'),
-            'idealo'      => $this->__('Idealo'),
-            'trovaprezzi' => $this->__('Trovaprezzi'),
-            'openai'      => $this->__('OpenAI Commerce'),
-            'custom'      => $this->__('Custom'),
+            ''                       => $this->__('-- Select Platform --'),
+            'google'                 => $this->__('Google Shopping'),
+            'google_local_inventory' => $this->__('Google Local Inventory'),
+            'facebook'               => $this->__('Facebook / Meta'),
+            'bing'                   => $this->__('Bing Shopping'),
+            'pinterest'              => $this->__('Pinterest'),
+            'idealo'                 => $this->__('Idealo'),
+            'trovaprezzi'            => $this->__('Trovaprezzi'),
+            'openai'                 => $this->__('OpenAI Commerce'),
+            'custom'                 => $this->__('Custom'),
         ];
     }
 
@@ -93,13 +94,14 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
     public function getPlatformFormats(string $platform): array
     {
         $formats = [
-            'google'     => ['xml'],
-            'facebook'   => ['xml', 'csv'],
-            'bing'       => ['xml'],
-            'pinterest'  => ['xml'],
-            'idealo'     => ['csv'],
-            'trovaprezzi' => ['xml'],
-            'custom'     => ['xml', 'csv', 'json'],
+            'google'                 => ['xml'],
+            'google_local_inventory' => ['xml', 'csv'],
+            'facebook'               => ['xml', 'csv'],
+            'bing'                   => ['xml'],
+            'pinterest'              => ['xml'],
+            'idealo'                 => ['csv'],
+            'trovaprezzi'            => ['xml'],
+            'custom'                 => ['xml', 'csv', 'json'],
         ];
 
         return $formats[$platform] ?? ['xml', 'csv', 'json'];
