@@ -69,6 +69,12 @@ class OAuth2Authenticator extends AbstractAuthenticator
 
         try {
             $payload = $this->jwtService->decodeToken($token);
+        } catch (\Firebase\JWT\ExpiredException $e) {
+            throw new CustomUserMessageAuthenticationException('Token has expired');
+        } catch (\Firebase\JWT\SignatureInvalidException $e) {
+            throw new CustomUserMessageAuthenticationException('Invalid token signature');
+        } catch (\UnexpectedValueException $e) {
+            throw new CustomUserMessageAuthenticationException('Malformed token');
         } catch (\Exception $e) {
             throw new CustomUserMessageAuthenticationException(
                 'Invalid or expired token: ' . $e->getMessage(),

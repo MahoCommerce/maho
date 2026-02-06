@@ -18,7 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Service\CustomerService;
 use Maho\ApiPlatform\ApiResource\Customer;
-use Maho\ApiPlatform\ApiResource\Address;
+use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -34,10 +34,12 @@ final class CustomerProvider implements ProviderInterface
 {
     use AuthenticationTrait;
 
+    private AddressMapper $addressMapper;
     private CustomerService $customerService;
 
     public function __construct(Security $security)
     {
+        $this->addressMapper = new AddressMapper();
         $this->customerService = new CustomerService();
         $this->security = $security;
     }
@@ -163,7 +165,7 @@ final class CustomerProvider implements ProviderInterface
 
         $dto->addresses = [];
         foreach ($customer->getAddresses() as $address) {
-            $addressDto = $this->mapAddressToDto($address);
+            $addressDto = $this->addressMapper->fromCustomerAddress($address);
 
             // Track default billing/shipping on the address DTO
             if ($address->getId() == $customer->getDefaultBilling()) {
@@ -205,7 +207,7 @@ final class CustomerProvider implements ProviderInterface
         if (isset($defaultBillingIds[$customerId])) {
             $addressId = $defaultBillingIds[$customerId];
             if (isset($addressMap[$addressId])) {
-                $addressDto = $this->mapAddressToDto($addressMap[$addressId]);
+                $addressDto = $this->addressMapper->fromCustomerAddress($addressMap[$addressId]);
                 $addressDto->isDefaultBilling = true;
                 $dto->defaultBillingAddress = $addressDto;
             }
@@ -214,25 +216,4 @@ final class CustomerProvider implements ProviderInterface
         return $dto;
     }
 
-    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
-    /**
-     * Map Maho address model to Address DTO
-     */
-    private function mapAddressToDto(\Mage_Customer_Model_Address $address): Address
-    {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
-
-        return $dto;
-    }
 }

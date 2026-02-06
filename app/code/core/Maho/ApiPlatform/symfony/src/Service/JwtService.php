@@ -178,6 +178,7 @@ class JwtService
             $this->decodeToken($token);
             return true;
         } catch (\Exception $e) {
+            \Mage::log('JWT validation failed: ' . $e->getMessage(), \Mage::LOG_DEBUG, 'api_auth.log');
             return false;
         }
     }

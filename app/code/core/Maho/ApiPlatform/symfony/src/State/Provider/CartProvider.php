@@ -18,7 +18,7 @@ use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Cart;
 use Maho\ApiPlatform\ApiResource\CartItem;
 use Maho\ApiPlatform\ApiResource\CartPrices;
-use Maho\ApiPlatform\ApiResource\Address;
+use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -33,10 +33,12 @@ final class CartProvider implements ProviderInterface
 {
     use AuthenticationTrait;
 
+    private AddressMapper $addressMapper;
     private CartService $cartService;
 
     public function __construct(Security $security)
     {
+        $this->addressMapper = new AddressMapper();
         $this->security = $security;
         $this->cartService = new CartService();
     }
@@ -141,13 +143,13 @@ final class CartProvider implements ProviderInterface
         // Map billing address
         $billingAddress = $quote->getBillingAddress();
         if ($billingAddress && $billingAddress->getId()) {
-            $dto->billingAddress = $this->mapAddressToDto($billingAddress);
+            $dto->billingAddress = $this->addressMapper->fromQuoteAddress($billingAddress);
         }
 
         // Map shipping address
         $shippingAddress = $quote->getShippingAddress();
         if ($shippingAddress && $shippingAddress->getId()) {
-            $dto->shippingAddress = $this->mapAddressToDto($shippingAddress);
+            $dto->shippingAddress = $this->addressMapper->fromQuoteAddress($shippingAddress);
 
             // Get available shipping methods
             $dto->availableShippingMethods = $this->getAvailableShippingMethods($shippingAddress);
@@ -254,27 +256,6 @@ final class CartProvider implements ProviderInterface
         $prices->grandTotal = (float) $quote->getGrandTotal();
 
         return $prices;
-    }
-
-    /**
-     * Map Maho quote address model to Address DTO
-     */
-    private function mapAddressToDto(\Mage_Sales_Model_Quote_Address $address): Address
-    {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
-
-        return $dto;
     }
 
     /**

@@ -18,7 +18,7 @@ use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\ApiResource\Cart;
 use Maho\ApiPlatform\ApiResource\CartItem;
 use Maho\ApiPlatform\ApiResource\CartPrices;
-use Maho\ApiPlatform\ApiResource\Address;
+use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 
 /**
@@ -28,10 +28,12 @@ use Maho\ApiPlatform\Service\CartService;
  */
 final class CartProcessor implements ProcessorInterface
 {
+    private AddressMapper $addressMapper;
     private CartService $cartService;
 
     public function __construct()
     {
+        $this->addressMapper = new AddressMapper();
         $this->cartService = new CartService();
     }
 
@@ -628,13 +630,13 @@ final class CartProcessor implements ProcessorInterface
         // Map billing address
         $billingAddress = $quote->getBillingAddress();
         if ($billingAddress && $billingAddress->getFirstname()) {
-            $cart->billingAddress = $this->mapAddressToDto($billingAddress);
+            $cart->billingAddress = $this->addressMapper->fromQuoteAddress($billingAddress);
         }
 
         // Map shipping address
         $shippingAddress = $quote->getShippingAddress();
         if ($shippingAddress && $shippingAddress->getFirstname()) {
-            $cart->shippingAddress = $this->mapAddressToDto($shippingAddress);
+            $cart->shippingAddress = $this->addressMapper->fromQuoteAddress($shippingAddress);
 
             // Get selected shipping method
             $selectedMethod = $shippingAddress->getShippingMethod();
@@ -736,24 +738,4 @@ final class CartProcessor implements ProcessorInterface
         return $prices;
     }
 
-    /**
-     * Map Maho quote address model to Address DTO
-     */
-    private function mapAddressToDto(\Mage_Sales_Model_Quote_Address $address): Address
-    {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
-
-        return $dto;
-    }
 }

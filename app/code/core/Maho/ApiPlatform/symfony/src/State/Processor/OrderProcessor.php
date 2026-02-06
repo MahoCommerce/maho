@@ -18,11 +18,11 @@ use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\ApiResource\Order;
 use Maho\ApiPlatform\ApiResource\OrderItem;
 use Maho\ApiPlatform\ApiResource\OrderPrices;
-use Maho\ApiPlatform\ApiResource\Address;
 use Maho\ApiPlatform\ApiResource\PosPayment;
 use Maho\ApiPlatform\ApiResource\PlaceOrderWithSplitPaymentsResult;
 use Maho\ApiPlatform\ApiResource\Invoice;
 use Maho\ApiPlatform\ApiResource\Shipment;
+use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Service\OrderService;
 use Maho\ApiPlatform\Service\PaymentService;
@@ -34,12 +34,14 @@ use Maho\ApiPlatform\Service\PaymentService;
  */
 final class OrderProcessor implements ProcessorInterface
 {
+    private AddressMapper $addressMapper;
     private CartService $cartService;
     private OrderService $orderService;
     private PaymentService $paymentService;
 
     public function __construct()
     {
+        $this->addressMapper = new AddressMapper();
         $this->cartService = new CartService();
         $this->orderService = new OrderService();
         $this->paymentService = new PaymentService();
@@ -180,13 +182,13 @@ final class OrderProcessor implements ProcessorInterface
         // Map billing address
         $billingAddress = $order->getBillingAddress();
         if ($billingAddress && $billingAddress->getId()) {
-            $dto->billingAddress = $this->mapAddressToDto($billingAddress);
+            $dto->billingAddress = $this->addressMapper->fromOrderAddress($billingAddress);
         }
 
         // Map shipping address
         $shippingAddress = $order->getShippingAddress();
         if ($shippingAddress && $shippingAddress->getId()) {
-            $dto->shippingAddress = $this->mapAddressToDto($shippingAddress);
+            $dto->shippingAddress = $this->addressMapper->fromOrderAddress($shippingAddress);
         }
 
         // Map shipping method
@@ -270,27 +272,6 @@ final class OrderProcessor implements ProcessorInterface
         }
 
         return $prices;
-    }
-
-    /**
-     * Map Maho order address model to Address DTO
-     */
-    private function mapAddressToDto(\Mage_Sales_Model_Order_Address $address): Address
-    {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
-
-        return $dto;
     }
 
     /**

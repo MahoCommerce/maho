@@ -86,36 +86,8 @@ class CartService
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
         }
 
-        // Collect totals
-        $quote->collectTotals();
-
-        // WORKAROUND: collectTotals() doesn't work properly in admin context
-        // Manually calculate totals if collectTotals() failed
-        if ($quote->getSubtotal() == 0 || !$quote->getSubtotal()) {
-            $subtotal = 0;
-            foreach ($quote->getAllVisibleItems() as $item) {
-                if (!$item->getRowTotal() || $item->getRowTotal() == 0) {
-                    $itemRowTotal = $item->getPrice() * $item->getQty();
-                    $item->setRowTotal($itemRowTotal);
-                    $item->setBaseRowTotal($itemRowTotal);
-                }
-                $subtotal += $item->getRowTotal();
-            }
-
-            $quote->setSubtotal($subtotal);
-            $quote->setBaseSubtotal($subtotal);
-
-            // Calculate discount from coupon if applied
-            $discountAmount = 0;
-            foreach ($quote->getAllVisibleItems() as $item) {
-                $discountAmount += (float) $item->getDiscountAmount();
-            }
-
-            // Calculate grand total
-            $grandTotal = $subtotal - $discountAmount + (float) $quote->getShippingAddress()->getShippingAmount();
-            $quote->setGrandTotal($grandTotal);
-            $quote->setBaseGrandTotal($grandTotal);
-        }
+        // Collect totals with manual fallback for admin context
+        $this->collectAndVerifyTotals($quote);
 
         return $quote;
     }
@@ -273,34 +245,7 @@ class CartService
             }
         }
 
-        \Mage::log('Before collectTotals - quote items: ' . count($quote->getAllItems()));
-
-        $quote->collectTotals();
-
-        \Mage::log("After collectTotals - quote subtotal: {$quote->getSubtotal()}, grand_total: {$quote->getGrandTotal()}");
-
-        // TODO: HACK - Manually calculate totals because collectTotals() is failing
-        // This should NOT be necessary - collectTotals() should handle this automatically
-        // If collectTotals didn't work (subtotal still 0), manually calculate totals
-        if ($quote->getSubtotal() == 0 || !$quote->getSubtotal()) {
-            \Mage::log('collectTotals failed, manually calculating quote totals');
-            $subtotal = 0;
-            foreach ($quote->getAllVisibleItems() as $item) {
-                // Ensure row_total is set
-                if (!$item->getRowTotal() || $item->getRowTotal() == 0) {
-                    $itemRowTotal = $item->getPrice() * $item->getQty();
-                    $item->setRowTotal($itemRowTotal);
-                    $item->setBaseRowTotal($itemRowTotal);
-                }
-                $subtotal += $item->getRowTotal();
-            }
-
-            $quote->setSubtotal($subtotal);
-            $quote->setBaseSubtotal($subtotal);
-            $quote->setGrandTotal($subtotal);
-            $quote->setBaseGrandTotal($subtotal);
-            \Mage::log("Manually set subtotal: {$subtotal}, grand_total: {$subtotal}");
-        }
+        $this->collectAndVerifyTotals($quote);
 
         $quote->save();
 
@@ -336,28 +281,7 @@ class CartService
             \Mage::log("Updated item {$itemId} qty to {$qty}, row_total: {$rowTotal}");
         }
 
-        $quote->collectTotals();
-
-        // TODO: HACK - Manually calculate totals if collectTotals() failed
-        if ($quote->getSubtotal() == 0 || !$quote->getSubtotal()) {
-            \Mage::log('collectTotals failed after updateItem, manually calculating quote totals');
-            $subtotal = 0;
-            foreach ($quote->getAllVisibleItems() as $quoteItem) {
-                // Ensure row_total is set
-                if (!$quoteItem->getRowTotal() || $quoteItem->getRowTotal() == 0) {
-                    $itemRowTotal = $quoteItem->getPrice() * $quoteItem->getQty();
-                    $quoteItem->setRowTotal($itemRowTotal);
-                    $quoteItem->setBaseRowTotal($itemRowTotal);
-                }
-                $subtotal += $quoteItem->getRowTotal();
-            }
-
-            $quote->setSubtotal($subtotal);
-            $quote->setBaseSubtotal($subtotal);
-            $quote->setGrandTotal($subtotal);
-            $quote->setBaseGrandTotal($subtotal);
-            \Mage::log("Manually set subtotal: {$subtotal}, grand_total: {$subtotal}");
-        }
+        $this->collectAndVerifyTotals($quote);
 
         $quote->save();
 
@@ -374,30 +298,7 @@ class CartService
     public function removeItem(\Mage_Sales_Model_Quote $quote, int $itemId): \Mage_Sales_Model_Quote
     {
         $quote->removeItem($itemId);
-        $quote->collectTotals();
-
-        // TODO: HACK - Manually calculate totals if collectTotals() failed
-        // Same workaround as addItem() and updateItem()
-        // See: CART_PRICING_WORKAROUND.md for more details
-        if ($quote->getItemsCount() > 0 && ($quote->getSubtotal() == 0 || !$quote->getSubtotal())) {
-            \Mage::log('collectTotals failed after removeItem, manually calculating quote totals');
-            $subtotal = 0;
-            foreach ($quote->getAllVisibleItems() as $quoteItem) {
-                // Ensure row_total is set
-                if (!$quoteItem->getRowTotal() || $quoteItem->getRowTotal() == 0) {
-                    $itemRowTotal = $quoteItem->getPrice() * $quoteItem->getQty();
-                    $quoteItem->setRowTotal($itemRowTotal);
-                    $quoteItem->setBaseRowTotal($itemRowTotal);
-                }
-                $subtotal += $quoteItem->getRowTotal();
-            }
-
-            $quote->setSubtotal($subtotal);
-            $quote->setBaseSubtotal($subtotal);
-            $quote->setGrandTotal($subtotal);
-            $quote->setBaseGrandTotal($subtotal);
-            \Mage::log("Manually set subtotal: {$subtotal}, grand_total: {$subtotal}");
-        }
+        $this->collectAndVerifyTotals($quote);
 
         $quote->save();
 
@@ -1060,27 +961,37 @@ class CartService
 
         if ($hasChanges) {
             \Mage::log('Recollecting quote totals after price changes');
-            $quote->collectTotals();
+            $this->collectAndVerifyTotals($quote);
+        }
+    }
 
-            // HACK: If collectTotals didn't work (subtotal still 0), manually calculate
-            if ($quote->getSubtotal() == 0 || !$quote->getSubtotal()) {
-                \Mage::log('collectTotals failed after reapplying prices, manually calculating totals');
-                $subtotal = 0;
-                foreach ($quote->getAllVisibleItems() as $item) {
-                    if (!$item->getRowTotal() || $item->getRowTotal() == 0) {
-                        $itemRowTotal = $item->getPrice() * $item->getQty();
-                        $item->setRowTotal($itemRowTotal);
-                        $item->setBaseRowTotal($itemRowTotal);
-                    }
-                    $subtotal += $item->getRowTotal();
+    /**
+     * Collect quote totals with manual fallback for admin context
+     *
+     * WORKAROUND: collectTotals() doesn't work properly in admin context.
+     * If subtotal is still 0 after collectTotals(), manually calculate from item row totals.
+     */
+    private function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
+    {
+        $quote->collectTotals();
+
+        if ($quote->getItemsCount() > 0 && ($quote->getSubtotal() == 0 || !$quote->getSubtotal())) {
+            \Mage::log('collectTotals failed, manually calculating quote totals');
+            $subtotal = 0;
+            foreach ($quote->getAllVisibleItems() as $item) {
+                if (!$item->getRowTotal() || $item->getRowTotal() == 0) {
+                    $itemRowTotal = $item->getPrice() * $item->getQty();
+                    $item->setRowTotal($itemRowTotal);
+                    $item->setBaseRowTotal($itemRowTotal);
                 }
-
-                $quote->setSubtotal($subtotal);
-                $quote->setBaseSubtotal($subtotal);
-                $quote->setGrandTotal($subtotal);
-                $quote->setBaseGrandTotal($subtotal);
-                \Mage::log("Manually set quote totals - subtotal: {$subtotal}, grand_total: {$subtotal}");
+                $subtotal += $item->getRowTotal();
             }
+
+            $quote->setSubtotal($subtotal);
+            $quote->setBaseSubtotal($subtotal);
+            $quote->setGrandTotal($subtotal);
+            $quote->setBaseGrandTotal($subtotal);
+            \Mage::log("Manually set subtotal: {$subtotal}, grand_total: {$subtotal}");
         }
     }
 }
