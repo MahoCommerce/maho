@@ -36,6 +36,38 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         $this->renderLayout();
     }
 
+    public function newAction(): void
+    {
+        $this->_forward('edit');
+    }
+
+    public function editAction(): void
+    {
+        $platform = $this->getRequest()->getParam('platform', '');
+
+        if ($platform && !Maho_FeedManager_Model_Platform::hasAdapter($platform)) {
+            $this->_getSession()->addError($this->__('Platform not found.'));
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        Mage::register('current_platform', $platform);
+
+        $this->_title($this->__('Catalog'))
+            ->_title($this->__('Feed Manager'))
+            ->_title($this->__('Category Mapping'));
+
+        if ($platform) {
+            $adapter = Maho_FeedManager_Model_Platform::getAdapter($platform);
+            if ($adapter) {
+                $this->_title($adapter->getName());
+            }
+        }
+
+        $this->_initAction();
+        $this->renderLayout();
+    }
+
     /**
      * Get categories tree as JSON for AJAX
      */

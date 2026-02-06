@@ -119,10 +119,11 @@ class Maho_FeedManager_Model_Notifier
         $storeName = Mage::getStoreConfig('general/store_information/name', $storeId)
             ?: Mage::app()->getStore($storeId)->getName();
 
-        // Build admin feed edit URL with tab parameter for JS switching
+        // Build admin feed edit URL without secret key (notifications persist across sessions)
         $logUrl = Mage::helper('adminhtml')->getUrl('adminhtml/feedmanager_feed/edit', [
             'id' => $feed->getId(),
             '_query' => ['tab' => 'logs'],
+            '_nosecret' => true,
         ]);
 
         // Send email
@@ -186,6 +187,7 @@ class Maho_FeedManager_Model_Notifier
         $url = Mage::helper('adminhtml')->getUrl('adminhtml/feedmanager_feed/edit', [
             'id' => $feed->getId(),
             '_query' => ['tab' => 'logs'],
+            '_nosecret' => true,
         ]);
 
         /** @var Mage_AdminNotification_Model_Inbox $inbox */

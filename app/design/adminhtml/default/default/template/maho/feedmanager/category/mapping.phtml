@@ -7,17 +7,18 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Maho_FeedManager_Block_Adminhtml_Category $this */
+/** @var Maho_FeedManager_Block_Adminhtml_Category_Edit $this */
 $platforms = $this->getPlatformOptions();
 $categories = $this->getCategoriesTree();
+$currentPlatform = $this->getCurrentPlatform();
 ?>
 
 <div class="content-header">
     <table cellspacing="0" width="100%">
         <tr>
-            <td><h3 class="icon-head head-products"><?php echo $this->__('Category Mapping') ?></h3></td>
+            <td><h3 id="category-mapping-title" class="icon-head head-products"><?php echo $this->__('Category Mapping') ?><?php if ($this->getCurrentPlatformName()): ?> — <?php echo $this->escapeHtml($this->getCurrentPlatformName()) ?><?php endif; ?></h3></td>
             <td class="form-buttons">
-                <button type="button" class="scalable back" onclick="setLocation('<?php echo $this->getUrl('*/feedmanager_feed/') ?>')">
+                <button type="button" class="scalable back" onclick="setLocation('<?php echo $this->getUrl('*/*/') ?>')">
                     <span><span><span><?php echo $this->__('Back') ?></span></span></span>
                 </button>
                 <button type="button" class="scalable" onclick="CategoryMapping.autoMap()">
@@ -37,7 +38,7 @@ $categories = $this->getCategoriesTree();
         <select id="platform-select" onchange="CategoryMapping.loadCategories()">
             <?php foreach ($platforms as $code => $name): ?>
                 <?php if ($code): ?>
-                    <option value="<?php echo $this->escapeHtml($code) ?>"><?php echo $this->escapeHtml($name) ?></option>
+                    <option value="<?php echo $this->escapeHtml($code) ?>"<?php if ($currentPlatform === $code): ?> selected<?php endif; ?>><?php echo $this->escapeHtml($name) ?></option>
                 <?php endif; ?>
             <?php endforeach; ?>
         </select>
@@ -111,7 +112,7 @@ const CategoryMapping = {
         autoMap: '<?php echo $this->getAutoMapUrl() ?>',
         searchTaxonomy: '<?php echo $this->getSearchTaxonomyUrl() ?>'
     },
-    currentPlatform: 'google',
+    currentPlatform: '<?php echo $this->jsQuoteEscape($currentPlatform ?: 'google') ?>',
     searchTimeout: null,
     bulkMode: false,
     bulkCategoryId: null,

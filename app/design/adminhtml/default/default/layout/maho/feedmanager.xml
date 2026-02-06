@@ -73,7 +73,7 @@
         </reference>
     </adminhtml_feedmanager_destination_edit>
 
-    <!-- Category Mapping -->
+    <!-- Category Mapping Grid -->
     <adminhtml_feedmanager_category_index>
         <update handle="feedmanager_default"/>
         <reference name="head">
@@ -83,6 +83,17 @@
             <block type="feedmanager/adminhtml_category" name="feedmanager_category"/>
         </reference>
     </adminhtml_feedmanager_category_index>
+
+    <!-- Category Mapping Editor (per-platform) -->
+    <adminhtml_feedmanager_category_edit>
+        <update handle="feedmanager_default"/>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Edit Category Mapping</title></action>
+        </reference>
+        <reference name="content">
+            <block type="feedmanager/adminhtml_category_edit" name="feedmanager_category_edit"/>
+        </reference>
+    </adminhtml_feedmanager_category_edit>
 
     <!-- Dynamic Rules Grid -->
     <adminhtml_feedmanager_dynamicrule_index>

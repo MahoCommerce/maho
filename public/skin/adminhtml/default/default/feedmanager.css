@@ -651,6 +651,36 @@
     }
 }
 
+/* Platform Picker Dropdown */
+.fm-platform-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 200px;
+    z-index: 100;
+    margin-top: 4px;
+    padding: 4px 0;
+}
+
+.fm-platform-dropdown-item {
+    display: block;
+    padding: 7px 14px;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 1.4;
+    white-space: nowrap;
+
+    &:hover {
+        background: #f0f0f0;
+        color: #111;
+    }
+}
+
 /* Header Buttons Alignment */
 .content-header {
     .form-buttons {
