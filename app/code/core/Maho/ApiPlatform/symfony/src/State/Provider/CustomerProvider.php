@@ -94,7 +94,7 @@ final class CustomerProvider implements ProviderInterface
         // GraphQL passes args in 'args', REST uses 'filters'
         $filters = $context['args'] ?? $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['pageSize'] ?? 15), 30); // Max 30 for search results
+        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 15), 30); // Max 30 for search results
         $search = $filters['search'] ?? null;
         $email = $filters['email'] ?? null;
         $telephone = $filters['telephone'] ?? null;

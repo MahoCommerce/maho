@@ -37,6 +37,24 @@ describe('GET /api/orders', function () {
         expect($response['status'])->toBeSuccessful();
     });
 
+    it('supports itemsPerPage parameter', function () {
+        $response = apiGet('/api/orders?itemsPerPage=5', adminToken());
+
+        expect($response['status'])->toBeSuccessful();
+    });
+
+    it('supports email exact match filter', function () {
+        $response = apiGet('/api/orders?email=test@example.com', adminToken());
+
+        expect($response['status'])->toBeSuccessful();
+    });
+
+    it('supports emailLike partial match filter', function () {
+        $response = apiGet('/api/orders?emailLike=example.com', adminToken());
+
+        expect($response['status'])->toBeSuccessful();
+    });
+
     it('requires authentication', function () {
         $response = apiGet('/api/orders');
 
@@ -104,8 +122,14 @@ describe('GET /api/customers/me/orders', function () {
             expect($response['json'])->toBeArray();
         });
 
-        it('supports pagination parameters', function () {
+        it('supports pagination with pageSize', function () {
             $response = apiGet('/api/customers/me/orders?page=1&pageSize=5', customerToken());
+
+            expect($response['status'])->toBeSuccessful();
+        });
+
+        it('supports pagination with itemsPerPage', function () {
+            $response = apiGet('/api/customers/me/orders?page=1&itemsPerPage=5', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
