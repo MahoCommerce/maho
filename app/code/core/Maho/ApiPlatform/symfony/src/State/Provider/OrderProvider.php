@@ -25,6 +25,7 @@ use Maho\ApiPlatform\ApiResource\PaymentSummary;
 use Maho\ApiPlatform\ApiResource\Shipment;
 use Maho\ApiPlatform\ApiResource\ShipmentTrack;
 use Maho\ApiPlatform\ApiResource\ShipmentItem;
+use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\OrderService;
 use Maho\ApiPlatform\Service\PaymentService;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
@@ -39,11 +40,13 @@ final class OrderProvider implements ProviderInterface
 {
     use AuthenticationTrait;
 
+    private AddressMapper $addressMapper;
     private OrderService $orderService;
     private PaymentService $paymentService;
 
     public function __construct(Security $security)
     {
+        $this->addressMapper = new AddressMapper();
         $this->orderService = new OrderService();
         $this->paymentService = new PaymentService();
         $this->security = $security;
@@ -270,13 +273,13 @@ final class OrderProvider implements ProviderInterface
         // Map billing address
         $billingAddress = $order->getBillingAddress();
         if ($billingAddress && $billingAddress->getId()) {
-            $dto->billingAddress = $this->mapAddressToDto($billingAddress);
+            $dto->billingAddress = $this->addressMapper->fromOrderAddress($billingAddress);
         }
 
         // Map shipping address
         $shippingAddress = $order->getShippingAddress();
         if ($shippingAddress && $shippingAddress->getId()) {
-            $dto->shippingAddress = $this->mapAddressToDto($shippingAddress);
+            $dto->shippingAddress = $this->addressMapper->fromOrderAddress($shippingAddress);
         }
 
         // Map shipping method
@@ -369,28 +372,6 @@ final class OrderProvider implements ProviderInterface
         }
 
         return $prices;
-    }
-
-    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
-    /**
-     * Map Maho order address model to Address DTO
-     */
-    private function mapAddressToDto(\Mage_Sales_Model_Order_Address $address): Address
-    {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
-
-        return $dto;
     }
 
     /**

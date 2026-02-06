@@ -371,6 +371,9 @@ class ProductQueryHandler
     /**
      * Load swatch data from database, indexed by option_id
      *
+     * Loaded once per request from the eav_attribute_option_swatch table.
+     * Size is bounded by the number of swatch-enabled attribute options.
+     *
      * @return array<int, array{type: string, value: string}>
      */
     private function loadSwatchData(): array

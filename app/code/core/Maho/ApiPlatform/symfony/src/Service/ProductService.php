@@ -74,6 +74,11 @@ class ProductService
             return self::$categorySortCache[$categoryId];
         }
 
+        // Evict oldest entries if cache exceeds max size
+        if (count(self::$categorySortCache) >= 100) {
+            self::$categorySortCache = array_slice(self::$categorySortCache, -50, null, true);
+        }
+
         $category = \Mage::getModel('catalog/category')->load($categoryId);
         if (!$category->getId()) {
             self::$categorySortCache[$categoryId] = null;
