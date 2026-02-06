@@ -118,7 +118,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     private function camelToSnake(string $input): string
     {
         // Don't convert if it's already snake_case or all uppercase
-        if (strpos($input, '_') !== false || strtoupper($input) === $input) {
+        if (str_contains($input, '_') || strtoupper($input) === $input) {
             return $input;
         }
 
