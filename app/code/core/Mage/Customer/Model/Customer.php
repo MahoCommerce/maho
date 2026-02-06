@@ -273,6 +273,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
                 self::EXCEPTION_INVALID_EMAIL_OR_PASSWORD,
             );
         }
+
         Mage::dispatchEvent('customer_customer_authenticated', [
             'model'    => $this,
             'password' => $password,

@@ -33,8 +33,22 @@ attributesForm._processValidationResult = function(transport) {
             attributeElement.setHasError(true, attributesForm);
             Validation.ajaxError(attributeElement, response.message);
             attributeElement.focus();
-        } else if (document.getElementById('messages')) {
-            document.getElementById('messages').innerHTML = '<ul class="messages"><li class="error-msg"><ul><li>' + response.message + '</li></ul></li></ul>';
+        } else {
+            const messagesEl = document.getElementById('messages');
+            if (messagesEl) {
+                messagesEl.textContent = '';
+                const ul = document.createElement('ul');
+                ul.className = 'messages';
+                const li = document.createElement('li');
+                li.className = 'error-msg';
+                const innerUl = document.createElement('ul');
+                const innerLi = document.createElement('li');
+                innerLi.textContent = response.message;
+                innerUl.appendChild(innerLi);
+                li.appendChild(innerUl);
+                ul.appendChild(li);
+                messagesEl.appendChild(ul);
+            }
         }
     } else {
         attributesForm._submit();
