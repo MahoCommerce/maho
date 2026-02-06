@@ -183,5 +183,4 @@ class Mage_Core_Model_Domainpolicy
         }
         return null;
     }
-
 }
