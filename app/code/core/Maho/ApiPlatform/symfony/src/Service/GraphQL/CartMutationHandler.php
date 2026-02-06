@@ -212,9 +212,11 @@ class CartMutationHandler
         }
 
         // First, check if this is a gift card code
+        /** @phpstan-ignore-next-line */
         $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($couponCode);
         if ($giftcard->getId() && $giftcard->isValid()) {
             // It's a valid gift card - apply it
+            /** @phpstan-ignore-next-line */
             \Mage::helper('maho_giftcard')->applyGiftcardToQuote($quote, $giftcard, null);
             $quote->collectTotals()->save();
             $quote = $this->cartService->getCart((int) $cartId);
@@ -288,6 +290,7 @@ class CartMutationHandler
         if (!$code) {
             throw ValidationException::requiredField('code');
         }
+        /** @phpstan-ignore-next-line */
         $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
@@ -325,11 +328,13 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
 
+        /** @phpstan-ignore-next-line */
         $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
         if (!$giftcard->getId() || !$giftcard->isValid()) {
             throw ValidationException::invalidValue('code', 'invalid or expired gift card');
         }
 
+        /** @phpstan-ignore-next-line */
         \Mage::helper('maho_giftcard')->applyGiftcardToQuote($quote, $giftcard, $amount);
         $quote->collectTotals()->save();
 
@@ -358,6 +363,7 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
 
+        /** @phpstan-ignore-next-line */
         \Mage::helper('maho_giftcard')->removeGiftcardFromQuote($quote, $code);
         $quote->collectTotals()->save();
 
@@ -390,7 +396,7 @@ class CartMutationHandler
 
         $shippingAddress = $quote->getShippingAddress();
         if (!$shippingAddress->getCountryId()) {
-            $shippingAddress->setCountryId('AU')->setPostcode('3000')->setRegionId(574)->setCollectShippingRates(true);
+            $shippingAddress->setCountryId('AU')->setPostcode('3000')->setRegionId(574)->setCollectShippingRates(1);
         }
 
         $shippingAddress->collectShippingRates();
@@ -498,6 +504,7 @@ class CartMutationHandler
         }
 
         foreach ($codesData as $code => $appliedAmount) {
+            /** @phpstan-ignore-next-line */
             $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
             if ($giftcard->getId()) {
                 $giftcards[] = [

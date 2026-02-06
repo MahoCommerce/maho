@@ -23,6 +23,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
  *
  * Maps REST endpoints to resource names and checks the permissions
  * embedded in the JWT token against the requested resource + operation.
+ *
+ * @extends Voter<string, mixed>
  */
 class ApiUserVoter extends Voter
 {
@@ -49,12 +51,14 @@ class ApiUserVoter extends Voter
         private readonly RequestStack $requestStack,
     ) {}
 
+    #[\Override]
     protected function supports(string $attribute, mixed $subject): bool
     {
         // Only handle API_USER_PERMISSION attribute, let Symfony handle IS_AUTHENTICATED_FULLY
         return $attribute === 'API_USER_PERMISSION';
     }
 
+    #[\Override]
     protected function voteOnAttribute(string $attribute, mixed $subject, TokenInterface $token, ?Vote $vote = null): bool
     {
         $user = $token->getUser();

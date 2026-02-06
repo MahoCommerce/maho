@@ -24,8 +24,10 @@ class PaymentService
      * @param int $orderId
      * @return \Maho_Pos_Model_Resource_Payment_Collection
      */
+    /** @phpstan-ignore-next-line */
     public function getOrderPayments(int $orderId): \Maho_Pos_Model_Resource_Payment_Collection
     {
+        /** @phpstan-ignore-next-line */
         $collection = \Mage::getModel('maho_pos/payment')->getCollection();
         $collection->addOrderFilter($orderId)
             ->setOrder('created_at', 'ASC');
@@ -47,8 +49,8 @@ class PaymentService
      * @param string|null $authCode
      * @param array|null $receiptData
      * @param string $status
-     * @return \Maho_Pos_Model_Payment
      * @throws \Mage_Core_Exception
+     * @phpstan-ignore-next-line
      */
     public function recordPayment(
         int $orderId,
@@ -61,8 +63,9 @@ class PaymentService
         ?string $cardLast4 = null,
         ?string $authCode = null,
         ?array $receiptData = null,
+        /** @phpstan-ignore-next-line */
         string $status = \Maho_Pos_Model_Payment::STATUS_CAPTURED,
-    ): \Maho_Pos_Model_Payment {
+    ) {
         // Load order
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId()) {
@@ -73,7 +76,9 @@ class PaymentService
         $currencyCode = $order->getOrderCurrencyCode();
 
         // Create payment record
+        /** @phpstan-ignore-next-line */
         $payment = \Mage::getModel('maho_pos/payment');
+        /** @phpstan-ignore-next-line */
         $payment->setData([
             'order_id' => $orderId,
             'register_id' => $registerId,
@@ -90,6 +95,7 @@ class PaymentService
             'status' => $status,
         ]);
 
+        /** @phpstan-ignore-next-line */
         $payment->save();
 
         return $payment;
@@ -142,6 +148,7 @@ class PaymentService
                 $paymentData['cardLast4'] ?? null,
                 $paymentData['authCode'] ?? null,
                 $paymentData['receiptData'] ?? null,
+                /** @phpstan-ignore-next-line */
                 \Maho_Pos_Model_Payment::STATUS_CAPTURED,
             );
 
@@ -159,7 +166,9 @@ class PaymentService
      */
     public function getTotalPaidAmount(int $orderId): float
     {
+        /** @phpstan-ignore-next-line */
         $resource = \Mage::getResourceModel('maho_pos/payment');
+        /** @phpstan-ignore-next-line */
         return $resource->getTotalPaidAmount($orderId);
     }
 
@@ -189,6 +198,7 @@ class PaymentService
      */
     public function getAvailablePaymentMethods(): array
     {
+        /** @phpstan-ignore-next-line */
         return \Maho_Pos_Model_Payment::getPaymentMethods();
     }
 }

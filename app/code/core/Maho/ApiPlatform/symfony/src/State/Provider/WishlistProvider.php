@@ -21,6 +21,7 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Wishlist State Provider
@@ -39,6 +40,7 @@ final class WishlistProvider implements ProviderInterface
     /**
      * @return array<WishlistItem>|WishlistItem|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|WishlistItem|null
     {
         StoreContext::ensureStore();
@@ -114,7 +116,7 @@ final class WishlistProvider implements ProviderInterface
     /**
      * Get single wishlist item
      */
-    private function getItem(int $itemId): ?WishlistItem
+    private function getItem(int $itemId): WishlistItem
     {
         $customerId = $this->requireAuthentication();
 
@@ -152,6 +154,7 @@ final class WishlistProvider implements ProviderInterface
         return $wishlistItem;
     }
 
+    // TODO: Extract getProductImageUrl() to a shared trait or service to eliminate duplication with WishlistProvider/WishlistProcessor
     /**
      * Get product thumbnail URL
      */

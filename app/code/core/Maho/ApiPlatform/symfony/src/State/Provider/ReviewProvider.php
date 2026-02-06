@@ -39,6 +39,7 @@ final class ReviewProvider implements ProviderInterface
     /**
      * @return array<Review>|Review|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Review|null
     {
         StoreContext::ensureStore();

@@ -639,7 +639,7 @@ class GuestCartController extends AbstractController
             // If simple product with configurable parent, get options from parent
             if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
                 $parentIds = \Mage::getModel('catalog/product_type_configurable')
-                    ->getParentIdsByChild($productId);
+                    ->getParentIdsByChild((int) $productId);
 
                 if (!empty($parentIds)) {
                     $product = \Mage::getModel('catalog/product')->load($parentIds[0]);

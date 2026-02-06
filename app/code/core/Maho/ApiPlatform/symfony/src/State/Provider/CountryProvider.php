@@ -32,6 +32,7 @@ final class CountryProvider implements ProviderInterface
      *
      * @return Country[]|Country|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Country|null
     {
         // Ensure valid store context (bootstraps Maho)

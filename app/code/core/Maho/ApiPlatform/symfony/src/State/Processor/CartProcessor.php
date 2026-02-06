@@ -38,6 +38,7 @@ final class CartProcessor implements ProcessorInterface
     /**
      * Process cart mutations
      */
+    #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Cart
     {
         $operationName = $operation->getName();

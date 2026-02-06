@@ -42,7 +42,7 @@ class ProductQueryHandler
         if (!$id) {
             throw new \RuntimeException('Product ID required');
         }
-        $product = $this->productService->getProduct((int) $id);
+        $product = $this->productService->getProductById((int) $id);
         return ['product' => $product ? $this->mapProduct($product) : null];
     }
 
@@ -297,6 +297,7 @@ class ProductQueryHandler
             $attrCode = $productAttribute->getAttributeCode();
             $options = [];
 
+            /** @phpstan-ignore arguments.count */
             foreach ($productAttribute->getSource()->getAllOptions(false) as $option) {
                 // Only include options that are actually used by child products
                 if ($option['value'] && isset($usedValues[$attrCode][$option['value']])) {

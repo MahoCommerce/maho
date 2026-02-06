@@ -29,6 +29,7 @@ class CustomerUserProvider implements UserProviderInterface
     /**
      * Load a user by their unique identifier (customer ID)
      */
+    #[\Override]
     public function loadUserByIdentifier(string $identifier): UserInterface
     {
         // Extract customer ID from identifier
@@ -60,6 +61,7 @@ class CustomerUserProvider implements UserProviderInterface
      * Refresh the user
      * Since we use stateless JWT auth, we reload from database
      */
+    #[\Override]
     public function refreshUser(UserInterface $user): UserInterface
     {
         if (!$user instanceof ApiUser) {
@@ -82,6 +84,7 @@ class CustomerUserProvider implements UserProviderInterface
     /**
      * Check if this provider supports the given user class
      */
+    #[\Override]
     public function supportsClass(string $class): bool
     {
         return $class === ApiUser::class || is_subclass_of($class, ApiUser::class);

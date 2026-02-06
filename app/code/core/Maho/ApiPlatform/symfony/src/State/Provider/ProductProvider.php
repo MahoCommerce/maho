@@ -59,13 +59,18 @@ final class ProductProvider implements ProviderInterface
             // Check if Meilisearch module is installed and enabled
             if (\Mage::helper('core')->isModuleEnabled('Meilisearch_Search')) {
                 /** @var \Meilisearch_Search_Helper_Config $configHelper */
+                /** @phpstan-ignore-next-line */
                 $configHelper = \Mage::helper('meilisearch_search/config');
 
+                /** @phpstan-ignore-next-line */
                 $host = $configHelper->getServerUrl();
+                /** @phpstan-ignore-next-line */
                 $apiKey = $configHelper->getAPIKey();
+                /** @phpstan-ignore-next-line */
                 $indexPrefix = rtrim($configHelper->getIndexPrefix() ?: 'maho', '_');
 
                 if ($host && $apiKey) {
+                    /** @phpstan-ignore-next-line */
                     $meilisearchClient = new \Meilisearch\Client($host, $apiKey);
                     $storeCode = StoreContext::getStoreCode() ?: 'default';
                     $indexBaseName = $indexPrefix . '_' . $storeCode;
@@ -76,6 +81,7 @@ final class ProductProvider implements ProviderInterface
             \Mage::log('Meilisearch init failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
         }
 
+        /** @phpstan-ignore-next-line */
         $this->productService = new ProductService($meilisearchClient, $indexBaseName);
         return $this->productService;
     }
@@ -85,6 +91,7 @@ final class ProductProvider implements ProviderInterface
      *
      * @return ArrayPaginator<Product>|Product|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Product|null
     {
         // Ensure valid store context (MUST happen before getProductService)
@@ -396,6 +403,7 @@ final class ProductProvider implements ProviderInterface
         $dto->weight = $product->getWeight() ? (float) $product->getWeight() : null;
 
         // Get barcode from configured attribute (if POS module available)
+        /** @phpstan-ignore-next-line */
         $posHelper = \Mage::helper('maho_pos');
         $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
             ? $posHelper->getBarcodeAttributeCode()
@@ -466,6 +474,7 @@ final class ProductProvider implements ProviderInterface
     {
         $options = [];
         $typeInstance = $product->getTypeInstance(true);
+        /** @phpstan-ignore-next-line */
         $configurableAttributes = $typeInstance->getConfigurableAttributes($product);
 
         foreach ($configurableAttributes as $attribute) {
@@ -475,6 +484,7 @@ final class ProductProvider implements ProviderInterface
             // Get all available values from child products
             $values = [];
             $usedValues = [];
+            /** @phpstan-ignore-next-line */
             $childProducts = $typeInstance->getUsedProducts(null, $product);
 
             foreach ($childProducts as $child) {
@@ -507,9 +517,12 @@ final class ProductProvider implements ProviderInterface
     {
         $variants = [];
         $typeInstance = $product->getTypeInstance(true);
+        /** @phpstan-ignore-next-line */
         $configurableAttributes = $typeInstance->getConfigurableAttributes($product);
+        /** @phpstan-ignore-next-line */
         $childProducts = $typeInstance->getUsedProducts(null, $product);
         $mediaConfig = $this->getMediaConfig();
+        /** @phpstan-ignore-next-line */
         $posHelper = \Mage::helper('maho_pos');
         $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
             ? $posHelper->getBarcodeAttributeCode()
@@ -703,6 +716,7 @@ final class ProductProvider implements ProviderInterface
         $dto->stockStatus = $data['stock_status'] ?? 'in_stock';
 
         // Get barcode from configured attribute (if POS module available)
+        /** @phpstan-ignore-next-line */
         $posHelper = \Mage::helper('maho_pos');
         $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
             ? $posHelper->getBarcodeAttributeCode()

@@ -23,6 +23,7 @@ use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Wishlist State Processor
@@ -45,6 +46,7 @@ final class WishlistProcessor implements ProcessorInterface
      * @param WishlistItem $data
      * @return WishlistItem|array<WishlistItem>|null
      */
+    #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         StoreContext::ensureStore();
@@ -172,6 +174,7 @@ final class WishlistProcessor implements ProcessorInterface
 
     /**
      * Remove item from wishlist
+     * @phpstan-ignore return.unusedType
      */
     private function removeFromWishlist(int $itemId): ?WishlistItem
     {
@@ -197,6 +200,7 @@ final class WishlistProcessor implements ProcessorInterface
         return null;
     }
 
+    // TODO: Refactor cart loading to use CartService instead of inline quote loading logic
     /**
      * Move wishlist item to cart
      */
@@ -222,7 +226,7 @@ final class WishlistProcessor implements ProcessorInterface
         $product = $item->getProduct();
 
         // Get the quote - prefer guest cart if cartId provided
-        /** @var \Mage_Sales_Model_Quote $quote */
+        /** @var \Mage_Sales_Model_Quote|null $quote */
         $quote = null;
         if ($cartId) {
             // Use CartService to load the cart properly (handles numeric or masked IDs)
@@ -244,7 +248,7 @@ final class WishlistProcessor implements ProcessorInterface
                 $quote = \Mage::getModel('sales/quote');
                 $quote->setStoreId(\Mage::app()->getStore()->getId());
                 $quote->setCustomerId($customerId);
-                $quote->setIsActive(true);
+                $quote->setIsActive(1);
                 $quote->save();
             }
         }
@@ -253,7 +257,7 @@ final class WishlistProcessor implements ProcessorInterface
         try {
             $this->cartService->addItem($quote, $product->getSku(), (float) $qty);
         } catch (\Exception $e) {
-            throw new BadRequestHttpException('Failed to add to cart: ' . $e->getMessage());
+            throw new BadRequestHttpException('Failed to add item to cart');
         }
 
         // Build response before deleting (we need the item data)
@@ -332,6 +336,7 @@ final class WishlistProcessor implements ProcessorInterface
         return $wishlistItem;
     }
 
+    // TODO: Extract getProductImageUrl() to a shared trait or service to eliminate duplication with WishlistProvider/WishlistProcessor
     /**
      * Get product thumbnail URL
      */

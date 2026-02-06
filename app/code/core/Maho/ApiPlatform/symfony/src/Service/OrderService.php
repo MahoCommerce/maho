@@ -118,7 +118,7 @@ class OrderService
             }
 
             // Deactivate quote
-            $quote->setIsActive(false);
+            $quote->setIsActive(0);
             $quote->save();
 
             return [
@@ -318,7 +318,7 @@ class OrderService
     ): \Mage_Sales_Model_Order {
         $order->addStatusHistoryComment($note, false)
             ->setIsCustomerNotified($notifyCustomer)
-            ->setIsVisibleOnFront($visibleOnFront);
+            ->setIsVisibleOnFront((int) $visibleOnFront);
 
         $order->save();
 

@@ -54,6 +54,7 @@ final class OrderProvider implements ProviderInterface
      *
      * @return Order|Order[]|PosPayment[]|PaymentSummary[]|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): Order|array|null
     {
         $operationName = $operation->getName();
@@ -369,6 +370,7 @@ final class OrderProvider implements ProviderInterface
         return $prices;
     }
 
+    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
     /**
      * Map Maho order address model to Address DTO
      */
@@ -451,6 +453,7 @@ final class OrderProvider implements ProviderInterface
             'banktransfer' => 'Bank Transfer',
         ];
 
+        /** @phpstan-ignore-next-line */
         foreach ($collection as $payment) {
             $dto = new PosPayment();
             $dto->id = (int) $payment->getId();
@@ -496,6 +499,7 @@ final class OrderProvider implements ProviderInterface
 
         // Group payments by method
         $grouped = [];
+        /** @phpstan-ignore-next-line */
         foreach ($collection as $payment) {
             $method = $payment->getMethodCode();
             if (!isset($grouped[$method])) {

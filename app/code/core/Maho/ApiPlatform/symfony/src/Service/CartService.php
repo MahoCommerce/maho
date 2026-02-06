@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,12 +37,12 @@ class CartService
 
         if ($customerId) {
             $quote->setCustomerId($customerId);
-            $quote->setCustomerIsGuest(false);
+            $quote->setCustomerIsGuest(0);
         } else {
-            $quote->setCustomerIsGuest(true);
+            $quote->setCustomerIsGuest(1);
         }
 
-        $quote->setIsActive(true);
+        $quote->setIsActive(1);
 
         // Generate and set masked ID for guest carts (before save to include in same transaction)
         $maskedId = null;
@@ -171,7 +171,7 @@ class CartService
 
         // Check if this simple product is a child of a configurable
         // If so, add the configurable parent with the proper super_attribute options
-        $buyRequest = new \Varien_Object(['qty' => $qty]);
+        $buyRequest = new \Maho\DataObject(['qty' => $qty]);
 
         // Add custom options if provided
         if (!empty($options)) {
@@ -181,7 +181,7 @@ class CartService
 
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
             $parentIds = \Mage::getModel('catalog/product_type_configurable')
-                ->getParentIdsByChild($productId);
+                ->getParentIdsByChild((int) $productId);
 
             if (!empty($parentIds)) {
                 $parentId = $parentIds[0];
@@ -239,7 +239,7 @@ class CartService
                 $websiteId = $store->getWebsiteId();
             }
 
-            $catalogRulePrice = $this->getCatalogRulePrice($productId, $quote->getCustomerGroupId(), $websiteId, $quote->getStoreId());
+            $catalogRulePrice = $this->getCatalogRulePrice((int) $productId, $quote->getCustomerGroupId(), $websiteId, $quote->getStoreId());
             if ($catalogRulePrice !== null && $catalogRulePrice < $price) {
                 \Mage::log("Applying catalog rule price: {$catalogRulePrice} (was {$price}) for customer group {$quote->getCustomerGroupId()}");
                 $price = $catalogRulePrice;
@@ -453,7 +453,7 @@ class CartService
         $address->addData($addressData);
 
         // Flag to trigger shipping rate collection
-        $address->setCollectShippingRates(true);
+        $address->setCollectShippingRates(1);
 
         $quote->collectTotals();
         $quote->save();
@@ -518,7 +518,7 @@ class CartService
         $payment->setMethod($methodCode);
 
         if ($additionalData) {
-            $payment->setAdditionalData($additionalData);
+            $payment->setAdditionalData(json_encode($additionalData));
         }
 
         $quote->collectTotals();
@@ -551,7 +551,7 @@ class CartService
         $customerCart->save();
 
         // Deactivate guest cart
-        $guestCart->setIsActive(false);
+        $guestCart->setIsActive(0);
         $guestCart->save();
 
         return $customerCart;
@@ -679,7 +679,7 @@ class CartService
             if ($quote->getCustomerId()) {
                 // Registered customer
                 $session->setCustomerId($quote->getCustomerId());
-                $quote->setCustomerIsGuest(false);
+                $quote->setCustomerIsGuest(0);
                 \Mage::log("PlaceOrder - Registered customer mode, Customer ID: {$quote->getCustomerId()}");
 
                 // Load customer and set addresses from default billing/shipping
@@ -690,7 +690,7 @@ class CartService
                     if ($defaultBillingAddress && $defaultBillingAddress->getId()) {
                         $billingAddress = $quote->getBillingAddress();
                         $billingAddress->importCustomerAddress($defaultBillingAddress);
-                        $billingAddress->setSaveInAddressBook(false);
+                        $billingAddress->setSaveInAddressBook(0);
                         \Mage::log('PlaceOrder - Set billing address from customer default');
                     }
 
@@ -699,14 +699,14 @@ class CartService
                     if ($defaultShippingAddress && $defaultShippingAddress->getId()) {
                         $shippingAddress = $quote->getShippingAddress();
                         $shippingAddress->importCustomerAddress($defaultShippingAddress);
-                        $shippingAddress->setSaveInAddressBook(false);
+                        $shippingAddress->setSaveInAddressBook(0);
                         \Mage::log('PlaceOrder - Set shipping address from customer default');
                     }
                 }
             } else {
                 // Guest checkout
                 $session->setCustomerId(-1);
-                $quote->setCustomerIsGuest(true);
+                $quote->setCustomerIsGuest(1);
                 \Mage::log('PlaceOrder - Guest checkout mode');
             }
 
@@ -766,7 +766,7 @@ class CartService
             \Mage::log("PlaceOrder - Order created successfully: {$order->getIncrementId()} (ID: {$order->getId()})");
 
             // Inactivate quote (to avoid it appearing in abandoned cart report)
-            $quote->setIsActive(false)->save();
+            $quote->setIsActive(0)->save();
 
             \Mage::log("Order created: {$order->getIncrementId()} (ID: {$order->getId()})");
 

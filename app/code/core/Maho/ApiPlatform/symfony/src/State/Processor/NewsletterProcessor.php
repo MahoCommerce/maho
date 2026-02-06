@@ -37,6 +37,7 @@ final class NewsletterProcessor implements ProcessorInterface
     /**
      * Process newsletter subscription operations
      */
+    #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): NewsletterSubscription
     {
         if (!$data instanceof NewsletterSubscription) {
