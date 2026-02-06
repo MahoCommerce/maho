@@ -12,8 +12,6 @@
 
 class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/translate_inline';
-
     /**
      * Ajax action for inline translation
      */
@@ -33,4 +31,17 @@ class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
         exit();
     }
 
+    /**
+     * Allow access to all admin users
+     *
+     * Inline translation is a dev tool available to any authenticated admin.
+     * The feature is gated by its own config flag (dev/translate_inline).
+     *
+     * @return true
+     */
+    #[\Override]
+    protected function _isAllowed()
+    {
+        return true;
+    }
 }
