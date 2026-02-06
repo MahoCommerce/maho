@@ -50,11 +50,41 @@ final class AddressProvider implements ProviderInterface
     {
         StoreContext::ensureStore();
 
+        $operationName = $operation->getName() ?? '';
+
+        // Handle GraphQL operations
+        if ($operationName === 'myAddresses') {
+            $customerId = $this->getAuthenticatedCustomerId();
+            if (!$customerId) {
+                throw new NotFoundHttpException('Authentication required');
+            }
+            $this->authorizeCustomerAccess($customerId);
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            if (!$customer->getId()) {
+                throw new NotFoundHttpException('Customer not found');
+            }
+            return $this->getCollection($customer);
+        }
+
+        if ($operationName === 'address') {
+            $addressId = (int) ($context['args']['id'] ?? $uriVariables['id'] ?? 0);
+            if (!$addressId) {
+                throw new NotFoundHttpException('Address ID is required');
+            }
+            $address = \Mage::getModel('customer/address')->load($addressId);
+            if (!$address->getId()) {
+                return null;
+            }
+            $customerId = (int) $address->getCustomerId();
+            $this->authorizeCustomerAccess($customerId);
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            return $this->mapToDto($address, $customer);
+        }
+
         $customerId = (int) ($uriVariables['customerId'] ?? 0);
         $addressId = (int) ($uriVariables['id'] ?? 0);
 
         // Check if this is a /customers/me/* route (uses authenticated customer)
-        $operationName = $operation->getName() ?? '';
         $isMeRoute = str_contains($operationName, '_me_') || str_starts_with($operationName, 'get_me') || str_starts_with($operationName, 'get_my');
 
         // For simple /addresses/{id} routes - load address first to get customerId

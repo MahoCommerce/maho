@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,6 +26,8 @@ use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Service\OrderService;
 use Maho\ApiPlatform\Service\PaymentService;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Order State Processor - Handles order mutations for API Platform
@@ -84,7 +86,7 @@ final class OrderProcessor implements ProcessorInterface
         );
 
         if (!$quote) {
-            throw new \RuntimeException('Cart not found');
+            throw new NotFoundHttpException('Cart not found');
         }
 
         // Place order
@@ -120,13 +122,13 @@ final class OrderProcessor implements ProcessorInterface
         );
 
         if (!$order) {
-            throw new \RuntimeException('Order not found');
+            throw new NotFoundHttpException('Order not found');
         }
 
         // Verify customer access for non-admin requests
         $customerId = $context['customer_id'] ?? null;
         if ($customerId && $order->getCustomerId() != $customerId) {
-            throw new \RuntimeException('Order not found');
+            throw new NotFoundHttpException('Order not found');
         }
 
         // Cancel order
@@ -288,11 +290,11 @@ final class OrderProcessor implements ProcessorInterface
         $employeeId = isset($args['employeeId']) ? (int) $args['employeeId'] : null;
 
         if (!$cartId && !$maskedId) {
-            throw new \RuntimeException('Cart ID or masked ID is required');
+            throw new BadRequestHttpException('Cart ID or masked ID is required');
         }
 
         if (empty($payments)) {
-            throw new \RuntimeException('At least one payment is required');
+            throw new BadRequestHttpException('At least one payment is required');
         }
 
         // Get quote
@@ -302,7 +304,7 @@ final class OrderProcessor implements ProcessorInterface
         );
 
         if (!$quote) {
-            throw new \RuntimeException('Cart not found');
+            throw new NotFoundHttpException('Cart not found');
         }
 
         // Set store context
@@ -368,7 +370,7 @@ final class OrderProcessor implements ProcessorInterface
 
         $grandTotal = (float) $quote->getGrandTotal();
         if ($totalPayment < $grandTotal - 0.01) {
-            throw new \RuntimeException(
+            throw new BadRequestHttpException(
                 "Insufficient payment: total payment ({$totalPayment}) is less than order total ({$grandTotal})",
             );
         }
@@ -505,17 +507,17 @@ final class OrderProcessor implements ProcessorInterface
         $authCode = $args['authCode'] ?? null;
 
         if (!$orderId) {
-            throw new \RuntimeException('Order ID is required');
+            throw new BadRequestHttpException('Order ID is required');
         }
 
         if ($amount <= 0) {
-            throw new \RuntimeException('Amount must be greater than 0');
+            throw new BadRequestHttpException('Amount must be greater than 0');
         }
 
         // Verify order exists
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId()) {
-            throw new \RuntimeException('Order not found');
+            throw new NotFoundHttpException('Order not found');
         }
 
         // Record payment

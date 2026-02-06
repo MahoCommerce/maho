@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service\GraphQL;
 
+use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Service\ProductService;
 
 /**
@@ -40,7 +41,7 @@ class ProductQueryHandler
     {
         $id = $variables['id'] ?? $variables['productId'] ?? null;
         if (!$id) {
-            throw new \RuntimeException('Product ID required');
+            throw ValidationException::requiredField('id');
         }
         $product = $this->productService->getProductById((int) $id);
         return ['product' => $product ? $this->mapProduct($product) : null];
@@ -53,7 +54,7 @@ class ProductQueryHandler
     {
         $sku = $variables['sku'] ?? null;
         if (!$sku) {
-            throw new \RuntimeException('SKU required');
+            throw ValidationException::requiredField('sku');
         }
         $product = $this->productService->getProductBySku($sku);
         return ['productBySku' => $product ? $this->mapProduct($product) : null];
@@ -66,7 +67,7 @@ class ProductQueryHandler
     {
         $barcode = $variables['barcode'] ?? null;
         if (!$barcode) {
-            throw new \RuntimeException('Barcode required');
+            throw ValidationException::requiredField('barcode');
         }
         $product = $this->productService->getProductByBarcode($barcode);
         return ['productByBarcode' => $product ? $this->mapProduct($product) : null];
@@ -109,7 +110,7 @@ class ProductQueryHandler
     {
         $sku = $variables['sku'] ?? null;
         if (!$sku) {
-            throw new \RuntimeException('SKU required');
+            throw ValidationException::requiredField('sku');
         }
         $product = $this->productService->getProductBySku($sku);
         if (!$product) {

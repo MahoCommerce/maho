@@ -63,12 +63,24 @@ final class CountryProvider implements ProviderInterface
     }
 
     /**
-     * Get all available countries
+     * Get all available countries (cached for 1 hour)
      *
      * @return Country[]
      */
     private function getCollection(): array
     {
+        $storeId = StoreContext::getStoreId();
+        $cacheKey = 'api_countries_' . $storeId;
+
+        // Try cache first (1-hour TTL)
+        $cached = \Mage::app()->getCache()->load($cacheKey);
+        if ($cached !== false) {
+            $data = json_decode($cached, true);
+            if (is_array($data)) {
+                return array_map(fn(array $c) => $this->arrayToDto($c), $data);
+            }
+        }
+
         $countries = [];
 
         // Get allowed countries from config
@@ -91,6 +103,15 @@ final class CountryProvider implements ProviderInterface
         // Sort by name
         usort($countries, fn($a, $b) => strcmp($a->name, $b->name));
 
+        // Cache for 1 hour
+        $cacheData = array_map(fn(Country $c) => $this->dtoToArray($c), $countries);
+        \Mage::app()->getCache()->save(
+            json_encode($cacheData),
+            $cacheKey,
+            ['API_COUNTRIES'],
+            3600,
+        );
+
         return $countries;
     }
 
@@ -106,8 +127,46 @@ final class CountryProvider implements ProviderInterface
         $dto->iso3Code = $country->getIso3Code();
 
         // Get regions for this country
-        $dto->available_regions = $this->getRegions($country->getCountryId());
+        $dto->availableRegions = $this->getRegions($country->getCountryId());
 
+        return $dto;
+    }
+
+    /**
+     * Convert Country DTO to array for caching
+     */
+    private function dtoToArray(Country $dto): array
+    {
+        return [
+            'id' => $dto->id,
+            'name' => $dto->name,
+            'iso2Code' => $dto->iso2Code,
+            'iso3Code' => $dto->iso3Code,
+            'availableRegions' => array_map(fn(Region $r) => [
+                'id' => $r->id,
+                'code' => $r->code,
+                'name' => $r->name,
+            ], $dto->availableRegions),
+        ];
+    }
+
+    /**
+     * Reconstruct Country DTO from cached array
+     */
+    private function arrayToDto(array $data): Country
+    {
+        $dto = new Country();
+        $dto->id = $data['id'] ?? '';
+        $dto->name = $data['name'] ?? '';
+        $dto->iso2Code = $data['iso2Code'] ?? '';
+        $dto->iso3Code = $data['iso3Code'] ?? '';
+        $dto->availableRegions = array_map(function (array $r) {
+            $region = new Region();
+            $region->id = $r['id'] ?? 0;
+            $region->code = $r['code'] ?? '';
+            $region->name = $r['name'] ?? '';
+            return $region;
+        }, $data['availableRegions'] ?? []);
         return $dto;
     }
 

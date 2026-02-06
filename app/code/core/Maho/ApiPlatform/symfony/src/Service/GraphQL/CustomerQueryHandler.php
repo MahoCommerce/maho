@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service\GraphQL;
 
+use Maho\ApiPlatform\Exception\NotFoundException;
+use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Service\CustomerService;
 
 /**
@@ -59,7 +61,7 @@ class CustomerQueryHandler
     {
         $id = $variables['id'] ?? $variables['customerId'] ?? null;
         if (!$id) {
-            throw new \RuntimeException('Customer ID required');
+            throw ValidationException::requiredField('customerId');
         }
         $customer = $this->customerService->getCustomerById((int) $id);
         return ['customer' => $customer ? $this->mapCustomer($customer) : null];
@@ -77,7 +79,7 @@ class CustomerQueryHandler
         $lastName = $input['lastName'] ?? null;
 
         if (!$email || !$firstName || !$lastName) {
-            throw new \RuntimeException('Email, first name and last name are required');
+            throw ValidationException::requiredField('email, firstName, lastName');
         }
 
         // Check if customer already exists
@@ -86,7 +88,7 @@ class CustomerQueryHandler
             ->loadByEmail($email);
 
         if ($existingCustomer->getId()) {
-            throw new \RuntimeException('A customer with this email already exists');
+            throw ValidationException::invalidValue('email', 'a customer with this email already exists');
         }
 
         // Create new customer
@@ -132,7 +134,7 @@ class CustomerQueryHandler
                 'success' => true,
             ]];
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to create customer: ' . $e->getMessage());
+            throw ValidationException::invalidValue('customer', 'failed to create: ' . $e->getMessage());
         }
     }
 
@@ -145,12 +147,12 @@ class CustomerQueryHandler
         $input = $variables['input'] ?? $variables;
 
         if (!$customerId) {
-            throw new \RuntimeException('Customer ID required');
+            throw ValidationException::requiredField('customerId');
         }
 
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
-            throw new \RuntimeException('Customer not found');
+            throw NotFoundException::customer();
         }
 
         // Get or create default billing address
@@ -202,7 +204,7 @@ class CustomerQueryHandler
                 'customer' => $this->mapCustomer($customer),
             ]];
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to update address: ' . $e->getMessage());
+            throw ValidationException::invalidValue('address', 'failed to update: ' . $e->getMessage());
         }
     }
 

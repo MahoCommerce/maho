@@ -28,8 +28,8 @@ api_platform:
     graphql:
         enabled: true
         graphql_playground: true
-        introspection: true
-        max_query_depth: 20
+        introspection: '%env(bool:GRAPHQL_INTROSPECTION)%'
+        max_query_depth: 12
         max_query_complexity: 500
 
     swagger:
