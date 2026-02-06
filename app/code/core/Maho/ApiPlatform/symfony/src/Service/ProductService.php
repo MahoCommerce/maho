@@ -20,6 +20,7 @@ use MeiliSearch\Client;
  */
 class ProductService
 {
+    /** @phpstan-ignore-next-line */
     private ?Client $meilisearchClient = null;
     private bool $useMeilisearch = false;
     private ?string $indexBaseName = null;
@@ -34,6 +35,7 @@ class ProductService
      * @param Client|null $meilisearchClient Meilisearch client instance
      * @param string|null $indexBaseName Base index name including prefix and store code (e.g., "dev_default")
      */
+    /** @phpstan-ignore-next-line */
     public function __construct(?Client $meilisearchClient = null, ?string $indexBaseName = null)
     {
         $this->meilisearchClient = $meilisearchClient;
@@ -52,6 +54,7 @@ class ProductService
      */
     private function getBarcodeAttributeCode(): string
     {
+        /** @phpstan-ignore-next-line */
         $posHelper = \Mage::helper('maho_pos');
         if ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode')) {
             return $posHelper->getBarcodeAttributeCode();
@@ -145,7 +148,7 @@ class ProductService
         $productId = \Mage::getModel('catalog/product')
             ->getIdBySku($sku);
 
-        return $productId ? $this->getProductById($productId) : null;
+        return $productId ? $this->getProductById((int) $productId) : null;
     }
 
     /**
@@ -162,6 +165,7 @@ class ProductService
             ->addAttributeToFilter($barcodeAttributeCode, $barcode)
             ->getFirstItem();
 
+        /** @phpstan-ignore return.type */
         return $product->getId() ? $product : null;
     }
 
@@ -306,16 +310,19 @@ class ProductService
         if ($usePosIndex) {
             $indexName = $this->getIndexName('pos');
             try {
+                /** @phpstan-ignore-next-line */
                 $index = $this->meilisearchClient->index($indexName);
                 // Test if index exists by getting stats
                 $index->stats();
             } catch (\Exception $e) {
                 // POS index doesn't exist, fall back to regular products index
                 $indexName = $this->getIndexName('products');
+                /** @phpstan-ignore-next-line */
                 $index = $this->meilisearchClient->index($indexName);
             }
         } else {
             $indexName = $this->getIndexName('products');
+            /** @phpstan-ignore-next-line */
             $index = $this->meilisearchClient->index($indexName);
         }
 
@@ -551,6 +558,7 @@ class ProductService
         $indexName = $posIndex ? $this->getIndexName('pos') : $this->getIndexName('products');
 
         // Create index with explicit primary key to avoid ambiguity with 'store_id'
+        /** @phpstan-ignore-next-line */
         $index = $this->meilisearchClient->index($indexName);
         try {
             $index->update(['primaryKey' => 'id']);

@@ -44,6 +44,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
     /**
      * Check if this authenticator supports the request
      */
+    #[\Override]
     public function supports(Request $request): ?bool
     {
         return $request->headers->has(self::AUTHORIZATION_HEADER)
@@ -56,6 +57,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
     /**
      * Authenticate the request and return a passport
      */
+    #[\Override]
     public function authenticate(Request $request): Passport
     {
         $authHeader = $request->headers->get(self::AUTHORIZATION_HEADER, '');
@@ -92,6 +94,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
     /**
      * Handle successful authentication
      */
+    #[\Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // Return null to allow the request to continue
@@ -101,6 +104,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
     /**
      * Handle authentication failure
      */
+    #[\Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         $data = [

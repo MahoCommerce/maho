@@ -24,6 +24,7 @@ use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Address State Processor - Handles address mutations
@@ -45,6 +46,7 @@ final class AddressProcessor implements ProcessorInterface
     /**
      * Process address mutations (create, update, delete)
      */
+    #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Address
     {
         StoreContext::ensureStore();
@@ -136,7 +138,7 @@ final class AddressProcessor implements ProcessorInterface
             }
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to create address: ' . $e->getMessage());
+            throw new BadRequestHttpException('Failed to create address');
         }
 
         return $this->mapToDto($address, $customer);
@@ -188,7 +190,7 @@ final class AddressProcessor implements ProcessorInterface
             }
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to update address: ' . $e->getMessage());
+            throw new BadRequestHttpException('Failed to update address');
         }
 
         // Reload customer to get updated defaults
@@ -231,7 +233,7 @@ final class AddressProcessor implements ProcessorInterface
             $address->delete();
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to delete address: ' . $e->getMessage());
+            throw new BadRequestHttpException('Failed to delete address');
         }
     }
 
@@ -286,6 +288,7 @@ final class AddressProcessor implements ProcessorInterface
         $address->setTelephone($data->telephone);
     }
 
+    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
     /**
      * Map Maho address model to Address DTO
      */

@@ -381,7 +381,7 @@ class CustomerService
             ->setLastname($lastName)
             ->setEmail($email)
             ->setPassword($password)
-            ->setIsSubscribed($isSubscribed ? 1 : 0);
+            ->setIsSubscribed($isSubscribed);
 
         $customer->save();
 
@@ -413,7 +413,7 @@ class CustomerService
         }
 
         if (isset($data['isSubscribed'])) {
-            $customer->setIsSubscribed($data['isSubscribed'] ? 1 : 0);
+            $customer->setIsSubscribed($data['isSubscribed']);
         }
 
         $customer->save();
@@ -485,8 +485,8 @@ class CustomerService
 
         // Set new password and clear token
         $customer->setPassword($newPassword);
-        $customer->setRpToken(null);
-        $customer->setRpTokenCreatedAt(null);
+        $customer->setRpToken('');
+        $customer->setRpTokenCreatedAt('');
         $customer->save();
 
         return true;

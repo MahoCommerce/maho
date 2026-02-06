@@ -47,6 +47,7 @@ final class CustomerProvider implements ProviderInterface
      *
      * @return array<Customer>|Customer|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Customer|null
     {
         $operationName = $operation->getName();
@@ -143,6 +144,7 @@ final class CustomerProvider implements ProviderInterface
         return $customers;
     }
 
+    // TODO: Extract customer mapping to a shared CustomerMapper service to eliminate duplication with CustomerProcessor/CustomerProvider
     /**
      * Map Maho customer model to Customer DTO (full version with all addresses)
      */
@@ -212,6 +214,7 @@ final class CustomerProvider implements ProviderInterface
         return $dto;
     }
 
+    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
     /**
      * Map Maho address model to Address DTO
      */

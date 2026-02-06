@@ -30,6 +30,7 @@ final class UrlResolverProvider implements ProviderInterface
     /**
      * @return UrlResolveResult|UrlResolveResult[]
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): UrlResolveResult|array
     {
         StoreContext::ensureStore();
@@ -82,6 +83,7 @@ final class UrlResolverProvider implements ProviderInterface
 
         // Try with .html suffix (common in Magento)
         $rewrite->loadByRequestPath($path . '.html');
+        /** @phpstan-ignore if.alwaysFalse */
         if ($rewrite->getId()) {
             return $this->processRewrite($rewrite, $result);
         }
@@ -215,6 +217,7 @@ final class UrlResolverProvider implements ProviderInterface
 
         $product = $collection->getFirstItem();
 
+        /** @phpstan-ignore return.type */
         return $product->getId() ? $product : null;
     }
 }

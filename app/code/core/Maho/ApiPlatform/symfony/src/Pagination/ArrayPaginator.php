@@ -20,6 +20,7 @@ use ApiPlatform\State\Pagination\PaginatorInterface;
  *
  * @implements PaginatorInterface<mixed>
  * @implements \IteratorAggregate<int, mixed>
+ * @phpstan-ignore-next-line
  */
 final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
 {
@@ -33,11 +34,13 @@ final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
         private readonly int $totalItems,
     ) {}
 
+    #[\Override]
     public function count(): int
     {
         return count($this->items);
     }
 
+    #[\Override]
     public function getLastPage(): float
     {
         if ($this->itemsPerPage <= 0) {
@@ -46,16 +49,19 @@ final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
         return max(1.0, ceil($this->totalItems / $this->itemsPerPage));
     }
 
+    #[\Override]
     public function getTotalItems(): float
     {
         return (float) $this->totalItems;
     }
 
+    #[\Override]
     public function getCurrentPage(): float
     {
         return (float) $this->currentPage;
     }
 
+    #[\Override]
     public function getItemsPerPage(): float
     {
         return (float) $this->itemsPerPage;
@@ -64,6 +70,7 @@ final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
     /**
      * @return \ArrayIterator<int, mixed>
      */
+    #[\Override]
     public function getIterator(): \ArrayIterator
     {
         return new \ArrayIterator($this->items);

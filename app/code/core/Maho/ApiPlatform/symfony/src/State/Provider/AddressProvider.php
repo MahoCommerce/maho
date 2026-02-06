@@ -45,6 +45,7 @@ final class AddressProvider implements ProviderInterface
      *
      * @return Address[]|Address|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Address|null
     {
         StoreContext::ensureStore();
@@ -125,6 +126,7 @@ final class AddressProvider implements ProviderInterface
         return $addresses;
     }
 
+    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
     /**
      * Map Maho address model to Address DTO
      */

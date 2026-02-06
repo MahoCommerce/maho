@@ -44,6 +44,7 @@ final class CartProvider implements ProviderInterface
     /**
      * Provide cart data based on operation type
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?Cart
     {
         $operationName = $operation->getName();
@@ -55,6 +56,7 @@ final class CartProvider implements ProviderInterface
                 // Verify the authenticated user matches the requested customer
                 $this->authorizeCustomerAccess((int) $customerId);
                 $quote = $this->cartService->getCustomerCart((int) $customerId);
+                /** @phpstan-ignore ternary.alwaysTrue */
                 return $quote ? $this->mapToDto($quote) : null;
             }
             return null;

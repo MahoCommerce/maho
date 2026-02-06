@@ -61,7 +61,7 @@ class CustomerQueryHandler
         if (!$id) {
             throw new \RuntimeException('Customer ID required');
         }
-        $customer = $this->customerService->getCustomer((int) $id);
+        $customer = $this->customerService->getCustomerById((int) $id);
         return ['customer' => $customer ? $this->mapCustomer($customer) : null];
     }
 

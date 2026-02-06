@@ -43,6 +43,7 @@ final class CustomerProcessor implements ProcessorInterface
     /**
      * Process customer mutations
      */
+    #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Customer
     {
         $operationName = $operation->getName();
@@ -93,6 +94,7 @@ final class CustomerProcessor implements ProcessorInterface
         if ($data->lastName !== null) {
             $customer->setLastname($data->lastName);
         }
+        /** @phpstan-ignore notIdentical.alwaysTrue */
         if ($data->email !== null && $data->email !== $customer->getEmail()) {
             // Check if new email is already in use
             $existingCustomer = \Mage::getModel('customer/customer')
@@ -328,6 +330,7 @@ final class CustomerProcessor implements ProcessorInterface
         return new Customer();
     }
 
+    // TODO: Extract customer mapping to a shared CustomerMapper service to eliminate duplication with CustomerProcessor/CustomerProvider
     /**
      * Map Maho customer model to Customer DTO
      */

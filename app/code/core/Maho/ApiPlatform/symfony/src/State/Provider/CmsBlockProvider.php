@@ -29,6 +29,7 @@ final class CmsBlockProvider implements ProviderInterface
     /**
      * @return CmsBlock|CmsBlock[]|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsBlock|array|null
     {
         StoreContext::ensureStore();
@@ -83,6 +84,7 @@ final class CmsBlockProvider implements ProviderInterface
             return null;
         }
 
+        /** @var \Mage_Cms_Model_Block $block */
         return $this->mapToDto($block);
     }
 

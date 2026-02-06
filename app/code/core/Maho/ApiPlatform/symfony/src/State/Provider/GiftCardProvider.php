@@ -29,6 +29,7 @@ final class GiftCardProvider implements ProviderInterface
      *
      * @return GiftCard|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?GiftCard
     {
         $operationName = $operation->getName();

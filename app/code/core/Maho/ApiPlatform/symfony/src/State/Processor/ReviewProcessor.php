@@ -20,11 +20,12 @@ use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Review State Processor
  *
- * @implements ProcessorInterface<Review, Review|null>
+ * @implements ProcessorInterface<Review, Review>
  */
 final class ReviewProcessor implements ProcessorInterface
 {
@@ -37,8 +38,9 @@ final class ReviewProcessor implements ProcessorInterface
 
     /**
      * @param Review $data
-     * @return Review|null
+     * @return Review
      */
+    #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         StoreContext::ensureStore();
@@ -186,7 +188,7 @@ final class ReviewProcessor implements ProcessorInterface
                 $ratingVote->setRatingId($ratingModel->getId())
                     ->setReviewId($review->getId())
                     ->setCustomerId($customerId)
-                    ->addOptionVote($optionId, $productId);
+                    ->addOptionVote($optionId, (string) $productId);
             }
         }
     }
@@ -197,6 +199,7 @@ final class ReviewProcessor implements ProcessorInterface
     private function getRatingOptionId(int $ratingId, int $starValue): ?int
     {
         /** @var \Mage_Rating_Model_Resource_Rating_Option_Collection $optionCollection */
+        /** @phpstan-ignore-next-line */
         $optionCollection = \Mage::getModel('rating/rating_option')->getCollection()
             ->addRatingFilter($ratingId)
             ->setPositionOrder();

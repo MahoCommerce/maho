@@ -36,6 +36,7 @@ final class NewsletterProvider implements ProviderInterface
     /**
      * Provide newsletter subscription data
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?NewsletterSubscription
     {
         $operationName = $operation->getName();

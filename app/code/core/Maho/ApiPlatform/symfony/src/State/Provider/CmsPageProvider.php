@@ -29,6 +29,7 @@ final class CmsPageProvider implements ProviderInterface
     /**
      * @return CmsPage|CmsPage[]|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsPage|array|null
     {
         StoreContext::ensureStore();

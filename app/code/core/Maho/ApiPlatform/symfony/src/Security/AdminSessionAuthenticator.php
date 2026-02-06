@@ -32,6 +32,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
     /**
      * Check if this authenticator supports the request
      */
+    #[\Override]
     public function supports(Request $request): ?bool
     {
         // Check if there's an admin session or admin context set
@@ -41,6 +42,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
     /**
      * Authenticate the request
      */
+    #[\Override]
     public function authenticate(Request $request): Passport
     {
         // First check if admin context was set by the controller
@@ -66,6 +68,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
     /**
      * Handle successful authentication
      */
+    #[\Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // Continue to the controller
@@ -75,6 +78,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
     /**
      * Handle authentication failure
      */
+    #[\Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): ?Response
     {
         return new JsonResponse([
@@ -118,7 +122,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
             }
 
             $adminUser = $adminSession->getUser();
-            return $adminUser?->getId() ? (int) $adminUser->getId() : null;
+            return $adminUser->getId() ? (int) $adminUser->getId() : null;
         } catch (\Exception $e) {
             \Mage::logException($e);
             return null;
@@ -161,7 +165,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
         // Set context for services
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminId;
         $_SERVER['MAHO_ADMIN_USERNAME'] = $admin->getUsername();
-        $_SERVER['MAHO_ADMIN_ROLE_ID'] = $admin->getRole()?->getId();
+        $_SERVER['MAHO_ADMIN_ROLE_ID'] = $admin->getRole()->getId();
         $_SERVER['MAHO_IS_ADMIN'] = '1';
 
         return new ApiUser(

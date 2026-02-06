@@ -33,6 +33,7 @@ class ServiceFactory
 
         if (\Mage::getStoreConfigFlag('maho_api/meilisearch/enabled')) {
             try {
+                /** @phpstan-ignore-next-line */
                 $meilisearchClient = new \Meilisearch\Client(
                     \Mage::getStoreConfig('maho_api/meilisearch/host'),
                     \Mage::getStoreConfig('maho_api/meilisearch/api_key'),
@@ -44,6 +45,7 @@ class ServiceFactory
 
         $indexPrefix = \Mage::getStoreConfig('maho_api/meilisearch/index_prefix') ?: 'maho_';
 
+        /** @phpstan-ignore-next-line */
         return new ProductService($meilisearchClient, $indexPrefix);
     }
 

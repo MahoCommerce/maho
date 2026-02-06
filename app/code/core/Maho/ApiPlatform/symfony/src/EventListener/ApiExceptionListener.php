@@ -36,6 +36,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         $this->debug = $debug;
     }
 
+    #[\Override]
     public static function getSubscribedEvents(): array
     {
         return [

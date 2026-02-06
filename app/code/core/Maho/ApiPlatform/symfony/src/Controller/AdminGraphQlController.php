@@ -25,6 +25,7 @@ use Maho\ApiPlatform\Service\ProductService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
@@ -121,7 +122,7 @@ class AdminGraphQlController
         $query = trim($query);
 
         // Handle introspection
-        if (strpos($query, '__schema') !== false || strpos($query, '__type') !== false) {
+        if (str_contains($query, '__schema') || str_contains($query, '__type')) {
             return ['data' => $this->getIntrospectionSchema()];
         }
 
@@ -139,7 +140,7 @@ class AdminGraphQlController
             return ['data' => $data];
         } catch (\Exception $e) {
             \Mage::logException($e);
-            return ['errors' => [['message' => $e->getMessage()]]];
+            return ['errors' => [['message' => \Mage::getIsDeveloperMode() ? $e->getMessage() : 'An error occurred processing the request']]];
         }
     }
 
@@ -155,9 +156,13 @@ class AdminGraphQlController
         $indexBaseName = null;
         if (\Mage::helper('core')->isModuleEnabled('Meilisearch_Search')) {
             try {
+                /** @phpstan-ignore-next-line */
                 $meilisearchHelper = \Mage::helper('meilisearch_search/meilisearchhelper');
+                /** @phpstan-ignore-next-line */
                 $meilisearchClient = $meilisearchHelper->getClient();
+                /** @phpstan-ignore-next-line */
                 $productHelper = \Mage::helper('meilisearch_search/entity_producthelper');
+                /** @phpstan-ignore-next-line */
                 $indexBaseName = $productHelper->getBaseIndexName($storeId);
             } catch (\Exception $e) {
                 \Mage::logException($e);
@@ -268,7 +273,7 @@ class AdminGraphQlController
             'categories', 'getCategories', 'GetCategories'
                 => $customerHandler->handleGetCategories($variables, $context),
 
-            default => throw new \RuntimeException("Unknown operation: {$operation}"),
+            default => throw new BadRequestHttpException("Unknown operation: {$operation}"),
         };
     }
 

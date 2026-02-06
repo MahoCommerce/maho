@@ -29,6 +29,7 @@ final class BlogPostProvider implements ProviderInterface
     /**
      * @return BlogPost|BlogPost[]|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|array|null
     {
         StoreContext::ensureStore();

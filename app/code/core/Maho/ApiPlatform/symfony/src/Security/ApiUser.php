@@ -34,6 +34,7 @@ class ApiUser implements UserInterface
      *
      * @return array<string>
      */
+    #[\Override]
     public function getRoles(): array
     {
         return $this->roles;
@@ -43,6 +44,7 @@ class ApiUser implements UserInterface
      * Erase sensitive credentials
      * Required by UserInterface but not used for JWT authentication
      */
+    #[\Override]
     public function eraseCredentials(): void
     {
         // No credentials to erase for JWT-based authentication
@@ -51,6 +53,7 @@ class ApiUser implements UserInterface
     /**
      * Get the unique user identifier
      */
+    #[\Override]
     public function getUserIdentifier(): string
     {
         return $this->identifier;

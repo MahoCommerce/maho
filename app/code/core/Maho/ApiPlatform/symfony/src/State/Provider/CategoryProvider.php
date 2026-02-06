@@ -31,6 +31,7 @@ final class CategoryProvider implements ProviderInterface
      *
      * @return array<Category>|Category|null
      */
+    #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Category|null
     {
         // Ensure valid store context

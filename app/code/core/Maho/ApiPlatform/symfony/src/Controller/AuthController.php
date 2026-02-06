@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -118,7 +118,7 @@ class AuthController extends AbstractController
                             $customerCart = \Mage::getModel('sales/quote');
                             $customerCart->setStoreId(\Mage::app()->getStore()->getId());
                             $customerCart->assignCustomer($customer);
-                            $customerCart->setIsActive(true);
+                            $customerCart->setIsActive(1);
                             $customerCart->save();
                         }
 
@@ -126,7 +126,7 @@ class AuthController extends AbstractController
                         $customerCart->collectTotals();
                         $customerCart->save();
 
-                        $guestCart->setIsActive(false);
+                        $guestCart->setIsActive(0);
                         $guestCart->save();
 
                         $cartId = (int) $customerCart->getId();
@@ -441,7 +441,7 @@ class AuthController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'server_error',
-                'message' => 'Failed to save address: ' . $e->getMessage(),
+                'message' => 'Failed to save address',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -459,7 +459,7 @@ class AuthController extends AbstractController
 
         // Load and verify ownership
         $address = \Mage::getModel('customer/address')->load($id);
-        if (!$address->getId() || $address->getCustomerId() != $customer->getId()) {
+        if (!$address->getId() || (int) $address->getCustomerId() !== (int) $customer->getId()) {
             return new JsonResponse([
                 'error' => 'not_found',
                 'message' => 'Address not found',
@@ -521,7 +521,7 @@ class AuthController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'server_error',
-                'message' => 'Failed to update address: ' . $e->getMessage(),
+                'message' => 'Failed to update address',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -539,7 +539,7 @@ class AuthController extends AbstractController
 
         // Load and verify ownership
         $address = \Mage::getModel('customer/address')->load($id);
-        if (!$address->getId() || $address->getCustomerId() != $customer->getId()) {
+        if (!$address->getId() || (int) $address->getCustomerId() !== (int) $customer->getId()) {
             return new JsonResponse([
                 'error' => 'not_found',
                 'message' => 'Address not found',
@@ -557,7 +557,7 @@ class AuthController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'server_error',
-                'message' => 'Failed to delete address: ' . $e->getMessage(),
+                'message' => 'Failed to delete address',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -696,7 +696,7 @@ class AuthController extends AbstractController
             $customerToken = $customer->getRpToken();
             $tokenExpiry = $customer->getRpTokenCreatedAt();
 
-            if (empty($customerToken) || $customerToken !== $token) {
+            if (empty($customerToken) || !hash_equals($customerToken, $token)) {
                 return new JsonResponse([
                     'error' => 'invalid_token',
                     'message' => 'Invalid or expired reset token',
@@ -717,8 +717,8 @@ class AuthController extends AbstractController
 
             // Reset the password
             $customer->setPassword($newPassword);
-            $customer->setRpToken(null);
-            $customer->setRpTokenCreatedAt(null);
+            $customer->setRpToken('');
+            $customer->setRpTokenCreatedAt('');
             $customer->save();
 
             return new JsonResponse([
@@ -800,6 +800,7 @@ class AuthController extends AbstractController
         ];
     }
 
+    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
     /**
      * Map address to array
      */
