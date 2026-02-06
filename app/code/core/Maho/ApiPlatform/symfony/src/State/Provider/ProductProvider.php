@@ -168,7 +168,7 @@ final class ProductProvider implements ProviderInterface
     {
         $requestFilters = $context['filters'] ?? [];
         $page = (int) ($requestFilters['page'] ?? 1);
-        $pageSize = min((int) ($requestFilters['pageSize'] ?? 20), 100);
+        $pageSize = min((int) ($requestFilters['itemsPerPage'] ?? $requestFilters['pageSize'] ?? 20), 100);
         // Support both 'search' and 'q' parameters for compatibility
         $search = $requestFilters['search'] ?? $requestFilters['q'] ?? '';
 

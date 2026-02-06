@@ -188,9 +188,10 @@ class OrderService
      * @param int $page Page number
      * @param int $pageSize Page size
      * @param string|null $status Filter by status
-     * @param string|null $email Filter by customer email (exact or partial match)
+     * @param string|null $email Filter by customer email (exact match, uses index)
      * @param string|null $incrementId Filter by order increment ID (exact match)
-     * @return array [orders, total]
+     * @param string|null $emailLike Filter by customer email (partial LIKE match, slower on large tables)
+     * @return array{orders: \Mage_Sales_Model_Resource_Order_Collection, total: int}
      */
     public function getAllOrders(
         int $page = 1,
@@ -198,6 +199,7 @@ class OrderService
         ?string $status = null,
         ?string $email = null,
         ?string $incrementId = null,
+        ?string $emailLike = null,
     ): array {
         $collection = \Mage::getModel('sales/order')->getCollection()
             ->setOrder('created_at', 'DESC');
@@ -207,28 +209,22 @@ class OrderService
         }
 
         if ($email) {
-            $collection->addFieldToFilter('customer_email', ['like' => '%' . $email . '%']);
+            $collection->addFieldToFilter('customer_email', $email);
+        } elseif ($emailLike) {
+            $collection->addFieldToFilter('customer_email', ['like' => '%' . $emailLike . '%']);
         }
 
         if ($incrementId) {
             $collection->addFieldToFilter('increment_id', $incrementId);
         }
 
-        $total = $collection->getSize();
-
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
 
-        // Load orders individually to ensure addresses are available
-        // Collection items don't auto-load related address data
-        $orders = [];
-        foreach ($collection as $orderItem) {
-            $order = \Mage::getModel('sales/order')->load($orderItem->getId());
-            $orders[] = $order;
-        }
+        $total = $collection->getSize();
 
         return [
-            'orders' => $orders,
+            'orders' => $collection,
             'total' => $total,
         ];
     }
@@ -252,21 +248,13 @@ class OrderService
             $collection->addFieldToFilter('status', $status);
         }
 
-        $total = $collection->getSize();
-
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
 
-        // Load orders individually to ensure addresses are available
-        // Collection items don't auto-load related address data
-        $orders = [];
-        foreach ($collection as $orderItem) {
-            $order = \Mage::getModel('sales/order')->load($orderItem->getId());
-            $orders[] = $order;
-        }
+        $total = $collection->getSize();
 
         return [
-            'orders' => $orders,
+            'orders' => $collection,
             'total' => $total,
         ];
     }

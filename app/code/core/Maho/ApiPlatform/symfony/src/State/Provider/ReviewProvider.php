@@ -73,7 +73,7 @@ final class ReviewProvider implements ProviderInterface
                 return $this->getProductReviews(
                     $productId,
                     (int) ($filters['page'] ?? 1),
-                    (int) ($filters['pageSize'] ?? 10),
+                    (int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10),
                 );
             }
             return [];

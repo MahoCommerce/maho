@@ -181,8 +181,8 @@ class CustomerService
 
         // Build query based on search type
         if ($telephone !== null && !empty($telephone)) {
-            // Phone search - search in address telephone
-            $telephoneSafe = $read->quote('%' . $telephone . '%');
+            // Phone search - use trailing wildcard only (digits already stripped by caller)
+            $telephoneSafe = $read->quote($telephone . '%');
 
             $sql = "
                 SELECT DISTINCT c.entity_id
@@ -204,13 +204,13 @@ class CustomerService
                 WHERE av_tel.value LIKE {$telephoneSafe}
             ";
         } elseif ($email !== null && !empty($email)) {
-            // Email search
-            $emailSafe = $read->quote('%' . $email . '%');
+            // Email search - use exact match to leverage index
+            $emailSafe = $read->quote($email);
 
             $sql = "
                 SELECT c.entity_id
                 FROM {$customerTable} c
-                WHERE c.email LIKE {$emailSafe}
+                WHERE c.email = {$emailSafe}
                 ORDER BY c.entity_id DESC
                 LIMIT {$pageSize} OFFSET {$offset}
             ";
@@ -218,11 +218,12 @@ class CustomerService
             $countSql = "
                 SELECT COUNT(*)
                 FROM {$customerTable} c
-                WHERE c.email LIKE {$emailSafe}
+                WHERE c.email = {$emailSafe}
             ";
         } elseif (!empty($search)) {
             // General search - name, email, or phone
-            $searchSafe = $read->quote('%' . $search . '%');
+            // Use trailing wildcard only (search%) to allow index usage
+            $searchSafe = $read->quote($search . '%');
 
             // Use UNION to combine results from different search paths
             $sql = "

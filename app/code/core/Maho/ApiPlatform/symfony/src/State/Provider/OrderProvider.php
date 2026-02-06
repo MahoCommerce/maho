@@ -193,7 +193,7 @@ final class OrderProvider implements ProviderInterface
 
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['pageSize'] ?? 10), 50);
+        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10), 50);
         $status = $filters['status'] ?? null;
 
         $result = $this->orderService->getCustomerOrders($customerId, $page, $pageSize, $status);
@@ -215,12 +215,13 @@ final class OrderProvider implements ProviderInterface
     {
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['pageSize'] ?? 20), 100);
+        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100);
         $status = $filters['status'] ?? null;
         $email = $filters['email'] ?? null;
+        $emailLike = $filters['emailLike'] ?? null;
         $incrementId = $filters['incrementId'] ?? null;
 
-        $result = $this->orderService->getAllOrders($page, $pageSize, $status, $email, $incrementId);
+        $result = $this->orderService->getAllOrders($page, $pageSize, $status, $email, $incrementId, $emailLike);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
