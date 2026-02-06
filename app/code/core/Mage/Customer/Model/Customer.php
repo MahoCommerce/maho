@@ -273,6 +273,13 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
                 self::EXCEPTION_INVALID_EMAIL_OR_PASSWORD,
             );
         }
+
+        // Upgrade legacy password hash to bcrypt
+        $encryptor = Mage::helper('core')->getEncryptor();
+        if (!$encryptor->validateHashByVersion($password, $this->getPasswordHash(), Mage_Core_Model_Encryption::HASH_VERSION_LATEST)) {
+            $this->setPassword($password)->save();
+        }
+
         Mage::dispatchEvent('customer_customer_authenticated', [
             'model'    => $this,
             'password' => $password,

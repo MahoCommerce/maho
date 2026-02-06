@@ -717,7 +717,7 @@ class Mage_Core_Controller_Response_Http
 
         $this->sendHeaders();
 
-        if ($this->isException() && $this->renderExceptions()) {
+        if ($this->isException() && $this->renderExceptions() && Mage::getIsDeveloperMode()) {
             $exceptions = '';
             foreach ($this->getException() as $e) {
                 $exceptions .= $e->__toString() . "\n";

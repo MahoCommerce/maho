@@ -12,6 +12,8 @@
 
 class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
 {
+    public const ADMIN_RESOURCE = 'system/translate_inline';
+
     /**
      * Ajax action for inline translation
      */
@@ -31,14 +33,4 @@ class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
         exit();
     }
 
-    /**
-     * Check is allowed access to action
-     *
-     * @return true
-     */
-    #[\Override]
-    protected function _isAllowed()
-    {
-        return true;
-    }
 }
