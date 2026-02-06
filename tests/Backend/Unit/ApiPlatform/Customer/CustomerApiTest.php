@@ -319,7 +319,7 @@ describe('CustomerProvider - mapToDtoForSearch', function () {
     });
 });
 
-describe('CustomerProvider - mapAddressToDto', function () {
+describe('AddressMapper - fromCustomerAddress', function () {
     it('correctly maps a Maho address to Address DTO', function () {
         // Load any existing address from the database
         $mahoAddress = \Mage::getModel('customer/address')
@@ -332,15 +332,9 @@ describe('CustomerProvider - mapAddressToDto', function () {
             $this->markTestSkipped('No customer addresses found in test database');
         }
 
-        // Use reflection to test private mapAddressToDto method
-        $securityMock = $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class);
-        $provider = new \Maho\ApiPlatform\State\Provider\CustomerProvider($securityMock);
-
-        $reflection = new ReflectionClass($provider);
-        $method = $reflection->getMethod('mapAddressToDto');
-        $method->setAccessible(true);
-
-        $dto = $method->invoke($provider, $mahoAddress);
+        $mapper = new \Maho\ApiPlatform\Service\AddressMapper();
+        /** @var \Mage_Customer_Model_Address $mahoAddress */
+        $dto = $mapper->fromCustomerAddress($mahoAddress);
 
         expect($dto)->toBeInstanceOf(\Maho\ApiPlatform\ApiResource\Address::class);
         expect($dto->id)->toBe((int) $mahoAddress->getId());
