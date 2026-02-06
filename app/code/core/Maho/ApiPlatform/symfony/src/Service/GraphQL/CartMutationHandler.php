@@ -219,7 +219,6 @@ class CartMutationHandler
             /** @phpstan-ignore-next-line */
             \Mage::helper('maho_giftcard')->applyGiftcardToQuote($quote, $giftcard, null);
             $quote->collectTotals()->save();
-            $quote = $this->cartService->getCart((int) $cartId);
             return ['applyCoupon' => $this->mapCart($quote)];
         }
 
@@ -230,8 +229,7 @@ class CartMutationHandler
             throw ValidationException::invalidValue('couponCode', 'invalid or expired coupon');
         }
 
-        // Reload quote to get fresh totals after coupon application
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote->collectTotals();
         return ['applyCoupon' => $this->mapCart($quote)];
     }
 
@@ -249,8 +247,7 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
         $this->cartService->removeCoupon($quote);
-        // Reload quote to get fresh totals after coupon removal
-        $quote = $this->cartService->getCart((int) $cartId);
+        $quote->collectTotals();
         return ['removeCoupon' => $this->mapCart($quote)];
     }
 

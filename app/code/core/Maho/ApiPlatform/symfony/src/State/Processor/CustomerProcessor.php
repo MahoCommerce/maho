@@ -68,6 +68,10 @@ final class CustomerProcessor implements ProcessorInterface
             'createCustomerQuick' => $this->createCustomerQuick($context),
             'customerLogin' => $this->customerLogin($context),
             'customerLogout' => $this->customerLogout($context),
+            'updateCustomer' => $this->updateCustomerGraphQl($context),
+            'changePassword' => $this->changePasswordGraphQl($context),
+            'forgotPassword' => $this->forgotPassword($context),
+            'resetPassword' => $this->resetPassword($context),
             default => $data instanceof Customer ? $data : new Customer(),
         };
     }
@@ -328,6 +332,194 @@ final class CustomerProcessor implements ProcessorInterface
         // For stateless API, logout is handled client-side by clearing tokens
         // Return empty customer to indicate logged out state
         return new Customer();
+    }
+
+    /**
+     * Update customer profile via GraphQL mutation
+     */
+    private function updateCustomerGraphQl(array $context): Customer
+    {
+        $args = $context['args']['input'] ?? [];
+
+        $customerId = $this->getAuthenticatedCustomerId();
+        if (!$customerId) {
+            throw new AccessDeniedHttpException('Authentication required');
+        }
+
+        $customer = \Mage::getModel('customer/customer')->load($customerId);
+        if (!$customer->getId()) {
+            throw new AccessDeniedHttpException('Customer not found');
+        }
+
+        if (isset($args['firstName'])) {
+            $customer->setFirstname($args['firstName']);
+        }
+        if (isset($args['lastName'])) {
+            $customer->setLastname($args['lastName']);
+        }
+        if (isset($args['email']) && $args['email'] !== $customer->getEmail()) {
+            $existingCustomer = \Mage::getModel('customer/customer')
+                ->setWebsiteId($customer->getWebsiteId())
+                ->loadByEmail($args['email']);
+            if ($existingCustomer->getId() && $existingCustomer->getId() != $customerId) {
+                throw new BadRequestHttpException('Email is already in use');
+            }
+            $customer->setEmail($args['email']);
+        }
+
+        try {
+            $customer->save();
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('Failed to update profile: ' . $e->getMessage());
+        }
+
+        return $this->mapToDto($customer);
+    }
+
+    /**
+     * Change password via GraphQL mutation
+     */
+    private function changePasswordGraphQl(array $context): Customer
+    {
+        $args = $context['args']['input'] ?? [];
+
+        $customerId = $this->getAuthenticatedCustomerId();
+        if (!$customerId) {
+            throw new AccessDeniedHttpException('Authentication required');
+        }
+
+        $currentPassword = $args['currentPassword'] ?? '';
+        $newPassword = $args['newPassword'] ?? '';
+
+        $coreHelper = \Mage::helper('core');
+
+        if (!$coreHelper->isValidNotBlank($currentPassword)) {
+            throw new BadRequestHttpException('Current password is required');
+        }
+        if (!$coreHelper->isValidNotBlank($newPassword)) {
+            throw new BadRequestHttpException('New password is required');
+        }
+
+        $minPasswordLength = (int) \Mage::getStoreConfig('customer/password/minimum_password_length') ?: 8;
+        if (!$coreHelper->isValidLength($newPassword, $minPasswordLength)) {
+            throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
+        }
+
+        $customer = \Mage::getModel('customer/customer')->load($customerId);
+        if (!$customer->getId()) {
+            throw new AccessDeniedHttpException('Customer not found');
+        }
+
+        if (!$customer->validatePassword($currentPassword)) {
+            throw new BadRequestHttpException('Current password is incorrect');
+        }
+
+        $customer->setPassword($newPassword);
+
+        try {
+            $customer->save();
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('Failed to change password: ' . $e->getMessage());
+        }
+
+        return $this->mapToDto($customer);
+    }
+
+    /**
+     * Send forgot password email via GraphQL mutation
+     */
+    private function forgotPassword(array $context): Customer
+    {
+        StoreContext::ensureStore();
+        $args = $context['args']['input'] ?? [];
+        $email = $args['email'] ?? '';
+
+        if (empty($email)) {
+            throw new BadRequestHttpException('Email is required');
+        }
+
+        $storeId = StoreContext::getStoreId();
+        $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
+
+        $customer = \Mage::getModel('customer/customer')
+            ->setWebsiteId($websiteId)
+            ->loadByEmail($email);
+
+        // Always return success to prevent email enumeration
+        if ($customer->getId()) {
+            try {
+                $customer->sendPasswordResetConfirmationEmail();
+            } catch (\Exception $e) {
+                \Mage::logException($e);
+            }
+        }
+
+        // Return empty customer DTO (no customer data leaked)
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
+    }
+
+    /**
+     * Reset password with token via GraphQL mutation
+     */
+    private function resetPassword(array $context): Customer
+    {
+        StoreContext::ensureStore();
+        $args = $context['args']['input'] ?? [];
+        $email = $args['email'] ?? '';
+        $resetToken = $args['resetToken'] ?? '';
+        $newPassword = $args['newPassword'] ?? '';
+
+        if (empty($email) || empty($resetToken) || empty($newPassword)) {
+            throw new BadRequestHttpException('Email, reset token, and new password are required');
+        }
+
+        $coreHelper = \Mage::helper('core');
+        $minPasswordLength = (int) \Mage::getStoreConfig('customer/password/minimum_password_length') ?: 8;
+        if (!$coreHelper->isValidLength($newPassword, $minPasswordLength)) {
+            throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
+        }
+
+        $storeId = StoreContext::getStoreId();
+        $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
+
+        $customer = \Mage::getModel('customer/customer')
+            ->setWebsiteId($websiteId)
+            ->loadByEmail($email);
+
+        if (!$customer->getId()) {
+            throw new BadRequestHttpException('Invalid email or reset token');
+        }
+
+        // Validate reset token
+        $customerToken = $customer->getRpToken();
+        if (!$customerToken || $customerToken !== $resetToken) {
+            throw new BadRequestHttpException('Invalid email or reset token');
+        }
+
+        // Check token expiry
+        $tokenCreatedAt = $customer->getRpTokenCreatedAt();
+        if ($tokenCreatedAt) {
+            $expirationPeriod = (int) \Mage::getStoreConfig('customer/password/reset_link_expiration_period') ?: 2;
+            $tokenAge = (time() - strtotime($tokenCreatedAt)) / 3600;
+            if ($tokenAge > $expirationPeriod) {
+                throw new BadRequestHttpException('Reset token has expired');
+            }
+        }
+
+        // Set new password and clear token
+        $customer->setPassword($newPassword);
+        $customer->setRpToken('');
+        $customer->setRpTokenCreatedAt('');
+
+        try {
+            $customer->save();
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException('Failed to reset password: ' . $e->getMessage());
+        }
+
+        return $this->mapToDto($customer);
     }
 
     // TODO: Extract customer mapping to a shared CustomerMapper service to eliminate duplication with CustomerProcessor/CustomerProvider

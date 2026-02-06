@@ -51,11 +51,25 @@ final class AddressProcessor implements ProcessorInterface
     {
         StoreContext::ensureStore();
 
+        $operationName = $operation->getName() ?? '';
+
+        // Handle GraphQL mutations
+        if ($operationName === 'createAddress') {
+            return $this->handleGraphQlCreate($data, $context);
+        }
+        if ($operationName === 'updateAddress') {
+            return $this->handleGraphQlUpdate($data, $context);
+        }
+        if ($operationName === 'deleteAddress') {
+            $this->handleGraphQlDelete($context);
+            return null;
+        }
+
+        // REST handling below
         $customerId = (int) ($uriVariables['customerId'] ?? 0);
         $addressId = (int) ($uriVariables['id'] ?? 0);
 
         // Check if this is a /customers/me/* route (uses authenticated customer)
-        $operationName = $operation->getName() ?? '';
         $isMeRoute = str_contains($operationName, '_me_') || str_starts_with($operationName, 'create_me') || str_starts_with($operationName, 'update_me') || str_starts_with($operationName, 'delete_me') || str_starts_with($operationName, 'create_my');
 
         // For /customers/me/* routes - always use authenticated customer
@@ -286,6 +300,134 @@ final class AddressProcessor implements ProcessorInterface
         $address->setPostcode($data->postcode);
         $address->setCountryId($data->countryId);
         $address->setTelephone($data->telephone);
+    }
+
+    /**
+     * Handle GraphQL createAddress mutation
+     */
+    private function handleGraphQlCreate(mixed $data, array $context): Address
+    {
+        $customerId = $this->getAuthenticatedCustomerId();
+        if (!$customerId) {
+            throw new NotFoundHttpException('Authentication required');
+        }
+        $this->authorizeCustomerAccess($customerId);
+        $customer = \Mage::getModel('customer/customer')->load($customerId);
+        if (!$customer->getId()) {
+            throw new NotFoundHttpException('Customer not found');
+        }
+
+        // Build Address DTO from GraphQL args
+        $args = $context['args']['input'] ?? [];
+        $addressDto = new Address();
+        $addressDto->firstName = $args['firstName'] ?? '';
+        $addressDto->lastName = $args['lastName'] ?? '';
+        $addressDto->street = $args['street'] ?? [];
+        $addressDto->city = $args['city'] ?? '';
+        $addressDto->region = $args['region'] ?? null;
+        $addressDto->regionId = isset($args['regionId']) ? (int) $args['regionId'] : null;
+        $addressDto->postcode = $args['postcode'] ?? '';
+        $addressDto->countryId = $args['countryId'] ?? '';
+        $addressDto->telephone = $args['telephone'] ?? '';
+        $addressDto->company = $args['company'] ?? null;
+        $addressDto->isDefaultBilling = $args['isDefaultBilling'] ?? false;
+        $addressDto->isDefaultShipping = $args['isDefaultShipping'] ?? false;
+
+        return $this->createAddress($addressDto, $customer);
+    }
+
+    /**
+     * Handle GraphQL updateAddress mutation
+     */
+    private function handleGraphQlUpdate(mixed $data, array $context): Address
+    {
+        $args = $context['args']['input'] ?? [];
+        $addressId = (int) ($args['id'] ?? 0);
+
+        if (!$addressId) {
+            throw new BadRequestHttpException('Address ID is required');
+        }
+
+        // Load address to get customerId
+        $existingAddress = \Mage::getModel('customer/address')->load($addressId);
+        if (!$existingAddress->getId()) {
+            throw new NotFoundHttpException('Address not found');
+        }
+
+        $customerId = (int) $existingAddress->getCustomerId();
+        $this->authorizeCustomerAccess($customerId);
+        $customer = \Mage::getModel('customer/customer')->load($customerId);
+        if (!$customer->getId()) {
+            throw new NotFoundHttpException('Customer not found');
+        }
+
+        // Build Address DTO from existing data + GraphQL args (partial update)
+        $addressDto = $this->mapToDto($existingAddress, $customer);
+        if (isset($args['firstName'])) {
+            $addressDto->firstName = $args['firstName'];
+        }
+        if (isset($args['lastName'])) {
+            $addressDto->lastName = $args['lastName'];
+        }
+        if (isset($args['street'])) {
+            $addressDto->street = $args['street'];
+        }
+        if (isset($args['city'])) {
+            $addressDto->city = $args['city'];
+        }
+        if (array_key_exists('region', $args)) {
+            $addressDto->region = $args['region'];
+        }
+        if (array_key_exists('regionId', $args)) {
+            $addressDto->regionId = isset($args['regionId']) ? (int) $args['regionId'] : null;
+        }
+        if (isset($args['postcode'])) {
+            $addressDto->postcode = $args['postcode'];
+        }
+        if (isset($args['countryId'])) {
+            $addressDto->countryId = $args['countryId'];
+        }
+        if (isset($args['telephone'])) {
+            $addressDto->telephone = $args['telephone'];
+        }
+        if (array_key_exists('company', $args)) {
+            $addressDto->company = $args['company'];
+        }
+        if (isset($args['isDefaultBilling'])) {
+            $addressDto->isDefaultBilling = (bool) $args['isDefaultBilling'];
+        }
+        if (isset($args['isDefaultShipping'])) {
+            $addressDto->isDefaultShipping = (bool) $args['isDefaultShipping'];
+        }
+
+        return $this->updateAddress($addressDto, $customer, $addressId);
+    }
+
+    /**
+     * Handle GraphQL deleteAddress mutation
+     */
+    private function handleGraphQlDelete(array $context): void
+    {
+        $args = $context['args']['input'] ?? [];
+        $addressId = (int) ($args['id'] ?? 0);
+
+        if (!$addressId) {
+            throw new BadRequestHttpException('Address ID is required');
+        }
+
+        $existingAddress = \Mage::getModel('customer/address')->load($addressId);
+        if (!$existingAddress->getId()) {
+            throw new NotFoundHttpException('Address not found');
+        }
+
+        $customerId = (int) $existingAddress->getCustomerId();
+        $this->authorizeCustomerAccess($customerId);
+        $customer = \Mage::getModel('customer/customer')->load($customerId);
+        if (!$customer->getId()) {
+            throw new NotFoundHttpException('Customer not found');
+        }
+
+        $this->deleteAddress($customer, $addressId);
     }
 
     // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider

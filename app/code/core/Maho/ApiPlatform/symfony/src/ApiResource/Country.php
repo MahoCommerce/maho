@@ -16,6 +16,8 @@ namespace Maho\ApiPlatform\ApiResource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\State\Provider\CountryProvider;
 
 #[ApiResource(
@@ -32,6 +34,14 @@ use Maho\ApiPlatform\State\Provider\CountryProvider;
             description: 'Get all available countries',
         ),
     ],
+    graphQlOperations: [
+        new QueryCollection(name: 'countries', description: 'Get all available countries with regions'),
+        new Query(
+            name: 'country',
+            args: ['id' => ['type' => 'String!', 'description' => 'ISO 2-letter country code']],
+            description: 'Get a country by ISO code',
+        ),
+    ],
 )]
 class Country
 {
@@ -40,5 +50,5 @@ class Country
     public ?string $iso2Code = null;
     public ?string $iso3Code = null;
     /** @var Region[] */
-    public array $available_regions = [];
+    public array $availableRegions = [];
 }

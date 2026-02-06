@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -83,6 +83,39 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
         new Mutation(
             name: 'customerLogout',
             description: 'Customer logout',
+        ),
+        new Mutation(
+            name: 'updateCustomer',
+            args: [
+                'firstName' => ['type' => 'String'],
+                'lastName' => ['type' => 'String'],
+                'email' => ['type' => 'String'],
+            ],
+            description: 'Update authenticated customer profile',
+        ),
+        new Mutation(
+            name: 'changePassword',
+            args: [
+                'currentPassword' => ['type' => 'String!'],
+                'newPassword' => ['type' => 'String!'],
+            ],
+            description: 'Change authenticated customer password',
+        ),
+        new Mutation(
+            name: 'forgotPassword',
+            args: [
+                'email' => ['type' => 'String!'],
+            ],
+            description: 'Send password reset email',
+        ),
+        new Mutation(
+            name: 'resetPassword',
+            args: [
+                'email' => ['type' => 'String!'],
+                'resetToken' => ['type' => 'String!'],
+                'newPassword' => ['type' => 'String!'],
+            ],
+            description: 'Reset password with token',
         ),
     ],
 )]

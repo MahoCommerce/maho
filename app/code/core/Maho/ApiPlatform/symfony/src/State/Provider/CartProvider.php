@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -131,10 +131,16 @@ final class CartProvider implements ProviderInterface
         $dto->createdAt = $quote->getCreatedAt();
         $dto->updatedAt = $quote->getUpdatedAt();
 
+        // Batch load product thumbnails to avoid N+1 queries
+        $items = $quote->getAllVisibleItems();
+        $thumbnailsByProductId = $this->batchLoadCartItemThumbnails($items);
+
         // Map items
         $dto->items = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
-            $dto->items[] = $this->mapItemToDto($item);
+        foreach ($items as $item) {
+            $productId = $item->getProductId() ? (int) $item->getProductId() : null;
+            $thumbnailUrl = $productId ? ($thumbnailsByProductId[$productId] ?? null) : null;
+            $dto->items[] = $this->mapItemToDto($item, $thumbnailUrl);
         }
 
         // Map prices
@@ -186,9 +192,47 @@ final class CartProvider implements ProviderInterface
     }
 
     /**
-     * Map Maho quote item model to CartItem DTO
+     * Batch load thumbnails for all cart items to avoid N+1 product loads
+     *
+     * @param \Mage_Sales_Model_Quote_Item[] $items
+     * @return array<int, string> Map of product ID => thumbnail URL
      */
-    private function mapItemToDto(\Mage_Sales_Model_Quote_Item $item): CartItem
+    private function batchLoadCartItemThumbnails(array $items): array
+    {
+        $productIds = [];
+        foreach ($items as $item) {
+            if ($item->getProductId()) {
+                $productIds[] = (int) $item->getProductId();
+            }
+        }
+
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $collection = \Mage::getResourceModel('catalog/product_collection')
+            ->addIdFilter($productIds)
+            ->addAttributeToSelect(['small_image', 'thumbnail']);
+
+        $thumbnails = [];
+        $mediaConfig = \Mage::getModel('catalog/product_media_config');
+
+        foreach ($collection as $product) {
+            $image = $product->getSmallImage() ?: $product->getThumbnail();
+            if ($image && $image !== 'no_selection') {
+                $thumbnails[(int) $product->getId()] = $mediaConfig->getMediaUrl($image);
+            }
+        }
+
+        return $thumbnails;
+    }
+
+    /**
+     * Map Maho quote item model to CartItem DTO
+     *
+     * @param string|null $preloadedThumbnailUrl Pre-loaded thumbnail URL from batch loading
+     */
+    private function mapItemToDto(\Mage_Sales_Model_Quote_Item $item, ?string $preloadedThumbnailUrl = null): CartItem
     {
         $dto = new CartItem();
         $dto->id = (int) $item->getId();
@@ -206,24 +250,7 @@ final class CartProvider implements ProviderInterface
         $dto->taxPercent = $item->getTaxPercent() ? (float) $item->getTaxPercent() : null;
         $dto->productId = $item->getProductId() ? (int) $item->getProductId() : null;
         $dto->productType = $item->getProductType();
-
-        // Get product thumbnail for cart display
-        $product = $item->getProduct();
-        if ($product) {
-            $thumbnail = $product->getThumbnail();
-            if ($thumbnail && $thumbnail !== 'no_selection') {
-                try {
-                    // Use small_image with width-only resize (more reliable than thumbnail with square resize)
-                    $dto->thumbnailUrl = (string) \Mage::helper('catalog/image')
-                        ->init($product, 'small_image')
-                        ->resize(100);
-                } catch (\Exception $e) {
-                    // Fallback to media URL if image helper fails
-                    $mediaConfig = \Mage::getModel('catalog/product_media_config');
-                    $dto->thumbnailUrl = $mediaConfig->getMediaUrl($thumbnail);
-                }
-            }
-        }
+        $dto->thumbnailUrl = $preloadedThumbnailUrl;
 
         return $dto;
     }

@@ -21,6 +21,10 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use ApiPlatform\Metadata\GraphQl\Mutation;
+use ApiPlatform\Metadata\GraphQl\DeleteMutation;
 use Maho\ApiPlatform\State\Provider\AddressProvider;
 use Maho\ApiPlatform\State\Processor\AddressProcessor;
 
@@ -91,6 +95,60 @@ use Maho\ApiPlatform\State\Processor\AddressProcessor;
                 'customerId' => new Link(toProperty: 'customerId'),
             ],
             description: 'Create a new address for a customer',
+        ),
+    ],
+    graphQlOperations: [
+        new QueryCollection(
+            name: 'myAddresses',
+            args: [],
+            description: 'Get all addresses for the authenticated customer',
+        ),
+        new Query(
+            name: 'address',
+            args: ['id' => ['type' => 'ID!']],
+            description: 'Get a single address by ID',
+        ),
+        new Mutation(
+            name: 'createAddress',
+            args: [
+                'firstName' => ['type' => 'String!'],
+                'lastName' => ['type' => 'String!'],
+                'street' => ['type' => '[String!]!'],
+                'city' => ['type' => 'String!'],
+                'region' => ['type' => 'String'],
+                'regionId' => ['type' => 'Int'],
+                'postcode' => ['type' => 'String!'],
+                'countryId' => ['type' => 'String!'],
+                'telephone' => ['type' => 'String!'],
+                'company' => ['type' => 'String'],
+                'isDefaultBilling' => ['type' => 'Boolean'],
+                'isDefaultShipping' => ['type' => 'Boolean'],
+            ],
+            description: 'Create a new address for the authenticated customer',
+        ),
+        new Mutation(
+            name: 'updateAddress',
+            args: [
+                'id' => ['type' => 'ID!'],
+                'firstName' => ['type' => 'String'],
+                'lastName' => ['type' => 'String'],
+                'street' => ['type' => '[String!]'],
+                'city' => ['type' => 'String'],
+                'region' => ['type' => 'String'],
+                'regionId' => ['type' => 'Int'],
+                'postcode' => ['type' => 'String'],
+                'countryId' => ['type' => 'String'],
+                'telephone' => ['type' => 'String'],
+                'company' => ['type' => 'String'],
+                'isDefaultBilling' => ['type' => 'Boolean'],
+                'isDefaultShipping' => ['type' => 'Boolean'],
+            ],
+            description: 'Update an existing address',
+        ),
+        new DeleteMutation(
+            name: 'deleteAddress',
+            args: ['id' => ['type' => 'ID!']],
+            description: 'Delete an address',
         ),
     ],
 )]

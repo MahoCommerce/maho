@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service\GraphQL;
 
+use Maho\ApiPlatform\Exception\NotFoundException;
+use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Service\OrderService;
 
 /**
@@ -69,13 +71,13 @@ class OrderMutationHandler
     {
         $cartId = $variables['cartId'] ?? null;
         if (!$cartId) {
-            throw new \RuntimeException('Cart ID required');
+            throw ValidationException::requiredField('cartId');
         }
 
         // Load quote without store filtering for admin/POS context
         $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
         if (!$quote || !$quote->getId()) {
-            throw new \RuntimeException('Cart not found');
+            throw NotFoundException::cart();
         }
 
         if ($quote->getStoreId()) {
@@ -196,16 +198,16 @@ class OrderMutationHandler
         $registerId = $variables['registerId'] ?? 1;
 
         if (!$cartId) {
-            throw new \RuntimeException('Cart ID required');
+            throw ValidationException::requiredField('cartId');
         }
         if (empty($payments)) {
-            throw new \RuntimeException('At least one payment is required');
+            throw ValidationException::requiredField('payments');
         }
 
         // Load quote without store filtering for admin/POS context
         $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
         if (!$quote || !$quote->getId()) {
-            throw new \RuntimeException('Cart not found');
+            throw NotFoundException::cart();
         }
 
         if ($quote->getStoreId()) {
@@ -366,7 +368,7 @@ class OrderMutationHandler
     {
         $orderId = $variables['orderId'] ?? null;
         if (!$orderId) {
-            throw new \RuntimeException('Order ID required');
+            throw ValidationException::requiredField('orderId');
         }
 
         /** @phpstan-ignore-next-line */
@@ -405,12 +407,12 @@ class OrderMutationHandler
     {
         $incrementId = $variables['incrementId'] ?? $variables['orderNumber'] ?? null;
         if (!$incrementId) {
-            throw new \RuntimeException('Order number (increment ID) required');
+            throw ValidationException::requiredField('incrementId');
         }
 
         $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
         if (!$order->getId()) {
-            throw new \RuntimeException('Order not found');
+            throw NotFoundException::order();
         }
 
         return ['lookupOrder' => $this->mapOrder($order)];
@@ -425,7 +427,7 @@ class OrderMutationHandler
         $limit = $variables['limit'] ?? 10;
 
         if (!$customerId) {
-            throw new \RuntimeException('Customer ID required');
+            throw ValidationException::requiredField('customerId');
         }
 
         try {
@@ -533,19 +535,19 @@ class OrderMutationHandler
         $comment = $variables['comment'] ?? 'POS Return';
 
         if (!$orderId) {
-            throw new \RuntimeException('Order ID required');
+            throw ValidationException::requiredField('orderId');
         }
         if (empty($items)) {
-            throw new \RuntimeException('At least one item is required for return');
+            throw ValidationException::requiredField('items');
         }
 
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId()) {
-            throw new \RuntimeException('Order not found');
+            throw NotFoundException::order();
         }
 
         if (!$order->canCreditmemo()) {
-            throw new \RuntimeException('Cannot create credit memo for this order');
+            throw ValidationException::invalidValue('orderId', 'cannot create credit memo for this order');
         }
 
         // Build credit memo data
@@ -574,7 +576,7 @@ class OrderMutationHandler
 
             /** @phpstan-ignore-next-line */
             if (!$creditmemo->isValidGrandTotal()) {
-                throw new \RuntimeException('Credit memo grand total must be positive');
+                throw ValidationException::invalidValue('grandTotal', 'credit memo grand total must be positive');
             }
 
             // Set refund to store credit if requested
@@ -617,7 +619,7 @@ class OrderMutationHandler
             ]];
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new \RuntimeException('Failed to process return: ' . $e->getMessage());
+            throw ValidationException::invalidValue('return', 'failed to process: ' . $e->getMessage());
         }
     }
 

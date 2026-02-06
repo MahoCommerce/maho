@@ -55,6 +55,7 @@ security:
         - { path: ^/api/url-resolver, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/stores, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/countries, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/store-config, roles: PUBLIC_ACCESS, methods: [GET] }
         # Token/auth endpoints are public
         - { path: ^/api/auth, roles: PUBLIC_ACCESS }
         # Guest cart creation

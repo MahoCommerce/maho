@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -110,6 +110,16 @@ final class ProductProvider implements ProviderInterface
             return $barcode ? $this->getProductByBarcode($barcode) : null;
         }
 
+        if ($operationName === 'categoryProducts') {
+            $categoryId = $context['args']['categoryId'] ?? null;
+            if ($categoryId === null) {
+                return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 20, totalItems: 0);
+            }
+            // Inject categoryId into filters and delegate to getCollection
+            $context['args'] = array_merge($context['args'] ?? [], ['categoryId' => (int) $categoryId]);
+            return $this->getCollection($context);
+        }
+
         if ($operation instanceof CollectionOperationInterface) {
             return $this->getCollection($context);
         }
@@ -166,7 +176,8 @@ final class ProductProvider implements ProviderInterface
      */
     private function getCollection(array $context): ArrayPaginator
     {
-        $requestFilters = $context['filters'] ?? [];
+        // Merge REST filters and GraphQL args (GraphQL args take precedence)
+        $requestFilters = array_merge($context['filters'] ?? [], $context['args'] ?? []);
         $page = (int) ($requestFilters['page'] ?? 1);
         $pageSize = min((int) ($requestFilters['itemsPerPage'] ?? $requestFilters['pageSize'] ?? 20), 100);
         // Support both 'search' and 'q' parameters for compatibility
@@ -462,6 +473,14 @@ final class ProductProvider implements ProviderInterface
 
             // Get custom options (e.g., String, Tension, Cover for tennis racquets)
             $dto->customOptions = $this->getCustomOptions($product);
+
+            // Media gallery images
+            $dto->mediaGallery = $this->getMediaGallery($product);
+
+            // Linked products (related, cross-sell, up-sell)
+            $dto->relatedProducts = $this->getLinkedProducts($product->getRelatedProductCollection());
+            $dto->crosssellProducts = $this->getLinkedProducts($product->getCrossSellProductCollection());
+            $dto->upsellProducts = $this->getLinkedProducts($product->getUpSellProductCollection());
         }
 
         return $dto;
@@ -659,6 +678,49 @@ final class ProductProvider implements ProviderInterface
         }
 
         return $result;
+    }
+
+    /**
+     * Get media gallery images for a product
+     *
+     * @return array<array{url: string, label: string|null, position: int}>
+     */
+    private function getMediaGallery(\Mage_Catalog_Model_Product $product): array
+    {
+        $gallery = [];
+        $mediaConfig = $this->getMediaConfig();
+
+        $images = $product->getMediaGalleryImages();
+        if ($images) {
+            foreach ($images as $image) {
+                $gallery[] = [
+                    'url' => $mediaConfig->getMediaUrl($image->getFile()),
+                    'label' => $image->getLabel() ?: null,
+                    'position' => (int) $image->getPosition(),
+                ];
+            }
+        }
+
+        return $gallery;
+    }
+
+    /**
+     * Get linked products (related, cross-sell, up-sell) as lightweight DTOs
+     *
+     * @return Product[]
+     */
+    private function getLinkedProducts(\Mage_Catalog_Model_Resource_Product_Collection $collection): array
+    {
+        $collection->addAttributeToSelect(['name', 'price', 'special_price', 'small_image', 'status', 'visibility'])
+            ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setPageSize(20);
+
+        $products = [];
+        foreach ($collection as $product) {
+            $products[] = $this->mapToDto($product, forListing: true);
+        }
+
+        return $products;
     }
 
     /**
