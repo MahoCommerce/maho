@@ -40,7 +40,6 @@ class Mage_Core_Model_Domainpolicy
     public const XML_CONTENT_TYPE_OPTIONS = 'admin/security/content_type_options_enabled';
     public const XML_XSS_PROTECTION = 'admin/security/xss_protection_enabled';
     public const XML_REFERRER_POLICY = 'admin/security/referrer_policy';
-    public const XML_CSP_POLICY = 'admin/security/csp_policy';
 
     /**
      * Current store
@@ -103,12 +102,6 @@ class Mage_Core_Model_Domainpolicy
         $referrerPolicy = $this->getReferrerPolicy();
         if ($referrerPolicy) {
             $response->setHeader('Referrer-Policy', $referrerPolicy, true);
-        }
-
-        // Content-Security-Policy
-        $cspPolicy = $this->getCspPolicy();
-        if ($cspPolicy) {
-            $response->setHeader('Content-Security-Policy', $cspPolicy, true);
         }
 
         return $this;
@@ -191,12 +184,4 @@ class Mage_Core_Model_Domainpolicy
         return null;
     }
 
-    public function getCspPolicy(): ?string
-    {
-        $policy = $this->_store->getConfig(self::XML_CSP_POLICY);
-        if ($policy && $policy != '0') {
-            return (string) $policy;
-        }
-        return null;
-    }
 }

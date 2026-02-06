@@ -421,7 +421,6 @@
                 <content_type_options_enabled>1</content_type_options_enabled>
                 <xss_protection_enabled>1</xss_protection_enabled>
                 <referrer_policy>strict-origin-when-cross-origin</referrer_policy>
-                <csp_policy/>
                 <session_cookie_lifetime>10800</session_cookie_lifetime>
                 <secure_system_configuration_save_disabled>0</secure_system_configuration_save_disabled>
             </security>
