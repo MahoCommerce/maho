@@ -27,16 +27,25 @@ beforeEach(function () {
 });
 
 afterEach(function () {
-    // Clean up any created categories
-    $collection = Mage::getModel('catalog/category')->getCollection()
-        ->addAttributeToFilter('level', ['gt' => 0])
-        ->addAttributeToFilter('entity_id', ['gt' => 2]); // Don't delete default category
+    // Clean up only test-created categories (identified by url_key prefix)
+    $testUrlKeys = [
+        'test-import-%',
+        'level1', 'level2', 'level3',
+        'auto-generated-key-',
+        'test-scope', 'another-category',
+        'test-category', 'test-multistore',
+        'to-delete',
+    ];
 
-    foreach ($collection as $category) {
-        try {
-            $category->delete();
-        } catch (Exception $e) {
-            // Ignore deletion errors in cleanup
+    foreach ($testUrlKeys as $pattern) {
+        $collection = Mage::getModel('catalog/category')->getCollection()
+            ->addAttributeToFilter('url_key', ['like' => $pattern]);
+        foreach ($collection as $category) {
+            try {
+                $category->delete();
+            } catch (Exception $e) {
+                // Ignore deletion errors in cleanup
+            }
         }
     }
 });
@@ -45,36 +54,36 @@ it('creates new categories with parent_id', function () {
     // First import top-level categories
     $csvData1 = [
         ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
-        ['', '2', '', 'Electronics', '1', 'electronics'],
-        ['', '2', '', 'Clothing', '1', 'clothing'],
+        ['', '2', '', 'Test Import Electronics', '1', 'test-import-electronics'],
+        ['', '2', '', 'Test Import Clothing', '1', 'test-import-clothing'],
     ];
     createAndImportCsv($csvData1);
 
-    $electronics = findCategoryByUrlKey('electronics');
-    $clothing = findCategoryByUrlKey('clothing');
+    $electronics = findCategoryByUrlKey('test-import-electronics');
+    $clothing = findCategoryByUrlKey('test-import-clothing');
 
     // Then import subcategories
     $csvData2 = [
         ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
-        ['', (string) $electronics->getId(), '', 'Phones', '1', 'phones'],
+        ['', (string) $electronics->getId(), '', 'Test Import Phones', '1', 'test-import-phones'],
     ];
     createAndImportCsv($csvData2);
 
     // Check electronics category was created
     expect($electronics)->not->toBeNull()
-        ->and($electronics->getName())->toBe('Electronics')
+        ->and($electronics->getName())->toBe('Test Import Electronics')
         ->and($electronics->getIsActive())->toBe(1);
 
     // Check phones subcategory was created with correct parent
-    $phones = findCategoryByUrlKey('phones');
+    $phones = findCategoryByUrlKey('test-import-phones');
     expect($phones)->not->toBeNull()
-        ->and($phones->getName())->toBe('Phones')
+        ->and($phones->getName())->toBe('Test Import Phones')
         ->and($phones->getParentId())->toBe((int) $electronics->getId());
 
     // Check clothing category was created
-    $clothing = findCategoryByUrlKey('clothing');
+    $clothing = findCategoryByUrlKey('test-import-clothing');
     expect($clothing)->not->toBeNull()
-        ->and($clothing->getName())->toBe('Clothing');
+        ->and($clothing->getName())->toBe('Test Import Clothing');
 });
 
 it('updates existing categories', function () {
