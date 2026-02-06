@@ -50,11 +50,6 @@ class Mage_Core_Controller_Response_Http
     protected bool $_isRedirect = false;
 
     /**
-     * Whether or not to render exceptions
-     */
-    protected bool $_renderExceptions = false;
-
-    /**
      * Array of exceptions
      */
     protected array $_exceptions = [];
@@ -689,18 +684,6 @@ class Mage_Core_Controller_Response_Http
     }
 
     /**
-     * Flag; are exceptions being rendered?
-     */
-    public function renderExceptions(bool|null $flag = null): bool
-    {
-        if (null !== $flag) {
-            $this->_renderExceptions = (bool) $flag;
-        }
-
-        return $this->_renderExceptions;
-    }
-
-    /**
      * Send the response, including all headers
      */
     public function sendResponse(): void
@@ -716,15 +699,6 @@ class Mage_Core_Controller_Response_Http
         }
 
         $this->sendHeaders();
-
-        if ($this->isException() && $this->renderExceptions() && Mage::getIsDeveloperMode()) {
-            $exceptions = '';
-            foreach ($this->getException() as $e) {
-                $exceptions .= $e->__toString() . "\n";
-            }
-            echo $exceptions;
-            return;
-        }
 
         echo $this->outputBody();
     }
