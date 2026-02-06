@@ -80,7 +80,7 @@ if (strpos($requestUri, '/api/admin/') !== false) {
     if ($isAuthenticated && $adminUser) {
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminUser->getId();
         $_SERVER['MAHO_ADMIN_USERNAME'] = $adminUser->getUsername();
-        $_SERVER['MAHO_STORE_ID'] = $input['variables']['storeId'] ?? 1;
+        $_SERVER['MAHO_STORE_ID'] = (int) ($input['variables']['storeId'] ?? 1);
     }
 }
 

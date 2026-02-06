@@ -1,5 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
 class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Role extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     #[\Override]
@@ -30,7 +40,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tab_Role extends Ma
     protected function _prepareForm(): static
     {
         $model = Mage::registry('api_user');
-        $form = new Varien_Data_Form();
+        $form = new Maho\Data\Form();
         $form->setHtmlIdPrefix('role_');
 
         $fieldset = $form->addFieldset('role_fieldset', [

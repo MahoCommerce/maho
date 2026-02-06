@@ -1,8 +1,25 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
 class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/api/api2_roles';
+
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['delete', 'save']);
+        return parent::preDispatch();
+    }
 
     /**
      * Available API v2 resources for permission assignment
@@ -197,8 +214,6 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
 
     public function deleteAction(): void
     {
-        $this->_setForcedFormKeyActions('delete');
-
         $id = (int) $this->getRequest()->getParam('role_id');
         if (!$id) {
             $this->_redirect('*/*/');

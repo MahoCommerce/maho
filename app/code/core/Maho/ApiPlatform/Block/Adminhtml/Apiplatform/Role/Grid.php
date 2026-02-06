@@ -1,5 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
 class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
@@ -17,7 +27,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Grid extends Mage_Adminh
         $resource = Mage::getSingleton('core/resource');
         $roleTable = $resource->getTableName('api/role');
 
-        $collection = new Varien_Data_Collection_Db(
+        $collection = new Maho\Data\Collection\Db(
             $resource->getConnection('core_read'),
         );
         $collection->getSelect()

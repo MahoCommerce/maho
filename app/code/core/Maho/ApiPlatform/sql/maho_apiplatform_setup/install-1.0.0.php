@@ -1,5 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
 /** @var Mage_Core_Model_Resource_Setup $this */
 $installer = $this;
 $installer->startSetup();
@@ -10,7 +20,7 @@ $tableName = $installer->getTable('api/user');
 // Add client_id column if it doesn't exist
 if (!$connection->tableColumnExists($tableName, 'client_id')) {
     $connection->addColumn($tableName, 'client_id', [
-        'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'     => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'   => 64,
         'nullable' => true,
         'default'  => null,
@@ -19,16 +29,16 @@ if (!$connection->tableColumnExists($tableName, 'client_id')) {
     ]);
     $connection->addIndex(
         $tableName,
-        $installer->getIdxName($tableName, ['client_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName($tableName, ['client_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['client_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
     );
 }
 
 // Add client_secret column if it doesn't exist
 if (!$connection->tableColumnExists($tableName, 'client_secret')) {
     $connection->addColumn($tableName, 'client_secret', [
-        'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'     => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'   => 255,
         'nullable' => true,
         'default'  => null,
@@ -41,7 +51,7 @@ if (!$connection->tableColumnExists($tableName, 'client_secret')) {
 $quoteTable = $installer->getTable('sales/quote');
 if (!$connection->tableColumnExists($quoteTable, 'masked_quote_id')) {
     $connection->addColumn($quoteTable, 'masked_quote_id', [
-        'type'     => Varien_Db_Ddl_Table::TYPE_TEXT,
+        'type'     => Maho\Db\Ddl\Table::TYPE_TEXT,
         'length'   => 64,
         'nullable' => true,
         'default'  => null,
@@ -49,9 +59,9 @@ if (!$connection->tableColumnExists($quoteTable, 'masked_quote_id')) {
     ]);
     $connection->addIndex(
         $quoteTable,
-        $installer->getIdxName($quoteTable, ['masked_quote_id'], Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE),
+        $installer->getIdxName($quoteTable, ['masked_quote_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
         ['masked_quote_id'],
-        Varien_Db_Adapter_Interface::INDEX_TYPE_UNIQUE,
+        Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE,
     );
 }
 
