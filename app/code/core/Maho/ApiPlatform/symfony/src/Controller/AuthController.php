@@ -50,7 +50,7 @@ class AuthController extends AbstractController
             'api_user' => $this->handleApiUserGrant($data),
             default => new JsonResponse([
                 'error' => 'unsupported_grant_type',
-                'message' => "Grant type '{$grantType}' is not supported. Use: customer, client_credentials, api_user",
+                'message' => 'Unsupported grant type. Use: customer, client_credentials, api_user',
             ], Response::HTTP_BAD_REQUEST),
         };
     }

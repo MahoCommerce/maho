@@ -93,14 +93,27 @@ final class ReviewProcessor implements ProcessorInterface
         }
 
         // Validate inputs
-        if (empty(trim($title))) {
+        $title = trim($title);
+        $detail = trim($detail);
+        $nickname = trim($nickname);
+
+        if (empty($title)) {
             throw new BadRequestHttpException('Review title is required');
         }
-        if (empty(trim($detail))) {
+        if (strlen($title) > 255) {
+            throw new BadRequestHttpException('Review title cannot exceed 255 characters');
+        }
+        if (empty($detail)) {
             throw new BadRequestHttpException('Review detail is required');
         }
-        if (empty(trim($nickname))) {
+        if (strlen($detail) > 65535) {
+            throw new BadRequestHttpException('Review detail is too long');
+        }
+        if (empty($nickname)) {
             throw new BadRequestHttpException('Nickname is required');
+        }
+        if (strlen($nickname) > 255) {
+            throw new BadRequestHttpException('Nickname cannot exceed 255 characters');
         }
         if ($rating < 1 || $rating > 5) {
             throw new BadRequestHttpException('Rating must be between 1 and 5');

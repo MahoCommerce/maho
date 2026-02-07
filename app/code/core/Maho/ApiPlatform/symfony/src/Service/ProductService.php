@@ -282,11 +282,13 @@ class ProductService
         $priceField = "price.{$currencyCode}.default";
 
         if (isset($filters['priceFrom'])) {
-            $filterStrings[] = "{$priceField} >= {$filters['priceFrom']}";
+            $priceFrom = (float) $filters['priceFrom'];
+            $filterStrings[] = "{$priceField} >= {$priceFrom}";
         }
 
         if (isset($filters['priceTo'])) {
-            $filterStrings[] = "{$priceField} <= {$filters['priceTo']}";
+            $priceTo = (float) $filters['priceTo'];
+            $filterStrings[] = "{$priceField} <= {$priceTo}";
         }
 
         if (!empty($filterStrings)) {

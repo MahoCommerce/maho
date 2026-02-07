@@ -26,7 +26,7 @@ class JwtService
 {
     private const CONFIG_PATH_SECRET = 'maho_apiplatform/oauth2/secret';
     private const CONFIG_PATH_LEGACY = 'maho_api/settings/jwt_secret';
-    private const TOKEN_EXPIRY_SECONDS = 86400 * 7; // 7 days
+    private const TOKEN_EXPIRY_SECONDS = 86400; // 24 hours
     private const ALGORITHM = 'HS256';
 
     private ?string $cachedSecret = null;

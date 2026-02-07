@@ -50,9 +50,10 @@ class GuestCartController extends AbstractController
                 'itemsQty' => 0,
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'cart_creation_failed',
-                'message' => $e->getMessage(),
+                'message' => 'Unable to create cart. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -75,9 +76,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while loading the cart.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -209,9 +211,10 @@ class GuestCartController extends AbstractController
                 'grandTotal' => (float) $quote->getGrandTotal(),
             ]);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while loading cart totals.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -353,9 +356,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse($methods);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while loading shipping methods.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -419,9 +423,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse($methods);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while loading payment methods.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
@@ -678,9 +683,10 @@ class GuestCartController extends AbstractController
                 'options' => $options,
             ]);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while loading product options.',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
