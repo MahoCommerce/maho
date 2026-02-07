@@ -45,6 +45,7 @@ query GetProduct($id: ID!) {
         configurableOptions variants customOptions mediaGallery
         relatedProducts crosssellProducts upsellProducts
         downloadableLinks linksTitle linksPurchasedSeparately
+        groupedProducts bundleOptions
     }
 }`;
 

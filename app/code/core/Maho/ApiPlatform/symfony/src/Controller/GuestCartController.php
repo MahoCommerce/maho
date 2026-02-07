@@ -112,6 +112,24 @@ class GuestCartController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
+            // Convert flat options to structured format when grouped/bundle params are present
+            if (!empty($data['super_group']) || !empty($data['bundle_option'])) {
+                $structured = [];
+                if (!empty($options)) {
+                    $structured['options'] = $options;
+                }
+                if (!empty($data['super_group'])) {
+                    $structured['super_group'] = $data['super_group'];
+                }
+                if (!empty($data['bundle_option'])) {
+                    $structured['bundle_option'] = $data['bundle_option'];
+                }
+                if (!empty($data['bundle_option_qty'])) {
+                    $structured['bundle_option_qty'] = $data['bundle_option_qty'];
+                }
+                $options = $structured;
+            }
+
             $quote = $this->cartService->addItem($quote, $sku, $qty, $options);
 
             return new JsonResponse($this->mapCartToArray($quote));
@@ -565,6 +583,7 @@ class GuestCartController extends AbstractController
                 'taxAmount' => (float) ($item->getTaxAmount() ?? 0),
                 'taxPercent' => (float) ($item->getTaxPercent() ?? 0),
                 'productId' => (int) $item->getProductId(),
+                'options' => $this->getItemConfigurationOptions($item),
             ];
 
             // Get product thumbnail for cart display
@@ -619,6 +638,45 @@ class GuestCartController extends AbstractController
             ],
             'couponCode' => $quote->getCouponCode(),
         ];
+    }
+
+    /**
+     * Get configured product options for a cart item (works for all product types)
+     *
+     * @return array<array{label: string, value: string}>
+     */
+    private function getItemConfigurationOptions(\Mage_Sales_Model_Quote_Item $item): array
+    {
+        try {
+            $typeId = $item->getProductType() ?: $item->getProduct()->getTypeId();
+
+            $rawOptions = match ($typeId) {
+                'bundle' => \Mage::helper('bundle/catalog_product_configuration')->getOptions($item),
+                'downloadable' => \Mage::helper('downloadable/catalog_product_configuration')->getOptions($item),
+                default => \Mage::helper('catalog/product_configuration')->getOptions($item),
+            };
+
+            $options = [];
+            foreach ($rawOptions as $option) {
+                $label = $option['label'] ?? '';
+                $value = $option['value'] ?? '';
+
+                if (is_array($value)) {
+                    $value = implode(', ', array_map(fn($v) => strip_tags((string) $v), $value));
+                } else {
+                    $value = strip_tags((string) $value);
+                }
+
+                if ($label !== '' && $value !== '') {
+                    $options[] = ['label' => (string) $label, 'value' => $value];
+                }
+            }
+
+            return $options;
+        } catch (\Throwable $e) {
+            \Mage::log('Error getting item configuration options: ' . $e->getMessage(), \Mage::LOG_WARNING);
+            return [];
+        }
     }
 
     /**

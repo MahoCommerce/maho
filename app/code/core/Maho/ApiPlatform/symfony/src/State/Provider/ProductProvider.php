@@ -407,6 +407,21 @@ final class ProductProvider implements ProviderInterface
             $dto->finalPrice = $dto->specialPrice ?? $dto->price;
         }
 
+        // Grouped/bundle products have null base price — use min_price from price index
+        // or calculate from associated products
+        if ($dto->price === null || $dto->price === 0.0) {
+            $minPrice = $product->getMinimalPrice() ?: $product->getData('min_price');
+            if (!$minPrice && in_array($dto->type, ['grouped', 'bundle'])) {
+                $minPrice = $this->getGroupedMinPrice($product);
+            }
+            if ($minPrice) {
+                $dto->price = (float) $minPrice;
+                if ($dto->finalPrice === null || $dto->finalPrice === 0.0) {
+                    $dto->finalPrice = (float) $minPrice;
+                }
+            }
+        }
+
         // Get stock information - use pre-loaded stock item if available (batch loading)
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
@@ -484,6 +499,16 @@ final class ProductProvider implements ProviderInterface
             $dto->relatedProducts = $this->getLinkedProducts($product->getRelatedProductCollection());
             $dto->crosssellProducts = $this->getLinkedProducts($product->getCrossSellProductCollection());
             $dto->upsellProducts = $this->getLinkedProducts($product->getUpSellProductCollection());
+
+            // Grouped product children
+            if ($product->getTypeId() === 'grouped') {
+                $dto->groupedProducts = $this->getGroupedProducts($product);
+            }
+
+            // Bundle product options with selections
+            if ($product->getTypeId() === 'bundle') {
+                $dto->bundleOptions = $this->getBundleOptions($product);
+            }
 
             // Downloadable links
             if ($product->getTypeId() === 'downloadable') {
@@ -815,8 +840,158 @@ final class ProductProvider implements ProviderInterface
     }
 
     /**
-     * Map array data (from Meilisearch) to Product DTO
+     * Get grouped product associated items
+     *
+     * @return array<array{id: int, sku: string, name: string, price: float, finalPrice: float, imageUrl: string|null, inStock: bool, stockQty: float, defaultQty: float, position: int}>
      */
+    private function getGroupedProducts(\Mage_Catalog_Model_Product $product): array
+    {
+        $typeInstance = $product->getTypeInstance(true);
+        /** @phpstan-ignore-next-line */
+        $associatedProducts = $typeInstance->getAssociatedProducts($product);
+
+        if (empty($associatedProducts)) {
+            return [];
+        }
+
+        // Batch load stock items
+        $childIds = array_map(fn($child) => (int) $child->getId(), $associatedProducts);
+        $stockByProduct = $this->batchLoadStockItems($childIds);
+        $mediaConfig = $this->getMediaConfig();
+
+        $result = [];
+        foreach ($associatedProducts as $child) {
+            $childId = (int) $child->getId();
+            $stockItem = $stockByProduct[$childId] ?? null;
+
+            $imageUrl = null;
+            if ($child->getThumbnail() && $child->getThumbnail() !== 'no_selection') {
+                $imageUrl = $mediaConfig->getMediaUrl($child->getThumbnail());
+            } elseif ($child->getSmallImage() && $child->getSmallImage() !== 'no_selection') {
+                $imageUrl = $mediaConfig->getMediaUrl($child->getSmallImage());
+            }
+
+            $result[] = [
+                'id' => $childId,
+                'sku' => $child->getSku(),
+                'name' => $child->getName(),
+                'price' => (float) $child->getPrice(),
+                'finalPrice' => (float) $child->getFinalPrice(),
+                'imageUrl' => $imageUrl,
+                'inStock' => $stockItem ? (bool) $stockItem->getIsInStock() : false,
+                'stockQty' => $stockItem ? (float) $stockItem->getQty() : 0,
+                'defaultQty' => (float) ($child->getQty() ?: 0),
+                'position' => (int) ($child->getPosition() ?: 0),
+            ];
+        }
+
+        // Sort by position
+        usort($result, fn($a, $b) => $a['position'] <=> $b['position']);
+
+        return $result;
+    }
+
+    /**
+     * Get bundle product options with their selections
+     *
+     * @return array<array{id: int, title: string, type: string, required: bool, position: int, selections: array}>
+     */
+    private function getBundleOptions(\Mage_Catalog_Model_Product $product): array
+    {
+        /** @var \Mage_Bundle_Model_Product_Type $typeInstance */
+        $typeInstance = $product->getTypeInstance(true);
+
+        // Get options
+        $optionsCollection = $typeInstance->getOptionsCollection($product);
+        if (!$optionsCollection || $optionsCollection->getSize() === 0) {
+            return [];
+        }
+
+        // Get all option IDs for batch loading selections
+        $optionIds = [];
+        foreach ($optionsCollection as $option) {
+            $optionIds[] = (int) $option->getId();
+        }
+
+        // Get all selections for all options at once
+        $selectionsCollection = $typeInstance->getSelectionsCollection($optionIds, $product);
+
+        // Group selections by option_id and collect product IDs for stock lookup
+        $selectionsByOption = [];
+        $selectionProductIds = [];
+        foreach ($selectionsCollection as $selection) {
+            $optId = (int) $selection->getOptionId();
+            $selectionsByOption[$optId][] = $selection;
+            $selectionProductIds[] = (int) $selection->getProductId();
+        }
+
+        // Batch load stock items for all selection products
+        $stockByProduct = $this->batchLoadStockItems(array_unique($selectionProductIds));
+
+        $result = [];
+        foreach ($optionsCollection as $option) {
+            $optionId = (int) $option->getId();
+
+            $selections = [];
+            foreach ($selectionsByOption[$optionId] ?? [] as $selection) {
+                $selProductId = (int) $selection->getProductId();
+                $stockItem = $stockByProduct[$selProductId] ?? null;
+
+                $selections[] = [
+                    'id' => (int) $selection->getSelectionId(),
+                    'productId' => $selProductId,
+                    'sku' => $selection->getSku(),
+                    'name' => $selection->getName(),
+                    'price' => (float) ($selection->getSelectionPriceValue() ?: $selection->getPrice()),
+                    'priceType' => (int) $selection->getSelectionPriceType() === 1 ? 'percent' : 'fixed',
+                    'inStock' => $stockItem ? (bool) $stockItem->getIsInStock() : false,
+                    'isDefault' => (bool) $selection->getIsDefault(),
+                    'canChangeQty' => (bool) $selection->getSelectionCanChangeQty(),
+                    'defaultQty' => (float) ($selection->getSelectionQty() ?: 1),
+                    'position' => (int) ($selection->getPosition() ?: 0),
+                ];
+            }
+
+            // Sort selections by position
+            usort($selections, fn($a, $b) => $a['position'] <=> $b['position']);
+
+            $result[] = [
+                'id' => $optionId,
+                'title' => $option->getDefaultTitle() ?: $option->getTitle(),
+                'type' => $option->getType(),
+                'required' => (bool) $option->getRequired(),
+                'position' => (int) ($option->getPosition() ?: 0),
+                'selections' => $selections,
+            ];
+        }
+
+        // Sort options by position
+        usort($result, fn($a, $b) => $a['position'] <=> $b['position']);
+
+        return $result;
+    }
+
+    /**
+     * Get minimum price from grouped product's associated products
+     */
+    private function getGroupedMinPrice(\Mage_Catalog_Model_Product $product): ?float
+    {
+        try {
+            /** @phpstan-ignore method.notFound */
+            $associated = $product->getTypeInstance(true)->getAssociatedProducts($product);
+            $prices = [];
+            foreach ($associated as $child) {
+                $price = (float) $child->getFinalPrice();
+                if ($price > 0) {
+                    $prices[] = $price;
+                }
+            }
+            return !empty($prices) ? min($prices) : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
     private function mapArrayToDto(array $data): Product
     {
         $dto = new Product();

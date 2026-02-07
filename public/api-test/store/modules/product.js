@@ -1,5 +1,6 @@
 /**
- * Product Module - Handles product viewing, configurable options, variants
+ * Product Module - Handles product viewing, configurable options, variants,
+ * grouped products, and bundle products
  */
 export default {
     // State
@@ -7,6 +8,9 @@ export default {
     qty: 1,
     selectedOptions: {},  // For configurable products: { attributeCode: valueId }
     selectedCustomOptions: {},  // For custom options: { optionId: valueId }
+    groupedQtys: {},  // For grouped products: { childProductId: qty }
+    selectedBundleOptions: {},  // For bundle products: { optionId: selectionId or [selectionIds] }
+    bundleOptionQtys: {},  // For bundle products: { optionId: qty }
 
     // View a product by ID (numeric) with optional urlKey for nice URLs
     async viewProduct(id, urlKey = null) {
@@ -48,10 +52,44 @@ export default {
             this.selectedOptions = {};
             this.selectedCustomOptions = {};
             this.selectedDownloadableLinks = [];
+            this.groupedQtys = {};
+            this.selectedBundleOptions = {};
+            this.bundleOptionQtys = {};
 
             // Auto-select all downloadable links when not purchased separately
             if (this.currentProduct?.type === 'downloadable' && !this.currentProduct.linksPurchasedSeparately) {
                 this.selectedDownloadableLinks = (this.currentProduct.downloadableLinks || []).map(l => l.id);
+            }
+
+            // Init grouped product quantities from defaults
+            if (this.currentProduct?.type === 'grouped' && this.currentProduct.groupedProducts?.length) {
+                for (const child of this.currentProduct.groupedProducts) {
+                    this.groupedQtys[child.id] = child.defaultQty || 0;
+                }
+            }
+
+            // Init bundle option selections from defaults
+            if (this.currentProduct?.type === 'bundle' && this.currentProduct.bundleOptions?.length) {
+                for (const option of this.currentProduct.bundleOptions) {
+                    const isMulti = option.type === 'checkbox' || option.type === 'multi';
+                    const defaults = option.selections?.filter(s => s.isDefault) || [];
+
+                    if (isMulti) {
+                        this.selectedBundleOptions[option.id] = defaults.map(s => s.id);
+                    } else if (defaults.length > 0) {
+                        this.selectedBundleOptions[option.id] = defaults[0].id;
+                    } else if (option.selections?.length === 1) {
+                        // Auto-select single selection
+                        this.selectedBundleOptions[option.id] = option.selections[0].id;
+                    }
+
+                    // Init quantities from default selections
+                    if (defaults.length > 0) {
+                        this.bundleOptionQtys[option.id] = defaults[0].defaultQty || 1;
+                    } else if (option.selections?.length) {
+                        this.bundleOptionQtys[option.id] = option.selections[0].defaultQty || 1;
+                    }
+                }
             }
 
             // Auto-select options with only one value
@@ -85,7 +123,7 @@ export default {
         });
     },
 
-    // Check if all required options are selected (configurable + custom)
+    // Check if all required options are selected (configurable + custom + grouped + bundle)
     allOptionsSelected() {
         // Check configurable options
         if (this.currentProduct?.configurableOptions?.length) {
@@ -103,6 +141,26 @@ export default {
             if (!allCustomSelected) return false;
         }
 
+        // Grouped: at least one child must have qty > 0
+        if (this.currentProduct?.type === 'grouped') {
+            const hasAnyQty = Object.values(this.groupedQtys).some(q => parseInt(q) > 0);
+            if (!hasAnyQty) return false;
+        }
+
+        // Bundle: all required options must be selected
+        if (this.currentProduct?.type === 'bundle' && this.currentProduct.bundleOptions?.length) {
+            for (const option of this.currentProduct.bundleOptions) {
+                if (!option.required) continue;
+                const selected = this.selectedBundleOptions[option.id];
+                const isMulti = option.type === 'checkbox' || option.type === 'multi';
+                if (isMulti) {
+                    if (!selected || !Array.isArray(selected) || selected.length === 0) return false;
+                } else {
+                    if (!selected) return false;
+                }
+            }
+        }
+
         return true;
     },
 
@@ -115,13 +173,42 @@ export default {
         return options;
     },
 
-    // Get SKU for add to cart (variant SKU for configurable, product SKU for simple)
+    // Get SKU for add to cart (variant SKU for configurable, parent SKU for grouped/bundle)
     getCartSku() {
         if (this.currentProduct?.type === 'configurable') {
             const variant = this.getSelectedVariant();
             return variant?.sku || null;
         }
+        // Grouped and bundle use parent SKU
         return this.currentProduct?.sku;
+    },
+
+    // Get grouped product super_group map: { childId: qty } (filtered to qty > 0)
+    getGroupedSuperGroup() {
+        const superGroup = {};
+        for (const [childId, qty] of Object.entries(this.groupedQtys)) {
+            const parsedQty = parseInt(qty);
+            if (parsedQty > 0) {
+                superGroup[childId] = parsedQty;
+            }
+        }
+        return superGroup;
+    },
+
+    // Get bundle cart options: { bundle_option: {...}, bundle_option_qty: {...} }
+    getBundleCartOptions() {
+        const bundleOption = {};
+        const bundleOptionQty = {};
+
+        for (const option of (this.currentProduct?.bundleOptions || [])) {
+            const selected = this.selectedBundleOptions[option.id];
+            if (selected !== undefined && selected !== null && selected !== '') {
+                bundleOption[option.id] = selected;
+                bundleOptionQty[option.id] = this.bundleOptionQtys[option.id] || 1;
+            }
+        }
+
+        return { bundle_option: bundleOption, bundle_option_qty: bundleOptionQty };
     },
 
     // Check if the selected variant (or any variant if none selected) is in stock

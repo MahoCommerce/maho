@@ -265,7 +265,60 @@ final class CartProvider implements ProviderInterface
         $dto->productType = $item->getProductType();
         $dto->thumbnailUrl = $preloadedThumbnailUrl;
 
+        // Get configured product options for display
+        $dto->options = $this->getItemConfigurationOptions($item);
+
         return $dto;
+    }
+
+    /**
+     * Get configured product options for a cart item (works for all product types)
+     *
+     * Uses Maho's built-in configuration helpers which return formatted label/value pairs:
+     * - Configurable: attribute selections (e.g., "Color: Red", "Size: M")
+     * - Bundle: selected options with qty and price (e.g., "Camera: 1 x Madison LX2200 $150.00")
+     * - Downloadable: selected links
+     * - Simple/Virtual: custom options only
+     * - Grouped: shown as individual simple items, so custom options only
+     *
+     * @return array<array{label: string, value: string}>
+     */
+    private function getItemConfigurationOptions(\Mage_Sales_Model_Quote_Item $item): array
+    {
+        try {
+            $typeId = $item->getProductType() ?: $item->getProduct()->getTypeId();
+
+            // Use the appropriate configuration helper per product type
+            $rawOptions = match ($typeId) {
+                'bundle' => \Mage::helper('bundle/catalog_product_configuration')->getOptions($item),
+                'downloadable' => \Mage::helper('downloadable/catalog_product_configuration')->getOptions($item),
+                default => \Mage::helper('catalog/product_configuration')->getOptions($item),
+            };
+
+            // Normalize to simple label/value string pairs for the API
+            $options = [];
+            foreach ($rawOptions as $option) {
+                $label = $option['label'] ?? '';
+                $value = $option['value'] ?? '';
+
+                // Value can be an array (e.g., bundle selections)
+                if (is_array($value)) {
+                    $value = implode(', ', array_map(fn($v) => strip_tags((string) $v), $value));
+                } else {
+                    $value = strip_tags((string) $value);
+                }
+
+                if ($label !== '' && $value !== '') {
+                    $options[] = ['label' => (string) $label, 'value' => $value];
+                }
+            }
+
+            return $options;
+        } catch (\Throwable $e) {
+            // Don't let option formatting break the cart response
+            \Mage::log('Error getting item configuration options: ' . $e->getMessage(), \Mage::LOG_WARNING);
+            return [];
+        }
     }
 
     /**

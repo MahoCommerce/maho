@@ -435,6 +435,7 @@ class ProductService
         $collection = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToSelect($attributes)
+            ->addPriceData()
             ->addStoreFilter();
 
         // Apply search query - search across core text attributes

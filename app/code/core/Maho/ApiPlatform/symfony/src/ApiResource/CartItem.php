@@ -36,6 +36,13 @@ class CartItem
     public ?string $thumbnailUrl = null;
 
     /**
+     * Configured product options for display (e.g., "Color: Red", "Size: M")
+     * Structure: [['label' => 'Color', 'value' => 'Red'], ...]
+     * @var array<array{label: string, value: string}>
+     */
+    public array $options = [];
+
+    /**
      * Fulfillment type for this item: SHIP (default) or PICKUP
      * Used for omnichannel scenarios (BOPIS, POS in-store pickup, etc.)
      */

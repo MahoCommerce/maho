@@ -59,7 +59,7 @@ export default {
         }
     },
 
-    async addToCart(sku, qty = 1, options = null, links = null) {
+    async addToCart(sku, qty = 1, options = null, links = null, superGroup = null, bundleOption = null, bundleOptionQty = null) {
         this.loading = true;
         try {
             await this.ensureCart();
@@ -69,6 +69,9 @@ export default {
                 const input = { maskedId: this.cartId, sku, qty };
                 if (options && Object.keys(options).length > 0) input.options = options;
                 if (links && links.length > 0) input.links = links;
+                if (superGroup && Object.keys(superGroup).length > 0) input.superGroup = superGroup;
+                if (bundleOption && Object.keys(bundleOption).length > 0) input.bundleOption = bundleOption;
+                if (bundleOptionQty && Object.keys(bundleOptionQty).length > 0) input.bundleOptionQty = bundleOptionQty;
                 const data = await this.gql(this._gqlQueries.ADD_TO_CART, { input });
                 // Update cart directly from mutation response
                 this.cart = data.addToCartCart?.cart || {};
@@ -76,10 +79,10 @@ export default {
             } else {
                 // REST branch
                 const payload = { sku, qty };
-                // Add custom options if provided
-                if (options && Object.keys(options).length > 0) {
-                    payload.options = options;
-                }
+                if (options && Object.keys(options).length > 0) payload.options = options;
+                if (superGroup && Object.keys(superGroup).length > 0) payload.super_group = superGroup;
+                if (bundleOption && Object.keys(bundleOption).length > 0) payload.bundle_option = bundleOption;
+                if (bundleOptionQty && Object.keys(bundleOptionQty).length > 0) payload.bundle_option_qty = bundleOptionQty;
                 await this.api('/guest-carts/' + this.cartId + '/items', {
                     method: 'POST',
                     body: JSON.stringify(payload)
