@@ -559,16 +559,6 @@ final class OrderProcessor implements ProcessorInterface
     /** @phpstan-ignore-next-line */
     private function mapPosPaymentToDto(\Maho_Pos_Model_Payment $payment): PosPayment
     {
-        $methodLabels = [
-            'cashondelivery' => 'Cash',
-            'cash' => 'Cash',
-            'purchaseorder' => 'EFTPOS/Card',
-            'eftpos' => 'EFTPOS/Card',
-            'gene_braintree_creditcard' => 'Credit Card',
-            'checkmo' => 'Check/Money Order',
-            'banktransfer' => 'Bank Transfer',
-        ];
-
         $dto = new PosPayment();
         /** @phpstan-ignore-next-line */
         $dto->id = (int) $payment->getId();
@@ -579,7 +569,7 @@ final class OrderProcessor implements ProcessorInterface
         /** @phpstan-ignore-next-line */
         $dto->methodCode = $payment->getMethodCode();
         /** @phpstan-ignore-next-line */
-        $dto->methodLabel = $methodLabels[$payment->getMethodCode()] ?? $payment->getMethodCode();
+        $dto->methodLabel = PaymentService::getMethodLabel($payment->getMethodCode());
         /** @phpstan-ignore-next-line */
         $dto->amount = (float) $payment->getAmount();
         /** @phpstan-ignore-next-line */

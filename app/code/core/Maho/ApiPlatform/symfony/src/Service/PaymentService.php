@@ -201,4 +201,14 @@ class PaymentService
         /** @phpstan-ignore-next-line */
         return \Maho_Pos_Model_Payment::getPaymentMethods();
     }
+
+    /**
+     * Get display label for a payment method code from Maho's live configuration
+     */
+    public static function getMethodLabel(string $methodCode): string
+    {
+        $title = \Mage::getStoreConfig('payment/' . $methodCode . '/title');
+
+        return $title ?: $methodCode;
+    }
 }
