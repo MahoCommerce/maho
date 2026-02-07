@@ -7,7 +7,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-    <link rel="stylesheet" href="/api-test/store/store.css?v=61">
+    <link rel="stylesheet" href="/api-test/store/store.css?v=63">
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="store()" x-cloak>
     <!-- Header -->
@@ -843,6 +843,95 @@
                             </div>
                         </template>
 
+                        <!-- Grouped Products -->
+                        <template x-if="currentProduct.type === 'grouped' && currentProduct.groupedProducts?.length > 0">
+                            <div class="mt-6 space-y-2 border-t pt-6">
+                                <h3 class="text-sm font-semibold text-gray-900 mb-3">Select Items</h3>
+                                <div class="divide-y rounded-lg border">
+                                    <template x-for="child in currentProduct.groupedProducts" :key="child.id">
+                                        <div class="flex items-center gap-4 p-3" :class="!child.inStock ? 'opacity-50' : ''">
+                                            <template x-if="child.imageUrl">
+                                                <img :src="child.imageUrl" :alt="child.name" class="w-12 h-12 object-contain rounded">
+                                            </template>
+                                            <div class="flex-1 min-w-0">
+                                                <p class="text-sm font-medium text-gray-900 truncate" x-text="child.name"></p>
+                                                <p class="text-sm text-gray-600" x-text="formatPrice(child.finalPrice || child.price)"></p>
+                                                <span x-show="!child.inStock" class="text-xs text-red-600">Out of Stock</span>
+                                            </div>
+                                            <div class="flex items-center border rounded-lg" x-show="child.inStock">
+                                                <button @click="groupedQtys[child.id] > 0 && groupedQtys[child.id]--" class="px-2 py-1 text-sm hover:bg-gray-100">-</button>
+                                                <input type="number" x-model.number="groupedQtys[child.id]" min="0"
+                                                       class="w-14 text-center text-sm border-x py-1" :disabled="!child.inStock">
+                                                <button @click="groupedQtys[child.id]++" class="px-2 py-1 text-sm hover:bg-gray-100">+</button>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Bundle Options -->
+                        <template x-if="currentProduct.type === 'bundle' && currentProduct.bundleOptions?.length > 0">
+                            <div class="mt-6 space-y-4 border-t pt-6">
+                                <h3 class="text-sm font-semibold text-gray-900 mb-3">Customize Your Bundle</h3>
+                                <template x-for="option in currentProduct.bundleOptions" :key="option.id">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                                            <span x-text="option.title"></span>
+                                            <span x-show="option.required" class="text-red-500">*</span>
+                                        </label>
+                                        <!-- Select / Dropdown type -->
+                                        <template x-if="option.type === 'select'">
+                                            <select x-model="selectedBundleOptions[option.id]"
+                                                    class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                                <template x-if="!option.required"><option value="">None</option></template>
+                                                <template x-for="sel in option.selections" :key="sel.id">
+                                                    <option :value="sel.id" :disabled="!sel.inStock"
+                                                            x-text="sel.name + (sel.price > 0 ? ' (+' + formatPrice(sel.price) + ')' : '') + (!sel.inStock ? ' - Out of Stock' : '')">
+                                                    </option>
+                                                </template>
+                                            </select>
+                                        </template>
+                                        <!-- Radio type -->
+                                        <template x-if="option.type === 'radio'">
+                                            <div class="space-y-2">
+                                                <template x-for="sel in option.selections" :key="sel.id">
+                                                    <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                                           :class="{'border-blue-500 bg-blue-50': selectedBundleOptions[option.id] == sel.id, 'opacity-50 cursor-not-allowed': !sel.inStock}">
+                                                        <input type="radio" :name="'bundle_option_' + option.id" :value="sel.id"
+                                                               x-model="selectedBundleOptions[option.id]" class="text-blue-600" :disabled="!sel.inStock">
+                                                        <span class="flex-1 text-sm" x-text="sel.name"></span>
+                                                        <span x-show="sel.price > 0" class="text-sm text-gray-500" x-text="'+' + formatPrice(sel.price)"></span>
+                                                        <span x-show="!sel.inStock" class="text-xs text-red-600">Out of Stock</span>
+                                                        <template x-if="sel.canChangeQty && selectedBundleOptions[option.id] == sel.id">
+                                                            <input type="number" x-model.number="bundleOptionQtys[option.id]" min="1"
+                                                                   class="w-14 text-center text-sm border rounded py-1 ml-2" @click.stop>
+                                                        </template>
+                                                    </label>
+                                                </template>
+                                            </div>
+                                        </template>
+                                        <!-- Checkbox / Multi type -->
+                                        <template x-if="option.type === 'checkbox' || option.type === 'multi'">
+                                            <div class="space-y-2">
+                                                <template x-for="sel in option.selections" :key="sel.id">
+                                                    <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                                           :class="{'border-blue-500 bg-blue-50': (selectedBundleOptions[option.id] || []).includes(sel.id), 'opacity-50 cursor-not-allowed': !sel.inStock}">
+                                                        <input type="checkbox" :value="sel.id" class="text-blue-600 rounded" :disabled="!sel.inStock"
+                                                               @change="if (!selectedBundleOptions[option.id]) selectedBundleOptions[option.id] = [];
+                                                                        if ($event.target.checked) { selectedBundleOptions[option.id].push(sel.id); }
+                                                                        else { selectedBundleOptions[option.id] = selectedBundleOptions[option.id].filter(id => id !== sel.id); }">
+                                                        <span class="flex-1 text-sm" x-text="sel.name"></span>
+                                                        <span x-show="sel.price > 0" class="text-sm text-gray-500" x-text="'+' + formatPrice(sel.price)"></span>
+                                                        <span x-show="!sel.inStock" class="text-xs text-red-600">Out of Stock</span>
+                                                    </label>
+                                                </template>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
 
                         <template x-if="currentProduct.customOptions?.length > 0">
                             <div class="mt-6 space-y-4 border-t pt-6">
@@ -916,7 +1005,10 @@
                                 <input type="number" x-model.number="qty" min="1" class="w-16 text-center border-x py-2">
                                 <button @click="qty++" class="px-3 py-2 hover:bg-gray-100">+</button>
                             </div>
-                            <button @click="addToCart(getCartSku(), qty, getCartCustomOptions(), selectedDownloadableLinks)"
+                            <button @click="addToCart(getCartSku(), qty, getCartCustomOptions(), selectedDownloadableLinks,
+                                        currentProduct.type === 'grouped' ? getGroupedSuperGroup() : null,
+                                        currentProduct.type === 'bundle' ? getBundleCartOptions().bundle_option : null,
+                                        currentProduct.type === 'bundle' ? getBundleCartOptions().bundle_option_qty : null)"
                                     :disabled="!allOptionsSelected() || !isSelectedVariantInStock()"
                                     class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition">
                                 <span x-show="!allOptionsSelected()">Select Options</span>
@@ -1102,6 +1194,13 @@
                                 <div class="flex-1">
                                     <h3 class="font-medium" x-text="item.name"></h3>
                                     <p class="text-sm text-gray-500" x-text="item.sku"></p>
+                                    <template x-if="item.options?.length > 0">
+                                        <div class="mt-1 space-y-0.5">
+                                            <template x-for="opt in item.options" :key="opt.label">
+                                                <p class="text-xs text-gray-500"><span class="font-medium" x-text="opt.label"></span>: <span x-text="opt.value"></span></p>
+                                            </template>
+                                        </div>
+                                    </template>
                                     <p class="text-blue-600 font-medium mt-1" x-text="formatPrice(item.priceInclTax || item.price)"></p>
                                 </div>
                                 <div class="flex flex-col items-end gap-2">
@@ -1423,6 +1522,13 @@
                                         <div class="flex-1 min-w-0">
                                             <p class="text-sm font-medium text-gray-900 truncate" x-text="item.name"></p>
                                             <p class="text-xs text-gray-500" x-text="item.sku"></p>
+                                            <template x-if="item.options?.length > 0">
+                                                <div class="mt-0.5">
+                                                    <template x-for="opt in item.options" :key="opt.label">
+                                                        <p class="text-xs text-gray-400 truncate"><span class="font-medium" x-text="opt.label"></span>: <span x-text="opt.value"></span></p>
+                                                    </template>
+                                                </div>
+                                            </template>
                                         </div>
                                         <!-- Price -->
                                         <div class="text-sm font-medium text-gray-900" x-text="formatPrice(item.rowTotalInclTax || item.rowTotal || item.price * item.qty)"></div>
@@ -2517,7 +2623,7 @@
         </div>
     </footer>
 
-    <script src="/api-test/store/store.js?v=61"></script>
+    <script src="/api-test/store/store.js?v=63"></script>
     <script>
     function homeBanner(html) {
         const parser = new DOMParser();

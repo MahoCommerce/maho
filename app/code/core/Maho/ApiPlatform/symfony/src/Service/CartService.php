@@ -155,12 +155,12 @@ class CartService
         // If so, add the configurable parent with the proper super_attribute options
         $buyRequest = new \Maho\DataObject(['qty' => $qty]);
 
-        // Add custom options and downloadable links if provided
+        // Add custom options, downloadable links, grouped, and bundle params if provided
         // Supports two formats:
-        //   Structured: ['options' => [...], 'links' => [...]] (from GraphQL CartProcessor)
+        //   Structured: ['options' => [...], 'links' => [...], 'super_group' => [...], 'bundle_option' => [...]] (from GraphQL CartProcessor)
         //   Flat: [optionId => valueId, ...] (from REST GuestCartController)
         if (!empty($options)) {
-            if (isset($options['options']) || isset($options['links'])) {
+            if (isset($options['options']) || isset($options['links']) || isset($options['super_group']) || isset($options['bundle_option'])) {
                 // Structured format
                 if (!empty($options['options'])) {
                     $buyRequest->setData('options', $options['options']);
@@ -168,12 +168,22 @@ class CartService
                 if (!empty($options['links'])) {
                     $buyRequest->setData('links', $options['links']);
                 }
+                if (!empty($options['super_group'])) {
+                    $buyRequest->setData('super_group', $options['super_group']);
+                }
+                if (!empty($options['bundle_option'])) {
+                    $buyRequest->setData('bundle_option', $options['bundle_option']);
+                }
+                if (!empty($options['bundle_option_qty'])) {
+                    $buyRequest->setData('bundle_option_qty', $options['bundle_option_qty']);
+                }
             } else {
                 // Flat custom options format (REST)
                 $buyRequest->setData('options', $options);
             }
         }
 
+        // Only auto-detect configurable parent for simple products (not grouped/bundle)
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
             $parentIds = \Mage::getModel('catalog/product_type_configurable')
                 ->getParentIdsByChild((int) $productId);
@@ -250,18 +260,42 @@ class CartService
         }
 
         // If price is still 0 after addProduct, manually set it on the quote item
+        // For grouped/bundle products, child items have their own SKUs — look up each child's price individually
+        $isGroupedOrBundle = in_array($product->getTypeId(), ['grouped', 'bundle'], true);
         $items = $quote->getAllItems();
         foreach ($items as $item) {
-            if ($item->getSku() === $sku && ($item->getPrice() == 0 || !$item->getPrice())) {
-                \Mage::log("Manually setting price {$price} on quote item {$item->getId()}");
-                $item->setPrice($price);
-                $item->setBasePrice($price);
-                $item->setCustomPrice($price);
-                $item->setOriginalCustomPrice($price);
+            if ($item->getPrice() != 0 && $item->getPrice()) {
+                continue; // Price is already set
+            }
+
+            // For simple/configurable: match by SKU; for grouped/bundle: fix all zero-price items
+            if (!$isGroupedOrBundle && $item->getSku() !== $sku) {
+                continue;
+            }
+
+            // Determine the correct price for this item
+            $itemPrice = $price; // Default: parent product's resolved price
+            if ($isGroupedOrBundle) {
+                // Load child product's own price
+                $childProductId = $item->getProductId();
+                $childProduct = \Mage::getModel('catalog/product')->setStoreId($quote->getStoreId())->load($childProductId);
+                $itemPrice = (float) $childProduct->getPrice();
+                if (!$itemPrice || $itemPrice == 0) {
+                    $childProduct = \Mage::getModel('catalog/product')->setStoreId(0)->load($childProductId);
+                    $itemPrice = (float) $childProduct->getPrice();
+                }
+            }
+
+            if ($itemPrice && $itemPrice > 0) {
+                \Mage::log("Manually setting price {$itemPrice} on quote item {$item->getId()} (SKU: {$item->getSku()})");
+                $item->setPrice($itemPrice);
+                $item->setBasePrice($itemPrice);
+                $item->setCustomPrice($itemPrice);
+                $item->setOriginalCustomPrice($itemPrice);
                 $item->getProduct()->setIsSuperMode(true); // Allow custom price
 
                 // Calculate row total manually
-                $rowTotal = $price * $item->getQty();
+                $rowTotal = $itemPrice * $item->getQty();
                 $item->setRowTotal($rowTotal);
                 $item->setBaseRowTotal($rowTotal);
                 \Mage::log("Set row_total to {$rowTotal}");

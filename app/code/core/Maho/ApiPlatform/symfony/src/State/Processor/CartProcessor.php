@@ -113,6 +113,15 @@ final class CartProcessor implements ProcessorInterface
         if (!empty($args['links'])) {
             $buyOptions['links'] = $args['links'];
         }
+        if (!empty($args['superGroup'])) {
+            $buyOptions['super_group'] = $args['superGroup'];
+        }
+        if (!empty($args['bundleOption'])) {
+            $buyOptions['bundle_option'] = $args['bundleOption'];
+        }
+        if (!empty($args['bundleOptionQty'])) {
+            $buyOptions['bundle_option_qty'] = $args['bundleOptionQty'];
+        }
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,

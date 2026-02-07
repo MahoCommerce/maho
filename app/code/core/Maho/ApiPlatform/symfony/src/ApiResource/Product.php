@@ -207,4 +207,18 @@ class Product
 
     #[ApiProperty(description: 'Whether links can be purchased individually (shows checkboxes)')]
     public ?bool $linksPurchasedSeparately = null;
+
+    /**
+     * Grouped product associated items (detail only)
+     * Structure: [['id' => 10, 'sku' => 'ABC', 'name' => 'Child', 'price' => 9.95, 'finalPrice' => 9.95, 'imageUrl' => '...', 'inStock' => true, 'stockQty' => 50, 'defaultQty' => 0, 'position' => 1]]
+     */
+    #[ApiProperty(description: 'Grouped product associated items (detail only)')]
+    public array $groupedProducts = [];
+
+    /**
+     * Bundle product options with selections (detail only)
+     * Structure: [['id' => 1, 'title' => 'Option', 'type' => 'radio', 'required' => true, 'position' => 1, 'selections' => [...]]]
+     */
+    #[ApiProperty(description: 'Bundle product options and selections (detail only)')]
+    public array $bundleOptions = [];
 }
