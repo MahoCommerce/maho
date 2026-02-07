@@ -351,7 +351,6 @@ final class CartProcessor implements ProcessorInterface
         $args = $context['args']['input'] ?? [];
         $cartId = $args['cartId'] ?? null;
         $maskedId = $args['maskedId'] ?? null;
-        $address = $args['address'] ?? [];
 
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
@@ -362,7 +361,7 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
-        $addressData = $this->mapInputToAddressData($address);
+        $addressData = $this->mapInputToAddressData($args);
         $quote = $this->cartService->setShippingAddress($quote, $addressData);
 
         return $this->mapQuoteToCart($quote);
@@ -376,7 +375,6 @@ final class CartProcessor implements ProcessorInterface
         $args = $context['args']['input'] ?? [];
         $cartId = $args['cartId'] ?? null;
         $maskedId = $args['maskedId'] ?? null;
-        $address = $args['address'] ?? [];
         $sameAsShipping = $args['sameAsShipping'] ?? false;
 
         $quote = $this->cartService->getCart(
@@ -388,7 +386,7 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
-        $addressData = $sameAsShipping ? [] : $this->mapInputToAddressData($address);
+        $addressData = $sameAsShipping ? [] : $this->mapInputToAddressData($args);
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
         return $this->mapQuoteToCart($quote);
@@ -669,6 +667,9 @@ final class CartProcessor implements ProcessorInterface
         if ($shippingAddress && $shippingAddress->getFirstname()) {
             $cart->shippingAddress = $this->addressMapper->fromQuoteAddress($shippingAddress);
 
+            // Get available shipping methods
+            $cart->availableShippingMethods = $this->getAvailableShippingMethods($shippingAddress);
+
             // Get selected shipping method
             $selectedMethod = $shippingAddress->getShippingMethod();
             if ($selectedMethod) {
@@ -684,6 +685,9 @@ final class CartProcessor implements ProcessorInterface
                 }
             }
         }
+
+        // Get available payment methods
+        $cart->availablePaymentMethods = $this->getAvailablePaymentMethods($quote);
 
         // Get selected payment method
         $payment = $quote->getPayment();
@@ -811,4 +815,59 @@ final class CartProcessor implements ProcessorInterface
         return $prices;
     }
 
+    /**
+     * Get available shipping methods for address
+     *
+     * @return array<array{carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}>
+     */
+    private function getAvailableShippingMethods(\Mage_Sales_Model_Quote_Address $address): array
+    {
+        $methods = [];
+
+        try {
+            $address->collectShippingRates();
+
+            foreach ($address->getAllShippingRates() as $rate) {
+                $methods[] = [
+                    'carrierCode' => $rate->getCarrier(),
+                    'methodCode' => $rate->getMethod(),
+                    'carrierTitle' => $rate->getCarrierTitle(),
+                    'methodTitle' => $rate->getMethodTitle(),
+                    'price' => (float) $rate->getPrice(),
+                ];
+            }
+        } catch (\Exception $e) {
+            \Mage::log('Error getting shipping methods: ' . $e->getMessage());
+        }
+
+        return $methods;
+    }
+
+    /**
+     * Get available payment methods for quote
+     *
+     * @return array<array{code: string, title: string}>
+     */
+    private function getAvailablePaymentMethods(\Mage_Sales_Model_Quote $quote): array
+    {
+        $methods = [];
+
+        try {
+            $store = $quote->getStore();
+            $availableMethods = \Mage::helper('payment')->getStoreMethods($store, $quote);
+
+            foreach ($availableMethods as $method) {
+                if ($method->canUseForCountry($quote->getBillingAddress()->getCountry())) {
+                    $methods[] = [
+                        'code' => $method->getCode(),
+                        'title' => $method->getTitle(),
+                    ];
+                }
+            }
+        } catch (\Exception $e) {
+            \Mage::log('Error getting payment methods: ' . $e->getMessage());
+        }
+
+        return $methods;
+    }
 }
