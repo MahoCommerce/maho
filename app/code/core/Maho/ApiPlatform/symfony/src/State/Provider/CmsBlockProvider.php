@@ -178,11 +178,28 @@ final class CmsBlockProvider implements ProviderInterface
             $content,
         );
 
-        // Process {{config path="..."}} directive
+        // Process {{config path="..."}} directive (whitelist safe paths only)
         $content = preg_replace_callback(
             '/\{\{config\s+path=["\']?([^"\'}\s]+)["\']?\s*\}\}/i',
             function ($matches) use ($storeId) {
-                return \Mage::getStoreConfig($matches[1], $storeId) ?? '';
+                $path = $matches[1];
+                // Only allow safe, non-sensitive config paths
+                $allowedPrefixes = [
+                    'general/store_information/',
+                    'web/unsecure/',
+                    'web/secure/',
+                    'design/',
+                    'trans_email/',
+                    'contacts/',
+                    'catalog/seo/',
+                ];
+                foreach ($allowedPrefixes as $prefix) {
+                    if (str_starts_with($path, $prefix)) {
+                        return \Mage::getStoreConfig($path, $storeId) ?? '';
+                    }
+                }
+                // Strip unrecognized config directives
+                return '';
             },
             $content,
         );

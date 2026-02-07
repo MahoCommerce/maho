@@ -248,6 +248,10 @@ final class CustomerProcessor implements ProcessorInterface
             throw new BadRequestHttpException('Email is required');
         }
 
+        if (!\Mage::helper('core')->isValidEmail($email)) {
+            throw new BadRequestHttpException('A valid email address is required');
+        }
+
         // Check if email already exists
         $existingCustomer = \Mage::getModel('customer/customer')
             ->setWebsiteId($websiteId)
