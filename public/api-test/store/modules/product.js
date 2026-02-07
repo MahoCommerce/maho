@@ -18,7 +18,17 @@ export default {
                 this.loadModule('reviews')
             ]);
 
-            this.currentProduct = await this.api('/products/' + id);
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                const data = await this.gql(this._gqlQueries.PRODUCT_QUERY, { id: '/api/products/' + id });
+                const product = data.productProduct;
+                if (product) product.id = this._parseId(product.id);
+                this.currentProduct = product;
+            } else {
+                // REST branch
+                this.currentProduct = await this.api('/products/' + id);
+            }
+
             this.qty = 1;
             this.selectedOptions = {};
             this.selectedCustomOptions = {};

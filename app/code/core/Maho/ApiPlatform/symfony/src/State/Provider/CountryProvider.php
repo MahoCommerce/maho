@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Country;
 use Maho\ApiPlatform\ApiResource\Region;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -30,10 +31,10 @@ final class CountryProvider implements ProviderInterface
     /**
      * Provide country data based on operation type
      *
-     * @return Country[]|Country|null
+     * @return ArrayPaginator<Country>|Country|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Country|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Country|null
     {
         // Ensure valid store context (bootstraps Maho)
         StoreContext::ensureStore();
@@ -65,9 +66,9 @@ final class CountryProvider implements ProviderInterface
     /**
      * Get all available countries (cached for 1 hour)
      *
-     * @return Country[]
+     * @return ArrayPaginator<Country>
      */
-    private function getCollection(): array
+    private function getCollection(): ArrayPaginator
     {
         $storeId = StoreContext::getStoreId();
         $cacheKey = 'api_countries_' . $storeId;
@@ -77,7 +78,9 @@ final class CountryProvider implements ProviderInterface
         if ($cached !== false) {
             $data = json_decode($cached, true);
             if (is_array($data)) {
-                return array_map(fn(array $c) => $this->arrayToDto($c), $data);
+                $countries = array_map(fn(array $c) => $this->arrayToDto($c), $data);
+                $total = count($countries);
+                return new ArrayPaginator(items: $countries, currentPage: 1, itemsPerPage: max($total, 300), totalItems: $total);
             }
         }
 
@@ -112,7 +115,14 @@ final class CountryProvider implements ProviderInterface
             3600,
         );
 
-        return $countries;
+        $total = count($countries);
+
+        return new ArrayPaginator(
+            items: $countries,
+            currentPage: 1,
+            itemsPerPage: max($total, 300),
+            totalItems: $total,
+        );
     }
 
     /**

@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\CategoryProvider;
 
 #[ApiResource(
@@ -48,6 +49,7 @@ use Maho\ApiPlatform\State\Provider\CategoryProvider;
             name: 'categoryByUrlKey',
             args: ['urlKey' => ['type' => 'String!']],
             description: 'Get a category by URL key',
+            resolver: CustomQueryResolver::class,
         ),
     ],
 )]

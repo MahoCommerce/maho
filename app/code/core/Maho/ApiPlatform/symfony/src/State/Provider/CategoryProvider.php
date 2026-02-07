@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Category;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -29,10 +30,10 @@ final class CategoryProvider implements ProviderInterface
     /**
      * Provide category data based on operation type
      *
-     * @return array<Category>|Category|null
+     * @return ArrayPaginator<Category>|Category|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Category|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Category|null
     {
         // Ensure valid store context
         StoreContext::ensureStore();
@@ -91,9 +92,9 @@ final class CategoryProvider implements ProviderInterface
     /**
      * Get category collection (tree)
      *
-     * @return array<Category>
+     * @return ArrayPaginator<Category>
      */
-    private function getCollection(array $context): array
+    private function getCollection(array $context): ArrayPaginator
     {
         $filters = $context['args'] ?? $context['filters'] ?? [];
         $parentId = $filters['parentId'] ?? null;
@@ -131,7 +132,14 @@ final class CategoryProvider implements ProviderInterface
             $categories[] = $this->mapToDto($mahoCategory, false);
         }
 
-        return $categories;
+        $total = count($categories);
+
+        return new ArrayPaginator(
+            items: $categories,
+            currentPage: 1,
+            itemsPerPage: max($total, 100),
+            totalItems: $total,
+        );
     }
 
     /**

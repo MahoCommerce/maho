@@ -98,15 +98,19 @@ use Maho\ApiPlatform\State\Processor\AddressProcessor;
         ),
     ],
     graphQlOperations: [
+        new Query(name: 'item_query', description: 'Get an address by ID', security: "is_granted('ROLE_USER')"),
+        new QueryCollection(name: 'collection_query', description: 'Get addresses', security: "is_granted('ROLE_USER')"),
         new QueryCollection(
             name: 'myAddresses',
             args: [],
             description: 'Get all addresses for the authenticated customer',
+            security: "is_granted('ROLE_USER')",
         ),
         new Query(
             name: 'address',
             args: ['id' => ['type' => 'ID!']],
             description: 'Get a single address by ID',
+            security: "is_granted('ROLE_USER')",
         ),
         new Mutation(
             name: 'createAddress',
@@ -125,6 +129,7 @@ use Maho\ApiPlatform\State\Processor\AddressProcessor;
                 'isDefaultShipping' => ['type' => 'Boolean'],
             ],
             description: 'Create a new address for the authenticated customer',
+            security: "is_granted('ROLE_USER')",
         ),
         new Mutation(
             name: 'updateAddress',
@@ -144,11 +149,13 @@ use Maho\ApiPlatform\State\Processor\AddressProcessor;
                 'isDefaultShipping' => ['type' => 'Boolean'],
             ],
             description: 'Update an existing address',
+            security: "is_granted('ROLE_USER')",
         ),
         new DeleteMutation(
             name: 'deleteAddress',
             args: ['id' => ['type' => 'ID!']],
             description: 'Delete an address',
+            security: "is_granted('ROLE_USER')",
         ),
     ],
 )]

@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\WishlistItem;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -38,22 +39,23 @@ final class WishlistProvider implements ProviderInterface
     }
 
     /**
-     * @return array<WishlistItem>|WishlistItem|null
+     * @return ArrayPaginator|WishlistItem|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|WishlistItem|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|WishlistItem|null
     {
         StoreContext::ensureStore();
         $operationName = $operation->getName();
 
-        // GraphQL operations
-        if ($operationName === 'myWishlist') {
-            return $this->getWishlistItems();
+        // GraphQL collection operations need ArrayPaginator
+        if ($operationName === 'myWishlist' || $operationName === 'collection_query') {
+            $items = $this->getWishlistItems();
+            return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: max(count($items), 50), totalItems: count($items));
         }
 
         // REST collection - get wishlist items
         if ($operation instanceof CollectionOperationInterface) {
-            return $this->getWishlistItems();
+            return new ArrayPaginator(items: $this->getWishlistItems(), currentPage: 1, itemsPerPage: 50, totalItems: 0);
         }
 
         // Single item lookup
@@ -82,8 +84,11 @@ final class WishlistProvider implements ProviderInterface
         }
 
         $items = [];
-        $itemCollection = $wishlist->getItemCollection()
-            ->addStoreFilter(\Mage::app()->getStore()->getId())
+        $itemCollection = $wishlist->getItemCollection();
+        if (!$itemCollection) {
+            return [];
+        }
+        $itemCollection->addStoreFilter(\Mage::app()->getStore()->getId())
             ->setVisibilityFilter();
 
         /** @var \Mage_Wishlist_Model_Item $item */

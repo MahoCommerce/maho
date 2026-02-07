@@ -21,6 +21,28 @@ export default {
      */
     async loadProductReviews(productId, page = 1) {
         this.reviewsLoading = true;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.PRODUCT_REVIEWS_QUERY, {
+                    productId: parseInt(productId),
+                    page,
+                    pageSize: 10
+                });
+                this.productReviews = this._gqlNodes(data, 'productReviewsReviews');
+                this.reviewsPage = page;
+                const totalReviews = data.productReviewsReviews?.totalCount || this.productReviews.length;
+                this.reviewsTotalPages = Math.ceil(totalReviews / 10) || 1;
+            } catch (e) {
+                console.error('Failed to load reviews (GQL):', e);
+                this.productReviews = [];
+            }
+            this.reviewsLoading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const response = await this.api(`/products/${productId}/reviews?page=${page}&pageSize=10`);
             this.productReviews = response.member || response['hydra:member'] || response || [];
@@ -59,6 +81,30 @@ export default {
         }
 
         this.reviewsLoading = true;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                await this.gql(this._gqlQueries.SUBMIT_REVIEW, {
+                    input: {
+                        productId: parseInt(productId),
+                        title: this.reviewForm.title,
+                        detail: this.reviewForm.detail,
+                        nickname: this.reviewForm.nickname,
+                        rating: this.reviewForm.rating
+                    }
+                });
+                this.success = 'Thank you! Your review has been submitted for approval.';
+                this.showReviewForm = false;
+                this.resetReviewForm();
+            } catch (e) {
+                this.error = 'Failed to submit review: ' + e.message;
+            }
+            this.reviewsLoading = false;
+            return;
+        }
+
+        // REST branch
         try {
             await this.api(`/products/${productId}/reviews`, {
                 method: 'POST',
@@ -97,6 +143,19 @@ export default {
     async loadMyReviews() {
         if (!this.token) return;
 
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.MY_REVIEWS_QUERY);
+                this.myReviews = this._gqlNodes(data, 'myReviewsReviews');
+            } catch (e) {
+                console.error('Failed to load my reviews (GQL):', e);
+                this.myReviews = [];
+            }
+            return;
+        }
+
+        // REST branch
         try {
             const response = await this.api('/customers/me/reviews');
             this.myReviews = response.member || response['hydra:member'] || response || [];
@@ -125,11 +184,11 @@ export default {
 
         for (let i = 0; i < max; i++) {
             if (i < fullStars) {
-                stars += '★';
+                stars += '\u2605';
             } else if (i === fullStars && hasHalf) {
-                stars += '☆'; // Use empty star for half (or could use different char)
+                stars += '\u2606'; // Use empty star for half (or could use different char)
             } else {
-                stars += '☆';
+                stars += '\u2606';
             }
         }
         return stars;

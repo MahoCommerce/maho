@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\CmsPage;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -27,22 +28,21 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class CmsPageProvider implements ProviderInterface
 {
     /**
-     * @return CmsPage|CmsPage[]|null
+     * @return CmsPage|ArrayPaginator<CmsPage>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsPage|array|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsPage|ArrayPaginator|null
     {
         StoreContext::ensureStore();
 
-        $operationName = $operation->getName();
-
-        // Handle GraphQL query by identifier
-        if ($operationName === 'cmsPageByIdentifier') {
-            $identifier = $context['args']['identifier'] ?? null;
-            return $identifier ? $this->getPageByIdentifier($identifier) : null;
-        }
-
         if ($operation instanceof CollectionOperationInterface) {
+            // Handle identifier filter for GraphQL cmsPages(identifier: "...") query
+            $identifier = $context['args']['identifier'] ?? $context['filters']['identifier'] ?? null;
+            if ($identifier) {
+                $page = $this->getPageByIdentifier($identifier);
+                $items = $page ? [$page] : [];
+                return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: 1, totalItems: count($items));
+            }
             return $this->getCollection($context);
         }
 
@@ -90,9 +90,9 @@ final class CmsPageProvider implements ProviderInterface
     }
 
     /**
-     * @return CmsPage[]
+     * @return ArrayPaginator<CmsPage>
      */
-    private function getCollection(array $context): array
+    private function getCollection(array $context): ArrayPaginator
     {
         $storeId = StoreContext::getStoreId();
         $filters = $context['filters'] ?? [];
@@ -126,7 +126,14 @@ final class CmsPageProvider implements ProviderInterface
             $pages[] = $this->mapToDto($page);
         }
 
-        return $pages;
+        $total = count($pages);
+
+        return new ArrayPaginator(
+            items: $pages,
+            currentPage: 1,
+            itemsPerPage: max($total, 100),
+            totalItems: $total,
+        );
     }
 
     private function mapToDto(\Mage_Cms_Model_Page $page): CmsPage

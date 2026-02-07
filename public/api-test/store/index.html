@@ -179,6 +179,47 @@
                         </div>
                     </div>
 
+                    <!-- API Transport Toggle -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="toggleApiMode()" @contextmenu.prevent="open = !open"
+                                class="relative text-gray-600 hover:text-gray-900"
+                                :title="(apiMode === 'graphql' ? 'GraphQL' : 'REST') + ' mode (right-click for stats)'">
+                            <!-- REST icon: arrow left-right (bidirectional API) -->
+                            <svg x-show="apiMode !== 'graphql'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                            </svg>
+                            <!-- GraphQL icon: hub/node graph -->
+                            <svg x-show="apiMode === 'graphql'" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.5v15m7.5-7.5h-15"/>
+                                <circle cx="12" cy="4.5" r="2" stroke-width="2"/>
+                                <circle cx="12" cy="19.5" r="2" stroke-width="2"/>
+                                <circle cx="4.5" cy="12" r="2" stroke-width="2"/>
+                                <circle cx="19.5" cy="12" r="2" stroke-width="2"/>
+                            </svg>
+                            <!-- Mode badge -->
+                            <span class="absolute -top-2 -right-2 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold"
+                                  :style="apiMode === 'graphql' ? 'background:#7e22ce;font-size:7px' : 'background:#2563eb;font-size:7px'"
+                                  x-text="apiMode === 'graphql' ? 'GQL' : 'REST'"></span>
+                        </button>
+                        <!-- Stats dropdown (right-click) -->
+                        <div x-show="open" @click.away="open = false"
+                             class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
+                            <div class="px-4 py-2 text-xs text-gray-500 uppercase tracking-wide border-b">API Transport</div>
+                            <div class="px-4 py-2 text-sm text-gray-700">
+                                Mode: <span class="font-medium" x-text="apiMode === 'graphql' ? 'GraphQL' : 'REST'"></span>
+                            </div>
+                            <div class="px-4 py-2 text-sm text-gray-700">
+                                REST calls: <span class="font-mono font-medium" x-text="apiCallStats.rest"></span>
+                            </div>
+                            <div class="px-4 py-2 text-sm text-gray-700">
+                                GQL calls: <span class="font-mono font-medium" x-text="apiCallStats.graphql"></span>
+                            </div>
+                            <template x-if="apiMode === 'graphql' && !token">
+                                <div class="px-4 py-2 text-xs text-yellow-600 border-t">Auth required for GraphQL</div>
+                            </template>
+                        </div>
+                    </div>
+
                     <!-- Account -->
                     <div class="relative" x-data="{ open: false }">
                         <button @click="open = !open" class="text-gray-600 hover:text-gray-900">
@@ -804,23 +845,23 @@
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span>Subtotal</span>
-                                <span x-text="formatPrice(cart.totals?.subtotal || 0)"></span>
+                                <span x-text="formatPrice(cart.prices?.subtotal || 0)"></span>
                             </div>
-                            <div x-show="cart.totals?.discount" class="flex justify-between text-green-600">
+                            <div x-show="cart.prices?.discountAmount" class="flex justify-between text-green-600">
                                 <span>Discount</span>
-                                <span x-text="'-' + formatPrice(Math.abs(cart.totals?.discount || 0))"></span>
+                                <span x-text="'-' + formatPrice(Math.abs(cart.prices?.discountAmount || 0))"></span>
                             </div>
                             <div class="flex justify-between">
                                 <span>Shipping</span>
-                                <span x-text="cart.totals?.shipping ? formatPrice(cart.totals.shipping) : 'Calculated at checkout'"></span>
+                                <span x-text="cart.prices?.shippingAmount ? formatPrice(cart.prices.shippingAmount) : 'Calculated at checkout'"></span>
                             </div>
-                            <div x-show="cart.totals?.tax" class="flex justify-between">
+                            <div x-show="cart.prices?.taxAmount" class="flex justify-between">
                                 <span>GST</span>
-                                <span x-text="formatPrice(cart.totals?.tax || 0)"></span>
+                                <span x-text="formatPrice(cart.prices?.taxAmount || 0)"></span>
                             </div>
                             <div class="border-t pt-2 mt-2 flex justify-between font-semibold text-lg">
                                 <span>Total <span class="text-xs font-normal text-gray-500">(inc. GST)</span></span>
-                                <span x-text="formatPrice(cart.totals?.grandTotal || cart.totals?.subtotal || 0)"></span>
+                                <span x-text="formatPrice(cart.prices?.grandTotal || cart.prices?.subtotal || 0)"></span>
                             </div>
                         </div>
 
@@ -1075,7 +1116,7 @@
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
                                     </svg>
                                 </span>
-                                <span class="font-semibold text-gray-900" x-text="formatPrice(cart.totals?.grandTotal || ((cart.totals?.subtotal || 0) + getSelectedShippingPrice()))"></span>
+                                <span class="font-semibold text-gray-900" x-text="formatPrice(cart.prices?.grandTotal || ((cart.prices?.subtotal || 0) + getSelectedShippingPrice()))"></span>
                             </button>
                         </div>
 
@@ -1125,9 +1166,9 @@
                             <div class="border-t pt-4 space-y-3">
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Subtotal</span>
-                                    <span class="text-gray-900" x-text="formatPrice(cart.totals?.subtotal || 0)"></span>
+                                    <span class="text-gray-900" x-text="formatPrice(cart.prices?.subtotal || 0)"></span>
                                 </div>
-                                <template x-if="cart.totals?.discount">
+                                <template x-if="cart.prices?.discountAmount">
                                     <div class="flex justify-between text-sm text-green-600">
                                         <span class="flex items-center gap-1">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1135,17 +1176,17 @@
                                             </svg>
                                             Discount
                                         </span>
-                                        <span x-text="'-' + formatPrice(Math.abs(cart.totals?.discount || 0))"></span>
+                                        <span x-text="'-' + formatPrice(Math.abs(cart.prices?.discountAmount || 0))"></span>
                                     </div>
                                 </template>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600">Shipping</span>
                                     <span class="text-gray-900" x-text="checkout.shippingMethod ? formatPrice(getSelectedShippingPrice()) : 'Calculated next'"></span>
                                 </div>
-                                <template x-if="cart.totals?.tax">
+                                <template x-if="cart.prices?.taxAmount">
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">GST</span>
-                                        <span class="text-gray-900" x-text="formatPrice(cart.totals?.tax || 0)"></span>
+                                        <span class="text-gray-900" x-text="formatPrice(cart.prices?.taxAmount || 0)"></span>
                                     </div>
                                 </template>
                             </div>
@@ -1153,7 +1194,7 @@
                             <!-- Grand total -->
                             <div class="border-t mt-4 pt-4 flex justify-between items-center">
                                 <span class="text-base text-gray-600">Total <span class="text-xs">(inc. GST)</span></span>
-                                <span class="text-2xl font-semibold text-gray-900" x-text="formatPrice(cart.totals?.grandTotal || ((cart.totals?.subtotal || 0) + getSelectedShippingPrice()))"></span>
+                                <span class="text-2xl font-semibold text-gray-900" x-text="formatPrice(cart.prices?.grandTotal || ((cart.prices?.subtotal || 0) + getSelectedShippingPrice()))"></span>
                             </div>
 
                             <!-- Place order button -->
@@ -2182,7 +2223,7 @@
         </div>
     </footer>
 
-    <script src="/api-test/store/store.js?v=44"></script>
+    <script src="/api-test/store/store.js?v=54"></script>
     <!-- Store function is defined in store.js -->
 </body>
 </html>

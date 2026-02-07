@@ -48,7 +48,7 @@ final class ReviewProcessor implements ProcessorInterface
 
         // GraphQL mutation
         if ($operationName === 'submitReview') {
-            $args = $context['args'] ?? [];
+            $args = $context['args']['input'] ?? [];
             return $this->submitReview(
                 (int) $args['productId'],
                 $args['title'],

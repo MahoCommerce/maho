@@ -21,6 +21,21 @@ export default {
     totalPages: 1,
 
     async loadCategories() {
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.CATEGORIES_QUERY);
+                this.categories = this._gqlNodes(data, 'categoriesCategories');
+                this.topCategories = this.categories.slice(0, 5);
+            } catch (e) {
+                console.error('Failed to load categories (GQL):', e);
+                this.categories = [];
+                this.topCategories = [];
+            }
+            return;
+        }
+
+        // REST branch
         try {
             const data = await this.api('/categories');
             this.categories = data.member || data.items || data || [];
@@ -39,6 +54,38 @@ export default {
 
     async loadProducts() {
         this.loading = true;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const variables = {
+                    pageSize: this.pageSize,
+                    page: this.page
+                };
+                if (this.searchQuery) variables.search = this.searchQuery;
+                if (this.currentCategory) variables.categoryId = this.currentCategory;
+                if (this.priceFilterActive && this.priceMin > 0) variables.priceMin = this.priceMin;
+                if (this.priceFilterActive && this.priceMax < this.priceSliderMax) variables.priceMax = this.priceMax;
+                if (this.sortBy) {
+                    const [field, dir] = this.sortBy.split('-');
+                    variables.sortBy = field;
+                    variables.sortDir = dir;
+                }
+
+                const data = await this.gql(this._gqlQueries.PRODUCTS_QUERY, variables);
+                this.products = this._gqlNodes(data, 'productsProducts');
+                const totalItems = data.productsProducts?.totalCount || this.products.length;
+                this.totalPages = Math.ceil(totalItems / this.pageSize) || 1;
+                this.updateUrl();
+            } catch (e) {
+                this.error = 'Failed to load products: ' + e.message;
+                this.products = [];
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const params = new URLSearchParams();
             params.append('pageSize', this.pageSize);
@@ -82,6 +129,19 @@ export default {
     },
 
     async loadSubcategories(parentId) {
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.CATEGORIES_QUERY, { parentId });
+                this.subcategories = this._gqlNodes(data, 'categoriesCategories');
+            } catch (e) {
+                console.error('Failed to load subcategories (GQL):', e);
+                this.subcategories = [];
+            }
+            return;
+        }
+
+        // REST branch
         try {
             const data = await this.api('/categories?parentId=' + parentId);
             this.subcategories = data.member || data.items || data || [];

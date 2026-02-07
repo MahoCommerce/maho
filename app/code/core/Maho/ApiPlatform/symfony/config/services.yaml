@@ -1,6 +1,3 @@
-parameters:
-    env(GRAPHQL_INTROSPECTION): 'true'
-
 services:
     _defaults:
         autowire: true
@@ -18,3 +15,61 @@ services:
             $debug: '%kernel.debug%'
         tags:
             - { name: kernel.event_subscriber }
+
+    # Custom GraphQL query resolver for operations without `id` arg (me, customerCart, etc.)
+    # ReadProvider short-circuits these, so this resolver calls the state provider directly.
+    Maho\ApiPlatform\GraphQl\CustomQueryResolver:
+        arguments:
+            $providerLocator: !tagged_locator { tag: 'maho.api.state_provider', default_index_method: null, index_by: 'key' }
+        tags:
+            - { name: 'api_platform.graphql.query_resolver' }
+
+    # Tag all our state providers so CustomQueryResolver can locate them
+    Maho\ApiPlatform\State\Provider\CustomerProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CustomerProvider' }
+    Maho\ApiPlatform\State\Provider\CartProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CartProvider' }
+    Maho\ApiPlatform\State\Provider\OrderProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\OrderProvider' }
+    Maho\ApiPlatform\State\Provider\ReviewProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\ReviewProvider' }
+    Maho\ApiPlatform\State\Provider\WishlistProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\WishlistProvider' }
+    Maho\ApiPlatform\State\Provider\AddressProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\AddressProvider' }
+    Maho\ApiPlatform\State\Provider\CategoryProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CategoryProvider' }
+    Maho\ApiPlatform\State\Provider\CmsPageProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CmsPageProvider' }
+    Maho\ApiPlatform\State\Provider\CmsBlockProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CmsBlockProvider' }
+    Maho\ApiPlatform\State\Provider\BlogPostProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\BlogPostProvider' }
+    Maho\ApiPlatform\State\Provider\CountryProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CountryProvider' }
+    Maho\ApiPlatform\State\Provider\ProductProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\ProductProvider' }
+    Maho\ApiPlatform\State\Provider\GiftCardProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\GiftCardProvider' }
+    Maho\ApiPlatform\State\Provider\StoreConfigProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\StoreConfigProvider' }
+    Maho\ApiPlatform\State\Provider\UrlResolverProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\UrlResolverProvider' }
+    Maho\ApiPlatform\State\Provider\NewsletterProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\NewsletterProvider' }

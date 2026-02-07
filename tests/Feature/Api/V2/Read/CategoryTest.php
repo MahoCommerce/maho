@@ -27,8 +27,8 @@ describe('API v2 Categories', function () {
             expect($response['status'])->toBe(200);
             expect($response['json'])->toBeArray();
             // Should have collection format with 'member' or 'hydra:member'
-            expect($response['json'])->toHaveKey('member')
-                ->or->toHaveKey('hydra:member');
+            $hasMember = isset($response['json']['member']) || isset($response['json']['hydra:member']);
+            expect($hasMember)->toBeTrue('Response should have "member" or "hydra:member" key');
         });
 
         it('allows getting single category without authentication', function () {

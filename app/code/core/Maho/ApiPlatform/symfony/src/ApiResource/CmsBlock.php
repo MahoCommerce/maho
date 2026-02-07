@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\CmsBlockProvider;
 
 #[ApiResource(
@@ -41,6 +42,7 @@ use Maho\ApiPlatform\State\Provider\CmsBlockProvider;
             name: 'cmsBlockByIdentifier',
             args: ['identifier' => ['type' => 'String!']],
             description: 'Get a CMS block by identifier',
+            resolver: CustomQueryResolver::class,
         ),
     ],
 )]

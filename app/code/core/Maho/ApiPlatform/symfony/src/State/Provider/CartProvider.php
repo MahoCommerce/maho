@@ -17,7 +17,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Cart;
 use Maho\ApiPlatform\ApiResource\CartItem;
-use Maho\ApiPlatform\ApiResource\CartPrices;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
@@ -53,7 +52,7 @@ final class CartProvider implements ProviderInterface
 
         // Handle customerCart query - get current authenticated customer's cart
         if ($operationName === 'customerCart') {
-            $customerId = $context['customer_id'] ?? null;
+            $customerId = $context['customer_id'] ?? $this->getAuthenticatedCustomerId();
             if ($customerId) {
                 // Verify the authenticated user matches the requested customer
                 $this->authorizeCustomerAccess((int) $customerId);
@@ -64,7 +63,21 @@ final class CartProvider implements ProviderInterface
             return null;
         }
 
-        // Handle cart query with cartId or maskedId
+        // Handle getCartByMaskedId query
+        if ($operationName === 'getCartByMaskedId') {
+            $maskedId = $context['args']['maskedId'] ?? null;
+            if (!$maskedId) {
+                return null;
+            }
+            $quote = $this->cartService->getCart(null, $maskedId);
+            if (!$quote) {
+                return null;
+            }
+            $this->verifyCartAccess($quote);
+            return $this->mapToDto($quote);
+        }
+
+        // Handle standard cart query with cartId
         $cartId = $context['args']['cartId'] ?? $uriVariables['id'] ?? null;
         $maskedId = $context['args']['maskedId'] ?? null;
 
@@ -121,7 +134,7 @@ final class CartProvider implements ProviderInterface
 
         $dto = new Cart();
         $dto->id = (int) $quote->getId();
-        $dto->maskedId = $quote->getData('masked_id');
+        $dto->maskedId = $quote->getData('masked_quote_id');
         $dto->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
         $dto->storeId = (int) $quote->getStoreId();
         $dto->isActive = (bool) $quote->getIsActive();
@@ -144,7 +157,7 @@ final class CartProvider implements ProviderInterface
         }
 
         // Map prices
-        $dto->prices = $this->mapPricesToDto($quote);
+        $dto->prices = $this->mapPricesToArray($quote);
 
         // Map billing address
         $billingAddress = $quote->getBillingAddress();
@@ -256,31 +269,36 @@ final class CartProvider implements ProviderInterface
     }
 
     /**
-     * Map Maho quote to CartPrices DTO
+     * Map Maho quote to prices array
      */
-    private function mapPricesToDto(\Mage_Sales_Model_Quote $quote): CartPrices
+    private function mapPricesToArray(\Mage_Sales_Model_Quote $quote): array
     {
-        $prices = new CartPrices();
         $shippingAddress = $quote->getShippingAddress();
 
-        $prices->subtotal = (float) $quote->getSubtotal();
-        $prices->subtotalInclTax = (float) ($quote->getSubtotal() + ($shippingAddress ? $shippingAddress->getTaxAmount() : 0));
-        $prices->subtotalWithDiscount = (float) $quote->getSubtotalWithDiscount();
+        $prices = [
+            'subtotal' => (float) $quote->getSubtotal(),
+            'subtotalInclTax' => (float) ($quote->getSubtotal() + ($shippingAddress ? $shippingAddress->getTaxAmount() : 0)),
+            'subtotalWithDiscount' => (float) $quote->getSubtotalWithDiscount(),
+            'discountAmount' => null,
+            'shippingAmount' => null,
+            'shippingAmountInclTax' => null,
+            'taxAmount' => 0.0,
+            'grandTotal' => (float) $quote->getGrandTotal(),
+            'giftcardAmount' => null,
+        ];
 
         if ($shippingAddress) {
-            $prices->discountAmount = $shippingAddress->getDiscountAmount()
+            $prices['discountAmount'] = $shippingAddress->getDiscountAmount()
                 ? (float) abs($shippingAddress->getDiscountAmount())
                 : null;
-            $prices->shippingAmount = $shippingAddress->getShippingAmount()
+            $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
                 ? (float) $shippingAddress->getShippingAmount()
                 : null;
-            $prices->shippingAmountInclTax = $shippingAddress->getShippingInclTax()
+            $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
                 ? (float) $shippingAddress->getShippingInclTax()
                 : null;
-            $prices->taxAmount = (float) $shippingAddress->getTaxAmount();
+            $prices['taxAmount'] = (float) $shippingAddress->getTaxAmount();
         }
-
-        $prices->grandTotal = (float) $quote->getGrandTotal();
 
         return $prices;
     }

@@ -15,6 +15,11 @@ function store() {
         success: null,
         currentPath: '',
 
+        // API Transport
+        apiMode: localStorage.getItem('apiMode') || 'rest',
+        apiCallStats: { rest: 0, graphql: 0 },
+        _gqlQueries: null,
+
         // CMS & Blog
         cmsPage: null,
         footerPages: [],
@@ -148,8 +153,18 @@ function store() {
             if (loadedModules.has(name)) return;
 
             try {
-                const module = await import(`/api-test/store/modules/${name}.js?v=45`);
+                const module = await import(`/api-test/store/modules/${name}.js?v=54`);
                 const methods = module.default;
+
+                // Special handling for graphql module: store queries, not methods
+                if (name === 'graphql') {
+                    if (methods.queries) {
+                        this._gqlQueries = methods.queries;
+                    }
+                    loadedModules.add(name);
+                    console.log(`Module loaded: ${name}`);
+                    return;
+                }
 
                 // Merge module methods into store (skip state, keep methods)
                 for (const [key, value] of Object.entries(methods)) {
@@ -171,8 +186,9 @@ function store() {
             // Validate auth state on init
             this.validateAuthState();
 
-            // Load core modules immediately
+            // Load core modules immediately (including graphql queries)
             await Promise.all([
+                this.loadModule('graphql'),
                 this.loadModule('catalog'),
                 this.loadModule('cart'),
                 this.loadModule('product'),
@@ -216,6 +232,79 @@ function store() {
             localStorage.removeItem('customer');
         },
 
+        // ==================== API Transport Toggle ====================
+
+        get useGraphQL() {
+            return this.apiMode === 'graphql' && this.token && !this.isTokenExpired();
+        },
+
+        toggleApiMode() {
+            this.apiMode = this.apiMode === 'rest' ? 'graphql' : 'rest';
+            localStorage.setItem('apiMode', this.apiMode);
+        },
+
+        /** Parse numeric ID from API Platform IRI (e.g. "/api/categories/4" → 4) */
+        _parseId(iri) {
+            if (typeof iri === 'number') return iri;
+            if (typeof iri === 'string' && iri.includes('/')) {
+                const num = parseInt(iri.split('/').pop(), 10);
+                return isNaN(num) ? iri : num;
+            }
+            return typeof iri === 'string' ? (parseInt(iri, 10) || iri) : iri;
+        },
+
+        /** Map GraphQL edges to nodes with numeric IDs */
+        _gqlNodes(data, key) {
+            return (data?.[key]?.edges?.map(e => e.node) || []).map(n => ({
+                ...n,
+                id: this._parseId(n.id)
+            }));
+        },
+
+        // ==================== GraphQL Helper ====================
+
+        async gql(query, variables = {}) {
+            this.apiCallStats.graphql++;
+            const headers = {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            };
+
+            if (this.token && !this.isTokenExpired()) {
+                headers['Authorization'] = 'Bearer ' + this.token;
+            }
+
+            if (this.currentStoreCode && this.currentStoreCode !== 'default') {
+                headers['X-Store-Code'] = this.currentStoreCode;
+            }
+
+            const response = await fetch('/api/graphql', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify({ query, variables })
+            });
+
+            if (response.status === 401) {
+                this.clearExpiredToken();
+                throw new Error('Authentication required for GraphQL');
+            }
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || error.detail || 'GraphQL Error');
+            }
+
+            const result = await response.json();
+
+            if (result.errors?.length) {
+                throw new Error(result.errors[0].message || 'GraphQL Error');
+            }
+
+            return result.data;
+        },
+
+        // ==================== Newsletter ====================
+
         // Newsletter toggle - inline implementation to avoid module timing issues
         async toggleNewsletter(subscribe) {
             if (!this.token || !this.customer?.email) {
@@ -223,6 +312,32 @@ function store() {
                 return;
             }
 
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                this.loading = true;
+                this.error = null;
+                try {
+                    const query = subscribe
+                        ? this._gqlQueries.SUBSCRIBE_NEWSLETTER
+                        : this._gqlQueries.UNSUBSCRIBE_NEWSLETTER;
+                    const data = await this.gql(query, { input: { email: this.customer.email } });
+                    const sub = data.subscribeNewsletterNewsletterSubscription || data.unsubscribeNewsletterNewsletterSubscription;
+                    const result = sub?.newsletterSubscription || sub;
+
+                    if (this.customer) {
+                        this.customer.isSubscribed = result.isSubscribed;
+                        localStorage.setItem('customer', JSON.stringify(this.customer));
+                    }
+
+                    this.success = result.message || (subscribe ? 'Subscribed to newsletter' : 'Unsubscribed from newsletter');
+                } catch (e) {
+                    this.error = e.message || 'Newsletter operation failed';
+                }
+                this.loading = false;
+                return;
+            }
+
+            // REST branch
             this.loading = true;
             this.error = null;
             try {
@@ -260,7 +375,7 @@ function store() {
             this.loading = false;
         },
 
-        // Guest newsletter signup (footer form)
+        // Guest newsletter signup (footer form) - always REST (public, no auth)
         async subscribeNewsletter() {
             if (!this.newsletterEmail) {
                 this.error = 'Please enter your email address';
@@ -290,7 +405,22 @@ function store() {
             this.loading = false;
         },
 
+        // ==================== CMS & Blog ====================
+
         async loadFooterPages() {
+            // GraphQL branch — CMS pages collection has no filter args, fetch all and filter client-side
+            if (this.useGraphQL && this._gqlQueries) {
+                try {
+                    const data = await this.gql(this._gqlQueries.CMS_PAGES_QUERY);
+                    this.footerPages = this._gqlNodes(data, 'cmsPages');
+                } catch (e) {
+                    console.error('Failed to load footer pages (GQL):', e);
+                    this.footerPages = [];
+                }
+                return;
+            }
+
+            // REST branch
             try {
                 const data = await this.api('/cms-pages?isFooterLink=true');
                 this.footerPages = data.member || data['hydra:member'] || data || [];
@@ -301,6 +431,19 @@ function store() {
         },
 
         async loadBlogPosts() {
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                try {
+                    const data = await this.gql(this._gqlQueries.BLOG_POSTS_QUERY);
+                    this.blogPosts = this._gqlNodes(data, 'blogPosts');
+                } catch (e) {
+                    console.error('Failed to load blog posts (GQL):', e);
+                    this.blogPosts = [];
+                }
+                return;
+            }
+
+            // REST branch
             try {
                 const data = await this.api('/blog-posts?pageSize=10');
                 this.blogPosts = data.member || data['hydra:member'] || data || [];
@@ -309,6 +452,59 @@ function store() {
                 this.blogPosts = [];
             }
         },
+
+        async loadHomePage() {
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                try {
+                    const data = await this.gql(this._gqlQueries.CMS_PAGE_BY_IDENTIFIER, { identifier: 'home' });
+                    const pages = this._gqlNodes(data, 'cmsPagesCmsPages');
+                    if (pages[0]) {
+                        this.cmsPage = pages[0];
+                    }
+                } catch (e) {
+                    console.log('No home CMS page found (GQL)');
+                }
+                return;
+            }
+
+            // REST branch
+            try {
+                const data = await this.api('/cms-pages?identifier=home');
+                const pages = data.member || data['hydra:member'] || data || [];
+                if (pages.length > 0) {
+                    this.cmsPage = pages[0];
+                }
+            } catch (e) {
+                console.log('No home CMS page found');
+            }
+        },
+
+        async loadCmsPage(pageId) {
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                try {
+                    const data = await this.gql(this._gqlQueries.CMS_PAGE_QUERY, { id: '/api/cms-pages/' + pageId });
+                    this.cmsPage = data.cmsPage;
+                    this.view = 'cms_page';
+                } catch (e) {
+                    this.error = 'Page not found';
+                    this.view = '404';
+                }
+                return;
+            }
+
+            // REST branch
+            try {
+                this.cmsPage = await this.api('/cms-pages/' + pageId);
+                this.view = 'cms_page';
+            } catch (e) {
+                this.error = 'Page not found';
+                this.view = '404';
+            }
+        },
+
+        // ==================== Path Resolution ====================
 
         async resolveCurrentPath() {
             const path = window.location.pathname.replace(BASE_PATH, '').replace(/^\/+/, '');
@@ -419,7 +615,7 @@ function store() {
                 return;
             }
 
-            // Try to resolve as CMS page or category URL
+            // Try to resolve as CMS page or category URL (always REST - url-resolver is custom)
             try {
                 const response = await this.api('/url-resolver?path=' + encodeURIComponent(path));
                 // API returns Hydra collection with member array
@@ -447,28 +643,6 @@ function store() {
             }
 
             this.view = '404';
-        },
-
-        async loadHomePage() {
-            try {
-                const data = await this.api('/cms-pages?identifier=home');
-                const pages = data.member || data['hydra:member'] || data || [];
-                if (pages.length > 0) {
-                    this.cmsPage = pages[0];
-                }
-            } catch (e) {
-                console.log('No home CMS page found');
-            }
-        },
-
-        async loadCmsPage(pageId) {
-            try {
-                this.cmsPage = await this.api('/cms-pages/' + pageId);
-                this.view = 'cms_page';
-            } catch (e) {
-                this.error = 'Page not found';
-                this.view = '404';
-            }
         },
 
         // ==================== URL & Navigation ====================
@@ -559,6 +733,7 @@ function store() {
         // ==================== API Helper ====================
 
         async api(endpoint, options = {}, retry = true) {
+            this.apiCallStats.rest++;
             const url = '/api' + endpoint;
             const headers = {
                 'Content-Type': 'application/json',
@@ -619,7 +794,9 @@ function store() {
         async loadStores() {
             try {
                 const data = await this.api('/stores');
-                this.stores = data.stores || data || [];
+                // Normalize response: handle array, object with stores, or hydra format
+                const storeList = data.stores || data.member || data['hydra:member'] || data || [];
+                this.stores = Array.isArray(storeList) ? storeList : [];
             } catch (e) {
                 console.error('Failed to load stores:', e);
             }
@@ -628,14 +805,44 @@ function store() {
         async switchStore(storeCode) {
             this.currentStoreCode = storeCode;
             localStorage.setItem('storeCode', storeCode);
-            await this.loadCategories();
-            await this.loadProducts();
+
+            // Reset countries cache so they reload for the new store
+            this.countries = [];
+
+            // Reload all store-dependent data
+            await Promise.all([
+                this.loadCategories(),
+                this.loadFooterPages()
+            ]);
+
+            // Reload products if we're on a listing page
+            if (this.view === 'home' || this.view === 'category' || this.view === 'search') {
+                await this.loadProducts();
+            }
         },
 
         // ==================== Countries & Regions ====================
 
         async loadCountries() {
             if (this.countries.length > 0) return;
+
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                try {
+                    const data = await this.gql(this._gqlQueries.COUNTRIES_QUERY);
+                    this.countries = this._gqlNodes(data, 'countriesCountries').map(c => ({
+                        ...c,
+                        // Normalize field name for compatibility with existing templates
+                        available_regions: c.availableRegions || []
+                    }));
+                } catch (e) {
+                    console.error('Failed to load countries (GQL):', e);
+                    this.countries = [];
+                }
+                return;
+            }
+
+            // REST branch
             try {
                 const data = await this.api('/countries');
                 this.countries = data.member || data || [];
@@ -691,13 +898,28 @@ function store() {
             this.loading = true;
             try {
                 let post;
-                if (!isNaN(urlKeyOrId)) {
-                    post = await this.api('/blog-posts/' + urlKeyOrId);
+
+                // GraphQL branch
+                if (this.useGraphQL && this._gqlQueries) {
+                    if (!isNaN(urlKeyOrId)) {
+                        const data = await this.gql(this._gqlQueries.BLOG_POST_QUERY, { id: '/api/blog-posts/' + urlKeyOrId });
+                        post = data.blogPost;
+                    } else {
+                        const data = await this.gql(this._gqlQueries.BLOG_POST_BY_URL_KEY, { urlKey: urlKeyOrId });
+                        const nodes = this._gqlNodes(data, 'blogPostsBlogPosts');
+                        post = nodes[0] || null;
+                    }
                 } else {
-                    const data = await this.api('/blog-posts?urlKey=' + encodeURIComponent(urlKeyOrId));
-                    const posts = data.member || data['hydra:member'] || data || [];
-                    post = posts.find(p => p.urlKey === urlKeyOrId) || posts[0];
+                    // REST branch
+                    if (!isNaN(urlKeyOrId)) {
+                        post = await this.api('/blog-posts/' + urlKeyOrId);
+                    } else {
+                        const data = await this.api('/blog-posts?urlKey=' + encodeURIComponent(urlKeyOrId));
+                        const posts = data.member || data['hydra:member'] || data || [];
+                        post = posts.find(p => p.urlKey === urlKeyOrId) || posts[0];
+                    }
                 }
+
                 if (post) {
                     this.currentBlogPost = post;
                     this.view = 'blog_post';
@@ -789,6 +1011,36 @@ function store() {
             this.instantSearchLoading = true;
             this.instantSearchOpen = true;
 
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                try {
+                    const search = this.searchQuery;
+                    // Products supports search arg; categories and CMS pages don't, so fetch all and filter client-side
+                    const [productsData, categoriesData, pagesData] = await Promise.all([
+                        this.gql(this._gqlQueries.PRODUCTS_QUERY, { search, pageSize: 12 }).catch(() => ({})),
+                        this.gql(this._gqlQueries.CATEGORIES_QUERY).catch(() => ({})),
+                        this.gql(this._gqlQueries.CMS_PAGES_QUERY).catch(() => ({}))
+                    ]);
+
+                    this.instantSearchResults = this._gqlNodes(productsData, 'productsProducts');
+                    // Client-side filter for categories and CMS pages (no server-side search arg)
+                    const q = search.toLowerCase();
+                    this.instantSearchCategories = this._gqlNodes(categoriesData, 'categoriesCategories')
+                        .filter(c => c.name?.toLowerCase().includes(q)).slice(0, 8);
+                    this.instantSearchPages = this._gqlNodes(pagesData, 'cmsPages')
+                        .filter(p => p.title?.toLowerCase().includes(q) || p.identifier?.toLowerCase().includes(q)).slice(0, 6);
+                } catch (e) {
+                    console.error('Instant search failed (GQL):', e);
+                    this.instantSearchResults = [];
+                    this.instantSearchCategories = [];
+                    this.instantSearchPages = [];
+                }
+
+                this.instantSearchLoading = false;
+                return;
+            }
+
+            // REST branch
             const query = encodeURIComponent(this.searchQuery);
 
             // Fetch products, categories, and pages in parallel

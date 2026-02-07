@@ -32,6 +32,7 @@ export default {
     selectedOrderInvoices: [],
     loadingInvoices: false,
 
+    // Login - always REST (custom AuthController)
     async login() {
         this.loading = true;
         try {
@@ -127,6 +128,7 @@ export default {
         }
     },
 
+    // Register - always REST (creates customer + auto-login via AuthController)
     async register() {
         if (this.registerForm.password !== this.registerForm.confirmPassword) {
             this.error = 'Passwords do not match';
@@ -164,6 +166,36 @@ export default {
     async loadAccountData() {
         if (!this.token) return;
 
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            this.loading = true;
+            try {
+                const data = await this.gql(this._gqlQueries.ME_QUERY);
+                const cust = data.meCustomer;
+                if (cust) {
+                    cust.id = this._parseId(cust.id);
+                    (cust.addresses || []).forEach(a => { a.id = this._parseId(a.id); });
+                    if (cust.defaultBillingAddress) cust.defaultBillingAddress.id = this._parseId(cust.defaultBillingAddress.id);
+                    if (cust.defaultShippingAddress) cust.defaultShippingAddress.id = this._parseId(cust.defaultShippingAddress.id);
+                }
+                this.customer = cust;
+                this.addresses = cust?.addresses || [];
+                localStorage.setItem('customer', JSON.stringify(cust));
+            } catch (e) {
+                if (e.message?.includes('Authentication') || e.message?.includes('401')) {
+                    this.logout();
+                    return;
+                }
+                this.error = 'Failed to load account data';
+                this.customer = null;
+                this.addresses = [];
+                localStorage.removeItem('customer');
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         this.loading = true;
         try {
             const res = await fetch('/api/auth/me', {
@@ -206,6 +238,24 @@ export default {
 
         this.loading = true;
         const pageSize = 10;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.CUSTOMER_ORDERS_QUERY, { page, pageSize });
+                this.orders = this._gqlNodes(data, 'customerOrdersOrders');
+                this.ordersPage = page;
+                const totalItems = data.customerOrdersOrders?.totalCount || this.orders.length;
+                this.ordersTotalPages = Math.ceil(totalItems / pageSize) || 1;
+                this.ordersTotalItems = totalItems;
+            } catch (e) {
+                this.error = 'Failed to load orders';
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const data = await fetch('/api/customers/me/orders?page=' + page + '&pageSize=' + pageSize, {
                 headers: { 'Authorization': 'Bearer ' + this.token }
@@ -230,6 +280,7 @@ export default {
         this.loading = false;
     },
 
+    // Invoice loading - always REST (binary download)
     async loadOrderInvoices(orderId) {
         if (!this.token || !orderId) return [];
 
@@ -250,6 +301,7 @@ export default {
         }
     },
 
+    // Invoice PDF - always REST (binary download)
     async downloadInvoice(orderId, invoiceId) {
         if (!this.token || !orderId || !invoiceId) {
             this.error = 'Unable to download invoice';
@@ -310,6 +362,7 @@ export default {
         this.selectedOrderInvoices = [];
     },
 
+    // Reorder - always REST (direct cart item POST)
     async reorder(order) {
         this.loading = true;
         this.error = null;
@@ -504,17 +557,38 @@ export default {
 
         this.loading = true;
         this.error = null;
-        try {
-            // Convert street string to array (API expects array)
-            const addressData = {
-                ...this.newAddress,
-                street: this.newAddress.street ? this.newAddress.street.split('\n').filter(line => line.trim()) : []
-            };
-            // If only one line without newlines, wrap it in an array
-            if (addressData.street.length === 0 && this.newAddress.street) {
-                addressData.street = [this.newAddress.street.trim()];
-            }
 
+        // Convert street string to array (API expects array)
+        const addressData = {
+            ...this.newAddress,
+            street: this.newAddress.street ? this.newAddress.street.split('\n').filter(line => line.trim()) : []
+        };
+        // If only one line without newlines, wrap it in an array
+        if (addressData.street.length === 0 && this.newAddress.street) {
+            addressData.street = [this.newAddress.street.trim()];
+        }
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.CREATE_ADDRESS, { input: addressData });
+                const addr = data.createAddressAddress?.address;
+                if (addr?.id) {
+                    addr.id = this._parseId(addr.id);
+                    this.addresses.push(addr);
+                }
+                this.success = 'Address added successfully';
+                this.showAddressForm = false;
+                this.resetAddressForm();
+            } catch (e) {
+                this.error = e.message || 'Failed to add address';
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
+        try {
             const res = await fetch('/api/customers/me/addresses', {
                 method: 'POST',
                 headers: {
@@ -621,17 +695,42 @@ export default {
 
         this.loading = true;
         this.error = null;
-        try {
-            // Convert street string to array (API expects array)
-            const addressData = {
-                ...this.newAddress,
-                street: this.newAddress.street ? this.newAddress.street.split('\n').filter(line => line.trim()) : []
-            };
-            // If only one line without newlines, wrap it in an array
-            if (addressData.street.length === 0 && this.newAddress.street) {
-                addressData.street = [this.newAddress.street.trim()];
-            }
 
+        // Convert street string to array (API expects array)
+        const addressData = {
+            ...this.newAddress,
+            street: this.newAddress.street ? this.newAddress.street.split('\n').filter(line => line.trim()) : []
+        };
+        // If only one line without newlines, wrap it in an array
+        if (addressData.street.length === 0 && this.newAddress.street) {
+            addressData.street = [this.newAddress.street.trim()];
+        }
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.UPDATE_ADDRESS, {
+                    input: { id: String(this.editingAddressId), ...addressData }
+                });
+                const updatedAddr = data.updateAddressAddress?.address;
+                if (updatedAddr) updatedAddr.id = this._parseId(updatedAddr.id);
+                const index = this.addresses.findIndex(a => a.id === this.editingAddressId);
+                if (index !== -1 && updatedAddr) {
+                    this.addresses[index] = updatedAddr;
+                }
+                this.success = 'Address updated successfully';
+                this.showAddressForm = false;
+                this.editingAddressId = null;
+                this.resetAddressForm();
+            } catch (e) {
+                this.error = e.message || 'Failed to update address';
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
+        try {
             const res = await fetch('/api/customers/me/addresses/' + this.editingAddressId, {
                 method: 'PUT',
                 headers: {
@@ -675,6 +774,21 @@ export default {
 
         this.loading = true;
         this.error = null;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                await this.gql(this._gqlQueries.DELETE_ADDRESS, { input: { id: String(addressId) } });
+                this.addresses = this.addresses.filter(a => a.id !== addressId);
+                this.success = 'Address deleted';
+            } catch (e) {
+                this.error = e.message || 'Failed to delete address';
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const res = await fetch('/api/customers/me/addresses/' + addressId, {
                 method: 'DELETE',
@@ -730,6 +844,22 @@ export default {
 
         this.loading = true;
         this.error = null;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.UPDATE_CUSTOMER, { input: this.profileForm });
+                this.customer = { ...this.customer, ...data.updateCustomerCustomer?.customer };
+                localStorage.setItem('customer', JSON.stringify(this.customer));
+                this.success = 'Profile updated successfully';
+            } catch (e) {
+                this.error = e.message || 'Failed to update profile';
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const res = await fetch('/api/customers/me', {
                 method: 'PUT',
@@ -789,6 +919,26 @@ export default {
 
         this.loading = true;
         this.error = null;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                await this.gql(this._gqlQueries.CHANGE_PASSWORD, {
+                    input: {
+                        currentPassword: this.passwordForm.currentPassword,
+                        newPassword: this.passwordForm.newPassword
+                    }
+                });
+                this.success = 'Password changed successfully';
+                this.resetPasswordForm();
+            } catch (e) {
+                this.error = e.message || 'Failed to change password';
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const res = await fetch('/api/customers/me/password', {
                 method: 'POST',
@@ -822,7 +972,7 @@ export default {
         this.loading = false;
     },
 
-    // Forgot password (forgotPasswordEmail state is in store.js)
+    // Forgot password - always REST (public, no auth required for GraphQL POST)
     async forgotPassword() {
         if (!this.forgotPasswordEmail) {
             this.error = 'Please enter your email address';
@@ -849,7 +999,7 @@ export default {
         this.loading = false;
     },
 
-    // Reset password (resetForm state is in store.js)
+    // Reset password - always REST (public, no auth required for GraphQL POST)
     async resetPassword() {
         if (!this.resetForm.email || !this.resetForm.token || !this.resetForm.newPassword) {
             this.error = 'Please fill in all fields';
@@ -903,6 +1053,32 @@ export default {
 
         this.loading = true;
         this.error = null;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const query = subscribe
+                    ? this._gqlQueries.SUBSCRIBE_NEWSLETTER
+                    : this._gqlQueries.UNSUBSCRIBE_NEWSLETTER;
+                const data = await this.gql(query, { input: { email: this.customer.email } });
+                const sub = data.subscribeNewsletterNewsletterSubscription || data.unsubscribeNewsletterNewsletterSubscription;
+                const result = sub?.newsletterSubscription || sub;
+
+                if (this.customer) {
+                    this.customer.isSubscribed = result.isSubscribed;
+                    localStorage.setItem('customer', JSON.stringify(this.customer));
+                }
+
+                this.success = result.message || (subscribe ? 'Subscribed to newsletter' : 'Unsubscribed from newsletter');
+            } catch (e) {
+                this.error = e.message || 'Newsletter operation failed';
+                await this.loadAccountData();
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const endpoint = subscribe ? '/api/newsletter/subscribe' : '/api/newsletter/unsubscribe';
             const res = await fetch(endpoint, {

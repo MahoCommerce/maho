@@ -603,6 +603,7 @@ class GuestCartController extends AbstractController
 
         return [
             'id' => (int) $quote->getId(),
+            'maskedId' => $quote->getData('masked_quote_id'),
             'itemsCount' => (int) $quote->getItemsCount(),
             'itemsQty' => (float) $quote->getItemsQty(),
             'items' => $items,

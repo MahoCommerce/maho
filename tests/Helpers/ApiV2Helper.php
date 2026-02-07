@@ -1,0 +1,378 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    Tests
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+declare(strict_types=1);
+
+namespace Tests\Helpers;
+
+use Firebase\JWT\JWT;
+use Maho\ApiPlatform\Service\JwtService;
+
+/**
+ * API v2 Test Helper
+ *
+ * Provides HTTP client methods, JWT token generation, and test fixtures
+ * for integration testing the API Platform REST and GraphQL endpoints.
+ */
+class ApiV2Helper
+{
+    private static ?string $baseUrl = null;
+    private static ?string $jwtSecret = null;
+
+    /**
+     * HTTP GET request
+     *
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function get(string $path, ?string $token = null): array
+    {
+        return self::request('GET', $path, null, $token);
+    }
+
+    /**
+     * HTTP POST request
+     *
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function post(string $path, array $data, ?string $token = null): array
+    {
+        return self::request('POST', $path, $data, $token);
+    }
+
+    /**
+     * HTTP PUT request
+     *
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function put(string $path, array $data, ?string $token = null): array
+    {
+        return self::request('PUT', $path, $data, $token);
+    }
+
+    /**
+     * HTTP DELETE request
+     *
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function delete(string $path, ?string $token = null): array
+    {
+        return self::request('DELETE', $path, null, $token);
+    }
+
+    /**
+     * GraphQL request
+     *
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function graphql(string $query, array $variables = [], ?string $token = null): array
+    {
+        $data = ['query' => $query];
+        if (!empty($variables)) {
+            $data['variables'] = $variables;
+        }
+        return self::request('POST', '/api/graphql', $data, $token);
+    }
+
+    /**
+     * Generate a valid customer JWT token
+     */
+    public static function generateCustomerToken(?int $customerId = null): string
+    {
+        $customerId ??= self::fixtures('customer_id');
+        $secret = self::getJwtSecret();
+        $now = time();
+
+        $payload = [
+            'iss' => self::getBaseUrl(),
+            'sub' => 'customer_' . $customerId,
+            'iat' => $now,
+            'exp' => $now + 86400,
+            'customer_id' => $customerId,
+            'email' => self::fixtures('customer_email'),
+            'type' => 'customer',
+            'roles' => ['ROLE_USER'],
+        ];
+
+        return JWT::encode($payload, $secret, 'HS256');
+    }
+
+    /**
+     * Generate a valid admin JWT token
+     */
+    public static function generateAdminToken(): string
+    {
+        $secret = self::getJwtSecret();
+        $now = time();
+
+        $payload = [
+            'iss' => self::getBaseUrl(),
+            'sub' => 'admin_1',
+            'iat' => $now,
+            'exp' => $now + 86400,
+            'admin_id' => 1,
+            'email' => 'admin@example.com',
+            'type' => 'admin',
+            'roles' => ['ROLE_ADMIN'],
+        ];
+
+        return JWT::encode($payload, $secret, 'HS256');
+    }
+
+    /**
+     * Generate an expired JWT token
+     */
+    public static function generateExpiredToken(): string
+    {
+        $secret = self::getJwtSecret();
+        $now = time();
+
+        $payload = [
+            'iss' => self::getBaseUrl(),
+            'sub' => 'customer_1',
+            'iat' => $now - 172800, // 2 days ago
+            'exp' => $now - 86400,  // expired 1 day ago
+            'customer_id' => 1,
+            'type' => 'customer',
+            'roles' => ['ROLE_USER'],
+        ];
+
+        return JWT::encode($payload, $secret, 'HS256');
+    }
+
+    /**
+     * Generate a JWT token signed with a wrong key
+     */
+    public static function generateInvalidToken(): string
+    {
+        $now = time();
+
+        $payload = [
+            'iss' => self::getBaseUrl(),
+            'sub' => 'customer_1',
+            'iat' => $now,
+            'exp' => $now + 86400,
+            'customer_id' => 1,
+            'type' => 'customer',
+            'roles' => ['ROLE_USER'],
+        ];
+
+        return JWT::encode($payload, 'wrong-secret-key-that-does-not-match', 'HS256');
+    }
+
+    /**
+     * Generate a custom JWT token with arbitrary payload
+     */
+    public static function generateToken(array $payload): string
+    {
+        $secret = self::getJwtSecret();
+        $now = time();
+
+        $defaults = [
+            'iss' => self::getBaseUrl(),
+            'iat' => $now,
+            'exp' => $now + 86400,
+        ];
+
+        $merged = array_merge($defaults, $payload);
+
+        // Remove null values from payload
+        $merged = array_filter($merged, fn($v) => $v !== null);
+
+        return JWT::encode($merged, $secret, 'HS256');
+    }
+
+    /**
+     * Get a test fixture value
+     */
+    public static function fixtures(string $key): mixed
+    {
+        static $fixtures = null;
+
+        if ($fixtures === null) {
+            $fixtures = [
+                'customer_id' => 1,
+                'customer_email' => self::lookupCustomerEmail(1),
+                'invalid_customer_id' => 999999,
+                'product_id' => 421,
+                'product_sku' => 'wsd015',
+                'configurable_sku' => 'mtk002',
+                'category_id' => 4,
+                'invalid_product_id' => 999999,
+                'existing_cart_id' => null,
+                'order_id' => self::lookupOrderId(),
+                'invalid_order_id' => 999999,
+                'write_test_sku' => 'wsd015',
+                'write_test_qty' => 1,
+                'blog_post_url_key' => null,
+            ];
+        }
+
+        return $fixtures[$key] ?? null;
+    }
+
+    /**
+     * Make an HTTP request to the API
+     *
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    private static function request(string $method, string $path, ?array $data = null, ?string $token = null): array
+    {
+        $url = self::getBaseUrl() . $path;
+
+        $headers = [
+            'Accept: application/ld+json, application/json',
+            'Content-Type: application/json',
+            // Basic auth for nginx
+            'Authorization: Basic ' . base64_encode('tenniswarehouse:tenniswarehouse'),
+        ];
+
+        // JWT Bearer token overrides basic auth
+        if ($token !== null) {
+            // Replace basic auth with bearer token, but add basic auth as X-Nginx-Auth
+            $headers = array_filter($headers, fn($h) => !str_starts_with($h, 'Authorization:'));
+            $headers[] = 'Authorization: Bearer ' . $token;
+            // Send nginx basic auth as a separate custom header won't work;
+            // use URL-embedded credentials instead
+        }
+
+        $options = [
+            'http' => [
+                'method' => $method,
+                'header' => implode("\r\n", $headers),
+                'ignore_errors' => true,
+                'timeout' => 30,
+                'follow_location' => false,
+            ],
+        ];
+
+        if ($data !== null) {
+            $options['http']['content'] = json_encode($data);
+        }
+
+        // For Bearer token auth, embed nginx basic auth in URL
+        $requestUrl = $url;
+        if ($token !== null) {
+            $parsed = parse_url($url);
+            $scheme = $parsed['scheme'] ?? 'https';
+            $host = $parsed['host'] ?? 'localhost';
+            $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
+            $pathAndQuery = ($parsed['path'] ?? '') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+            $requestUrl = "{$scheme}://tenniswarehouse:tenniswarehouse@{$host}{$port}{$pathAndQuery}";
+        }
+
+        $context = stream_context_create($options);
+        $raw = @file_get_contents($requestUrl, false, $context);
+
+        // Extract status code from response headers
+        $status = 500;
+        $responseHeaders = $http_response_header ?? [];
+        if (!empty($responseHeaders)) {
+            if (preg_match('/HTTP\/\d+\.?\d*\s+(\d+)/', $responseHeaders[0], $matches)) {
+                $status = (int) $matches[1];
+            }
+        }
+
+        // Handle connection failures
+        if ($raw === false) {
+            return [
+                'status' => $status,
+                'json' => ['error' => 'connection_failed', 'message' => 'Failed to connect to API'],
+                'raw' => '',
+                'headers' => $responseHeaders,
+            ];
+        }
+
+        $json = json_decode($raw, true) ?? [];
+
+        return [
+            'status' => $status,
+            'json' => $json,
+            'raw' => $raw,
+            'headers' => $responseHeaders,
+        ];
+    }
+
+    /**
+     * Get API base URL
+     */
+    private static function getBaseUrl(): string
+    {
+        if (self::$baseUrl !== null) {
+            return self::$baseUrl;
+        }
+
+        // Check environment variable first
+        if (!empty($_ENV['API_BASE_URL'])) {
+            self::$baseUrl = rtrim($_ENV['API_BASE_URL'], '/');
+            return self::$baseUrl;
+        }
+
+        // Try Maho config
+        try {
+            $baseUrl = \Mage::getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
+            if ($baseUrl && filter_var($baseUrl, FILTER_VALIDATE_URL)) {
+                self::$baseUrl = rtrim($baseUrl, '/');
+                return self::$baseUrl;
+            }
+        } catch (\Exception $e) {
+            // Fall through to default
+        }
+
+        self::$baseUrl = 'https://maho.tenniswarehouse.com.au';
+        return self::$baseUrl;
+    }
+
+    /**
+     * Get JWT secret from Maho configuration
+     */
+    private static function getJwtSecret(): string
+    {
+        if (self::$jwtSecret !== null) {
+            return self::$jwtSecret;
+        }
+
+        try {
+            $jwtService = new JwtService();
+            self::$jwtSecret = $jwtService->getSecret();
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Cannot get JWT secret: ' . $e->getMessage());
+        }
+
+        return self::$jwtSecret;
+    }
+
+    /**
+     * Look up a valid order ID from DB
+     */
+    private static function lookupOrderId(): ?int
+    {
+        try {
+            $order = \Mage::getModel('sales/order')->getCollection()
+                ->setPageSize(1)
+                ->getFirstItem();
+            return $order->getId() ? (int) $order->getId() : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Look up customer email from DB
+     */
+    private static function lookupCustomerEmail(int $customerId): string
+    {
+        try {
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            return $customer->getEmail() ?: 'test@example.com';
+        } catch (\Exception $e) {
+            return 'test@example.com';
+        }
+    }
+}

@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Review;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -37,10 +38,10 @@ final class ReviewProvider implements ProviderInterface
     }
 
     /**
-     * @return array<Review>|Review|null
+     * @return ArrayPaginator<Review>|Review|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Review|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Review|null
     {
         StoreContext::ensureStore();
         $operationName = $operation->getName();
@@ -76,7 +77,7 @@ final class ReviewProvider implements ProviderInterface
                     (int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10),
                 );
             }
-            return [];
+            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 10, totalItems: 0);
         }
 
         // Single review by ID
@@ -91,9 +92,9 @@ final class ReviewProvider implements ProviderInterface
     /**
      * Get reviews for a product (only approved reviews)
      *
-     * @return array<Review>
+     * @return ArrayPaginator<Review>
      */
-    private function getProductReviews(int $productId, int $page = 1, int $pageSize = 10): array
+    private function getProductReviews(int $productId, int $page = 1, int $pageSize = 10): ArrayPaginator
     {
         $storeId = StoreContext::getStoreId();
 
@@ -117,19 +118,26 @@ final class ReviewProvider implements ProviderInterface
             $reviews[] = $this->buildReview($review);
         }
 
-        return $reviews;
+        $total = (int) $collection->getSize();
+
+        return new ArrayPaginator(
+            items: $reviews,
+            currentPage: $page,
+            itemsPerPage: $pageSize,
+            totalItems: $total,
+        );
     }
 
     /**
      * Get current customer's submitted reviews
      *
-     * @return array<Review>
+     * @return ArrayPaginator<Review>
      */
-    private function getCustomerReviews(): array
+    private function getCustomerReviews(): ArrayPaginator
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
-            return [];
+            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 10, totalItems: 0);
         }
 
         $storeId = StoreContext::getStoreId();
@@ -147,7 +155,14 @@ final class ReviewProvider implements ProviderInterface
             $reviews[] = $this->buildReview($review);
         }
 
-        return $reviews;
+        $total = count($reviews);
+
+        return new ArrayPaginator(
+            items: $reviews,
+            currentPage: 1,
+            itemsPerPage: max($total, 100),
+            totalItems: $total,
+        );
     }
 
     /**

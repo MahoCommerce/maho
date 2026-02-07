@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Address;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -43,10 +44,10 @@ final class AddressProvider implements ProviderInterface
     /**
      * Provide address data based on operation type
      *
-     * @return Address[]|Address|null
+     * @return ArrayPaginator<Address>|Address|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Address|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Address|null
     {
         StoreContext::ensureStore();
 
@@ -143,9 +144,9 @@ final class AddressProvider implements ProviderInterface
     /**
      * Get all addresses for a customer
      *
-     * @return Address[]
+     * @return ArrayPaginator<Address>
      */
-    private function getCollection(\Mage_Customer_Model_Customer $customer): array
+    private function getCollection(\Mage_Customer_Model_Customer $customer): ArrayPaginator
     {
         $addresses = [];
 
@@ -153,7 +154,14 @@ final class AddressProvider implements ProviderInterface
             $addresses[] = $this->mapToDto($address, $customer);
         }
 
-        return $addresses;
+        $total = count($addresses);
+
+        return new ArrayPaginator(
+            items: $addresses,
+            currentPage: 1,
+            itemsPerPage: max($total, 50),
+            totalItems: $total,
+        );
     }
 
     // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider

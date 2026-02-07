@@ -314,13 +314,20 @@ class CartService
      */
     public function applyCoupon(\Mage_Sales_Model_Quote $quote, string $couponCode): \Mage_Sales_Model_Quote
     {
+        // Validate coupon exists in the database before applying
+        /** @var \Mage_SalesRule_Model_Coupon $coupon */
+        $coupon = \Mage::getModel('salesrule/coupon')->load($couponCode, 'code');
+        if (!$coupon->getId()) {
+            throw new \RuntimeException("Coupon code '{$couponCode}' is not valid");
+        }
+
         $quote->setCouponCode($couponCode);
         $quote->collectTotals();
         $quote->save();
 
         // Verify coupon was applied successfully
         if ($quote->getCouponCode() !== $couponCode) {
-            throw new \RuntimeException("Coupon code '{$couponCode}' is not valid");
+            throw new \RuntimeException("Coupon code '{$couponCode}' could not be applied");
         }
 
         return $quote;
@@ -975,23 +982,32 @@ class CartService
     {
         $quote->collectTotals();
 
-        if ($quote->getItemsCount() > 0 && ($quote->getSubtotal() == 0 || !$quote->getSubtotal())) {
+        // Use actual item count (not the stale getItemsCount() counter)
+        $items = $quote->getAllVisibleItems();
+        $actualItemCount = count($items);
+
+        if ($actualItemCount > 0 && ($quote->getSubtotal() == 0 || !$quote->getSubtotal())) {
             \Mage::log('collectTotals failed, manually calculating quote totals');
             $subtotal = 0;
-            foreach ($quote->getAllVisibleItems() as $item) {
+            $totalQty = 0;
+            foreach ($items as $item) {
                 if (!$item->getRowTotal() || $item->getRowTotal() == 0) {
                     $itemRowTotal = $item->getPrice() * $item->getQty();
                     $item->setRowTotal($itemRowTotal);
                     $item->setBaseRowTotal($itemRowTotal);
                 }
                 $subtotal += $item->getRowTotal();
+                $totalQty += $item->getQty();
             }
 
             $quote->setSubtotal($subtotal);
             $quote->setBaseSubtotal($subtotal);
             $quote->setGrandTotal($subtotal);
             $quote->setBaseGrandTotal($subtotal);
-            \Mage::log("Manually set subtotal: {$subtotal}, grand_total: {$subtotal}");
+            $quote->setItemsCount($actualItemCount);
+            $quote->setItemsQty($totalQty);
+            $quote->setTotalsCollectedFlag(true);
+            \Mage::log("Manually set subtotal: {$subtotal}, grand_total: {$subtotal}, items: {$actualItemCount}");
         }
     }
 }
