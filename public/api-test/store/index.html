@@ -630,6 +630,31 @@
                             </div>
                         </template>
 
+                        <!-- Downloadable Links -->
+                        <template x-if="currentProduct.type === 'downloadable' && currentProduct.downloadableLinks && currentProduct.downloadableLinks.length > 0">
+                            <div class="mt-6">
+                                <h3 class="text-sm font-semibold text-gray-900 mb-3" x-text="currentProduct.linksTitle || 'Links'"></h3>
+                                <div class="space-y-2">
+                                    <template x-for="link in currentProduct.downloadableLinks" :key="link.id">
+                                        <label class="flex items-center gap-3 p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+                                               :class="selectedDownloadableLinks.includes(link.id) ? 'border-blue-500 bg-blue-50' : ''">
+                                            <template x-if="currentProduct.linksPurchasedSeparately">
+                                                <input type="checkbox" :value="link.id" class="text-blue-600 rounded"
+                                                       @change="$event.target.checked ? selectedDownloadableLinks.push(link.id) : selectedDownloadableLinks = selectedDownloadableLinks.filter(id => id !== link.id)">
+                                            </template>
+                                            <template x-if="!currentProduct.linksPurchasedSeparately">
+                                                <input type="checkbox" checked disabled class="text-blue-600 rounded opacity-50">
+                                            </template>
+                                            <span class="flex-1 text-sm" x-text="link.title"></span>
+                                            <span x-show="link.price > 0" class="text-sm text-gray-500" x-text="'+$' + link.price.toFixed(2)"></span>
+                                            <a x-show="link.sampleUrl" :href="link.sampleUrl" target="_blank"
+                                               class="text-xs text-blue-600 hover:underline" @click.stop>Sample</a>
+                                        </label>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+
                         <div class="mt-6" x-show="currentProduct.shortDescription" x-html="currentProduct.shortDescription"></div>
 
                         <div class="mt-6 flex items-center gap-4">
@@ -638,7 +663,7 @@
                                 <input type="number" x-model.number="qty" min="1" class="w-16 text-center border-x py-2">
                                 <button @click="qty++" class="px-3 py-2 hover:bg-gray-100">+</button>
                             </div>
-                            <button @click="addToCart(getCartSku(), qty, getCartCustomOptions())"
+                            <button @click="addToCart(getCartSku(), qty, getCartCustomOptions(), selectedDownloadableLinks)"
                                     :disabled="!allOptionsSelected() || !isSelectedVariantInStock()"
                                     class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition">
                                 <span x-show="!allOptionsSelected()">Select Options</span>
@@ -1008,9 +1033,9 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm text-gray-600 mb-1">Country</label>
-                                    <select x-model="checkout.shipping.countryId" @change="onCountryChange(); onShippingAddressChange()" class="w-full border rounded-lg px-3 py-2">
+                                    <select x-model="checkout.shipping.countryId" x-effect="$el.value = checkout.shipping.countryId" @change="onCountryChange(); onShippingAddressChange()" class="w-full border rounded-lg px-3 py-2">
                                         <template x-for="country in countries" :key="country.id">
-                                            <option :value="country.id" :selected="country.id === checkout.shipping.countryId" x-text="country.name"></option>
+                                            <option :value="country.id" x-text="country.name"></option>
                                         </template>
                                     </select>
                                 </div>
@@ -1597,7 +1622,7 @@
                                                    class="border rounded-lg px-3 py-2 text-sm">
                                             <input type="text" x-model="newAddress.postcode" placeholder="Postcode"
                                                    class="border rounded-lg px-3 py-2 text-sm">
-                                            <select x-model="newAddress.countryId" class="border rounded-lg px-3 py-2 text-sm">
+                                            <select x-model="newAddress.countryId" x-effect="$el.value = newAddress.countryId" class="border rounded-lg px-3 py-2 text-sm">
                                                 <template x-for="c in countries" :key="c.id">
                                                     <option :value="c.id" x-text="c.name"></option>
                                                 </template>

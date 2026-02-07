@@ -26,6 +26,98 @@ class ApiV2Helper
     private static ?string $baseUrl = null;
     private static ?string $jwtSecret = null;
 
+    /** @var array<string, list<int>> Entity IDs created during tests, keyed by type */
+    private static array $createdEntities = [];
+
+    /**
+     * Track a created entity for cleanup
+     */
+    public static function trackCreated(string $type, int $id): void
+    {
+        self::$createdEntities[$type][] = $id;
+    }
+
+    /**
+     * Clean up all tracked entities via direct DB
+     *
+     * Call this in afterAll() hooks to remove test data.
+     */
+    public static function cleanup(): void
+    {
+        try {
+            $write = \Mage::getSingleton('core/resource')->getConnection('core_write');
+        } catch (\Exception $e) {
+            return; // DB not available
+        }
+
+        // Delete quotes (carts) and related records
+        if (!empty(self::$createdEntities['quote'])) {
+            $ids = self::$createdEntities['quote'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM sales_flat_quote_item WHERE quote_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_quote_address WHERE quote_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_quote_payment WHERE quote_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_quote WHERE entity_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        // Delete reviews
+        if (!empty(self::$createdEntities['review'])) {
+            $ids = self::$createdEntities['review'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM review_detail WHERE review_id IN ({$idList})");
+                $write->query("DELETE FROM review_entity_summary WHERE entity_pk_value IN (SELECT entity_pk_value FROM review WHERE review_id IN ({$idList}))");
+                $write->query("DELETE FROM review_store WHERE review_id IN ({$idList})");
+                $write->query("DELETE FROM review WHERE review_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        // Delete wishlist items
+        if (!empty(self::$createdEntities['wishlist_item'])) {
+            $ids = self::$createdEntities['wishlist_item'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM wishlist_item WHERE wishlist_item_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        // Delete orders and related records
+        if (!empty(self::$createdEntities['order'])) {
+            $ids = self::$createdEntities['order'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM sales_flat_order_item WHERE order_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_order_address WHERE parent_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_order_payment WHERE parent_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_order_status_history WHERE parent_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_order_grid WHERE entity_id IN ({$idList})");
+                $write->query("DELETE FROM sales_flat_order WHERE entity_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        self::$createdEntities = [];
+    }
+
+    /**
+     * Get count of tracked entities (for debugging)
+     *
+     * @return array<string, int>
+     */
+    public static function getTrackedCounts(): array
+    {
+        return array_map('count', self::$createdEntities);
+    }
+
     /**
      * HTTP GET request
      *

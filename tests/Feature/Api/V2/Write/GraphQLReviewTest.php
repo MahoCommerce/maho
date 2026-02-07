@@ -5,14 +5,16 @@ declare(strict_types=1);
 /**
  * GraphQL Review Integration Tests (WRITE)
  *
- * WARNING: These tests CREATE real data in the database!
- * Only run with: ./vendor/bin/pest --group=write
- *
  * Includes regression test for args vs args.input bug in ReviewProcessor.
+ * Created reviews are cleaned up after tests complete.
  *
  * @group write
  * @group graphql
  */
+
+afterAll(function () {
+    cleanupTestData();
+});
 
 describe('GraphQL Review - Product Reviews Query', function () {
 
@@ -50,8 +52,6 @@ describe('GraphQL Review - Submit Review Mutation', function () {
 
     /**
      * Regression: submitReview was reading args instead of args.input
-     * The ReviewProcessor was looking for productId in $context['args']
-     * but API Platform GraphQL passes it in $context['args']['input']
      */
     it('submits a review successfully (regression: args vs args.input)', function () {
         $productId = fixtures('product_id');
@@ -91,7 +91,13 @@ describe('GraphQL Review - Submit Review Mutation', function () {
         expect($review['title'])->toContain('Test Review');
         expect($review['nickname'])->toBe('TestUser');
         expect($review['rating'])->toBe(4);
-        expect($review['status'])->toBeString(); // 'pending' typically
+        expect($review['status'])->toBeString();
+
+        // Track for cleanup
+        $reviewId = $review['_id'] ?? null;
+        if ($reviewId) {
+            trackCreated('review', (int) $reviewId);
+        }
     });
 
     it('returns error when required fields are missing', function () {
@@ -114,7 +120,6 @@ describe('GraphQL Review - Submit Review Mutation', function () {
         $response = gqlQuery($query, [], customerToken());
 
         expect($response['status'])->toBe(200);
-        // Should have errors due to empty required fields
         expect($response['json'])->toHaveKey('errors');
     });
 

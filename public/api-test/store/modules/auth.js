@@ -672,7 +672,10 @@ export default {
         return country?.available_regions || [];
     },
 
-    editAddress(address) {
+    async editAddress(address) {
+        if (this.countries.length === 0) {
+            await this.loadCountries();
+        }
         this.editingAddressId = address.id;
         this.newAddress = {
             firstName: address.firstName || '',

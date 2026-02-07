@@ -63,11 +63,11 @@ describe('Guest Cart Response Structure', function () {
         expect($response['json'])->toHaveKey('itemsCount');
         expect($response['json'])->toHaveKey('itemsQty');
         expect($response['json'])->toHaveKey('items');
-        expect($response['json'])->toHaveKey('totals');
+        expect($response['json'])->toHaveKey('prices');
         expect($response['json']['items'])->toBeArray();
     });
 
-    it('returns totals with expected structure', function () {
+    it('returns prices with expected structure', function () {
         if (!$this->existingCartId) {
             $this->markTestSkipped('No existing_cart_id configured in fixtures');
         }
@@ -80,11 +80,11 @@ describe('Guest Cart Response Structure', function () {
 
         expect($response['status'])->toBe(200);
 
-        $totals = $response['json']['totals'];
-        expect($totals)->toHaveKey('subtotal');
-        expect($totals)->toHaveKey('grandTotal');
-        expect($totals['subtotal'])->toBeNumeric();
-        expect($totals['grandTotal'])->toBeNumeric();
+        $prices = $response['json']['prices'];
+        expect($prices)->toHaveKey('subtotal');
+        expect($prices)->toHaveKey('grandTotal');
+        expect($prices['subtotal'])->toBeNumeric();
+        expect($prices['grandTotal'])->toBeNumeric();
     });
 
     it('returns consistent item count and items array length', function () {

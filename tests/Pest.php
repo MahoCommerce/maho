@@ -80,6 +80,16 @@ function fixtures(string $key): mixed
     return ApiV2Helper::fixtures($key);
 }
 
+function trackCreated(string $type, int $id): void
+{
+    ApiV2Helper::trackCreated($type, $id);
+}
+
+function cleanupTestData(): void
+{
+    ApiV2Helper::cleanup();
+}
+
 /**
  * Helper to extract items from API Platform collection responses.
  * Handles both JSON-LD (hydra:member / member) and plain array formats.

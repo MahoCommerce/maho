@@ -5,11 +5,9 @@ declare(strict_types=1);
 /**
  * GraphQL Cart Integration Tests (WRITE)
  *
- * WARNING: These tests CREATE real data in the database!
- * Only run with: ./vendor/bin/pest --group=write
- *
  * Tests cart mutations and queries via GraphQL.
  * Includes regression tests for the prices field.
+ * All created carts are cleaned up after tests complete.
  *
  * Note: Cart `items`, `prices`, and other array fields are typed as `Iterable`
  * in GraphQL (not object types), so they cannot have sub-selections.
@@ -19,25 +17,46 @@ declare(strict_types=1);
  * @group graphql
  */
 
+afterAll(function () {
+    cleanupTestData();
+});
+
+/**
+ * Helper to create a cart via GraphQL and track for cleanup
+ */
+function createGqlCart(?string $token = null): array
+{
+    $query = <<<'GRAPHQL'
+    mutation {
+        createCartCart(input: {}) {
+            cart {
+                id
+                _id
+                maskedId
+                itemsCount
+                itemsQty
+                isActive
+            }
+        }
+    }
+    GRAPHQL;
+
+    $response = gqlQuery($query, [], $token ?? customerToken());
+
+    if ($response['status'] === 200 && !isset($response['json']['errors'])) {
+        $id = $response['json']['data']['createCartCart']['cart']['_id'] ?? null;
+        if ($id) {
+            trackCreated('quote', (int) $id);
+        }
+    }
+
+    return $response;
+}
+
 describe('GraphQL Cart - Create Cart Mutation', function () {
 
     it('creates a cart with maskedId', function () {
-        $query = <<<'GRAPHQL'
-        mutation {
-            createCartCart(input: {}) {
-                cart {
-                    id
-                    _id
-                    maskedId
-                    itemsCount
-                    itemsQty
-                    isActive
-                }
-            }
-        }
-        GRAPHQL;
-
-        $response = gqlQuery($query, [], customerToken());
+        $response = createGqlCart();
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('data');
@@ -56,24 +75,11 @@ describe('GraphQL Cart - Create Cart Mutation', function () {
 describe('GraphQL Cart - Query Cart', function () {
 
     it('returns cart by maskedId with prices field', function () {
-        // First create a cart
-        $createQuery = <<<'GRAPHQL'
-        mutation {
-            createCartCart(input: {}) {
-                cart {
-                    _id
-                    maskedId
-                }
-            }
-        }
-        GRAPHQL;
-
-        $createResponse = gqlQuery($createQuery, [], customerToken());
+        $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
         $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
 
-        // Query the cart — items and prices are Iterable scalars (no sub-selection)
         $query = <<<GRAPHQL
         {
             getCartByMaskedIdCart(maskedId: "{$maskedId}") {
@@ -107,25 +113,12 @@ describe('GraphQL Cart - Query Cart', function () {
 describe('GraphQL Cart - Add To Cart Mutation', function () {
 
     it('adds item to cart and returns updated cart with prices', function () {
-        // Create cart
-        $createQuery = <<<'GRAPHQL'
-        mutation {
-            createCartCart(input: {}) {
-                cart {
-                    _id
-                    maskedId
-                }
-            }
-        }
-        GRAPHQL;
-
-        $createResponse = gqlQuery($createQuery, [], customerToken());
+        $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
         $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
         $sku = fixtures('write_test_sku');
 
-        // Add item — items/prices are Iterable scalars
         $addQuery = <<<GRAPHQL
         mutation {
             addToCartCart(input: {maskedId: "{$maskedId}", sku: "{$sku}", qty: 1}) {
@@ -163,18 +156,7 @@ describe('GraphQL Cart - Add To Cart Mutation', function () {
     });
 
     it('returns error for invalid SKU', function () {
-        // Create cart
-        $createQuery = <<<'GRAPHQL'
-        mutation {
-            createCartCart(input: {}) {
-                cart {
-                    maskedId
-                }
-            }
-        }
-        GRAPHQL;
-
-        $createResponse = gqlQuery($createQuery, [], customerToken());
+        $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
         $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
@@ -204,6 +186,7 @@ describe('GraphQL Cart - Update Item Quantity', function () {
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
         $cartId = $createResponse['json']['id'];
+        trackCreated('quote', (int) $cartId);
 
         $sku = fixtures('write_test_sku');
         $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
@@ -219,7 +202,6 @@ describe('GraphQL Cart - Update Item Quantity', function () {
             $this->markTestSkipped('Could not get maskedId or itemId from REST response');
         }
 
-        // Update quantity via GraphQL
         $updateQuery = <<<GRAPHQL
         mutation {
             updateCartItemQtyCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}, qty: 3}) {
@@ -242,10 +224,10 @@ describe('GraphQL Cart - Update Item Quantity', function () {
 describe('GraphQL Cart - Remove Item', function () {
 
     it('removes item from cart', function () {
-        // Create cart and add item via REST
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
         $cartId = $createResponse['json']['id'];
+        trackCreated('quote', (int) $cartId);
 
         $sku = fixtures('write_test_sku');
         $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
@@ -261,7 +243,6 @@ describe('GraphQL Cart - Remove Item', function () {
             $this->markTestSkipped('Could not get maskedId or itemId from REST response');
         }
 
-        // Remove item via GraphQL
         $removeQuery = <<<GRAPHQL
         mutation {
             removeCartItemCart(input: {maskedId: "{$maskedId}", itemId: {$itemId}}) {
@@ -284,18 +265,7 @@ describe('GraphQL Cart - Remove Item', function () {
 describe('GraphQL Cart - Apply Coupon', function () {
 
     it('returns error for invalid coupon', function () {
-        // Create cart
-        $createQuery = <<<'GRAPHQL'
-        mutation {
-            createCartCart(input: {}) {
-                cart {
-                    maskedId
-                }
-            }
-        }
-        GRAPHQL;
-
-        $createResponse = gqlQuery($createQuery, [], customerToken());
+        $createResponse = createGqlCart();
         $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
 
         $couponQuery = <<<GRAPHQL

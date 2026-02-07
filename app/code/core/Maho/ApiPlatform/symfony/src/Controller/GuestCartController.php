@@ -607,11 +607,11 @@ class GuestCartController extends AbstractController
             'itemsCount' => (int) $quote->getItemsCount(),
             'itemsQty' => (float) $quote->getItemsQty(),
             'items' => $items,
-            'totals' => [
+            'prices' => [
                 'subtotal' => (float) ($quote->getSubtotal() ?? 0),
-                'discount' => $shippingAddress ? (float) abs($shippingAddress->getDiscountAmount() ?? 0) : 0,
-                'shipping' => $shippingAddress ? (float) ($shippingAddress->getShippingAmount() ?? 0) : 0,
-                'tax' => $shippingAddress ? (float) ($shippingAddress->getTaxAmount() ?? 0) : 0,
+                'discountAmount' => $shippingAddress ? (float) abs($shippingAddress->getDiscountAmount() ?? 0) : 0,
+                'shippingAmount' => $shippingAddress ? (float) ($shippingAddress->getShippingAmount() ?? 0) : 0,
+                'taxAmount' => $shippingAddress ? (float) ($shippingAddress->getTaxAmount() ?? 0) : 0,
                 'grandTotal' => (float) ($quote->getGrandTotal() ?? 0),
             ],
             'couponCode' => $quote->getCouponCode(),

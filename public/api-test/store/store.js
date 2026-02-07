@@ -36,6 +36,7 @@ function store() {
         qty: 1,
         selectedOptions: {},
         selectedCustomOptions: {},
+        selectedDownloadableLinks: [],
 
         // Catalog
         products: [],
