@@ -466,6 +466,38 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
             }
         }
 
+        if (!empty($localization['install_langpack'])) {
+            if (in_array($locale, Mage_Install_Helper_Data::AVAILABLE_LANGUAGE_PACKS, true)) {
+                $packageName = 'mahocommerce/maho-language-' . strtolower($locale);
+                $installed = false;
+
+                $helper = Mage::helper('install');
+                $phpBinary = $helper->getPhpBinary();
+                $composerBinary = $helper->getComposerBinary();
+
+                if ($phpBinary && $composerBinary) {
+                    try {
+                        $process = new \Symfony\Component\Process\Process(
+                            [$phpBinary, $composerBinary, 'require', $packageName, '--no-interaction'],
+                            Mage::getBaseDir(),
+                        );
+                        $process->setTimeout(120);
+                        $process->run();
+                        $installed = $process->isSuccessful();
+
+                        if (!$installed) {
+                            Mage::log('Failed to install language pack: ' . $process->getErrorOutput(), Mage::LOG_WARNING);
+                        }
+                    } catch (Exception $e) {
+                        Mage::logException($e);
+                    }
+                }
+
+                if (!$installed) {
+                    $session->setLanguagePackCommand('composer require ' . $packageName);
+                }
+            }
+        }
     }
 
     public function checkHostAction(): void

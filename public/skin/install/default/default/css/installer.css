@@ -1255,6 +1255,7 @@ body.installation-complete-page .middle-container {
     border: 1px solid var(--color-border-light);
     border-radius: var(--radius-md);
     padding: var(--space-lg);
+    margin-top: var(--space-sm);
     margin-bottom: var(--space-xl);
     text-align: left;
 }

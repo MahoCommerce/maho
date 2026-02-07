@@ -112,8 +112,18 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
         return in_array($this->getLocale(), Mage_Install_Helper_Data::AVAILABLE_LANGUAGE_PACKS, true);
     }
 
+    public function canInstallLanguagePack(): bool
+    {
+        return $this->hasLanguagePack() && Mage::helper('install')->isComposerAvailable();
+    }
+
     public function getLanguagePackName(): string
     {
         return 'mahocommerce/maho-language-' . strtolower($this->getLocale());
+    }
+
+    public function getLanguagePackCommand(): string
+    {
+        return 'composer require ' . $this->getLanguagePackName();
     }
 }

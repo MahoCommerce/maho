@@ -22,18 +22,6 @@ class Mage_Install_Block_Complete extends Mage_Install_Block_Abstract
 
     public function getLanguagePackCommand(): ?string
     {
-        $session = Mage::getSingleton('install/session');
-        $localization = $session->getLocalizationData();
-
-        if (empty($localization['install_langpack'])) {
-            return null;
-        }
-
-        $locale = (string) $session->getLocale();
-        if (!$locale || !in_array($locale, Mage_Install_Helper_Data::AVAILABLE_LANGUAGE_PACKS, true)) {
-            return null;
-        }
-
-        return 'composer require mahocommerce/maho-language-' . strtolower($locale);
+        return Mage::getSingleton('install/session')->getLanguagePackCommand() ?: null;
     }
 }

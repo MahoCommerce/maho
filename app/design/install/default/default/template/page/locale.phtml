@@ -60,7 +60,7 @@
         </div>
     </div>
 
-    <?php if ($this->hasLanguagePack()): ?>
+    <?php if ($this->canInstallLanguagePack()): ?>
     <div class="localization-action">
         <div class="localization-action-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -79,6 +79,11 @@
                 <span class="localization-toggle-slider"></span>
             </label>
         </div>
+    </div>
+    <?php elseif ($this->hasLanguagePack()): ?>
+    <div class="langpack-notice">
+        <p><?= $this->__('To complete localization, run the following command:') ?></p>
+        <code><?= $this->escapeHtml($this->getLanguagePackCommand()) ?></code>
     </div>
     <?php endif; ?>
 </div>

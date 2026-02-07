@@ -108,7 +108,7 @@
 "The URL ""%s"" is invalid.","The URL ""%s"" is invalid."
 "The URL ""%s"" is not accessible.","The URL ""%s"" is not accessible."
 "Time Zone","Time Zone"
-"To install the language pack, run the following command:","To install the language pack, run the following command:"
+"To complete localization, run the following command:","To complete localization, run the following command:"
 "URL must end with a trailing slash (/)","URL must end with a trailing slash (/)"
 "User Name","User Name"
 "Username","Username"
@@ -120,4 +120,3 @@
 "You're All Set","You're All Set"
 "You can specify server port, ex.: localhost:3307<br>If you are not using default UNIX socket, you can specify it here instead of host, ex.: /var/run/mysqld/mysqld.sock","You can specify server port, ex.: localhost:3307<br>If you are not using default UNIX socket, you can specify it here instead of host, ex.: /var/run/mysqld/mysqld.sock"
 "You can specify server port, ex.: localhost:5432","You can specify server port, ex.: localhost:5432"
-"Your store locale is set to %s. We recommend the following to fully localize your store.","Your store locale is set to %s. We recommend the following to fully localize your store."

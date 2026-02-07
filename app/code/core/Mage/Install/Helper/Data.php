@@ -17,4 +17,94 @@ class Mage_Install_Helper_Data extends Mage_Core_Helper_Abstract
     ];
 
     protected $_moduleName = 'Mage_Install';
+
+    private static ?string $composerBinary = null;
+    private static ?string $phpBinary = null;
+    private static bool $composerChecked = false;
+    private static bool $phpChecked = false;
+
+    /**
+     * Find the PHP CLI binary, or return null if not available.
+     */
+    public function getPhpBinary(): ?string
+    {
+        if (self::$phpChecked) {
+            return self::$phpBinary;
+        }
+        self::$phpChecked = true;
+
+        $searchDirs = array_filter(array_unique([
+            PHP_BINDIR,
+            dirname(PHP_BINDIR) . '/bin',
+            '/usr/local/bin',
+            '/usr/bin',
+            '/opt/homebrew/bin',
+        ]));
+
+        foreach ($searchDirs as $dir) {
+            $path = $dir . '/php';
+            if (is_file($path) && is_executable($path)) {
+                self::$phpBinary = $path;
+                return self::$phpBinary;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find the composer binary, or return null if not available.
+     */
+    public function getComposerBinary(): ?string
+    {
+        if (self::$composerChecked) {
+            return self::$composerBinary;
+        }
+        self::$composerChecked = true;
+
+        // Check for composer.phar in project root
+        $projectPhar = Mage::getBaseDir() . '/composer.phar';
+        if (is_file($projectPhar)) {
+            self::$composerBinary = $projectPhar;
+            return self::$composerBinary;
+        }
+
+        // Search common locations for the composer binary
+        $searchDirs = array_filter(array_unique([
+            PHP_BINDIR,
+            dirname(PHP_BINDIR) . '/bin',
+            '/usr/local/bin',
+            '/usr/bin',
+            '/opt/homebrew/bin',
+        ]));
+
+        foreach ($searchDirs as $dir) {
+            $path = $dir . '/composer';
+            if (is_file($path) && is_executable($path)) {
+                self::$composerBinary = $path;
+                return self::$composerBinary;
+            }
+        }
+
+        return null;
+    }
+
+    public function isComposerAvailable(): bool
+    {
+        $php = $this->getPhpBinary();
+        $composer = $this->getComposerBinary();
+
+        if (!$php || !$composer) {
+            return false;
+        }
+
+        try {
+            $process = new \Symfony\Component\Process\Process([$php, $composer, '--version']);
+            $process->setTimeout(10);
+            $process->run();
+            return $process->isSuccessful();
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
 }
