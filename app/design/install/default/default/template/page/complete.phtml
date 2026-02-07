@@ -46,6 +46,56 @@
 
     <p><?= $this->__('Get ready to experience Open-Source eCommerce Evolved.') ?></p>
 
+    <?php if ($this->needsLocalization()): ?>
+    <div class="localization-section">
+        <h4 class="localization-heading"><?= $this->__('Localization') ?></h4>
+        <p class="localization-intro">
+            <?= $this->__('Your store locale is set to %s. We recommend the following to fully localize your store.', '<strong>' . $this->escapeHtml($this->getLocale()) . '</strong>') ?>
+        </p>
+
+        <div class="localization-actions">
+            <div class="localization-action" id="action-regions">
+                <div class="localization-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </div>
+                <div class="localization-action-content">
+                    <strong><?= $this->__('Import regions/states for %s', $this->escapeHtml($this->getCountryName())) ?></strong>
+                    <span><?= $this->__('Adds states and provinces to address forms') ?></span>
+                </div>
+                <div class="localization-action-status" id="status-regions">
+                    <button type="button" class="form-button form-button-sm" id="btn-regions">
+                        <span><?= $this->__('Import') ?></span>
+                    </button>
+                </div>
+            </div>
+
+            <?php if ($this->hasLanguagePack()): ?>
+            <div class="localization-action" id="action-langpack">
+                <div class="localization-action-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="2" y1="12" x2="22" y2="12"></line>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                    </svg>
+                </div>
+                <div class="localization-action-content">
+                    <strong><?= $this->__('Install %s language pack', $this->escapeHtml($this->getLanguageName())) ?></strong>
+                    <span><?= $this->escapeHtml($this->getLanguagePackName()) ?></span>
+                </div>
+                <div class="localization-action-status" id="status-langpack">
+                    <button type="button" class="form-button form-button-sm" id="btn-langpack">
+                        <span><?= $this->__('Install') ?></span>
+                    </button>
+                </div>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="button-set">
         <a target="_blank" href="<?= $this->getUrl('') ?>" class="form-button">
             <span><?= $this->__('Go to Frontend') ?></span>
@@ -55,3 +105,55 @@
         </a>
     </div>
 </div>
+
+<?php if ($this->needsLocalization()): ?>
+<script type="module">
+    const regionsUrl = '<?= $this->getRegionsImportUrl() ?>';
+    const langpackUrl = '<?= $this->getLanguagePackUrl() ?>';
+
+    function setStatus(containerId, state, message) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        if (state === 'running') {
+            container.innerHTML = '<span class="localization-spinner"></span>';
+        } else if (state === 'success') {
+            container.innerHTML = `<span class="localization-result localization-success">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="20" height="20"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                ${message}
+            </span>`;
+        } else if (state === 'error') {
+            container.innerHTML = `<span class="localization-result localization-error">${message}</span>`;
+        }
+    }
+
+    async function runAction(url, statusId, btn) {
+        btn.disabled = true;
+        setStatus(statusId, 'running');
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                setStatus(statusId, 'success', '<?= $this->__('Done') ?>');
+            } else {
+                setStatus(statusId, 'error', data.message || '<?= $this->__('Failed') ?>');
+            }
+        } catch (e) {
+            setStatus(statusId, 'error', '<?= $this->__('Request failed') ?>');
+        }
+    }
+
+    document.getElementById('btn-regions')?.addEventListener('click', function() {
+        runAction(regionsUrl, 'status-regions', this);
+    });
+
+    document.getElementById('btn-langpack')?.addEventListener('click', function() {
+        runAction(langpackUrl, 'status-langpack', this);
+    });
+</script>
+<?php endif; ?>

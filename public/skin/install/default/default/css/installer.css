@@ -1555,3 +1555,133 @@ body.installation-complete-page .middle-container {
         font-size: var(--font-size-xs);
     }
 }
+
+/* ========================================
+   Localization Section (Complete Page)
+   ======================================== */
+
+.localization-section {
+    text-align: left;
+    background: var(--color-bg);
+    border-radius: var(--radius-md);
+    padding: var(--space-xl);
+    margin: var(--space-xl) 0;
+    border: 1px solid var(--color-border-light);
+}
+
+.localization-heading {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--space-sm);
+}
+
+.localization-intro {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin-bottom: var(--space-lg);
+}
+
+.localization-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.localization-action {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-white);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--color-border-light);
+}
+
+.localization-action-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg);
+    border-radius: var(--radius-sm);
+    color: var(--color-primary-dark);
+}
+
+.localization-action-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+.localization-action-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.localization-action-content strong {
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+.localization-action-content span {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-lighter);
+}
+
+.localization-action-status {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    min-width: 100px;
+    justify-content: flex-end;
+}
+
+.form-button-sm {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-sm);
+    min-width: auto;
+}
+
+.localization-spinner {
+    width: 24px;
+    height: 24px;
+    border: 3px solid rgba(215, 223, 34, 0.2);
+    border-top-color: var(--color-primary);
+    border-radius: var(--radius-full);
+    animation: spin 0.8s linear infinite;
+}
+
+.localization-result {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.localization-success {
+    color: var(--color-success);
+}
+
+.localization-error {
+    color: var(--color-error);
+}
+
+@media (max-width: 768px) {
+    .localization-action {
+        flex-wrap: wrap;
+    }
+
+    .localization-action-status {
+        width: 100%;
+        justify-content: stretch;
+    }
+
+    .localization-action-status .form-button-sm {
+        width: 100%;
+    }
+}

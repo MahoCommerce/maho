@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Exception;
+use Locale;
 use Mage;
 use Mage_Install_Model_Installer_Console;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -121,6 +122,8 @@ class Install extends BaseMahoCommand
             }
             return Command::FAILURE;
         }
+
+        $this->showLocalizationSuggestions($input, $output);
 
         $output->writeln('');
 
@@ -296,6 +299,47 @@ class Install extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    private function showLocalizationSuggestions(InputInterface $input, OutputInterface $output): void
+    {
+        $locale = $input->getOption('locale');
+
+        if (!$locale || $locale === 'en_US' || $input->getOption('sample_data')) {
+            return;
+        }
+
+        $availableLanguagePacks = [
+            'de_DE', 'el_GR', 'es_ES', 'fr_FR', 'it_IT', 'nl_NL', 'pt_BR', 'pt_PT',
+        ];
+
+        $parsed = Locale::parseLocale($locale);
+        $countryCode = $parsed['region'] ?? null;
+
+        if (!$countryCode) {
+            return;
+        }
+
+        $countryName = Locale::getDisplayRegion($locale, 'en');
+        $languageName = Locale::getDisplayLanguage($locale, 'en');
+
+        $output->writeln('');
+        $output->writeln('<info>  Localization recommendations for your store</info>');
+        $output->writeln('');
+        $output->writeln("  Your store locale is set to <comment>{$locale}</comment>. To fully localize your");
+        $output->writeln('  store, we recommend running the following commands:');
+        $output->writeln('');
+        $output->writeln("  Import regions/states for {$countryName}:");
+        $output->writeln("    <comment>./maho sys:directory:regions:import -c {$countryCode} -l {$locale}</comment>");
+
+        if (in_array($locale, $availableLanguagePacks, true)) {
+            $packageName = 'mahocommerce/maho-language-' . strtolower($locale);
+            $output->writeln('');
+            $output->writeln("  Install the {$languageName} language pack:");
+            $output->writeln("    <comment>composer require {$packageName}</comment>");
+        }
+
+        $output->writeln('');
     }
 
     private function handleForceInstall(InputInterface $input, OutputInterface $output): bool
