@@ -440,16 +440,6 @@ final class OrderProvider implements ProviderInterface
         $collection = $this->paymentService->getOrderPayments($orderId);
         $payments = [];
 
-        $methodLabels = [
-            'cashondelivery' => 'Cash',
-            'cash' => 'Cash',
-            'purchaseorder' => 'EFTPOS/Card',
-            'eftpos' => 'EFTPOS/Card',
-            'gene_braintree_creditcard' => 'Credit Card',
-            'checkmo' => 'Check/Money Order',
-            'banktransfer' => 'Bank Transfer',
-        ];
-
         /** @phpstan-ignore-next-line */
         foreach ($collection as $payment) {
             $dto = new PosPayment();
@@ -457,7 +447,7 @@ final class OrderProvider implements ProviderInterface
             $dto->orderId = (int) $payment->getOrderId();
             $dto->registerId = (int) $payment->getRegisterId();
             $dto->methodCode = $payment->getMethodCode();
-            $dto->methodLabel = $methodLabels[$payment->getMethodCode()] ?? $payment->getMethodCode();
+            $dto->methodLabel = PaymentService::getMethodLabel($payment->getMethodCode());
             $dto->amount = (float) $payment->getAmount();
             $dto->baseAmount = (float) $payment->getBaseAmount();
             $dto->currencyCode = $payment->getCurrencyCode();
@@ -484,16 +474,6 @@ final class OrderProvider implements ProviderInterface
     {
         $collection = $this->paymentService->getOrderPayments($orderId);
 
-        $methodLabels = [
-            'cashondelivery' => 'Cash',
-            'cash' => 'Cash',
-            'purchaseorder' => 'EFTPOS/Card',
-            'eftpos' => 'EFTPOS/Card',
-            'gene_braintree_creditcard' => 'Credit Card',
-            'checkmo' => 'Check/Money Order',
-            'banktransfer' => 'Bank Transfer',
-        ];
-
         // Group payments by method
         $grouped = [];
         /** @phpstan-ignore-next-line */
@@ -502,7 +482,7 @@ final class OrderProvider implements ProviderInterface
             if (!isset($grouped[$method])) {
                 $grouped[$method] = [
                     'method' => $method,
-                    'methodTitle' => $methodLabels[$method] ?? $method,
+                    'methodTitle' => PaymentService::getMethodLabel($method),
                     'totalAmount' => 0.0,
                     'paymentCount' => 0,
                 ];

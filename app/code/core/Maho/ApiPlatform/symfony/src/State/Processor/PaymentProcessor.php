@@ -29,17 +29,6 @@ final class PaymentProcessor implements ProcessorInterface
 {
     private PaymentService $paymentService;
 
-    private array $methodLabels = [
-        'cashondelivery' => 'Cash',
-        'cash' => 'Cash',
-        'purchaseorder' => 'EFTPOS/Card',
-        'eftpos' => 'EFTPOS/Card',
-        'gene_braintree_creditcard' => 'Credit Card',
-        'checkmo' => 'Check/Money Order',
-        'banktransfer' => 'Bank Transfer',
-        'free' => 'Free',
-    ];
-
     public function __construct()
     {
         $this->paymentService = new PaymentService();
@@ -157,7 +146,7 @@ final class PaymentProcessor implements ProcessorInterface
         /** @phpstan-ignore-next-line */
         $dto->methodCode = $payment->getMethodCode();
         /** @phpstan-ignore-next-line */
-        $dto->methodLabel = $this->methodLabels[$payment->getMethodCode()] ?? $payment->getMethodCode();
+        $dto->methodLabel = PaymentService::getMethodLabel($payment->getMethodCode());
         /** @phpstan-ignore-next-line */
         $dto->amount = (float) $payment->getAmount();
         /** @phpstan-ignore-next-line */
