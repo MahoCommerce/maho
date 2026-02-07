@@ -25,7 +25,7 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
     protected string $_defaultFormat = 'xml';
     protected string $_rootElement = 'feed';
     protected string $_itemElement = 'entry';
-    protected ?string $_taxonomyFile = null;
+    protected ?string $_taxonomyFile = 'taxonomy/google_product_taxonomy.txt';
 
     protected array $_namespaces = [
         'xmlns' => 'http://www.w3.org/2005/Atom',

@@ -62,6 +62,7 @@ class Maho_FeedManager_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Bloc
                 'mapped_count' => $mapped,
                 'total_categories' => $totalCategories,
                 'coverage' => $coverage,
+                'supports_mapping' => $platformAdapter->supportsCategoryMapping(),
             ]);
             $collection->addItem($item);
         }
@@ -108,18 +109,11 @@ class Maho_FeedManager_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Bloc
 
         $this->addColumn('action', [
             'header' => $this->__('Action'),
-            'type' => 'action',
+            'index' => 'platform',
             'width' => '120px',
-            'getter' => 'getPlatform',
-            'actions' => [
-                [
-                    'caption' => $this->__('Edit Mapping'),
-                    'url' => ['base' => '*/*/edit'],
-                    'field' => 'platform',
-                ],
-            ],
             'filter' => false,
             'sortable' => false,
+            'frame_callback' => [$this, 'decorateAction'],
         ]);
 
         return parent::_prepareColumns();
@@ -143,9 +137,24 @@ class Maho_FeedManager_Block_Adminhtml_Category_Grid extends Mage_Adminhtml_Bloc
         return '<span class="' . $class . '">' . $pct . '%</span>';
     }
 
+    /**
+     * Action column decorator
+     */
+    public function decorateAction(string $value, Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
+    {
+        if (!$row->getSupportsMapping()) {
+            return '<span class="feedmanager-status">' . $this->escapeHtml($this->__('Not required')) . '</span>';
+        }
+        $url = $this->getUrl('*/*/edit', ['platform' => $row->getPlatform()]);
+        return '<a href="' . $this->escapeHtml($url) . '">' . $this->escapeHtml($this->__('Edit Mapping')) . '</a>';
+    }
+
     #[\Override]
     public function getRowUrl($row): string
     {
+        if (!$row->getSupportsMapping()) {
+            return '';
+        }
         return $this->getUrl('*/*/edit', ['platform' => $row->getPlatform()]);
     }
 }

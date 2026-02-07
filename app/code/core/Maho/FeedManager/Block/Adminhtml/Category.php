@@ -45,7 +45,7 @@ class Maho_FeedManager_Block_Adminhtml_Category extends Mage_Adminhtml_Block_Wid
         $platforms = [];
         foreach (Maho_FeedManager_Model_Platform::getAvailablePlatforms() as $code) {
             $adapter = Maho_FeedManager_Model_Platform::getAdapter($code);
-            if ($adapter) {
+            if ($adapter && $adapter->supportsCategoryMapping()) {
                 $platforms[] = [
                     'code' => $code,
                     'name' => $adapter->getName(),
