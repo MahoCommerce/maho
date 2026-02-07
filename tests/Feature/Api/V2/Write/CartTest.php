@@ -68,3 +68,49 @@ describe('GET /api/carts/{id}', function () {
     });
 
 });
+
+/**
+ * Regression tests for cart prices field
+ */
+describe('Cart Prices Field (Regression)', function () {
+
+    it('returns totals object in guest cart response', function () {
+        // Guest cart REST endpoints use 'totals' (Symfony controller)
+        $createResponse = apiPost('/api/guest-carts', []);
+        expect($createResponse['status'])->toBe(201);
+
+        $cartId = $createResponse['json']['id'];
+
+        $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
+            'sku' => fixtures('write_test_sku'),
+            'qty' => 1,
+        ]);
+        expect($addResponse['status'])->toBe(200);
+
+        $cart = $addResponse['json'];
+
+        // Guest cart REST uses 'totals'
+        expect($cart)->toHaveKey('totals');
+
+        $totals = $cart['totals'];
+        expect($totals)->toHaveKey('subtotal');
+        expect($totals)->toHaveKey('grandTotal');
+    });
+
+    it('includes thumbnailUrl in cart items', function () {
+        $createResponse = apiPost('/api/guest-carts', []);
+        expect($createResponse['status'])->toBe(201);
+
+        $cartId = $createResponse['json']['id'];
+
+        $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
+            'sku' => fixtures('write_test_sku'),
+            'qty' => 1,
+        ]);
+        expect($addResponse['status'])->toBe(200);
+
+        $item = $addResponse['json']['items'][0];
+        expect($item)->toHaveKey('thumbnailUrl');
+    });
+
+});

@@ -35,12 +35,12 @@ use Maho\ApiPlatform\State\Provider\BlogPostProvider;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'blogPost', description: 'Get a blog post by ID'),
-        new QueryCollection(name: 'blogPosts', description: 'Get blog posts'),
-        new Query(
-            name: 'blogPostByUrlKey',
-            args: ['urlKey' => ['type' => 'String!']],
-            description: 'Get a blog post by URL key',
+        new Query(name: 'item_query', description: 'Get a blog post by ID'),
+        new QueryCollection(name: 'collection_query', description: 'Get blog posts'),
+        new QueryCollection(
+            name: 'blogPosts',
+            args: ['urlKey' => ['type' => 'String']],
+            description: 'Get blog posts, optionally filter by URL key',
         ),
     ],
 )]

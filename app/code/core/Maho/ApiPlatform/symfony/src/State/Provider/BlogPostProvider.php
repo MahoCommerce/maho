@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\BlogPost;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -27,22 +28,21 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class BlogPostProvider implements ProviderInterface
 {
     /**
-     * @return BlogPost|BlogPost[]|null
+     * @return BlogPost|ArrayPaginator<BlogPost>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|array|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|ArrayPaginator|null
     {
         StoreContext::ensureStore();
 
-        $operationName = $operation->getName();
-
-        // Handle GraphQL query by URL key
-        if ($operationName === 'blogPostByUrlKey') {
-            $urlKey = $context['args']['urlKey'] ?? null;
-            return $urlKey ? $this->getPostByUrlKey($urlKey) : null;
-        }
-
         if ($operation instanceof CollectionOperationInterface) {
+            // Handle urlKey filter for GraphQL blogPosts(urlKey: "...") query
+            $urlKey = $context['args']['urlKey'] ?? $context['filters']['urlKey'] ?? null;
+            if ($urlKey) {
+                $post = $this->getPostByUrlKey($urlKey);
+                $items = $post ? [$post] : [];
+                return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: 1, totalItems: count($items));
+            }
             return $this->getCollection($context);
         }
 
@@ -87,9 +87,9 @@ final class BlogPostProvider implements ProviderInterface
     }
 
     /**
-     * @return BlogPost[]
+     * @return ArrayPaginator<BlogPost>
      */
-    private function getCollection(array $context): array
+    private function getCollection(array $context): ArrayPaginator
     {
         $storeId = StoreContext::getStoreId();
         $filters = $context['filters'] ?? [];
@@ -120,7 +120,14 @@ final class BlogPostProvider implements ProviderInterface
             $posts[] = $this->mapToDto($post);
         }
 
-        return $posts;
+        $total = (int) $collection->getSize();
+
+        return new ArrayPaginator(
+            items: $posts,
+            currentPage: $page,
+            itemsPerPage: $pageSize,
+            totalItems: $total,
+        );
     }
 
     private function mapToDto(\Maho_Blog_Model_Post $post): BlogPost

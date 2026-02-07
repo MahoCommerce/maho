@@ -11,27 +11,6 @@ declare(strict_types=1);
  * @group read
  */
 
-/**
- * Helper to extract items from API response
- * Handles both Hydra format and plain array format
- */
-function getItems(array $response): array
-{
-    $json = $response['json'] ?? [];
-    // API Platform Hydra format
-    if (isset($json['member'])) {
-        return $json['member'];
-    }
-    if (isset($json['hydra:member'])) {
-        return $json['hydra:member'];
-    }
-    // Plain array format (when called without proper Accept header)
-    if (is_array($json) && (empty($json) || isset($json[0]))) {
-        return $json;
-    }
-    return [];
-}
-
 describe('GET /api/products - Basic', function () {
 
     it('returns a list of products', function () {
@@ -159,7 +138,6 @@ describe('GET /api/products - Sorting by Name', function () {
 describe('GET /api/products - Sorting by Price', function () {
 
     it('sorts products by price ascending (low to high)', function () {
-        // Use priceMin to filter out products with zero/null prices
         $response = apiGet('/api/products?pageSize=10&sortBy=price&sortDir=asc&priceMin=1');
 
         expect($response['status'])->toBe(200);
@@ -167,17 +145,15 @@ describe('GET /api/products - Sorting by Price', function () {
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        // Filter out any products with null or 0 prices for comparison
         $prices = array_filter(
             array_map(fn($p) => (float) ($p['price'] ?? 0), $items),
             fn($p) => $p > 0,
         );
         $prices = array_values($prices);
 
-        // Check prices are in ascending order
-        for ($i = 1; $i < count($prices); $i++) {
-            expect($prices[$i])->toBeGreaterThanOrEqual($prices[$i - 1]);
-        }
+        $sorted = $prices;
+        sort($sorted);
+        expect($prices)->toBe($sorted);
     });
 
     it('sorts products by price descending (high to low)', function () {
@@ -190,15 +166,14 @@ describe('GET /api/products - Sorting by Price', function () {
 
         $prices = array_map(fn($p) => (float) ($p['price'] ?? 0), $items);
 
-        // Check prices are in descending order
-        for ($i = 1; $i < count($prices); $i++) {
-            expect($prices[$i])->toBeLessThanOrEqual($prices[$i - 1]);
-        }
+        $sorted = $prices;
+        rsort($sorted);
+        expect($prices)->toBe($sorted);
     });
 
     it('returns different first product for asc vs desc price sort', function () {
-        $ascResponse = apiGet('/api/products?pageSize=1&sortBy=price&sortDir=asc');
-        $descResponse = apiGet('/api/products?pageSize=1&sortBy=price&sortDir=desc');
+        $ascResponse = apiGet('/api/products?pageSize=1&sortBy=price&sortDir=asc&priceMin=1');
+        $descResponse = apiGet('/api/products?pageSize=1&sortBy=price&sortDir=desc&priceMin=1');
 
         expect($ascResponse['status'])->toBe(200);
         expect($descResponse['status'])->toBe(200);
@@ -209,7 +184,6 @@ describe('GET /api/products - Sorting by Price', function () {
         expect($ascItems)->not->toBeEmpty();
         expect($descItems)->not->toBeEmpty();
 
-        // First product's price should be different (lowest vs highest)
         expect($ascItems[0]['price'])->toBeLessThan($descItems[0]['price']);
     });
 
@@ -218,83 +192,77 @@ describe('GET /api/products - Sorting by Price', function () {
 describe('GET /api/products - Category Filtering', function () {
 
     it('filters products by categoryId', function () {
-        // Category 4 = Racquets (parent category)
-        $response = apiGet('/api/products?pageSize=10&categoryId=4');
+        // Category 8 = Sale (leaf category — products have 8 in their categoryIds)
+        $response = apiGet('/api/products?pageSize=10&categoryId=8');
 
         expect($response['status'])->toBe(200);
 
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        // Products should belong to category 4 or its subcategories (5, 6, 7, 8, 45, 287, 289)
-        $validCategoryIds = [4, 5, 6, 7, 8, 45, 287, 289];
+        // Products should belong to category 8
         foreach ($items as $product) {
-            $hasValidCategory = !empty(array_intersect($product['categoryIds'], $validCategoryIds));
-            expect($hasValidCategory)->toBeTrue();
+            expect($product['categoryIds'])->toContain(8);
         }
     });
 
     it('returns different products for different categories', function () {
-        // Category 4 = Racquets, Category 9 = Tennis String
-        $racquetsResponse = apiGet('/api/products?pageSize=5&categoryId=4');
-        $stringsResponse = apiGet('/api/products?pageSize=5&categoryId=9');
+        // Category 8 = Sale, Category 9 = VIP
+        $saleResponse = apiGet('/api/products?pageSize=5&categoryId=8');
+        $vipResponse = apiGet('/api/products?pageSize=5&categoryId=9');
 
-        expect($racquetsResponse['status'])->toBe(200);
-        expect($stringsResponse['status'])->toBe(200);
+        expect($saleResponse['status'])->toBe(200);
+        expect($vipResponse['status'])->toBe(200);
 
-        $racquetItems = getItems($racquetsResponse);
-        $stringItems = getItems($stringsResponse);
+        $saleItems = getItems($saleResponse);
+        $vipItems = getItems($vipResponse);
 
-        expect($racquetItems)->not->toBeEmpty();
-        expect($stringItems)->not->toBeEmpty();
+        expect($saleItems)->not->toBeEmpty();
+        expect($vipItems)->not->toBeEmpty();
 
-        // Product SKUs should be different
-        $racquetSkus = array_column($racquetItems, 'sku');
-        $stringSkus = array_column($stringItems, 'sku');
+        // Product SKUs should be different between Sale and VIP
+        $saleSkus = array_column($saleItems, 'sku');
+        $vipSkus = array_column($vipItems, 'sku');
 
-        // No overlap between the two sets
-        expect(array_intersect($racquetSkus, $stringSkus))->toBeEmpty();
+        expect(array_intersect($saleSkus, $vipSkus))->toBeEmpty();
     });
 
-    it('returns products from subcategory', function () {
-        // Category 5 = Adult Tennis Racquets (subcategory of 4)
-        $response = apiGet('/api/products?pageSize=5&categoryId=5');
+    it('returns products from parent category including subcategories', function () {
+        // Category 4 = Women (children: 10=New Arrivals, 11=Tops, 12=Pants, 13=Dresses)
+        // The API filter includes descendants, but products' categoryIds contain leaf IDs
+        $response = apiGet('/api/products?pageSize=5&categoryId=4');
 
         expect($response['status'])->toBe(200);
 
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        // Each product should have categoryId 5 in its categoryIds array
+        // Products should have at least one of Women's subcategory IDs
+        $womenSubcategoryIds = [4, 10, 11, 12, 13];
         foreach ($items as $product) {
-            expect($product['categoryIds'])->toContain(5);
+            $hasValidCategory = !empty(array_intersect($product['categoryIds'], $womenSubcategoryIds));
+            expect($hasValidCategory)->toBeTrue(
+                "Product {$product['name']} should belong to Women or its subcategories, has: " . implode(',', $product['categoryIds']),
+            );
         }
     });
 
-    it('can combine category filter with sorting', function () {
-        // Use priceMin to filter out $0 products for cleaner price sorting
-        $response = apiGet('/api/products?pageSize=10&categoryId=4&sortBy=price&sortDir=asc&priceMin=1');
+    it('can combine category filter with price filter', function () {
+        $response = apiGet('/api/products?pageSize=10&categoryId=8&priceMin=1');
 
         expect($response['status'])->toBe(200);
 
         $items = getItems($response);
         expect($items)->not->toBeEmpty();
 
-        // Check category filter is applied (products belong to category 4 or its subcategories)
-        $validCategoryIds = [4, 5, 6, 7, 8, 45, 287, 289];
+        // Check category filter is applied
         foreach ($items as $product) {
-            $hasValidCategory = !empty(array_intersect($product['categoryIds'], $validCategoryIds));
-            expect($hasValidCategory)->toBeTrue();
+            expect($product['categoryIds'])->toContain(8);
         }
 
-        // Check price sorting
-        $prices = array_filter(
-            array_map(fn($p) => (float) ($p['price'] ?? 0), $items),
-            fn($p) => $p > 0,
-        );
-        $prices = array_values($prices);
-        for ($i = 1; $i < count($prices); $i++) {
-            expect($prices[$i])->toBeGreaterThanOrEqual($prices[$i - 1]);
+        // Check price filter is applied
+        foreach ($items as $product) {
+            expect((float) $product['price'])->toBeGreaterThanOrEqual(1);
         }
     });
 

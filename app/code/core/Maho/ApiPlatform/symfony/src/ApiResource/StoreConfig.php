@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GraphQl\Query;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\StoreConfigProvider;
 
 #[ApiResource(
@@ -34,6 +35,7 @@ use Maho\ApiPlatform\State\Provider\StoreConfigProvider;
             name: 'storeConfig',
             args: [],
             description: 'Get current store configuration',
+            resolver: CustomQueryResolver::class,
         ),
     ],
 )]

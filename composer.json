@@ -76,7 +76,9 @@
         "symfony/twig-bundle": "^7.4",
         "symfony/asset": "^7.4",
         "league/oauth2-server": "^9.0",
-        "nelmio/cors-bundle": "^2.4"
+        "nelmio/cors-bundle": "^2.4",
+        "webonyx/graphql-php": "^15.30",
+        "symfony/expression-language": "^7.4"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",

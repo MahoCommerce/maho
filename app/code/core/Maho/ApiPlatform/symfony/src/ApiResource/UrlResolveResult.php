@@ -16,6 +16,7 @@ namespace Maho\ApiPlatform\ApiResource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\UrlResolverProvider;
 
 #[ApiResource(
@@ -33,6 +34,7 @@ use Maho\ApiPlatform\State\Provider\UrlResolverProvider;
             name: 'resolveUrl',
             args: ['path' => ['type' => 'String!']],
             description: 'Resolve a URL path to its target',
+            resolver: CustomQueryResolver::class,
         ),
     ],
 )]

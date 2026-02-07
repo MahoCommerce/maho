@@ -54,7 +54,7 @@ final class WishlistProcessor implements ProcessorInterface
 
         // GraphQL mutations
         if ($operationName === 'addToWishlist') {
-            $args = $context['args'] ?? [];
+            $args = $context['args']['input'] ?? [];
             return $this->addToWishlist(
                 (int) $args['productId'],
                 (int) ($args['qty'] ?? 1),
@@ -63,12 +63,12 @@ final class WishlistProcessor implements ProcessorInterface
         }
 
         if ($operationName === 'removeFromWishlist') {
-            $args = $context['args'] ?? [];
+            $args = $context['args']['input'] ?? [];
             return $this->removeFromWishlist((int) $args['itemId']);
         }
 
         if ($operationName === 'moveWishlistItemToCart') {
-            $args = $context['args'] ?? [];
+            $args = $context['args']['input'] ?? [];
             return $this->moveToCart(
                 (int) $args['itemId'],
                 (int) ($args['qty'] ?? 1),
@@ -76,8 +76,14 @@ final class WishlistProcessor implements ProcessorInterface
         }
 
         if ($operationName === 'syncWishlist') {
-            $args = $context['args'] ?? [];
-            return $this->syncWishlist($args['productIds'] ?? []);
+            $args = $context['args']['input'] ?? [];
+            $addedItems = $this->syncWishlist($args['productIds'] ?? []);
+            // GraphQL mutation expects a single WishlistItem
+            if (!empty($addedItems)) {
+                return $addedItems[0];
+            }
+            // Nothing was added — return first existing wishlist item
+            return $this->getFirstWishlistItem();
         }
 
         // REST operations
@@ -139,7 +145,7 @@ final class WishlistProcessor implements ProcessorInterface
 
         // Check if already in wishlist
         $existingItem = null;
-        foreach ($wishlist->getItemCollection() as $item) {
+        foreach ($wishlist->getItemCollection() ?? [] as $item) {
             if ((int) $item->getProductId() === $productId) {
                 $existingItem = $item;
                 break;
@@ -282,7 +288,7 @@ final class WishlistProcessor implements ProcessorInterface
 
         // Get existing product IDs in wishlist
         $existingProductIds = [];
-        foreach ($wishlist->getItemCollection() as $item) {
+        foreach ($wishlist->getItemCollection() ?? [] as $item) {
             $existingProductIds[] = (int) $item->getProductId();
         }
 
@@ -312,6 +318,34 @@ final class WishlistProcessor implements ProcessorInterface
         $wishlist->save();
 
         return $addedItems;
+    }
+
+    /**
+     * Get the first item from the customer's wishlist (for mutation return when no new items added)
+     */
+    private function getFirstWishlistItem(): WishlistItem
+    {
+        $customerId = $this->requireAuthentication();
+        $wishlist = $this->getWishlist($customerId);
+
+        $itemCollection = $wishlist->getItemCollection();
+        if ($itemCollection) {
+            $itemCollection->addStoreFilter(\Mage::app()->getStore()->getId())
+                ->setVisibilityFilter();
+
+            /** @var \Mage_Wishlist_Model_Item $item */
+            foreach ($itemCollection as $item) {
+                $product = $item->getProduct();
+                if ($product && $product->getId()) {
+                    return $this->buildWishlistItem($item, $product);
+                }
+            }
+        }
+
+        // Empty wishlist — return a placeholder with wishlist ID
+        $placeholder = new WishlistItem();
+        $placeholder->id = (int) $wishlist->getId();
+        return $placeholder;
     }
 
     /**

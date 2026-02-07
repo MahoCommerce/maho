@@ -56,6 +56,8 @@ use Maho\ApiPlatform\State\Processor\ReviewProcessor;
         ),
     ],
     graphQlOperations: [
+        new Query(name: 'item_query', description: 'Get a review by ID'),
+        new QueryCollection(name: 'collection_query', description: 'Get reviews'),
         new QueryCollection(
             name: 'productReviews',
             description: 'Get reviews for a product',
@@ -72,10 +74,12 @@ use Maho\ApiPlatform\State\Processor\ReviewProcessor;
         new QueryCollection(
             name: 'myReviews',
             description: 'Get current customer submitted reviews',
+            security: "is_granted('ROLE_USER')",
         ),
         new Mutation(
             name: 'submitReview',
             description: 'Submit a product review',
+            security: "is_granted('ROLE_USER')",
             args: [
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID'],
                 'title' => ['type' => 'String!', 'description' => 'Review title/summary'],

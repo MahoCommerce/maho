@@ -73,6 +73,23 @@ export default {
 
     async loadCountries() {
         if (this.countries.length > 0) return;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.COUNTRIES_QUERY);
+                this.countries = this._gqlNodes(data, 'countriesCountries').map(c => ({
+                    ...c,
+                    available_regions: c.availableRegions || []
+                }));
+            } catch (e) {
+                console.error('Failed to load countries (GQL):', e);
+                this.countries = [];
+            }
+            return;
+        }
+
+        // REST branch
         try {
             const data = await this.api('/countries');
             this.countries = data.member || data || [];
@@ -127,6 +144,42 @@ export default {
 
     async getShippingMethods() {
         this.loading = true;
+
+        // GraphQL branch: set shipping address on cart (returns available methods)
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const addr = this.checkout.shipping;
+                const street = addr.street ? addr.street.split(',').map(s => s.trim()).filter(Boolean) : [];
+                const data = await this.gql(this._gqlQueries.SET_SHIPPING_ADDRESS, {
+                    input: {
+                        maskedId: this.cartId,
+                        firstName: addr.firstName,
+                        lastName: addr.lastName,
+                        street: street.length ? street : [addr.street],
+                        city: addr.city,
+                        region: addr.region || undefined,
+                        regionId: addr.regionId || undefined,
+                        postcode: addr.postcode,
+                        countryId: addr.countryId,
+                        telephone: addr.telephone
+                    }
+                });
+                this.shippingMethods = data.setShippingAddressOnCartCart?.cart?.availableShippingMethods || [];
+                if (this.shippingMethods.length > 0 && !this.checkout.shippingMethod) {
+                    this.checkout.shippingMethod = this.shippingMethods[0].code;
+                }
+            } catch (e) {
+                this.error = 'Failed to get shipping methods: ' + e.message;
+                this.shippingMethods = [
+                    { code: 'flatrate_flatrate', title: 'Flat Rate', description: '5-7 days', price: 10 },
+                    { code: 'freeshipping_freeshipping', title: 'Free Shipping', description: '7-10 days', price: 0 }
+                ];
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const data = await this.api('/guest-carts/' + this.cartId + '/shipping-methods', {
                 method: 'POST',
@@ -153,6 +206,27 @@ export default {
     async loadPaymentMethods() {
         if (!this.cartId) return;
 
+        // GraphQL branch: load cart which includes available payment methods
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.CART_QUERY, { maskedId: this.cartId });
+                this.paymentMethods = data.getCartByMaskedIdCart?.availablePaymentMethods || [];
+                this.paymentMethodsLoaded = true;
+                if (this.paymentMethods.length > 0 && !this.checkout.paymentMethod) {
+                    this.checkout.paymentMethod = this.paymentMethods[0].code;
+                }
+            } catch (e) {
+                console.error('Failed to load payment methods (GQL):', e);
+                this.paymentMethods = [
+                    { code: 'checkmo', title: 'Check / Money Order' },
+                    { code: 'cashondelivery', title: 'Cash on Delivery' }
+                ];
+                this.paymentMethodsLoaded = true;
+            }
+            return;
+        }
+
+        // REST branch
         try {
             const data = await this.api('/guest-carts/' + this.cartId + '/payment-methods');
             this.paymentMethods = data || [];
@@ -195,6 +269,35 @@ export default {
             return;
         }
         this.loading = true;
+
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                const data = await this.gql(this._gqlQueries.PLACE_ORDER, {
+                    input: {
+                        maskedId: this.cartId,
+                        paymentMethod: this.checkout.paymentMethod,
+                        shippingMethod: this.checkout.shippingMethod
+                    }
+                });
+                const order = data.placeOrderOrder?.order;
+                this.lastOrderId = order?.incrementId || order?.id;
+
+                // Clear cart
+                this.cartId = null;
+                localStorage.removeItem('cartId');
+                this.cart = {};
+                this.cartCount = 0;
+
+                this.view = 'success';
+            } catch (e) {
+                this.error = 'Failed to place order: ' + e.message;
+            }
+            this.loading = false;
+            return;
+        }
+
+        // REST branch
         try {
             const data = await this.api('/guest-carts/' + this.cartId + '/place-order', {
                 method: 'POST',

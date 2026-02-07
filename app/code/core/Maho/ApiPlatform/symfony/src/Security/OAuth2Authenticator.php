@@ -88,7 +88,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
 
         // Build user badge with loader callback
         $userBadge = new UserBadge(
-            $payload->sub,
+            (string) $payload->sub,
             function (string $userIdentifier) use ($payload): ApiUser {
                 return $this->createUserFromPayload($payload);
             },
@@ -149,7 +149,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
         }
 
         return new ApiUser(
-            identifier: $payload->sub,
+            identifier: (string) $payload->sub,
             roles: $roles,
             customerId: $customerId,
             adminId: $adminId,

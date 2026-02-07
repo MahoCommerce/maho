@@ -208,13 +208,6 @@ class ProductService
         }
 
         // Use Meilisearch for all product queries when available (much faster than MySQL)
-        // Map price sorting to sort_price (flat field) since nested price objects don't work
-        // Fall back to MySQL if sort_price not yet indexed
-        $sortByPrice = $sort && strtolower($sort['field']) === 'price';
-        if ($sortByPrice) {
-            $sort['field'] = 'sort_price';
-        }
-
         if ($this->useMeilisearch) {
             $results = $this->searchWithMeilisearch($query, $page, $pageSize, $filters, $sort, $usePosIndex, $storeId);
 
@@ -525,6 +518,10 @@ class ProductService
                 // addCategoryFilter already joins cat_index which has position
                 // We can use 'cat_index_position' for proper ordering
                 $collection->getSelect()->order("cat_index.position {$direction}");
+            } elseif ($field === 'price') {
+                // Price sorting requires the price index for correct results
+                $collection->addPriceData();
+                $collection->getSelect()->order("price_index.price {$direction}");
             } else {
                 $collection->setOrder($field, $direction);
             }

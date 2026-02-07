@@ -18,7 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Order;
 use Maho\ApiPlatform\ApiResource\OrderItem;
-use Maho\ApiPlatform\ApiResource\OrderPrices;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\ApiResource\Address;
 use Maho\ApiPlatform\ApiResource\PosPayment;
 use Maho\ApiPlatform\ApiResource\PaymentSummary;
@@ -55,10 +55,10 @@ final class OrderProvider implements ProviderInterface
     /**
      * Provide order data based on operation type
      *
-     * @return Order|Order[]|PosPayment[]|PaymentSummary[]|null
+     * @return Order|ArrayPaginator<Order>|PosPayment[]|PaymentSummary[]|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Order|array|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Order|ArrayPaginator|array|null
     {
         $operationName = $operation->getName();
 
@@ -109,7 +109,7 @@ final class OrderProvider implements ProviderInterface
         if ($operationName === 'customerOrders') {
             $customerId = $context['customer_id'] ?? null;
             if (!$customerId) {
-                return [];
+                return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 20, totalItems: 0);
             }
 
             $page = $context['args']['page'] ?? 1;
@@ -123,7 +123,12 @@ final class OrderProvider implements ProviderInterface
                 $orders[] = $this->mapToDto($order);
             }
 
-            return $orders;
+            return new ArrayPaginator(
+                items: $orders,
+                currentPage: $page,
+                itemsPerPage: $pageSize,
+                totalItems: (int) ($result['total'] ?? count($orders)),
+            );
         }
 
         // Handle single order query by ID
@@ -185,13 +190,13 @@ final class OrderProvider implements ProviderInterface
     /**
      * Get current customer's orders (REST /customers/me/orders)
      *
-     * @return array<Order>
+     * @return ArrayPaginator<Order>
      */
-    private function getMyOrders(array $context): array
+    private function getMyOrders(array $context): ArrayPaginator
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
-            return [];
+            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 10, totalItems: 0);
         }
 
         $filters = $context['filters'] ?? [];
@@ -206,15 +211,20 @@ final class OrderProvider implements ProviderInterface
             $orders[] = $this->mapToDto($order);
         }
 
-        return $orders;
+        return new ArrayPaginator(
+            items: $orders,
+            currentPage: $page,
+            itemsPerPage: $pageSize,
+            totalItems: (int) ($result['total'] ?? count($orders)),
+        );
     }
 
     /**
      * Get order collection with pagination
      *
-     * @return array<Order>
+     * @return ArrayPaginator<Order>
      */
-    private function getCollection(array $context): array
+    private function getCollection(array $context): ArrayPaginator
     {
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
@@ -231,7 +241,12 @@ final class OrderProvider implements ProviderInterface
             $orders[] = $this->mapToDto($order);
         }
 
-        return $orders;
+        return new ArrayPaginator(
+            items: $orders,
+            currentPage: $page,
+            itemsPerPage: $pageSize,
+            totalItems: (int) ($result['total'] ?? count($orders)),
+        );
     }
 
     /**
@@ -268,7 +283,7 @@ final class OrderProvider implements ProviderInterface
         }
 
         // Map prices
-        $dto->prices = $this->mapPricesToDto($order);
+        $dto->prices = $this->mapPricesToArray($order);
 
         // Map billing address
         $billingAddress = $order->getBillingAddress();
@@ -342,33 +357,33 @@ final class OrderProvider implements ProviderInterface
     }
 
     /**
-     * Map Maho order to OrderPrices DTO
+     * Map Maho order to prices array
      */
-    private function mapPricesToDto(\Mage_Sales_Model_Order $order): OrderPrices
+    private function mapPricesToArray(\Mage_Sales_Model_Order $order): array
     {
-        $prices = new OrderPrices();
+        $prices = [
+            'subtotal' => (float) $order->getSubtotal(),
+            'subtotalInclTax' => (float) $order->getSubtotalInclTax(),
+            'discountAmount' => $order->getDiscountAmount()
+                ? abs((float) $order->getDiscountAmount())
+                : null,
+            'shippingAmount' => $order->getShippingAmount()
+                ? (float) $order->getShippingAmount()
+                : null,
+            'shippingAmountInclTax' => $order->getShippingInclTax()
+                ? (float) $order->getShippingInclTax()
+                : null,
+            'taxAmount' => (float) $order->getTaxAmount(),
+            'grandTotal' => (float) $order->getGrandTotal(),
+            'totalPaid' => (float) $order->getTotalPaid(),
+            'totalRefunded' => (float) $order->getTotalRefunded(),
+            'totalDue' => (float) $order->getTotalDue(),
+            'giftcardAmount' => null,
+        ];
 
-        $prices->subtotal = (float) $order->getSubtotal();
-        $prices->subtotalInclTax = (float) $order->getSubtotalInclTax();
-        $prices->discountAmount = $order->getDiscountAmount()
-            ? abs((float) $order->getDiscountAmount())
-            : null;
-        $prices->shippingAmount = $order->getShippingAmount()
-            ? (float) $order->getShippingAmount()
-            : null;
-        $prices->shippingAmountInclTax = $order->getShippingInclTax()
-            ? (float) $order->getShippingInclTax()
-            : null;
-        $prices->taxAmount = (float) $order->getTaxAmount();
-        $prices->grandTotal = (float) $order->getGrandTotal();
-        $prices->totalPaid = (float) $order->getTotalPaid();
-        $prices->totalRefunded = (float) $order->getTotalRefunded();
-        $prices->totalDue = (float) $order->getTotalDue();
-
-        // Check for giftcard amount if available
         $giftcardAmount = $order->getData('giftcard_amount');
         if ($giftcardAmount) {
-            $prices->giftcardAmount = abs((float) $giftcardAmount);
+            $prices['giftcardAmount'] = abs((float) $giftcardAmount);
         }
 
         return $prices;

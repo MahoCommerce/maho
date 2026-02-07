@@ -17,7 +17,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\ApiResource\Order;
 use Maho\ApiPlatform\ApiResource\OrderItem;
-use Maho\ApiPlatform\ApiResource\OrderPrices;
 use Maho\ApiPlatform\ApiResource\PosPayment;
 use Maho\ApiPlatform\ApiResource\PlaceOrderWithSplitPaymentsResult;
 use Maho\ApiPlatform\ApiResource\Invoice;
@@ -78,6 +77,8 @@ final class OrderProcessor implements ProcessorInterface
         $orderNote = $args['orderNote'] ?? null;
         $cashTendered = isset($args['cashTendered']) ? (float) $args['cashTendered'] : null;
         $employeeId = isset($args['employeeId']) ? (int) $args['employeeId'] : null;
+        $paymentMethod = $args['paymentMethod'] ?? null;
+        $shippingMethod = $args['shippingMethod'] ?? null;
 
         // Get cart/quote
         $quote = $this->cartService->getCart(
@@ -87,6 +88,22 @@ final class OrderProcessor implements ProcessorInterface
 
         if (!$quote) {
             throw new NotFoundHttpException('Cart not found');
+        }
+
+        // Set payment method on quote if provided
+        if ($paymentMethod) {
+            $quote->getPayment()->setMethod($paymentMethod);
+        }
+
+        // Set shipping method on quote if provided
+        if ($shippingMethod && !$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+            $shippingAddress->setShippingMethod($shippingMethod);
+            $shippingAddress->setCollectShippingRates(1);
+        }
+
+        if ($paymentMethod || $shippingMethod) {
+            $quote->collectTotals()->save();
         }
 
         // Place order
@@ -179,7 +196,7 @@ final class OrderProcessor implements ProcessorInterface
         }
 
         // Map prices
-        $dto->prices = $this->mapPricesToDto($order);
+        $dto->prices = $this->mapPricesToArray($order);
 
         // Map billing address
         $billingAddress = $order->getBillingAddress();
@@ -244,33 +261,33 @@ final class OrderProcessor implements ProcessorInterface
     }
 
     /**
-     * Map Maho order to OrderPrices DTO
+     * Map Maho order to prices array
      */
-    private function mapPricesToDto(\Mage_Sales_Model_Order $order): OrderPrices
+    private function mapPricesToArray(\Mage_Sales_Model_Order $order): array
     {
-        $prices = new OrderPrices();
+        $prices = [
+            'subtotal' => (float) $order->getSubtotal(),
+            'subtotalInclTax' => (float) $order->getSubtotalInclTax(),
+            'discountAmount' => $order->getDiscountAmount()
+                ? (float) abs($order->getDiscountAmount())
+                : null,
+            'shippingAmount' => $order->getShippingAmount()
+                ? (float) $order->getShippingAmount()
+                : null,
+            'shippingAmountInclTax' => $order->getShippingInclTax()
+                ? (float) $order->getShippingInclTax()
+                : null,
+            'taxAmount' => (float) $order->getTaxAmount(),
+            'grandTotal' => (float) $order->getGrandTotal(),
+            'totalPaid' => (float) $order->getTotalPaid(),
+            'totalRefunded' => (float) $order->getTotalRefunded(),
+            'totalDue' => (float) $order->getTotalDue(),
+            'giftcardAmount' => null,
+        ];
 
-        $prices->subtotal = (float) $order->getSubtotal();
-        $prices->subtotalInclTax = (float) $order->getSubtotalInclTax();
-        $prices->discountAmount = $order->getDiscountAmount()
-            ? (float) abs($order->getDiscountAmount())
-            : null;
-        $prices->shippingAmount = $order->getShippingAmount()
-            ? (float) $order->getShippingAmount()
-            : null;
-        $prices->shippingAmountInclTax = $order->getShippingInclTax()
-            ? (float) $order->getShippingInclTax()
-            : null;
-        $prices->taxAmount = (float) $order->getTaxAmount();
-        $prices->grandTotal = (float) $order->getGrandTotal();
-        $prices->totalPaid = (float) $order->getTotalPaid();
-        $prices->totalRefunded = (float) $order->getTotalRefunded();
-        $prices->totalDue = (float) $order->getTotalDue();
-
-        // Check for giftcard amount if available
         $giftcardAmount = $order->getData('giftcard_amount');
         if ($giftcardAmount) {
-            $prices->giftcardAmount = (float) abs($giftcardAmount);
+            $prices['giftcardAmount'] = (float) abs($giftcardAmount);
         }
 
         return $prices;

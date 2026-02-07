@@ -17,7 +17,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\ApiResource\Cart;
 use Maho\ApiPlatform\ApiResource\CartItem;
-use Maho\ApiPlatform\ApiResource\CartPrices;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 
@@ -608,7 +607,7 @@ final class CartProcessor implements ProcessorInterface
     {
         $cart = new Cart();
         $cart->id = (int) $quote->getId();
-        $cart->maskedId = $quote->getData('masked_id');
+        $cart->maskedId = $quote->getData('masked_quote_id');
         $cart->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
         $cart->storeId = (int) $quote->getStoreId();
         $cart->isActive = (bool) $quote->getIsActive();
@@ -618,14 +617,18 @@ final class CartProcessor implements ProcessorInterface
         $cart->createdAt = $quote->getCreatedAt();
         $cart->updatedAt = $quote->getUpdatedAt();
 
-        // Map items
+        // Batch load product thumbnails and map items
+        $items = $quote->getAllVisibleItems();
+        $thumbnailsByProductId = $this->batchLoadCartItemThumbnails($items);
         $cart->items = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
-            $cart->items[] = $this->mapItemToDto($item);
+        foreach ($items as $item) {
+            $productId = $item->getProductId() ? (int) $item->getProductId() : null;
+            $thumbnailUrl = $productId ? ($thumbnailsByProductId[$productId] ?? null) : null;
+            $cart->items[] = $this->mapItemToDto($item, $thumbnailUrl);
         }
 
         // Map prices
-        $cart->prices = $this->mapPricesToDto($quote);
+        $cart->prices = $this->mapPricesToArray($quote);
 
         // Map billing address
         $billingAddress = $quote->getBillingAddress();
@@ -686,7 +689,7 @@ final class CartProcessor implements ProcessorInterface
     /**
      * Map Maho quote item model to CartItem DTO
      */
-    private function mapItemToDto(\Mage_Sales_Model_Quote_Item $item): CartItem
+    private function mapItemToDto(\Mage_Sales_Model_Quote_Item $item, ?string $preloadedThumbnailUrl = null): CartItem
     {
         $dto = new CartItem();
         $dto->id = (int) $item->getId();
@@ -703,37 +706,79 @@ final class CartProcessor implements ProcessorInterface
         $dto->taxAmount = $item->getTaxAmount() ? (float) $item->getTaxAmount() : null;
         $dto->productId = $item->getProductId() ? (int) $item->getProductId() : null;
         $dto->productType = $item->getProductType();
+        $dto->thumbnailUrl = $preloadedThumbnailUrl;
         $dto->fulfillmentType = $this->getItemFulfillmentType($item);
 
         return $dto;
     }
 
     /**
-     * Map Maho quote to CartPrices DTO
+     * Batch load thumbnails for all cart items
+     *
+     * @param \Mage_Sales_Model_Quote_Item[] $items
+     * @return array<int, string> Map of product ID => thumbnail URL
      */
-    private function mapPricesToDto(\Mage_Sales_Model_Quote $quote): CartPrices
+    private function batchLoadCartItemThumbnails(array $items): array
     {
-        $prices = new CartPrices();
-        $shippingAddress = $quote->getShippingAddress();
-
-        $prices->subtotal = (float) $quote->getSubtotal();
-        $prices->subtotalInclTax = (float) ($quote->getSubtotal() + ($shippingAddress ? $shippingAddress->getTaxAmount() : 0));
-        $prices->subtotalWithDiscount = (float) $quote->getSubtotalWithDiscount();
-
-        if ($shippingAddress) {
-            $prices->discountAmount = $shippingAddress->getDiscountAmount()
-                ? (float) abs($shippingAddress->getDiscountAmount())
-                : null;
-            $prices->shippingAmount = $shippingAddress->getShippingAmount()
-                ? (float) $shippingAddress->getShippingAmount()
-                : null;
-            $prices->shippingAmountInclTax = $shippingAddress->getShippingInclTax()
-                ? (float) $shippingAddress->getShippingInclTax()
-                : null;
-            $prices->taxAmount = (float) $shippingAddress->getTaxAmount();
+        $productIds = [];
+        foreach ($items as $item) {
+            if ($item->getProductId()) {
+                $productIds[] = (int) $item->getProductId();
+            }
         }
 
-        $prices->grandTotal = (float) $quote->getGrandTotal();
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $collection = \Mage::getResourceModel('catalog/product_collection')
+            ->addIdFilter($productIds)
+            ->addAttributeToSelect(['small_image', 'thumbnail']);
+
+        $thumbnails = [];
+        $mediaConfig = \Mage::getModel('catalog/product_media_config');
+
+        foreach ($collection as $product) {
+            $image = $product->getSmallImage() ?: $product->getThumbnail();
+            if ($image && $image !== 'no_selection') {
+                $thumbnails[(int) $product->getId()] = $mediaConfig->getMediaUrl($image);
+            }
+        }
+
+        return $thumbnails;
+    }
+
+    /**
+     * Map Maho quote to prices array
+     */
+    private function mapPricesToArray(\Mage_Sales_Model_Quote $quote): array
+    {
+        $shippingAddress = $quote->getShippingAddress();
+
+        $prices = [
+            'subtotal' => (float) $quote->getSubtotal(),
+            'subtotalInclTax' => (float) ($quote->getSubtotal() + ($shippingAddress ? $shippingAddress->getTaxAmount() : 0)),
+            'subtotalWithDiscount' => (float) $quote->getSubtotalWithDiscount(),
+            'discountAmount' => null,
+            'shippingAmount' => null,
+            'shippingAmountInclTax' => null,
+            'taxAmount' => 0.0,
+            'grandTotal' => (float) $quote->getGrandTotal(),
+            'giftcardAmount' => null,
+        ];
+
+        if ($shippingAddress) {
+            $prices['discountAmount'] = $shippingAddress->getDiscountAmount()
+                ? (float) abs($shippingAddress->getDiscountAmount())
+                : null;
+            $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
+                ? (float) $shippingAddress->getShippingAmount()
+                : null;
+            $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
+                ? (float) $shippingAddress->getShippingInclTax()
+                : null;
+            $prices['taxAmount'] = (float) $shippingAddress->getTaxAmount();
+        }
 
         return $prices;
     }

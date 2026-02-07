@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Service\CustomerService;
 use Maho\ApiPlatform\ApiResource\Customer;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -47,10 +48,10 @@ final class CustomerProvider implements ProviderInterface
     /**
      * Provide customer data based on operation type
      *
-     * @return array<Customer>|Customer|null
+     * @return ArrayPaginator<Customer>|Customer|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|Customer|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Customer|null
     {
         $operationName = $operation->getName();
 
@@ -89,9 +90,9 @@ final class CustomerProvider implements ProviderInterface
     /**
      * Get customer collection with pagination and search
      *
-     * @return array<Customer>
+     * @return ArrayPaginator<Customer>
      */
-    private function getCollection(array $context): array
+    private function getCollection(array $context): ArrayPaginator
     {
         // GraphQL passes args in 'args', REST uses 'filters'
         $filters = $context['args'] ?? $context['filters'] ?? [];
@@ -110,7 +111,7 @@ final class CustomerProvider implements ProviderInterface
         );
 
         if (empty($result['customers'])) {
-            return [];
+            return new ArrayPaginator(items: [], currentPage: $page, itemsPerPage: $pageSize, totalItems: 0);
         }
 
         // Pre-load default billing addresses for all customers in a single query
@@ -143,7 +144,12 @@ final class CustomerProvider implements ProviderInterface
             $customers[] = $this->mapToDtoForSearch($mahoCustomer, $defaultBillingIds, $addressMap);
         }
 
-        return $customers;
+        return new ArrayPaginator(
+            items: $customers,
+            currentPage: $page,
+            itemsPerPage: $pageSize,
+            totalItems: (int) ($result['total'] ?? count($customers)),
+        );
     }
 
     // TODO: Extract customer mapping to a shared CustomerMapper service to eliminate duplication with CustomerProcessor/CustomerProvider

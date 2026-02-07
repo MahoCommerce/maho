@@ -45,7 +45,8 @@ security:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
         - { path: ^/api/admin/graphql, roles: ROLE_ADMIN }
         - { path: ^/api/graphql$, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/graphql$, roles: IS_AUTHENTICATED_FULLY, methods: [POST] }
+        # GraphQL endpoint is public — per-operation security handles authorization
+        - { path: ^/api/graphql$, roles: PUBLIC_ACCESS, methods: [POST] }
         # Public read access for storefront (products, categories, CMS, blog, stores, URL resolver, countries)
         - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }

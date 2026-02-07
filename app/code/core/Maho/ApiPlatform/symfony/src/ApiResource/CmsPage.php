@@ -35,12 +35,12 @@ use Maho\ApiPlatform\State\Provider\CmsPageProvider;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'cmsPage', description: 'Get a CMS page by ID'),
-        new QueryCollection(name: 'cmsPages', description: 'Get CMS pages'),
-        new Query(
-            name: 'cmsPageByIdentifier',
-            args: ['identifier' => ['type' => 'String!']],
-            description: 'Get a CMS page by URL identifier',
+        new Query(name: 'item_query', description: 'Get a CMS page by ID'),
+        new QueryCollection(name: 'collection_query', description: 'Get CMS pages'),
+        new QueryCollection(
+            name: 'cmsPages',
+            args: ['identifier' => ['type' => 'String'], 'isFooterLink' => ['type' => 'Boolean']],
+            description: 'Get CMS pages, optionally filter by identifier',
         ),
     ],
 )]

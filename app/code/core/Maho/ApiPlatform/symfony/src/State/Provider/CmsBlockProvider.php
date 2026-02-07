@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\CmsBlock;
+use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -27,10 +28,10 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class CmsBlockProvider implements ProviderInterface
 {
     /**
-     * @return CmsBlock|CmsBlock[]|null
+     * @return CmsBlock|ArrayPaginator<CmsBlock>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsBlock|array|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsBlock|ArrayPaginator|null
     {
         StoreContext::ensureStore();
 
@@ -89,9 +90,9 @@ final class CmsBlockProvider implements ProviderInterface
     }
 
     /**
-     * @return CmsBlock[]
+     * @return ArrayPaginator<CmsBlock>
      */
-    private function getCollection(array $context): array
+    private function getCollection(array $context): ArrayPaginator
     {
         $storeId = StoreContext::getStoreId();
         $filters = $context['filters'] ?? [];
@@ -125,7 +126,14 @@ final class CmsBlockProvider implements ProviderInterface
             $blocks[] = $this->mapToDto($block);
         }
 
-        return $blocks;
+        $total = count($blocks);
+
+        return new ArrayPaginator(
+            items: $blocks,
+            currentPage: 1,
+            itemsPerPage: max($total, 100),
+            totalItems: $total,
+        );
     }
 
     private function mapToDto(\Mage_Cms_Model_Block $block): CmsBlock

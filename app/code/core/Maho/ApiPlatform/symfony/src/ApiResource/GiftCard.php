@@ -16,6 +16,7 @@ namespace Maho\ApiPlatform\ApiResource;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GraphQl\Query;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\GiftCardProvider;
 
 #[ApiResource(
@@ -33,6 +34,7 @@ use Maho\ApiPlatform\State\Provider\GiftCardProvider;
             name: 'checkGiftcardBalance',
             args: ['code' => ['type' => 'String!']],
             description: 'Check gift card balance by code',
+            resolver: CustomQueryResolver::class,
         ),
     ],
 )]

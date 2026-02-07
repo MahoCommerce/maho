@@ -42,7 +42,24 @@ export default {
             return;
         }
 
-        // Logged in: save to API
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            this.wishlistLoading = true;
+            try {
+                const data = await this.gql(this._gqlQueries.ADD_TO_WISHLIST, { input: { productId, qty: 1 } });
+                const item = data.addToWishlistWishlistItem?.wishlistItem;
+                if (item?.id) {
+                    this.wishlist.push(item);
+                }
+                this.success = 'Added to wishlist';
+            } catch (e) {
+                this.error = 'Failed to add to wishlist: ' + e.message;
+            }
+            this.wishlistLoading = false;
+            return;
+        }
+
+        // REST branch
         this.wishlistLoading = true;
         try {
             const response = await this.api('/customers/me/wishlist', {
@@ -73,10 +90,25 @@ export default {
             return;
         }
 
-        // Logged in: remove via API
+        // Logged in: find item by productId
         const item = this.wishlist.find(w => w.productId === productId);
         if (!item) return;
 
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            this.wishlistLoading = true;
+            try {
+                await this.gql(this._gqlQueries.REMOVE_FROM_WISHLIST, { input: { itemId: item.id } });
+                this.wishlist = this.wishlist.filter(w => w.id !== item.id);
+                this.success = 'Removed from wishlist';
+            } catch (e) {
+                this.error = 'Failed to remove from wishlist: ' + e.message;
+            }
+            this.wishlistLoading = false;
+            return;
+        }
+
+        // REST branch
         this.wishlistLoading = true;
         try {
             await this.api('/customers/me/wishlist/' + item.id, {
@@ -98,6 +130,21 @@ export default {
     async loadWishlist() {
         if (!this.token) return;
 
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            this.wishlistLoading = true;
+            try {
+                const data = await this.gql(this._gqlQueries.MY_WISHLIST_QUERY);
+                this.wishlist = this._gqlNodes(data, 'myWishlistWishlistItems');
+            } catch (e) {
+                console.error('Failed to load wishlist (GQL):', e);
+                this.wishlist = [];
+            }
+            this.wishlistLoading = false;
+            return;
+        }
+
+        // REST branch
         this.wishlistLoading = true;
         try {
             const response = await this.api('/customers/me/wishlist');
@@ -115,6 +162,20 @@ export default {
     async syncGuestWishlist() {
         if (!this.token || this.guestWishlist.length === 0) return;
 
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            try {
+                await this.gql(this._gqlQueries.SYNC_WISHLIST, { input: { productIds: this.guestWishlist } });
+                this.guestWishlist = [];
+                localStorage.removeItem('guestWishlist');
+                await this.loadWishlist();
+            } catch (e) {
+                console.error('Failed to sync guest wishlist (GQL):', e);
+            }
+            return;
+        }
+
+        // REST branch
         try {
             const response = await this.api('/customers/me/wishlist/sync', {
                 method: 'POST',
@@ -145,6 +206,22 @@ export default {
         // Ensure we have a cart
         await this.ensureCart();
 
+        // GraphQL branch
+        if (this.useGraphQL && this._gqlQueries) {
+            this.wishlistLoading = true;
+            try {
+                await this.gql(this._gqlQueries.MOVE_WISHLIST_TO_CART, { input: { itemId, qty: 1 } });
+                this.wishlist = this.wishlist.filter(w => w.id !== itemId);
+                await this.loadCart();
+                this.success = 'Moved to cart';
+            } catch (e) {
+                this.error = 'Failed to move to cart: ' + e.message;
+            }
+            this.wishlistLoading = false;
+            return;
+        }
+
+        // REST branch
         this.wishlistLoading = true;
         try {
             await this.api('/customers/me/wishlist/' + itemId + '/move-to-cart', {

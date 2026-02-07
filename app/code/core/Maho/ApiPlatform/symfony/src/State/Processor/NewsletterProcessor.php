@@ -84,9 +84,9 @@ final class NewsletterProcessor implements ProcessorInterface
             $data->customerId = $customerId;
         }
 
-        // For GraphQL, email might be in args
-        if (empty($email) && isset($context['args']['email'])) {
-            $email = $context['args']['email'];
+        // For GraphQL, email might be in mutation input args
+        if (empty($email) && isset($context['args']['input']['email'])) {
+            $email = $context['args']['input']['email'];
         }
 
         // Validate email

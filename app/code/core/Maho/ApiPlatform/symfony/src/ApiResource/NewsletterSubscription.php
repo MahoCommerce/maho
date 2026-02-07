@@ -18,6 +18,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
+use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\NewsletterProvider;
 use Maho\ApiPlatform\State\Processor\NewsletterProcessor;
 
@@ -47,9 +49,14 @@ use Maho\ApiPlatform\State\Processor\NewsletterProcessor;
         ),
     ],
     graphQlOperations: [
+        new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_USER')"),
+        new QueryCollection(name: 'collection_query', description: 'Get newsletter subscriptions', security: "is_granted('ROLE_ADMIN')"),
         new Query(
             name: 'newsletterStatus',
+            args: [],
             description: 'Get subscription status for authenticated customer',
+            security: "is_granted('ROLE_USER')",
+            resolver: CustomQueryResolver::class,
         ),
         new Mutation(
             name: 'subscribeNewsletter',

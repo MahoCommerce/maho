@@ -19,6 +19,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\ProductProvider;
 
 #[ApiResource(
@@ -55,11 +56,13 @@ use Maho\ApiPlatform\State\Provider\ProductProvider;
             name: 'productBySku',
             args: ['sku' => ['type' => 'String!']],
             description: 'Get a product by SKU',
+            resolver: CustomQueryResolver::class,
         ),
         new Query(
             name: 'productByBarcode',
             args: ['barcode' => ['type' => 'String!']],
             description: 'Get a product by barcode',
+            resolver: CustomQueryResolver::class,
         ),
         new QueryCollection(
             name: 'categoryProducts',

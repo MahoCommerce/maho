@@ -41,7 +41,7 @@ class AuthController extends AbstractController
     {
         StoreContext::ensureStore();
 
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true) ?? [];
         $grantType = $data['grant_type'] ?? 'customer';
 
         return match ($grantType) {
@@ -98,6 +98,13 @@ class AuthController extends AbstractController
                     'error' => 'invalid_credentials',
                     'message' => 'Invalid email or password',
                 ], Response::HTTP_UNAUTHORIZED);
+            }
+
+            if ($customer->getConfirmation() && $customer->isConfirmationRequired()) {
+                return new JsonResponse([
+                    'error' => 'email_not_confirmed',
+                    'message' => 'This account is not confirmed. Please check your email for the confirmation link.',
+                ], Response::HTTP_FORBIDDEN);
             }
 
             $token = $this->jwtService->generateCustomerToken($customer);
