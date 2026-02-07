@@ -5,11 +5,15 @@ declare(strict_types=1);
 /**
  * API v2 Cart Endpoint Tests (WRITE)
  *
- * WARNING: These tests CREATE real data in the database!
- * Only run with: ./vendor/bin/pest --group=write
- *
  * Tests POST /api/carts endpoints.
+ * All created carts are cleaned up after tests complete.
+ *
+ * @group write
  */
+
+afterAll(function () {
+    cleanupTestData();
+});
 
 describe('POST /api/carts', function () {
 
@@ -41,14 +45,12 @@ describe('POST /api/carts', function () {
 describe('GET /api/carts/{id}', function () {
 
     it('returns cart details', function () {
-        // First create a cart
         $createResponse = apiPost('/api/carts', [], customerToken());
         expect($createResponse['status'])->toBeSuccessful();
 
         $cartId = $createResponse['json']['id'] ?? null;
         expect($cartId)->not->toBeNull();
 
-        // Then fetch it
         $response = apiGet("/api/carts/{$cartId}", customerToken());
 
         expect($response['status'])->toBe(200);
@@ -74,12 +76,12 @@ describe('GET /api/carts/{id}', function () {
  */
 describe('Cart Prices Field (Regression)', function () {
 
-    it('returns totals object in guest cart response', function () {
-        // Guest cart REST endpoints use 'totals' (Symfony controller)
+    it('returns prices object in guest cart response', function () {
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
 
         $cartId = $createResponse['json']['id'];
+        trackCreated('quote', (int) $cartId);
 
         $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
             'sku' => fixtures('write_test_sku'),
@@ -89,12 +91,12 @@ describe('Cart Prices Field (Regression)', function () {
 
         $cart = $addResponse['json'];
 
-        // Guest cart REST uses 'totals'
-        expect($cart)->toHaveKey('totals');
+        // REST now uses 'prices' (aligned with GraphQL)
+        expect($cart)->toHaveKey('prices');
 
-        $totals = $cart['totals'];
-        expect($totals)->toHaveKey('subtotal');
-        expect($totals)->toHaveKey('grandTotal');
+        $prices = $cart['prices'];
+        expect($prices)->toHaveKey('subtotal');
+        expect($prices)->toHaveKey('grandTotal');
     });
 
     it('includes thumbnailUrl in cart items', function () {
@@ -102,6 +104,7 @@ describe('Cart Prices Field (Regression)', function () {
         expect($createResponse['status'])->toBe(201);
 
         $cartId = $createResponse['json']['id'];
+        trackCreated('quote', (int) $cartId);
 
         $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
             'sku' => fixtures('write_test_sku'),

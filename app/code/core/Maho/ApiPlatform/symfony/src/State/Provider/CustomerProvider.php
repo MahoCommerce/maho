@@ -164,7 +164,8 @@ final class CustomerProvider implements ProviderInterface
         $dto->firstName = $customer->getFirstname();
         $dto->lastName = $customer->getLastname();
         $dto->fullName = trim(($customer->getFirstname() ?? '') . ' ' . ($customer->getLastname() ?? ''));
-        $dto->isSubscribed = (bool) $customer->getIsSubscribed();
+        $subscriber = \Mage::getModel('newsletter/subscriber')->loadByCustomer($customer);
+        $dto->isSubscribed = $subscriber->isSubscribed();
         $dto->groupId = (int) $customer->getGroupId();
         $dto->createdAt = $customer->getCreatedAt();
         $dto->updatedAt = $customer->getUpdatedAt();

@@ -191,4 +191,17 @@ class Product
 
     #[ApiProperty(description: 'Average rating on 1-5 scale, null if no reviews')]
     public ?float $averageRating = null;
+
+    /**
+     * Downloadable product links (detail only)
+     * Structure: [['id' => 20, 'title' => 'PDF Download', 'price' => 0.0, 'sortOrder' => 0, 'numberOfDownloads' => 0, 'sampleUrl' => null]]
+     */
+    #[ApiProperty(description: 'Downloadable links (detail only, for downloadable products)')]
+    public array $downloadableLinks = [];
+
+    #[ApiProperty(description: 'Section title for downloadable links (e.g. "Check Items to Download")')]
+    public ?string $linksTitle = null;
+
+    #[ApiProperty(description: 'Whether links can be purchased individually (shows checkboxes)')]
+    public ?bool $linksPurchasedSeparately = null;
 }

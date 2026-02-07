@@ -59,16 +59,17 @@ export default {
         }
     },
 
-    async addToCart(sku, qty = 1, options = null) {
+    async addToCart(sku, qty = 1, options = null, links = null) {
         this.loading = true;
         try {
             await this.ensureCart();
 
             // GraphQL branch
             if (this.useGraphQL && this._gqlQueries) {
-                const data = await this.gql(this._gqlQueries.ADD_TO_CART, {
-                    input: { maskedId: this.cartId, sku, qty }
-                });
+                const input = { maskedId: this.cartId, sku, qty };
+                if (options && Object.keys(options).length > 0) input.options = options;
+                if (links && links.length > 0) input.links = links;
+                const data = await this.gql(this._gqlQueries.ADD_TO_CART, { input });
                 // Update cart directly from mutation response
                 this.cart = data.addToCartCart?.cart || {};
                 this.cartCount = this.cart.items?.length || 0;

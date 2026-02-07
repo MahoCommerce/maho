@@ -44,6 +44,7 @@ query GetProduct($id: ID!) {
         reviewCount averageRating hasRequiredOptions
         configurableOptions variants customOptions mediaGallery
         relatedProducts crosssellProducts upsellProducts
+        downloadableLinks linksTitle linksPurchasedSeparately
     }
 }`;
 

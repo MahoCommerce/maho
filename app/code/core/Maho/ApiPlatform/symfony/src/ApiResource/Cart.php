@@ -74,6 +74,8 @@ use Maho\ApiPlatform\State\Processor\CartProcessor;
                 'sku' => ['type' => 'String!'],
                 'qty' => ['type' => 'Float!'],
                 'fulfillmentType' => ['type' => 'String', 'description' => 'SHIP (default) or PICKUP'],
+                'options' => ['type' => 'Iterable', 'description' => 'Custom options as {optionId: valueId} pairs'],
+                'links' => ['type' => '[Int]', 'description' => 'Downloadable link IDs to purchase'],
             ],
             description: 'Add item to cart',
         ),

@@ -481,6 +481,15 @@ final class ProductProvider implements ProviderInterface
             $dto->relatedProducts = $this->getLinkedProducts($product->getRelatedProductCollection());
             $dto->crosssellProducts = $this->getLinkedProducts($product->getCrossSellProductCollection());
             $dto->upsellProducts = $this->getLinkedProducts($product->getUpSellProductCollection());
+
+            // Downloadable links
+            if ($product->getTypeId() === 'downloadable') {
+                $dto->downloadableLinks = $this->getDownloadableLinks($product);
+                $dto->linksTitle = $product->getData('links_title')
+                    ?: \Mage::getStoreConfig('catalog/downloadable/links_title')
+                    ?: 'Links';
+                $dto->linksPurchasedSeparately = (bool) $product->getData('links_purchased_separately');
+            }
         }
 
         return $dto;
@@ -757,6 +766,49 @@ final class ProductProvider implements ProviderInterface
         }
 
         return $customOptions;
+    }
+
+    /**
+     * Get downloadable product links
+     *
+     * @return array<array{id: int, title: string, price: float, sortOrder: int, numberOfDownloads: int, sampleUrl: string|null}>
+     */
+    private function getDownloadableLinks(\Mage_Catalog_Model_Product $product): array
+    {
+        /** @var \Mage_Downloadable_Model_Product_Type $typeInstance */
+        $typeInstance = $product->getTypeInstance(true);
+        $links = $typeInstance->getLinks($product);
+
+        if (!$links) {
+            return [];
+        }
+
+        $result = [];
+        $store = \Mage::app()->getStore();
+
+        foreach ($links as $link) {
+            /** @var \Mage_Downloadable_Model_Link $link */
+            $sampleUrl = null;
+            if ($link->getSampleFile()) {
+                $sampleUrl = \Mage::getUrl('downloadable/download/linkSample', ['link_id' => $link->getId()]);
+            } elseif ($link->getSampleUrl()) {
+                $sampleUrl = $link->getSampleUrl();
+            }
+
+            $result[] = [
+                'id' => (int) $link->getId(),
+                'title' => $link->getStoreTitle() ?: $link->getTitle(),
+                'price' => (float) $store->convertPrice($link->getPrice(), false),
+                'sortOrder' => (int) $link->getSortOrder(),
+                'numberOfDownloads' => (int) $link->getNumberOfDownloads(),
+                'sampleUrl' => $sampleUrl,
+            ];
+        }
+
+        // Sort by sort_order
+        usort($result, fn($a, $b) => $a['sortOrder'] <=> $b['sortOrder']);
+
+        return $result;
     }
 
     /**

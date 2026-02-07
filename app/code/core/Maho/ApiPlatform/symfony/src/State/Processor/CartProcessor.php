@@ -105,6 +105,15 @@ final class CartProcessor implements ProcessorInterface
             $fulfillmentType = 'SHIP';
         }
 
+        // Build buy request options
+        $buyOptions = [];
+        if (!empty($args['options'])) {
+            $buyOptions['options'] = $args['options'];
+        }
+        if (!empty($args['links'])) {
+            $buyOptions['links'] = $args['links'];
+        }
+
         $quote = $this->cartService->getCart(
             $cartId ? (int) $cartId : null,
             $maskedId,
@@ -114,7 +123,7 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
-        $quote = $this->cartService->addItem($quote, $sku, $qty);
+        $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);
 
         // Set fulfillment type on the newly added item
         if ($fulfillmentType !== 'SHIP') {

@@ -95,6 +95,7 @@ final class BlogPostProvider implements ProviderInterface
         $filters = $context['filters'] ?? [];
 
         $collection = \Mage::getResourceModel('blog/post_collection');
+        $collection->addAttributeToSelect('image');
         $collection->addStoreFilter($storeId);
         $collection->addFieldToFilter('is_active', 1);
 

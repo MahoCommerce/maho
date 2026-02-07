@@ -32,7 +32,9 @@ class CartService
         if ($storeId) {
             $quote->setStoreId($storeId);
         } else {
-            $quote->setStoreId(\Mage::app()->getStore()->getId());
+            // Use the default store — Mage::app()->getStore() returns admin (0) under Symfony
+            $defaultStoreId = (int) \Mage::app()->getDefaultStoreView()->getId();
+            $quote->setStoreId($defaultStoreId ?: 1);
         }
 
         if ($customerId) {
@@ -145,10 +147,23 @@ class CartService
         // If so, add the configurable parent with the proper super_attribute options
         $buyRequest = new \Maho\DataObject(['qty' => $qty]);
 
-        // Add custom options if provided
+        // Add custom options and downloadable links if provided
+        // Supports two formats:
+        //   Structured: ['options' => [...], 'links' => [...]] (from GraphQL CartProcessor)
+        //   Flat: [optionId => valueId, ...] (from REST GuestCartController)
         if (!empty($options)) {
-            $buyRequest->setData('options', $options);
-            \Mage::log('Adding custom options: ' . json_encode($options));
+            if (isset($options['options']) || isset($options['links'])) {
+                // Structured format
+                if (!empty($options['options'])) {
+                    $buyRequest->setData('options', $options['options']);
+                }
+                if (!empty($options['links'])) {
+                    $buyRequest->setData('links', $options['links']);
+                }
+            } else {
+                // Flat custom options format (REST)
+                $buyRequest->setData('options', $options);
+            }
         }
 
         if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
@@ -980,34 +995,12 @@ class CartService
      */
     private function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
+        // Ensure quote has addresses — collectTotals() calculates per-address,
+        // so without addresses all totals (including discounts) return 0
+        $quote->getBillingAddress();
+        $quote->getShippingAddress();
+
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
-
-        // Use actual item count (not the stale getItemsCount() counter)
-        $items = $quote->getAllVisibleItems();
-        $actualItemCount = count($items);
-
-        if ($actualItemCount > 0 && ($quote->getSubtotal() == 0 || !$quote->getSubtotal())) {
-            \Mage::log('collectTotals failed, manually calculating quote totals');
-            $subtotal = 0;
-            $totalQty = 0;
-            foreach ($items as $item) {
-                if (!$item->getRowTotal() || $item->getRowTotal() == 0) {
-                    $itemRowTotal = $item->getPrice() * $item->getQty();
-                    $item->setRowTotal($itemRowTotal);
-                    $item->setBaseRowTotal($itemRowTotal);
-                }
-                $subtotal += $item->getRowTotal();
-                $totalQty += $item->getQty();
-            }
-
-            $quote->setSubtotal($subtotal);
-            $quote->setBaseSubtotal($subtotal);
-            $quote->setGrandTotal($subtotal);
-            $quote->setBaseGrandTotal($subtotal);
-            $quote->setItemsCount($actualItemCount);
-            $quote->setItemsQty($totalQty);
-            $quote->setTotalsCollectedFlag(true);
-            \Mage::log("Manually set subtotal: {$subtotal}, grand_total: {$subtotal}, items: {$actualItemCount}");
-        }
     }
 }

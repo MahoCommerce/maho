@@ -32,6 +32,12 @@ export default {
             this.qty = 1;
             this.selectedOptions = {};
             this.selectedCustomOptions = {};
+            this.selectedDownloadableLinks = [];
+
+            // Auto-select all downloadable links when not purchased separately
+            if (this.currentProduct?.type === 'downloadable' && !this.currentProduct.linksPurchasedSeparately) {
+                this.selectedDownloadableLinks = (this.currentProduct.downloadableLinks || []).map(l => l.id);
+            }
 
             // Auto-select options with only one value
             this.autoSelectSingleOptions();
