@@ -305,6 +305,7 @@ final class ProductProvider implements ProviderInterface
         return [
             'id' => $dto->id,
             'sku' => $dto->sku,
+            'urlKey' => $dto->urlKey,
             'name' => $dto->name,
             'description' => $dto->description,
             'shortDescription' => $dto->shortDescription,
@@ -338,6 +339,7 @@ final class ProductProvider implements ProviderInterface
         $dto = new Product();
         $dto->id = $data['id'] ?? null;
         $dto->sku = $data['sku'] ?? '';
+        $dto->urlKey = $data['urlKey'] ?? null;
         $dto->name = $data['name'] ?? '';
         $dto->description = $data['description'] ?? null;
         $dto->shortDescription = $data['shortDescription'] ?? null;
@@ -382,6 +384,7 @@ final class ProductProvider implements ProviderInterface
         $dto = new Product();
         $dto->id = (int) $product->getId();
         $dto->sku = $product->getSku() ?? '';
+        $dto->urlKey = $product->getUrlKey();
         $dto->name = $product->getName() ?? '';
         $dto->description = $product->getDescription();
         $dto->shortDescription = $product->getShortDescription();
@@ -819,6 +822,7 @@ final class ProductProvider implements ProviderInterface
         $dto = new Product();
         $dto->id = isset($data['id']) ? (int) $data['id'] : null;
         $dto->sku = $data['sku'] ?? '';
+        $dto->urlKey = $data['url_key'] ?? null;
         $dto->name = $data['name'] ?? '';
         $dto->description = $data['description'] ?? null;
         $dto->type = $data['type'] ?? \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE;

@@ -85,6 +85,9 @@ class Product
     #[ApiProperty(description: 'Product SKU')]
     public string $sku = '';
 
+    #[ApiProperty(description: 'URL key for SEO-friendly URLs')]
+    public ?string $urlKey = null;
+
     #[ApiProperty(description: 'Product name')]
     public string $name = '';
 

@@ -42,13 +42,8 @@ export default {
             this.topCategories = this.categories.slice(0, 5);
         } catch (e) {
             console.error('Failed to load categories:', e);
-            this.categories = [
-                { id: 2, name: 'Default Category' },
-                { id: 3, name: 'Racquets' },
-                { id: 4, name: 'Shoes' },
-                { id: 5, name: 'Apparel' }
-            ];
-            this.topCategories = this.categories.slice(0, 4);
+            this.categories = [];
+            this.topCategories = [];
         }
     },
 
@@ -112,10 +107,13 @@ export default {
         this.loading = false;
     },
 
-    async loadCategory(catId, isSubcategory = false) {
+    async loadCategory(catId, isSubcategory = false, urlKey = null) {
         this.currentCategory = catId;
+        this._currentCategoryUrlKey = urlKey || this._currentCategoryUrlKey;
         this.page = 1;
         this.view = 'category';
+        this.mobileMenuOpen = false;
+        window.scrollTo({ top: 0, behavior: 'instant' });
         // Clear search when navigating to a category
         this.searchQuery = '';
 

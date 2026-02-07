@@ -44,7 +44,7 @@ final class WishlistProcessor implements ProcessorInterface
 
     /**
      * @param WishlistItem $data
-     * @return WishlistItem|array<WishlistItem>|null
+     * @return WishlistItem|null
      */
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
@@ -102,7 +102,12 @@ final class WishlistProcessor implements ProcessorInterface
 
         if ($operationName === 'sync_wishlist') {
             $body = $context['request']?->toArray() ?? [];
-            return $this->syncWishlist($body['productIds'] ?? []);
+            $addedItems = $this->syncWishlist($body['productIds'] ?? []);
+            // REST POST expects single resource — return first added or first existing
+            if (!empty($addedItems)) {
+                return $addedItems[0];
+            }
+            return $this->getFirstWishlistItem();
         }
 
         // Default POST - add to wishlist
@@ -145,7 +150,7 @@ final class WishlistProcessor implements ProcessorInterface
 
         // Check if already in wishlist
         $existingItem = null;
-        foreach ($wishlist->getItemCollection() ?? [] as $item) {
+        foreach ($wishlist->getItemsCollection() as $item) {
             if ((int) $item->getProductId() === $productId) {
                 $existingItem = $item;
                 break;
@@ -288,7 +293,7 @@ final class WishlistProcessor implements ProcessorInterface
 
         // Get existing product IDs in wishlist
         $existingProductIds = [];
-        foreach ($wishlist->getItemCollection() ?? [] as $item) {
+        foreach ($wishlist->getItemsCollection() as $item) {
             $existingProductIds[] = (int) $item->getProductId();
         }
 
@@ -328,17 +333,14 @@ final class WishlistProcessor implements ProcessorInterface
         $customerId = $this->requireAuthentication();
         $wishlist = $this->getWishlist($customerId);
 
-        $itemCollection = $wishlist->getItemCollection();
-        if ($itemCollection) {
-            $itemCollection->addStoreFilter(\Mage::app()->getStore()->getId())
-                ->setVisibilityFilter();
+        $itemCollection = $wishlist->getItemsCollection();
+        $itemCollection->addStoreFilter([\Mage::app()->getStore()->getId()]);
 
-            /** @var \Mage_Wishlist_Model_Item $item */
-            foreach ($itemCollection as $item) {
-                $product = $item->getProduct();
-                if ($product && $product->getId()) {
-                    return $this->buildWishlistItem($item, $product);
-                }
+        /** @var \Mage_Wishlist_Model_Item $item */
+        foreach ($itemCollection as $item) {
+            $product = $item->getProduct();
+            if ($product && $product->getId()) {
+                return $this->buildWishlistItem($item, $product);
             }
         }
 
