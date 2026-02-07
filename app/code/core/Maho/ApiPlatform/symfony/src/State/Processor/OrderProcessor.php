@@ -142,10 +142,16 @@ final class OrderProcessor implements ProcessorInterface
             throw new NotFoundHttpException('Order not found');
         }
 
-        // Verify customer access for non-admin requests
+        // Verify customer access: customers can only cancel their own orders
         $customerId = $context['customer_id'] ?? null;
-        if ($customerId && $order->getCustomerId() != $customerId) {
-            throw new NotFoundHttpException('Order not found');
+        $isAdmin = !empty($context['is_admin']);
+        if (!$isAdmin) {
+            if (!$customerId) {
+                throw new BadRequestHttpException('Authentication required to cancel orders');
+            }
+            if ($order->getCustomerId() != $customerId) {
+                throw new NotFoundHttpException('Order not found');
+            }
         }
 
         // Cancel order

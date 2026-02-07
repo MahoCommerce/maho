@@ -525,15 +525,13 @@ class GuestCartController extends AbstractController
     }
 
     /**
-     * Load cart by ID or masked ID
+     * Load cart by masked ID only
+     *
+     * Security: Guest carts are only accessible via masked IDs (32-char hex tokens).
+     * Numeric IDs are sequential and would allow cart enumeration attacks.
      */
     private function loadCart(string $cartId): ?\Mage_Sales_Model_Quote
     {
-        // Check if it's a numeric ID or masked ID
-        if (is_numeric($cartId)) {
-            return $this->cartService->getCart((int) $cartId, null);
-        }
-
         return $this->cartService->getCart(null, $cartId);
     }
 

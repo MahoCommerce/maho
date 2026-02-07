@@ -72,6 +72,16 @@ class PaymentService
             throw new \Mage_Core_Exception('Order not found');
         }
 
+        // Validate cumulative payments don't exceed order total
+        $existingPaid = $this->getTotalPaidAmount($orderId);
+        $orderTotal = (float) $order->getGrandTotal();
+        $tolerance = 0.01;
+        if (($existingPaid + $amount) > ($orderTotal + $tolerance)) {
+            throw new \Mage_Core_Exception(
+                "Payment would exceed order total. Order total: {$orderTotal}, already paid: {$existingPaid}, attempted: {$amount}",
+            );
+        }
+
         // Get currency
         $currencyCode = $order->getOrderCurrencyCode();
 

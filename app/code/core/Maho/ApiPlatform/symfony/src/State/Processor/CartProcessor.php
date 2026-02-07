@@ -445,22 +445,32 @@ final class CartProcessor implements ProcessorInterface
 
     /**
      * Assign customer to cart (merge guest cart)
+     *
+     * Security: Only allows assigning the authenticated user's own customer ID.
+     * Prevents IDOR where any authenticated user could assign any customer to a cart.
      */
     private function assignCustomerToCart(array $context): Cart
     {
         $args = $context['args']['input'] ?? [];
         $maskedId = $args['maskedId'] ?? null;
-        $customerId = $args['customerId'] ?? $context['customer_id'] ?? null;
+        $requestedCustomerId = $args['customerId'] ?? null;
+        $authenticatedCustomerId = $context['customer_id'] ?? null;
 
         if (!$maskedId) {
             throw new \RuntimeException('Masked cart ID is required');
         }
 
-        if (!$customerId) {
-            throw new \RuntimeException('Customer ID is required');
+        if (!$authenticatedCustomerId) {
+            throw new \RuntimeException('Authentication required');
         }
 
-        $quote = $this->cartService->mergeCarts($maskedId, (int) $customerId);
+        // Security: Only allow assigning your own customer ID
+        $customerId = (int) $authenticatedCustomerId;
+        if ($requestedCustomerId && (int) $requestedCustomerId !== $customerId) {
+            throw new \RuntimeException('Cannot assign a different customer to this cart');
+        }
+
+        $quote = $this->cartService->mergeCarts($maskedId, $customerId);
 
         return $this->mapQuoteToCart($quote);
     }
