@@ -85,9 +85,8 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
                 'maskedId' => ['type' => 'String'],
                 'paymentMethod' => ['type' => 'String'],
                 'shippingMethod' => ['type' => 'String'],
-                'customerId' => ['type' => 'ID'],
             ],
-            description: 'Place order from cart',
+            description: 'Place order from cart (requires maskedId for guest, or authentication for customer carts)',
         ),
         new Mutation(
             name: 'cancelOrder',

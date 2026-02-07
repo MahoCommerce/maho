@@ -473,14 +473,16 @@ class CustomerService
             throw new \Exception('Invalid email or token.');
         }
 
-        // Validate reset token
-        if ($customer->getRpToken() !== $token) {
+        // Validate reset token (use hash_equals to prevent timing attacks)
+        $storedToken = $customer->getRpToken();
+        if (!$storedToken || !hash_equals($storedToken, $token)) {
             throw new \Exception('Invalid or expired reset token.');
         }
 
-        // Check token expiration (24 hours)
+        // Check token expiration using configurable duration (default 24 hours)
+        $expiryHours = (int) \Mage::getStoreConfig('customer/password/reset_link_expiration_period') ?: 24;
         $tokenCreatedAt = strtotime($customer->getRpTokenCreatedAt());
-        if ((time() - $tokenCreatedAt) > 86400) {
+        if ((time() - $tokenCreatedAt) > ($expiryHours * 3600)) {
             throw new \Exception('Reset token has expired.');
         }
 

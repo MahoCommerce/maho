@@ -125,6 +125,14 @@ class CartService
      */
     public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = []): \Mage_Sales_Model_Quote
     {
+        // Validate quantity
+        if ($qty <= 0) {
+            throw new \RuntimeException('Quantity must be greater than zero');
+        }
+        if ($qty > 10000) {
+            throw new \RuntimeException('Quantity cannot exceed 10,000');
+        }
+
         // First find product ID by SKU
         $productId = \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
 
@@ -277,6 +285,14 @@ class CartService
      */
     public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, float $qty): \Mage_Sales_Model_Quote
     {
+        // Validate quantity
+        if ($qty <= 0) {
+            throw new \RuntimeException('Quantity must be greater than zero');
+        }
+        if ($qty > 10000) {
+            throw new \RuntimeException('Quantity cannot exceed 10,000');
+        }
+
         $item = $quote->getItemById($itemId);
 
         if (!$item) {
@@ -493,22 +509,20 @@ class CartService
     /**
      * Get cart ID from masked ID via database lookup
      *
-     * @param string $maskedId Masked ID
+     * Security: Only accepts 32-character hex masked IDs (cryptographically secure).
+     * Legacy base64 format has been removed as it was predictable and reversible.
+     *
+     * @param string $maskedId Masked ID (32-char hex string)
      * @return int|null Cart ID or null if not found
      */
     private function getCartIdFromMaskedId(string $maskedId): ?int
     {
-        // Security: Only lookup if maskedId looks like a valid hex string
+        // Only accept secure 32-char hex format
         if (!preg_match('/^[a-f0-9]{32}$/i', $maskedId)) {
-            // Backwards compatibility: try legacy base64 format
-            $decoded = base64_decode($maskedId, true);
-            if ($decoded && preg_match('/^cart_(\d+)_/', $decoded, $matches)) {
-                return (int) $matches[1];
-            }
             return null;
         }
 
-        // Database lookup for new secure format
+        // Database lookup
         $resource = \Mage::getSingleton('core/resource');
         $read = $resource->getConnection('core_read');
         $quoteTable = $resource->getTableName('sales/quote');
