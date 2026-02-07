@@ -20,6 +20,13 @@ function store() {
         apiCallStats: { rest: 0, graphql: 0 },
         _gqlQueries: null,
 
+        // Mobile UI
+        mobileMenuOpen: false,
+        mobileSearchOpen: false,
+        mobileMenuExpandedCat: null,
+        mobileMenuSubcategories: [],
+        mobileMenuSubsLoading: false,
+
         // CMS & Blog
         cmsPage: null,
         footerPages: [],
@@ -45,6 +52,7 @@ function store() {
         subcategories: [],
         currentCategory: null,
         currentTopCategory: null,
+        _currentCategoryUrlKey: null,
         searchQuery: '',
         instantSearchResults: [],
         instantSearchCategories: [],
@@ -154,7 +162,7 @@ function store() {
             if (loadedModules.has(name)) return;
 
             try {
-                const module = await import(`/api-test/store/modules/${name}.js?v=54`);
+                const module = await import(`/api-test/store/modules/${name}.js?v=61`);
                 const methods = module.default;
 
                 // Special handling for graphql module: store queries, not methods
@@ -508,6 +516,7 @@ function store() {
         // ==================== Path Resolution ====================
 
         async resolveCurrentPath() {
+            window.scrollTo({ top: 0, behavior: 'instant' });
             const path = window.location.pathname.replace(BASE_PATH, '').replace(/^\/+/, '');
             const params = new URLSearchParams(window.location.search);
             this.currentPath = path;
@@ -523,6 +532,7 @@ function store() {
                 return;
             }
 
+            // Legacy query param support (redirect to slug URLs)
             if (params.get('product')) {
                 await this.viewProduct(params.get('product'));
                 return;
@@ -532,7 +542,7 @@ function store() {
                 const categoryId = parseInt(params.get('category'));
                 this.currentCategory = categoryId;
                 this.currentTopCategory = categoryId;
-                this.searchQuery = '';  // Clear search when loading category from URL
+                this.searchQuery = '';
                 this.page = parseInt(params.get('page')) || 1;
                 this.pageSize = parseInt(params.get('pageSize')) || 12;
                 this.sortBy = params.get('sort') || '';
@@ -628,9 +638,18 @@ function store() {
                 } else if (data?.type === 'category') {
                     this.currentCategory = data.id;
                     this.currentTopCategory = data.id;
+                    this._currentCategoryUrlKey = data.identifier || path;
                     this.page = parseInt(params.get('page')) || 1;
                     this.pageSize = parseInt(params.get('pageSize')) || 12;
                     this.sortBy = params.get('sort') || '';
+                    if (params.get('priceMin')) {
+                        this.priceMin = parseInt(params.get('priceMin'));
+                        this.priceFilterActive = true;
+                    }
+                    if (params.get('priceMax')) {
+                        this.priceMax = parseInt(params.get('priceMax'));
+                        this.priceFilterActive = true;
+                    }
                     this.view = 'category';
                     await this.loadSubcategories(data.id);
                     this.loadProducts();
@@ -650,8 +669,6 @@ function store() {
 
         buildUrl(params = {}) {
             const searchParams = new URLSearchParams();
-            if (params.product) searchParams.set('product', params.product);
-            if (params.category) searchParams.set('category', params.category);
             if (params.page > 1) searchParams.set('page', params.page);
             if (params.pageSize && params.pageSize != 12) searchParams.set('pageSize', params.pageSize);
             if (params.sort) searchParams.set('sort', params.sort);
@@ -662,19 +679,41 @@ function store() {
         },
 
         updateUrl() {
-            const params = this.buildUrl({
-                product: this.view === 'product' && this.currentProduct ? this.currentProduct.id : null,
-                category: this.view === 'category' && this.currentCategory ? this.currentCategory : null,
-                page: this.page,
-                pageSize: this.pageSize,
-                sort: this.sortBy,
-                priceMin: this.priceMin,
-                priceMax: this.priceMax,
-                priceFilterActive: this.priceFilterActive,
-                priceSliderMax: this.priceSliderMax,
-                search: this.view === 'search' ? this.searchQuery : null
-            });
-            const newUrl = BASE_PATH + params;
+            let path = '';
+
+            if (this.view === 'product' && this.currentProduct?.urlKey) {
+                path = '/' + this.currentProduct.urlKey;
+            } else if (this.view === 'category' && this._currentCategoryUrlKey) {
+                path = '/' + this._currentCategoryUrlKey;
+            } else if (this.view === 'search' && this.searchQuery) {
+                // Search stays as query param
+                const params = this.buildUrl({
+                    search: this.searchQuery,
+                    page: this.page,
+                    pageSize: this.pageSize,
+                    sort: this.sortBy,
+                    priceMin: this.priceMin,
+                    priceMax: this.priceMax,
+                    priceFilterActive: this.priceFilterActive,
+                    priceSliderMax: this.priceSliderMax,
+                });
+                window.history.replaceState({}, '', BASE_PATH + params);
+                return;
+            }
+
+            // Append pagination/filter params for category views
+            if (this.view === 'category' && path) {
+                const searchParams = new URLSearchParams();
+                if (this.page > 1) searchParams.set('page', this.page);
+                if (this.pageSize && this.pageSize != 12) searchParams.set('pageSize', this.pageSize);
+                if (this.sortBy) searchParams.set('sort', this.sortBy);
+                if (this.priceFilterActive && this.priceMin > 0) searchParams.set('priceMin', this.priceMin);
+                if (this.priceFilterActive && this.priceMax < this.priceSliderMax) searchParams.set('priceMax', this.priceMax);
+                const qs = searchParams.toString();
+                if (qs) path += '?' + qs;
+            }
+
+            const newUrl = BASE_PATH + path;
             window.history.replaceState({}, '', newUrl);
         },
 
@@ -689,9 +728,13 @@ function store() {
         async navigate(view) {
             this.error = null;
             this.success = null;
+            this.mobileMenuOpen = false;
+            this.mobileSearchOpen = false;
+            window.scrollTo({ top: 0, behavior: 'instant' });
             if (view === 'home') {
                 this.currentCategory = null;
                 this.currentTopCategory = null;
+                this._currentCategoryUrlKey = null;
                 this.subcategories = [];
                 this.searchQuery = '';
                 this.page = 1;
@@ -731,6 +774,30 @@ function store() {
             }
         },
 
+        // ==================== Mobile Menu ====================
+
+        async mobileMenuToggleCat(catId) {
+            if (this.mobileMenuExpandedCat === catId) {
+                this.mobileMenuExpandedCat = null;
+                this.mobileMenuSubcategories = [];
+                return;
+            }
+            this.mobileMenuExpandedCat = catId;
+            this.mobileMenuSubsLoading = true;
+            try {
+                if (this.useGraphQL && this._gqlQueries) {
+                    const data = await this.gql(this._gqlQueries.CATEGORIES_QUERY, { parentId: catId });
+                    this.mobileMenuSubcategories = this._gqlNodes(data, 'categoriesCategories');
+                } else {
+                    const data = await this.api('/categories?parentId=' + catId);
+                    this.mobileMenuSubcategories = data.member || data.items || data || [];
+                }
+            } catch (e) {
+                this.mobileMenuSubcategories = [];
+            }
+            this.mobileMenuSubsLoading = false;
+        },
+
         // ==================== API Helper ====================
 
         async api(endpoint, options = {}, retry = true) {
@@ -766,6 +833,7 @@ function store() {
                 const error = await response.json().catch(() => ({}));
                 throw new Error(error.message || error.detail || 'API Error');
             }
+            if (response.status === 204) return null;
             return response.json();
         },
 
@@ -849,20 +917,7 @@ function store() {
                 this.countries = data.member || data || [];
             } catch (e) {
                 console.error('Failed to load countries:', e);
-                this.countries = [{
-                    id: 'AU',
-                    name: 'Australia',
-                    available_regions: [
-                        { id: 320, code: 'ACT', name: 'Australian Capital Territory' },
-                        { id: 321, code: 'NSW', name: 'New South Wales' },
-                        { id: 322, code: 'NT', name: 'Northern Territory' },
-                        { id: 323, code: 'QLD', name: 'Queensland' },
-                        { id: 324, code: 'SA', name: 'South Australia' },
-                        { id: 325, code: 'TAS', name: 'Tasmania' },
-                        { id: 326, code: 'VIC', name: 'Victoria' },
-                        { id: 327, code: 'WA', name: 'Western Australia' }
-                    ]
-                }];
+                this.countries = [];
             }
         },
 
@@ -897,6 +952,7 @@ function store() {
 
         async viewBlogPost(urlKeyOrId) {
             this.loading = true;
+            window.scrollTo({ top: 0, behavior: 'instant' });
             try {
                 let post;
 
@@ -1068,15 +1124,16 @@ function store() {
         selectSearchResult(product) {
             this.instantSearchOpen = false;
             this.clearInstantSearchResults();
-            this.viewProduct(product.id);
+            this.viewProduct(product.id, product.urlKey);
         },
 
         selectCategory(category) {
             this.instantSearchOpen = false;
             this.clearInstantSearchResults();
             this.searchQuery = '';
-            // Navigate to category via URL parameter
-            window.history.pushState({}, '', BASE_PATH + '?category=' + category.id);
+            // Navigate to category via URL slug
+            const slug = category.urlKey || category.id;
+            window.history.pushState({}, '', BASE_PATH + '/' + slug);
             this.resolveCurrentPath();
         },
 

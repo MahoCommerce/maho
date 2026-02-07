@@ -7,46 +7,7 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-    <style>
-        [x-cloak] { display: none !important; }
-
-        /* Skeleton loading animation */
-        @keyframes skeleton-pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
-        .skeleton {
-            background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
-            background-size: 200% 100%;
-            animation: skeleton-pulse 1.5s ease-in-out infinite;
-            border-radius: 0.375rem;
-        }
-
-        /* Mobile menu slide-in */
-        .mobile-menu-backdrop {
-            transition: opacity 0.3s ease;
-        }
-        .mobile-menu-panel {
-            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .mobile-menu-panel[data-closed] {
-            transform: translateX(-100%);
-        }
-
-        /* Mobile search overlay */
-        .mobile-search-overlay {
-            transition: opacity 0.2s ease, transform 0.2s ease;
-        }
-        .mobile-search-overlay[data-closed] {
-            opacity: 0;
-            transform: translateY(-8px);
-        }
-
-        /* Body scroll lock when mobile menu is open */
-        body.menu-open {
-            overflow: hidden;
-        }
-    </style>
+    <link rel="stylesheet" href="/api-test/store/store.css?v=61">
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="store()" x-cloak>
     <!-- Header -->
@@ -205,9 +166,6 @@
         <nav class="border-t bg-gray-50 hidden lg:block">
             <div class="max-w-7xl mx-auto px-4">
                 <div class="flex items-center gap-6 py-2 overflow-x-auto">
-                    <a href="#" @click.prevent="navigate('home')"
-                       :class="!currentCategory && view === 'home' ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
-                       class="whitespace-nowrap text-sm">All Products</a>
                     <template x-if="topCategories.length === 0">
                         <div class="flex items-center gap-6">
                             <div class="skeleton h-4 w-16 rounded"></div>
@@ -218,7 +176,7 @@
                         </div>
                     </template>
                     <template x-for="cat in topCategories" :key="cat.id">
-                        <a href="#" @click.prevent="loadCategory(cat.id)"
+                        <a href="#" @click.prevent="loadCategory(cat.id, false, cat.urlKey)"
                            :class="currentTopCategory == cat.id ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
                            class="whitespace-nowrap text-sm" x-text="cat.name"></a>
                     </template>
@@ -424,20 +382,12 @@
                 <div class="px-5 py-4 border-b">
                     <h3 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">Shop by Category</h3>
                     <div class="space-y-0.5">
-                        <a href="#" @click.prevent="currentCategory = null; currentTopCategory = null; subcategories = []; loadProducts(); mobileMenuOpen = false; document.body.classList.remove('menu-open'); navigate('home')"
-                           class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition text-sm"
-                           :class="!currentCategory && view === 'home' ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'">
-                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                            </svg>
-                            All Products
-                        </a>
                         <template x-for="cat in categories" :key="cat.id">
                             <div>
                                 <div class="flex items-center rounded-lg transition text-sm"
                                      :class="currentTopCategory == cat.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-50'">
                                     <!-- Category name — navigates -->
-                                    <a href="#" @click.prevent="loadCategory(cat.id); document.body.classList.remove('menu-open')"
+                                    <a href="#" @click.prevent="loadCategory(cat.id, false, cat.urlKey); document.body.classList.remove('menu-open')"
                                        class="flex-1 px-3 py-2.5" x-text="cat.name"></a>
                                     <!-- Expand chevron — loads subcategories -->
                                     <button @click.prevent="mobileMenuToggleCat(cat.id)"
@@ -457,13 +407,13 @@
                                     </div>
                                     <!-- "View All" link -->
                                     <a x-show="!mobileMenuSubsLoading && mobileMenuSubcategories.length > 0"
-                                       href="#" @click.prevent="loadCategory(cat.id); document.body.classList.remove('menu-open')"
+                                       href="#" @click.prevent="loadCategory(cat.id, false, cat.urlKey); document.body.classList.remove('menu-open')"
                                        class="block px-3 py-2 text-sm text-gray-500 hover:text-blue-600 hover:bg-gray-50 rounded-lg transition">
                                         All <span x-text="cat.name"></span>
                                     </a>
                                     <!-- Subcategory links -->
                                     <template x-for="sub in mobileMenuSubcategories" :key="sub.id">
-                                        <a href="#" @click.prevent="loadCategory(sub.id, true); document.body.classList.remove('menu-open')"
+                                        <a href="#" @click.prevent="loadCategory(sub.id, true, sub.urlKey); document.body.classList.remove('menu-open')"
                                            class="block px-3 py-2 text-sm rounded-lg transition"
                                            :class="currentCategory == sub.id ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
                                            x-text="sub.name"></a>
@@ -559,9 +509,45 @@
         <!-- Home / Product Listing -->
         <template x-if="view === 'home' || view === 'category' || view === 'search'">
             <div>
-                <!-- Homepage CMS Content Banner -->
+                <!-- Homepage Slideshow + Promos -->
                 <template x-if="view === 'home' && cmsPage && cmsPage.content">
-                    <div class="bg-white rounded-lg shadow mb-6 p-6 prose prose-lg max-w-none" x-html="DOMPurify.sanitize(cmsPage.content || '')"></div>
+                    <div x-data="homeBanner(cmsPage.content)">
+                        <!-- Slideshow -->
+                        <template x-if="slides.length > 0">
+                            <div class="cms-slideshow bg-white rounded-lg shadow mb-4">
+                                <div class="slides" :style="'transform: translateX(-' + (currentSlide * 100) + '%)'">
+                                    <template x-for="(slide, i) in slides" :key="i">
+                                        <div class="slide">
+                                            <a :href="slide.href" @click.prevent="navigateToSlide(slide.href)">
+                                                <img :src="slide.img" :alt="slide.alt" loading="lazy">
+                                            </a>
+                                        </div>
+                                    </template>
+                                </div>
+                                <button class="slide-btn" style="left:0.75rem" @click="prevSlide()">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                </button>
+                                <button class="slide-btn" style="right:0.75rem" @click="nextSlide()">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </button>
+                                <div class="slide-dots" x-show="slides.length > 1">
+                                    <template x-for="(slide, i) in slides" :key="i">
+                                        <button class="slide-dot" :class="currentSlide === i ? 'bg-white' : 'bg-white/50'" @click="currentSlide = i"></button>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                        <!-- Promo Banners -->
+                        <template x-if="promos.length > 0">
+                            <div class="cms-promos mb-6">
+                                <template x-for="(promo, i) in promos" :key="i">
+                                    <a :href="promo.href" @click.prevent="navigateToSlide(promo.href)">
+                                        <img :src="promo.img" :alt="promo.alt" loading="lazy">
+                                    </a>
+                                </template>
+                            </div>
+                        </template>
+                    </div>
                 </template>
 
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -612,7 +598,7 @@
                                         </li>
                                         <template x-for="sub in subcategories" :key="sub.id">
                                             <li>
-                                                <a href="#" @click.prevent="loadCategory(sub.id, true)"
+                                                <a href="#" @click.prevent="loadCategory(sub.id, true, sub.urlKey)"
                                                    class="text-sm" :class="currentCategory == sub.id ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
                                                    x-text="sub.name"></a>
                                             </li>
@@ -630,15 +616,9 @@
                                 <div>
                                     <h3 class="font-semibold mb-3">Categories</h3>
                                     <ul class="space-y-2">
-                                        <li>
-                                            <a href="#" @click.prevent="currentCategory = null; currentTopCategory = null; subcategories = []; loadProducts()"
-                                               class="text-sm" :class="!currentCategory ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'">
-                                                All Products
-                                            </a>
-                                        </li>
                                         <template x-for="cat in categories" :key="cat.id">
                                             <li>
-                                                <a href="#" @click.prevent="loadCategory(cat.id)"
+                                                <a href="#" @click.prevent="loadCategory(cat.id, false, cat.urlKey)"
                                                    class="text-sm" :class="currentCategory == cat.id ? 'text-blue-600 font-medium' : 'text-gray-600 hover:text-gray-900'"
                                                    x-text="cat.name"></a>
                                             </li>
@@ -713,7 +693,7 @@
                         <div x-show="!loading" class="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                             <template x-for="(product, idx) in products" :key="product.id">
                                 <div class="bg-white rounded-lg shadow overflow-hidden group">
-                                    <a href="#" @click.prevent="viewProduct(product.id)">
+                                    <a href="#" @click.prevent="viewProduct(product.id, product.urlKey)">
                                         <div class="aspect-square bg-gray-100 relative overflow-hidden">
                                             <img x-show="product.smallImageUrl || product.imageUrl || product.thumbnailUrl"
                                                  :src="product.smallImageUrl || product.imageUrl || product.thumbnailUrl"
@@ -739,7 +719,7 @@
                                         </div>
                                     </a>
                                     <div class="p-2 sm:p-4">
-                                        <a href="#" @click.prevent="viewProduct(product.id)"
+                                        <a href="#" @click.prevent="viewProduct(product.id, product.urlKey)"
                                            class="block text-xs sm:text-base font-medium text-gray-900 hover:text-blue-600 line-clamp-2 min-h-[2rem] sm:min-h-[3rem]" x-text="product.name"></a>
                                         <!-- Star Rating — hidden on smallest screens -->
                                         <div class="hidden sm:flex items-center gap-1 mt-1 h-4">
@@ -759,7 +739,7 @@
                                         </div>
                                         <!-- Products needing options: configurable or has required options -->
                                         <template x-if="product.type === 'configurable' || product.hasRequiredOptions">
-                                            <button @click="viewProduct(product.id)"
+                                            <button @click="viewProduct(product.id, product.urlKey)"
                                                     :disabled="product.stockStatus === 'out_of_stock'"
                                                     class="w-full mt-2 sm:mt-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition">
                                                 <span x-text="product.stockStatus !== 'out_of_stock' ? 'Select Options' : 'Out of Stock'"></span>
@@ -863,7 +843,7 @@
                             </div>
                         </template>
 
-                        <!-- Custom Options (e.g., String, Tension, Cover) -->
+
                         <template x-if="currentProduct.customOptions?.length > 0">
                             <div class="mt-6 space-y-4 border-t pt-6">
                                 <template x-for="option in currentProduct.customOptions" :key="option.id">
@@ -1102,7 +1082,7 @@
                             <p class="text-sm text-gray-500 mb-3">Popular Categories</p>
                             <div class="flex flex-wrap justify-center gap-2">
                                 <template x-for="cat in categories.slice(0, 5)" :key="cat.id">
-                                    <button @click="loadCategory(cat.id)"
+                                    <button @click="loadCategory(cat.id, false, cat.urlKey)"
                                             class="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-full text-sm text-gray-700 transition"
                                             x-text="cat.name">
                                     </button>
@@ -2537,7 +2517,61 @@
         </div>
     </footer>
 
-    <script src="/api-test/store/store.js?v=58"></script>
-    <!-- Store function is defined in store.js -->
+    <script src="/api-test/store/store.js?v=61"></script>
+    <script>
+    function homeBanner(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const BASE = '/api-test/store';
+        const SITE = window.location.origin;
+
+        function parseLink(href) {
+            if (!href) return '';
+            // Strip site origin and .html suffix to get the url_key slug
+            let path = href.replace(SITE, '').replace(/^\/+/, '').replace(/\.html$/, '');
+            return path ? BASE + '/' + path : BASE;
+        }
+
+        function parseItems(container) {
+            if (!container) return [];
+            return [...container.querySelectorAll('li')].map(li => {
+                const a = li.querySelector('a');
+                const img = li.querySelector('img');
+                return {
+                    href: a ? parseLink(a.getAttribute('href')) : '',
+                    img: img?.getAttribute('src') || '',
+                    alt: img?.getAttribute('alt') || '',
+                };
+            }).filter(item => item.img);
+        }
+
+        const slides = parseItems(doc.querySelector('.slideshow ul'));
+        const promos = parseItems(doc.querySelector('ul.promos'));
+
+        return {
+            slides,
+            promos,
+            currentSlide: 0,
+            _autoplayTimer: null,
+            init() {
+                if (this.slides.length > 1) {
+                    this._autoplayTimer = setInterval(() => this.nextSlide(), 5000);
+                }
+            },
+            destroy() {
+                if (this._autoplayTimer) clearInterval(this._autoplayTimer);
+            },
+            nextSlide() {
+                this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+            },
+            prevSlide() {
+                this.currentSlide = (this.currentSlide - 1 + this.slides.length) % this.slides.length;
+            },
+            navigateToSlide(href) {
+                if (href) window.location.href = href;
+            },
+        };
+    }
+    </script>
 </body>
 </html>

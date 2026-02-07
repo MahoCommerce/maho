@@ -8,9 +8,14 @@ export default {
     selectedOptions: {},  // For configurable products: { attributeCode: valueId }
     selectedCustomOptions: {},  // For custom options: { optionId: valueId }
 
-    // View a product by ID
-    async viewProduct(id) {
+    // View a product by ID (numeric) with optional urlKey for nice URLs
+    async viewProduct(id, urlKey = null) {
         this.loading = true;
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        // If called with a slug (from URL resolver), resolve to numeric ID first
+        const isNumeric = /^\d+$/.test(String(id));
+        let productId = id;
+
         try {
             // Load wishlist and reviews modules for product page
             await Promise.all([
@@ -18,15 +23,25 @@ export default {
                 this.loadModule('reviews')
             ]);
 
+            if (!isNumeric) {
+                const resolved = await this.api('/url-resolver?path=' + encodeURIComponent(id));
+                const result = (resolved.member || resolved['hydra:member'] || [])[0];
+                if (result?.type === 'product' && result.id) {
+                    productId = result.id;
+                } else {
+                    throw new Error('Product not found');
+                }
+            }
+
             // GraphQL branch
             if (this.useGraphQL && this._gqlQueries) {
-                const data = await this.gql(this._gqlQueries.PRODUCT_QUERY, { id: '/api/products/' + id });
+                const data = await this.gql(this._gqlQueries.PRODUCT_QUERY, { id: '/api/products/' + productId });
                 const product = data.productProduct;
                 if (product) product.id = this._parseId(product.id);
                 this.currentProduct = product;
             } else {
                 // REST branch
-                this.currentProduct = await this.api('/products/' + id);
+                this.currentProduct = await this.api('/products/' + productId);
             }
 
             this.qty = 1;
@@ -46,8 +61,9 @@ export default {
             this.updateUrl();
 
             // Load product reviews
-            if (this.loadProductReviews) {
-                this.loadProductReviews(id);
+            const reviewProductId = this.currentProduct?.id;
+            if (this.loadProductReviews && reviewProductId) {
+                this.loadProductReviews(reviewProductId);
             }
         } catch (e) {
             this.error = 'Failed to load product: ' + e.message;

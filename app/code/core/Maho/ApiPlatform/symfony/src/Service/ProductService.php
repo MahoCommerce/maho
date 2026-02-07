@@ -386,6 +386,7 @@ class ProductService
             'thumbnail_url' => $hit['thumbnail_url'] ?? null,
             'created_at' => $hit['created_at'] ?? null,
             'updated_at' => $hit['updated_at'] ?? null,
+            'url_key' => $hit['url_key'] ?? null,
         ];
     }
 
@@ -399,6 +400,7 @@ class ProductService
     private const LISTING_ATTRIBUTES = [
         'name',
         'sku',
+        'url_key',
         'description',
         'short_description',
         'price',

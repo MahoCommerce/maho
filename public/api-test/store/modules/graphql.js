@@ -27,7 +27,7 @@ query GetCategory($id: ID!) {
 const PRODUCTS_QUERY = `
 query GetProducts($search: String, $categoryId: Int, $priceMin: Float, $priceMax: Float, $sortBy: String, $sortDir: String, $pageSize: Int, $page: Int) {
     productsProducts(search: $search, categoryId: $categoryId, priceMin: $priceMin, priceMax: $priceMax, sortBy: $sortBy, sortDir: $sortDir, pageSize: $pageSize, page: $page) {
-        edges { node { id sku name type status finalPrice price specialPrice stockStatus stockQty imageUrl smallImageUrl thumbnailUrl reviewCount averageRating } }
+        edges { node { id sku urlKey name type status finalPrice price specialPrice stockStatus stockQty imageUrl smallImageUrl thumbnailUrl reviewCount averageRating } }
         totalCount
         pageInfo { hasNextPage endCursor }
     }
@@ -38,7 +38,7 @@ query GetProducts($search: String, $categoryId: Int, $priceMin: Float, $priceMax
 const PRODUCT_QUERY = `
 query GetProduct($id: ID!) {
     productProduct(id: $id) {
-        id sku name description shortDescription type status visibility
+        id sku urlKey name description shortDescription type status visibility
         price specialPrice finalPrice stockStatus stockQty weight
         imageUrl smallImageUrl thumbnailUrl categoryIds
         reviewCount averageRating hasRequiredOptions

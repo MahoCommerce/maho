@@ -55,7 +55,8 @@ final class WishlistProvider implements ProviderInterface
 
         // REST collection - get wishlist items
         if ($operation instanceof CollectionOperationInterface) {
-            return new ArrayPaginator(items: $this->getWishlistItems(), currentPage: 1, itemsPerPage: 50, totalItems: 0);
+            $items = $this->getWishlistItems();
+            return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: 50, totalItems: count($items));
         }
 
         // Single item lookup
@@ -84,12 +85,8 @@ final class WishlistProvider implements ProviderInterface
         }
 
         $items = [];
-        $itemCollection = $wishlist->getItemCollection();
-        if (!$itemCollection) {
-            return [];
-        }
-        $itemCollection->addStoreFilter(\Mage::app()->getStore()->getId())
-            ->setVisibilityFilter();
+        $itemCollection = $wishlist->getItemsCollection();
+        $itemCollection->addStoreFilter([\Mage::app()->getStore()->getId()]);
 
         /** @var \Mage_Wishlist_Model_Item $item */
         foreach ($itemCollection as $item) {

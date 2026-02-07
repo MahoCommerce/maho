@@ -13,7 +13,7 @@ export default {
             postcode: '',
             region: '',
             regionId: null,
-            countryId: 'AU',
+            countryId: '',
             telephone: ''
         },
         shippingMethod: '',
@@ -132,7 +132,7 @@ export default {
                     postcode: address.postcode || '',
                     region: address.region || '',
                     regionId: address.regionId || null,
-                    countryId: address.countryId || 'AU',
+                    countryId: address.countryId || '',
                     telephone: address.telephone || ''
                 };
 

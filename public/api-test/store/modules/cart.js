@@ -21,7 +21,7 @@ export default {
 
             // REST branch
             const data = await this.api('/guest-carts', { method: 'POST', body: '{}' });
-            this.cartId = data.id || data.cartId;
+            this.cartId = data.maskedId || data.id;
             localStorage.setItem('cartId', this.cartId);
         }
         return this.cartId;
