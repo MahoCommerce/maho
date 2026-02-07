@@ -518,15 +518,6 @@
 .category-mapping-container {
     margin-top: var(--fm-spacing-xl);
 
-    .platform-selector {
-        margin-bottom: var(--fm-spacing-xl);
-    }
-
-    #platform-select {
-        margin-left: 10px;
-        padding: 5px;
-    }
-
     .category-mapping-table {
         position: relative;
     }

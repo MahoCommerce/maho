@@ -36,11 +36,6 @@ class Maho_FeedManager_Block_Adminhtml_Category_Edit extends Mage_Adminhtml_Bloc
         return '';
     }
 
-    public function getPlatformOptions(): array
-    {
-        return Maho_FeedManager_Model_Platform::getPlatformOptions();
-    }
-
     public function getCategoriesJsonUrl(): string
     {
         return $this->getUrl('*/*/categoriesJson');

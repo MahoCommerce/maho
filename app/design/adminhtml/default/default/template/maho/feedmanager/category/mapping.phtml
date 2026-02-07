@@ -8,7 +8,6 @@
  */
 
 /** @var Maho_FeedManager_Block_Adminhtml_Category_Edit $this */
-$platforms = $this->getPlatformOptions();
 $categories = $this->getCategoriesTree();
 $currentPlatform = $this->getCurrentPlatform();
 ?>
@@ -33,17 +32,6 @@ $currentPlatform = $this->getCurrentPlatform();
 </div>
 
 <div class="category-mapping-container">
-    <div class="platform-selector">
-        <label for="platform-select"><strong><?php echo $this->__('Platform:') ?></strong></label>
-        <select id="platform-select" onchange="CategoryMapping.loadCategories()">
-            <?php foreach ($platforms as $code => $name): ?>
-                <?php if ($code): ?>
-                    <option value="<?php echo $this->escapeHtml($code) ?>"<?php if ($currentPlatform === $code): ?> selected<?php endif; ?>><?php echo $this->escapeHtml($name) ?></option>
-                <?php endif; ?>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
     <!-- Bulk Mode Indicator (hidden by default) -->
     <div id="bulk-mode-bar" class="bulk-mode-bar">
         <div class="bulk-mode-bar-content">
@@ -60,7 +48,7 @@ $currentPlatform = $this->getCurrentPlatform();
         </div>
     </div>
 
-    <div class="category-mapping-table">
+    <div class="category-mapping-table grid">
         <table class="data" id="category-mapping-grid">
             <thead>
                 <tr class="headings">
@@ -70,8 +58,9 @@ $currentPlatform = $this->getCurrentPlatform();
                 </tr>
             </thead>
             <tbody id="category-rows">
+                <?php $rowIndex = 0; ?>
                 <?php foreach ($categories as $category): ?>
-                    <tr data-category-id="<?php echo (int) $category['id'] ?>">
+                    <tr data-category-id="<?php echo (int) $category['id'] ?>" class="<?php echo ++$rowIndex % 2 ? 'odd' : 'even' ?>">
                         <td>
                             <span class="category-indent" style="padding-left: <?php echo (($category['level'] - 1) * 20) ?>px;">
                                 <?php echo $this->escapeHtml($category['path']) ?>
@@ -122,7 +111,6 @@ const CategoryMapping = {
     categoryInputs: [],
 
     init: function() {
-        this.currentPlatform = document.getElementById('platform-select').value;
         this.loadCategories();
         this.initAutocomplete();
         this.initKeyboardShortcuts();
@@ -137,8 +125,6 @@ const CategoryMapping = {
     },
 
     loadCategories: function() {
-        this.currentPlatform = document.getElementById('platform-select').value;
-
         mahoFetch(this.urls.categories + '?platform=' + encodeURIComponent(this.currentPlatform), {
             method: 'GET'
         })
