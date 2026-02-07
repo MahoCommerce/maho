@@ -80,10 +80,10 @@ describe('Cart Prices Field (Regression)', function () {
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
 
-        $cartId = $createResponse['json']['id'];
-        trackCreated('quote', (int) $cartId);
+        trackCreated('quote', (int) $createResponse['json']['id']);
+        $maskedId = $createResponse['json']['maskedId'];
 
-        $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
+        $addResponse = apiPost("/api/guest-carts/{$maskedId}/items", [
             'sku' => fixtures('write_test_sku'),
             'qty' => 1,
         ]);
@@ -103,10 +103,10 @@ describe('Cart Prices Field (Regression)', function () {
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
 
-        $cartId = $createResponse['json']['id'];
-        trackCreated('quote', (int) $cartId);
+        trackCreated('quote', (int) $createResponse['json']['id']);
+        $maskedId = $createResponse['json']['maskedId'];
 
-        $addResponse = apiPost("/api/guest-carts/{$cartId}/items", [
+        $addResponse = apiPost("/api/guest-carts/{$maskedId}/items", [
             'sku' => fixtures('write_test_sku'),
             'qty' => 1,
         ]);

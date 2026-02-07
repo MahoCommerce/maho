@@ -281,6 +281,22 @@ class ApiV2Helper
     }
 
     /**
+     * Ensure Maho is bootstrapped for DB lookups and config access
+     */
+    private static function ensureMahoBootstrapped(): void
+    {
+        static $bootstrapped = false;
+        if (!$bootstrapped) {
+            try {
+                \Mage::app();
+                $bootstrapped = true;
+            } catch (\Throwable $e) {
+                // Unable to bootstrap — DB lookups will use fallbacks
+            }
+        }
+    }
+
+    /**
      * Get a test fixture value
      */
     public static function fixtures(string $key): mixed
@@ -288,6 +304,8 @@ class ApiV2Helper
         static $fixtures = null;
 
         if ($fixtures === null) {
+            self::ensureMahoBootstrapped();
+
             $fixtures = [
                 'customer_id' => 1,
                 'customer_email' => self::lookupCustomerEmail(1),
@@ -408,12 +426,13 @@ class ApiV2Helper
 
         // Try Maho config
         try {
+            self::ensureMahoBootstrapped();
             $baseUrl = \Mage::getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
             if ($baseUrl && filter_var($baseUrl, FILTER_VALIDATE_URL)) {
                 self::$baseUrl = rtrim($baseUrl, '/');
                 return self::$baseUrl;
             }
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             // Fall through to default
         }
 
@@ -431,9 +450,10 @@ class ApiV2Helper
         }
 
         try {
+            self::ensureMahoBootstrapped();
             $jwtService = new JwtService();
             self::$jwtSecret = $jwtService->getSecret();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new \RuntimeException('Cannot get JWT secret: ' . $e->getMessage());
         }
 
@@ -450,7 +470,7 @@ class ApiV2Helper
                 ->setPageSize(1)
                 ->getFirstItem();
             return $order->getId() ? (int) $order->getId() : null;
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return null;
         }
     }
@@ -463,7 +483,7 @@ class ApiV2Helper
         try {
             $customer = \Mage::getModel('customer/customer')->load($customerId);
             return $customer->getEmail() ?: 'test@example.com';
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             return 'test@example.com';
         }
     }
