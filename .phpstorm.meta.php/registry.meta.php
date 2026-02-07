@@ -41,6 +41,7 @@ namespace PHPSTORM_META {
         current_layer,
         current_linkrule,
         current_order,
+        current_platform,
         current_product,
         current_promo_catalog_rule,
         current_promo_quote_rule,
