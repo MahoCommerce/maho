@@ -164,7 +164,12 @@ export default {
                         telephone: addr.telephone
                     }
                 });
-                this.shippingMethods = data.setShippingAddressOnCartCart?.cart?.availableShippingMethods || [];
+                const raw = data.setShippingAddressOnCartCart?.cart?.availableShippingMethods || [];
+                this.shippingMethods = raw.map(m => ({
+                    code: m.carrierCode + '_' + m.methodCode,
+                    title: m.carrierTitle + ' - ' + m.methodTitle,
+                    price: m.price
+                }));
                 if (this.shippingMethods.length > 0 && !this.checkout.shippingMethod) {
                     this.checkout.shippingMethod = this.shippingMethods[0].code;
                 }
