@@ -27,6 +27,9 @@
 # Composer
 /vendor
 
+# Local scripts with credentials
+/shell/cf-purge.sh
+
 # PHP-CS-Fixer
 .php-cs-fixer.cache
 
