@@ -84,11 +84,9 @@ class Install extends BaseMahoCommand
             }
         }
 
-        // Reset some options in case we're installing sample data
-        if ($input->getOption('sample_data')) {
+        // Sample data SQL uses hardcoded table names, so db_prefix is not supported
+        if ($input->getOption('sample_data') && $input->getOption('db_prefix')) {
             $options = $input->getOptions();
-            $options['locale'] = 'en_US';
-            $options['default_currency'] = 'USD';
             unset($options['db_prefix']);
 
             $_SERVER['argv'] = ['maho', 'install'];
@@ -305,13 +303,9 @@ class Install extends BaseMahoCommand
     {
         $locale = $input->getOption('locale');
 
-        if (!$locale || $locale === 'en_US' || $input->getOption('sample_data')) {
+        if (!$locale || $locale === 'en_US') {
             return;
         }
-
-        $availableLanguagePacks = [
-            'de_DE', 'el_GR', 'es_ES', 'fr_FR', 'it_IT', 'nl_NL', 'pt_BR', 'pt_PT',
-        ];
 
         $parsed = Locale::parseLocale($locale);
         $countryCode = $parsed['region'] ?? null;
@@ -332,7 +326,7 @@ class Install extends BaseMahoCommand
         $output->writeln("  Import regions/states for {$countryName}:");
         $output->writeln("    <comment>./maho sys:directory:regions:import -c {$countryCode} -l {$locale}</comment>");
 
-        if (in_array($locale, $availableLanguagePacks, true)) {
+        if (in_array($locale, \Mage_Install_Helper_Data::AVAILABLE_LANGUAGE_PACKS, true)) {
             $packageName = 'mahocommerce/maho-language-' . strtolower($locale);
             $output->writeln('');
             $output->writeln("  Install the {$languageName} language pack:");

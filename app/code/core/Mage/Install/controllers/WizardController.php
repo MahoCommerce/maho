@@ -126,9 +126,14 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_checkIfInstalled();
         $step = $this->_getWizard()->getStepByName('locale');
 
+        $session = Mage::getSingleton('install/session');
+
         if ($data = $this->getRequest()->getPost('configuration')) {
-            Mage::getSingleton('install/session')->setLocaleData($data);
+            $session->setLocaleData($data);
         }
+
+        $localization = $this->getRequest()->getPost('localization');
+        $session->setLocalizationData($localization ?: []);
 
         $this->getResponse()->setRedirect($step->getNextUrl());
     }
@@ -411,6 +416,8 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
             return;
         }
 
+        $this->runLocalizationActions();
+
         $this->_getInstaller()->finish();
 
         $this->_prepareLayout();
@@ -423,88 +430,42 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         Mage::getSingleton('install/session')->clear();
     }
 
-    public function regionsImportAction(): void
+    private function runLocalizationActions(): void
     {
-        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
+        $session = Mage::getSingleton('install/session');
+        $localization = $session->getLocalizationData();
 
-        try {
-            $locale = (string) Mage::getStoreConfig('general/locale/code');
-            $parsed = \Locale::parseLocale($locale);
-            $countryCode = $parsed['region'] ?? null;
-
-            if (!$countryCode) {
-                $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                    'success' => false,
-                    'message' => 'Could not determine country code from locale.',
-                ]));
-                return;
-            }
-
-            $mahoPath = Mage::getBaseDir() . '/maho';
-            $command = escapeshellarg($mahoPath) . ' sys:directory:regions:import'
-                . ' -c ' . escapeshellarg($countryCode)
-                . ' -l ' . escapeshellarg($locale)
-                . ' 2>&1';
-
-            exec($command, $output, $returnVar);
-
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => $returnVar === 0,
-                'message' => $returnVar === 0
-                    ? "Regions imported successfully for {$countryCode}."
-                    : 'Failed to import regions.',
-                'output' => implode("\n", $output),
-            ]));
-        } catch (Exception $e) {
-            Mage::logException($e);
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]));
+        if (empty($localization)) {
+            return;
         }
-    }
 
-    public function languagePackAction(): void
-    {
-        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
-
-        $availableLanguagePacks = [
-            'de_DE', 'el_GR', 'es_ES', 'fr_FR', 'it_IT', 'nl_NL', 'pt_BR', 'pt_PT',
-        ];
-
-        try {
-            $locale = (string) Mage::getStoreConfig('general/locale/code');
-
-            if (!in_array($locale, $availableLanguagePacks, true)) {
-                $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                    'success' => false,
-                    'message' => "No language pack available for {$locale}.",
-                ]));
-                return;
-            }
-
-            $packageName = 'mahocommerce/maho-language-' . strtolower($locale);
-            $baseDir = Mage::getBaseDir();
-            $command = 'cd ' . escapeshellarg($baseDir)
-                . ' && composer require ' . escapeshellarg($packageName)
-                . ' 2>&1';
-
-            exec($command, $output, $returnVar);
-
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => $returnVar === 0,
-                'message' => $returnVar === 0
-                    ? "Language pack {$packageName} installed successfully."
-                    : 'Failed to install language pack.',
-                'output' => implode("\n", $output),
-            ]));
-        } catch (Exception $e) {
-            Mage::logException($e);
-            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]));
+        $locale = (string) $session->getLocale();
+        if (!$locale || $locale === 'en_US') {
+            return;
         }
+
+        $parsed = \Locale::parseLocale($locale);
+        $countryCode = $parsed['region'] ?? null;
+
+        if (!$countryCode) {
+            return;
+        }
+
+        if (!empty($localization['import_regions'])) {
+            try {
+                $importer = new \MahoCLI\Commands\SysDirectoryRegionsImport();
+                $result = $importer->importRegionsData($countryCode, [
+                    'locales' => $locale,
+                ]);
+
+                if (!$result['success']) {
+                    Mage::log('Failed to import regions: ' . ($result['error'] ?? 'Unknown error'), Mage::LOG_WARNING);
+                }
+            } catch (Exception $e) {
+                Mage::logException($e);
+            }
+        }
+
     }
 
     public function checkHostAction(): void

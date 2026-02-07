@@ -1250,6 +1250,31 @@ body.installation-complete-page .middle-container {
     gap: var(--space-lg);
 }
 
+.langpack-notice {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    padding: var(--space-lg);
+    margin-bottom: var(--space-xl);
+    text-align: left;
+}
+
+.langpack-notice p {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-light);
+    margin: 0 0 var(--space-sm) 0;
+}
+
+.langpack-notice code {
+    display: block;
+    background: var(--color-text);
+    color: var(--color-white);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm);
+    user-select: all;
+}
+
 /* ========================================
    Utilities
    ======================================== */
@@ -1557,34 +1582,20 @@ body.installation-complete-page .middle-container {
 }
 
 /* ========================================
-   Localization Section (Complete Page)
+   Localization Options (Locale Step)
    ======================================== */
-
-.localization-section {
-    text-align: left;
-    background: var(--color-bg);
-    border-radius: var(--radius-md);
-    padding: var(--space-xl);
-    margin: var(--space-xl) 0;
-    border: 1px solid var(--color-border-light);
-}
 
 .localization-heading {
     font-size: var(--font-size-lg);
     font-weight: 600;
-    margin-bottom: var(--space-sm);
-}
-
-.localization-intro {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-light);
-    margin-bottom: var(--space-lg);
+    margin-bottom: var(--space-md);
 }
 
 .localization-actions {
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
+    margin-bottom: var(--space-lg);
 }
 
 .localization-action {
@@ -1636,52 +1647,53 @@ body.installation-complete-page .middle-container {
     flex-shrink: 0;
     display: flex;
     align-items: center;
-    min-width: 100px;
     justify-content: flex-end;
 }
 
-.form-button-sm {
-    padding: var(--space-sm) var(--space-lg);
-    font-size: var(--font-size-sm);
-    min-width: auto;
-}
-
-.localization-spinner {
-    width: 24px;
+.localization-toggle {
+    position: relative;
+    display: inline-block;
+    width: 44px;
     height: 24px;
-    border: 3px solid rgba(215, 223, 34, 0.2);
-    border-top-color: var(--color-primary);
+    cursor: pointer;
+}
+
+.localization-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.localization-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--color-border);
     border-radius: var(--radius-full);
-    animation: spin 0.8s linear infinite;
+    transition: background 0.2s;
 }
 
-.localization-result {
-    display: flex;
-    align-items: center;
-    gap: var(--space-xs);
-    font-size: var(--font-size-sm);
-    font-weight: 500;
+.localization-toggle-slider::before {
+    content: "";
+    position: absolute;
+    width: 18px;
+    height: 18px;
+    left: 3px;
+    bottom: 3px;
+    background: var(--color-white);
+    border-radius: var(--radius-full);
+    transition: transform 0.2s;
 }
 
-.localization-success {
-    color: var(--color-success);
+.localization-toggle input:checked + .localization-toggle-slider {
+    background: var(--color-primary);
 }
 
-.localization-error {
-    color: var(--color-error);
+.localization-toggle input:checked + .localization-toggle-slider::before {
+    transform: translateX(20px);
 }
 
 @media (max-width: 768px) {
     .localization-action {
         flex-wrap: wrap;
-    }
-
-    .localization-action-status {
-        width: 100%;
-        justify-content: stretch;
-    }
-
-    .localization-action-status .form-button-sm {
-        width: 100%;
     }
 }
