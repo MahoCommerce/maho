@@ -53,18 +53,18 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
         new Query(
             name: 'item_query',
             description: 'Get an order by ID',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new QueryCollection(
             name: 'collection_query',
             description: 'Get orders',
-            security: "is_granted('ROLE_ADMIN')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
         new Query(
             name: 'order',
             args: ['id' => ['type' => 'ID!']],
             description: 'Get order by ID',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Query(
             name: 'guestOrder',
@@ -76,7 +76,7 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
             name: 'customerOrders',
             args: ['page' => ['type' => 'Int'], 'pageSize' => ['type' => 'Int'], 'status' => ['type' => 'String']],
             description: 'Get orders for authenticated customer',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'placeOrder',
@@ -96,7 +96,7 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
                 'reason' => ['type' => 'String', 'description' => 'Optional cancellation reason'],
             ],
             description: 'Cancel an order',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'placeOrderWithSplitPayments',
@@ -107,7 +107,7 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
                 'payments' => ['type' => '[PaymentInput!]!'],
             ],
             description: 'Place order with split payment methods (POS)',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'recordPayment',
@@ -123,20 +123,20 @@ use Maho\ApiPlatform\State\Processor\OrderProcessor;
                 'authCode' => ['type' => 'String'],
             ],
             description: 'Record a payment against an order',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
         new Query(
             name: 'orderPayments',
             args: ['orderId' => ['type' => 'ID!']],
             description: 'Get all POS payments for an order',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
             resolver: CustomQueryResolver::class,
         ),
         new Query(
             name: 'orderPaymentSummary',
             args: ['orderId' => ['type' => 'ID!']],
             description: 'Get payment summary grouped by method',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
             resolver: CustomQueryResolver::class,
         ),
     ],

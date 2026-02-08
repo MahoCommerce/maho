@@ -58,7 +58,7 @@ use Maho\ApiPlatform\State\Processor\CartProcessor;
             name: 'customerCart',
             args: [],
             description: 'Get current customer active cart',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
@@ -172,7 +172,7 @@ use Maho\ApiPlatform\State\Processor\CartProcessor;
             name: 'assignCustomerToCart',
             args: ['cartId' => ['type' => 'ID'], 'maskedId' => ['type' => 'String'], 'customerId' => ['type' => 'ID!']],
             description: 'Assign customer to cart',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'applyGiftcardToCart',

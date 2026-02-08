@@ -43,13 +43,13 @@ use Maho\ApiPlatform\State\Processor\PaymentProcessor;
             name: 'posPayment',
             args: ['id' => ['type' => 'ID!']],
             description: 'Get POS payment by ID',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
         new QueryCollection(
             name: 'orderPosPayments',
             args: ['orderId' => ['type' => 'ID!']],
             description: 'Get all POS payments for an order',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
     ],
 )]

@@ -21,40 +21,21 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 /**
  * Voter that enforces resource-level permissions for API users.
  *
- * Maps REST endpoints to resource names and checks the permissions
- * embedded in the JWT token against the requested resource + operation.
+ * Maps REST endpoints to resource names via ApiPermissionRegistry and checks
+ * the permissions embedded in the JWT token against the requested resource + operation.
  *
  * @extends Voter<string, mixed>
  */
 class ApiUserVoter extends Voter
 {
-    /**
-     * Endpoint prefix to resource name mapping
-     */
-    private const RESOURCE_MAP = [
-        '/api/orders'      => 'orders',
-        '/api/products'    => 'products',
-        '/api/customers'   => 'customers',
-        '/api/shipments'   => 'shipments',
-        '/api/categories'  => 'categories',
-        '/api/newsletter'  => 'newsletter',
-        '/api/carts'       => 'carts',
-        '/api/guest-carts' => 'carts',
-        '/api/cms-pages'   => 'cms',
-        '/api/cms-blocks'  => 'cms',
-        '/api/blog-posts'  => 'blog',
-        '/api/stores'      => 'stores',
-        '/api/countries'   => 'countries',
-    ];
-
     public function __construct(
         private readonly RequestStack $requestStack,
+        private readonly ApiPermissionRegistry $registry,
     ) {}
 
     #[\Override]
     protected function supports(string $attribute, mixed $subject): bool
     {
-        // Only handle API_USER_PERMISSION attribute, let Symfony handle IS_AUTHENTICATED_FULLY
         return $attribute === 'API_USER_PERMISSION';
     }
 
@@ -63,7 +44,6 @@ class ApiUserVoter extends Voter
     {
         $user = $token->getUser();
 
-        // Must be an authenticated ApiUser
         if (!$user instanceof ApiUser) {
             return false;
         }
@@ -83,9 +63,8 @@ class ApiUserVoter extends Voter
             return false;
         }
 
-        $resource = $this->resolveResource($request->getPathInfo());
+        $resource = $this->registry->resolveRestResource($request->getPathInfo());
         if ($resource === null) {
-            // Unknown resource - deny by default for API users
             return false;
         }
 
@@ -97,25 +76,13 @@ class ApiUserVoter extends Voter
     }
 
     /**
-     * Map a request path to a resource name
-     */
-    private function resolveResource(string $path): ?string
-    {
-        foreach (self::RESOURCE_MAP as $prefix => $resource) {
-            if (str_starts_with($path, $prefix)) {
-                return $resource;
-            }
-        }
-        return null;
-    }
-
-    /**
      * Map HTTP method to operation
      */
     private function resolveOperation(string $method): string
     {
         return match (strtoupper($method)) {
             'GET', 'HEAD', 'OPTIONS' => 'read',
+            'POST' => 'create',
             default => 'write',
         };
     }
