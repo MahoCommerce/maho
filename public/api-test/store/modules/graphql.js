@@ -20,7 +20,7 @@ query GetCategories($parentId: Int, $includeInMenu: Boolean) {
 const CATEGORY_QUERY = `
 query GetCategory($id: ID!) {
     categoryCategory(id: $id) {
-        id parentId name description urlKey urlPath image level position isActive includeInMenu productCount childrenIds
+        id parentId name description urlKey urlPath image level position isActive includeInMenu productCount childrenIds metaTitle metaDescription metaKeywords
     }
 }`;
 
@@ -39,6 +39,7 @@ const PRODUCT_QUERY = `
 query GetProduct($id: ID!) {
     productProduct(id: $id) {
         id sku urlKey name description shortDescription type status visibility
+        metaTitle metaDescription metaKeywords
         price specialPrice finalPrice stockStatus stockQty weight
         imageUrl smallImageUrl thumbnailUrl categoryIds
         reviewCount averageRating hasRequiredOptions
@@ -60,7 +61,7 @@ const CART_QUERY = `
 query GetCart($maskedId: String!) {
     getCartByMaskedIdCart(maskedId: $maskedId) {
         id maskedId isActive itemsCount itemsQty
-        items prices appliedCoupon
+        items prices appliedCoupon appliedGiftcards
         availableShippingMethods selectedShippingMethod
         availablePaymentMethods selectedPaymentMethod
         billingAddress { firstName lastName street city region regionId postcode countryId telephone }
@@ -137,6 +138,26 @@ mutation SetPaymentMethodOnCart($input: setPaymentMethodOnCartCartInput!) {
     setPaymentMethodOnCartCart(input: $input) {
         cart {
             id selectedPaymentMethod availablePaymentMethods
+        }
+    }
+}`;
+
+// ==================== Gift Cards ====================
+
+const APPLY_GIFTCARD = `
+mutation ApplyGiftcardToCart($input: applyGiftcardToCartCartInput!) {
+    applyGiftcardToCartCart(input: $input) {
+        cart {
+            id itemsCount itemsQty items prices appliedCoupon appliedGiftcards
+        }
+    }
+}`;
+
+const REMOVE_GIFTCARD = `
+mutation RemoveGiftcardFromCart($input: removeGiftcardFromCartCartInput!) {
+    removeGiftcardFromCartCart(input: $input) {
+        cart {
+            id itemsCount itemsQty items prices appliedCoupon appliedGiftcards
         }
     }
 }`;
@@ -371,6 +392,9 @@ export default {
         SET_SHIPPING_ADDRESS,
         SET_SHIPPING_METHOD,
         SET_PAYMENT_METHOD,
+        // Gift Cards
+        APPLY_GIFTCARD,
+        REMOVE_GIFTCARD,
         // Checkout / Order
         PLACE_ORDER,
         COUNTRIES_QUERY,

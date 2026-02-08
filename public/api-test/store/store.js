@@ -35,6 +35,7 @@ function store() {
 
         // Store switching
         stores: [],
+        storeConfig: null,
         currentStoreCode: localStorage.getItem('storeCode') || 'default',
 
         // Module state placeholders (will be populated by modules)
@@ -75,6 +76,8 @@ function store() {
         cart: {},
         cartCount: 0,
         couponCode: '',
+        giftcardCode: '',
+        promoTab: 'coupon',
 
         // Checkout
         checkout: {
@@ -162,7 +165,7 @@ function store() {
             if (loadedModules.has(name)) return;
 
             try {
-                const module = await import(`/api-test/store/modules/${name}.js?v=61`);
+                const module = await import(`/api-test/store/modules/${name}.js?v=66`);
                 const methods = module.default;
 
                 // Special handling for graphql module: store queries, not methods
@@ -202,7 +205,8 @@ function store() {
                 this.loadModule('cart'),
                 this.loadModule('product'),
                 this.loadModule('wishlist'),
-                this.loadModule('auth')
+                this.loadModule('auth'),
+                this.loadModule('seo')
             ]);
 
             // Load initial data
@@ -210,15 +214,19 @@ function store() {
                 this.loadCategories(),
                 this.loadCart(),
                 this.loadFooterPages(),
-                this.loadStores()
+                this.loadStores(),
+                this.loadStoreConfig()
             ]);
 
             // Resolve current path
             await this.resolveCurrentPath();
+            if (typeof this.updateSeo === 'function') this.updateSeo();
 
             // Handle browser back/forward
             window.addEventListener('popstate', () => {
-                this.resolveCurrentPath();
+                this.resolveCurrentPath().then(() => {
+                    if (typeof this.updateSeo === 'function') this.updateSeo();
+                });
             });
         },
 
@@ -715,6 +723,7 @@ function store() {
 
             const newUrl = BASE_PATH + path;
             window.history.replaceState({}, '', newUrl);
+            if (typeof this.updateSeo === 'function') this.updateSeo();
         },
 
         navigateTo(path, pushState = true) {
@@ -772,6 +781,7 @@ function store() {
             } else {
                 this.view = view;
             }
+            if (typeof this.updateSeo === 'function') this.updateSeo();
         },
 
         // ==================== Mobile Menu ====================
@@ -871,6 +881,14 @@ function store() {
             }
         },
 
+        async loadStoreConfig() {
+            try {
+                this.storeConfig = await this.api('/store-config');
+            } catch (e) {
+                console.error('Failed to load store config:', e);
+            }
+        },
+
         async switchStore(storeCode) {
             this.currentStoreCode = storeCode;
             localStorage.setItem('storeCode', storeCode);
@@ -881,7 +899,8 @@ function store() {
             // Reload all store-dependent data
             await Promise.all([
                 this.loadCategories(),
-                this.loadFooterPages()
+                this.loadFooterPages(),
+                this.loadStoreConfig()
             ]);
 
             // Reload products if we're on a listing page

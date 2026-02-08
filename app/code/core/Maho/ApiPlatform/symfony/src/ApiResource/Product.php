@@ -88,6 +88,15 @@ class Product
     #[ApiProperty(description: 'URL key for SEO-friendly URLs')]
     public ?string $urlKey = null;
 
+    #[ApiProperty(description: 'SEO meta title')]
+    public ?string $metaTitle = null;
+
+    #[ApiProperty(description: 'SEO meta description')]
+    public ?string $metaDescription = null;
+
+    #[ApiProperty(description: 'SEO meta keywords')]
+    public ?string $metaKeywords = null;
+
     #[ApiProperty(description: 'Product name')]
     public string $name = '';
 

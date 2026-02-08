@@ -201,6 +201,27 @@ final class CartProvider implements ProviderInterface
             ];
         }
 
+        // Get applied gift cards
+        $giftcardCodesJson = $quote->getData('giftcard_codes');
+        if ($giftcardCodesJson) {
+            $giftcardCodes = json_decode($giftcardCodesJson, true);
+            if (is_array($giftcardCodes)) {
+                foreach ($giftcardCodes as $code => $balance) {
+                    $dto->appliedGiftcards[] = [
+                        'code' => (string) $code,
+                        'balance' => (float) $balance,
+                        'appliedAmount' => 0.0, // Actual applied amounts calculated by totals collector
+                    ];
+                }
+            }
+        }
+
+        // Populate giftcard amount in prices from quote
+        $giftcardAmount = (float) $quote->getData('giftcard_amount');
+        if ($giftcardAmount > 0) {
+            $dto->prices['giftcardAmount'] = $giftcardAmount;
+        }
+
         return $dto;
     }
 

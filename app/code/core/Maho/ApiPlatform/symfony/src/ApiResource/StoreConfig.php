@@ -86,4 +86,16 @@ class StoreConfig
 
     #[ApiProperty(description: 'Whether product reviews are enabled')]
     public bool $reviewsEnabled = true;
+
+    #[ApiProperty(description: 'Full URL to the store logo image')]
+    public ?string $logoUrl = null;
+
+    #[ApiProperty(description: 'Alt text for the store logo')]
+    public ?string $logoAlt = null;
+
+    #[ApiProperty(description: 'Default page title for SEO')]
+    public ?string $defaultTitle = null;
+
+    #[ApiProperty(description: 'Default meta description for SEO')]
+    public ?string $defaultDescription = null;
 }

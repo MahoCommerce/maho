@@ -7,6 +7,7 @@ export default {
     cart: {},
     cartCount: 0,
     couponCode: '',
+    giftcardCode: '',
 
     async ensureCart() {
         if (!this.cartId) {
@@ -173,6 +174,65 @@ export default {
             }
         } catch (e) {
             this.error = 'Invalid coupon code';
+        }
+        this.loading = false;
+    },
+
+    async applyGiftcard() {
+        if (!this.giftcardCode) return;
+        this.loading = true;
+        this.error = null;
+        try {
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                const data = await this.gql(this._gqlQueries.APPLY_GIFTCARD, {
+                    input: { maskedId: this.cartId, giftcardCode: this.giftcardCode }
+                });
+                this.cart = { ...this.cart, ...data.applyGiftcardToCartCart?.cart };
+                this.cartCount = this.cart.items?.length || 0;
+                this.success = 'Gift card applied!';
+                this.giftcardCode = '';
+                await this.loadCart();
+            } else {
+                // REST branch
+                await this.api('/guest-carts/' + this.cartId + '/giftcard', {
+                    method: 'POST',
+                    body: JSON.stringify({ giftcardCode: this.giftcardCode })
+                });
+                await this.loadCart();
+                this.success = 'Gift card applied!';
+                this.giftcardCode = '';
+            }
+        } catch (e) {
+            this.error = e.message || 'Invalid gift card code';
+        }
+        this.loading = false;
+    },
+
+    async removeGiftcard(code) {
+        this.loading = true;
+        this.error = null;
+        try {
+            // GraphQL branch
+            if (this.useGraphQL && this._gqlQueries) {
+                const data = await this.gql(this._gqlQueries.REMOVE_GIFTCARD, {
+                    input: { maskedId: this.cartId, giftcardCode: code }
+                });
+                this.cart = { ...this.cart, ...data.removeGiftcardFromCartCart?.cart };
+                this.cartCount = this.cart.items?.length || 0;
+                this.success = 'Gift card removed';
+                await this.loadCart();
+            } else {
+                // REST branch
+                await this.api('/guest-carts/' + this.cartId + '/giftcard', {
+                    method: 'DELETE',
+                    body: JSON.stringify({ giftcardCode: code })
+                });
+                await this.loadCart();
+                this.success = 'Gift card removed';
+            }
+        } catch (e) {
+            this.error = e.message || 'Failed to remove gift card';
         }
         this.loading = false;
     }

@@ -50,7 +50,9 @@ final class StoreConfigProvider implements ProviderInterface
         $dto = new StoreConfig();
         $dto->id = $store->getCode();
         $dto->storeCode = $store->getCode();
-        $dto->storeName = $store->getName();
+        $dto->storeName = \Mage::getStoreConfig('general/store_information/name', $storeId)
+            ?: $store->getGroup()->getName()
+            ?: $store->getName();
         $dto->baseCurrencyCode = $store->getBaseCurrencyCode();
         $dto->defaultDisplayCurrencyCode = $store->getDefaultCurrencyCode();
         $dto->locale = \Mage::getStoreConfig('general/locale/code', $storeId) ?: 'en_AU';
@@ -66,6 +68,18 @@ final class StoreConfigProvider implements ProviderInterface
         $dto->newsletterEnabled = (bool) \Mage::helper('core')->isModuleEnabled('Mage_Newsletter');
         $dto->wishlistEnabled = (bool) \Mage::getStoreConfigFlag('wishlist/general/active', $storeId);
         $dto->reviewsEnabled = (bool) \Mage::getStoreConfigFlag('catalog/review/active', $storeId);
+
+        // Logo
+        $logoSrc = \Mage::getStoreConfig('design/header/logo_src', $storeId) ?: 'images/logo.svg';
+        $skinBaseUrl = $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_SKIN);
+        $package = \Mage::getStoreConfig('design/package/name', $storeId) ?: 'default';
+        $theme = \Mage::getStoreConfig('design/theme/default', $storeId) ?: 'default';
+        $dto->logoUrl = $skinBaseUrl . 'frontend/' . $package . '/' . $theme . '/' . $logoSrc;
+        $dto->logoAlt = \Mage::getStoreConfig('design/header/logo_alt', $storeId) ?: $dto->storeName;
+
+        // SEO defaults
+        $dto->defaultTitle = \Mage::getStoreConfig('design/head/default_title', $storeId) ?: null;
+        $dto->defaultDescription = \Mage::getStoreConfig('design/head/default_description', $storeId) ?: null;
 
         // Cache for 1 hour
         \Mage::app()->getCache()->save(
@@ -99,6 +113,10 @@ final class StoreConfigProvider implements ProviderInterface
             'newsletterEnabled' => $dto->newsletterEnabled,
             'wishlistEnabled' => $dto->wishlistEnabled,
             'reviewsEnabled' => $dto->reviewsEnabled,
+            'logoUrl' => $dto->logoUrl,
+            'logoAlt' => $dto->logoAlt,
+            'defaultTitle' => $dto->defaultTitle,
+            'defaultDescription' => $dto->defaultDescription,
         ];
     }
 
@@ -123,6 +141,10 @@ final class StoreConfigProvider implements ProviderInterface
         $dto->newsletterEnabled = $data['newsletterEnabled'] ?? true;
         $dto->wishlistEnabled = $data['wishlistEnabled'] ?? true;
         $dto->reviewsEnabled = $data['reviewsEnabled'] ?? true;
+        $dto->logoUrl = $data['logoUrl'] ?? null;
+        $dto->logoAlt = $data['logoAlt'] ?? null;
+        $dto->defaultTitle = $data['defaultTitle'] ?? null;
+        $dto->defaultDescription = $data['defaultDescription'] ?? null;
         return $dto;
     }
 }
