@@ -38,7 +38,7 @@
                         (one column, two column, three column) and number of product columns. */ ?>
                 <?php $_imgSize = 300; ?>
                 <img id="product-collection-image-<?= $_product->getId() ?>" width="<?= $_imgSize ?>" height="<?= $_imgSize ?>"
-                     src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->keepFrame(false)->resize($_imgSize) ?>"
+                     src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
                      srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
                      alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
             </a>

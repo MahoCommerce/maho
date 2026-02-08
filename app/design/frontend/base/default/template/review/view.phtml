@@ -18,8 +18,8 @@
     </div>
     <div class="product-img-box">
         <a href="<?= $this->getProductData()->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductData()->getName()) ?>">
-            <img src="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(450, 450)->keepFrame(false) ?>"
-                 srcset="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(900, 900)->keepFrame(false) ?> 2x"
+            <img src="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(450, 450) ?>"
+                 srcset="<?= $this->helper('catalog/image')->init($this->getProductData(), 'small_image')->resize(900, 900) ?> 2x"
                  alt="<?= $this->escapeHtml($this->getProductData()->getName()) ?>"
                  class="product-image" />
         </a>
