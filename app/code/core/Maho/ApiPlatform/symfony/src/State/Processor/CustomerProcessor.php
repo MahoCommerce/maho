@@ -113,7 +113,8 @@ final class CustomerProcessor implements ProcessorInterface
         try {
             $customer->save();
         } catch (\Exception $e) {
-            throw new BadRequestHttpException('Failed to update profile: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new BadRequestHttpException('Failed to update profile');
         }
 
         return $this->mapToDto($customer);
@@ -159,7 +160,8 @@ final class CustomerProcessor implements ProcessorInterface
         try {
             $customer->save();
         } catch (\Exception $e) {
-            throw new BadRequestHttpException('Failed to change password: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new BadRequestHttpException('Failed to change password');
         }
 
         return $this->mapToDto($customer);
@@ -209,7 +211,7 @@ final class CustomerProcessor implements ProcessorInterface
         $customer->setFirstname($data->firstName ?? '');
         $customer->setLastname($data->lastName ?? '');
         $customer->setPassword($data->password);
-        $customer->setGroupId($data->groupId ?? 1);
+        $customer->setGroupId((int) (\Mage::getStoreConfig('customer/create_account/default_group') ?: 1));
 
         try {
             $customer->save();
@@ -220,7 +222,7 @@ final class CustomerProcessor implements ProcessorInterface
                 \Mage::log('Non-critical observer error during customer save: ' . $e->getMessage(), \Mage::LOG_WARNING);
             } else {
                 \Mage::logException($e);
-                throw new \RuntimeException('Failed to create customer: ' . $e->getMessage());
+                throw new \RuntimeException('Failed to create customer');
             }
         }
 
@@ -289,7 +291,8 @@ final class CustomerProcessor implements ProcessorInterface
                 $address->save();
             }
         } catch (\Exception $e) {
-            throw new \RuntimeException('Failed to create customer: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new \RuntimeException('Failed to create customer');
         }
 
         return $this->mapToDto($customer);
@@ -374,7 +377,8 @@ final class CustomerProcessor implements ProcessorInterface
         try {
             $customer->save();
         } catch (\Exception $e) {
-            throw new BadRequestHttpException('Failed to update profile: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new BadRequestHttpException('Failed to update profile');
         }
 
         return $this->mapToDto($customer);
@@ -423,7 +427,8 @@ final class CustomerProcessor implements ProcessorInterface
         try {
             $customer->save();
         } catch (\Exception $e) {
-            throw new BadRequestHttpException('Failed to change password: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new BadRequestHttpException('Failed to change password');
         }
 
         return $this->mapToDto($customer);
@@ -498,7 +503,7 @@ final class CustomerProcessor implements ProcessorInterface
 
         // Validate reset token
         $customerToken = $customer->getRpToken();
-        if (!$customerToken || $customerToken !== $resetToken) {
+        if (!$customerToken || !hash_equals($customerToken, $resetToken)) {
             throw new BadRequestHttpException('Invalid email or reset token');
         }
 
@@ -520,7 +525,8 @@ final class CustomerProcessor implements ProcessorInterface
         try {
             $customer->save();
         } catch (\Exception $e) {
-            throw new BadRequestHttpException('Failed to reset password: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new BadRequestHttpException('Failed to reset password');
         }
 
         return $this->mapToDto($customer);

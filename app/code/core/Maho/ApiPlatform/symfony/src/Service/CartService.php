@@ -423,7 +423,7 @@ class CartService
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
     {
         $address = $quote->getShippingAddress();
-        $address->addData($addressData);
+        $address->addData($this->sanitizeAddressData($addressData));
 
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates(1);
@@ -447,6 +447,8 @@ class CartService
         if ($sameAsShipping) {
             $shippingAddress = $quote->getShippingAddress();
             $addressData = $shippingAddress->getData();
+        } else {
+            $addressData = $this->sanitizeAddressData($addressData);
         }
 
         $address = $quote->getBillingAddress();
@@ -465,11 +467,27 @@ class CartService
      * @param string $methodCode Method code
      * @return \Mage_Sales_Model_Quote
      */
-    public function setShippingMethod(\Mage_Sales_Model_Quote $quote, string $carrierCode, string $methodCode): \Mage_Sales_Model_Quote
+    public function setShippingMethod(\Mage_Sales_Model_Quote $quote, string $carrierCode, string $methodCode, bool $skipValidation = false): \Mage_Sales_Model_Quote
     {
         $shippingMethod = $carrierCode . '_' . $methodCode;
 
         $address = $quote->getShippingAddress();
+
+        // Validate the shipping method is available for this address
+        if (!$skipValidation) {
+            $address->setCollectShippingRates(1);
+            $address->collectShippingRates();
+
+            $availableMethods = [];
+            foreach ($address->getAllShippingRates() as $rate) {
+                $availableMethods[] = $rate->getCarrier() . '_' . $rate->getMethod();
+            }
+
+            if (!in_array($shippingMethod, $availableMethods, true)) {
+                throw new \RuntimeException('Shipping method is not available for this address');
+            }
+        }
+
         $address->setShippingMethod($shippingMethod);
         $quote->collectTotals();
         $quote->save();
@@ -485,8 +503,26 @@ class CartService
      * @param array|null $additionalData Additional payment data
      * @return \Mage_Sales_Model_Quote
      */
-    public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
+    public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null, bool $skipValidation = false): \Mage_Sales_Model_Quote
     {
+        // Validate the payment method is enabled and available for this quote
+        if (!$skipValidation) {
+            $store = $quote->getStoreId() ? \Mage::app()->getStore($quote->getStoreId()) : \Mage::app()->getStore();
+            $availableMethods = \Mage::helper('payment')->getStoreMethods($store, $quote);
+
+            $isAvailable = false;
+            foreach ($availableMethods as $method) {
+                if ($method->getCode() === $methodCode) {
+                    $isAvailable = true;
+                    break;
+                }
+            }
+
+            if (!$isAvailable) {
+                throw new \RuntimeException('Payment method is not available');
+            }
+        }
+
         $payment = $quote->getPayment();
         $payment->setMethod($methodCode);
 
@@ -498,6 +534,53 @@ class CartService
         $quote->save();
 
         return $quote;
+    }
+
+    /**
+     * Sanitize address data to prevent stored XSS
+     *
+     * Strips HTML tags and limits field lengths for all string address fields.
+     * Called before passing user-supplied address data to quote address models.
+     *
+     * @param array $addressData Raw address data from API input
+     * @return array Sanitized address data
+     */
+    private function sanitizeAddressData(array $addressData): array
+    {
+        $maxLengths = [
+            'firstname' => 255,
+            'lastname' => 255,
+            'company' => 255,
+            'city' => 255,
+            'region' => 255,
+            'postcode' => 20,
+            'telephone' => 50,
+            'fax' => 50,
+            'email' => 255,
+            'prefix' => 40,
+            'suffix' => 40,
+            'middlename' => 255,
+            'vat_id' => 50,
+        ];
+
+        foreach ($addressData as $key => $value) {
+            if ($key === 'street') {
+                if (is_array($value)) {
+                    $addressData[$key] = array_map(fn($line) => mb_substr(strip_tags((string) $line), 0, 255), $value);
+                } elseif (is_string($value)) {
+                    $addressData[$key] = mb_substr(strip_tags($value), 0, 255);
+                }
+                continue;
+            }
+
+            if (is_string($value)) {
+                $value = strip_tags($value);
+                $maxLen = $maxLengths[$key] ?? 255;
+                $addressData[$key] = mb_substr($value, 0, $maxLen);
+            }
+        }
+
+        return $addressData;
     }
 
     /**
@@ -776,7 +859,7 @@ class CartService
         } catch (\Exception $e) {
             \Mage::log("Error placing order with payment method '{$paymentMethod}': " . $e->getMessage());
             \Mage::logException($e);
-            throw new \RuntimeException("Failed to place order with payment method '{$paymentMethod}': " . $e->getMessage());
+            throw new \RuntimeException('Failed to place order');
         }
     }
 

@@ -109,34 +109,44 @@ class AuthController extends AbstractController
 
             $token = $this->jwtService->generateCustomerToken($customer);
 
-            // Handle cart merge if guest cart ID provided
-            $guestCartId = $data['cartId'] ?? $data['guestCartId'] ?? null;
+            // Handle cart merge if guest cart masked ID provided
+            $guestCartMaskedId = $data['maskedId'] ?? $data['cartId'] ?? $data['guestCartId'] ?? null;
             $cartId = null;
 
-            if ($guestCartId) {
+            if ($guestCartMaskedId && is_string($guestCartMaskedId)) {
                 try {
-                    $guestCart = \Mage::getModel('sales/quote')->loadByIdWithoutStore((int) $guestCartId);
-                    if ($guestCart->getId() && !$guestCart->getCustomerId()) {
-                        $customerCart = \Mage::getModel('sales/quote')
-                            ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
-                            ->loadByCustomer((int) $customer->getId());
+                    // Only accept 32-char hex masked IDs — never numeric IDs
+                    if (!preg_match('/^[a-f0-9]{32}$/i', $guestCartMaskedId)) {
+                        // Silently ignore invalid format — don't fail login over bad cart ID
+                        $guestCartMaskedId = null;
+                    }
 
-                        if (!$customerCart->getId()) {
-                            $customerCart = \Mage::getModel('sales/quote');
-                            $customerCart->setStoreId(\Mage::app()->getStore()->getId());
-                            $customerCart->assignCustomer($customer);
-                            $customerCart->setIsActive(1);
+                    if ($guestCartMaskedId) {
+                        $cartService = new \Maho\ApiPlatform\Service\CartService();
+                        $guestCart = $cartService->getCart(null, $guestCartMaskedId);
+
+                        if ($guestCart && $guestCart->getId() && !$guestCart->getCustomerId()) {
+                            $customerCart = \Mage::getModel('sales/quote')
+                                ->setSharedStoreIds([\Mage::app()->getStore()->getId()])
+                                ->loadByCustomer((int) $customer->getId());
+
+                            if (!$customerCart->getId()) {
+                                $customerCart = \Mage::getModel('sales/quote');
+                                $customerCart->setStoreId(\Mage::app()->getStore()->getId());
+                                $customerCart->assignCustomer($customer);
+                                $customerCart->setIsActive(1);
+                                $customerCart->save();
+                            }
+
+                            $customerCart->merge($guestCart);
+                            $customerCart->collectTotals();
                             $customerCart->save();
+
+                            $guestCart->setIsActive(0);
+                            $guestCart->save();
+
+                            $cartId = (int) $customerCart->getId();
                         }
-
-                        $customerCart->merge($guestCart);
-                        $customerCart->collectTotals();
-                        $customerCart->save();
-
-                        $guestCart->setIsActive(0);
-                        $guestCart->save();
-
-                        $cartId = (int) $customerCart->getId();
                     }
                 } catch (\Exception $e) {
                     \Mage::log('Cart merge failed: ' . $e->getMessage(), \Mage::LOG_WARNING);

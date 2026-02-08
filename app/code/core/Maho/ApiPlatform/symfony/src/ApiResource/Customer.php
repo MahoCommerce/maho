@@ -137,6 +137,8 @@ class Customer
     public ?string $lastName = null;
     public ?string $fullName = null;
     public bool $isSubscribed = false;
+
+    #[ApiProperty(writable: false)]
     public int $groupId = 1;
     public ?Address $defaultBillingAddress = null;
     public ?Address $defaultShippingAddress = null;

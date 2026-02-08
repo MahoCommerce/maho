@@ -76,9 +76,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
         } catch (\UnexpectedValueException $e) {
             throw new CustomUserMessageAuthenticationException('Malformed token');
         } catch (\Exception $e) {
-            throw new CustomUserMessageAuthenticationException(
-                'Invalid or expired token: ' . $e->getMessage(),
-            );
+            throw new CustomUserMessageAuthenticationException('Invalid or expired token');
         }
 
         // Validate required payload fields

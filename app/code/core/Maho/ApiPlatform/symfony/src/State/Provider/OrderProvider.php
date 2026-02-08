@@ -226,6 +226,8 @@ final class OrderProvider implements ProviderInterface
      */
     private function getCollection(array $context): ArrayPaginator
     {
+        $this->requireAdminOrApiUser('Order listing requires admin or API access');
+
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
         $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100);

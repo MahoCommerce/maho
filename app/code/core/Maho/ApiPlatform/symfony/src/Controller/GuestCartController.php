@@ -134,9 +134,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -164,9 +165,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -191,9 +193,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse(['success' => true]);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -270,9 +273,10 @@ class GuestCartController extends AbstractController
                 'couponCode' => $quote->getCouponCode(),
             ]);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'invalid_coupon',
-                'message' => $e->getMessage(),
+                'message' => 'Could not apply coupon code',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -360,9 +364,10 @@ class GuestCartController extends AbstractController
                 'appliedGiftcards' => $this->mapAppliedGiftcards($quote),
             ]);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -419,9 +424,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse(['success' => true]);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -446,9 +452,10 @@ class GuestCartController extends AbstractController
 
             return new JsonResponse(['success' => true]);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage(),
+                'message' => 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -691,7 +698,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'order_failed',
-                'message' => $e->getMessage(),
+                'message' => 'Failed to place order',
             ], Response::HTTP_BAD_REQUEST);
         }
     }

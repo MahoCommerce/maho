@@ -262,9 +262,27 @@ class OrderMutationHandler
         $result = $this->orderService->placeOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
 
         $order = $result['order'];
+        $grandTotal = (float) $order->getGrandTotal();
         $invoice = null;
         $shipment = null;
         $savedPayments = [];
+
+        // Validate individual payment amounts and total
+        $totalPayment = 0.0;
+        foreach ($payments as $paymentData) {
+            $amount = (float) ($paymentData['amount'] ?? 0);
+            if ($amount <= 0) {
+                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Each payment amount must be greater than 0');
+            }
+            $totalPayment += $amount;
+        }
+
+        $tolerance = 0.01;
+        if ($totalPayment < $grandTotal - $tolerance) {
+            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException(
+                sprintf('Total payment (%.2f) is less than order total (%.2f)', $totalPayment, $grandTotal),
+            );
+        }
 
         foreach ($payments as $paymentData) {
             /** @phpstan-ignore-next-line */
