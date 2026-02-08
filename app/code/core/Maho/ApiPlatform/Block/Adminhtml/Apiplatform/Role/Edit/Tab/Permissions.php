@@ -59,38 +59,20 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
             'onclick' => 'toggleAllPermissions(this)',
         ]);
 
-        // Per-resource read/write checkboxes
+        // Per-resource permission checkboxes (one per operation)
         foreach ($resources as $resourceId => $config) {
-            // Support both old format (string label) and new format (array with capabilities)
-            if (is_string($config)) {
-                $label = $config;
-                $hasRead = true;
-                $hasWrite = true;
-            } else {
-                $label = $config['label'];
-                $hasRead = $config['read'] ?? true;
-                $hasWrite = $config['write'] ?? false;
-            }
+            $label = $config['label'] ?? (string) $resourceId;
+            $operations = $config['operations'] ?? ['read' => 'View', 'write' => 'Manage'];
 
-            $readChecked = $hasAll || in_array($resourceId . '/read', $currentPermissions, true);
-            $writeChecked = $hasAll || in_array($resourceId . '/write', $currentPermissions, true);
+            foreach ($operations as $operation => $operationLabel) {
+                $permValue = $resourceId . '/' . $operation;
+                $isChecked = $hasAll || in_array($permValue, $currentPermissions, true);
 
-            if ($hasRead) {
-                $fieldset->addField('perm_' . $resourceId . '_read', 'checkbox', [
+                $fieldset->addField('perm_' . $resourceId . '_' . $operation, 'checkbox', [
                     'name'    => 'permissions[]',
-                    'label'   => $this->__('%s - Read', $label),
-                    'value'   => $resourceId . '/read',
-                    'checked' => $readChecked,
-                    'class'   => 'resource-permission',
-                ]);
-            }
-
-            if ($hasWrite) {
-                $fieldset->addField('perm_' . $resourceId . '_write', 'checkbox', [
-                    'name'    => 'permissions[]',
-                    'label'   => $this->__('%s - Write', $label),
-                    'value'   => $resourceId . '/write',
-                    'checked' => $writeChecked,
+                    'label'   => $this->__('%s - %s', $label, $operationLabel),
+                    'value'   => $permValue,
+                    'checked' => $isChecked,
                     'class'   => 'resource-permission',
                 ]);
             }

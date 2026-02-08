@@ -54,12 +54,12 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_granted('ROLE_USER')"),
-        new QueryCollection(name: 'collection_query', description: 'Get wishlist items', security: "is_granted('ROLE_USER')"),
+        new Query(name: 'item_query', description: 'Get a wishlist item by ID', security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')"),
+        new QueryCollection(name: 'collection_query', description: 'Get wishlist items', security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')"),
         new QueryCollection(
             name: 'myWishlist',
             description: 'Get current customer wishlist items',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'addToWishlist',
@@ -69,7 +69,7 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
                 'qty' => ['type' => 'Int', 'description' => 'Quantity (default 1)'],
                 'description' => ['type' => 'String', 'description' => 'Optional note'],
             ],
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'removeFromWishlist',
@@ -77,7 +77,7 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
             args: [
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
             ],
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'moveWishlistItemToCart',
@@ -86,7 +86,7 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
                 'itemId' => ['type' => 'Int!', 'description' => 'Wishlist item ID'],
                 'qty' => ['type' => 'Int', 'description' => 'Quantity to add to cart'],
             ],
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'syncWishlist',
@@ -94,7 +94,7 @@ use Maho\ApiPlatform\State\Processor\WishlistProcessor;
             args: [
                 'productIds' => ['type' => '[Int!]!', 'description' => 'Product IDs from localStorage'],
             ],
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
     ],
 )]

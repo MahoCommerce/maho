@@ -56,9 +56,9 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN')"),
-        new QueryCollection(name: 'collection_query', description: 'Get customers', security: "is_granted('ROLE_ADMIN')"),
-        new Query(name: 'customer', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN')"),
+        new Query(name: 'item_query', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
+        new QueryCollection(name: 'collection_query', description: 'Get customers', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
+        new Query(name: 'customer', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
         new QueryCollection(
             name: 'customers',
             description: 'Search customers by email, phone, or name',
@@ -69,19 +69,19 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
                 'pageSize' => ['type' => 'Int', 'description' => 'Number of results per page'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
             ],
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
         new Query(
             name: 'me',
             args: [],
             description: 'Get current authenticated customer',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
             name: 'createCustomerQuick',
             description: 'Quick customer creation for POS',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS')",
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'customerLogin',
@@ -90,7 +90,7 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
         new Mutation(
             name: 'customerLogout',
             description: 'Customer logout',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'updateCustomer',
@@ -100,7 +100,7 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
                 'email' => ['type' => 'String'],
             ],
             description: 'Update authenticated customer profile',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'changePassword',
@@ -109,7 +109,7 @@ use Maho\ApiPlatform\State\Processor\CustomerProcessor;
                 'newPassword' => ['type' => 'String!'],
             ],
             description: 'Change authenticated customer password',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'forgotPassword',

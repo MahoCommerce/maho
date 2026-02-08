@@ -73,3 +73,6 @@ services:
     Maho\ApiPlatform\State\Provider\NewsletterProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\NewsletterProvider' }
+    Maho\ApiPlatform\State\Provider\ShipmentProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\ShipmentProvider' }

@@ -21,24 +21,6 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
         return parent::preDispatch();
     }
 
-    /**
-     * Available API v2 resources for permission assignment
-     * Format: 'resource_id' => ['label' => 'Display Name', 'read' => bool, 'write' => bool]
-     */
-    private const API_RESOURCES = [
-        'orders'     => ['label' => 'Orders', 'read' => true, 'write' => true],
-        'customers'  => ['label' => 'Customers', 'read' => true, 'write' => true],
-        'carts'      => ['label' => 'Carts', 'read' => true, 'write' => true],
-        'newsletter' => ['label' => 'Newsletter', 'read' => true, 'write' => true],
-        'products'   => ['label' => 'Products', 'read' => true, 'write' => false],
-        'categories' => ['label' => 'Categories', 'read' => true, 'write' => false],
-        'cms'        => ['label' => 'CMS Pages & Blocks', 'read' => true, 'write' => false],
-        'blog'       => ['label' => 'Blog Posts', 'read' => true, 'write' => false],
-        'stores'     => ['label' => 'Stores', 'read' => true, 'write' => false],
-        'countries'  => ['label' => 'Countries', 'read' => true, 'write' => false],
-        // 'shipments' removed - no REST endpoints, only embedded in orders
-    ];
-
     protected function _initAction(): static
     {
         $this->loadLayout()
@@ -108,7 +90,8 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
 
         Mage::register('api_role_data', $roleData ?: []);
         Mage::register('api_role_permissions', $permissions);
-        Mage::register('api_resources', self::API_RESOURCES);
+        $registry = new \Maho\ApiPlatform\Security\ApiPermissionRegistry();
+        Mage::register('api_resources', $registry->getResources());
 
         $this->_title($roleData ? $roleData['role_name'] : $this->__('New Role'));
 

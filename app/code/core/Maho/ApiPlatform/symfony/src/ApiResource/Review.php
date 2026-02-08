@@ -74,12 +74,12 @@ use Maho\ApiPlatform\State\Processor\ReviewProcessor;
         new QueryCollection(
             name: 'myReviews',
             description: 'Get current customer submitted reviews',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(
             name: 'submitReview',
             description: 'Submit a product review',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             args: [
                 'productId' => ['type' => 'Int!', 'description' => 'Product ID'],
                 'title' => ['type' => 'String!', 'description' => 'Review title/summary'],

@@ -49,13 +49,13 @@ use Maho\ApiPlatform\State\Processor\NewsletterProcessor;
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_USER')"),
-        new QueryCollection(name: 'collection_query', description: 'Get newsletter subscriptions', security: "is_granted('ROLE_ADMIN')"),
+        new Query(name: 'item_query', description: 'Get newsletter subscription', security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')"),
+        new QueryCollection(name: 'collection_query', description: 'Get newsletter subscriptions', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),
         new Query(
             name: 'newsletterStatus',
             args: [],
             description: 'Get subscription status for authenticated customer',
-            security: "is_granted('ROLE_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             resolver: CustomQueryResolver::class,
         ),
         new Mutation(
