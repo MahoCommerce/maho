@@ -1321,7 +1321,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     twig?: TwigConfig,
  *     api_platform?: ApiPlatformConfig,
  *     nelmio_cors?: NelmioCorsConfig,
- *     "when@prod"?: array{
+ *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
  *         services?: ServicesConfig,
@@ -1410,7 +1410,7 @@ namespace Symfony\Component\Routing\Loader\Configurator;
  *     deprecated?: array{package:string, version:string, message?:string},
  * }
  * @psalm-type RoutesConfig = array{
- *     "when@prod"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
+ *     "when@dev"?: array<string, RouteConfig|ImportConfig|AliasConfig>,
  *     ...<string, RouteConfig|ImportConfig|AliasConfig>
  * }
  */

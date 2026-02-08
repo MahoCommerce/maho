@@ -128,7 +128,7 @@ class OrderService
             ];
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new \RuntimeException('Failed to place order: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to place order');
         }
     }
 
@@ -285,7 +285,7 @@ class OrderService
             return $order;
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new \RuntimeException('Failed to cancel order: ' . $e->getMessage());
+            throw new \RuntimeException('Failed to cancel order');
         }
     }
 

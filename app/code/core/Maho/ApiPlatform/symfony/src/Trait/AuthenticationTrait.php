@@ -181,6 +181,23 @@ trait AuthenticationTrait
     }
 
     /**
+     * Require admin or dedicated API user role
+     *
+     * Throws AccessDeniedHttpException if user is not an admin or API user.
+     * Regular customers are denied — use this for administrative operations
+     * like creating shipments, gift cards, managing orders, etc.
+     *
+     * @param string $message Custom error message
+     * @throws AccessDeniedHttpException If not admin or API user
+     */
+    protected function requireAdminOrApiUser(string $message = 'Admin or API access required'): void
+    {
+        if (!$this->isAdmin() && !$this->isApiUser()) {
+            throw new AccessDeniedHttpException($message);
+        }
+    }
+
+    /**
      * Check if user can access specific customer data
      *
      * @param int $customerId The customer ID to check

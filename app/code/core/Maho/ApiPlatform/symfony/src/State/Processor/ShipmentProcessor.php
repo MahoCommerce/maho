@@ -18,6 +18,8 @@ use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\ApiResource\Shipment;
 use Maho\ApiPlatform\ApiResource\ShipmentItem;
 use Maho\ApiPlatform\ApiResource\ShipmentTrack;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -28,9 +30,17 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class ShipmentProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
+    public function __construct(Security $security)
+    {
+        $this->security = $security;
+    }
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Shipment
     {
+        $this->requireAdminOrApiUser('Shipment creation requires admin or API access');
         $operationName = $operation->getName();
 
         return match ($operationName) {
