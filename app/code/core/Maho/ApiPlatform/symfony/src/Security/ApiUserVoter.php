@@ -68,7 +68,7 @@ class ApiUserVoter extends Voter
             return false;
         }
 
-        $operation = $this->resolveOperation($request->getMethod());
+        $operation = $this->resolveOperation($request->getMethod(), $resource);
         $required = $resource . '/' . $operation;
 
         return $user->hasPermission($required)
@@ -76,13 +76,16 @@ class ApiUserVoter extends Voter
     }
 
     /**
-     * Map HTTP method to operation
+     * Map HTTP method to operation.
+     *
+     * For POST, checks whether the resource defines a 'create' operation.
+     * Resources without 'create' (e.g. wishlists, newsletter) map POST to 'write'.
      */
-    private function resolveOperation(string $method): string
+    private function resolveOperation(string $method, string $resource): string
     {
         return match (strtoupper($method)) {
             'GET', 'HEAD', 'OPTIONS' => 'read',
-            'POST' => 'create',
+            'POST' => $this->registry->resourceHasOperation($resource, 'create') ? 'create' : 'write',
             default => 'write',
         };
     }

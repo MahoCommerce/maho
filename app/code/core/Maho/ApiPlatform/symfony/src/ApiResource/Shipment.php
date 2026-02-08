@@ -64,7 +64,7 @@ use Maho\ApiPlatform\State\Processor\ShipmentProcessor;
         ),
         new QueryCollection(
             name: 'orderShipments',
-            args: ['orderId' => ['type' => 'ID!']],
+            args: ['orderId' => ['type' => 'Int!']],
             description: 'Get shipments for an order',
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),

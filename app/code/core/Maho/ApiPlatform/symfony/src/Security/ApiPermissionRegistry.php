@@ -14,7 +14,11 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Security;
 
 use GraphQL\Language\AST\FieldNode;
+use GraphQL\Language\AST\FragmentDefinitionNode;
+use GraphQL\Language\AST\FragmentSpreadNode;
+use GraphQL\Language\AST\InlineFragmentNode;
 use GraphQL\Language\AST\OperationDefinitionNode;
+use GraphQL\Language\AST\SelectionSetNode;
 use GraphQL\Language\Parser;
 
 /**
@@ -47,34 +51,38 @@ class ApiPermissionRegistry
         'stores'     => ['label' => 'Store Config', 'operations' => ['read' => 'View']],
         'countries'  => ['label' => 'Countries', 'operations' => ['read' => 'View']],
         'url-resolver' => ['label' => 'URL Resolver', 'operations' => ['read' => 'Resolve']],
+        'invoices'   => ['label' => 'Invoices', 'operations' => ['read' => 'View']],
         'pos'        => ['label' => 'POS', 'operations' => ['read' => 'View', 'write' => 'Manage']],
     ];
 
     /**
-     * REST URL prefix → resource name
+     * URL path segment → resource name.
+     * The resolver finds the last matching segment in the URL path.
      */
-    private const REST_PATH_MAP = [
-        '/api/products'      => 'products',
-        '/api/categories'    => 'categories',
-        '/api/orders'        => 'orders',
-        '/api/customers'     => 'customers',
-        '/api/carts'         => 'carts',
-        '/api/guest-carts'   => 'carts',
-        '/api/addresses'     => 'addresses',
-        '/api/wishlists'     => 'wishlists',
-        '/api/wishlist'      => 'wishlists',
-        '/api/reviews'       => 'reviews',
-        '/api/giftcards'     => 'giftcards',
-        '/api/newsletter'    => 'newsletter',
-        '/api/cms-pages'     => 'cms',
-        '/api/cms-blocks'    => 'cms',
-        '/api/blog-posts'    => 'blog',
-        '/api/stores'        => 'stores',
-        '/api/store-config'  => 'stores',
-        '/api/countries'     => 'countries',
-        '/api/url-resolver'  => 'url-resolver',
-        '/api/pos-payments'  => 'pos',
-        '/api/shipments'     => 'shipments',
+    private const SEGMENT_MAP = [
+        'products'     => 'products',
+        'categories'   => 'categories',
+        'orders'       => 'orders',
+        'customers'    => 'customers',
+        'carts'        => 'carts',
+        'guest-carts'  => 'carts',
+        'addresses'    => 'addresses',
+        'wishlists'    => 'wishlists',
+        'wishlist'     => 'wishlists',
+        'reviews'      => 'reviews',
+        'giftcards'    => 'giftcards',
+        'newsletter'   => 'newsletter',
+        'cms-pages'    => 'cms',
+        'cms-blocks'   => 'cms',
+        'blog-posts'   => 'blog',
+        'stores'       => 'stores',
+        'store-config' => 'stores',
+        'countries'    => 'countries',
+        'url-resolver' => 'url-resolver',
+        'pos-payments' => 'pos',
+        'shipments'    => 'shipments',
+        'invoices'     => 'invoices',
+        'items'        => null, // sub-resource, fall through to parent
     ];
 
     /**
@@ -209,30 +217,43 @@ class ApiPermissionRegistry
     }
 
     /**
-     * Get REST path → resource map
+     * Resolve a REST URL path to a resource name.
      *
-     * @return array<string, string>
-     */
-    public function getRestPathMap(): array
-    {
-        return self::REST_PATH_MAP;
-    }
-
-    /**
-     * Resolve a REST URL path to a resource name
+     * Splits the path into segments and returns the resource mapped by the
+     * last known segment. This correctly handles nested paths like
+     * /api/orders/5/shipments → 'shipments'.
      */
     public function resolveRestResource(string $path): ?string
     {
-        foreach (self::REST_PATH_MAP as $prefix => $resource) {
-            if (str_starts_with($path, $prefix)) {
-                return $resource;
+        $segments = explode('/', trim($path, '/'));
+        $resolved = null;
+
+        foreach ($segments as $segment) {
+            if (array_key_exists($segment, self::SEGMENT_MAP)) {
+                $mapped = self::SEGMENT_MAP[$segment];
+                if ($mapped !== null) {
+                    $resolved = $mapped;
+                }
+                // null entries (like 'items') are skipped, keeping the parent
             }
         }
-        return null;
+
+        return $resolved;
+    }
+
+    /**
+     * Check if a resource defines a specific operation
+     */
+    public function resourceHasOperation(string $resource, string $operation): bool
+    {
+        return isset(self::RESOURCES[$resource]['operations'][$operation]);
     }
 
     /**
      * Parse a GraphQL query and return required resource/operation pairs.
+     *
+     * Handles FieldNode, FragmentSpreadNode, and InlineFragmentNode to
+     * prevent permission bypass via fragment queries.
      *
      * @return array<string> List of permissions needed, e.g. ['products/read', 'orders/create']
      */
@@ -244,6 +265,14 @@ class ApiPermissionRegistry
             return [];
         }
 
+        // Build fragment map for resolving FragmentSpreadNode references
+        $fragments = [];
+        foreach ($document->definitions as $definition) {
+            if ($definition instanceof FragmentDefinitionNode) {
+                $fragments[$definition->name->value] = $definition;
+            }
+        }
+
         $permissions = [];
 
         foreach ($document->definitions as $definition) {
@@ -252,14 +281,9 @@ class ApiPermissionRegistry
             }
 
             $operationType = $definition->operation ?? 'query';
+            $topLevelFields = $this->collectTopLevelFields($definition->selectionSet, $fragments);
 
-            foreach ($definition->selectionSet->selections as $selection) {
-                if (!$selection instanceof FieldNode) {
-                    continue;
-                }
-
-                $fieldName = $selection->name->value;
-
+            foreach ($topLevelFields as $fieldName) {
                 // Skip introspection fields
                 if (str_starts_with($fieldName, '__')) {
                     continue;
@@ -287,5 +311,37 @@ class ApiPermissionRegistry
         }
 
         return array_unique($permissions);
+    }
+
+    /**
+     * Collect top-level field names from a selection set, resolving fragments.
+     *
+     * @param array<string, FragmentDefinitionNode> $fragments
+     * @return array<string>
+     */
+    private function collectTopLevelFields(SelectionSetNode $selectionSet, array $fragments): array
+    {
+        $fields = [];
+
+        foreach ($selectionSet->selections as $selection) {
+            if ($selection instanceof FieldNode) {
+                $fields[] = $selection->name->value;
+            } elseif ($selection instanceof FragmentSpreadNode) {
+                $fragmentName = $selection->name->value;
+                if (isset($fragments[$fragmentName])) {
+                    $fields = array_merge(
+                        $fields,
+                        $this->collectTopLevelFields($fragments[$fragmentName]->selectionSet, $fragments),
+                    );
+                }
+            } elseif ($selection instanceof InlineFragmentNode) {
+                $fields = array_merge(
+                    $fields,
+                    $this->collectTopLevelFields($selection->selectionSet, $fragments),
+                );
+            }
+        }
+
+        return $fields;
     }
 }
