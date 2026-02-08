@@ -278,6 +278,155 @@ class GuestCartController extends AbstractController
     }
 
     /**
+     * Apply gift card code
+     */
+    #[Route('/api/guest-carts/{cartId}/giftcard', name: 'api_guest_cart_apply_giftcard', methods: ['POST'])]
+    public function applyGiftcard(string $cartId, Request $request): JsonResponse
+    {
+        try {
+            $quote = $this->loadCart($cartId);
+
+            if (!$quote) {
+                return new JsonResponse([
+                    'error' => 'cart_not_found',
+                    'message' => 'Cart not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $data = json_decode($request->getContent(), true);
+            $giftcardCode = trim($data['giftcardCode'] ?? '');
+
+            if (!$giftcardCode) {
+                return new JsonResponse([
+                    'error' => 'invalid_request',
+                    'message' => 'Gift card code is required',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Check if cart has gift card products
+            foreach ($quote->getAllItems() as $item) {
+                if ($item->getProductType() === 'giftcard') {
+                    return new JsonResponse([
+                        'error' => 'invalid_request',
+                        'message' => 'Gift cards cannot be used to purchase gift card products',
+                    ], Response::HTTP_BAD_REQUEST);
+                }
+            }
+
+            // Load gift card by code
+            $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($giftcardCode);
+
+            if (!$giftcard->getId()) {
+                return new JsonResponse([
+                    'error' => 'invalid_giftcard',
+                    'message' => 'Gift card is not valid',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            if (!$giftcard->isValid()) {
+                $status = $giftcard->getStatus();
+                $msg = match ($status) {
+                    'pending' => 'Gift card is pending activation',
+                    'expired' => 'Gift card has expired',
+                    'used' => 'Gift card has been fully used',
+                    default => 'Gift card is not active',
+                };
+                return new JsonResponse([
+                    'error' => 'invalid_giftcard',
+                    'message' => $msg,
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Get currently applied codes
+            $appliedCodes = $quote->getGiftcardCodes();
+            $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
+
+            if (isset($appliedCodes[$giftcardCode])) {
+                return new JsonResponse([
+                    'error' => 'already_applied',
+                    'message' => 'Gift card is already applied to this cart',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Apply gift card
+            $quoteCurrency = $quote->getQuoteCurrencyCode();
+            $appliedCodes[$giftcardCode] = $giftcard->getBalance($quoteCurrency);
+
+            $quote->setGiftcardCodes(json_encode($appliedCodes));
+            $quote->collectTotals()->save();
+
+            return new JsonResponse([
+                'success' => true,
+                'appliedGiftcards' => $this->mapAppliedGiftcards($quote),
+            ]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
+     * Remove gift card code
+     */
+    #[Route('/api/guest-carts/{cartId}/giftcard', name: 'api_guest_cart_remove_giftcard', methods: ['DELETE'])]
+    public function removeGiftcard(string $cartId, Request $request): JsonResponse
+    {
+        try {
+            $quote = $this->loadCart($cartId);
+
+            if (!$quote) {
+                return new JsonResponse([
+                    'error' => 'cart_not_found',
+                    'message' => 'Cart not found',
+                ], Response::HTTP_NOT_FOUND);
+            }
+
+            $data = json_decode($request->getContent(), true);
+            $giftcardCode = trim($data['giftcardCode'] ?? '');
+
+            if (!$giftcardCode) {
+                return new JsonResponse([
+                    'error' => 'invalid_request',
+                    'message' => 'Gift card code is required',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Get currently applied codes
+            $appliedCodes = $quote->getGiftcardCodes();
+            $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
+
+            if (!isset($appliedCodes[$giftcardCode])) {
+                return new JsonResponse([
+                    'error' => 'not_applied',
+                    'message' => 'Gift card is not applied to this cart',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Remove the code
+            unset($appliedCodes[$giftcardCode]);
+
+            if (empty($appliedCodes)) {
+                $quote->setGiftcardCodes(null);
+                $quote->setGiftcardAmount(0);
+                $quote->setBaseGiftcardAmount(0);
+            } else {
+                $quote->setGiftcardCodes(json_encode($appliedCodes));
+            }
+
+            $quote->collectTotals()->save();
+
+            return new JsonResponse(['success' => true]);
+        } catch (\Exception $e) {
+            return new JsonResponse([
+                'error' => 'error',
+                'message' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        }
+    }
+
+    /**
      * Remove coupon code
      */
     #[Route('/api/guest-carts/{cartId}/coupon', name: 'api_guest_cart_remove_coupon', methods: ['DELETE'])]
@@ -623,7 +772,7 @@ class GuestCartController extends AbstractController
 
         $shippingAddress = $quote->getShippingAddress();
 
-        return [
+        $result = [
             'id' => (int) $quote->getId(),
             'maskedId' => $quote->getData('masked_quote_id'),
             'itemsCount' => (int) $quote->getItemsCount(),
@@ -637,7 +786,45 @@ class GuestCartController extends AbstractController
                 'grandTotal' => (float) ($quote->getGrandTotal() ?? 0),
             ],
             'couponCode' => $quote->getCouponCode(),
+            'appliedGiftcards' => $this->mapAppliedGiftcards($quote),
         ];
+
+        // Add giftcard amount to prices if present
+        $giftcardAmount = (float) $quote->getData('giftcard_amount');
+        if ($giftcardAmount > 0) {
+            $result['prices']['giftcardAmount'] = $giftcardAmount;
+        }
+
+        return $result;
+    }
+
+    /**
+     * Map applied gift cards from quote to response array
+     *
+     * @return array<array{code: string, balance: float, appliedAmount: float}>|null
+     */
+    private function mapAppliedGiftcards(\Mage_Sales_Model_Quote $quote): ?array
+    {
+        $giftcardCodesJson = $quote->getData('giftcard_codes');
+        if (!$giftcardCodesJson) {
+            return null;
+        }
+
+        $giftcardCodes = json_decode($giftcardCodesJson, true);
+        if (!is_array($giftcardCodes) || empty($giftcardCodes)) {
+            return null;
+        }
+
+        $cards = [];
+        foreach ($giftcardCodes as $code => $balance) {
+            $cards[] = [
+                'code' => (string) $code,
+                'balance' => (float) $balance,
+                'appliedAmount' => 0.0,
+            ];
+        }
+
+        return $cards;
     }
 
     /**

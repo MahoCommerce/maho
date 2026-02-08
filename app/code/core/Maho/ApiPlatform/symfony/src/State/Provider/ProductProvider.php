@@ -306,6 +306,9 @@ final class ProductProvider implements ProviderInterface
             'id' => $dto->id,
             'sku' => $dto->sku,
             'urlKey' => $dto->urlKey,
+            'metaTitle' => $dto->metaTitle,
+            'metaDescription' => $dto->metaDescription,
+            'metaKeywords' => $dto->metaKeywords,
             'name' => $dto->name,
             'description' => $dto->description,
             'shortDescription' => $dto->shortDescription,
@@ -340,6 +343,9 @@ final class ProductProvider implements ProviderInterface
         $dto->id = $data['id'] ?? null;
         $dto->sku = $data['sku'] ?? '';
         $dto->urlKey = $data['urlKey'] ?? null;
+        $dto->metaTitle = $data['metaTitle'] ?? null;
+        $dto->metaDescription = $data['metaDescription'] ?? null;
+        $dto->metaKeywords = $data['metaKeywords'] ?? null;
         $dto->name = $data['name'] ?? '';
         $dto->description = $data['description'] ?? null;
         $dto->shortDescription = $data['shortDescription'] ?? null;
@@ -385,6 +391,9 @@ final class ProductProvider implements ProviderInterface
         $dto->id = (int) $product->getId();
         $dto->sku = $product->getSku() ?? '';
         $dto->urlKey = $product->getUrlKey();
+        $dto->metaTitle = $product->getMetaTitle();
+        $dto->metaDescription = $product->getMetaDescription();
+        $dto->metaKeywords = $product->getMetaKeyword();
         $dto->name = $product->getName() ?? '';
         $dto->description = $product->getDescription();
         $dto->shortDescription = $product->getShortDescription();

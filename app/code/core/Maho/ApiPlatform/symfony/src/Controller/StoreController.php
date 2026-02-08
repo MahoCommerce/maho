@@ -44,8 +44,8 @@ class StoreController extends AbstractController
             ];
         }
 
-        // Build store list with full details
-        foreach (\Mage::app()->getStores(true) as $store) {
+        // Build store list with full details (exclude admin store)
+        foreach (\Mage::app()->getStores(false) as $store) {
             if (!$store->getIsActive()) {
                 continue;
             }

@@ -3,11 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Maho Headless Store</title>
+    <title>Store</title>
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <link rel="canonical" href="">
+    <meta property="og:title" content="">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="">
+    <meta property="og:url" content="">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="">
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3/dist/purify.min.js"></script>
-    <link rel="stylesheet" href="/api-test/store/store.css?v=64">
+    <link rel="stylesheet" href="/api-test/store/store.css?v=66">
 </head>
 <body class="bg-gray-100 min-h-screen" x-data="store()" x-cloak>
     <!-- Header -->
@@ -1236,20 +1249,66 @@
                                 <span>GST</span>
                                 <span x-text="formatPrice(cart.prices?.taxAmount || 0)"></span>
                             </div>
+                            <div x-show="cart.prices?.giftcardAmount" class="flex justify-between text-green-600">
+                                <span>Gift Card</span>
+                                <span x-text="'-' + formatPrice(cart.prices?.giftcardAmount || 0)"></span>
+                            </div>
                             <div class="border-t pt-2 mt-2 flex justify-between font-semibold text-lg">
                                 <span>Total <span class="text-xs font-normal text-gray-500">(inc. GST)</span></span>
                                 <span x-text="formatPrice(cart.prices?.grandTotal || cart.prices?.subtotal || 0)"></span>
                             </div>
                         </div>
 
-                        <!-- Coupon -->
+                        <!-- Promo / Gift Card Tabs -->
                         <div class="mt-4">
-                            <div class="flex gap-2">
-                                <input type="text" x-model="couponCode" placeholder="Coupon code"
-                                       class="flex-1 border rounded px-3 py-2 text-sm">
-                                <button @click="applyCoupon()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-sm">
-                                    Apply
+                            <div class="flex border-b border-gray-200 mb-3">
+                                <button @click="promoTab = 'coupon'"
+                                        :class="promoTab === 'coupon' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                        class="flex-1 pb-2 text-sm font-medium border-b-2 transition-colors text-center">
+                                    Coupon Code
                                 </button>
+                                <button @click="promoTab = 'giftcard'"
+                                        :class="promoTab === 'giftcard' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                        class="flex-1 pb-2 text-sm font-medium border-b-2 transition-colors text-center">
+                                    Gift Card
+                                </button>
+                            </div>
+                            <!-- Coupon tab -->
+                            <div x-show="promoTab === 'coupon'">
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="couponCode" placeholder="Enter coupon code"
+                                           @keyup.enter="applyCoupon()"
+                                           class="flex-1 border rounded px-3 py-2 text-sm">
+                                    <button @click="applyCoupon()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-sm font-medium transition">
+                                        Apply
+                                    </button>
+                                </div>
+                                <template x-if="cart.appliedCoupon">
+                                    <div class="mt-2 flex items-center justify-between text-sm bg-blue-50 border border-blue-200 rounded px-3 py-1.5">
+                                        <span class="text-blue-700"><span class="font-mono text-xs" x-text="cart.appliedCoupon.code || cart.couponCode"></span> applied</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <!-- Gift Card tab -->
+                            <div x-show="promoTab === 'giftcard'">
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="giftcardCode" placeholder="Enter gift card code"
+                                           @keyup.enter="applyGiftcard()"
+                                           class="flex-1 border rounded px-3 py-2 text-sm">
+                                    <button @click="applyGiftcard()" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded text-sm font-medium transition">
+                                        Apply
+                                    </button>
+                                </div>
+                                <template x-if="cart.appliedGiftcards?.length > 0">
+                                    <div class="mt-2 space-y-1">
+                                        <template x-for="gc in cart.appliedGiftcards" :key="gc.code">
+                                            <div class="flex items-center justify-between text-sm bg-green-50 border border-green-200 rounded px-3 py-1.5">
+                                                <span class="text-green-700 font-mono text-xs" x-text="gc.code"></span>
+                                                <button @click="removeGiftcard(gc.code)" class="text-red-500 hover:text-red-700 text-xs font-medium ml-2">Remove</button>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
                             </div>
                         </div>
 
@@ -1536,14 +1595,59 @@
                                 </template>
                             </div>
 
-                            <!-- Discount code -->
-                            <div class="flex gap-2 mb-6">
-                                <input type="text" x-model="couponCode" placeholder="Discount code"
-                                       class="flex-1 border rounded-lg px-3 py-2 text-sm bg-white">
-                                <button @click="applyCoupon()"
-                                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition">
-                                    Apply
-                                </button>
+                            <!-- Promo / Gift Card Tabs -->
+                            <div class="mb-4">
+                                <div class="flex border-b border-gray-200 mb-3">
+                                    <button @click="promoTab = 'coupon'"
+                                            :class="promoTab === 'coupon' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="flex-1 pb-2 text-sm font-medium border-b-2 transition-colors text-center">
+                                        Coupon Code
+                                    </button>
+                                    <button @click="promoTab = 'giftcard'"
+                                            :class="promoTab === 'giftcard' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700'"
+                                            class="flex-1 pb-2 text-sm font-medium border-b-2 transition-colors text-center">
+                                        Gift Card
+                                    </button>
+                                </div>
+                                <!-- Coupon tab -->
+                                <div x-show="promoTab === 'coupon'">
+                                    <div class="flex gap-2">
+                                        <input type="text" x-model="couponCode" placeholder="Enter coupon code"
+                                               @keyup.enter="applyCoupon()"
+                                               class="flex-1 border rounded-lg px-3 py-2 text-sm bg-white">
+                                        <button @click="applyCoupon()"
+                                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition">
+                                            Apply
+                                        </button>
+                                    </div>
+                                    <template x-if="cart.appliedCoupon">
+                                        <div class="mt-2 flex items-center justify-between text-sm bg-blue-50 border border-blue-200 rounded-lg px-3 py-1.5">
+                                            <span class="text-blue-700"><span class="font-mono text-xs" x-text="cart.appliedCoupon.code || cart.couponCode"></span> applied</span>
+                                        </div>
+                                    </template>
+                                </div>
+                                <!-- Gift Card tab -->
+                                <div x-show="promoTab === 'giftcard'">
+                                    <div class="flex gap-2">
+                                        <input type="text" x-model="giftcardCode" placeholder="Enter gift card code"
+                                               @keyup.enter="applyGiftcard()"
+                                               class="flex-1 border rounded-lg px-3 py-2 text-sm bg-white">
+                                        <button @click="applyGiftcard()"
+                                                class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition">
+                                            Apply
+                                        </button>
+                                    </div>
+                                    <template x-if="cart.appliedGiftcards?.length > 0">
+                                        <div class="mt-2 space-y-1">
+                                            <template x-for="gc in cart.appliedGiftcards" :key="gc.code">
+                                                <div class="flex items-center justify-between text-sm bg-green-50 border border-green-200 rounded-lg px-3 py-1.5">
+                                                    <span class="text-green-700 font-mono text-xs" x-text="gc.code"></span>
+                                                    <button @click="removeGiftcard(gc.code)" class="text-red-500 hover:text-red-700 text-xs font-medium ml-2">Remove</button>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
+                                </div>
                             </div>
 
                             <!-- Totals -->
@@ -1571,6 +1675,12 @@
                                     <div class="flex justify-between text-sm">
                                         <span class="text-gray-600">GST</span>
                                         <span class="text-gray-900" x-text="formatPrice(cart.prices?.taxAmount || 0)"></span>
+                                    </div>
+                                </template>
+                                <template x-if="cart.prices?.giftcardAmount">
+                                    <div class="flex justify-between text-sm text-green-600">
+                                        <span>Gift Card</span>
+                                        <span x-text="'-' + formatPrice(cart.prices?.giftcardAmount || 0)"></span>
                                     </div>
                                 </template>
                             </div>
@@ -2623,7 +2733,7 @@
         </div>
     </footer>
 
-    <script src="/api-test/store/store.js?v=64"></script>
+    <script src="/api-test/store/store.js?v=66"></script>
     <script>
     function homeBanner(html) {
         const parser = new DOMParser();
