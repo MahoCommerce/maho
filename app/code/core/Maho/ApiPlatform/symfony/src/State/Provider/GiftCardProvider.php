@@ -89,20 +89,33 @@ final class GiftCardProvider implements ProviderInterface
     }
 
     /**
-     * Get gift card collection (admin/API user only)
+     * Get gift card collection with pagination (admin/API user only)
      */
     private function getGiftCardCollection(array $context): ArrayPaginator
     {
+        $filters = $context['filters'] ?? [];
+        $page = (int) ($filters['page'] ?? 1);
+        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100);
+
         $collection = \Mage::getResourceModel('giftcard/giftcard_collection');
         $collection->setOrder('created_at', 'DESC');
+
+        $total = $collection->getSize();
+
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
 
         $items = [];
         foreach ($collection as $giftcard) {
             $items[] = $this->mapToDto($giftcard);
         }
 
-        $total = count($items);
-        return new ArrayPaginator($items, 1, max($total, 50), $total);
+        return new ArrayPaginator(
+            items: $items,
+            currentPage: $page,
+            itemsPerPage: $pageSize,
+            totalItems: $total,
+        );
     }
 
     /**
