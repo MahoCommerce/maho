@@ -19,6 +19,7 @@ use ApiPlatform\State\ProcessorInterface;
 use Maho\ApiPlatform\ApiResource\WishlistItem;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\CartService;
+use Maho\ApiPlatform\State\Provider\WishlistProvider;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -178,6 +179,7 @@ final class WishlistProcessor implements ProcessorInterface
         }
 
         $wishlist->save();
+        WishlistProvider::invalidateCache($customerId);
 
         // Return the wishlist item
         return $this->buildWishlistItem($item, $product);
@@ -207,6 +209,7 @@ final class WishlistProcessor implements ProcessorInterface
         }
 
         $item->delete();
+        WishlistProvider::invalidateCache($customerId);
 
         return null;
     }
@@ -276,6 +279,7 @@ final class WishlistProcessor implements ProcessorInterface
 
         // Remove from wishlist
         $item->delete();
+        WishlistProvider::invalidateCache($customerId);
 
         return $wishlistItem;
     }
@@ -321,6 +325,7 @@ final class WishlistProcessor implements ProcessorInterface
         }
 
         $wishlist->save();
+        WishlistProvider::invalidateCache($customerId);
 
         return $addedItems;
     }

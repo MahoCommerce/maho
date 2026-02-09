@@ -33,6 +33,14 @@ final class WishlistProvider implements ProviderInterface
 {
     use AuthenticationTrait;
 
+    /**
+     * Wishlists are per-user and mutate often — short TTL
+     */
+    private function getCacheTtl(): int
+    {
+        return max(60, (int) (\Maho_ApiPlatform_Model_Observer::getCacheTtl() / 3));
+    }
+
     public function __construct(Security $security)
     {
         $this->security = $security;
@@ -76,6 +84,16 @@ final class WishlistProvider implements ProviderInterface
     private function getWishlistItems(): array
     {
         $customerId = $this->requireAuthentication();
+        $storeId = \Mage::app()->getStore()->getId();
+        $cacheKey = "api_wishlist_{$customerId}_{$storeId}";
+
+        $cached = \Mage::app()->getCache()->load($cacheKey);
+        if ($cached !== false) {
+            $data = json_decode($cached, true);
+            if (is_array($data)) {
+                return array_map(fn(array $d) => $this->arrayToWishlistDto($d), $data);
+            }
+        }
 
         /** @var \Mage_Wishlist_Model_Wishlist $wishlist */
         $wishlist = \Mage::getModel('wishlist/wishlist')->loadByCustomer($customerId, true);
@@ -86,7 +104,7 @@ final class WishlistProvider implements ProviderInterface
 
         $items = [];
         $itemCollection = $wishlist->getItemsCollection();
-        $itemCollection->addStoreFilter([\Mage::app()->getStore()->getId()]);
+        $itemCollection->addStoreFilter([$storeId]);
 
         /** @var \Mage_Wishlist_Model_Item $item */
         foreach ($itemCollection as $item) {
@@ -111,6 +129,13 @@ final class WishlistProvider implements ProviderInterface
 
             $items[] = $wishlistItem;
         }
+
+        \Mage::app()->getCache()->save(
+            (string) json_encode(array_map(fn(WishlistItem $i) => $this->wishlistDtoToArray($i), $items)),
+            $cacheKey,
+            ['API_WISHLIST', "API_WISHLIST_{$customerId}"],
+            $this->getCacheTtl(),
+        );
 
         return $items;
     }
@@ -169,5 +194,53 @@ final class WishlistProvider implements ProviderInterface
         } catch (\Exception $e) {
             return '';
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function wishlistDtoToArray(WishlistItem $item): array
+    {
+        return [
+            'id' => $item->id,
+            'productId' => $item->productId,
+            'productName' => $item->productName,
+            'productSku' => $item->productSku,
+            'productPrice' => $item->productPrice,
+            'productImageUrl' => $item->productImageUrl,
+            'productUrl' => $item->productUrl,
+            'productType' => $item->productType,
+            'qty' => $item->qty,
+            'description' => $item->description,
+            'addedAt' => $item->addedAt,
+            'inStock' => $item->inStock,
+        ];
+    }
+
+    private function arrayToWishlistDto(array $data): WishlistItem
+    {
+        $item = new WishlistItem();
+        $item->id = (int) $data['id'];
+        $item->productId = (int) $data['productId'];
+        $item->productName = $data['productName'];
+        $item->productSku = $data['productSku'];
+        $item->productPrice = (float) $data['productPrice'];
+        $item->productImageUrl = $data['productImageUrl'] ?? '';
+        $item->productUrl = $data['productUrl'] ?? '';
+        $item->productType = $data['productType'] ?? 'simple';
+        $item->qty = (int) ($data['qty'] ?? 1);
+        $item->description = $data['description'] ?? null;
+        $item->addedAt = $data['addedAt'] ?? null;
+        $item->inStock = (bool) ($data['inStock'] ?? true);
+
+        return $item;
+    }
+
+    /**
+     * Invalidate wishlist cache for a customer
+     */
+    public static function invalidateCache(int $customerId): void
+    {
+        \Mage::app()->getCache()->clean(["API_WISHLIST_{$customerId}"]);
     }
 }

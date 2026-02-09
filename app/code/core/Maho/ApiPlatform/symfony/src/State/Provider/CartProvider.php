@@ -289,6 +289,13 @@ final class CartProvider implements ProviderInterface
         // Get configured product options for display
         $dto->options = $this->getItemConfigurationOptions($item);
 
+        // Check stock status
+        $product = $item->getProduct();
+        if ($product) {
+            $stockItem = \Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
+            $dto->stockStatus = $stockItem->getIsInStock() ? 'in_stock' : 'out_of_stock';
+        }
+
         return $dto;
     }
 

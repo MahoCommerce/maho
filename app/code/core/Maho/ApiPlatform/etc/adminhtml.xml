@@ -26,6 +26,13 @@
                 <children>
                     <system>
                         <children>
+                            <config>
+                                <children>
+                                    <maho_apiplatform translate="title" module="maho_apiplatform">
+                                        <title>API Platform</title>
+                                    </maho_apiplatform>
+                                </children>
+                            </config>
                             <api>
                                 <children>
                                     <api2_users translate="title" module="maho_apiplatform">

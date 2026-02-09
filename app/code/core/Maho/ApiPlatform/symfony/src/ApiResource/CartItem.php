@@ -47,4 +47,9 @@ class CartItem
      * Used for omnichannel scenarios (BOPIS, POS in-store pickup, etc.)
      */
     public string $fulfillmentType = 'SHIP';
+
+    /**
+     * Stock status: 'in_stock' or 'out_of_stock'
+     */
+    public string $stockStatus = 'in_stock';
 }
