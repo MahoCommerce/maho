@@ -32,6 +32,14 @@ final class ReviewProvider implements ProviderInterface
 {
     use AuthenticationTrait;
 
+    /**
+     * Reviews change less frequently, use 3x the base TTL
+     */
+    private function getCacheTtl(): int
+    {
+        return \Maho_ApiPlatform_Model_Observer::getCacheTtl() * 3;
+    }
+
     public function __construct(Security $security)
     {
         $this->security = $security;
@@ -97,6 +105,21 @@ final class ReviewProvider implements ProviderInterface
     private function getProductReviews(int $productId, int $page = 1, int $pageSize = 10): ArrayPaginator
     {
         $storeId = StoreContext::getStoreId();
+        $cacheKey = "api_reviews_{$productId}_{$page}_{$pageSize}_{$storeId}";
+
+        $cached = \Mage::app()->getCache()->load($cacheKey);
+        if ($cached !== false) {
+            $data = json_decode($cached, true);
+            if ($data !== null) {
+                $reviews = array_map(fn(array $r) => $this->arrayToReviewDto($r), $data['reviews']);
+                return new ArrayPaginator(
+                    items: $reviews,
+                    currentPage: $data['page'],
+                    itemsPerPage: $data['pageSize'],
+                    totalItems: $data['total'],
+                );
+            }
+        }
 
         /** @var \Mage_Review_Model_Resource_Review_Collection $collection */
         $collection = \Mage::getModel('review/review')->getCollection();
@@ -112,13 +135,32 @@ final class ReviewProvider implements ProviderInterface
         // Add rating data
         $collection->addRateVotes();
 
-        $reviews = [];
+        $total = (int) $collection->getSize();
+
+        // Batch load product names to avoid N+1
+        $productIds = [];
         /** @var \Mage_Review_Model_Review $review */
         foreach ($collection as $review) {
-            $reviews[] = $this->buildReview($review);
+            $productIds[] = (int) $review->getEntityPkValue();
+        }
+        $productNames = $this->batchLoadProductNames(array_unique($productIds));
+
+        $reviews = [];
+        foreach ($collection as $review) {
+            $reviews[] = $this->buildReview($review, $productNames);
         }
 
-        $total = (int) $collection->getSize();
+        \Mage::app()->getCache()->save(
+            (string) json_encode([
+                'reviews' => array_map(fn(Review $r) => $this->reviewDtoToArray($r), $reviews),
+                'page' => $page,
+                'pageSize' => $pageSize,
+                'total' => $total,
+            ]),
+            $cacheKey,
+            ['API_REVIEWS'],
+            $this->getCacheTtl(),
+        );
 
         return new ArrayPaginator(
             items: $reviews,
@@ -149,10 +191,17 @@ final class ReviewProvider implements ProviderInterface
         $collection->setDateOrder();
         $collection->addRateVotes();
 
-        $reviews = [];
+        // Batch load product names
+        $productIds = [];
         /** @var \Mage_Review_Model_Review $review */
         foreach ($collection as $review) {
-            $reviews[] = $this->buildReview($review);
+            $productIds[] = (int) $review->getEntityPkValue();
+        }
+        $productNames = $this->batchLoadProductNames(array_unique($productIds));
+
+        $reviews = [];
+        foreach ($collection as $review) {
+            $reviews[] = $this->buildReview($review, $productNames);
         }
 
         $total = count($reviews);
@@ -191,8 +240,10 @@ final class ReviewProvider implements ProviderInterface
 
     /**
      * Build Review resource from model
+     *
+     * @param array<int, string> $productNames Pre-loaded product names keyed by product ID
      */
-    private function buildReview(\Mage_Review_Model_Review $review): Review
+    private function buildReview(\Mage_Review_Model_Review $review, array $productNames = []): Review
     {
         $resource = new Review();
         $resource->id = (int) $review->getId();
@@ -225,14 +276,69 @@ final class ReviewProvider implements ProviderInterface
         }
         $resource->rating = max(1, min(5, $rating));
 
-        // Get product name
-        try {
-            $product = \Mage::getModel('catalog/product')->load($review->getEntityPkValue());
-            $resource->productName = $product->getName();
-        } catch (\Exception $e) {
-            $resource->productName = null;
-        }
+        $resource->productName = $productNames[$resource->productId] ?? null;
 
         return $resource;
+    }
+
+    /**
+     * Batch load product names by IDs (single query instead of N+1)
+     *
+     * @param array<int> $productIds
+     * @return array<int, string>
+     */
+    private function batchLoadProductNames(array $productIds): array
+    {
+        if (empty($productIds)) {
+            return [];
+        }
+
+        $collection = \Mage::getResourceModel('catalog/product_collection')
+            ->addAttributeToSelect('name')
+            ->addIdFilter($productIds);
+
+        $names = [];
+        /** @var \Mage_Catalog_Model_Product $product */
+        foreach ($collection as $product) {
+            $names[(int) $product->getId()] = $product->getName();
+        }
+
+        return $names;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function reviewDtoToArray(Review $review): array
+    {
+        return [
+            'id' => $review->id,
+            'productId' => $review->productId,
+            'productName' => $review->productName,
+            'title' => $review->title,
+            'detail' => $review->detail,
+            'nickname' => $review->nickname,
+            'rating' => $review->rating,
+            'status' => $review->status,
+            'createdAt' => $review->createdAt,
+            'customerId' => $review->customerId,
+        ];
+    }
+
+    private function arrayToReviewDto(array $data): Review
+    {
+        $review = new Review();
+        $review->id = (int) $data['id'];
+        $review->productId = (int) $data['productId'];
+        $review->productName = $data['productName'] ?? null;
+        $review->title = $data['title'];
+        $review->detail = $data['detail'];
+        $review->nickname = $data['nickname'];
+        $review->rating = (int) $data['rating'];
+        $review->status = $data['status'];
+        $review->createdAt = $data['createdAt'];
+        $review->customerId = isset($data['customerId']) ? (int) $data['customerId'] : null;
+
+        return $review;
     }
 }

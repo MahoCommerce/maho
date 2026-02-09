@@ -28,6 +28,15 @@
                 </setup>
             </maho_apiplatform_setup>
         </resources>
+        <cache>
+            <types>
+                <api_data translate="label,description" module="maho_apiplatform">
+                    <label>API Data</label>
+                    <description>REST and GraphQL API response cache (products, reviews, wishlists, etc.)</description>
+                    <tags>API_PRODUCTS,API_REVIEWS,API_WISHLIST,API_STORE_CONFIG,API_COUNTRIES</tags>
+                </api_data>
+            </types>
+        </cache>
         <events>
             <!-- Add deprecation headers to legacy API responses -->
             <controller_front_send_response_before>
@@ -86,6 +95,16 @@
                     </maho_apiplatform_price_cache>
                 </observers>
             </catalogrule_after_apply>
+
+            <!-- Invalidate API reviews cache when a review is saved -->
+            <review_save_after>
+                <observers>
+                    <maho_apiplatform_review_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateReviewCache</method>
+                    </maho_apiplatform_review_cache>
+                </observers>
+            </review_save_after>
         </events>
     </global>
     <frontend>
@@ -143,6 +162,10 @@
                 <enabled>1</enabled>
                 <legacy_sunset_date>2028-01-01</legacy_sunset_date>
             </general>
+            <cache>
+                <ttl>300</ttl>
+                <auto_clean>all</auto_clean>
+            </cache>
             <graphql>
                 <naming_convention>graphql</naming_convention>
             </graphql>

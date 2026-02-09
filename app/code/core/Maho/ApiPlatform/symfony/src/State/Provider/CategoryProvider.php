@@ -109,7 +109,7 @@ final class CategoryProvider implements ProviderInterface
 
         $collection = \Mage::getModel('catalog/category')
             ->getCollection()
-            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description'])
+            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page'])
             ->addAttributeToFilter('is_active', 1)
             ->setOrder('position', 'ASC');
 
@@ -159,6 +159,12 @@ final class CategoryProvider implements ProviderInterface
         $dto->isActive = (bool) $category->getIsActive();
         $dto->includeInMenu = (bool) $category->getIncludeInMenu();
         $dto->path = $category->getPath();
+        $dto->displayMode = $category->getDisplayMode() ?: null;
+        // Render CMS static block if landing_page is set
+        $landingPage = $category->getLandingPage();
+        if ($landingPage) {
+            $dto->cmsBlock = $this->renderCmsBlock((int) $landingPage);
+        }
         $dto->metaTitle = $category->getMetaTitle();
         $dto->metaKeywords = $category->getMetaKeywords();
         $dto->metaDescription = $category->getMetaDescription();
@@ -183,7 +189,7 @@ final class CategoryProvider implements ProviderInterface
         if ($includeChildren && !empty($dto->childrenIds)) {
             $childCollection = \Mage::getModel('catalog/category')
                 ->getCollection()
-                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level'])
+                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page'])
                 ->addAttributeToFilter('entity_id', ['in' => $dto->childrenIds])
                 ->addAttributeToFilter('is_active', 1)
                 ->setOrder('position', 'ASC');
@@ -194,5 +200,65 @@ final class CategoryProvider implements ProviderInterface
         }
 
         return $dto;
+    }
+
+    /**
+     * Render a CMS static block by ID, resolving directives without session dependency
+     */
+    private function renderCmsBlock(int $blockId): ?string
+    {
+        try {
+            $cmsBlock = \Mage::getModel('cms/block')
+                ->setStoreId(\Mage::app()->getStore()->getId())
+                ->load($blockId);
+            if (!$cmsBlock->getIsActive() || !$cmsBlock->getContent()) {
+                return null;
+            }
+            return $this->processDirectives($cmsBlock->getContent());
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
+    /**
+     * Process CMS directives ({{block}}, {{media}}, {{config}}) without the full rendering pipeline
+     */
+    private function processDirectives(string $content): string
+    {
+        // Resolve {{block type="cms/block" block_id="..."}} by loading referenced blocks recursively
+        $content = (string) preg_replace_callback(
+            '/\{\{block\s+type="cms\/block"\s+block_id="([^"]+)"\s*\}\}/i',
+            function (array $matches): string {
+                $identifier = $matches[1];
+                try {
+                    $block = \Mage::getModel('cms/block')
+                        ->setStoreId(\Mage::app()->getStore()->getId())
+                        ->load($identifier, 'identifier');
+                    if ($block->getIsActive() && $block->getContent()) {
+                        return $this->processDirectives($block->getContent());
+                    }
+                } catch (\Throwable) {
+                }
+                return '';
+            },
+            $content,
+        );
+
+        // Resolve {{media url="..."}}
+        $mediaUrl = \Mage::getBaseUrl('media');
+        $content = (string) preg_replace(
+            '/\{\{media\s+url="([^"]+)"\s*\}\}/i',
+            $mediaUrl . '$1',
+            $content,
+        );
+
+        // Resolve {{config path="..."}}
+        $content = (string) preg_replace_callback(
+            '/\{\{config\s+path="([^"]+)"\s*\}\}/i',
+            fn(array $m): string => (string) \Mage::getStoreConfig($m[1]),
+            $content,
+        );
+
+        return $content;
     }
 }

@@ -13,7 +13,9 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Controller;
 
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -26,10 +28,13 @@ use Maho\ApiPlatform\Service\CartService;
  */
 class GuestCartController extends AbstractController
 {
+    use AuthenticationTrait;
+
     private CartService $cartService;
 
-    public function __construct()
+    public function __construct(Security $security)
     {
+        $this->security = $security;
         $this->cartService = new CartService();
     }
 
@@ -112,11 +117,14 @@ class GuestCartController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            // Convert flat options to structured format when grouped/bundle params are present
-            if (!empty($data['super_group']) || !empty($data['bundle_option'])) {
+            // Convert flat options to structured format when grouped/bundle/downloadable params are present
+            if (!empty($data['super_group']) || !empty($data['bundle_option']) || !empty($data['links'])) {
                 $structured = [];
                 if (!empty($options)) {
                     $structured['options'] = $options;
+                }
+                if (!empty($data['links'])) {
+                    $structured['links'] = $data['links'];
                 }
                 if (!empty($data['super_group'])) {
                     $structured['super_group'] = $data['super_group'];
@@ -191,7 +199,7 @@ class GuestCartController extends AbstractController
 
             $quote = $this->cartService->removeItem($quote, $itemId);
 
-            return new JsonResponse(['success' => true]);
+            return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -638,8 +646,25 @@ class GuestCartController extends AbstractController
 
             $data = json_decode($request->getContent(), true);
 
+            // Check if authenticated customer is placing the order
+            $customerId = $this->getAuthenticatedCustomerId();
+            if ($customerId) {
+                $customer = \Mage::getModel('customer/customer')->load($customerId);
+                if ($customer->getId()) {
+                    $quote->setCustomerId($customerId);
+                    $quote->setCustomerFirstname($customer->getFirstname());
+                    $quote->setCustomerLastname($customer->getLastname());
+                    $quote->setCustomerGroupId($customer->getGroupId());
+                    $quote->setCustomerIsGuest(0);
+                    // Use form email if provided, fall back to customer record
+                    $quote->setCustomerEmail(
+                        !empty($data['email']) ? $data['email'] : $customer->getEmail(),
+                    );
+                }
+            }
+
             // Set email for guest
-            if (isset($data['email'])) {
+            if (!$customerId && isset($data['email'])) {
                 $quote->setCustomerEmail($data['email']);
             }
 
@@ -773,6 +798,10 @@ class GuestCartController extends AbstractController
                     $itemData['thumbnailUrl'] = $mediaConfig->getMediaUrl($thumbnail);
                 }
             }
+
+            // Stock status
+            $stockItem = \Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
+            $itemData['stockStatus'] = $stockItem->getIsInStock() ? 'in_stock' : 'out_of_stock';
 
             $items[] = $itemData;
         }

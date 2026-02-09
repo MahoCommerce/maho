@@ -132,8 +132,32 @@ final class ProductProvider implements ProviderInterface
      */
     private function getItem(int $id): ?Product
     {
+        $storeId = StoreContext::getStoreId();
+        $cacheKey = "api_product_{$id}_{$storeId}";
+
+        $cached = \Mage::app()->getCache()->load($cacheKey);
+        if ($cached !== false) {
+            $data = json_decode($cached, true);
+            if ($data !== null) {
+                return $this->arrayToFullProductDto($data);
+            }
+        }
+
         $mahoProduct = $this->getProductService()->getProductById($id);
-        return $mahoProduct ? $this->mapToDto($mahoProduct) : null;
+        if (!$mahoProduct) {
+            return null;
+        }
+
+        $dto = $this->mapToDto($mahoProduct);
+
+        \Mage::app()->getCache()->save(
+            (string) json_encode($this->fullProductDtoToArray($dto)),
+            $cacheKey,
+            ['API_PRODUCTS', "API_PRODUCT_{$id}"],
+            $this->getCacheTtl(),
+        );
+
+        return $dto;
     }
 
     /**
@@ -155,9 +179,12 @@ final class ProductProvider implements ProviderInterface
     }
 
     /**
-     * Cache TTL for product listings (in seconds)
+     * Get configurable cache TTL (from admin config, default 300s)
      */
-    private const CACHE_TTL = 300; // 5 minutes
+    private function getCacheTtl(): int
+    {
+        return \Maho_ApiPlatform_Model_Observer::getCacheTtl();
+    }
 
     /**
      * Generate cache key for product collection
@@ -167,6 +194,43 @@ final class ProductProvider implements ProviderInterface
         $keyData = array_filter($filters, fn($v) => $v !== '' && $v !== null);
         ksort($keyData);
         return 'api_products_' . md5(json_encode($keyData) . '_' . StoreContext::getStoreId());
+    }
+
+    /**
+     * Get products by urlKey — direct DB lookup
+     *
+     * @return ArrayPaginator<Product>
+     */
+    private function getByUrlKey(string $urlKey, int $page, int $pageSize): ArrayPaginator
+    {
+        $collection = \Mage::getResourceModel('catalog/product_collection')
+            ->addAttributeToSelect('*')
+            ->addAttributeToFilter('url_key', $urlKey)
+            ->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+            ->setPageSize($pageSize)
+            ->setCurPage($page);
+
+        // Sort configurables first so they take priority over simples with shared url_keys
+        $collection->getSelect()->order(
+            new \Maho\Db\Expr("FIELD(e.type_id, 'configurable', 'grouped', 'bundle') DESC"),
+        );
+
+        $storeId = StoreContext::getStoreId();
+        if ($storeId) {
+            $collection->setStoreId($storeId);
+        }
+
+        $products = [];
+        foreach ($collection as $product) {
+            $products[] = $this->mapToDto($product);
+        }
+
+        return new ArrayPaginator(
+            items: $products,
+            currentPage: $page,
+            itemsPerPage: $pageSize,
+            totalItems: (int) $collection->getSize(),
+        );
     }
 
     /**
@@ -201,6 +265,11 @@ final class ProductProvider implements ProviderInterface
                     );
                 }
             }
+        }
+
+        // Handle urlKey filter — direct DB lookup, bypass search
+        if (!empty($requestFilters['urlKey'])) {
+            return $this->getByUrlKey((string) $requestFilters['urlKey'], $page, $pageSize);
         }
 
         // Build filters for ProductService
@@ -255,14 +324,15 @@ final class ProductProvider implements ProviderInterface
         // Batch load stock items to avoid N+1 queries
         $stockItemsByProduct = $this->batchLoadStockItems($productIds);
 
+        $forListing = empty($requestFilters['fullDetail']);
+
         $products = [];
         foreach ($result['products'] as $product) {
             if ($product instanceof \Mage_Catalog_Model_Product) {
                 $productId = (int) $product->getId();
-                // For listings, skip expensive operations (custom options, variants)
                 $products[] = $this->mapToDto(
                     $product,
-                    forListing: true,
+                    forListing: $forListing,
                     reviewSummary: $reviewSummaries[$productId] ?? null,
                     categoryIds: $categoryIdsByProduct[$productId] ?? [],
                     stockItem: $stockItemsByProduct[$productId] ?? null,
@@ -284,7 +354,7 @@ final class ProductProvider implements ProviderInterface
                 json_encode($cacheData),
                 $cacheKey,
                 ['API_PRODUCTS'],
-                self::CACHE_TTL,
+                $this->getCacheTtl(),
             );
         }
 
@@ -332,6 +402,48 @@ final class ProductProvider implements ProviderInterface
             'reviewCount' => $dto->reviewCount,
             'averageRating' => $dto->averageRating,
         ];
+    }
+
+    /**
+     * Convert full Product DTO (with detail fields) to array for caching
+     */
+    private function fullProductDtoToArray(Product $dto): array
+    {
+        $data = $this->productDtoToArray($dto);
+        $data['configurableOptions'] = $dto->configurableOptions;
+        $data['variants'] = $dto->variants;
+        $data['customOptions'] = $dto->customOptions;
+        $data['mediaGallery'] = $dto->mediaGallery;
+        $data['relatedProducts'] = $dto->relatedProducts ? array_map(fn($p) => $this->productDtoToArray($p), $dto->relatedProducts) : null;
+        $data['crosssellProducts'] = $dto->crosssellProducts ? array_map(fn($p) => $this->productDtoToArray($p), $dto->crosssellProducts) : null;
+        $data['upsellProducts'] = $dto->upsellProducts ? array_map(fn($p) => $this->productDtoToArray($p), $dto->upsellProducts) : null;
+        $data['groupedProducts'] = $dto->groupedProducts;
+        $data['bundleOptions'] = $dto->bundleOptions;
+        $data['downloadableLinks'] = $dto->downloadableLinks;
+        $data['linksTitle'] = $dto->linksTitle;
+        $data['linksPurchasedSeparately'] = $dto->linksPurchasedSeparately;
+        return $data;
+    }
+
+    /**
+     * Reconstruct full Product DTO (with detail fields) from cached array
+     */
+    private function arrayToFullProductDto(array $data): Product
+    {
+        $dto = $this->arrayToProductDto($data);
+        $dto->configurableOptions = $data['configurableOptions'] ?? null;
+        $dto->variants = $data['variants'] ?? null;
+        $dto->customOptions = $data['customOptions'] ?? null;
+        $dto->mediaGallery = $data['mediaGallery'] ?? null;
+        $dto->relatedProducts = isset($data['relatedProducts']) ? array_map(fn($p) => $this->arrayToProductDto($p), $data['relatedProducts']) : null;
+        $dto->crosssellProducts = isset($data['crosssellProducts']) ? array_map(fn($p) => $this->arrayToProductDto($p), $data['crosssellProducts']) : null;
+        $dto->upsellProducts = isset($data['upsellProducts']) ? array_map(fn($p) => $this->arrayToProductDto($p), $data['upsellProducts']) : null;
+        $dto->groupedProducts = $data['groupedProducts'] ?? null;
+        $dto->bundleOptions = $data['bundleOptions'] ?? null;
+        $dto->downloadableLinks = $data['downloadableLinks'] ?? null;
+        $dto->linksTitle = $data['linksTitle'] ?? null;
+        $dto->linksPurchasedSeparately = $data['linksPurchasedSeparately'] ?? null;
+        return $dto;
     }
 
     /**

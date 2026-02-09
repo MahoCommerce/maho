@@ -72,6 +72,8 @@ class Category
     /** @var int[] */
     public array $childrenIds = [];
     public ?string $path = null;
+    public ?string $displayMode = null;
+    public ?string $cmsBlock = null;
     public ?string $metaTitle = null;
     public ?string $metaKeywords = null;
     public ?string $metaDescription = null;
