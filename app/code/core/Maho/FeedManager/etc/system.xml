@@ -40,6 +40,7 @@
                             <label>Output Directory</label>
                             <comment>Relative to media folder. Default: feeds</comment>
                             <frontend_type>text</frontend_type>
+                            <backend_model>feedmanager/system_config_backend_outputDirectory</backend_model>
                             <sort_order>20</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>0</show_in_website>

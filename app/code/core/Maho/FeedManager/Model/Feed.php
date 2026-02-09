@@ -307,6 +307,27 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave(): self
     {
+        // Sanitize filename to prevent path traversal
+        $filename = $this->getFilename();
+        if ($filename !== null && $filename !== '') {
+            $filename = basename($filename);
+
+            // Strip feed format extension if the user included it — the real extension is determined by file_format
+            $feedExtensions = ['xml', 'csv', 'json', 'jsonl', 'gz'];
+            while (in_array(\Symfony\Component\Filesystem\Path::getExtension($filename), $feedExtensions, true)) {
+                $filename = \Symfony\Component\Filesystem\Path::getFilenameWithoutExtension($filename);
+            }
+
+            if ($filename === '') {
+                Mage::throwException(Mage::helper('feedmanager')->__('Invalid filename.'));
+            }
+            $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
+            if (!\Maho\Io::allowedPath($outputDir . DS . $filename . '.tmp', $outputDir)) {
+                Mage::throwException(Mage::helper('feedmanager')->__('Invalid filename.'));
+            }
+            $this->setFilename($filename);
+        }
+
         // Serialize conditions
         if ($this->_conditions) {
             $this->setConditionsSerialized(serialize($this->_conditions->asArray()));

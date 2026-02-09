@@ -860,8 +860,10 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             }
 
             $filePath = $feed->getOutputFilePath();
+            $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
+            $validPath = \Maho\Io::validatePath($filePath, $outputDir);
 
-            if (!file_exists($filePath)) {
+            if ($validPath === false) {
                 $this->_getSession()->addError($this->__('Feed file not found. Please generate the feed first.'));
                 $this->_redirect('*/*/edit', ['id' => $id]);
                 return;
@@ -873,7 +875,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             }
             $this->_prepareDownloadResponse(
                 $feed->getFilename() . '.' . $extension,
-                file_get_contents($filePath),
+                file_get_contents($validPath),
                 'application/octet-stream',
             );
 
