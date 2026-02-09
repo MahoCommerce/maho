@@ -232,16 +232,25 @@ const CategoryMapping = {
             return;
         }
 
-        let html = '';
+        container.replaceChildren();
         results.forEach(result => {
-            html += '<div class="autocomplete-item" onclick="CategoryMapping.selectCategory(' + categoryId + ', \'' +
-                    this.escapeHtml(result.id) + '\', \'' + this.escapeHtml(result.path) + '\')">' +
-                    '<div>' + this.escapeHtml(result.path) + '</div>' +
-                    '<div class="category-id">ID: ' + this.escapeHtml(result.id) + '</div>' +
-                    '</div>';
-        });
+            const item = document.createElement('div');
+            item.className = 'autocomplete-item';
+            item.addEventListener('click', () => {
+                this.selectCategory(categoryId, result.id, result.path);
+            });
 
-        container.innerHTML = html;
+            const pathDiv = document.createElement('div');
+            pathDiv.textContent = result.path;
+            item.appendChild(pathDiv);
+
+            const idDiv = document.createElement('div');
+            idDiv.className = 'category-id';
+            idDiv.textContent = 'ID: ' + result.id;
+            item.appendChild(idDiv);
+
+            container.appendChild(item);
+        });
         container.style.display = 'block';
     },
 
@@ -418,11 +427,6 @@ const CategoryMapping = {
         });
     },
 
-    escapeHtml: function(text) {
-        const div = document.createElement('div');
-        div.textContent = text || '';
-        return div.innerHTML.replace(/'/g, "\\'");
-    }
 };
 
 document.addEventListener('DOMContentLoaded', function() {
