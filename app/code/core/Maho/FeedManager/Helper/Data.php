@@ -93,18 +93,7 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getPlatformFormats(string $platform): array
     {
-        $formats = [
-            'google'                 => ['xml'],
-            'google_local_inventory' => ['xml', 'csv'],
-            'facebook'               => ['xml', 'csv'],
-            'bing'                   => ['xml'],
-            'pinterest'              => ['xml'],
-            'idealo'                 => ['csv'],
-            'trovaprezzi'            => ['xml'],
-            'custom'                 => ['xml', 'csv', 'json'],
-        ];
-
-        return $formats[$platform] ?? ['xml', 'csv', 'json'];
+        return Maho_FeedManager_Model_Platform::getPlatformFormats($platform);
     }
 
     /**
