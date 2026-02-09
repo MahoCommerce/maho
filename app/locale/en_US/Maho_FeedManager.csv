@@ -496,6 +496,8 @@
 "Weight","Weight"
 "What type of value to output when conditions match","What type of value to output when conditions match"
 "Without extension. E.g., ""google_feed"" will create ""google_feed.xml""","Without extension. E.g., ""google_feed"" will create ""google_feed.xml"""
+"Error Threshold (%)","Error Threshold (%)"
+"Maximum percentage of products that can fail before aborting feed generation. For example, 10 means abort if more than 10% of products fail. Set to 0 to disable (never abort). Default: 10","Maximum percentage of products that can fail before aborting feed generation. For example, 10 means abort if more than 10% of products fail. Set to 0 to disable (never abort). Default: 10"
 "XML Builder","XML Builder"
 "XML tag name that wraps each product (e.g., item, entry, product). Leave empty for no wrapper.","XML tag name that wraps each product (e.g., item, entry, product). Leave empty for no wrapper."
 "Yes","Yes"
