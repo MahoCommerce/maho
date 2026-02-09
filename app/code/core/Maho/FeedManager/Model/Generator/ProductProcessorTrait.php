@@ -567,6 +567,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
             'xml' => 'xml',
             'csv' => 'csv',
             'json' => 'json',
+            'jsonl' => 'jsonl',
             default => 'xml',
         };
 

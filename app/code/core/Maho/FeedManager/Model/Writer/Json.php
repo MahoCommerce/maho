@@ -71,19 +71,12 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
             }
         }
 
-        $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+        $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
         if ($this->_prettyPrint) {
             $flags |= JSON_PRETTY_PRINT;
         }
 
-        $json = json_encode($productData, $flags);
-
-        if ($json === false) {
-            // Handle encoding errors gracefully
-            $json = json_encode($this->_sanitizeForJson($productData), $flags);
-        }
-
-        fwrite($this->_handle, $json);
+        fwrite($this->_handle, json_encode($productData, $flags));
         $this->_firstProduct = false;
     }
 
@@ -155,28 +148,5 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
         }
 
         return $this;
-    }
-
-    /**
-     * Sanitize data for JSON encoding
-     */
-    protected function _sanitizeForJson(array $data): array
-    {
-        $sanitized = [];
-
-        foreach ($data as $key => $value) {
-            if (is_string($value)) {
-                // Remove invalid UTF-8 sequences
-                $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-                // Remove control characters
-                $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $value);
-            } elseif (is_array($value)) {
-                $value = $this->_sanitizeForJson($value);
-            }
-
-            $sanitized[$key] = $value;
-        }
-
-        return $sanitized;
     }
 }

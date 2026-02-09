@@ -47,6 +47,7 @@ class Maho_FeedManager_Model_Validator
             'xml' => $this->_validateXml($filePath),
             'csv' => $this->_validateCsv($filePath),
             'json' => $this->_validateJson($filePath),
+            'jsonl' => $this->_validateJsonl($filePath),
             default => true,
         };
     }
@@ -241,6 +242,53 @@ class Maho_FeedManager_Model_Validator
             $this->_warnings[] = 'Could not find products array in JSON';
         } elseif (empty($products)) {
             $this->_warnings[] = 'JSON contains no products';
+        }
+
+        return empty($this->_errors);
+    }
+
+    /**
+     * Validate JSONL (JSON Lines) file structure
+     */
+    protected function _validateJsonl(string $filePath): bool
+    {
+        $handle = fopen($filePath, 'r');
+        if (!$handle) {
+            $this->_errors[] = 'Cannot open file for reading';
+            return false;
+        }
+
+        $lineNumber = 0;
+        $validLines = 0;
+        $invalidLines = [];
+
+        while (($line = fgets($handle)) !== false) {
+            $lineNumber++;
+            $line = trim($line);
+
+            if ($line === '') {
+                continue;
+            }
+
+            if (!json_validate($line)) {
+                $invalidLines[] = $lineNumber;
+                if (count($invalidLines) <= 5) {
+                    $this->_warnings[] = "Line {$lineNumber}: Invalid JSON — " . json_last_error_msg();
+                }
+            } else {
+                $validLines++;
+            }
+        }
+
+        fclose($handle);
+
+        if (count($invalidLines) > 5) {
+            $this->_warnings[] = '... and ' . (count($invalidLines) - 5) . ' more lines with invalid JSON';
+        }
+
+        if ($validLines === 0) {
+            $this->_errors[] = 'No valid JSON lines found';
+            return false;
         }
 
         return empty($this->_errors);

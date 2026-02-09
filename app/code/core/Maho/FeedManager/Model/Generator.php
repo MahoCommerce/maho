@@ -410,6 +410,7 @@ class Maho_FeedManager_Model_Generator
             'xml' => new Maho_FeedManager_Model_Writer_Xml(),
             'csv' => new Maho_FeedManager_Model_Writer_Csv(),
             'json' => new Maho_FeedManager_Model_Writer_Json(),
+            'jsonl' => new Maho_FeedManager_Model_Writer_Jsonl(),
             default => throw new InvalidArgumentException("Unsupported format: {$format}"),
         };
 

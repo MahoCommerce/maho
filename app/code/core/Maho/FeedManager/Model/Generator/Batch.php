@@ -445,6 +445,7 @@ class Maho_FeedManager_Model_Generator_Batch
         $isTemplateMode = !empty($xmlTemplate) && $format === 'xml' && !$isStructureMode;
         $isCsvMode = $format === 'csv';
         $isJsonMode = $format === 'json';
+        $isJsonlMode = $format === 'jsonl';
         $itemTag = trim($this->_feed->getXmlItemTag() ?: 'item');
 
         // Parse structure once if using structure mode
@@ -559,7 +560,12 @@ class Maho_FeedManager_Model_Generator_Batch
                     } else {
                         file_put_contents($tempPath, ",\n", FILE_APPEND);
                     }
-                    file_put_contents($tempPath, json_encode($mappedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), FILE_APPEND);
+                    file_put_contents($tempPath, json_encode($mappedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), FILE_APPEND);
+                } elseif ($isJsonlMode) {
+                    // JSONL generation — one JSON object per line
+                    $mappedData = $this->_mapper->mapProduct($product);
+                    $json = json_encode($mappedData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
+                    file_put_contents($tempPath, $json . "\n", FILE_APPEND);
                 }
 
                 $this->_state['product_count']++;
