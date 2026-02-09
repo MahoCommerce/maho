@@ -605,8 +605,11 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
      * Acquire a generation lock using SELECT FOR UPDATE to prevent race conditions
      *
      * Creates a new log entry with STATUS_RUNNING. If a running log already exists:
-     * - When $throwOnConflict is true: throws RuntimeException
-     * - When $throwOnConflict is false: returns the existing log
+     * - When $throwOnConflict is true: throws RuntimeException (unless the job is stale)
+     * - When $throwOnConflict is false: returns the existing log (unless the job is stale)
+     *
+     * Stale jobs (running longer than HUNG_FEED_TIMEOUT_MINUTES) are automatically
+     * marked as failed, allowing a new generation to proceed.
      *
      * Sets $this->_log on success and returns null.
      *
@@ -616,31 +619,55 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
     {
         $resource = Mage::getSingleton('core/resource');
         $connection = $resource->getConnection('core_write');
+        $staleLogId = null;
 
         $connection->beginTransaction();
         try {
             $tableName = $resource->getTableName('feedmanager/log');
             $select = $connection->select()
-                ->from($tableName, ['log_id'])
+                ->from($tableName, ['log_id', 'started_at'])
                 ->where('feed_id = ?', $this->_feed->getId())
                 ->where('status = ?', Maho_FeedManager_Model_Log::STATUS_RUNNING)
                 ->forUpdate();
 
-            $runningLogId = $connection->fetchOne($select);
+            $runningRow = $connection->fetchRow($select);
 
-            if ($runningLogId) {
-                $connection->rollBack();
+            if ($runningRow) {
+                $hungTimeout = Maho_FeedManager_Model_Cron::HUNG_FEED_TIMEOUT_MINUTES * 60;
+                $startedAt = strtotime($runningRow['started_at']);
+                $isStale = (time() - $startedAt) > $hungTimeout;
 
-                if ($throwOnConflict) {
-                    throw new RuntimeException('Feed generation already in progress (Log ID: ' . $runningLogId . ')');
+                if ($isStale) {
+                    // Mark the stale job as failed within the same transaction
+                    $connection->update(
+                        $tableName,
+                        [
+                            'status' => Maho_FeedManager_Model_Log::STATUS_FAILED,
+                            'completed_at' => Mage_Core_Model_Locale::now(),
+                        ],
+                        ['log_id = ?' => $runningRow['log_id']],
+                    );
+
+                    $staleLogId = $runningRow['log_id'];
+
+                    Mage::log(
+                        "FeedManager: Cleared stale generation lock for feed '{$this->_feed->getName()}' (Log ID: {$runningRow['log_id']}, running since {$runningRow['started_at']})",
+                        Mage::LOG_WARNING,
+                    );
+                } else {
+                    $connection->rollBack();
+
+                    if ($throwOnConflict) {
+                        throw new RuntimeException('Feed generation already in progress (Log ID: ' . $runningRow['log_id'] . ')');
+                    }
+
+                    $existingLog = Mage::getModel('feedmanager/log')->load($runningRow['log_id']);
+                    Mage::log(
+                        "FeedManager: Generation already running for feed '{$this->_feed->getName()}' (Log ID: {$runningRow['log_id']})",
+                        Mage::LOG_WARNING,
+                    );
+                    return $existingLog;
                 }
-
-                $existingLog = Mage::getModel('feedmanager/log')->load($runningLogId);
-                Mage::log(
-                    "FeedManager: Generation already running for feed '{$this->_feed->getName()}' (Log ID: {$runningLogId})",
-                    Mage::LOG_WARNING,
-                );
-                return $existingLog;
             }
 
             $this->_log = Mage::getModel('feedmanager/log');
@@ -655,6 +682,13 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         } catch (Exception $e) {
             $connection->rollBack();
             throw $e;
+        }
+
+        // Record error on the stale log after commit, so the model load
+        // sees the committed status and save() cannot overwrite it
+        if ($staleLogId !== null) {
+            $staleLog = Mage::getModel('feedmanager/log')->load($staleLogId);
+            $staleLog->addError('Generation was interrupted or timed out (exceeded ' . Maho_FeedManager_Model_Cron::HUNG_FEED_TIMEOUT_MINUTES . ' minutes)')->save();
         }
 
         return null;
