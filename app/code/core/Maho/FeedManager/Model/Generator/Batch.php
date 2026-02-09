@@ -35,6 +35,8 @@ class Maho_FeedManager_Model_Generator_Batch
     protected string $_jobId;
     protected array $_errors = [];
 
+    protected ?\Maho\Io\File $_lockFile = null;
+
     /**
      * Initialize a new batch generation job
      *
@@ -127,50 +129,63 @@ class Maho_FeedManager_Model_Generator_Batch
      */
     public function processBatch(string $jobId): array
     {
-        // Load state
         $this->_jobId = $jobId;
-        if (!$this->_loadState()) {
+
+        // Acquire exclusive lock to prevent concurrent batch processing
+        if (!$this->_acquireStateLock()) {
             return [
-                'status' => self::STATUS_FAILED,
+                'status' => self::STATUS_PROCESSING,
                 'progress' => 0,
                 'total' => 0,
                 'batches_processed' => 0,
                 'batches_total' => 0,
-                'message' => 'Invalid or expired job ID',
+                'message' => 'Another request is already processing this batch, please wait',
             ];
         }
-
-        // Check if already completed
-        if ($this->_state['status'] === self::STATUS_COMPLETED) {
-            return [
-                'status' => self::STATUS_COMPLETED,
-                'progress' => $this->_state['product_count'],
-                'total' => $this->_state['total_products'],
-                'batches_processed' => $this->_state['batches_processed'],
-                'batches_total' => $this->_state['batches_total'],
-                'message' => 'Generation already completed',
-            ];
-        }
-
-        // Load feed
-        $this->_feed = Mage::getModel('feedmanager/feed')->load($this->_state['feed_id']);
-        if (!$this->_feed->getId()) {
-            return $this->_failWithError('Feed no longer exists');
-        }
-
-        // Load log
-        $this->_log = Mage::getModel('feedmanager/log')->load($this->_state['log_id']);
-
-        // Initialize mapper and platform
-        $this->_mapper = new Maho_FeedManager_Model_Mapper($this->_feed);
-        $this->_configureMapperFromBuilder();
-        $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($this->_feed->getPlatform());
-
-        // Update status
-        $this->_state['status'] = self::STATUS_PROCESSING;
-        $this->_state['current_page']++;
 
         try {
+            // Load state
+            if (!$this->_loadState()) {
+                return [
+                    'status' => self::STATUS_FAILED,
+                    'progress' => 0,
+                    'total' => 0,
+                    'batches_processed' => 0,
+                    'batches_total' => 0,
+                    'message' => 'Invalid or expired job ID',
+                ];
+            }
+
+            // Check if already completed
+            if ($this->_state['status'] === self::STATUS_COMPLETED) {
+                return [
+                    'status' => self::STATUS_COMPLETED,
+                    'progress' => $this->_state['product_count'],
+                    'total' => $this->_state['total_products'],
+                    'batches_processed' => $this->_state['batches_processed'],
+                    'batches_total' => $this->_state['batches_total'],
+                    'message' => 'Generation already completed',
+                ];
+            }
+
+            // Load feed
+            $this->_feed = Mage::getModel('feedmanager/feed')->load($this->_state['feed_id']);
+            if (!$this->_feed->getId()) {
+                return $this->_failWithError('Feed no longer exists');
+            }
+
+            // Load log
+            $this->_log = Mage::getModel('feedmanager/log')->load($this->_state['log_id']);
+
+            // Initialize mapper and platform
+            $this->_mapper = new Maho_FeedManager_Model_Mapper($this->_feed);
+            $this->_configureMapperFromBuilder();
+            $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($this->_feed->getPlatform());
+
+            // Update status
+            $this->_state['status'] = self::STATUS_PROCESSING;
+            $this->_state['current_page']++;
+
             // Process this batch
             $processedInBatch = $this->_processBatchProducts();
 
@@ -197,6 +212,8 @@ class Maho_FeedManager_Model_Generator_Batch
             ];
         } catch (Exception $e) {
             return $this->_failWithError($e->getMessage());
+        } finally {
+            $this->_releaseStateLock();
         }
     }
 
@@ -207,27 +224,39 @@ class Maho_FeedManager_Model_Generator_Batch
      */
     public function finalize(string $jobId): array
     {
-        // Load state
         $this->_jobId = $jobId;
-        if (!$this->_loadState()) {
+
+        // Acquire exclusive lock to prevent concurrent finalization
+        if (!$this->_acquireStateLock()) {
             return [
                 'status' => self::STATUS_FAILED,
                 'file_url' => '',
                 'product_count' => 0,
                 'file_size' => 0,
-                'message' => 'Invalid or expired job ID',
+                'message' => 'Another request is already finalizing this job',
             ];
         }
 
-        // Load feed and log
-        $this->_feed = Mage::getModel('feedmanager/feed')->load($this->_state['feed_id']);
-        $this->_log = Mage::getModel('feedmanager/log')->load($this->_state['log_id']);
-
-        if (!$this->_feed->getId()) {
-            return $this->_failWithError('Feed no longer exists');
-        }
-
         try {
+            // Load state
+            if (!$this->_loadState()) {
+                return [
+                    'status' => self::STATUS_FAILED,
+                    'file_url' => '',
+                    'product_count' => 0,
+                    'file_size' => 0,
+                    'message' => 'Invalid or expired job ID',
+                ];
+            }
+
+            // Load feed and log
+            $this->_feed = Mage::getModel('feedmanager/feed')->load($this->_state['feed_id']);
+            $this->_log = Mage::getModel('feedmanager/log')->load($this->_state['log_id']);
+
+            if (!$this->_feed->getId()) {
+                return $this->_failWithError('Feed no longer exists');
+            }
+
             $tempPath = $this->_state['temp_path'];
 
             // Write footer for XML structure/template mode
@@ -283,6 +312,8 @@ class Maho_FeedManager_Model_Generator_Batch
             ];
         } catch (Exception $e) {
             return $this->_failWithError($e->getMessage());
+        } finally {
+            $this->_releaseStateLock();
         }
     }
 
@@ -292,27 +323,37 @@ class Maho_FeedManager_Model_Generator_Batch
     public function cancel(string $jobId): array
     {
         $this->_jobId = $jobId;
-        if (!$this->_loadState()) {
-            return ['status' => 'error', 'message' => 'Job not found'];
+
+        // Acquire exclusive lock — block until any in-progress batch finishes
+        if (!$this->_acquireStateLock()) {
+            return ['status' => 'error', 'message' => 'Could not acquire lock, a batch may be processing'];
         }
 
-        // Load and update log
-        $this->_log = Mage::getModel('feedmanager/log')->load($this->_state['log_id']);
-        if ($this->_log->getId()) {
-            $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
-                ->addError('Generation cancelled by user')
-                ->save();
+        try {
+            if (!$this->_loadState()) {
+                return ['status' => 'error', 'message' => 'Job not found'];
+            }
+
+            // Load and update log
+            $this->_log = Mage::getModel('feedmanager/log')->load($this->_state['log_id']);
+            if ($this->_log->getId()) {
+                $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED)
+                    ->addError('Generation cancelled by user')
+                    ->save();
+            }
+
+            // Cleanup temp file
+            if (file_exists($this->_state['temp_path'])) {
+                unlink($this->_state['temp_path']);
+            }
+
+            // Remove state file
+            $this->_deleteState();
+
+            return ['status' => 'cancelled', 'message' => 'Generation cancelled'];
+        } finally {
+            $this->_releaseStateLock();
         }
-
-        // Cleanup temp file
-        if (file_exists($this->_state['temp_path'])) {
-            unlink($this->_state['temp_path']);
-        }
-
-        // Remove state file
-        $this->_deleteState();
-
-        return ['status' => 'cancelled', 'message' => 'Generation cancelled'];
     }
 
     /**
@@ -540,11 +581,48 @@ class Maho_FeedManager_Model_Generator_Batch
     }
 
     /**
-     * Save state to file
+     * Acquire an exclusive lock on the state file to prevent concurrent access.
+     *
+     * Returns false if a lock cannot be acquired (another request is already
+     * processing this job). The lock is held until _releaseStateLock() is called.
+     */
+    protected function _acquireStateLock(): bool
+    {
+        $lockPath = $this->_getStatePath() . '.lock';
+        $this->_lockFile = new \Maho\Io\File();
+        try {
+            $this->_lockFile->streamOpen($lockPath, 'c', 0666);
+        } catch (\Exception) {
+            $this->_lockFile = null;
+            return false;
+        }
+
+        if (!$this->_lockFile->streamLock(true, false)) {
+            $this->_lockFile->streamClose();
+            $this->_lockFile = null;
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Release the state file lock
+     */
+    protected function _releaseStateLock(): void
+    {
+        if ($this->_lockFile !== null) {
+            $this->_lockFile->streamClose();
+            $this->_lockFile = null;
+        }
+    }
+
+    /**
+     * Save state to file (uses LOCK_EX for atomic writes)
      */
     protected function _saveState(): void
     {
-        file_put_contents($this->_getStatePath(), Mage::helper('core')->jsonEncode($this->_state));
+        file_put_contents($this->_getStatePath(), Mage::helper('core')->jsonEncode($this->_state), LOCK_EX);
     }
 
     /**
@@ -557,20 +635,40 @@ class Maho_FeedManager_Model_Generator_Batch
             return false;
         }
 
-        $content = file_get_contents($path);
+        $file = new \Maho\Io\File();
+        try {
+            $file->streamOpen($path, 'r');
+            $file->streamLock(false);
+            $content = '';
+            while (($chunk = $file->streamRead(8192)) !== false) {
+                $content .= $chunk;
+            }
+            $file->streamClose();
+        } catch (\Exception) {
+            return false;
+        }
+
+        if ($content === '') {
+            return false;
+        }
+
         $this->_state = Mage::helper('core')->jsonDecode($content);
 
         return !empty($this->_state);
     }
 
     /**
-     * Delete state file
+     * Delete state file and its lock file
      */
     protected function _deleteState(): void
     {
         $path = $this->_getStatePath();
         if (file_exists($path)) {
             unlink($path);
+        }
+        $lockPath = $path . '.lock';
+        if (file_exists($lockPath)) {
+            unlink($lockPath);
         }
     }
 
@@ -741,10 +839,14 @@ class Maho_FeedManager_Model_Generator_Batch
         if (is_dir($tmpDir)) {
             foreach (glob($tmpDir . "/feed_{$feedId}_*.state.json") as $stateFile) {
                 if (filemtime($stateFile) < time() - $staleTimeout) {
-                    // Also clean up the temp file
+                    // Also clean up the temp and lock files
                     $tmpFile = str_replace('.state.json', '.tmp', $stateFile);
                     if (file_exists($tmpFile)) {
                         unlink($tmpFile);
+                    }
+                    $lockFile = $stateFile . '.lock';
+                    if (file_exists($lockFile)) {
+                        unlink($lockFile);
                     }
                     unlink($stateFile);
                 }
