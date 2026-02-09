@@ -537,7 +537,7 @@ $defaultRules = [
         'is_system' => 1,
         'is_enabled' => 1,
         'sort_order' => 10,
-        'cases' => json_encode([
+        'cases' => Mage::helper('core')->jsonEncode([
             [
                 'conditions' => [
                     'type' => 'feedmanager/rule_condition_combine',
@@ -579,7 +579,7 @@ $defaultRules = [
         'is_system' => 1,
         'is_enabled' => 1,
         'sort_order' => 20,
-        'cases' => json_encode([
+        'cases' => Mage::helper('core')->jsonEncode([
             [
                 'conditions' => [
                     'type' => 'feedmanager/rule_condition_combine',
@@ -621,7 +621,7 @@ $defaultRules = [
         'is_system' => 1,
         'is_enabled' => 1,
         'sort_order' => 30,
-        'cases' => json_encode([
+        'cases' => Mage::helper('core')->jsonEncode([
             [
                 'conditions' => [
                     'type' => 'feedmanager/rule_condition_combine',
@@ -670,7 +670,7 @@ $defaultRules = [
         'is_system' => 1,
         'is_enabled' => 1,
         'sort_order' => 40,
-        'cases' => json_encode([
+        'cases' => Mage::helper('core')->jsonEncode([
             [
                 'conditions' => [
                     'type' => 'feedmanager/rule_condition_combine',

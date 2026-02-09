@@ -105,7 +105,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         $replacements = [
             '{{store_name}}' => $store->getName(),
             '{{store_url}}' => $store->getBaseUrl(),
-            '{{generation_date}}' => date('Y-m-d H:i:s'),
+            '{{generation_date}}' => Mage_Core_Model_Locale::now(),
         ];
 
         return str_replace(array_keys($replacements), array_values($replacements), $template);

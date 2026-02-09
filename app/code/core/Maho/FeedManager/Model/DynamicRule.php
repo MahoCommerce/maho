@@ -112,15 +112,14 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
         if ($this->_cases === null) {
             $casesJson = $this->getData('cases');
             if ($casesJson) {
-                $decoded = json_decode($casesJson, true);
-                if (json_last_error() !== JSON_ERROR_NONE) {
+                try {
+                    $this->_cases = Mage::helper('core')->jsonDecode($casesJson) ?: [];
+                } catch (\JsonException $e) {
                     Mage::log(
-                        'Failed to decode cases JSON for rule ' . $this->getId() . ': ' . json_last_error_msg(),
+                        'Failed to decode cases JSON for rule ' . $this->getId() . ': ' . $e->getMessage(),
                         Mage::LOG_WARNING,
                     );
                     $this->_cases = [];
-                } else {
-                    $this->_cases = $decoded ?: [];
                 }
             } else {
                 $this->_cases = [];
@@ -138,7 +137,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     public function setCases(array $cases): self
     {
         $this->_cases = $cases;
-        $this->setData('cases', json_encode($cases));
+        $this->setData('cases', Mage::helper('core')->jsonEncode($cases));
         return $this;
     }
 
