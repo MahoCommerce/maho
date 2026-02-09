@@ -401,6 +401,96 @@
     }
 }
 
+/* CSV Builder Grid */
+#csv-builder-container {
+    max-width: 100%;
+}
+
+#csv-grid-container {
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.csv-grid {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    min-width: 700px;
+
+    th,
+    td {
+        padding: 8px;
+        border: 1px solid #ddd;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    th {
+        background: #f5f5f5;
+        text-align: left;
+        font-weight: 600;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+        width: 30px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+        width: 18%;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+        width: 15%;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+        width: auto;
+    }
+
+    th:nth-child(5),
+    td:nth-child(5) {
+        width: 100px;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6) {
+        width: 70px;
+    }
+
+    input,
+    select {
+        width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+.csv-row {
+    &:hover {
+        background: #f9f9f9;
+    }
+
+    &.dragging {
+        opacity: 0.5;
+    }
+}
+
+.csv-drag-handle:hover {
+    color: #333 !important;
+}
+
+#csv-preview-panel {
+    max-width: 100%;
+
+    pre {
+        overflow-x: auto;
+        white-space: pre;
+    }
+}
+
 /* ============================================
    Transformer Modal
    ============================================ */

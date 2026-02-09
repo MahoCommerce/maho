@@ -893,7 +893,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             }
             $this->_prepareDownloadResponse(
                 $feed->getFilename() . '.' . $extension,
-                file_get_contents($validPath),
+                ['type' => 'filename', 'value' => $validPath],
                 'application/octet-stream',
             );
 

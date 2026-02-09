@@ -399,7 +399,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 
                     if (data.file_url) {
                         const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
-                        buttonsHtml += ' <a href="' + data.file_url + cacheBuster + Date.now() + '" class="form-button" target="_blank">' +
+                        buttonsHtml += ' <a href="' + escapeHtml(data.file_url + cacheBuster + Date.now(), true) + '" class="form-button" target="_blank">' +
                             this.translations.download + '</a>';
                     }
                     if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;

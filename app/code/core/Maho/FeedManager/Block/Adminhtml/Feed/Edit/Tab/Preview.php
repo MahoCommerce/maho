@@ -126,7 +126,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Preview extends Mage_Adminh
             function highlightXml(element) {
                 var text = element.textContent;
 
-                // Simple XML syntax highlighting using CSS classes
+                // Simple regex-based XML syntax highlighting for preview only
+                // Note: This is intentionally basic and not a full XML parser
+                // It's sufficient for visual preview purposes but may not handle all edge cases
                 text = text.replace(/(&lt;!--[\s\S]*?--&gt;)/g, '<span class="fm-syntax-comment">$1</span>');
                 text = text.replace(/(&lt;\?[\s\S]*?\?&gt;)/g, '<span class="fm-syntax-keyword">$1</span>');
                 text = text.replace(/(&lt;!\[CDATA\[[\s\S]*?\]\]&gt;)/g, '<span class="fm-syntax-string">$1</span>');

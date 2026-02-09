@@ -401,26 +401,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             CsvBuilder.init();
         });
         </script>
-
-        <style>
-        #csv-builder-container { max-width: 100%; }
-        #csv-grid-container { max-width: 100%; overflow-x: auto; }
-        .csv-grid { width: 100%; border-collapse: collapse; table-layout: fixed; min-width: 700px; }
-        .csv-grid th, .csv-grid td { padding: 8px; border: 1px solid #ddd; overflow: hidden; text-overflow: ellipsis; }
-        .csv-grid th { background: #f5f5f5; text-align: left; font-weight: 600; }
-        .csv-grid th:nth-child(1), .csv-grid td:nth-child(1) { width: 30px; }
-        .csv-grid th:nth-child(2), .csv-grid td:nth-child(2) { width: 18%; }
-        .csv-grid th:nth-child(3), .csv-grid td:nth-child(3) { width: 15%; }
-        .csv-grid th:nth-child(4), .csv-grid td:nth-child(4) { width: auto; }
-        .csv-grid th:nth-child(5), .csv-grid td:nth-child(5) { width: 100px; }
-        .csv-grid th:nth-child(6), .csv-grid td:nth-child(6) { width: 70px; }
-        .csv-grid input, .csv-grid select { width: 100%; box-sizing: border-box; }
-        .csv-row:hover { background: #f9f9f9; }
-        .csv-row.dragging { opacity: 0.5; }
-        .csv-drag-handle:hover { color: #333 !important; }
-        #csv-preview-panel { max-width: 100%; }
-        #csv-preview-panel pre { overflow-x: auto; white-space: pre; }
-        </style>
         ';
     }
 }
