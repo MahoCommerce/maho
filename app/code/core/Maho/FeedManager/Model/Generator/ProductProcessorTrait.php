@@ -123,7 +123,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
             'price_decimals' => $feed->getPriceDecimals() ?? 2,
             'price_decimal_point' => $feed->getPriceDecimalPoint() ?? '.',
             'price_thousands_sep' => $feed->getPriceThousandsSep() ?? '',
-            'price_currency' => $feed->getPriceCurrency() ?: 'AUD',
+            'price_currency' => $feed->getPriceCurrency() ?: Mage::app()->getStore($feed->getStoreId())->getBaseCurrencyCode(),
         ];
 
         // Find all field configurations in the template: {type="..." value="..." ...}
@@ -485,7 +485,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         $decimals = (int) ($feed->getPriceDecimals() ?? 2);
         $decimalPoint = $feed->getPriceDecimalPoint() ?: '.';
         $thousandsSep = $feed->getPriceThousandsSep() ?? '';
-        $currency = $feed->getPriceCurrency() ?: 'AUD';
+        $currency = $feed->getPriceCurrency() ?: Mage::app()->getStore($feed->getStoreId())->getBaseCurrencyCode();
 
         $formattedPrice = number_format($price, $decimals, $decimalPoint, $thousandsSep);
 

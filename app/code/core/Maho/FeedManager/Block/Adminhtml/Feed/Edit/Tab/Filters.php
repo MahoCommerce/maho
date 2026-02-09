@@ -327,6 +327,18 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
         $productTypesJson = Mage::helper('core')->jsonEncode($productTypes);
         $visibilityOptionsJson = Mage::helper('core')->jsonEncode($visibilityOptions);
         $specialAttrs = Mage::helper('core')->jsonEncode($this->_getSpecialAttributes());
+        $translationsJson = Mage::helper('core')->jsonEncode([
+            'emptyState' => $this->__('No conditions defined. All products will be included (subject to common exclusions above).'),
+            'conditionGroup' => $this->__('Condition Group'),
+            'removeGroup' => $this->__('Remove Group'),
+            'addOrCondition' => $this->__('Add OR Condition'),
+            'selectAttribute' => $this->__('-- Select Attribute --'),
+            'inStock' => $this->__('In Stock'),
+            'outOfStock' => $this->__('Out of Stock'),
+            'filterCategories' => $this->__('Filter categories...'),
+            'value' => $this->__('Value'),
+            'remove' => $this->__('Remove'),
+        ]);
 
         return <<<SCRIPT
         <script type="text/javascript">
@@ -340,6 +352,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             productTypes: {$productTypesJson},
             visibilityOptions: {$visibilityOptionsJson},
             specialAttributes: {$specialAttrs},
+            translations: {$translationsJson},
 
             init: function() {
                 document.querySelectorAll('.cond-group').forEach(function(group) {
@@ -601,18 +614,18 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
             checkEmpty: function() {
                 var container = document.getElementById('groups-container');
                 if (container.querySelectorAll('.cond-group').length === 0) {
-                    container.innerHTML = '<div id="cond-empty-state" class="cond-empty">No conditions defined. All products will be included (subject to common exclusions above).</div>';
+                    container.innerHTML = '<div id="cond-empty-state" class="cond-empty">' + this.translations.emptyState + '</div>';
                 }
             },
 
             getGroupHtml: function(groupIndex) {
                 return '<div class="cond-group" id="cond-group-' + groupIndex + '" data-group-index="' + groupIndex + '">' +
-                    '<div class="cond-group-header"><span class="cond-group-title">Condition Group</span>' +
-                    '<button type="button" class="delete" onclick="FMConditions.removeGroup(' + groupIndex + '); return false;" title="Remove Group"><span>&#x2715;</span></button></div>' +
+                    '<div class="cond-group-header"><span class="cond-group-title">' + this.translations.conditionGroup + '</span>' +
+                    '<button type="button" class="delete" onclick="FMConditions.removeGroup(' + groupIndex + '); return false;" title="' + this.translations.removeGroup + '"><span>&#x2715;</span></button></div>' +
                     '<div class="cond-group-body"><div class="cond-list" id="cond-list-' + groupIndex + '">' +
                     this.getConditionHtml(groupIndex, 0, false) +
                     '</div><button type="button" onclick="FMConditions.addCondition(' + groupIndex + '); return false;">' +
-                    '<span>Add OR Condition</span></button></div></div>';
+                    '<span>' + this.translations.addOrCondition + '</span></button></div></div>';
             },
 
             getConditionHtml: function(groupIndex, condIndex, showOr) {
@@ -625,7 +638,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
 
                 // Attribute select with optgroups
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][attribute]" class="attr-select" onchange="FMConditions.onAttributeChange(this)">';
-                html += '<option value="">-- Select Attribute --</option>';
+                html += '<option value="">' + this.translations.selectAttribute + '</option>';
                 for (var groupLabel in this.attributeGroups) {
                     html += '<optgroup label="' + escapeHtml(groupLabel, true) + '">';
                     for (var code in this.attributeGroups[groupLabel]) {
@@ -644,7 +657,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
 
                 // Stock select (hidden by default via CSS)
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][stock_value]" class="stock-select" onchange="FMConditions.onStockChange(this)">';
-                html += '<option value="1">In Stock</option><option value="0">Out of Stock</option></select>';
+                html += '<option value="1">' + this.translations.inStock + '</option><option value="0">' + this.translations.outOfStock + '</option></select>';
 
                 // Product type select (hidden by default via CSS)
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][type_value]" class="type-select" onchange="FMConditions.onTypeChange(this)">';
@@ -662,7 +675,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
 
                 // Category container (hidden by default via CSS)
                 html += '<div class="cond-category-wrap">';
-                html += '<input type="text" class="input-text" placeholder="Filter categories..." onkeyup="FMConditions.filterCategories(this)" />';
+                html += '<input type="text" class="input-text" placeholder="' + this.translations.filterCategories + '" onkeyup="FMConditions.filterCategories(this)" />';
                 html += '<select name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][category_value]" class="category-select" multiple="multiple" onchange="FMConditions.onCategoryChange(this)">';
                 for (var catId in this.categories) {
                     html += '<option value="' + escapeHtml(catId, true) + '">' + escapeHtml(this.categories[catId]) + '</option>';
@@ -670,10 +683,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Filters extends Mage_Adminh
                 html += '</select></div>';
 
                 // Value input
-                html += '<input type="text" name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][value]" class="input-text value-input" placeholder="Value" />';
+                html += '<input type="text" name="condition_groups[' + groupIndex + '][conditions][' + condIndex + '][value]" class="input-text value-input" placeholder="' + this.translations.value + '" />';
 
                 // Remove button
-                html += '<button type="button" class="delete" onclick="FMConditions.removeCondition(' + groupIndex + ', ' + condIndex + '); return false;" title="Remove"><span>&#x2715;</span></button>';
+                html += '<button type="button" class="delete" onclick="FMConditions.removeCondition(' + groupIndex + ', ' + condIndex + '); return false;" title="' + this.translations.remove + '"><span>&#x2715;</span></button>';
 
                 html += '</div>';
 

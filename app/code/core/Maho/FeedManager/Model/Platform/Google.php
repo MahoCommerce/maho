@@ -317,14 +317,14 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
 
         // Ensure price has currency
         if (isset($productData['price']) && is_numeric($productData['price'])) {
-            $currency = $productData['currency'] ?? 'AUD';
+            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['price'] = $this->_formatPrice((float) $productData['price'], $currency);
             unset($productData['currency']);
         }
 
         // Same for sale_price
         if (isset($productData['sale_price']) && is_numeric($productData['sale_price'])) {
-            $currency = $productData['currency'] ?? 'AUD';
+            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['sale_price'] = $this->_formatPrice((float) $productData['sale_price'], $currency);
         }
 

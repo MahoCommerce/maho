@@ -61,8 +61,8 @@ class Maho_FeedManager_Model_Mapper
     /** @var array<int, array{name: string, path: string}> Static cache of category data (id => [name, path]) */
     protected static array $_categoryCache = [];
 
-    /** @var bool Flag to indicate if all categories have been loaded */
-    protected static bool $_categoriesCacheLoaded = false;
+    /** @var int|null Store ID for which category cache was loaded */
+    protected static ?int $_categoriesCacheStoreId = null;
 
     /**
      * Price formatting settings from feed
@@ -576,9 +576,14 @@ class Maho_FeedManager_Model_Mapper
      */
     protected function _ensureCategoryCache(): void
     {
-        if (self::$_categoriesCacheLoaded) {
+        $storeId = $this->_storeId ?: 0;
+
+        if (self::$_categoriesCacheStoreId === $storeId) {
             return;
         }
+
+        // Clear cache when store context changes to avoid cross-store data leakage
+        self::$_categoryCache = [];
 
         // Load all categories with a single query
         $resource = Mage::getSingleton('core/resource');
@@ -590,8 +595,6 @@ class Maho_FeedManager_Model_Mapper
         $eavAttribute = Mage::getSingleton('eav/config')
             ->getAttribute(Mage_Catalog_Model_Category::ENTITY, 'name');
         $nameAttributeId = $eavAttribute->getId();
-
-        $storeId = $this->_storeId ?: 0;
 
         // Query category data with name (prefer store-specific, fall back to default)
         $select = $adapter->select()
@@ -623,7 +626,7 @@ class Maho_FeedManager_Model_Mapper
             ];
         }
 
-        self::$_categoriesCacheLoaded = true;
+        self::$_categoriesCacheStoreId = $storeId;
     }
 
     /**
