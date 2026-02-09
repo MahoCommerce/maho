@@ -16,6 +16,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
 
     public const ADMIN_RESOURCE = 'catalog/feedmanager/category_mapping';
 
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['save', 'autoMap']);
+        return parent::preDispatch();
+    }
+
     protected function _initAction(): self
     {
         $this->loadLayout()

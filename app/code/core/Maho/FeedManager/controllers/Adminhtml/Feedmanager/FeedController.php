@@ -16,6 +16,24 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
     public const ADMIN_RESOURCE = 'catalog/feedmanager/feeds';
 
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions([
+            'delete',
+            'save',
+            'duplicate',
+            'generate',
+            'reset',
+            'forceReset',
+            'massGenerate',
+            'massStatus',
+            'massDelete',
+            'upload',
+        ]);
+        return parent::preDispatch();
+    }
+
     protected function _initAction(): self
     {
         $this->loadLayout()

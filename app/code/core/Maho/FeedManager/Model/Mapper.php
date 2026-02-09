@@ -825,10 +825,18 @@ class Maho_FeedManager_Model_Mapper
      */
     protected function _getParentId(Mage_Catalog_Model_Product $product): ?int
     {
-        $parentIds = Mage::getModel('catalog/product_type_configurable')
-            ->getParentIdsByChild($product->getId());
+        $childId = (int) $product->getId();
 
-        return empty($parentIds) ? null : (int) $parentIds[0];
+        if (array_key_exists($childId, $this->_childParentMap)) {
+            return $this->_childParentMap[$childId];
+        }
+
+        $parentIds = Mage::getModel('catalog/product_type_configurable')
+            ->getParentIdsByChild($childId);
+        $parentId = empty($parentIds) ? null : (int) $parentIds[0];
+        $this->_childParentMap[$childId] = $parentId;
+
+        return $parentId;
     }
 
     /**
