@@ -54,42 +54,7 @@ class Maho_FeedManager_Model_Generator_Batch
         $this->_jobId = 'feed_' . $feed->getId() . '_' . uniqid();
 
         // Check for existing running generation (race condition prevention)
-        // Use a transaction with SELECT FOR UPDATE to ensure atomicity
-        $resource = Mage::getSingleton('core/resource');
-        $connection = $resource->getConnection('core_write');
-
-        $connection->beginTransaction();
-        try {
-            // Check if there's already a running log for this feed
-            $tableName = $resource->getTableName('feedmanager/log');
-            $select = $connection->select()
-                ->from($tableName, ['log_id'])
-                ->where('feed_id = ?', $feed->getId())
-                ->where('status = ?', Maho_FeedManager_Model_Log::STATUS_RUNNING)
-                ->forUpdate();
-
-            $runningLogId = $connection->fetchOne($select);
-
-            if ($runningLogId) {
-                $connection->rollBack();
-                throw new RuntimeException('Feed generation already in progress (Log ID: ' . $runningLogId . ')');
-            }
-
-            // Create log entry
-            $this->_log = Mage::getModel('feedmanager/log');
-            $this->_log->setFeedId($feed->getId())
-                ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-                ->setStartedAt(Mage_Core_Model_Locale::now())
-                ->save();
-
-            $connection->commit();
-        } catch (RuntimeException $e) {
-            // Already rolled back above for race condition detection
-            throw $e;
-        } catch (Exception $e) {
-            $connection->rollBack();
-            throw $e;
-        }
+        $this->_acquireGenerationLock(true);
 
         // Count total products
         $collection = $this->_getProductCollection();
@@ -198,6 +163,7 @@ class Maho_FeedManager_Model_Generator_Batch
 
         // Initialize mapper and platform
         $this->_mapper = new Maho_FeedManager_Model_Mapper($this->_feed);
+        $this->_configureMapperFromBuilder();
         $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($this->_feed->getPlatform());
 
         // Update status
@@ -282,58 +248,12 @@ class Maho_FeedManager_Model_Generator_Batch
                 file_put_contents($tempPath, "\n]}", FILE_APPEND);
             }
 
-            // Validate the generated feed
-            $validator = new Maho_FeedManager_Model_Validator();
-            if (!$validator->validate($tempPath, $this->_feed->getFileFormat())) {
-                $errors = $validator->getErrors();
-                foreach ($errors as $error) {
-                    $this->_state['errors'][] = $error;
-                }
-                throw new RuntimeException('Feed validation failed: ' . implode(', ', $errors));
-            }
+            // Validate, move to output, and compress
+            $finalPath = $this->_validateAndMoveToOutput($tempPath, $this->_state['errors']);
 
-            // Add validation warnings to errors
-            foreach ($validator->getWarnings() as $warning) {
-                $this->_state['errors'][] = "[Validation Warning] {$warning}";
-            }
-
-            // Move to final location
-            $finalPath = $this->_getOutputPath();
-            if (!rename($tempPath, $finalPath)) {
-                throw new RuntimeException('Failed to move generated file to output directory');
-            }
-
-            // Apply gzip compression if enabled for this feed
-            if ($this->_feed->getGzipCompression()) {
-                $finalPath = $this->_compressFile($finalPath);
-            }
-
-            // Get file size
+            // Finalize: update log, feed, and reset notifier
             $fileSize = file_exists($finalPath) ? filesize($finalPath) : 0;
-
-            // Update log with success
-            $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_COMPLETED)
-                ->setCompletedAt(Mage_Core_Model_Locale::now())
-                ->setProductCount($this->_state['product_count'])
-                ->setFileSize($fileSize);
-
-            // Save errors if any
-            if (!empty($this->_state['errors'])) {
-                foreach ($this->_state['errors'] as $error) {
-                    $this->_log->addError($error);
-                }
-            }
-            $this->_log->save();
-
-            // Update feed
-            $this->_feed->setLastGeneratedAt(Mage_Core_Model_Locale::now())
-                ->setLastProductCount($this->_state['product_count'])
-                ->setLastFileSize($fileSize)
-                ->save();
-
-            // Reset notification flag on success
-            $notifier = new Maho_FeedManager_Model_Notifier();
-            $notifier->resetNotificationFlag($this->_feed);
+            $this->_finalizeGenerationSuccess($this->_state['product_count'], $fileSize, $this->_state['errors']);
 
             // Handle upload if configured
             $uploadResult = $this->_handleUpload();
@@ -454,7 +374,7 @@ class Maho_FeedManager_Model_Generator_Batch
             $structure = Mage::helper('core')->jsonDecode($xmlStructure);
         }
 
-        // For CSV, get headers from CSV columns or mapper
+        // For CSV, get headers from CSV columns
         $csvHeaders = [];
         $csvDelimiter = ',';
         $csvEnclosure = '"';
@@ -464,7 +384,6 @@ class Maho_FeedManager_Model_Generator_Batch
                 $columns = Mage::helper('core')->jsonDecode($csvColumns);
                 if (is_array($columns) && !empty($columns)) {
                     $csvHeaders = array_column($columns, 'name');
-                    $this->_mapper->setMappingsFromCsvColumns($columns);
                 }
             }
             $delimiter = $this->_feed->getCsvDelimiter();
@@ -483,9 +402,6 @@ class Maho_FeedManager_Model_Generator_Batch
             $jsonStructureData = $this->_feed->getJsonStructure();
             if ($jsonStructureData) {
                 $jsonStructure = Mage::helper('core')->jsonDecode($jsonStructureData);
-                if (is_array($jsonStructure) && !empty($jsonStructure)) {
-                    $this->_mapper->setMappingsFromJsonStructure($jsonStructure);
-                }
             }
         }
 
@@ -670,9 +586,7 @@ class Maho_FeedManager_Model_Generator_Batch
         // Update log if loaded
         if ($this->_log && $this->_log->getId()) {
             $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED);
-            foreach ($this->_state['errors'] as $error) {
-                $this->_log->addError($error);
-            }
+            $this->_saveErrorsToLog($this->_state['errors']);
             $this->_log->save();
         }
 

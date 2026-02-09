@@ -134,6 +134,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
             }
 
             const FeedGenerator = {
+                ...FeedGeneratorBase,
                 urls: {
                     init: '{$initUrl}',
                     batch: '{$batchUrl}',
@@ -144,12 +145,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                 },
                 translations: {$translations},
                 hasDestination: {$this->_boolToJs($hasDestination)},
-                currentJobId: null,
                 currentFeedId: null,
-                cancelled: false,
-                dialog: null,
 
-                saveAndGenerate: function(feedId) {
+                saveAndGenerate(feedId) {
                     if (!confirm(this.translations.confirm)) {
                         return;
                     }
@@ -169,7 +167,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     }
                 },
 
-                start: function(feedId, force) {
+                start(feedId, force) {
                     this.cancelled = false;
                     this.currentFeedId = feedId;
                     this.showDialog();
@@ -205,80 +203,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     });
                 },
 
-                processBatch: function() {
-                    if (this.cancelled) {
-                        return;
-                    }
-
-                    mahoFetch(this.urls.batch, {
-                        method: 'POST',
-                        body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-                        loaderArea: false
-                    })
-                    .then(data => {
-                        if (this.cancelled) {
-                            return;
-                        }
-
-                        if (data.status === 'failed') {
-                            this.showError(data.message);
-                            return;
-                        }
-
-                        const progress = data.progress || 0;
-                        const total = data.total || this.totalProducts;
-
-                        if (data.status === 'finalizing') {
-                            this.updateProgress(progress, total, this.translations.finalizing);
-                            this.finalize();
-                        } else if (data.status === 'processing') {
-                            const batchNum = data.batches_processed || 0;
-                            const batchTotal = data.batches_total || this.batchesTotal;
-                            this.updateProgress(progress, total,
-                                this.translations.processing.replace('%s', batchNum + 1).replace('%s', batchTotal));
-                            this.processBatch();
-                        } else if (data.status === 'completed') {
-                            this.showSuccess(data);
-                        }
-                    })
-                    .catch(error => {
-                        if (!this.cancelled) {
-                            this.showError(error.message || 'Network error');
-                        }
-                    });
-                },
-
-                finalize: function() {
-                    mahoFetch(this.urls.finalize, {
-                        method: 'POST',
-                        body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-                        loaderArea: false
-                    })
-                    .then(data => {
-                        if (data.status === 'completed') {
-                            this.showSuccess(data);
-                        } else {
-                            this.showError(data.message || this.translations.failed);
-                        }
-                    })
-                    .catch(error => {
-                        this.showError(error.message || 'Network error');
-                    });
-                },
-
-                cancel: function() {
-                    this.cancelled = true;
-                    if (this.currentJobId) {
-                        mahoFetch(this.urls.cancel, {
-                            method: 'POST',
-                            body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-                            loaderArea: false
-                        }).catch(() => {});
-                    }
-                    this.closeDialog();
-                },
-
-                reset: function(feedId) {
+                reset(feedId) {
                     if (!confirm(this.translations.confirm_reset)) {
                         return;
                     }
@@ -300,68 +225,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     });
                 },
 
-                showDialog: function() {
-                    const self = this;
-                    this.dialog = Dialog.info(this.getDialogContent(), {
-                        title: this.translations.generating,
-                        className: 'feed-generator-dialog',
-                        width: 450,
-                        height: 'auto',
-                        extraButtons: [
-                            { id: 'gen-cancel-btn', class: 'cancel', label: this.translations.cancel }
-                        ],
-                        onOpen: function(dialog) {
-                            dialog.style.height = 'auto';
-                            dialog.querySelector('#gen-cancel-btn')?.addEventListener('click', () => self.cancel());
-                        }
-                    });
-                },
-
-                closeDialog: function() {
-                    if (this.dialog) {
-                        this.dialog.remove();
-                        this.dialog = null;
-                    }
-                    this.currentJobId = null;
-                },
-
-                getDialogContent: function() {
-                    return `
-                        <div class="status" id="gen-status"></div>
-                        <div class="progress-container">
-                            <div class="progress-bar-bg">
-                                <div class="progress-bar" id="gen-progress-bar"></div>
-                            </div>
-                            <div class="progress-text" id="gen-progress-text"></div>
-                        </div>
-                    `;
-                },
-
-                updateProgress: function(current, total, message) {
-                    const percent = total > 0 ? Math.round((current / total) * 100) : 0;
-                    const progressBar = document.getElementById('gen-progress-bar');
-                    const progressText = document.getElementById('gen-progress-text');
-                    const statusEl = document.getElementById('gen-status');
-
-                    if (progressBar) progressBar.style.width = percent + '%';
-                    if (progressText) progressText.textContent = current + ' / ' + total + ' (' + percent + '%)';
-                    if (statusEl) statusEl.textContent = message;
-                },
-
-                showError: function(message) {
-                    const statusEl = document.getElementById('gen-status');
-                    const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
-
-                    if (statusEl) {
-                        statusEl.innerHTML = '<div class="error-msg">' + escapeHtml(message) + '</div>';
-                    }
-                    if (buttonsEl) {
-                        buttonsEl.innerHTML = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog()">' +
-                            this.translations.close + '</button>';
-                    }
-                },
-
-                showSuccess: function(data) {
+                showSuccess(data) {
                     const statusEl = document.getElementById('gen-status');
                     const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
                     const progressBar = document.getElementById('gen-progress-bar');
@@ -405,7 +269,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                     if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
                 },
 
-                upload: function() {
+                upload() {
                     const btn = document.getElementById('upload-now-btn');
                     if (btn) {
                         btn.disabled = true;

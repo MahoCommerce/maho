@@ -21,6 +21,7 @@
         <update handle="feedmanager_default"/>
         <reference name="head">
             <action method="setTitle" translate="title"><title>Feeds</title></action>
+            <action method="addJs"><name>mage/adminhtml/feedmanager-generator.js</name></action>
         </reference>
         <reference name="content">
             <block type="feedmanager/adminhtml_feed" name="feedmanager_feed"/>
@@ -32,6 +33,7 @@
         <update handle="feedmanager_default"/>
         <update handle="editor"/>
         <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/feedmanager-generator.js</name></action>
             <action method="addJs"><name>mage/adminhtml/feedmanager-mapping.js</name></action>
         </reference>
         <reference name="content">

@@ -62,6 +62,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed extends Mage_Adminhtml_Block_Widget_
         return <<<HTML
 <script>
 const FeedGenerator = {
+    ...FeedGeneratorBase,
     urls: {
         init: '{$initUrl}',
         batch: '{$batchUrl}',
@@ -70,18 +71,15 @@ const FeedGenerator = {
         massBatch: '{$massBatchUrl}'
     },
     translations: {$translations},
-    currentJobId: null,
     currentJobs: [],
-    cancelled: false,
-    dialog: null,
 
-    start: function(feedId) {
+    start(feedId) {
         if (!confirm(this.translations.confirm)) {
             return false;
         }
 
         this.cancelled = false;
-        this.showDialog(false);
+        this.showDialog(this.translations.generating);
         this.updateProgress(0, 0, this.translations.initializing);
 
         mahoFetch(this.urls.init, {
@@ -111,7 +109,7 @@ const FeedGenerator = {
         return false;
     },
 
-    startMultiple: function(feedIds) {
+    startMultiple(feedIds) {
         if (!confirm(this.translations.confirm_multiple)) {
             return false;
         }
@@ -119,7 +117,7 @@ const FeedGenerator = {
         this.cancelled = false;
         this.currentJobs = [];
         this.currentJobIndex = 0;
-        this.showDialog(true);
+        this.showDialog(this.translations.generating_multiple);
         this.updateProgress(0, feedIds.length, this.translations.initializing);
 
         mahoFetch(this.urls.massBatch, {
@@ -152,7 +150,7 @@ const FeedGenerator = {
         return false;
     },
 
-    processNextJob: function() {
+    processNextJob() {
         if (this.cancelled || this.currentJobIndex >= this.currentJobs.length) {
             this.showMultipleSuccess();
             return;
@@ -171,7 +169,7 @@ const FeedGenerator = {
         this.processBatchForMultiple();
     },
 
-    processBatchForMultiple: function() {
+    processBatchForMultiple() {
         if (this.cancelled) {
             return;
         }
@@ -210,7 +208,7 @@ const FeedGenerator = {
         });
     },
 
-    finalizeForMultiple: function() {
+    finalizeForMultiple() {
         mahoFetch(this.urls.finalize, {
             method: 'POST',
             body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
@@ -232,129 +230,7 @@ const FeedGenerator = {
         });
     },
 
-    processBatch: function() {
-        if (this.cancelled) {
-            return;
-        }
-
-        mahoFetch(this.urls.batch, {
-            method: 'POST',
-            body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-            loaderArea: false
-        })
-        .then(data => {
-            if (this.cancelled) {
-                return;
-            }
-
-            if (data.status === 'failed') {
-                this.showError(data.message);
-                return;
-            }
-
-            const progress = data.progress || 0;
-            const total = data.total || this.totalProducts;
-
-            if (data.status === 'finalizing') {
-                this.updateProgress(progress, total, this.translations.finalizing);
-                this.finalize();
-            } else if (data.status === 'processing') {
-                const batchNum = data.batches_processed || 0;
-                const batchTotal = data.batches_total || this.batchesTotal;
-                this.updateProgress(progress, total,
-                    this.translations.processing.replace('%s', batchNum + 1).replace('%s', batchTotal));
-                this.processBatch();
-            } else if (data.status === 'completed') {
-                this.showSuccess(data);
-            }
-        })
-        .catch(error => {
-            if (!this.cancelled) {
-                this.showError(error.message || 'Network error');
-            }
-        });
-    },
-
-    finalize: function() {
-        mahoFetch(this.urls.finalize, {
-            method: 'POST',
-            body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-            loaderArea: false
-        })
-        .then(data => {
-            if (data.status === 'completed') {
-                this.showSuccess(data);
-            } else {
-                this.showError(data.message || this.translations.failed);
-            }
-        })
-        .catch(error => {
-            this.showError(error.message || 'Network error');
-        });
-    },
-
-    cancel: function() {
-        this.cancelled = true;
-        if (this.currentJobId) {
-            mahoFetch(this.urls.cancel, {
-                method: 'POST',
-                body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-                loaderArea: false
-            }).catch(() => {});
-        }
-        this.closeDialog();
-    },
-
-    showDialog: function(isMultiple) {
-        const self = this;
-        const title = isMultiple ? this.translations.generating_multiple : this.translations.generating;
-        this.dialog = Dialog.info(this.getDialogContent(), {
-            title: title,
-            className: 'feed-generator-dialog',
-            width: 450,
-            height: 'auto',
-            extraButtons: [
-                { id: 'gen-cancel-btn', class: 'cancel', label: this.translations.cancel }
-            ],
-            onOpen: function(dialog) {
-                dialog.style.height = 'auto';
-                dialog.querySelector('#gen-cancel-btn')?.addEventListener('click', () => self.cancel());
-            }
-        });
-    },
-
-    closeDialog: function() {
-        if (this.dialog) {
-            this.dialog.remove();
-            this.dialog = null;
-        }
-        this.currentJobId = null;
-    },
-
-    getDialogContent: function() {
-        return \`
-            <div class="status" id="gen-status"></div>
-            <div class="progress-container">
-                <div class="progress-bar-bg">
-                    <div class="progress-bar" id="gen-progress-bar"></div>
-                </div>
-                <div class="progress-text" id="gen-progress-text"></div>
-            </div>
-        \`;
-    },
-
-    updateProgress: function(current, total, message) {
-        const percent = total > 0 ? Math.round((current / total) * 100) : 0;
-        const progressBar = document.getElementById('gen-progress-bar');
-        const progressText = document.getElementById('gen-progress-text');
-        const statusEl = document.getElementById('gen-status');
-
-        if (progressBar) progressBar.style.width = percent + '%';
-        if (progressText) progressText.textContent = current + ' / ' + total + ' (' + percent + '%)';
-        if (statusEl) statusEl.textContent = message;
-    },
-
-    updateMultipleProgress: function(message) {
+    updateMultipleProgress(message) {
         const percent = this.totalJobs > 0 ? Math.round((this.currentJobIndex / this.totalJobs) * 100) : 0;
         const progressBar = document.getElementById('gen-progress-bar');
         const progressText = document.getElementById('gen-progress-text');
@@ -365,20 +241,7 @@ const FeedGenerator = {
         if (statusEl) statusEl.textContent = message;
     },
 
-    showError: function(message) {
-        const statusEl = document.getElementById('gen-status');
-        const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
-
-        if (statusEl) {
-            statusEl.innerHTML = '<div class="error-msg">' + escapeHtml(message) + '</div>';
-        }
-        if (buttonsEl) {
-            buttonsEl.innerHTML = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog()">' +
-                this.translations.close + '</button>';
-        }
-    },
-
-    showSuccess: function(data) {
+    showSuccess(data) {
         const statusEl = document.getElementById('gen-status');
         const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
         const progressBar = document.getElementById('gen-progress-bar');
@@ -405,7 +268,7 @@ const FeedGenerator = {
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
     },
 
-    showMultipleSuccess: function() {
+    showMultipleSuccess() {
         const statusEl = document.getElementById('gen-status');
         const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
         const progressBar = document.getElementById('gen-progress-bar');

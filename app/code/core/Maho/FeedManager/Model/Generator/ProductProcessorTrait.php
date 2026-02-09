@@ -600,4 +600,158 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
             ));
         }
     }
+
+    /**
+     * Acquire a generation lock using SELECT FOR UPDATE to prevent race conditions
+     *
+     * Creates a new log entry with STATUS_RUNNING. If a running log already exists:
+     * - When $throwOnConflict is true: throws RuntimeException
+     * - When $throwOnConflict is false: returns the existing log
+     *
+     * Sets $this->_log on success and returns null.
+     *
+     * @throws RuntimeException if lock cannot be acquired and $throwOnConflict is true
+     */
+    protected function _acquireGenerationLock(bool $throwOnConflict = false): ?Maho_FeedManager_Model_Log
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+
+        $connection->beginTransaction();
+        try {
+            $tableName = $resource->getTableName('feedmanager/log');
+            $select = $connection->select()
+                ->from($tableName, ['log_id'])
+                ->where('feed_id = ?', $this->_feed->getId())
+                ->where('status = ?', Maho_FeedManager_Model_Log::STATUS_RUNNING)
+                ->forUpdate();
+
+            $runningLogId = $connection->fetchOne($select);
+
+            if ($runningLogId) {
+                $connection->rollBack();
+
+                if ($throwOnConflict) {
+                    throw new RuntimeException('Feed generation already in progress (Log ID: ' . $runningLogId . ')');
+                }
+
+                $existingLog = Mage::getModel('feedmanager/log')->load($runningLogId);
+                Mage::log(
+                    "FeedManager: Generation already running for feed '{$this->_feed->getName()}' (Log ID: {$runningLogId})",
+                    Mage::LOG_WARNING,
+                );
+                return $existingLog;
+            }
+
+            $this->_log = Mage::getModel('feedmanager/log');
+            $this->_log->setFeedId($this->_feed->getId())
+                ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
+                ->setStartedAt(Mage_Core_Model_Locale::now())
+                ->save();
+
+            $connection->commit();
+        } catch (RuntimeException $e) {
+            throw $e;
+        } catch (Exception $e) {
+            $connection->rollBack();
+            throw $e;
+        }
+
+        return null;
+    }
+
+    /**
+     * Configure mapper from CSV/JSON builder definitions
+     */
+    protected function _configureMapperFromBuilder(): void
+    {
+        $format = $this->_feed->getFileFormat();
+
+        if ($format === 'csv') {
+            $csvColumns = $this->_feed->getCsvColumns();
+            if ($csvColumns) {
+                $columns = Mage::helper('core')->jsonDecode($csvColumns);
+                if (is_array($columns) && !empty($columns)) {
+                    $this->_mapper->setMappingsFromCsvColumns($columns);
+                }
+            }
+        } elseif ($format === 'json') {
+            $jsonStructure = $this->_feed->getJsonStructure();
+            if ($jsonStructure) {
+                $structure = Mage::helper('core')->jsonDecode($jsonStructure);
+                if (is_array($structure) && !empty($structure)) {
+                    $this->_mapper->setMappingsFromJsonStructure($structure);
+                }
+            }
+        }
+    }
+
+    /**
+     * Validate generated feed, move temp file to output, and compress if configured
+     *
+     * @param string $tempPath Path to the temporary feed file
+     * @param array $errors Errors array, validation errors/warnings are appended by reference
+     * @return string Final file path (may differ from output path if compressed)
+     * @throws RuntimeException if validation or file move fails
+     */
+    protected function _validateAndMoveToOutput(string $tempPath, array &$errors): string
+    {
+        $validator = new Maho_FeedManager_Model_Validator();
+        if (!$validator->validate($tempPath, $this->_feed->getFileFormat())) {
+            $errors = array_merge($errors, $validator->getErrors());
+            throw new RuntimeException('Feed validation failed: ' . implode(', ', $validator->getErrors()));
+        }
+
+        foreach ($validator->getWarnings() as $warning) {
+            $errors[] = "[Validation Warning] {$warning}";
+        }
+
+        $outputPath = $this->_getOutputPath();
+        if (!rename($tempPath, $outputPath)) {
+            throw new RuntimeException("Failed to move temp file to final path: {$outputPath}");
+        }
+
+        $finalPath = $outputPath;
+        if ($this->_feed->getGzipCompression()) {
+            $finalPath = $this->_compressFile($outputPath);
+        }
+
+        return $finalPath;
+    }
+
+    /**
+     * Finalize a successful generation: update log, update feed, reset notifier
+     *
+     * @param int $productCount Number of products generated
+     * @param int $fileSize Size of the generated file in bytes
+     * @param array $errors Any errors/warnings to save to the log
+     */
+    protected function _finalizeGenerationSuccess(int $productCount, int $fileSize, array $errors): void
+    {
+        $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_COMPLETED)
+            ->setCompletedAt(Mage_Core_Model_Locale::now())
+            ->setProductCount($productCount)
+            ->setFileSize($fileSize);
+
+        $this->_saveErrorsToLog($errors);
+        $this->_log->save();
+
+        $this->_feed->setLastGeneratedAt(Mage_Core_Model_Locale::now())
+            ->setLastProductCount($productCount)
+            ->setLastFileSize($fileSize)
+            ->save();
+
+        $notifier = new Maho_FeedManager_Model_Notifier();
+        $notifier->resetNotificationFlag($this->_feed);
+    }
+
+    /**
+     * Save an array of error messages to the log model
+     */
+    protected function _saveErrorsToLog(array $errors): void
+    {
+        foreach ($errors as $error) {
+            $this->_log->addError($error);
+        }
+    }
 }
