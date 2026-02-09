@@ -66,6 +66,16 @@
                             <show_in_website>0</show_in_website>
                             <show_in_store>0</show_in_store>
                         </log_retention_days>
+                        <error_threshold_percent translate="label comment">
+                            <label>Error Threshold (%)</label>
+                            <comment>Maximum percentage of products that can fail before aborting feed generation. For example, 10 means abort if more than 10% of products fail. Set to 0 to disable (never abort). Default: 10</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number validate-number-range number-range-0-100</validate>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </error_threshold_percent>
                     </fields>
                 </general>
             </groups>

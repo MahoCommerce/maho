@@ -572,4 +572,31 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
 
         return $outputDir . DS . $filename . '.' . $extension;
     }
+
+    /**
+     * Check if error threshold has been exceeded
+     *
+     * @param int $errorCount Number of errors so far
+     * @param int $processed Number of products processed so far
+     * @throws RuntimeException if threshold exceeded
+     */
+    protected function _checkErrorThreshold(int $errorCount, int $processed): void
+    {
+        $thresholdPercent = (int) Mage::getStoreConfig('feedmanager/general/error_threshold_percent');
+
+        // Skip check if threshold is disabled (0) or not enough products processed yet
+        if ($thresholdPercent === 0 || $processed < 10) {
+            return;
+        }
+
+        $errorPercent = ($errorCount / $processed) * 100;
+
+        if ($errorPercent > $thresholdPercent) {
+            throw new RuntimeException(sprintf(
+                'Error threshold exceeded: %.1f%% of products failed (threshold: %d%%). Aborting generation.',
+                $errorPercent,
+                $thresholdPercent,
+            ));
+        }
+    }
 }

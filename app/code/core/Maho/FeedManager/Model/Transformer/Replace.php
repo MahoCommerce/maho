@@ -63,8 +63,18 @@ class Maho_FeedManager_Model_Transformer_Replace extends Maho_FeedManager_Model_
 
         if ($isRegex) {
             $pattern = $search;
-            if (!$caseSensitive && !str_contains($pattern, 'i')) {
-                $pattern .= 'i';
+            if (!$caseSensitive) {
+                // Only add 'i' flag if not already present in the flags section
+                // Extract flags by finding the last delimiter and checking what follows
+                if (preg_match('/^(.)(.*)\1([imsxADSUXJu]*)$/s', $pattern, $matches)) {
+                    // Valid delimited regex - check if 'i' is in the flags
+                    if (!str_contains($matches[3], 'i')) {
+                        $pattern .= 'i';
+                    }
+                } else {
+                    // Non-delimited pattern - just append 'i'
+                    $pattern .= 'i';
+                }
             }
             return preg_replace($pattern, $replace, $value) ?? $value;
         }

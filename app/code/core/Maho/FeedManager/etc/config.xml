@@ -147,6 +147,7 @@
                 <output_directory>feeds</output_directory>
                 <batch_size>500</batch_size>
                 <log_retention_days>30</log_retention_days>
+                <error_threshold_percent>10</error_threshold_percent>
             </general>
         </feedmanager>
     </default>

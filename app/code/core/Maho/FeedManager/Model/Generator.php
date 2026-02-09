@@ -50,12 +50,47 @@ class Maho_FeedManager_Model_Generator
         $this->_errorCount = 0;
         $this->_errors = [];
 
-        // Create log entry
-        $this->_log = Mage::getModel('feedmanager/log');
-        $this->_log->setFeedId($feed->getId())
-            ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-            ->setStartedAt(Mage_Core_Model_Locale::now())
-            ->save();
+        // Check for existing running generation (race condition prevention)
+        // Use a transaction with SELECT FOR UPDATE to ensure atomicity
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+
+        $connection->beginTransaction();
+        try {
+            // Check if there's already a running log for this feed
+            $tableName = $resource->getTableName('feedmanager/log');
+            $select = $connection->select()
+                ->from($tableName, ['log_id'])
+                ->where('feed_id = ?', $feed->getId())
+                ->where('status = ?', Maho_FeedManager_Model_Log::STATUS_RUNNING)
+                ->forUpdate();
+
+            $runningLogId = $connection->fetchOne($select);
+
+            if ($runningLogId) {
+                $connection->rollBack();
+
+                // Return existing log instead of creating duplicate
+                $existingLog = Mage::getModel('feedmanager/log')->load($runningLogId);
+                Mage::log(
+                    "FeedManager: Generation already running for feed '{$feed->getName()}' (Log ID: {$runningLogId})",
+                    Mage::LOG_WARNING,
+                );
+                return $existingLog;
+            }
+
+            // Create log entry
+            $this->_log = Mage::getModel('feedmanager/log');
+            $this->_log->setFeedId($feed->getId())
+                ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
+                ->setStartedAt(Mage_Core_Model_Locale::now())
+                ->save();
+
+            $connection->commit();
+        } catch (Exception $e) {
+            $connection->rollBack();
+            throw $e;
+        }
 
         try {
             // Initialize mapper
@@ -219,11 +254,10 @@ class Maho_FeedManager_Model_Generator
                 } catch (Exception $e) {
                     $this->_errorCount++;
                     $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
+                    $processed++;
 
-                    // Stop if too many errors
-                    if ($this->_errorCount > 100) {
-                        throw new RuntimeException('Too many errors during generation. Aborting.');
-                    }
+                    // Check error threshold (percentage-based)
+                    $this->_checkErrorThreshold($this->_errorCount, $processed);
                 }
             }
 
@@ -494,11 +528,10 @@ class Maho_FeedManager_Model_Generator
                     } catch (Exception $e) {
                         $this->_errorCount++;
                         $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
+                        $processed++;
 
-                        // Stop if too many errors
-                        if ($this->_errorCount > 100) {
-                            throw new RuntimeException('Too many errors during generation. Aborting.');
-                        }
+                        // Check error threshold (percentage-based)
+                        $this->_checkErrorThreshold($this->_errorCount, $processed);
                     }
                 }
 
@@ -597,11 +630,10 @@ class Maho_FeedManager_Model_Generator
                     } catch (Exception $e) {
                         $this->_errorCount++;
                         $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
+                        $processed++;
 
-                        // Stop if too many errors
-                        if ($this->_errorCount > 100) {
-                            throw new RuntimeException('Too many errors during generation. Aborting.');
-                        }
+                        // Check error threshold (percentage-based)
+                        $this->_checkErrorThreshold($this->_errorCount, $processed);
                     }
                 }
 

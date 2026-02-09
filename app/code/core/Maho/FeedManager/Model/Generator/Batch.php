@@ -53,12 +53,43 @@ class Maho_FeedManager_Model_Generator_Batch
         // Generate unique job ID
         $this->_jobId = 'feed_' . $feed->getId() . '_' . uniqid();
 
-        // Create log entry
-        $this->_log = Mage::getModel('feedmanager/log');
-        $this->_log->setFeedId($feed->getId())
-            ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-            ->setStartedAt(Mage_Core_Model_Locale::now())
-            ->save();
+        // Check for existing running generation (race condition prevention)
+        // Use a transaction with SELECT FOR UPDATE to ensure atomicity
+        $resource = Mage::getSingleton('core/resource');
+        $connection = $resource->getConnection('core_write');
+
+        $connection->beginTransaction();
+        try {
+            // Check if there's already a running log for this feed
+            $tableName = $resource->getTableName('feedmanager/log');
+            $select = $connection->select()
+                ->from($tableName, ['log_id'])
+                ->where('feed_id = ?', $feed->getId())
+                ->where('status = ?', Maho_FeedManager_Model_Log::STATUS_RUNNING)
+                ->forUpdate();
+
+            $runningLogId = $connection->fetchOne($select);
+
+            if ($runningLogId) {
+                $connection->rollBack();
+                throw new RuntimeException('Feed generation already in progress (Log ID: ' . $runningLogId . ')');
+            }
+
+            // Create log entry
+            $this->_log = Mage::getModel('feedmanager/log');
+            $this->_log->setFeedId($feed->getId())
+                ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
+                ->setStartedAt(Mage_Core_Model_Locale::now())
+                ->save();
+
+            $connection->commit();
+        } catch (RuntimeException $e) {
+            // Already rolled back above for race condition detection
+            throw $e;
+        } catch (Exception $e) {
+            $connection->rollBack();
+            throw $e;
+        }
 
         // Count total products
         $collection = $this->_getProductCollection();
@@ -539,10 +570,8 @@ class Maho_FeedManager_Model_Generator_Batch
                 $this->_state['errors'][] = "Product {$product->getSku()}: {$e->getMessage()}";
                 $this->_state['processed_count']++;
 
-                // Stop if too many errors
-                if (count($this->_state['errors']) > 100) {
-                    throw new RuntimeException('Too many errors during generation. Aborting.');
-                }
+                // Check error threshold (percentage-based)
+                $this->_checkErrorThreshold(count($this->_state['errors']), $this->_state['processed_count']);
             }
         }
 
