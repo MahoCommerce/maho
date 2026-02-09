@@ -141,7 +141,11 @@ class Maho_FeedManager_Model_Notifier
                 'store_name' => $storeName,
                 'failure_type' => ucfirst($failureType),
                 'errors' => $errors,
-                'error_list' => implode("\n", array_map(fn($e) => "• {$e}", $errors)),
+                'error_list' => htmlspecialchars(
+                    implode("\n", array_map(fn($e) => "• {$e}", $errors)),
+                    ENT_QUOTES,
+                    'UTF-8',
+                ),
                 'timestamp' => Mage::helper('core')->formatDate(null, 'medium', true),
                 'platform' => ucfirst($feed->getPlatform() ?: 'Custom'),
                 'filename' => $feed->getFilename() . '.' . $feed->getFileFormat(),
