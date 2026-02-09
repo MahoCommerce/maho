@@ -533,7 +533,15 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         $gzPath = $sourcePath . '.gz';
 
         $source = fopen($sourcePath, 'rb');
+        if ($source === false) {
+            throw new Mage_Core_Exception("Failed to open source file for compression: {$sourcePath}");
+        }
+
         $dest = gzopen($gzPath, 'wb9');
+        if ($dest === false) {
+            fclose($source);
+            throw new Mage_Core_Exception("Failed to create gzip file: {$gzPath}");
+        }
 
         while (!feof($source)) {
             gzwrite($dest, fread($source, 1048576)); // 1MB chunks
