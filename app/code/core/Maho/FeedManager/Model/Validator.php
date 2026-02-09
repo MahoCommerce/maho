@@ -53,32 +53,35 @@ class Maho_FeedManager_Model_Validator
     }
 
     /**
-     * Validate XML file structure
+     * Validate XML file structure using streaming XMLReader to avoid OOM on large feeds
      */
     protected function _validateXml(string $filePath): bool
     {
-        // Use libxml internal errors
         $previousUseErrors = libxml_use_internal_errors(true);
         libxml_clear_errors();
 
-        // Try to load the XML
-        $xml = new DOMDocument();
-        $xml->preserveWhiteSpace = false;
-
-        // Load with options for large files
-        $loaded = $xml->load($filePath, LIBXML_NONET | LIBXML_NOWARNING);
-
-        if (!$loaded) {
-            $errors = libxml_get_errors();
-            foreach ($errors as $error) {
-                $this->_errors[] = $this->_formatLibxmlError($error);
-            }
-            libxml_clear_errors();
+        $reader = new XMLReader();
+        if (!$reader->open($filePath, flags: LIBXML_NONET | LIBXML_NOWARNING)) {
+            $this->_errors[] = 'Cannot open XML file for reading';
             libxml_use_internal_errors($previousUseErrors);
             return false;
         }
 
-        // Validate structure
+        $hasRootElement = false;
+        $itemCount = 0;
+        $itemNames = ['item', 'entry', 'product'];
+
+        while (@$reader->read()) {
+            if ($reader->nodeType === XMLReader::ELEMENT) {
+                if (!$hasRootElement) {
+                    $hasRootElement = true;
+                }
+                if (in_array($reader->localName, $itemNames, true)) {
+                    $itemCount++;
+                }
+            }
+        }
+
         $errors = libxml_get_errors();
         foreach ($errors as $error) {
             if ($error->level === LIBXML_ERR_WARNING) {
@@ -88,40 +91,20 @@ class Maho_FeedManager_Model_Validator
             }
         }
 
+        $reader->close();
         libxml_clear_errors();
         libxml_use_internal_errors($previousUseErrors);
 
-        // Check for root element
-        if (!$xml->documentElement) {
+        if (!$hasRootElement) {
             $this->_errors[] = 'XML has no root element';
             return false;
         }
 
-        // Check for items
-        $itemCount = $this->_countXmlItems($xml);
         if ($itemCount === 0) {
             $this->_warnings[] = 'XML contains no product items';
         }
 
         return empty($this->_errors);
-    }
-
-    /**
-     * Count items in XML document
-     */
-    protected function _countXmlItems(DOMDocument $xml): int
-    {
-        // Try common item element names
-        $itemNames = ['item', 'entry', 'product'];
-
-        foreach ($itemNames as $itemName) {
-            $items = $xml->getElementsByTagName($itemName);
-            if ($items->length > 0) {
-                return $items->length;
-            }
-        }
-
-        return 0;
     }
 
     /**
@@ -208,35 +191,45 @@ class Maho_FeedManager_Model_Validator
 
     /**
      * Validate JSON file structure
+     *
+     * For small files (< 2MB), performs full validation.
+     * For large files, validates only start/end structure to avoid OOM.
      */
     protected function _validateJson(string $filePath): bool
     {
-        // Read file content
+        $fileSize = filesize($filePath);
+
+        if ($fileSize < 2 * 1024 * 1024) {
+            return $this->_validateJsonFull($filePath);
+        }
+
+        return $this->_validateJsonStructure($filePath, $fileSize);
+    }
+
+    /**
+     * Full JSON validation for small files
+     */
+    protected function _validateJsonFull(string $filePath): bool
+    {
         $content = file_get_contents($filePath);
         if ($content === false) {
             $this->_errors[] = 'Cannot read file';
             return false;
         }
 
-        // Try to decode
         $data = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
             $this->_errors[] = 'Invalid JSON: ' . json_last_error_msg();
-
-            // Try to find approximate error location
             $this->_findJsonErrorLocation($content);
-
             return false;
         }
 
-        // Check structure
         if (!is_array($data)) {
             $this->_errors[] = 'JSON root must be an array or object';
             return false;
         }
 
-        // Check for products array
         $products = $data['products'] ?? $data;
         if (!is_array($products)) {
             $this->_warnings[] = 'Could not find products array in JSON';
@@ -245,6 +238,65 @@ class Maho_FeedManager_Model_Validator
         }
 
         return empty($this->_errors);
+    }
+
+    /**
+     * Streaming structural validation for large JSON files
+     *
+     * Reads only the first and last few KB to verify the file
+     * has valid JSON opening/closing structure without loading
+     * the entire file into memory.
+     */
+    protected function _validateJsonStructure(string $filePath, int $fileSize): bool
+    {
+        $handle = fopen($filePath, 'r');
+        if (!$handle) {
+            $this->_errors[] = 'Cannot open file for reading';
+            return false;
+        }
+
+        // Read first 8KB to check opening structure
+        $head = ltrim((string) fread($handle, 8192));
+
+        if ($head === '') {
+            fclose($handle);
+            $this->_errors[] = 'File appears empty or contains only whitespace';
+            return false;
+        }
+
+        $firstChar = $head[0];
+        if ($firstChar !== '{' && $firstChar !== '[') {
+            fclose($handle);
+            $this->_errors[] = 'Invalid JSON: must start with { or [';
+            return false;
+        }
+
+        // Read last 8KB to check closing structure
+        fseek($handle, max(0, $fileSize - 8192));
+        $tail = rtrim((string) fread($handle, 8192));
+        fclose($handle);
+
+        if ($tail === '') {
+            $this->_errors[] = 'File appears truncated';
+            return false;
+        }
+
+        $lastChar = $tail[strlen($tail) - 1];
+        $expectedClose = ($firstChar === '{') ? '}' : ']';
+
+        if ($lastChar !== $expectedClose) {
+            $this->_errors[] = sprintf(
+                "Invalid JSON structure: opens with '%s' but does not end with '%s'",
+                $firstChar,
+                $expectedClose,
+            );
+            return false;
+        }
+
+        $sizeMb = round($fileSize / (1024 * 1024), 1);
+        $this->_warnings[] = "Large file ({$sizeMb} MB) — only start/end structure validated, full JSON parsing skipped";
+
+        return true;
     }
 
     /**

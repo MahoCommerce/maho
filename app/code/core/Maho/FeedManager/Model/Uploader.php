@@ -312,6 +312,9 @@ class Maho_FeedManager_Model_Uploader
 
     /**
      * Upload via Facebook/Meta Catalog API
+     *
+     * Uses streaming multipart upload via Symfony Mime to avoid
+     * loading the entire feed file into memory.
      */
     protected function _uploadFacebookApi(string $localPath): bool
     {
@@ -322,25 +325,23 @@ class Maho_FeedManager_Model_Uploader
             throw new InvalidArgumentException('Facebook API configuration incomplete');
         }
 
-        // Read feed content
-        $feedContent = file_get_contents($localPath);
-        if ($feedContent === false) {
-            throw new RuntimeException('Failed to read feed file');
-        }
-
         // Facebook Catalog API endpoint for feed upload
         $url = "https://graph.facebook.com/v18.0/{$catalogId}/product_feed";
+
+        // Build multipart form with streaming file part (no full file_get_contents)
+        $formData = new \Symfony\Component\Mime\Part\Multipart\FormDataPart([
+            'update_type' => 'CREATE_OR_UPDATE',
+            'file' => \Symfony\Component\Mime\Part\DataPart::fromPath($localPath),
+        ]);
+
+        $headers = $formData->getPreparedHeaders()->toArray();
+        $headers['Authorization'] = 'Bearer ' . $accessToken;
 
         $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 300]);
 
         $response = $client->request('POST', $url, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $accessToken,
-            ],
-            'body' => [
-                'update_type' => 'CREATE_OR_UPDATE',
-                'file' => $feedContent,
-            ],
+            'headers' => $headers,
+            'body' => $formData->bodyToIterable(),
         ]);
 
         $statusCode = $response->getStatusCode();
