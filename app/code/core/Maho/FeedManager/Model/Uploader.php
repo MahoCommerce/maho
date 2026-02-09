@@ -194,13 +194,16 @@ class Maho_FeedManager_Model_Uploader
             $privateKey = $this->_config['private_key'] ?? '';
             // Write private key to temp file
             $keyFile = tempnam(sys_get_temp_dir(), 'sftp_key_');
-            file_put_contents($keyFile, $privateKey);
-            chmod($keyFile, 0600);
+            try {
+                file_put_contents($keyFile, $privateKey);
+                chmod($keyFile, 0600);
 
-            // Note: For key-only auth, public key file is often not required by server
-            /** @phpstan-ignore argument.type */
-            $auth = ssh2_auth_pubkey_file($connection, $username, null, $keyFile);
-            unlink($keyFile);
+                // Note: For key-only auth, public key file is often not required by server
+                /** @phpstan-ignore argument.type */
+                $auth = ssh2_auth_pubkey_file($connection, $username, null, $keyFile);
+            } finally {
+                @unlink($keyFile);
+            }
         } else {
             $password = $this->_config['password'] ?? '';
             $auth = ssh2_auth_password($connection, $username, $password);
@@ -456,12 +459,15 @@ class Maho_FeedManager_Model_Uploader
                     return ['success' => false, 'message' => 'Private key is required for key authentication'];
                 }
                 $keyFile = tempnam(sys_get_temp_dir(), 'sftp_key_');
-                file_put_contents($keyFile, $privateKey);
-                chmod($keyFile, 0600);
+                try {
+                    file_put_contents($keyFile, $privateKey);
+                    chmod($keyFile, 0600);
 
-                /** @phpstan-ignore argument.type (null pubkey file works for key-only auth) */
-                $authenticated = @ssh2_auth_pubkey_file($connection, $username, null, $keyFile);
-                @unlink($keyFile);
+                    /** @phpstan-ignore argument.type (null pubkey file works for key-only auth) */
+                    $authenticated = @ssh2_auth_pubkey_file($connection, $username, null, $keyFile);
+                } finally {
+                    @unlink($keyFile);
+                }
             } else {
                 $password = $this->_config['password'] ?? '';
                 $authenticated = @ssh2_auth_password($connection, $username, $password);
