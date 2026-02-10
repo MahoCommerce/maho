@@ -114,6 +114,22 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        // Verify the quote belongs to the current customer or session
+        $quoteItem = Mage::getModel('sales/quote_item')->load($option->getItemId());
+        $quote = Mage::getModel('sales/quote')->load($quoteItem->getQuoteId());
+        $customerSession = Mage::getSingleton('customer/session');
+        $checkoutQuoteId = Mage::getSingleton('checkout/session')->getQuoteId();
+
+        if ($quote->getCustomerId()) {
+            if (!$customerSession->isLoggedIn() || $quote->getCustomerId() != $customerSession->getCustomerId()) {
+                $this->_forward('noRoute');
+                return;
+            }
+        } elseif ($quote->getId() != $checkoutQuoteId) {
+            $this->_forward('noRoute');
+            return;
+        }
+
         $optionId = null;
         if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
             $optionId = str_replace(Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX, '', $option->getCode());

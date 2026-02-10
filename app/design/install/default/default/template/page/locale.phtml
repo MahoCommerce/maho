@@ -19,7 +19,7 @@
     <?= $this->getMessagesBlock()->toHtml() ?>
 </div>
 
-<form action="<?= $this->getPostUrl() ?>" method="get" id="form-validate">
+<form action="<?= $this->getPostUrl() ?>" method="post" id="form-validate">
 <div class="form-list">
     <ul>
         <li>
@@ -36,6 +36,59 @@
         </li>
     </ul>
 </div>
+
+<?php if ($this->needsLocalization()): ?>
+<div class="localization-actions">
+    <h4 class="localization-heading"><?= $this->__('Localization Options') ?></h4>
+
+    <div class="localization-action">
+        <div class="localization-action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+        </div>
+        <div class="localization-action-content">
+            <strong><?= $this->__('Import regions/states for %s', $this->escapeHtml($this->getCountryName())) ?></strong>
+            <span><?= $this->__('Adds states and provinces to address forms') ?></span>
+        </div>
+        <div class="localization-action-status">
+            <label class="localization-toggle">
+                <input type="checkbox" name="localization[import_regions]" value="1" checked>
+                <span class="localization-toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <?php if ($this->canInstallLanguagePack()): ?>
+    <div class="localization-action">
+        <div class="localization-action-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+        </div>
+        <div class="localization-action-content">
+            <strong><?= $this->__('Install %s language pack', $this->escapeHtml($this->getLanguageName())) ?></strong>
+            <span><?= $this->escapeHtml($this->getLanguagePackName()) ?></span>
+        </div>
+        <div class="localization-action-status">
+            <label class="localization-toggle">
+                <input type="checkbox" name="localization[install_langpack]" value="1" checked>
+                <span class="localization-toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+    <?php elseif ($this->hasLanguagePack()): ?>
+    <div class="langpack-notice">
+        <p><?= $this->__('To complete localization, run the following command:') ?></p>
+        <code><?= $this->escapeHtml($this->getLanguagePackCommand()) ?></code>
+    </div>
+    <?php endif; ?>
+</div>
+<?php endif; ?>
+
 <div class="button-set">
     <p class="required">* <?= $this->__('Required Fields') ?></p>
     <button class="form-button" type="submit"><span><?= $this->__('Continue') ?></span></button>

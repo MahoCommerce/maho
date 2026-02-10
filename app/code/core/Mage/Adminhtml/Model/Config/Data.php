@@ -257,7 +257,6 @@ class Mage_Adminhtml_Model_Config_Data extends \Maho\DataObject
             $session = Mage::getSingleton('admin/session');
             $resourceLookup = "admin/system/config/{$section}";
             if ($session->getData('acl') instanceof Mage_Admin_Model_Acl) {
-                /** @var Mage_Admin_Model_Acl $acl */
                 $acl = $session->getData('acl');
                 $resource = $acl->getResource($resourceLookup);
                 return $session->isAllowed($resource->getResourceId());
