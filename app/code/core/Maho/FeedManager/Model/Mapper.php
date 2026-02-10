@@ -147,7 +147,7 @@ class Maho_FeedManager_Model_Mapper
             ->addFieldToFilter('platform', $this->_feed->getPlatform());
 
         foreach ($collection as $mapping) {
-            $this->_categoryMappings[$mapping->getCategoryId()] = $mapping->getPlatformCategory();
+            $this->_categoryMappings[$mapping->getCategoryId()] = $mapping->getPlatformCategoryId();
         }
     }
 
@@ -758,7 +758,7 @@ class Maho_FeedManager_Model_Mapper
             foreach ($collection as $mapping) {
                 $catId = $mapping->getCategoryId();
                 $categoryIds[] = $catId;
-                $mappingData[$catId] = $mapping->getPlatformCategoryPath();
+                $mappingData[$catId] = $mapping->getPlatformCategoryId();
             }
 
             // Load category depths in a single query instead of per-product

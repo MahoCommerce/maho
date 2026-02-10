@@ -744,6 +744,10 @@ class Maho_FeedManager_Model_Generator
             $collection->addAttributeToFilter('type_id', ['in' => $types]);
         }
 
+        // Always exclude products with zero final price (invalid for any feed)
+        $collection->addPriceData();
+        $collection->getSelect()->where('price_index.final_price > 0');
+
         $collection->setPageSize($limit);
         $collection->setCurPage(1);
 

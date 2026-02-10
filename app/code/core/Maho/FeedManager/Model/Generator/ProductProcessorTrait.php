@@ -47,6 +47,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         // Apply product type filter
         $this->_applyProductTypeFilter($collection);
 
+        // Always exclude products with zero final price (invalid for any feed)
+        $collection->addPriceData();
+        $collection->getSelect()->where('price_index.final_price > 0');
+
         // Collect validated attributes from Rule conditions
         $conditions = $this->_feed->getConditions();
         if (method_exists($conditions, 'collectValidatedAttributes')) {
