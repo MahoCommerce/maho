@@ -244,7 +244,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         "</div>" +
                         "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
                         "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('Transformers') . '</label>" +
-                        "<button type=\"button\" class=\"scalable\" onclick=\"XmlBuilder.openTransformers(\'" + path + "\')\"><span>" + (node.transformers ? node.transformers.split("|").length + " transforms" : "+ Add") + "</span></button>" +
+                        "<button type=\"button\" class=\"scalable\" onclick=\"XmlBuilder.openTransformers(\'" + path + "\')\"><span>" + (node.transformers ? (function(n) { return n + (n === 1 ? " transformer" : " transformers"); })(node.transformers.split("|").length) : "+ Add") + "</span></button>" +
                         "</div>";
                 } else {
                     html += "<p style=\"color: #666; font-size: 11px;\">' . $this->__('This is a group element. Add child elements using the + Child Element button below the tree.') . '</p>";

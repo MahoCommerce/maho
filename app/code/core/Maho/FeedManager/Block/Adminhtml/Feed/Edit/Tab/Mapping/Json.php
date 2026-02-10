@@ -235,7 +235,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                         "</div>" +
                         "<div style=\"margin-bottom: 15px;\">" +
                         "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Transformers') . '</label>" +
-                        "<button type=\"button\" class=\"scalable\" onclick=\"JsonBuilder.openTransformers(\'" + path + "\')\"><span>" + (node.transformers ? node.transformers.split("|").length + " transforms" : "+ Add") + "</span></button>" +
+                        "<button type=\"button\" class=\"scalable\" onclick=\"JsonBuilder.openTransformers(\'" + path + "\')\"><span>" + (node.transformers ? (function(n) { return n + (n === 1 ? " transformer" : " transformers"); })(node.transformers.split("|").length) : "+ Add") + "</span></button>" +
                         "</div>";
                 }
 
