@@ -1135,7 +1135,7 @@
         display: block;
         width: 100%;
         text-align: left;
-        padding: 0 0 5px 0;
+        padding: 0 0 5px 0 !important;
         font-weight: 600;
 
         label {
