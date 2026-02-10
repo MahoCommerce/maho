@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -295,6 +295,20 @@ final class ProductProvider implements ProviderInterface
             ];
         }
 
+        // Extract attribute filters — REST uses attr_ prefix, GraphQL uses JSON string
+        $attributeFilters = [];
+        if (!empty($requestFilters['attributeFilters'])) {
+            $decoded = json_decode($requestFilters['attributeFilters'], true);
+            if (is_array($decoded)) {
+                $attributeFilters = $decoded;
+            }
+        }
+        foreach ($requestFilters as $key => $value) {
+            if (str_starts_with($key, 'attr_') && $value !== '') {
+                $attributeFilters[substr($key, 5)] = $value;
+            }
+        }
+
         $result = $this->getProductService()->searchProducts(
             query: $search,
             page: $page,
@@ -303,6 +317,7 @@ final class ProductProvider implements ProviderInterface
             sort: $sort,
             usePosIndex: false,
             storeId: StoreContext::getStoreId(),
+            attributeFilters: $attributeFilters,
         );
 
         // Collect product IDs for batch operations

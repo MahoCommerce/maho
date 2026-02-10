@@ -76,3 +76,6 @@ services:
     Maho\ApiPlatform\State\Provider\ShipmentProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\ShipmentProvider' }
+    Maho\ApiPlatform\State\Provider\LayeredFilterProvider:
+        tags:
+            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\LayeredFilterProvider' }
