@@ -861,15 +861,6 @@
     min-width: 200px;
 }
 
-.fm-platform-badge {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 8px;
-    background: var(--fm-info-bg);
-    color: var(--fm-info-text);
-    border-radius: var(--fm-radius-sm);
-}
-
 .fm-panels-container {
     display: flex;
     gap: 0;
@@ -1159,6 +1150,24 @@
 
     .form-list .note {
         max-width: 100%;
+    }
+
+    /* Item Tag: inline label + input */
+    tr:has(#mapping_xml_item_tag) {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+
+        td.label {
+            display: table-cell;
+            width: auto;
+            padding: 0;
+            white-space: nowrap;
+        }
+
+        td.value {
+            flex: 1;
+        }
     }
 
     /* Hide empty labels for builder rows */

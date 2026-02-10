@@ -43,7 +43,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     <option value="">' . $this->__('Load Preset...') . '</option>
                     ' . $platformOptions . '
                 </select>
-                <span id="xml-platform-badge" class="fm-platform-badge"' . ($feed->getPlatform() && $feed->getPlatform() !== 'custom' ? '' : ' style="display:none"') . '>' . ucfirst($feed->getPlatform() ?: '') . '</span>
                 <button type="button" class="scalable" onclick="XmlBuilder.showImportModal()">
                     <span>' . $this->__('Import XML') . '</span>
                 </button>
@@ -98,10 +97,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             previewUrl: "' . $this->getUrl('*/*/xmlPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
             feedId: ' . (int) $feed->getId() . ',
+            currentPlatform: ' . Mage::helper('core')->jsonEncode($feed->getPlatform() ?: '') . ',
 
             init: function() {
                 if (!this.structure || !Array.isArray(this.structure) || this.structure.length === 0) {
                     this.structure = [];
+                }
+                if (this.currentPlatform) {
+                    var sel = document.getElementById("xml-preset-select");
+                    if (sel) sel.value = this.currentPlatform;
                 }
                 this.render();
             },
@@ -380,7 +384,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 // Confirm before overwriting existing structure
                 if (this.structure && this.structure.length > 0) {
                     if (!confirm("Loading a preset will replace your current XML structure. Continue?")) {
-                        document.getElementById("xml-preset-select").value = "";
+                        document.getElementById("xml-preset-select").value = this.currentPlatform || "";
                         return;
                     }
                 }
@@ -410,9 +414,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 })
                 .catch(function(err) {
                     alert("Error loading preset: " + err.message);
+                    document.getElementById("xml-preset-select").value = self.currentPlatform || "";
                 });
-
-                document.getElementById("xml-preset-select").value = "";
             },
 
             updatePlatform: function(platform) {
@@ -420,11 +423,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 if (platformField) {
                     platformField.value = platform;
                 }
-                var badge = document.getElementById("xml-platform-badge");
-                if (badge) {
-                    badge.textContent = platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : "";
-                    badge.style.display = platform ? "inline-block" : "none";
-                }
+                this.currentPlatform = platform;
             },
 
             showImportModal: function() {

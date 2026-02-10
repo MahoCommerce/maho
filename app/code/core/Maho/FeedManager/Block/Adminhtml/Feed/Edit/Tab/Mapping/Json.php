@@ -43,7 +43,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                     <option value="">' . $this->__('Load Preset...') . '</option>
                     ' . $platformOptions . '
                 </select>
-                <span id="json-platform-badge" class="fm-platform-badge"' . ($feed->getPlatform() && $feed->getPlatform() !== 'custom' ? '' : ' style="display:none"') . '>' . ucfirst($feed->getPlatform() ?: '') . '</span>
                 <button type="button" class="scalable" onclick="JsonBuilder.showImportModal()">
                     <span>' . $this->__('Import JSON') . '</span>
                 </button>
@@ -101,10 +100,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
             previewUrl: "' . $this->getUrl('*/*/jsonPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
             feedId: ' . (int) $feed->getId() . ',
+            currentPlatform: ' . Mage::helper('core')->jsonEncode($feed->getPlatform() ?: '') . ',
 
             init: function() {
                 if (!this.structure || Object.keys(this.structure).length === 0) {
                     this.structure = {};
+                }
+                if (this.currentPlatform) {
+                    var sel = document.getElementById("json-preset-select");
+                    if (sel) sel.value = this.currentPlatform;
                 }
                 this.render();
             },
@@ -383,7 +387,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 );
                 if (hasContent) {
                     if (!confirm("Loading a preset will replace your current JSON structure. Continue?")) {
-                        document.getElementById("json-preset-select").value = "";
+                        document.getElementById("json-preset-select").value = this.currentPlatform || "";
                         return;
                     }
                 }
@@ -412,9 +416,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 })
                 .catch(function(err) {
                     alert("Error loading preset: " + err.message);
+                    document.getElementById("json-preset-select").value = self.currentPlatform || "";
                 });
-
-                document.getElementById("json-preset-select").value = "";
             },
 
             updatePlatform: function(platform) {
@@ -422,11 +425,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 if (platformField) {
                     platformField.value = platform;
                 }
-                var badge = document.getElementById("json-platform-badge");
-                if (badge) {
-                    badge.textContent = platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : "";
-                    badge.style.display = platform ? "inline-block" : "none";
-                }
+                this.currentPlatform = platform;
             },
 
             showImportModal: function() {

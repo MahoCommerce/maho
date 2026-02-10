@@ -37,7 +37,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                     <option value="">' . $this->__('Load Preset...') . '</option>
                     ' . $platformOptions . '
                 </select>
-                <span id="csv-platform-badge" class="fm-platform-badge"' . ($feed->getPlatform() && $feed->getPlatform() !== 'custom' ? '' : ' style="display:none"') . '>' . ucfirst($feed->getPlatform() ?: '') . '</span>
                 <button type="button" class="scalable" onclick="CsvBuilder.showImportModal()">
                     <span>' . $this->__('Import CSV') . '</span>
                 </button>
@@ -98,8 +97,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             previewUrl: "' . $this->getUrl('*/*/csvPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
             feedId: ' . (int) $feed->getId() . ',
+            currentPlatform: ' . Mage::helper('core')->jsonEncode($feed->getPlatform() ?: '') . ',
 
             init: function() {
+                if (this.currentPlatform) {
+                    var sel = document.getElementById("csv-preset-select");
+                    if (sel) sel.value = this.currentPlatform;
+                }
                 this.render();
             },
 
@@ -268,7 +272,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 // Confirm before overwriting existing mappings
                 if (this.columns && this.columns.length > 0) {
                     if (!confirm("Loading a preset will replace your current column mappings. Continue?")) {
-                        document.getElementById("csv-preset-select").value = "";
+                        document.getElementById("csv-preset-select").value = this.currentPlatform || "";
                         return;
                     }
                 }
@@ -295,9 +299,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 })
                 .catch(function(err) {
                     alert("Error loading preset: " + err.message);
+                    document.getElementById("csv-preset-select").value = self.currentPlatform || "";
                 });
-
-                document.getElementById("csv-preset-select").value = "";
             },
 
             updatePlatform: function(platform) {
@@ -305,11 +308,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 if (platformField) {
                     platformField.value = platform;
                 }
-                var badge = document.getElementById("csv-platform-badge");
-                if (badge) {
-                    badge.textContent = platform ? platform.charAt(0).toUpperCase() + platform.slice(1) : "";
-                    badge.style.display = platform ? "inline-block" : "none";
-                }
+                this.currentPlatform = platform;
             },
 
             showImportModal: function() {
