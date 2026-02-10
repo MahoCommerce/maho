@@ -4,8 +4,6 @@ title: FeedManager User Guide
 
 # Maho FeedManager User Guide
 
-**Version 1.11**
-
 ---
 
 ## 1. Introduction
@@ -19,12 +17,12 @@ Welcome to **Maho FeedManager** - a powerful module for exporting your product c
 | **Google Shopping** | XML (Atom) |
 | **Google Local Inventory** | XML or CSV |
 | **Facebook / Meta** | XML or CSV |
-| **Bing Shopping** | XML |
-| **Pinterest** | XML |
+| **Bing Shopping** | XML or CSV |
+| **Pinterest** | XML or CSV |
 | **Idealo** | CSV (EU markets) |
 | **Trovaprezzi** | XML (Italy) |
-| **OpenAI Commerce** | JSONL |
-| **Custom** | XML, CSV, or JSON |
+| **OpenAI Commerce** | JSONL or CSV |
+| **Custom** | XML, CSV, JSON, or JSONL |
 
 ### Key Features
 
@@ -61,6 +59,7 @@ Go to **System > Configuration > Catalog > Feed Manager** to configure:
 | Output Directory | Where feed files are saved (relative to `media/`) | `feeds` |
 | Batch Size | Products processed per batch (lower = less memory) | 500 |
 | Log Retention (Days) | How long to keep generation logs | 30 |
+| Error Threshold (%) | Max percentage of products that can fail before aborting generation. Set to 0 to disable. | 10 |
 
 ---
 
@@ -73,22 +72,21 @@ Click **"Add New Feed"** and fill in the General tab:
 | Field | Description |
 |---|---|
 | Feed Name | A friendly name (e.g., "Google Shopping - Main Store") |
-| Platform | Select your target platform - this pre-configures required fields |
+| Feed Template | Combined platform and format selector (e.g., "Google Shopping - XML") |
 | Store View | Which store's products and prices to export |
-| File Format | XML, CSV, or JSON |
 | Filename | Output filename (without extension) |
+| Enabled | Turn the feed on or off |
+
+The General tab also includes **Schedule**, **Upload Settings** (destination, auto-upload, gzip compression), and **Notification** settings.
 
 ### Step 2: Product Selection
 
 In the **Filters** tab, configure which products to include:
 
-- **Configurable Mode**:
-    - *Simple Products Only* - Export only simple products
-    - *Children Only* - Export configurable children with item_group_id linking
-    - *Both* - Export parent configurables and their children
 - **Exclude Disabled** - Skip disabled products
 - **Exclude Out of Stock** - Skip products with no stock
-- **Condition Groups** - Advanced filtering (see [Product Filtering](#10-product-filtering))
+- **Product Types** - Select which product types to include (simple, configurable, grouped, bundle, virtual, downloadable)
+- **Product Conditions** - Standard rule conditions for advanced filtering (see [Product Filtering](#10-product-filtering))
 
 ### Step 3: Attribute Mapping
 
@@ -196,7 +194,7 @@ When exporting configurable product children, you often need data from the paren
     | item_group_id | N/A | Automatically set to parent's entity_id |
 
 !!! tip "Item Group ID"
-    When using "Children Only" mode, FeedManager automatically adds `item_group_id` to link variants together. This tells platforms like Google Shopping that these products are variations of the same item.
+    When exporting configurable product children, FeedManager automatically adds `item_group_id` to link variants together. This tells platforms like Google Shopping that these products are variations of the same item.
 
 ---
 
@@ -285,18 +283,19 @@ A Dynamic Rule consists of multiple **output rows**, evaluated top-to-bottom. Th
 | `identifier_exists` | GTIN/MPN presence check | "yes" or "no" |
 | `sale_price` | Special price when valid | special_price value or empty |
 
-### Available Operators
+### Conditions
 
-| Operator | Description | Example |
-|---|---|---|
-| `eq` | Equals | status eq "1" |
-| `neq` | Not equals | type_id neq "bundle" |
-| `gt` / `lt` | Greater/Less than | qty gt "0" |
-| `gteq` / `lteq` | Greater/Less than or equal | price gteq "10" |
-| `in` / `nin` | In list / Not in list | category_ids in "5,10,15" |
-| `like` / `nlike` | Contains / Not contains | name like "sale" |
-| `null` / `notnull` | Is empty / Has value | gtin notnull |
-| `gt_attr` / `lt_attr` | Compare to another attribute | price gt_attr "cost_price" |
+Dynamic Rules use the standard Maho rule conditions widget -- the same interface used by Catalog Price Rules and Cart Price Rules. Each rule's **Conditions** tab lets you build conditions using a visual, point-and-click interface.
+
+Available condition operators include:
+
+| Operator | Description |
+|---|---|
+| is / is not | Exact match |
+| equals or greater than / equals or less than | Numeric comparison |
+| greater than / less than | Strict numeric comparison |
+| contains / does not contain | Substring match |
+| is one of / is not one of | Match against a list of values |
 
 ### Creating Custom Rules
 
@@ -305,8 +304,8 @@ A Dynamic Rule consists of multiple **output rows**, evaluated top-to-bottom. Th
 
     | Row | Condition | Output Type | Output Value |
     |---|---|---|---|
-    | 1 | price > 500 | Static | premium |
-    | 2 | price > 100 | Static | mid-range |
+    | 1 | price greater than 500 | Static | premium |
+    | 2 | price greater than 100 | Static | mid-range |
     | 3 | (default) | Static | budget |
 
 !!! example "Limited Stock Warning"
@@ -314,8 +313,8 @@ A Dynamic Rule consists of multiple **output rows**, evaluated top-to-bottom. Th
 
     | Row | Conditions | Output |
     |---|---|---|
-    | 1 | qty > 10 | "in stock" |
-    | 2 | qty > 0 AND qty <= 10 | "limited availability" |
+    | 1 | qty greater than 10 | "in stock" |
+    | 2 | qty equals or less than 10, qty greater than 0 | "limited availability" |
     | 3 | (default) | "out of stock" |
 
 !!! example "Image Fallback"
@@ -323,19 +322,9 @@ A Dynamic Rule consists of multiple **output rows**, evaluated top-to-bottom. Th
 
     | Row | Condition | Output Type | Output |
     |---|---|---|---|
-    | 1 | google_image notnull | Attribute | google_image |
-    | 2 | facebook_image notnull | Attribute | facebook_image |
+    | 1 | google_image is not empty | Attribute | google_image |
+    | 2 | facebook_image is not empty | Attribute | facebook_image |
     | 3 | (default) | Attribute | image |
-
-!!! example "Profitable Products Flag"
-    Using attribute comparison to check if price is greater than cost:
-
-    | Row | Condition | Output |
-    |---|---|---|
-    | 1 | price **gt_attr** cost_price | "profitable" |
-    | 2 | (default) | "break-even" |
-
-    The `gt_attr` operator compares the price attribute directly against the cost_price attribute.
 
 ---
 
@@ -345,16 +334,46 @@ Transformers modify attribute values before they're added to your feed. You can 
 
 ### Available Transformers
 
+Transformers are grouped by category in the UI.
+
+**Text Formatting:**
+
 | Transformer | Description | Options |
 |---|---|---|
-| `strip_tags` | Remove HTML tags | allowed_tags (optional) |
-| `truncate` | Limit text length | max_length, suffix, break_words |
-| `format_price` | Format as currency | decimals, currency, include_currency |
-| `map_values` | Replace values | mapping (key=value pairs) |
-| `default_value` | Fallback if empty | default |
-| `uppercase` | Convert to UPPERCASE | - |
-| `lowercase` | Convert to lowercase | - |
-| `combine_fields` | Merge multiple fields | template |
+| `uppercase` | Convert to UPPERCASE | -- |
+| `lowercase` | Convert to lowercase | -- |
+| `capitalise` | Capitalise text | mode (title, first, sentence) |
+| `strip_tags` | Remove HTML tags | allowed_tags, decode_entities |
+| `truncate` | Limit text length | max_length, suffix, word_boundary |
+| `replace` | Find & replace text | search, replace, is_regex, case_sensitive |
+
+**Values & Defaults:**
+
+| Transformer | Description | Options |
+|---|---|---|
+| `default_value` | Fallback if empty | default, empty_includes_zero |
+| `map_values` | Replace values by mapping | mapping (key=value pairs), default, case_sensitive |
+| `conditional` | Output different values based on conditions | condition_field, operator, compare_value, true_value, false_value |
+
+**Numbers & Prices:**
+
+| Transformer | Description | Options |
+|---|---|---|
+| `format_price` | Format as currency | currency, decimals, decimal_separator, thousands_separator, skip_if_empty |
+| `round` | Round numeric values | precision, mode (round, ceil, floor) |
+
+**Dates & URLs:**
+
+| Transformer | Description | Options |
+|---|---|---|
+| `format_date` | Format date/time values | output_format, input_format, timezone |
+| `url_encode` | Encode values for URLs | encode_type (path, query, full) |
+
+**Advanced:**
+
+| Transformer | Description | Options |
+|---|---|---|
+| `prepend_append` | Add text before/after value | prepend, append, skip_if_empty |
 
 ### Transformer Syntax
 
@@ -369,14 +388,14 @@ Chain transformers using the pipe character: `transformer1|transformer2:option=v
 
     This removes HTML tags and limits to 5000 characters with "..." suffix.
 
-!!! example "Price Markup for Marketplace"
-    Add 10% markup for a specific marketplace:
+!!! example "Format Price for Google Shopping"
+    Format a price with 2 decimals and currency suffix:
 
     ```
-    format_price:decimals=2,multiply=1.10,currency=AUD
+    format_price:decimals=2,currency=AUD
     ```
 
-    **Input:** 100.00 --> **Output:** 110.00 AUD
+    **Input:** 295 --> **Output:** 295.00 AUD
 
 !!! example "Map Stock Status Values"
     Convert numeric stock status to text:
@@ -403,18 +422,34 @@ Chain transformers using the pipe character: `transformer1|transformer2:option=v
     combine_fields:template={{brand}} {{name}}|truncate:max_length=150
     ```
 
-!!! tip "Price Adjustments for Different Channels"
-    Create separate feeds for each marketplace with different price multipliers:
+!!! example "Round and Format a Price"
+    Chain rounding with price formatting:
 
-    - **Google Shopping:** Base price
-    - **eBay:** `format_price:multiply=1.15` (15% markup for fees)
-    - **Amazon:** `format_price:multiply=1.20` (20% markup for fees)
+    ```
+    round:precision=2,mode=ceil|format_price:currency=EUR,decimal_separator=','
+    ```
+
+    **Input:** 29.993 --> **Output:** 30,00 EUR
+
+!!! example "Date Formatting"
+    Format a date for feed output:
+
+    ```
+    format_date:output_format=Y-m-d
+    ```
+
+!!! example "Prepend/Append Text"
+    Add prefix and suffix to a value:
+
+    ```
+    prepend_append:prepend=https://store.com/,append=?utm_source=feed
+    ```
 
 ---
 
 ## 9. Formats & Regional Settings
 
-Each feed has its own formatting and regional settings, configured in the **Feed Content** tab under **Formats & Regional Settings**. These control how prices, numbers, and URLs are formatted in the output.
+Each feed has its own formatting and regional settings, configured in the **Mapping** tab under **Formats & Regional Settings**. These control how prices, numbers, and URLs are formatted in the output.
 
 ### Number Format Presets
 
@@ -474,37 +509,37 @@ Select a preset to quickly configure decimal and thousands separators, or choose
 
 ## 10. Product Filtering
 
-Use condition groups to precisely control which products appear in your feed.
+Use the **Product Conditions** widget in the Filters tab to precisely control which products appear in your feed. This uses the same rule conditions interface as Catalog Price Rules and Cart Price Rules.
 
-### Condition Groups
+### How Conditions Work
 
-Filters use **groups** with **OR** logic between groups, and **AND** logic within a group.
+The conditions widget uses a visual, point-and-click interface:
+
+1. Click the green **+** button to add a new condition
+2. Select a product attribute (e.g., price, category, SKU)
+3. Choose an operator (is, is not, greater than, contains, etc.)
+4. Set the comparison value
+
+Conditions can be nested with **ALL** (AND) or **ANY** (OR) logic using the "If ALL/ANY of these conditions are TRUE" selector.
 
 !!! example "Export Specific Categories with Price Threshold"
-    Include products from category 10 OR category 15, but only if price > $20:
+    **If ALL of these conditions are TRUE:**
 
-    **Group 1:**
-
-    - category_ids IN "10"
-    - AND price > "20"
-
-    **OR**
-
-    **Group 2:**
-
-    - category_ids IN "15"
-    - AND price > "20"
+    - Category **is one of** 10, 15
+    - Price **greater than** 20
 
 ### Common Filter Patterns
 
-| Use Case | Filter Configuration |
+| Use Case | Condition Setup |
 |---|---|
-| Only products with images | image IS NOT EMPTY |
-| Exclude certain brands | brand NOT IN "Brand1,Brand2" |
-| Only visible products | visibility IN "2,4" (Catalog, Both) |
-| Minimum price threshold | price > "10" |
-| In-stock only | is_in_stock = "1" |
-| Specific product types | type_id IN "simple,configurable" |
+| Only products with images | image **is not empty** |
+| Exclude certain brands | brand **is not one of** Brand1, Brand2 |
+| Only visible products | visibility **is one of** Catalog, Catalog/Search |
+| Minimum price threshold | price **greater than** 10 |
+| In-stock only | quantity **greater than** 0 |
+
+!!! tip "Product Types Filter"
+    For filtering by product type, use the dedicated **Product Types** multiselect field in the Filters tab instead of a condition. This provides a cleaner interface for selecting simple, configurable, grouped, bundle, virtual, or downloadable products.
 
 ---
 
@@ -643,7 +678,7 @@ FeedManager provides command-line tools for automation and debugging.
     - Check your filter conditions -- they may be too restrictive
     - Verify "Exclude Disabled" and "Exclude Out of Stock" settings
     - Ensure products exist in the selected store view
-    - Check the Configurable Mode setting
+    - Check the Product Types selection in the Filters tab
 
 !!! warning "Feed generation times out"
     - Reduce batch size in System Configuration
