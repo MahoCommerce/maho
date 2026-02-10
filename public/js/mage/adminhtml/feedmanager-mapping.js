@@ -275,7 +275,7 @@ const TransformerModal = {
             id: 'transformer-modal',
             title: TransformerData.translations.configure_transformers,
             width: 600,
-            okLabel: TransformerData.translations.apply_transformers,
+            okLabel: TransformerData.translations.save,
             onOk: function() {
                 self.apply();
             },
@@ -303,14 +303,7 @@ const TransformerModal = {
     },
 
     getContent: function() {
-        return '<div class="transformer-pipeline">' +
-            '<span class="pipeline-label">' + TransformerData.translations.input + '</span>' +
-            '<span class="pipeline-arrow">→</span>' +
-            '<span class="pipeline-label">' + TransformerData.translations.transformers + '</span>' +
-            '<span class="pipeline-arrow">→</span>' +
-            '<span class="pipeline-label">' + TransformerData.translations.output + '</span>' +
-        '</div>' +
-        '<div id="transformer-chain-list" class="transformer-chain-list">' +
+        return '<div id="transformer-chain-list" class="transformer-chain-list">' +
             '<p class="no-transformers">' + TransformerData.translations.no_transformers + '</p>' +
         '</div>' +
         '<div class="transformer-add-section">' +
@@ -386,12 +379,12 @@ const TransformerModal = {
             html += '<span class="transformer-item-name">' + def.name + '</span>';
             html += '<div class="transformer-item-actions">';
             if (i > 0) {
-                html += '<button type="button" onclick="TransformerModal.moveUp(' + i + '); event.stopPropagation();" title="Move Up">↑</button>';
+                html += '<button type="button" onclick="TransformerModal.moveUp(' + i + '); event.stopPropagation();" title="Move Up">' + TransformerData.icons.arrow_up + '</button>';
             }
             if (i < this.chain.length - 1) {
-                html += '<button type="button" onclick="TransformerModal.moveDown(' + i + '); event.stopPropagation();" title="Move Down">↓</button>';
+                html += '<button type="button" onclick="TransformerModal.moveDown(' + i + '); event.stopPropagation();" title="Move Down">' + TransformerData.icons.arrow_down + '</button>';
             }
-            html += '<button type="button" class="remove-btn" onclick="TransformerModal.remove(' + i + '); event.stopPropagation();" title="Remove">×</button>';
+            html += '<button type="button" class="remove-btn" onclick="TransformerModal.remove(' + i + '); event.stopPropagation();" title="Remove">' + TransformerData.icons.x + '</button>';
             html += '</div></div>';
 
             // Options
@@ -427,7 +420,7 @@ const TransformerModal = {
                     }
 
                     if (opt.note) {
-                        html += '<div class="note">' + opt.note + '</div>';
+                        html += '<div class="note">' + escapeHtml(opt.note) + '</div>';
                     }
                     html += '</div>';
                 }

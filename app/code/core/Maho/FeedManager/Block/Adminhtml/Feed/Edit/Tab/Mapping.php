@@ -264,12 +264,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
         $data = Maho_FeedManager_Model_Transformer::getTransformerDataForJs();
         $data['translations'] = [
             'configure_transformers' => $this->__('Configure Transformers'),
-            'apply_transformers' => $this->__('Apply Transformers'),
-            'input' => $this->__('Input'),
-            'transformers' => $this->__('Transformers'),
-            'output' => $this->__('Output'),
+            'save' => $this->__('Save'),
             'no_transformers' => $this->__('No transformers added. Click "Add Transformer" to start.'),
             'add_transformer' => $this->__('+ Add Transformer'),
+        ];
+        $data['icons'] = [
+            'arrow_up' => $this->getIconSvg('arrow-up'),
+            'arrow_down' => $this->getIconSvg('arrow-down'),
+            'x' => $this->getIconSvg('x'),
         ];
 
         $transformerData = Mage::helper('core')->jsonEncode($data);

@@ -26,7 +26,6 @@ class Maho_FeedManager_Model_Transformer_Capitalise extends Maho_FeedManager_Mod
                 'first' => 'First Letter Only',
                 'sentence' => 'Sentence Case',
             ],
-            'note' => 'How to capitalise the text',
         ],
     ];
 
