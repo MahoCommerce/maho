@@ -76,14 +76,14 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
             'required' => true,
             'description' => 'Stock availability (Y/N or quantity)',
         ],
+        'Categories' => [
+            'label' => 'Categories',
+            'required' => true,
+            'description' => 'Product category path',
+        ],
     ];
 
     protected array $_optionalAttributes = [
-        'Category' => [
-            'label' => 'Category',
-            'required' => false,
-            'description' => 'Product category path',
-        ],
         'PartNumber' => [
             'label' => 'Part Number',
             'required' => false,
@@ -119,6 +119,16 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
             'required' => false,
             'description' => 'Product color',
         ],
+        'Image2' => [
+            'label' => 'Image 2',
+            'required' => false,
+            'description' => 'Second product image URL',
+        ],
+        'Image3' => [
+            'label' => 'Image 3',
+            'required' => false,
+            'description' => 'Third product image URL',
+        ],
     ];
 
     protected array $_defaultMappings = [
@@ -134,10 +144,13 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
         'EanCode' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
         'PartNumber' => ['source_type' => 'attribute', 'source_value' => 'mpn'],
         'Stock' => ['source_type' => 'rule', 'source_value' => 'stock_status'],
-        'Category' => ['source_type' => 'attribute', 'source_value' => 'category_path'],
+        'Categories' => ['source_type' => 'attribute', 'source_value' => 'category_path'],
+        'Weight' => ['source_type' => 'attribute', 'source_value' => 'weight'],
         'DeliveryTime' => ['source_type' => 'static', 'source_value' => '2-5 giorni lavorativi'],
         'Color' => ['source_type' => 'attribute', 'source_value' => 'color'],
         'Size' => ['source_type' => 'attribute', 'source_value' => 'size'],
+        'Image2' => ['source_type' => 'static', 'source_value' => ''],
+        'Image3' => ['source_type' => 'static', 'source_value' => ''],
     ];
 
     #[\Override]
@@ -174,8 +187,8 @@ class Maho_FeedManager_Model_Platform_Trovaprezzi extends Maho_FeedManager_Model
         $errors = parent::validateProductData($productData);
 
         // Validate EAN format
-        if (!empty($productData['EanCode']) && !preg_match('/^\d{13}$/', $productData['EanCode'])) {
-            $errors[] = 'Invalid EAN code format (must be 13 digits)';
+        if (!empty($productData['EanCode']) && !preg_match('/^\d{8}$|^\d{12,14}$/', $productData['EanCode'])) {
+            $errors[] = 'Invalid EAN/GTIN format (must be 8, 12, 13, or 14 digits)';
         }
 
         // Validate stock value

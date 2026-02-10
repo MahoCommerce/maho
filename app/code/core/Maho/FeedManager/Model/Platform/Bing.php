@@ -91,8 +91,8 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
             'required' => false,
             'description' => 'new, refurbished, used (defaults to new)',
         ],
-        'product_category' => [
-            'label' => 'Product Category',
+        'google_product_category' => [
+            'label' => 'Google Product Category',
             'required' => false,
             'description' => 'Google Product Category ID or path',
         ],
@@ -196,6 +196,11 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
             'required' => false,
             'description' => 'Name of the seller (for marketplaces)',
         ],
+        'ads_redirect' => [
+            'label' => 'Ads Redirect',
+            'required' => false,
+            'description' => 'Tracking URL for click analytics (max 2000 chars)',
+        ],
     ];
 
     protected array $_defaultMappings = [
@@ -213,7 +218,7 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
         'gtin' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
         'mpn' => ['source_type' => 'attribute', 'source_value' => 'mpn'],
         'condition' => ['source_type' => 'static', 'source_value' => 'new'],
-        'product_category' => ['source_type' => 'taxonomy', 'source_value' => 'bing', 'use_parent' => 'if_empty'],
+        'google_product_category' => ['source_type' => 'taxonomy', 'source_value' => 'bing', 'use_parent' => 'if_empty'],
         'product_type' => ['source_type' => 'attribute', 'source_value' => 'category_path', 'use_parent' => 'if_empty'],
         'item_group_id' => ['source_type' => 'attribute', 'source_value' => 'sku', 'use_parent' => 'always'],
         'color' => ['source_type' => 'attribute', 'source_value' => 'color'],
@@ -231,6 +236,7 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
         'custom_label_3' => ['source_type' => 'static', 'source_value' => ''],
         'custom_label_4' => ['source_type' => 'static', 'source_value' => ''],
         'seller_name' => ['source_type' => 'attribute', 'source_value' => 'store_name'],
+        'ads_redirect' => ['source_type' => 'static', 'source_value' => ''],
     ];
 
     #[\Override]
@@ -258,20 +264,21 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
         if (isset($productData['description'])) {
             $productData['description'] = $this->_truncateText(
                 $this->_sanitizeText($productData['description']),
-                5000,
+                10000,
             );
         }
 
+        // Extract currency before formatting prices
+        $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
+        unset($productData['currency']);
+
         // Ensure price has currency
         if (isset($productData['price']) && is_numeric($productData['price'])) {
-            $currency = $productData['currency'] ?? 'USD';
             $productData['price'] = $this->_formatPrice((float) $productData['price'], $currency);
-            unset($productData['currency']);
         }
 
         // Same for sale_price
         if (isset($productData['sale_price']) && is_numeric($productData['sale_price']) && $productData['sale_price'] > 0) {
-            $currency = $productData['currency'] ?? 'USD';
             $productData['sale_price'] = $this->_formatPrice((float) $productData['sale_price'], $currency);
         }
 
@@ -347,6 +354,7 @@ class Maho_FeedManager_Model_Platform_Bing extends Maho_FeedManager_Model_Platfo
     /**
      * Get attributes that need the g: namespace prefix in XML
      */
+    #[\Override]
     public function getNamespacedAttributes(): array
     {
         return array_diff(

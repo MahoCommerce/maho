@@ -125,6 +125,16 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
             'required' => false,
             'description' => 'Product size',
         ],
+        'size_system' => [
+            'label' => 'Size System',
+            'required' => false,
+            'description' => 'Size system used (US, UK, EU, DE, FR, etc.)',
+        ],
+        'size_type' => [
+            'label' => 'Size Type',
+            'required' => false,
+            'description' => 'Cut of clothing (regular, petite, plus, big_and_tall, maternity)',
+        ],
         'gender' => [
             'label' => 'Gender',
             'required' => false,
@@ -238,6 +248,8 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
         'item_group_id' => ['source_type' => 'attribute', 'source_value' => 'sku', 'use_parent' => 'always'],
         'color' => ['source_type' => 'attribute', 'source_value' => 'color'],
         'size' => ['source_type' => 'attribute', 'source_value' => 'size'],
+        'size_system' => ['source_type' => 'static', 'source_value' => ''],
+        'size_type' => ['source_type' => 'static', 'source_value' => ''],
         'gender' => ['source_type' => 'attribute', 'source_value' => 'gender'],
         'age_group' => ['source_type' => 'static', 'source_value' => ''],
         'material' => ['source_type' => 'attribute', 'source_value' => 'material'],
@@ -290,17 +302,28 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
             );
         }
 
+        // Extract currency before formatting prices
+        $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
+        unset($productData['currency']);
+
         // Ensure price has currency
         if (isset($productData['price']) && is_numeric($productData['price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['price'] = $this->_formatPrice((float) $productData['price'], $currency);
-            unset($productData['currency']);
         }
 
         // Same for sale_price
         if (isset($productData['sale_price']) && is_numeric($productData['sale_price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['sale_price'] = $this->_formatPrice((float) $productData['sale_price'], $currency);
+        }
+
+        // Transform gender
+        if (isset($productData['gender'])) {
+            $productData['gender'] = $this->_transformGender($productData['gender']);
+        }
+
+        // Transform age_group
+        if (isset($productData['age_group'])) {
+            $productData['age_group'] = $this->_transformAgeGroup($productData['age_group']);
         }
 
         // Ensure inventory is integer
@@ -317,7 +340,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
         $errors = parent::validateProductData($productData);
 
         // Validate availability values
-        $validAvailability = ['in stock', 'out of stock', 'available for order', 'discontinued'];
+        $validAvailability = ['in stock', 'out of stock', 'available for order', 'discontinued', 'preorder', 'pending'];
         if (isset($productData['availability']) && !in_array($productData['availability'], $validAvailability)) {
             $errors[] = 'Invalid availability value: ' . $productData['availability'];
         }
@@ -362,8 +385,9 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
             'available' => 'in stock',
             'unavailable' => 'out of stock',
             'available for order' => 'available for order',
-            'preorder' => 'available for order',
+            'preorder' => 'preorder',
             'backorder' => 'available for order',
+            'pending' => 'pending',
             'discontinued' => 'discontinued',
             'yes' => 'in stock',
             'no' => 'out of stock',
@@ -376,6 +400,7 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
     /**
      * Get attributes that need the g: namespace prefix (for XML format)
      */
+    #[\Override]
     public function getNamespacedAttributes(): array
     {
         // Facebook XML format uses g: prefix for most attributes
@@ -383,17 +408,5 @@ class Maho_FeedManager_Model_Platform_Facebook extends Maho_FeedManager_Model_Pl
             array_keys($this->getAllAttributes()),
             ['id', 'title', 'link'],
         );
-    }
-
-    /**
-     * Get CSV column headers
-     */
-    public function getCsvHeaders(): array
-    {
-        $headers = [];
-        foreach (array_keys($this->getAllAttributes()) as $code) {
-            $headers[] = $code;
-        }
-        return $headers;
     }
 }

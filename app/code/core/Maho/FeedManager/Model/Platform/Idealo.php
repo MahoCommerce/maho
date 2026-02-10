@@ -39,7 +39,7 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
             'required' => true,
             'description' => 'Product title/name (max 255 characters)',
         ],
-        'category_path' => [
+        'categoryPath' => [
             'label' => 'Category Path',
             'required' => true,
             'description' => 'Product category path (e.g., Electronics > Computers > Laptops)',
@@ -47,7 +47,7 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
         'eans' => [
             'label' => 'EAN',
             'required' => true,
-            'description' => 'European Article Number (13 digits). Multiple values separated by semicolon',
+            'description' => 'European Article Number (8, 12, 13, or 14 digits). Multiple values separated by semicolon',
         ],
         'price' => [
             'label' => 'Price',
@@ -59,19 +59,29 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
             'required' => true,
             'description' => 'Direct link to the product page',
         ],
-        'image_urls' => [
+        'imageUrls' => [
             'label' => 'Image URL',
             'required' => true,
             'description' => 'Main product image URL (max 1MB)',
         ],
-        'delivery_time' => [
+        'delivery' => [
             'label' => 'Delivery Time',
             'required' => true,
-            'description' => 'Delivery time in days or text (e.g., "1-3 Werktage")',
+            'description' => 'Delivery timeframe in working days (e.g., "1-3 Werktage")',
         ],
     ];
 
     protected array $_optionalAttributes = [
+        'fulfillmentType' => [
+            'label' => 'Fulfillment Type',
+            'required' => false,
+            'description' => 'Fulfillment type: PAKETDIENST, Spedition, Download, or Briefversand',
+        ],
+        'checkoutLimitPerPeriod' => [
+            'label' => 'Checkout Limit',
+            'required' => false,
+            'description' => 'Maximum quantity per order',
+        ],
         'hans' => [
             'label' => 'HAN',
             'required' => false,
@@ -82,32 +92,27 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Product description (max 1000 characters)',
         ],
-        'checkout_limit_per_period' => [
-            'label' => 'Checkout Limit',
-            'required' => false,
-            'description' => 'Maximum quantity per order',
-        ],
-        'base_price' => [
+        'basePrice' => [
             'label' => 'Base Price',
             'required' => false,
             'description' => 'Price per unit for comparison (e.g., price per kg)',
         ],
-        'packaging_unit' => [
+        'packagingUnit' => [
             'label' => 'Packaging Unit',
             'required' => false,
             'description' => 'Unit of the packaging (e.g., kg, l, piece)',
         ],
-        'delivery_comment' => [
+        'deliveryComment' => [
             'label' => 'Delivery Comment',
             'required' => false,
             'description' => 'Additional delivery information',
         ],
-        'delivery_cost' => [
-            'label' => 'Delivery Cost',
+        'deliveryCosts' => [
+            'label' => 'Delivery Costs',
             'required' => false,
-            'description' => 'Shipping cost (decimal, no currency)',
+            'description' => 'Shipping cost. For carrier-specific costs, create additional columns named deliveryCosts_dhl, deliveryCosts_hermes, etc.',
         ],
-        'payment_costs' => [
+        'paymentCosts' => [
             'label' => 'Payment Costs',
             'required' => false,
             'description' => 'Additional payment method costs',
@@ -117,17 +122,12 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Is product used/refurbished (true/false)',
         ],
-        'merchant_name' => [
+        'merchantName' => [
             'label' => 'Merchant Name',
             'required' => false,
             'description' => 'Name of the selling merchant',
         ],
-        'fulfillment_type' => [
-            'label' => 'Fulfillment Type',
-            'required' => false,
-            'description' => 'Type of fulfillment (e.g., MERCHANT, AMAZON)',
-        ],
-        'voucher_code' => [
+        'voucherCode' => [
             'label' => 'Voucher Code',
             'required' => false,
             'description' => 'Discount voucher code',
@@ -162,15 +162,40 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Is product a digital download (true/false)',
         ],
-        'energy_efficiency_class' => [
+        'eec' => [
             'label' => 'Energy Efficiency Class',
             'required' => false,
             'description' => 'EU energy label (A+++, A++, A+, A, B, C, D, E, F, G)',
         ],
-        'energy_label_url' => [
+        'energyLabelUrl' => [
             'label' => 'Energy Label URL',
             'required' => false,
             'description' => 'URL to energy label image',
+        ],
+        'checkout' => [
+            'label' => 'Checkout Enabled',
+            'required' => false,
+            'description' => 'Enable Idealo Direktkauf for this product (true/false)',
+        ],
+        'formerPrice' => [
+            'label' => 'Former Price',
+            'required' => false,
+            'description' => 'Strikethrough price for promotional display',
+        ],
+        'deposit' => [
+            'label' => 'Deposit',
+            'required' => false,
+            'description' => 'Deposit amount (Pfand) for applicable products',
+        ],
+        'maxOrderProcessingTime' => [
+            'label' => 'Max Order Processing Time',
+            'required' => false,
+            'description' => 'Maximum processing time before shipment (in days)',
+        ],
+        'freeReturnDays' => [
+            'label' => 'Free Return Days',
+            'required' => false,
+            'description' => 'Number of days for free returns',
         ],
     ];
 
@@ -178,19 +203,26 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
         'sku' => ['source_type' => 'attribute', 'source_value' => 'sku'],
         'brand' => ['source_type' => 'attribute', 'source_value' => 'manufacturer'],
         'title' => ['source_type' => 'attribute', 'source_value' => 'name'],
-        'category_path' => ['source_type' => 'attribute', 'source_value' => 'category_path'],
+        'categoryPath' => ['source_type' => 'attribute', 'source_value' => 'category_path'],
         'eans' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
         'hans' => ['source_type' => 'attribute', 'source_value' => 'mpn'],
         'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
         'url' => ['source_type' => 'attribute', 'source_value' => 'url', 'use_parent' => 'always'],
-        'image_urls' => ['source_type' => 'attribute', 'source_value' => 'image', 'use_parent' => 'if_empty'],
+        'imageUrls' => ['source_type' => 'attribute', 'source_value' => 'image', 'use_parent' => 'if_empty'],
         'description' => ['source_type' => 'attribute', 'source_value' => 'short_description'],
-        'delivery_time' => ['source_type' => 'static', 'source_value' => '2-4 business days'],
-        'delivery_cost' => ['source_type' => 'static', 'source_value' => '0'],
+        'delivery' => ['source_type' => 'static', 'source_value' => '2-4 business days'],
+        'deliveryCosts' => ['source_type' => 'static', 'source_value' => '0'],
         'used' => ['source_type' => 'static', 'source_value' => 'false'],
-        'merchant_name' => ['source_type' => 'attribute', 'source_value' => 'store_name'],
+        'merchantName' => ['source_type' => 'attribute', 'source_value' => 'store_name'],
         'colour' => ['source_type' => 'attribute', 'source_value' => 'color'],
         'size' => ['source_type' => 'attribute', 'source_value' => 'size'],
+        'fulfillmentType' => ['source_type' => 'static', 'source_value' => 'Parcel_Service'],
+        'checkoutLimitPerPeriod' => ['source_type' => 'static', 'source_value' => '5'],
+        'checkout' => ['source_type' => 'static', 'source_value' => 'true'],
+        'formerPrice' => ['source_type' => 'static', 'source_value' => ''],
+        'deposit' => ['source_type' => 'static', 'source_value' => ''],
+        'maxOrderProcessingTime' => ['source_type' => 'static', 'source_value' => ''],
+        'freeReturnDays' => ['source_type' => 'static', 'source_value' => ''],
     ];
 
     #[\Override]
@@ -237,13 +269,13 @@ class Maho_FeedManager_Model_Platform_Idealo extends Maho_FeedManager_Model_Plat
     {
         $errors = parent::validateProductData($productData);
 
-        // Validate EAN format (13 digits)
+        // Validate EAN/GTIN format (8, 12, 13, or 14 digits)
         if (!empty($productData['eans'])) {
             $eans = explode(';', $productData['eans']);
             foreach ($eans as $ean) {
                 $ean = trim($ean);
-                if ($ean && !preg_match('/^\d{13}$/', $ean)) {
-                    $errors[] = 'Invalid EAN format: ' . $ean . ' (must be 13 digits)';
+                if ($ean && !preg_match('/^\d{8}$|^\d{12,14}$/', $ean)) {
+                    $errors[] = 'Invalid EAN/GTIN format for "' . $ean . '" (must be 8, 12, 13, or 14 digits)';
                 }
             }
         }

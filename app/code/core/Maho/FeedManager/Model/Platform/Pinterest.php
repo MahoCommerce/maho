@@ -105,6 +105,11 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
             'required' => false,
             'description' => 'Discounted price (must be lower than regular price)',
         ],
+        'sale_price_effective_date' => [
+            'label' => 'Sale Price Effective Date',
+            'required' => false,
+            'description' => 'Date range for sale price in ISO 8601 format (start/end)',
+        ],
         'additional_image_link' => [
             'label' => 'Additional Image Links',
             'required' => false,
@@ -195,6 +200,11 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
             'required' => false,
             'description' => 'Minimum order for free shipping',
         ],
+        'ad_link' => [
+            'label' => 'Ad Link',
+            'required' => false,
+            'description' => 'Tracking URL for Shopping Ads (overrides link in ads)',
+        ],
     ];
 
     protected array $_defaultMappings = [
@@ -206,6 +216,7 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
         'additional_image_link' => ['source_type' => 'attribute', 'source_value' => 'additional_images_csv', 'use_parent' => 'if_empty'],
         'price' => ['source_type' => 'attribute', 'source_value' => 'price'],
         'sale_price' => ['source_type' => 'attribute', 'source_value' => 'special_price'],
+        'sale_price_effective_date' => ['source_type' => 'static', 'source_value' => ''],
         'availability' => ['source_type' => 'rule', 'source_value' => 'stock_status'],
         'brand' => ['source_type' => 'attribute', 'source_value' => 'manufacturer', 'use_parent' => 'if_empty'],
         'gtin' => ['source_type' => 'attribute', 'source_value' => 'gtin'],
@@ -230,6 +241,7 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
         'adult' => ['source_type' => 'static', 'source_value' => 'no'],
         'free_shipping_label' => ['source_type' => 'static', 'source_value' => ''],
         'free_shipping_limit' => ['source_type' => 'static', 'source_value' => ''],
+        'ad_link' => ['source_type' => 'static', 'source_value' => ''],
     ];
 
     #[\Override]
@@ -261,16 +273,22 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
             );
         }
 
+        // Truncate ID to Pinterest max length
+        if (isset($productData['id'])) {
+            $productData['id'] = $this->_truncateText((string) $productData['id'], 127);
+        }
+
+        // Extract currency before formatting prices
+        $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
+        unset($productData['currency']);
+
         // Ensure price has currency (ISO 4217)
         if (isset($productData['price']) && is_numeric($productData['price'])) {
-            $currency = $productData['currency'] ?? 'USD';
             $productData['price'] = $this->_formatPrice((float) $productData['price'], $currency);
-            unset($productData['currency']);
         }
 
         // Same for sale_price
         if (isset($productData['sale_price']) && is_numeric($productData['sale_price']) && $productData['sale_price'] > 0) {
-            $currency = $productData['currency'] ?? 'USD';
             $productData['sale_price'] = $this->_formatPrice((float) $productData['sale_price'], $currency);
         }
 
@@ -363,6 +381,7 @@ class Maho_FeedManager_Model_Platform_Pinterest extends Maho_FeedManager_Model_P
     /**
      * Get attributes that need the g: namespace prefix in XML
      */
+    #[\Override]
     public function getNamespacedAttributes(): array
     {
         return array_diff(

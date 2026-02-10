@@ -96,6 +96,12 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
     }
 
     #[\Override]
+    public function getNamespacedAttributes(): array
+    {
+        return [];
+    }
+
+    #[\Override]
     public function transformProductData(array $productData): array
     {
         // Default: no transformation

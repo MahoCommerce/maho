@@ -217,15 +217,35 @@ class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'Product weight with unit',
         ],
+        'product_category' => [
+            'label' => 'Product Category',
+            'required' => false,
+            'description' => 'Product category path using ">" separator',
+        ],
+        'shipping' => [
+            'label' => 'Shipping',
+            'required' => false,
+            'description' => 'Shipping details (country:region:service:price format)',
+        ],
+        'review_count' => [
+            'label' => 'Review Count',
+            'required' => false,
+            'description' => 'Total number of product reviews',
+        ],
+        'star_rating' => [
+            'label' => 'Star Rating',
+            'required' => false,
+            'description' => 'Average product star rating',
+        ],
         'popularity_score' => [
             'label' => 'Popularity Score',
             'required' => false,
-            'description' => 'Quality signal for product ranking',
+            'description' => 'Quality signal for product ranking (0-5 scale)',
         ],
         'return_rate' => [
             'label' => 'Return Rate',
             'required' => false,
-            'description' => 'Product return rate (quality signal)',
+            'description' => 'Product return rate percentage (quality signal)',
         ],
     ];
 
@@ -265,6 +285,10 @@ class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Plat
         'additional_image_urls' => ['source_type' => 'attribute', 'source_value' => 'additional_images_csv', 'use_parent' => 'if_empty'],
         'availability_date' => ['source_type' => 'static', 'source_value' => ''],
         'shipping_weight' => ['source_type' => 'attribute', 'source_value' => 'weight'],
+        'product_category' => ['source_type' => 'attribute', 'source_value' => 'category_path'],
+        'shipping' => ['source_type' => 'static', 'source_value' => ''],
+        'review_count' => ['source_type' => 'static', 'source_value' => ''],
+        'star_rating' => ['source_type' => 'static', 'source_value' => ''],
         'popularity_score' => ['source_type' => 'static', 'source_value' => ''],
         'return_rate' => ['source_type' => 'static', 'source_value' => ''],
         'is_eligible_search' => ['source_type' => 'static', 'source_value' => 'true'],
@@ -341,15 +365,15 @@ class Maho_FeedManager_Model_Platform_Openai extends Maho_FeedManager_Model_Plat
         }
 
         // Ensure price has currency in correct format
+        $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
+        unset($productData['currency']);
+
         if (isset($productData['price']) && is_numeric($productData['price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['price'] = $this->_formatPriceOpenai((float) $productData['price'], $currency);
-            unset($productData['currency']);
         }
 
         // Same for sale_price
         if (isset($productData['sale_price']) && is_numeric($productData['sale_price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['sale_price'] = $this->_formatPriceOpenai((float) $productData['sale_price'], $currency);
         }
 

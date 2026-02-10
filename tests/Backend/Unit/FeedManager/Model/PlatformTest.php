@@ -311,7 +311,7 @@ describe('Idealo Platform', function () {
         expect($required)->toHaveKey('sku')
             ->and($required)->toHaveKey('brand')
             ->and($required)->toHaveKey('eans')
-            ->and($required)->toHaveKey('delivery_time');
+            ->and($required)->toHaveKey('delivery');
     });
 
     test('does not support category mapping', function () {
@@ -436,8 +436,8 @@ describe('Google Local Inventory Platform', function () {
             ->and($formats)->toContain('csv');
     });
 
-    test('supports category mapping', function () {
+    test('does not support category mapping', function () {
         $adapter = Maho_FeedManager_Model_Platform::getAdapter('google_local_inventory');
-        expect($adapter->supportsCategoryMapping())->toBeTrue();
+        expect($adapter->supportsCategoryMapping())->toBeFalse();
     });
 });

@@ -19,7 +19,7 @@ class Maho_FeedManager_Model_Platform_Custom extends Maho_FeedManager_Model_Plat
 {
     protected string $_code = 'custom';
     protected string $_name = 'Custom Feed';
-    protected array $_supportedFormats = ['xml', 'csv', 'json'];
+    protected array $_supportedFormats = ['xml', 'csv', 'json', 'jsonl'];
     protected string $_defaultFormat = 'csv';
     protected string $_rootElement = 'products';
     protected string $_itemElement = 'product';

@@ -23,6 +23,7 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
     protected string $_itemElement = 'item';
     protected array $_namespaces = [];
     protected array $_namespacedAttributes = [];
+    protected bool $_isRss = false;
 
     #[\Override]
     public function getFormat(): string
@@ -57,21 +58,31 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
         $this->_itemElement = $platform ? $platform->getItemElement() : 'item';
         $this->_namespaces = $platform ? $platform->getNamespaces() : [];
 
-        // Get namespaced attributes if platform supports it
-        if ($platform && method_exists($platform, 'getNamespacedAttributes')) {
+        // Get namespaced attributes
+        if ($platform) {
             $this->_namespacedAttributes = $platform->getNamespacedAttributes();
         }
+
+        // Detect RSS format
+        $this->_isRss = ($rootElement === 'rss');
 
         // Write XML declaration
         fwrite($this->_handle, '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL);
 
         // Write root element with namespaces
         $nsAttrs = '';
+        if ($this->_isRss) {
+            $nsAttrs .= ' version="2.0"';
+        }
         foreach ($this->_namespaces as $prefix => $uri) {
             $nsAttrs .= " {$prefix}=\"{$uri}\"";
         }
 
         fwrite($this->_handle, "<{$rootElement}{$nsAttrs}>" . PHP_EOL);
+
+        if ($this->_isRss) {
+            fwrite($this->_handle, '<channel>' . PHP_EOL);
+        }
     }
 
     #[\Override]
@@ -93,6 +104,9 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
         }
 
         $rootElement = $this->_platform ? $this->_platform->getRootElement() : 'feed';
+        if ($this->_isRss) {
+            fwrite($this->_handle, '</channel>' . PHP_EOL);
+        }
         fwrite($this->_handle, "</{$rootElement}>" . PHP_EOL);
         fclose($this->_handle);
         $this->_handle = null;

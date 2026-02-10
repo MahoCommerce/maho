@@ -85,6 +85,13 @@ interface Maho_FeedManager_Model_Platform_AdapterInterface
     public function getNamespaces(): array;
 
     /**
+     * Get attributes that should use namespace prefix in XML output
+     *
+     * @return string[]
+     */
+    public function getNamespacedAttributes(): array;
+
+    /**
      * Transform product data for this platform
      *
      * @param array<string, mixed> $productData Raw product data

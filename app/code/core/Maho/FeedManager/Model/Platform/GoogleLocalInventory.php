@@ -25,7 +25,7 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
     protected string $_defaultFormat = 'xml';
     protected string $_rootElement = 'feed';
     protected string $_itemElement = 'entry';
-    protected ?string $_taxonomyFile = 'taxonomy/google_product_taxonomy.txt';
+    protected ?string $_taxonomyFile = null;
 
     protected array $_namespaces = [
         'xmlns' => 'http://www.w3.org/2005/Atom',
@@ -109,16 +109,17 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
             $productData['availability'] = $this->_transformAvailability($productData['availability']);
         }
 
+        // Extract currency before formatting prices
+        $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
+        unset($productData['currency']);
+
         // Ensure price has currency
         if (isset($productData['price']) && is_numeric($productData['price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['price'] = $this->_formatPrice((float) $productData['price'], $currency);
-            unset($productData['currency']);
         }
 
         // Same for sale_price
         if (isset($productData['sale_price']) && is_numeric($productData['sale_price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['sale_price'] = $this->_formatPrice((float) $productData['sale_price'], $currency);
         }
 
@@ -242,6 +243,7 @@ class Maho_FeedManager_Model_Platform_GoogleLocalInventory extends Maho_FeedMana
     /**
      * Get attributes that need the g: namespace prefix in XML
      */
+    #[\Override]
     public function getNamespacedAttributes(): array
     {
         return array_diff(

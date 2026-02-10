@@ -240,6 +240,11 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             'required' => false,
             'description' => 'yes/no - adult content',
         ],
+        'availability_date' => [
+            'label' => 'Availability Date',
+            'required' => false,
+            'description' => 'Date a preordered or backordered product becomes available (ISO 8601)',
+        ],
     ];
 
     protected array $_defaultMappings = [
@@ -284,6 +289,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
         'multipack' => ['source_type' => 'static', 'source_value' => ''],
         'is_bundle' => ['source_type' => 'static', 'source_value' => ''],
         'adult' => ['source_type' => 'static', 'source_value' => ''],
+        'availability_date' => ['source_type' => 'static', 'source_value' => ''],
     ];
 
     #[\Override]
@@ -315,16 +321,17 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             );
         }
 
+        // Extract currency before formatting prices
+        $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
+        unset($productData['currency']);
+
         // Ensure price has currency
         if (isset($productData['price']) && is_numeric($productData['price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['price'] = $this->_formatPrice((float) $productData['price'], $currency);
-            unset($productData['currency']);
         }
 
         // Same for sale_price
         if (isset($productData['sale_price']) && is_numeric($productData['sale_price'])) {
-            $currency = $productData['currency'] ?? Mage::app()->getStore()->getBaseCurrencyCode();
             $productData['sale_price'] = $this->_formatPrice((float) $productData['sale_price'], $currency);
         }
 
@@ -374,6 +381,18 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
             $errors[] = 'Invalid condition value: ' . $productData['condition'];
         }
 
+        // Warn if availability_date is missing for preorder/backorder products
+        if (isset($productData['availability'])
+            && in_array($productData['availability'], ['preorder', 'backorder'])
+            && empty($productData['availability_date'])
+        ) {
+            Mage::log(
+                'Warning: availability_date is recommended for ' . $productData['availability'] . ' products'
+                    . (isset($productData['id']) ? ' (product: ' . $productData['id'] . ')' : ''),
+                Mage::LOG_WARNING,
+            );
+        }
+
         return $errors;
     }
 
@@ -389,6 +408,7 @@ class Maho_FeedManager_Model_Platform_Google extends Maho_FeedManager_Model_Plat
     /**
      * Get attributes that need the g: namespace prefix
      */
+    #[\Override]
     public function getNamespacedAttributes(): array
     {
         // All Google Shopping attributes except id, title, link need g: prefix
