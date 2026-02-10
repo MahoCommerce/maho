@@ -51,6 +51,7 @@ return RectorConfig::configure()
         Rector\Php80\Rector\Switch_\ChangeSwitchToMatchRector::class,
         Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector::class,
         TypeDeclaration\ClassMethod\ReturnNeverTypeRector::class,
+        TypeDeclaration\StmtsAwareInterface\SafeDeclareStrictTypesRector::class,
     ])
     ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
         'sensitive_parameters' => [

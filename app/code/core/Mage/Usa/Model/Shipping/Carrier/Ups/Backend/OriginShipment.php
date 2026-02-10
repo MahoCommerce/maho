@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -9,7 +11,6 @@
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
-
 class Mage_Usa_Model_Shipping_Carrier_Ups_Backend_OriginShipment extends Mage_Usa_Model_Shipping_Carrier_Abstract_Backend_Abstract
 {
     /**
