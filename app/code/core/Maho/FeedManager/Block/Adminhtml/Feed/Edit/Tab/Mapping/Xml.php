@@ -47,10 +47,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 <button type="button" class="scalable" onclick="XmlBuilder.showImportModal()">
                     <span>' . $this->__('Import XML') . '</span>
                 </button>
-                <div class="fm-toolbar-spacer"></div>
-                <button type="button" class="scalable" onclick="XmlBuilder.togglePreview()">
-                    <span id="xml-preview-toggle-label">' . $this->__('Show Preview') . '</span>
-                </button>
             </div>
 
             <div id="xml-builder-panels" class="fm-panels-container">
@@ -77,22 +73,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 </div>
             </div>
 
-            <div id="xml-preview-panel" class="fm-preview-panel">
-                <div class="fm-preview-header">
-                    <span class="fm-preview-title">' . $this->__('Preview') . '</span>
-                    <button type="button" class="scalable" onclick="XmlBuilder.refreshPreview()"><span>' . $this->__('Refresh') . '</span></button>
-                    <button type="button" class="scalable" onclick="XmlBuilder.copyPreview()"><span>' . $this->__('Copy') . '</span></button>
-                    <button type="button" class="scalable" onclick="XmlBuilder.validateXml()"><span>' . $this->__('Validate') . '</span></button>
-                    <span id="xml-validation-status"></span>
-                    <span class="fm-preview-options">
-                        <label class="fm-preview-checkbox">
-                            <input type="checkbox" id="xml-full-preview" onchange="XmlBuilder.toggleFullPreview(this.checked)" />
-                            ' . $this->__('Full Document') . '
-                        </label>
-                    </span>
-                </div>
-                <pre id="xml-preview-content" class="fm-preview-content"></pre>
-            </div>
         </div>
 
         <div id="xml-import-modal" class="fm-modal-overlay">
@@ -118,7 +98,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             previewUrl: "' . $this->getUrl('*/*/xmlPreview') . '",
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
             feedId: ' . (int) $feed->getId() . ',
-            fullPreview: false,
 
             init: function() {
                 if (!this.structure || !Array.isArray(this.structure) || this.structure.length === 0) {
@@ -492,29 +471,35 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 return result;
             },
 
-            togglePreview: function() {
-                var panel = document.getElementById("xml-preview-panel");
-                var label = document.getElementById("xml-preview-toggle-label");
-                if (panel.style.display === "none") {
-                    panel.style.display = "block";
-                    label.textContent = "' . $this->__('Hide Preview') . '";
-                    this.refreshPreview();
-                } else {
-                    panel.style.display = "none";
-                    label.textContent = "' . $this->__('Show Preview') . '";
-                }
+            showPreview: function() {
+                var self = this;
+                Dialog.info("<pre id=\"xml-preview-content\" class=\"fm-preview-content\">' . $this->__('Loading...') . '</pre>", {
+                    title: "' . $this->__('Feed Preview') . '",
+                    className: "feed-preview-dialog",
+                    extraButtons: [
+                        { id: "preview-copy", label: "' . $this->__('Copy') . '", onclick: "XmlBuilder.copyPreview()" },
+                        { id: "preview-validate", label: "' . $this->__('Validate') . '", onclick: "XmlBuilder.validateXml()" }
+                    ],
+                    onOpen: function(dialog) {
+                        var btns = dialog.querySelector(".dialog-buttons");
+                        var status = document.createElement("span");
+                        status.id = "xml-validation-status";
+                        btns.appendChild(status);
+                        self.refreshPreview();
+                    }
+                });
             },
 
             refreshPreview: function() {
                 var content = document.getElementById("xml-preview-content");
                 content.textContent = "' . $this->__('Loading...') . '";
 
-                mahoFetch(this.previewUrl, {
+                return mahoFetch(this.previewUrl, {
                     method: "POST",
                     body: new URLSearchParams({
                         id: this.feedId,
                         structure: JSON.stringify(this.structure),
-                        full_preview: this.fullPreview ? 1 : 0,
+                        full_preview: 1,
                         form_key: FORM_KEY
                     }),
                     loaderArea: false
@@ -531,13 +516,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                 });
             },
 
-            toggleFullPreview: function(checked) {
-                this.fullPreview = checked;
-                this.refreshPreview();
-            },
-
             copyPreview: function() {
                 navigator.clipboard.writeText(document.getElementById("xml-preview-content").textContent);
+                var status = document.getElementById("xml-validation-status");
+                if (status) {
+                    status.innerHTML = \'<span style="color:#185b00">&#10004; ' . $this->__('Copied!') . '</span>\';
+                    setTimeout(function() { status.innerHTML = ""; }, 1500);
+                }
             },
 
             validateXml: function() {
@@ -549,19 +534,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     return;
                 }
 
-                // Wrap in root element if not full preview (items only)
-                var xmlToValidate = content;
-                if (!this.fullPreview) {
-                    xmlToValidate = "<root>" + content + "</root>";
-                }
-
                 var parser = new DOMParser();
-                var doc = parser.parseFromString(xmlToValidate, "application/xml");
+                var doc = parser.parseFromString(content, "application/xml");
                 var parseError = doc.querySelector("parsererror");
 
                 if (parseError) {
                     var errorText = parseError.textContent || "' . $this->__('Invalid XML') . '";
-                    // Extract just the error message, not the full verbose output
                     var match = errorText.match(/error[^:]*:\s*(.+?)(?:\n|$)/i);
                     var shortError = match ? match[1].trim() : "' . $this->__('Invalid XML structure') . '";
                     status.innerHTML = \'<span style="color:#963535">&#10008; \' + escapeHtml(shortError) + \'</span>\';

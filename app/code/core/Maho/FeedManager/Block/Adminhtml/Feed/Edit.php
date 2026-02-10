@@ -31,6 +31,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
             'class' => 'save',
         ], -100);
 
+        $this->_addButton('preview', [
+            'label' => $this->__('Preview'),
+            'onclick' => 'showFeedPreview()',
+        ], -91);
+
         // Add buttons for existing feeds
         if ($this->_getFeed()->getId()) {
             $this->_addButton('duplicate', [
@@ -119,6 +124,21 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         ]);
 
         return <<<JS
+
+            function showFeedPreview() {
+                if (!{$this->_getFeedIdForJs()}) {
+                    alert('{$this->__('Please save the feed first to enable preview.')}');
+                    return;
+                }
+                var format = document.getElementById('feed_file_format')?.value || 'xml';
+                if (format === 'xml' && typeof XmlBuilder !== 'undefined') {
+                    XmlBuilder.showPreview();
+                } else if (format === 'csv' && typeof CsvBuilder !== 'undefined') {
+                    CsvBuilder.showPreview();
+                } else if (format === 'json' && typeof JsonBuilder !== 'undefined') {
+                    JsonBuilder.showPreview();
+                }
+            }
 
             function saveAndContinueEdit() {
                 var form = document.getElementById('edit_form');

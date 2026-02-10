@@ -198,6 +198,16 @@
     }
 }
 
+.feed-preview-dialog .dialog-content {
+    padding: 0;
+    background: #1e1e1e;
+}
+
+.feed-preview-dialog .dialog-buttons {
+    justify-content: flex-start;
+    align-items: center;
+}
+
 .fm-preview-header {
     display: flex;
     align-items: center;

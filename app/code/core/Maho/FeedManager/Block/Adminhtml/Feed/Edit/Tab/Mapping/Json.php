@@ -47,10 +47,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 <button type="button" class="scalable" onclick="JsonBuilder.showImportModal()">
                     <span>' . $this->__('Import JSON') . '</span>
                 </button>
-                <div class="fm-toolbar-spacer"></div>
-                <button type="button" class="scalable" onclick="JsonBuilder.togglePreview()">
-                    <span id="json-preview-toggle-label">' . $this->__('Show Preview') . '</span>
-                </button>
             </div>
 
             <div id="json-builder-panels" class="fm-panels-container">
@@ -80,16 +76,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 </div>
             </div>
 
-            <div id="json-preview-panel" class="fm-preview-panel">
-                <div class="fm-preview-header">
-                    <span class="fm-preview-title">' . $this->__('Preview') . '</span>
-                    <button type="button" class="scalable" onclick="JsonBuilder.refreshPreview()"><span>' . $this->__('Refresh') . '</span></button>
-                    <button type="button" class="scalable" onclick="JsonBuilder.copyPreview()"><span>' . $this->__('Copy') . '</span></button>
-                    <button type="button" class="scalable" onclick="JsonBuilder.validateJson()"><span>' . $this->__('Validate') . '</span></button>
-                    <span id="json-validation-status"></span>
-                </div>
-                <pre id="json-preview-content" class="fm-preview-content"></pre>
-            </div>
         </div>
 
         <div id="json-import-modal" class="fm-modal-overlay">
@@ -483,17 +469,23 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                 return result;
             },
 
-            togglePreview: function() {
-                var panel = document.getElementById("json-preview-panel");
-                var label = document.getElementById("json-preview-toggle-label");
-                if (panel.style.display === "none") {
-                    panel.style.display = "block";
-                    label.textContent = "' . $this->__('Hide Preview') . '";
-                    this.refreshPreview();
-                } else {
-                    panel.style.display = "none";
-                    label.textContent = "' . $this->__('Show Preview') . '";
-                }
+            showPreview: function() {
+                var self = this;
+                Dialog.info("<pre id=\"json-preview-content\" class=\"fm-preview-content\">' . $this->__('Loading...') . '</pre>", {
+                    title: "' . $this->__('Feed Preview') . '",
+                    className: "feed-preview-dialog",
+                    extraButtons: [
+                        { id: "preview-copy", label: "' . $this->__('Copy') . '", onclick: "JsonBuilder.copyPreview()" },
+                        { id: "preview-validate", label: "' . $this->__('Validate') . '", onclick: "JsonBuilder.validateJson()" }
+                    ],
+                    onOpen: function(dialog) {
+                        var btns = dialog.querySelector(".dialog-buttons");
+                        var status = document.createElement("span");
+                        status.id = "json-validation-status";
+                        btns.appendChild(status);
+                        self.refreshPreview();
+                    }
+                });
             },
 
             refreshPreview: function() {
@@ -523,6 +515,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
 
             copyPreview: function() {
                 navigator.clipboard.writeText(document.getElementById("json-preview-content").textContent);
+                var status = document.getElementById("json-validation-status");
+                if (status) {
+                    status.innerHTML = \'<span style="color:#185b00">&#10004; ' . $this->__('Copied!') . '</span>\';
+                    setTimeout(function() { status.innerHTML = ""; }, 1500);
+                }
             },
 
             validateJson: function() {

@@ -41,10 +41,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 <button type="button" class="scalable" onclick="CsvBuilder.showImportModal()">
                     <span>' . $this->__('Import CSV') . '</span>
                 </button>
-                <div class="fm-toolbar-spacer"></div>
-                <button type="button" class="scalable" onclick="CsvBuilder.togglePreview()">
-                    <span id="csv-preview-toggle-label">' . $this->__('Show Preview') . '</span>
-                </button>
             </div>
 
             <div id="csv-grid-container">
@@ -74,15 +70,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 </table>
             </div>
 
-            <div id="csv-preview-panel" class="fm-preview-panel">
-                <div class="fm-preview-header">
-                    <span class="fm-preview-title">' . $this->__('Preview') . '</span>
-                    <span class="fm-preview-meta">(<span id="csv-preview-count">0</span> ' . $this->__('sample products') . ')</span>
-                    <button type="button" class="scalable" onclick="CsvBuilder.refreshPreview()"><span>' . $this->__('Refresh') . '</span></button>
-                    <button type="button" class="scalable" onclick="CsvBuilder.copyPreview()"><span>' . $this->__('Copy') . '</span></button>
-                </div>
-                <pre id="csv-preview-content" class="fm-preview-content"></pre>
-            </div>
         </div>
 
         <div id="csv-import-modal" class="fm-modal-overlay">
@@ -352,17 +339,27 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                 this.hideImportModal();
             },
 
-            togglePreview: function() {
-                var panel = document.getElementById("csv-preview-panel");
-                var label = document.getElementById("csv-preview-toggle-label");
-                if (panel.style.display === "none") {
-                    panel.style.display = "block";
-                    label.textContent = "' . $this->__('Hide Preview') . '";
-                    this.refreshPreview();
-                } else {
-                    panel.style.display = "none";
-                    label.textContent = "' . $this->__('Show Preview') . '";
-                }
+            showPreview: function() {
+                var self = this;
+                Dialog.info("<pre id=\"csv-preview-content\" class=\"fm-preview-content\">' . $this->__('Loading...') . '</pre>", {
+                    title: "' . $this->__('Feed Preview') . '",
+                    className: "feed-preview-dialog",
+                    extraButtons: [
+                        { id: "preview-copy", label: "' . $this->__('Copy') . '", onclick: "CsvBuilder.copyPreview()" }
+                    ],
+                    onOpen: function(dialog) {
+                        var btns = dialog.querySelector(".dialog-buttons");
+                        var status = document.createElement("span");
+                        status.id = "csv-preview-status";
+                        btns.appendChild(status);
+                        var meta = document.createElement("span");
+                        meta.className = "fm-preview-meta";
+                        meta.style.marginLeft = "auto";
+                        meta.innerHTML = "(<span id=\"csv-preview-count\">0</span> ' . $this->__('sample products') . ')";
+                        btns.appendChild(meta);
+                        self.refreshPreview();
+                    }
+                });
             },
 
             refreshPreview: function() {
@@ -394,6 +391,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             copyPreview: function() {
                 var content = document.getElementById("csv-preview-content").textContent;
                 navigator.clipboard.writeText(content);
+                var status = document.getElementById("csv-preview-status");
+                if (status) {
+                    status.innerHTML = \'<span style="color:#185b00">&#10004; ' . $this->__('Copied!') . '</span>\';
+                    setTimeout(function() { status.innerHTML = ""; }, 1500);
+                }
             }
         };
 
