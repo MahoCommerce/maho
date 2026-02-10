@@ -149,6 +149,19 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
             $this->setWatermarkSize($watermarkSize);
         }
 
+        $keepFrame = Mage::getStoreConfig('catalog/product_image/keep_frame');
+        if ($keepFrame !== null) {
+            $this->keepFrame((bool) (int) $keepFrame);
+        }
+
+        $bgColor = Mage::getStoreConfig('catalog/product_image/background_color');
+        if ($bgColor) {
+            $rgb = sscanf(ltrim($bgColor, '#'), '%02x%02x%02x');
+            if (count(array_filter($rgb, fn($v) => $v !== null)) === 3) {
+                $this->backgroundColor($rgb);
+            }
+        }
+
         if ($imageFile) {
             $this->setImageFile($imageFile);
         } else {
