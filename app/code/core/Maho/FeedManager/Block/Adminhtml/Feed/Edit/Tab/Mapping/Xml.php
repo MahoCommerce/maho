@@ -61,6 +61,9 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         <button type="button" class="scalable" onclick="XmlBuilder.addGroup()">
                             <span>' . $this->__('+ Group') . '</span>
                         </button>
+                        <button type="button" id="xml-add-child-btn" class="scalable add" onclick="XmlBuilder.addChildElement(XmlBuilder.selectedPath)" style="display:none">
+                            <span>' . $this->__('+ Child Element') . '</span>
+                        </button>
                     </div>
                 </div>
 
@@ -99,6 +102,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             presetUrl: "' . $this->getUrl('*/*/platformPreset') . '",
             feedId: ' . (int) $feed->getId() . ',
             currentPlatform: ' . Mage::helper('core')->jsonEncode($feed->getPlatform() ?: '') . ',
+            iconDuplicate: ' . Mage::helper('core')->jsonEncode(Mage::helper('core')->getIconSvg('copy-check')) . ',
+            iconDelete: ' . Mage::helper('core')->jsonEncode(Mage::helper('core')->getIconSvg('x')) . ',
 
             init: function() {
                 if (!this.structure || !Array.isArray(this.structure) || this.structure.length === 0) {
@@ -128,11 +133,17 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     var isSelected = this.selectedPath === itemPath;
                     var nodeClass = "xml-node" + (isSelected ? " selected" : "");
 
+                    var actions = "<span class=\"xml-node-actions\">" +
+                        "<button type=\"button\" title=\"' . $this->__('Duplicate') . '\" onclick=\"event.stopPropagation(); XmlBuilder.duplicateNode(\'" + itemPath + "\')\">" + this.iconDuplicate + "</button>" +
+                        "<button type=\"button\" title=\"' . $this->__('Delete') . '\" onclick=\"event.stopPropagation(); XmlBuilder.deleteNode(\'" + itemPath + "\')\">" + this.iconDelete + "</button>" +
+                        "</span>";
+
                     if (node.children && node.children.length > 0) {
                         html += "<div class=\"" + nodeClass + "\" style=\"padding-left: " + indent + "px;\" onclick=\"XmlBuilder.selectNode(\'" + itemPath + "\')\" data-path=\"" + itemPath + "\">";
                         html += "<span class=\"xml-toggle\" onclick=\"XmlBuilder.toggleNode(event, \'" + itemPath + "\')\">&blacktriangledown;</span> ";
                         html += "<span class=\"xml-tag\">&lt;" + escapeHtml(node.tag) + "&gt;</span>";
                         if (node.cdata) html += " <span class=\"xml-badge\">CDATA</span>";
+                        html += actions;
                         html += "</div>";
                         html += "<div class=\"xml-children\" id=\"xml-children-" + itemPath.replace(/\./g, "-") + "\">";
                         html += this.renderNodes(node.children, itemPath + ".children", depth + 1);
@@ -142,6 +153,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         html += "<span class=\"xml-tag\">&lt;" + escapeHtml(node.tag) + "&gt;</span>";
                         if (node.cdata) html += " <span class=\"xml-badge\">CDATA</span>";
                         if (node.optional) html += " <span class=\"xml-badge optional\">optional</span>";
+                        html += actions;
                         html += "</div>";
                     }
                 }
@@ -161,27 +173,31 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
 
                 var panel = document.getElementById("xml-properties-content");
 
-                var html = "<div style=\"margin-bottom: 15px;\">" +
-                    "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Tag Name') . '</label>" +
-                    "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(node.tag, true) + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'tag\', this.value)\" style=\"width: 100%;\" placeholder=\"g:id\">" +
+                var html = "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
+                    "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('Tag Name') . '</label>" +
+                    "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(node.tag, true) + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'tag\', this.value)\" style=\"flex: 1;\" placeholder=\"g:id\">" +
                     "</div>";
+
+                // Show/hide the + Child Element footer button based on node type
+                var childBtn = document.getElementById("xml-add-child-btn");
+                if (childBtn) childBtn.style.display = Array.isArray(node.children) ? "" : "none";
 
                 // Show element properties if no children array, group properties if children array exists (even if empty)
                 if (!Array.isArray(node.children)) {
-                    html += "<div style=\"margin-bottom: 15px;\">" +
-                        "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Source Type') . '</label>" +
-                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_type\', this.value); XmlBuilder.showProperties(\'" + path + "\');\" style=\"width: 100%;\">" +
+                    html += "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
+                        "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('Source Type') . '</label>" +
+                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_type\', this.value); XmlBuilder.showProperties(\'" + path + "\');\" style=\"flex: 1;\">" +
                         this.buildSourceTypeOptions(node.source_type) +
                         "</select>" +
                         "</div>" +
-                        "<div style=\"margin-bottom: 15px;\">" +
-                        "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Source Value') . '</label>";
+                        "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
+                        "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('Source Value') . '</label>";
 
                     if (node.source_type === "attribute" || !node.source_type) {
                         var selectHtml = this.attributeOptionsHtml.replace(new RegExp("value=\"" + escapeHtml(node.source_value || "", true) + "\""), "value=\"" + escapeHtml(node.source_value || "", true) + "\" selected");
-                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">" + selectHtml + "</select>";
+                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"flex: 1;\">" + selectHtml + "</select>";
                     } else if (node.source_type === "rule") {
-                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
+                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"flex: 1;\">";
                         html += "<option value=\"\">' . $this->__('-- Select Rule --') . '</option>";
                         for (var ruleCode in this.ruleOptions) {
                             var selected = (node.source_value === ruleCode) ? " selected" : "";
@@ -189,7 +205,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         }
                         html += "</select>";
                     } else if (node.source_type === "taxonomy") {
-                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"width: 100%;\">";
+                        html += "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" style=\"flex: 1;\">";
                         for (var platform in this.taxonomyPlatforms) {
                             var selected = (node.source_value === platform) ? " selected" : "";
                             html += "<option value=\"" + escapeHtml(platform, true) + "\"" + selected + ">" + escapeHtml(this.taxonomyPlatforms[platform]) + "</option>";
@@ -197,51 +213,42 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         html += "</select>";
                     } else {
                         var placeholder = node.source_type === "combined" ? "{{name}} - {{sku}}" : "";
-                        html += "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(node.source_value || "", true) + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"width: 100%;\">";
+                        html += "<input type=\"text\" class=\"input-text\" value=\"" + escapeHtml(node.source_value || "", true) + "\" onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'source_value\', this.value)\" placeholder=\"" + placeholder + "\" style=\"flex: 1;\">";
                     }
 
                     html += "</div>" +
-                        "<div style=\"margin-bottom: 15px;\">" +
-                        "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Use Parent') . '</label>" +
-                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'use_parent\', this.value)\" style=\"width: 100%;\">" +
+                        "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
+                        "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('Use Parent') . '</label>" +
+                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'use_parent\', this.value)\" style=\"flex: 1;\">" +
                         "<option value=\"\"" + (!node.use_parent ? " selected" : "") + ">—</option>" +
                         "<option value=\"if_empty\"" + (node.use_parent === "if_empty" ? " selected" : "") + ">' . $this->__('If empty') . '</option>" +
                         "<option value=\"always\"" + (node.use_parent === "always" ? " selected" : "") + ">' . $this->__('Always') . '</option>" +
                         "</select>" +
-                        "<p style=\"margin: 4px 0 0; font-size: 11px; color: #888;\">' . $this->__('For simple products, use parent (configurable) value') . '</p>" +
                         "</div>" +
-                        "<div style=\"margin-bottom: 15px;\">" +
-                        "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Transformers') . '</label>" +
-                        "<button type=\"button\" class=\"scalable\" onclick=\"XmlBuilder.openTransformers(\'" + path + "\')\"><span>" + (node.transformers ? node.transformers.split("|").length + " transforms" : "+ Add") + "</span></button>" +
-                        "</div>" +
-                        "<div style=\"display: flex; gap: 15px; margin-bottom: 12px;\">" +
-                        "<div style=\"flex: 1;\">" +
-                        "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('CDATA') . '</label>" +
-                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'cdata\', this.value === \'1\')\" style=\"width: 100%;\">" +
+                        "<p style=\"margin: -6px 0 10px 110px; font-size: 11px; color: #888;\">' . $this->__('For simple products, use parent (configurable) value') . '</p>" +
+                        "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
+                        "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('CDATA') . '</label>" +
+                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'cdata\', this.value === \'1\')\" style=\"width: auto;\">" +
                         "<option value=\"0\"" + (!node.cdata ? " selected" : "") + ">' . $this->__('No') . '</option>" +
                         "<option value=\"1\"" + (node.cdata ? " selected" : "") + ">' . $this->__('Yes') . '</option>" +
                         "</select>" +
+                        "<span style=\"font-size: 11px; color: #888;\">' . $this->__('Wraps special characters') . '</span>" +
                         "</div>" +
-                        "<div style=\"flex: 1;\">" +
-                        "<label style=\"font-weight: 600; display: block; margin-bottom: 5px;\">' . $this->__('Optional') . '</label>" +
-                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'optional\', this.value === \'1\')\" style=\"width: 100%;\">" +
+                        "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
+                        "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('Optional') . '</label>" +
+                        "<select onchange=\"XmlBuilder.updateNodeProp(\'" + path + "\', \'optional\', this.value === \'1\')\" style=\"width: auto;\">" +
                         "<option value=\"0\"" + (!node.optional ? " selected" : "") + ">' . $this->__('No') . '</option>" +
                         "<option value=\"1\"" + (node.optional ? " selected" : "") + ">' . $this->__('Yes') . '</option>" +
                         "</select>" +
+                        "<span style=\"font-size: 11px; color: #888;\">' . $this->__('Skips element if value is empty') . '</span>" +
                         "</div>" +
-                        "</div>" +
-                        "<p style=\"margin: 0 0 15px; font-size: 11px; color: #888;\">' . $this->__('CDATA wraps special characters. Optional skips element if value is empty.') . '</p>";
-                } else {
-                    html += "<p style=\"color: #666; font-size: 11px;\">' . $this->__('This is a group element. Add child elements by selecting it and clicking + Element.') . '</p>" +
-                        "<div style=\"margin-top: 15px;\">" +
-                        "<button type=\"button\" class=\"scalable add\" onclick=\"XmlBuilder.addChildElement(\'" + path + "\')\"><span>' . $this->__('+ Child Element') . '</span></button>" +
+                        "<div style=\"display: flex; align-items: center; gap: 10px; margin-bottom: 10px;\">" +
+                        "<label style=\"font-weight: 600; white-space: nowrap; min-width: 100px;\">' . $this->__('Transformers') . '</label>" +
+                        "<button type=\"button\" class=\"scalable\" onclick=\"XmlBuilder.openTransformers(\'" + path + "\')\"><span>" + (node.transformers ? node.transformers.split("|").length + " transforms" : "+ Add") + "</span></button>" +
                         "</div>";
+                } else {
+                    html += "<p style=\"color: #666; font-size: 11px;\">' . $this->__('This is a group element. Add child elements using the + Child Element button below the tree.') . '</p>";
                 }
-
-                html += "<div style=\"border-top: 1px solid #ddd; padding-top: 15px; margin-top: 15px; display: flex; gap: 10px;\">" +
-                    "<button type=\"button\" class=\"scalable\" onclick=\"XmlBuilder.duplicateNode(\'" + path + "\')\"><span>' . $this->__('Duplicate') . '</span></button>" +
-                    "<button type=\"button\" class=\"scalable delete\" onclick=\"XmlBuilder.deleteNode(\'" + path + "\')\"><span>' . $this->__('Delete') . '</span></button>" +
-                    "</div>";
 
                 panel.innerHTML = html;
             },
@@ -334,6 +341,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                     this.selectedPath = null;
                     this.render();
                     document.getElementById("xml-properties-content").innerHTML = "<p style=\"color: #666; text-align: center;\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
+                    var childBtn = document.getElementById("xml-add-child-btn");
+                    if (childBtn) childBtn.style.display = "none";
                 }
             },
 
@@ -409,6 +418,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         self.selectedPath = null;
                         self.render();
                         document.getElementById("xml-properties-content").innerHTML = "<p style=\"color: #666; text-align: center;\">' . addslashes($this->__('Select an element to edit its properties')) . '</p>";
+                        var childBtn = document.getElementById("xml-add-child-btn");
+                        if (childBtn) childBtn.style.display = "none";
                         // Update platform field in General tab
                         self.updatePlatform(data.platform);
                     }

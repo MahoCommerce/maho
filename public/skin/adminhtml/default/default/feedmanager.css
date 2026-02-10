@@ -790,9 +790,49 @@
     cursor: pointer;
     border-radius: var(--fm-radius-sm);
     margin: 2px 0;
+    display: flex;
+    align-items: center;
 
     &:hover {
         background: var(--fm-bg-lighter);
+
+        .xml-node-actions {
+            opacity: 1;
+        }
+    }
+}
+
+.xml-node-actions {
+    margin-left: auto;
+    opacity: 0;
+    transition: opacity 0.15s;
+    display: flex;
+    gap: 2px;
+
+    button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 2px;
+        color: var(--fm-text-muted);
+        line-height: 0;
+        border-radius: var(--fm-radius-sm);
+        display: flex;
+        align-items: center;
+
+        svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        &:hover {
+            color: var(--fm-text-primary);
+            background: var(--fm-border-light);
+        }
+
+        &:last-child:hover {
+            color: var(--fm-error-color, #c62828);
+        }
     }
 }
 
@@ -896,6 +936,8 @@
     letter-spacing: 0.5px;
     color: var(--fm-text-muted);
     padding: var(--fm-spacing-sm) var(--fm-spacing-md);
+    height: 46px;
+    box-sizing: border-box;
     background: var(--fm-bg-lighter);
     border-bottom: 1px solid var(--fm-border-light);
 }
