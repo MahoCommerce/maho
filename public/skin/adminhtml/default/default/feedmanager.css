@@ -887,6 +887,9 @@
 }
 
 .fm-panel-header {
+    display: flex;
+    align-items: center;
+    gap: var(--fm-spacing-sm);
     font-weight: 600;
     font-size: 12px;
     text-transform: uppercase;
@@ -895,6 +898,29 @@
     padding: var(--fm-spacing-sm) var(--fm-spacing-md);
     background: var(--fm-bg-lighter);
     border-bottom: 1px solid var(--fm-border-light);
+}
+
+.fm-panel-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    flex-shrink: 0;
+
+    select {
+        width: auto !important;
+        font-size: 12px;
+        text-transform: none;
+        letter-spacing: normal;
+        font-weight: normal;
+    }
+
+    .scalable {
+        white-space: nowrap;
+        font-size: 11px;
+        text-transform: none;
+        letter-spacing: normal;
+    }
 }
 
 .fm-panel-header-sticky {

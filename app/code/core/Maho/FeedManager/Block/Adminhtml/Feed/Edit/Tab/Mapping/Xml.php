@@ -38,20 +38,21 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
 
         return '
         <div id="xml-builder-container">
-            <div class="fm-toolbar">
-                <select id="xml-preset-select" onchange="XmlBuilder.loadPreset(this.value)" class="fm-input-lg">
-                    <option value="">' . $this->__('Load Preset...') . '</option>
-                    ' . $platformOptions . '
-                </select>
-                <button type="button" class="scalable" onclick="XmlBuilder.showImportModal()">
-                    <span>' . $this->__('Import XML') . '</span>
-                </button>
-            </div>
-
             <div id="xml-builder-panels" class="fm-panels-container">
                 <!-- Tree Panel -->
                 <div id="xml-tree-panel" class="fm-panel fm-panel-main">
-                    <div class="fm-panel-header">' . $this->__('Structure') . '</div>
+                    <div class="fm-panel-header">
+                        <span>' . $this->__('Structure') . '</span>
+                        <div class="fm-panel-header-actions">
+                            <select id="xml-preset-select" onchange="XmlBuilder.loadPreset(this.value)">
+                                <option value="">' . $this->__('Load Preset...') . '</option>
+                                ' . $platformOptions . '
+                            </select>
+                            <button type="button" class="scalable" onclick="XmlBuilder.showImportModal()">
+                                <span>' . $this->__('Import') . '</span>
+                            </button>
+                        </div>
+                    </div>
                     <div id="xml-tree" class="fm-tree"></div>
                     <div class="fm-panel-footer">
                         <button type="button" class="scalable add" onclick="XmlBuilder.addElement()">

@@ -38,7 +38,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
                     ' . $platformOptions . '
                 </select>
                 <button type="button" class="scalable" onclick="CsvBuilder.showImportModal()">
-                    <span>' . $this->__('Import CSV') . '</span>
+                    <span>' . $this->__('Import') . '</span>
                 </button>
             </div>
 

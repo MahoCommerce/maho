@@ -116,11 +116,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'class' => 'fieldset-wide',
         ]);
 
+        $headerValue = $feed->getData('xml_header') ?: $this->_getDefaultXmlHeader();
+        $headerLines = max(3, substr_count($headerValue, "\n") + 1);
         $xmlFieldset->addField('xml_header', 'textarea', [
             'name' => 'xml_header',
             'label' => $this->__('Header'),
-            'value' => $feed->getData('xml_header') ?: $this->_getDefaultXmlHeader(),
-            'style' => 'width: 100% !important; height: 120px; font-family: monospace; font-size: 12px;',
+            'value' => $headerValue,
+            'style' => 'width: 100% !important; height: ' . ($headerLines * 21 + 24) . 'px !important;',
             'note' => $this->__('Opening XML tags. Variables: {{store_name}}, {{store_url}}, {{generation_date}}'),
         ]);
 
@@ -142,11 +144,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
             'value' => $feed->getXmlStructure(),
         ]);
 
+        $footerValue = $feed->getData('xml_footer') ?: $this->_getDefaultXmlFooter();
+        $footerLines = max(2, substr_count($footerValue, "\n") + 1);
         $xmlFieldset->addField('xml_footer', 'textarea', [
             'name' => 'xml_footer',
             'label' => $this->__('Footer'),
-            'value' => $feed->getData('xml_footer') ?: $this->_getDefaultXmlFooter(),
-            'style' => 'width: 100% !important; height: 80px; font-family: monospace; font-size: 12px;',
+            'value' => $footerValue,
+            'style' => 'width: 100% !important; height: ' . ($footerLines * 21 + 24) . 'px !important;',
             'note' => $this->__('Closing XML tags'),
         ]);
 

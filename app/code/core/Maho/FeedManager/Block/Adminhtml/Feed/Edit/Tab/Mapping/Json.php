@@ -38,20 +38,21 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
 
         return '
         <div id="json-builder-container">
-            <div class="fm-toolbar">
-                <select id="json-preset-select" onchange="JsonBuilder.loadPreset(this.value)" class="fm-input-lg">
-                    <option value="">' . $this->__('Load Preset...') . '</option>
-                    ' . $platformOptions . '
-                </select>
-                <button type="button" class="scalable" onclick="JsonBuilder.showImportModal()">
-                    <span>' . $this->__('Import JSON') . '</span>
-                </button>
-            </div>
-
             <div id="json-builder-panels" class="fm-panels-container">
                 <!-- Tree Panel -->
                 <div id="json-tree-panel" class="fm-panel fm-panel-main">
-                    <div class="fm-panel-header">' . $this->__('Structure') . '</div>
+                    <div class="fm-panel-header">
+                        <span>' . $this->__('Structure') . '</span>
+                        <div class="fm-panel-header-actions">
+                            <select id="json-preset-select" onchange="JsonBuilder.loadPreset(this.value)">
+                                <option value="">' . $this->__('Load Preset...') . '</option>
+                                ' . $platformOptions . '
+                            </select>
+                            <button type="button" class="scalable" onclick="JsonBuilder.showImportModal()">
+                                <span>' . $this->__('Import') . '</span>
+                            </button>
+                        </div>
+                    </div>
                     <div id="json-tree" class="fm-tree"></div>
                     <div class="fm-panel-footer">
                         <button type="button" class="scalable add" onclick="JsonBuilder.addField()">

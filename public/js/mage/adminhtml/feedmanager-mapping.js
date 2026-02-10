@@ -125,7 +125,7 @@ function initCodeEditors() {
         // Initial highlight
         updateSyntaxHighlight(textarea, backdrop);
 
-        // Handle resize
+        // Handle resize - sync backdrop to textarea
         if (typeof ResizeObserver !== 'undefined') {
             const resizeObserver = new ResizeObserver(function() {
                 backdrop.style.height = textarea.offsetHeight + 'px';
