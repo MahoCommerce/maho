@@ -47,14 +47,11 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         // Apply product type filter
         $this->_applyProductTypeFilter($collection);
 
-        // Collect validated attributes from conditions
+        // Collect validated attributes from Rule conditions
         $conditions = $this->_feed->getConditions();
         if (method_exists($conditions, 'collectValidatedAttributes')) {
             $conditions->collectValidatedAttributes($collection);
         }
-
-        // Apply condition groups as SQL filters
-        $this->_applyConditionGroupsToCollection($collection);
 
         return $collection;
     }
@@ -73,16 +70,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
     }
 
     /**
-     * Apply condition groups to collection as SQL WHERE clauses
-     */
-    protected function _applyConditionGroupsToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection): void
-    {
-        $groups = $this->_feed->getConditionGroupsArray();
-        Mage::getSingleton('feedmanager/filter_condition')->applyConditionGroupsToCollection($collection, $groups);
-    }
-
-    /**
-     * Validate product against Rule conditions (legacy Mage_Rule system)
+     * Validate product against Rule conditions
      */
     protected function _validateProductConditions(Mage_Catalog_Model_Product $product): bool
     {

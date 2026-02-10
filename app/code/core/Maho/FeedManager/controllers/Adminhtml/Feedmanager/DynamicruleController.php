@@ -63,6 +63,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DynamicruleController extends Mage_
 
         Mage::register('current_dynamic_rule', $rule);
 
+        $rule->getConditions()->setJsFormObject('rule_conditions_fieldset');
+
         $this->_title($this->__('Catalog'))
             ->_title($this->__('Feed Manager'));
 

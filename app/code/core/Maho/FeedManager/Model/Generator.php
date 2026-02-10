@@ -163,7 +163,7 @@ class Maho_FeedManager_Model_Generator
 
             foreach ($collection as $product) {
                 try {
-                    // Validate against Rule conditions (legacy Mage_Rule system)
+                    // Validate against Rule conditions
                     if (!$this->_validateProductConditions($product)) {
                         $processed++;
                         continue;
@@ -396,7 +396,7 @@ class Maho_FeedManager_Model_Generator
 
                 foreach ($collection as $product) {
                     try {
-                        // Validate against Rule conditions (legacy Mage_Rule system)
+                        // Validate against Rule conditions
                         if (!$this->_validateProductConditions($product)) {
                             $processed++;
                             continue;
@@ -506,7 +506,7 @@ class Maho_FeedManager_Model_Generator
 
                 foreach ($collection as $product) {
                     try {
-                        // Validate against Rule conditions (legacy Mage_Rule system)
+                        // Validate against Rule conditions
                         if (!$this->_validateProductConditions($product)) {
                             $processed++;
                             continue;

@@ -448,7 +448,7 @@ class Maho_FeedManager_Model_Generator_Batch
 
         foreach ($collection as $product) {
             try {
-                // Validate against Rule conditions (legacy Mage_Rule system)
+                // Validate against Rule conditions
                 if (!$this->_validateProductConditions($product)) {
                     $this->_state['processed_count']++;
                     continue;

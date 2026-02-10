@@ -33,6 +33,7 @@
         <update handle="feedmanager_default"/>
         <update handle="editor"/>
         <reference name="head">
+            <action method="addJs"><name>mage/adminhtml/rules.js</name></action>
             <action method="addJs"><name>mage/adminhtml/feedmanager-generator.js</name></action>
             <action method="addJs"><name>mage/adminhtml/feedmanager-mapping.js</name></action>
         </reference>

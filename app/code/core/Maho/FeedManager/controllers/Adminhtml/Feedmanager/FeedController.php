@@ -74,6 +74,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
         Mage::register('current_feed', $feed);
 
+        $feed->getConditions()->setJsFormObject('feed_conditions_fieldset');
+
         $this->_title($this->__('Catalog'))
             ->_title($this->__('Feed Manager'));
 
@@ -127,19 +129,20 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
                 $data['include_product_types'] = implode(',', $data['include_product_types']);
             }
 
-            // Handle condition groups (new AND/OR format) before addData to avoid array-to-string warning
-            $conditionGroups = null;
-            if (isset($data['condition_groups'])) {
-                $conditionGroups = $this->_processConditionGroups($data['condition_groups']);
-                unset($data['condition_groups']);
-            }
+            // Handle Rule conditions before addData to avoid array-to-string warning
+            if (isset($data['rule']['conditions'])) {
+                $conditionsData = $data['rule']['conditions'];
+                unset($data['rule']);
 
-            // Save main feed data
-            $feed->addData($data);
+                $conditionsArray = $this->_buildConditionsArray($conditionsData);
+                $feed->addData($data);
 
-            // Set condition groups as JSON
-            if ($conditionGroups !== null) {
-                $feed->setConditionGroupsArray($conditionGroups);
+                if (!empty($conditionsArray)) {
+                    $feed->getConditions()->setConditions([])->loadArray($conditionsArray);
+                }
+            } else {
+                unset($data['rule']);
+                $feed->addData($data);
             }
 
             $feed->save();
@@ -200,37 +203,45 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     /**
-     * Process condition groups from form submission (new AND/OR format)
-     *
-     * @param array $conditionGroups Raw form data from condition_groups[]
-     * @return array Cleaned condition groups array
+     * Build conditions array from form post data
      */
-    protected function _processConditionGroups(array $conditionGroups): array
+    protected function _buildConditionsArray(array $conditionsData): array
     {
-        $groups = [];
+        $arr = $this->_convertFlatToRecursive($conditionsData);
 
-        foreach ($conditionGroups as $groupData) {
-            if (!isset($groupData['conditions']) || !is_array($groupData['conditions'])) {
-                continue;
-            }
-
-            $conditions = [];
-            foreach ($groupData['conditions'] as $condition) {
-                if (!empty($condition['attribute'])) {
-                    $conditions[] = [
-                        'attribute' => $condition['attribute'],
-                        'operator' => $condition['operator'] ?? 'eq',
-                        'value' => $condition['value'] ?? '',
-                    ];
-                }
-            }
-
-            if (!empty($conditions)) {
-                $groups[] = ['conditions' => $conditions];
-            }
+        if (empty($arr) || !isset($arr[1])) {
+            return [];
         }
 
-        return $groups;
+        return $arr[1];
+    }
+
+    /**
+     * Convert flat form conditions data to recursive array structure
+     *
+     * @return array<int|string, mixed>
+     */
+    protected function _convertFlatToRecursive(array $data): array
+    {
+        /** @var array<string, mixed> $arr */
+        $arr = ['conditions' => []];
+        foreach ($data as $id => $itemData) {
+            $path = explode('--', (string) $id);
+            $node = &$arr;
+            for ($i = 0, $l = count($path); $i < $l; $i++) {
+                if (!array_key_exists('conditions', $node)) {
+                    $node['conditions'] = [];
+                }
+                if (!array_key_exists($path[$i], $node['conditions'])) {
+                    $node['conditions'][$path[$i]] = [];
+                }
+                $node = &$node['conditions'][$path[$i]];
+            }
+            foreach ($itemData as $k => $v) {
+                $node[$k] = $v;
+            }
+        }
+        return $arr['conditions'];
     }
 
     public function deleteAction(): void
