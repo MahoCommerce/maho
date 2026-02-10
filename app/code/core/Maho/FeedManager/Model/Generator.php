@@ -105,7 +105,7 @@ class Maho_FeedManager_Model_Generator
                 Mage::LOG_INFO,
             );
 
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             $this->_errors[] = $e->getMessage();
             $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_FAILED);
 
@@ -176,7 +176,7 @@ class Maho_FeedManager_Model_Generator
                     if ($processed % 100 === 0) {
                         $this->_log->setProductCount($this->_productCount)->save();
                     }
-                } catch (Exception $e) {
+                } catch (\Throwable $e) {
                     $this->_errorCount++;
                     $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
                     $processed++;

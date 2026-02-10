@@ -108,7 +108,7 @@ class Maho_FeedManager_Model_Mapper
         // Get mappings from database
         $mappingCollection = $this->_feed->getAttributeMappings();
         foreach ($mappingCollection as $mapping) {
-            $this->_mappings[$mapping->getFeedAttribute()] = [
+            $this->_mappings[$mapping->getPlatformAttribute()] = [
                 'source_type' => $mapping->getSourceType(),
                 'source_value' => $mapping->getSourceValue(),
                 'transformers' => $mapping->getTransformersArray(),

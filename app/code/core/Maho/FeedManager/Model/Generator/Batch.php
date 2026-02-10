@@ -210,7 +210,7 @@ class Maho_FeedManager_Model_Generator_Batch
                     ? 'Ready to finalize'
                     : "Processed batch {$this->_state['batches_processed']}/{$this->_state['batches_total']}",
             ];
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->_failWithError($e->getMessage());
         } finally {
             $this->_releaseStateLock();
@@ -310,7 +310,7 @@ class Maho_FeedManager_Model_Generator_Batch
                 'upload_status' => $uploadResult['status'],
                 'upload_message' => $uploadResult['message'],
             ];
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             return $this->_failWithError($e->getMessage());
         } finally {
             $this->_releaseStateLock();
@@ -529,7 +529,7 @@ class Maho_FeedManager_Model_Generator_Batch
                 $processedInBatch++;
                 $this->_state['processed_count']++;
 
-            } catch (Exception $e) {
+            } catch (\Throwable $e) {
                 $this->_state['errors'][] = "Product {$product->getSku()}: {$e->getMessage()}";
                 $this->_state['processed_count']++;
 
@@ -791,7 +791,7 @@ class Maho_FeedManager_Model_Generator_Batch
                 'status' => Maho_FeedManager_Model_Log::UPLOAD_STATUS_FAILED,
                 'message' => $message,
             ];
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
             Mage::logException($e);
             $message = $e->getMessage();
             $this->_log->recordUploadFailure($destinationId, $message);
