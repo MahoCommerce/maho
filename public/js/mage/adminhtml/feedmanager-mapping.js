@@ -307,12 +307,9 @@ const TransformerModal = {
             '<p class="no-transformers">' + TransformerData.translations.no_transformers + '</p>' +
         '</div>' +
         '<div class="transformer-add-section">' +
-            '<div class="transformer-dropdown-wrapper">' +
-                '<button type="button" id="add-transformer-btn" class="scalable add" onclick="TransformerModal.toggleDropdown()">' +
-                    '<span>' + TransformerData.translations.add_transformer + '</span>' +
-                '</button>' +
-                '<div id="transformer-dropdown" class="transformer-dropdown"></div>' +
-            '</div>' +
+            '<select id="transformer-select" class="transformer-select" onchange="TransformerModal.addFromSelect(this)">' +
+                '<option value="">' + TransformerData.translations.add_transformer + '</option>' +
+            '</select>' +
         '</div>';
     },
 
@@ -434,39 +431,33 @@ const TransformerModal = {
     },
 
     renderDropdown: function() {
-        const dropdown = document.getElementById('transformer-dropdown');
-        let html = '';
+        const select = document.getElementById('transformer-select');
+        // Keep the placeholder option
+        let html = '<option value="">' + TransformerData.translations.add_transformer + '</option>';
 
         for (const category in TransformerData.categories) {
-            html += '<div class="transformer-dropdown-category">' + category + '</div>';
+            html += '<optgroup label="' + category + '">';
             for (const code in TransformerData.categories[category]) {
                 const t = TransformerData.categories[category][code];
-                html += '<div class="transformer-dropdown-item" onclick="TransformerModal.add(\'' + code + '\')">';
-                html += '<div class="transformer-dropdown-item-name">' + t.name + '</div>';
-                html += '<div class="transformer-dropdown-item-desc">' + t.description + '</div>';
-                html += '</div>';
+                html += '<option value="' + code + '">' + t.name + '</option>';
             }
+            html += '</optgroup>';
         }
 
-        dropdown.innerHTML = html;
+        select.innerHTML = html;
     },
 
-    toggleDropdown: function() {
-        const dropdown = document.getElementById('transformer-dropdown');
-        dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
-    },
-
-    hideDropdown: function() {
-        const dropdown = document.getElementById('transformer-dropdown');
-        if (dropdown) {
-            dropdown.style.display = 'none';
-        }
+    addFromSelect: function(select) {
+        const code = select.value;
+        if (!code) return;
+        this.chain.push({ code: code, options: {} });
+        this.renderChainList();
+        select.value = '';
     },
 
     add: function(code) {
         this.chain.push({ code: code, options: {} });
         this.renderChainList();
-        this.hideDropdown();
     },
 
     remove: function(index) {
@@ -505,13 +496,6 @@ const TransformerModal = {
         }
     }
 };
-
-// Close dropdown when clicking outside
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('.transformer-dropdown-wrapper')) {
-        TransformerModal.hideDropdown();
-    }
-});
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', initFeedMappingTab);
