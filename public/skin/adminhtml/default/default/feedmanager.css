@@ -10,7 +10,8 @@
 .category-mapping-container,
 #dynamicrule-cases-container,
 #feed_condition_groups_fieldset,
-.fm-preview-panel {
+.fm-preview-panel,
+.fm-panels-container {
     /* Status colors */
     --fm-success-bg: #d4edda;
     --fm-success-border: #c3e6cb;
@@ -843,6 +844,95 @@
         background: #fff3e0;
         color: #e65100;
     }
+}
+
+/* ============================================
+   Builder Panels (side-by-side tree + properties)
+   ============================================ */
+
+.fm-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.fm-input-lg {
+    min-width: 200px;
+}
+
+.fm-platform-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    background: var(--fm-info-bg);
+    color: var(--fm-info-text);
+    border-radius: var(--fm-radius-sm);
+}
+
+.fm-panels-container {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--fm-border-light);
+    border-radius: var(--fm-radius-md);
+    overflow: hidden;
+}
+
+.fm-panel {
+    min-height: 300px;
+}
+
+.fm-panel-main {
+    flex: 1 1 50%;
+    border-right: 1px solid var(--fm-border-light);
+    overflow-y: auto;
+    max-height: 600px;
+}
+
+.fm-panel-sidebar {
+    flex: 1 1 50%;
+    overflow-y: auto;
+    max-height: 600px;
+}
+
+.fm-panel-header {
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--fm-text-muted);
+    padding: var(--fm-spacing-sm) var(--fm-spacing-md);
+    background: var(--fm-bg-lighter);
+    border-bottom: 1px solid var(--fm-border-light);
+}
+
+.fm-panel-header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.fm-panel-content {
+    padding: var(--fm-spacing-md);
+}
+
+.fm-tree {
+    padding: var(--fm-spacing-sm);
+}
+
+.fm-panel-footer {
+    padding: var(--fm-spacing-sm) var(--fm-spacing-md);
+    border-top: 1px solid var(--fm-border-light);
+    background: var(--fm-bg-lighter);
+    position: sticky;
+    bottom: 0;
+    display: flex;
+    gap: var(--fm-spacing-sm);
+}
+
+.fm-status-muted {
+    color: var(--fm-text-muted);
+    font-size: 12px;
 }
 
 /* ============================================
