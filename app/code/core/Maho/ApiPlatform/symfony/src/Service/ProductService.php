@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -184,6 +184,7 @@ class ProductService
      * @param array|null $sort Sorting options
      * @param bool $usePosIndex Use POS index (includes disabled/out of stock)
      * @param int|null $storeId Filter by store ID
+     * @param array<string, string> $attributeFilters EAV attribute filters (code => value)
      */
     public function searchProducts(
         string $query = '',
@@ -193,6 +194,7 @@ class ProductService
         ?array $sort = null,
         bool $usePosIndex = false,
         ?int $storeId = null,
+        array $attributeFilters = [],
     ): array {
         // If filtering by category and no explicit sort, use category's default sort order
         if (!$sort && isset($filters['categoryId'])) {
@@ -209,7 +211,7 @@ class ProductService
 
         // Use Meilisearch for all product queries when available (much faster than MySQL)
         if ($this->useMeilisearch) {
-            $results = $this->searchWithMeilisearch($query, $page, $pageSize, $filters, $sort, $usePosIndex, $storeId);
+            $results = $this->searchWithMeilisearch($query, $page, $pageSize, $filters, $sort, $usePosIndex, $storeId, $attributeFilters);
 
             // Fallback to MySQL if no results - handles cases where:
             // 1. POS needs to find products by GTIN (even if disabled/out of stock)
@@ -220,17 +222,20 @@ class ProductService
             );
 
             if ($shouldFallback) {
-                $results = $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex);
+                $results = $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex, $attributeFilters);
             }
 
             return $results;
         }
 
-        return $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex);
+        return $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex, $attributeFilters);
     }
 
     /**
      * Search products using Meilisearch (fast, typo-tolerant)
+     */
+    /**
+     * @param array<string, string> $attributeFilters
      */
     private function searchWithMeilisearch(
         string $query,
@@ -240,6 +245,7 @@ class ProductService
         ?array $sort,
         bool $usePosIndex = false,
         ?int $storeId = null,
+        array $attributeFilters = [],
     ): array {
         $searchParams = [
             'limit' => $pageSize,
@@ -289,6 +295,13 @@ class ProductService
         if (isset($filters['priceTo'])) {
             $priceTo = (float) $filters['priceTo'];
             $filterStrings[] = "{$priceField} <= {$priceTo}";
+        }
+
+        // Attribute filters (e.g., brand_id=10, series=1877)
+        foreach ($attributeFilters as $code => $value) {
+            if (preg_match('/^[a-z][a-z0-9_]*$/', $code)) {
+                $filterStrings[] = "{$code} = {$value}";
+            }
         }
 
         if (!empty($filterStrings)) {
@@ -417,6 +430,9 @@ class ProductService
     /**
      * Search products using MySQL (fallback when Meilisearch unavailable)
      */
+    /**
+     * @param array<string, string> $attributeFilters
+     */
     private function searchWithMysql(
         string $query,
         int $page,
@@ -424,6 +440,7 @@ class ProductService
         array $filters,
         ?array $sort,
         bool $includeDisabled = false,
+        array $attributeFilters = [],
     ): array {
         // Get barcode attribute to include in selection
         $barcodeAttr = $this->getBarcodeAttributeCode();
@@ -511,6 +528,29 @@ class ProductService
             $collection->addAttributeToFilter('name', $filters['name']['eq']);
         } elseif (isset($filters['name']['like'])) {
             $collection->addAttributeToFilter('name', ['like' => "%{$filters['name']['like']}%"]);
+        }
+
+        // Apply EAV attribute filters via catalog_product_index_eav
+        $storeId = (int) \Mage::app()->getStore()->getId();
+        foreach ($attributeFilters as $code => $value) {
+            if (!preg_match('/^[a-z][a-z0-9_]*$/', $code)) {
+                continue;
+            }
+            $attribute = \Mage::getSingleton('eav/config')
+                ->getAttribute(\Mage_Catalog_Model_Product::ENTITY, $code);
+            if (!$attribute || !$attribute->getId() || !$attribute->getIsFilterable()) {
+                continue;
+            }
+            $alias = 'attr_filter_' . $code;
+            $attrId = (int) $attribute->getId();
+            $collection->getSelect()->join(
+                [$alias => $collection->getTable('catalog/product_index_eav')],
+                "{$alias}.entity_id = e.entity_id"
+                    . " AND {$alias}.attribute_id = {$attrId}"
+                    . " AND {$alias}.store_id = {$storeId}",
+                [],
+            );
+            $collection->getSelect()->where("{$alias}.value = ?", $value);
         }
 
         // Apply sorting
