@@ -1,0 +1,123 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+namespace Maho\ApiPlatform\Security;
+
+use Mage;
+use Mage_Oauth_Model_Consumer;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\Exception\CustomUserMessageAuthenticationException;
+use Symfony\Component\Security\Http\Authenticator\AbstractAuthenticator;
+use Symfony\Component\Security\Http\Authenticator\Passport\Badge\UserBadge;
+use Symfony\Component\Security\Http\Authenticator\Passport\Passport;
+use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPassport;
+
+/**
+ * Admin API Authenticator
+ * Validates Bearer key:secret tokens for admin API endpoints using OAuth consumers
+ */
+final class AdminApiAuthenticator extends AbstractAuthenticator
+{
+    public const CONSUMER_ATTRIBUTE = '_admin_api_consumer';
+
+    private const AUTHORIZATION_HEADER = 'Authorization';
+    private const BEARER_PREFIX = 'Bearer ';
+
+    /**
+     * Check if this authenticator supports the request
+     */
+    #[\Override]
+    public function supports(Request $request): bool
+    {
+        return str_starts_with($request->getPathInfo(), '/api/admin/');
+    }
+
+    /**
+     * Authenticate the request and return a passport
+     */
+    #[\Override]
+    public function authenticate(Request $request): Passport
+    {
+        $authHeader = $request->headers->get(self::AUTHORIZATION_HEADER, '');
+
+        if (!str_starts_with($authHeader, self::BEARER_PREFIX)) {
+            throw new CustomUserMessageAuthenticationException('Missing or invalid Authorization header');
+        }
+
+        $token = substr($authHeader, strlen(self::BEARER_PREFIX));
+        $parts = explode(':', $token, 2);
+
+        if (count($parts) !== 2) {
+            throw new CustomUserMessageAuthenticationException('Invalid token format. Expected key:secret');
+        }
+
+        [$key, $secret] = $parts;
+
+        /** @var Mage_Oauth_Model_Consumer $consumer */
+        $consumer = Mage::getModel('oauth/consumer')->load($key, 'key');
+
+        if (!$consumer->getId()) {
+            throw new CustomUserMessageAuthenticationException('Invalid consumer key');
+        }
+
+        if ($consumer->getSecret() !== $secret) {
+            throw new CustomUserMessageAuthenticationException('Invalid consumer secret');
+        }
+
+        if (!$consumer->hasAdminAccess()) {
+            throw new CustomUserMessageAuthenticationException('Consumer does not have admin API access');
+        }
+
+        if ($consumer->isExpired()) {
+            throw new CustomUserMessageAuthenticationException('Consumer token has expired');
+        }
+
+        // Update last used timestamp
+        $consumer->touchLastUsed();
+
+        // Store consumer in request for processors to access
+        $request->attributes->set(self::CONSUMER_ATTRIBUTE, $consumer);
+
+        return new SelfValidatingPassport(
+            new UserBadge($consumer->getKey(), fn() => new AdminApiUser($consumer)),
+        );
+    }
+
+    /**
+     * Handle successful authentication
+     */
+    #[\Override]
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
+    {
+        // Return null to allow the request to continue
+        return null;
+    }
+
+    /**
+     * Handle authentication failure
+     */
+    #[\Override]
+    public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
+    {
+        return new JsonResponse([
+            '@context' => '/api/contexts/Error',
+            '@type' => 'hydra:Error',
+            'hydra:title' => 'Unauthorized',
+            'hydra:description' => $exception->getMessage(),
+        ], Response::HTTP_UNAUTHORIZED);
+    }
+}
