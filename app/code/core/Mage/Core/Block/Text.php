@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -20,6 +22,7 @@
  * @method string getAfterText()
  * @method $this setAfterText(string $value)
  */
+
 class Mage_Core_Block_Text extends Mage_Core_Block_Abstract
 {
     /**

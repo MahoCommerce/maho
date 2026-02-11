@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -15,4 +17,5 @@ namespace Maho\Io;
 /**
  * @deprecated since 26.1 Extend Maho\Io directly instead
  */
+
 abstract class AbstractIo extends \Maho\Io implements IoInterface {}

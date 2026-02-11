@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -16,6 +18,7 @@
  *
  * @method $this setWishlistId(int $value)
  */
+
 class Mage_Wishlist_Block_Share_Email_Rss extends Mage_Core_Block_Template
 {
     public function __construct()
