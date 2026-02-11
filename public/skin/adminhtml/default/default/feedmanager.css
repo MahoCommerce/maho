@@ -219,6 +219,14 @@
     color: #e0e0e0;
 }
 
+.fm-preview-count {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+}
+
 .fm-preview-title {
     font-weight: 600;
     color: #e0e0e0;

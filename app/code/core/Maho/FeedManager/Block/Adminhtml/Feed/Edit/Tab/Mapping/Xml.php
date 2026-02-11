@@ -496,6 +496,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         var status = document.createElement("span");
                         status.id = "xml-validation-status";
                         btns.appendChild(status);
+                        var countWrap = document.createElement("span");
+                        countWrap.className = "fm-preview-count";
+                        countWrap.innerHTML = "' . $this->__('Products') . ': <select id=\"xml-preview-count\" onchange=\"XmlBuilder.refreshPreview()\"><option value=\"3\" selected>3</option><option value=\"5\">5</option><option value=\"10\">10</option></select>";
+                        btns.appendChild(countWrap);
                         self.refreshPreview();
                     }
                 });
@@ -504,6 +508,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             refreshPreview: function() {
                 var content = document.getElementById("xml-preview-content");
                 content.textContent = "' . $this->__('Loading...') . '";
+                var countSelect = document.getElementById("xml-preview-count");
+                var previewCount = countSelect ? countSelect.value : "3";
 
                 return mahoFetch(this.previewUrl, {
                     method: "POST",
@@ -511,6 +517,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
                         id: this.feedId,
                         structure: JSON.stringify(this.structure),
                         full_preview: 1,
+                        preview_count: previewCount,
                         form_key: FORM_KEY
                     }),
                     loaderArea: false

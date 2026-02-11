@@ -43,15 +43,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tabs extends Mage_Adminhtml_Blo
             'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_feed_edit_tab_filters')->toHtml(),
         ]);
 
-        // Only show preview and logs tabs for existing feeds
-        if ($this->_getFeed()->getId()) {
-            $this->addTab('preview', [
-                'label' => $this->__('Preview'),
-                'title' => $this->__('Feed Preview'),
-                'content' => $this->getLayout()->createBlock('feedmanager/adminhtml_feed_edit_tab_preview')->toHtml(),
-            ]);
-        }
-
         // Only show logs tab for existing feeds
         if ($this->_getFeed()->getId()) {
             $this->addTab('logs', [

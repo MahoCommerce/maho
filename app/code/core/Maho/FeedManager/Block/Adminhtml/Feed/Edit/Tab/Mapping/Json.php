@@ -483,6 +483,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
                         var status = document.createElement("span");
                         status.id = "json-validation-status";
                         btns.appendChild(status);
+                        var countWrap = document.createElement("span");
+                        countWrap.className = "fm-preview-count";
+                        countWrap.innerHTML = "' . $this->__('Products') . ': <select id=\"json-preview-count\" onchange=\"JsonBuilder.refreshPreview()\"><option value=\"3\" selected>3</option><option value=\"5\">5</option><option value=\"10\">10</option></select>";
+                        btns.appendChild(countWrap);
                         self.refreshPreview();
                     }
                 });
@@ -491,12 +495,15 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
             refreshPreview: function() {
                 var content = document.getElementById("json-preview-content");
                 content.textContent = "' . $this->__('Loading...') . '";
+                var countSelect = document.getElementById("json-preview-count");
+                var previewCount = countSelect ? countSelect.value : "3";
 
                 mahoFetch(this.previewUrl, {
                     method: "POST",
                     body: new URLSearchParams({
                         id: this.feedId,
                         structure: JSON.stringify(this.structure),
+                        preview_count: previewCount,
                         form_key: FORM_KEY
                     }),
                     loaderArea: false

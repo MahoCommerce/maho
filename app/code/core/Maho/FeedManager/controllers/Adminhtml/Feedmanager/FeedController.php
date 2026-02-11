@@ -449,84 +449,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     /**
-     * AJAX action to generate feed preview
-     */
-    public function previewAction(): void
-    {
-        $feedId = (int) $this->getRequest()->getParam('feed_id');
-        $previewCount = (int) $this->getRequest()->getParam('preview_count', 3);
-
-        // Limit preview count
-        $previewCount = min(max($previewCount, 1), 10);
-
-        try {
-            // Get form data for template preview
-            $postData = $this->getRequest()->getPost();
-
-            // Load existing feed or create temporary one
-            $feed = Mage::getModel('feedmanager/feed');
-            if ($feedId) {
-                $feed->load($feedId);
-            }
-
-            // Apply posted form data to the feed for preview
-            if ($postData) {
-                // Apply XML template data if provided
-                if (!empty($postData['xml_header'])) {
-                    $feed->setXmlHeader($postData['xml_header']);
-                }
-                if (!empty($postData['xml_item_template'])) {
-                    $feed->setXmlItemTemplate($postData['xml_item_template']);
-                }
-                if (!empty($postData['xml_footer'])) {
-                    $feed->setXmlFooter($postData['xml_footer']);
-                }
-
-                // Apply format settings
-                if (!empty($postData['price_currency'])) {
-                    $feed->setPriceCurrency($postData['price_currency']);
-                }
-                if (isset($postData['price_decimals'])) {
-                    $feed->setPriceDecimals($postData['price_decimals']);
-                }
-                if (!empty($postData['price_decimal_point'])) {
-                    $feed->setPriceDecimalPoint($postData['price_decimal_point']);
-                }
-                if (isset($postData['price_thousands_sep'])) {
-                    $feed->setPriceThousandsSep($postData['price_thousands_sep']);
-                }
-                if (!empty($postData['tax_mode'])) {
-                    $feed->setTaxMode($postData['tax_mode']);
-                }
-                if (!empty($postData['store_id'])) {
-                    $feed->setStoreId($postData['store_id']);
-                }
-            }
-
-            // Generate preview
-            $generator = new Maho_FeedManager_Model_Generator();
-            $preview = $generator->generatePreview($feed, $previewCount);
-
-            $this->_sendJsonResponse([
-                'success' => true,
-                'preview' => $preview,
-            ]);
-
-        } catch (Exception $e) {
-            $this->_sendJsonResponse([
-                'success' => false,
-                'message' => $e->getMessage(),
-            ]);
-        }
-    }
-
-    /**
      * AJAX action for CSV preview - uses Mapper for consistent output
      */
     public function csvPreviewAction(): void
     {
         $feedId = (int) $this->getRequest()->getParam('id');
         $columns = $this->getRequest()->getParam('columns');
+        $previewCount = min(max((int) $this->getRequest()->getParam('preview_count', 3), 1), 10);
 
         try {
             /** @var Maho_FeedManager_Model_Feed $feed */
@@ -550,7 +479,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $mapper->setMappingsFromCsvColumns($columnsData);
 
             // Get sample products
-            $collection = $this->_getPreviewCollection();
+            $collection = $this->_getPreviewCollection($previewCount);
 
             $output = [];
 
@@ -587,6 +516,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     {
         $feedId = (int) $this->getRequest()->getParam('id');
         $structure = $this->getRequest()->getParam('structure');
+        $previewCount = min(max((int) $this->getRequest()->getParam('preview_count', 3), 1), 10);
 
         try {
             /** @var Maho_FeedManager_Model_Feed $feed */
@@ -611,7 +541,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $mapper = new Maho_FeedManager_Model_Mapper($feed);
 
             // Get sample products
-            $collection = $this->_getPreviewCollection(2);
+            $collection = $this->_getPreviewCollection($previewCount);
 
             $products = [];
             foreach ($collection as $product) {
@@ -639,6 +569,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $feedId = (int) $this->getRequest()->getParam('id');
         $structure = $this->getRequest()->getParam('structure');
         $fullPreview = (bool) $this->getRequest()->getParam('full_preview');
+        $previewCount = min(max((int) $this->getRequest()->getParam('preview_count', 3), 1), 10);
 
         try {
             /** @var Maho_FeedManager_Model_Feed $feed */
@@ -662,7 +593,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $mapper = new Maho_FeedManager_Model_Mapper($feed);
 
             // Get sample products
-            $collection = $this->_getPreviewCollection(2);
+            $collection = $this->_getPreviewCollection($previewCount);
 
             $xml = '';
 
