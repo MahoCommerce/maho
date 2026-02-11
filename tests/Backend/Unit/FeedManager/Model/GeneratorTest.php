@@ -179,6 +179,165 @@ describe('Feed Generation - XML', function () {
     });
 });
 
+/**
+ * Create a test feed pointing to a fresh non-existent output directory
+ *
+ * @return array{0: Maho_FeedManager_Model_Feed, 1: string}
+ */
+function createTestFeedInFreshDirectory(string $format, ?string $relativeDir = null): array
+{
+    $relativeDir ??= 'feeds/test-integration-' . uniqid();
+    Mage::app()->getStore()->setConfig('feedmanager/general/output_directory', $relativeDir);
+
+    $feed = createTestFeed($format);
+
+    return [$feed, $relativeDir];
+}
+
+/**
+ * Clean up a test feed and its temporary output directory
+ */
+function cleanupTestFeedAndDirectory(Maho_FeedManager_Model_Feed $feed, string $relativeDir): void
+{
+    cleanupTestFeed($feed);
+
+    $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
+    if (is_dir($absoluteDir)) {
+        // Remove any remaining files
+        $files = glob($absoluteDir . '/*');
+        if ($files) {
+            foreach ($files as $file) {
+                @unlink($file);
+            }
+        }
+        // Remove directory tree (deepest first)
+        $dirs = [];
+        $parts = explode('/', $relativeDir);
+        $path = Mage::getBaseDir('media');
+        foreach ($parts as $part) {
+            $path .= DS . $part;
+            $dirs[] = $path;
+        }
+        foreach (array_reverse($dirs) as $dir) {
+            if (is_dir($dir)) {
+                @rmdir($dir);
+            }
+        }
+    }
+
+    // Restore default config
+    Mage::app()->getStore()->setConfig('feedmanager/general/output_directory', 'feeds');
+}
+
+describe('Feed Generation - Fresh Output Directory', function () {
+    test('generates CSV feed into non-existent directory', function () {
+        [$feed, $relativeDir] = createTestFeedInFreshDirectory('csv');
+
+        try {
+            $generator = new Maho_FeedManager_Model_Generator();
+            $log = $generator->generate($feed);
+
+            $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
+            expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
+
+            $outputPath = $feed->getOutputFilePath();
+            expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
+            expect(filesize($outputPath))->toBeGreaterThan(0);
+
+            expect($log->getStatus())->toBe('completed');
+            expect($log->getProductCount())->toBeGreaterThan(0);
+
+            $validator = new Maho_FeedManager_Model_Validator();
+            expect($validator->validate($outputPath, 'csv'))->toBeTrue();
+        } finally {
+            cleanupTestFeedAndDirectory($feed, $relativeDir);
+        }
+    });
+
+    test('generates JSON feed into non-existent directory', function () {
+        [$feed, $relativeDir] = createTestFeedInFreshDirectory('json');
+
+        try {
+            $generator = new Maho_FeedManager_Model_Generator();
+            $log = $generator->generate($feed);
+
+            $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
+            expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
+
+            $outputPath = $feed->getOutputFilePath();
+            expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
+            expect(filesize($outputPath))->toBeGreaterThan(0);
+
+            expect($log->getStatus())->toBe('completed');
+            expect($log->getProductCount())->toBeGreaterThan(0);
+
+            $validator = new Maho_FeedManager_Model_Validator();
+            expect($validator->validate($outputPath, 'json'))->toBeTrue();
+
+            $content = file_get_contents($outputPath);
+            $data = json_decode($content, true);
+            expect(json_last_error())->toBe(JSON_ERROR_NONE);
+            expect($data)->toHaveKey('products');
+            expect(count($data['products']))->toBeGreaterThan(0);
+        } finally {
+            cleanupTestFeedAndDirectory($feed, $relativeDir);
+        }
+    });
+
+    test('generates XML feed into non-existent directory', function () {
+        [$feed, $relativeDir] = createTestFeedInFreshDirectory('xml');
+
+        try {
+            $generator = new Maho_FeedManager_Model_Generator();
+            $log = $generator->generate($feed);
+
+            $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
+            expect(is_dir($absoluteDir))->toBeTrue('Output directory should have been created');
+
+            $outputPath = $feed->getOutputFilePath();
+            expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
+            expect(filesize($outputPath))->toBeGreaterThan(0);
+
+            expect($log->getStatus())->toBe('completed');
+            expect($log->getProductCount())->toBeGreaterThan(0);
+
+            $validator = new Maho_FeedManager_Model_Validator();
+            expect($validator->validate($outputPath, 'xml'))->toBeTrue();
+
+            $content = file_get_contents($outputPath);
+            $xml = simplexml_load_string($content);
+            expect($xml)->not()->toBeFalse();
+        } finally {
+            cleanupTestFeedAndDirectory($feed, $relativeDir);
+        }
+    });
+
+    test('generates feed into nested non-existent directory', function () {
+        $relativeDir = 'feeds/deep/nested/test-' . uniqid();
+        [$feed, $relativeDir] = createTestFeedInFreshDirectory('csv', $relativeDir);
+
+        try {
+            $generator = new Maho_FeedManager_Model_Generator();
+            $log = $generator->generate($feed);
+
+            $absoluteDir = Mage::getBaseDir('media') . DS . $relativeDir;
+            expect(is_dir($absoluteDir))->toBeTrue('Nested output directory should have been created recursively');
+
+            $outputPath = $feed->getOutputFilePath();
+            expect(file_exists($outputPath))->toBeTrue('Feed file should exist on disk');
+            expect(filesize($outputPath))->toBeGreaterThan(0);
+
+            expect($log->getStatus())->toBe('completed');
+            expect($log->getProductCount())->toBeGreaterThan(0);
+
+            $validator = new Maho_FeedManager_Model_Validator();
+            expect($validator->validate($outputPath, 'csv'))->toBeTrue();
+        } finally {
+            cleanupTestFeedAndDirectory($feed, $relativeDir);
+        }
+    });
+});
+
 describe('Validator', function () {
     test('rejects non-existent file', function () {
         $validator = new Maho_FeedManager_Model_Validator();
