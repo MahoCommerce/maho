@@ -10,6 +10,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 /**
  * Entity attribute frontend interface
  * Frontend is providing the user interface for the attribute

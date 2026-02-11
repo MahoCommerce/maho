@@ -11,6 +11,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 /**
  * @method Mage_Api_Model_Resource_Role _getResource()
  * @method Mage_Api_Model_Resource_Role getResource()

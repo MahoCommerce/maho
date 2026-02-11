@@ -10,6 +10,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 /**
  * Admin order totals block - gift card totals are added via child block
  * @see Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard
