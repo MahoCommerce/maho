@@ -197,6 +197,25 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
 
         try {
             $model->addData($data);
+
+            // Handle admin API permissions
+            $permissions = $this->getRequest()->getPost('permissions', []);
+            if (!empty($permissions)) {
+                $model->setAdminPermissions(json_encode($permissions));
+            } else {
+                $model->setAdminPermissions(null);
+            }
+
+            $storeIds = $this->getRequest()->getPost('store_ids', []);
+            if (!empty($storeIds)) {
+                $model->setStoreIds(json_encode($storeIds));
+            } else {
+                $model->setStoreIds('all');
+            }
+
+            $expiresAt = $this->getRequest()->getPost('expires_at');
+            $model->setExpiresAt($expiresAt ?: null);
+
             $model->save();
             $this->_getSession()->addSuccess($this->__('The consumer has been saved.'));
             $this->_setFormData(null);
