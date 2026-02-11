@@ -259,16 +259,20 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     {
         $res = [];
         foreach ($this->getConfigurableAttributes($product) as $attribute) {
+            $productAttribute = $attribute->getProductAttribute();
+            if (!$productAttribute) {
+                continue;
+            }
             $res[] = [
                 'id'             => $attribute->getId(),
                 'label'          => $attribute->getLabel(),
                 'use_default'    => $attribute->getUseDefault(),
                 'position'       => $attribute->getPosition(),
                 'values'         => $attribute->getPrices() ?: [],
-                'attribute_id'   => $attribute->getProductAttribute()->getId(),
-                'attribute_code' => $attribute->getProductAttribute()->getAttributeCode(),
-                'frontend_label' => $attribute->getProductAttribute()->getFrontend()->getLabel(),
-                'store_label'    => $attribute->getProductAttribute()->getStoreLabel(),
+                'attribute_id'   => $productAttribute->getId(),
+                'attribute_code' => $productAttribute->getAttributeCode(),
+                'frontend_label' => $productAttribute->getFrontend()->getLabel(),
+                'store_label'    => $productAttribute->getStoreLabel(),
             ];
         }
         return $res;
@@ -405,7 +409,9 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
             }
         }
         foreach ($this->getConfigurableAttributes($product) as $attribute) {
-            $this->getProduct($product)->setData($attribute->getProductAttribute()->getAttributeCode());
+            if ($attribute->getProductAttribute()) {
+                $this->getProduct($product)->setData($attribute->getProductAttribute()->getAttributeCode());
+            }
         }
 
         return $this;
