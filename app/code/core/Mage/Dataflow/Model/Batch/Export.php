@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -22,6 +24,7 @@
  * @method int getStatus()
  * @method $this setStatus(int $value)
  */
+
 class Mage_Dataflow_Model_Batch_Export extends Mage_Dataflow_Model_Batch_Abstract
 {
     #[\Override]

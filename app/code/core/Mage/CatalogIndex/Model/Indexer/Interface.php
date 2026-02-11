@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -13,6 +15,7 @@
 /**
  * Catalog indexer interface
  */
+
 interface Mage_CatalogIndex_Model_Indexer_Interface
 {
     /**

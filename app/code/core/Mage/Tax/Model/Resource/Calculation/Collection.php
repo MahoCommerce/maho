@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -13,6 +15,7 @@
 /**
  * @method Mage_Tax_Model_Calculation[] getItems()
  */
+
 class Mage_Tax_Model_Resource_Calculation_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
     #[\Override]
