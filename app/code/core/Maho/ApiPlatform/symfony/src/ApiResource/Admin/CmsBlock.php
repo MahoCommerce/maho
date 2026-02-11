@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Maho\ApiPlatform\ApiResource\Admin;
+
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\State\Admin\CmsBlockProcessor;
+
+#[ApiResource(
+    uriTemplate: '/admin/cms-blocks',
+    shortName: 'AdminCmsBlock',
+    operations: [
+        new Post(
+            processor: CmsBlockProcessor::class,
+            description: 'Creates a new static block with content sanitization',
+        ),
+    ],
+    security: "is_granted('ROLE_ADMIN_API')",
+)]
+#[ApiResource(
+    uriTemplate: '/admin/cms-blocks/{id}',
+    shortName: 'AdminCmsBlock',
+    operations: [
+        new Put(
+            processor: CmsBlockProcessor::class,
+            description: 'Updates an existing static block with content sanitization',
+        ),
+        new Delete(
+            processor: CmsBlockProcessor::class,
+            description: 'Deletes a static block',
+        ),
+    ],
+    security: "is_granted('ROLE_ADMIN_API')",
+)]
+class CmsBlock
+{
+    public ?int $id = null;
+    public string $identifier = '';
+    public string $title = '';
+    public string $content = '';
+    public bool $isActive = true;
+    /** @var string[] */
+    public array $stores = ['all'];
+}
