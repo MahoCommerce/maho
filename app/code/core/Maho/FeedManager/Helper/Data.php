@@ -33,8 +33,8 @@ class Maho_FeedManager_Helper_Data extends Mage_Core_Helper_Abstract
         $relative = Mage::getStoreConfig(self::XML_PATH_OUTPUT_DIRECTORY) ?: 'feeds';
         $path = Mage::getBaseDir('media') . DS . $relative;
 
-        if (!is_dir($path)) {
-            mkdir($path, 0755, true);
+        if (!is_dir($path) && !mkdir($path, 0755, true)) {
+            throw new RuntimeException("Feed output directory could not be created: {$path}");
         }
 
         return $path;
