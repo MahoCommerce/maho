@@ -25,6 +25,13 @@ security:
             pattern: ^/api/admin/graphql
             security: false
 
+        # Admin Content API - OAuth consumer key:secret auth
+        admin_api:
+            pattern: ^/api/admin/
+            stateless: true
+            custom_authenticators:
+                - Maho\ApiPlatform\Security\AdminApiAuthenticator
+
         # Public GraphQL endpoint - OAuth2 auth
         api_graphql:
             pattern: ^/api/graphql
@@ -57,6 +64,7 @@ security:
         - { path: ^/api/stores, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/countries, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/store-config, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/layered-filters, roles: PUBLIC_ACCESS, methods: [GET] }
         # Token/auth endpoints are public
         - { path: ^/api/auth, roles: PUBLIC_ACCESS }
         # Guest cart creation
@@ -66,5 +74,7 @@ security:
         # Newsletter subscribe/unsubscribe (guests allowed)
         - { path: ^/api/newsletter/subscribe, roles: PUBLIC_ACCESS, methods: [POST] }
         - { path: ^/api/newsletter/unsubscribe, roles: PUBLIC_ACCESS, methods: [POST] }
+        # Contact form (public)
+        - { path: ^/api/contact, roles: PUBLIC_ACCESS }
         # Everything else requires auth + resource-level permission check
         - { path: ^/api, roles: [IS_AUTHENTICATED_FULLY, API_USER_PERMISSION] }
