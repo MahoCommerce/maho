@@ -75,4 +75,5 @@ declare(strict_types=1);
  * @method $this setBaseCurrencyCode(string $value)
  * @method $this setStoreId(int $value)
  */
+
 class Mage_Shipping_Model_Shipment_Request extends \Maho\DataObject {}

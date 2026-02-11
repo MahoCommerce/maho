@@ -16,6 +16,7 @@ declare(strict_types=1);
  * @method $this setCode(string $value)
  * @method $this setTotalConfigNode(array $value)
  */
+
 abstract class Mage_Sales_Model_Order_Total_Abstract extends \Maho\DataObject
 {
     /**

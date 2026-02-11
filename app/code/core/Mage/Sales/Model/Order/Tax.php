@@ -37,6 +37,7 @@ declare(strict_types=1);
  * @method int getHidden()
  * @method $this setHidden(int $value)
  */
+
 class Mage_Sales_Model_Order_Tax extends Mage_Core_Model_Abstract
 {
     #[\Override]

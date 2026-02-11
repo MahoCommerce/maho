@@ -19,6 +19,7 @@ declare(strict_types=1);
  * @method string getKeywords()
  * @method string getRobots()
  */
+
 class Mage_Core_Block_Text_Tag_Meta extends Mage_Core_Block_Text
 {
     /**

@@ -31,6 +31,7 @@ declare(strict_types=1);
  * @method string getComment()
  * @method $this setComment(string $value)
  */
+
 class Mage_Dataflow_Model_Session extends Mage_Core_Model_Abstract
 {
     #[\Override]

@@ -17,6 +17,7 @@ declare(strict_types=1);
  *
  * @method $this setSharingForm(array $value)
  */
+
 class Mage_Wishlist_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()

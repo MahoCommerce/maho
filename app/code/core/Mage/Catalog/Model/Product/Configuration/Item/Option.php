@@ -11,6 +11,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 class Mage_Catalog_Model_Product_Configuration_Item_Option extends \Maho\DataObject implements Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
 {
     /**

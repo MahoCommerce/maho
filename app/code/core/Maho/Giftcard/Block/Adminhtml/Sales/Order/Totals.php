@@ -14,6 +14,7 @@ declare(strict_types=1);
  * Admin order totals block - gift card totals are added via child block
  * @see Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard
  */
+
 class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals extends Mage_Adminhtml_Block_Sales_Order_Totals
 {
     // Gift card totals are added via initTotals() in child block

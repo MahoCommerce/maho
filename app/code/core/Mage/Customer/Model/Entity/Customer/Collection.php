@@ -17,4 +17,5 @@ declare(strict_types=1);
  *
  * @method Mage_Customer_Model_Entity_Customer getEntity()
  */
+
 class Mage_Customer_Model_Entity_Customer_Collection extends Mage_Customer_Model_Resource_Customer_Collection {}

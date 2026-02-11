@@ -27,6 +27,7 @@ declare(strict_types=1);
  * @method $this setSingleFile(bool $isSingleFile)
  *      Enable single file upload.
  */
+
 class Mage_Uploader_Model_Config_Uploader extends Mage_Uploader_Model_Config_Abstract
 {
     /**

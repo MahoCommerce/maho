@@ -17,4 +17,5 @@ declare(strict_types=1);
  *
  * @method $this setEmailValue(string $value)
  */
+
 class Mage_Customer_Block_Account_Forgotpassword extends Mage_Core_Block_Template {}

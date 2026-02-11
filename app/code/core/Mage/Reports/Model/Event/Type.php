@@ -19,6 +19,7 @@ declare(strict_types=1);
  * @method int getCustomerLogin()
  * @method $this setCustomerLogin(int $value)
  */
+
 class Mage_Reports_Model_Event_Type extends Mage_Core_Model_Abstract
 {
     #[\Override]

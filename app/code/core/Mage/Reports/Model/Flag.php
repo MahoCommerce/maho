@@ -10,6 +10,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 class Mage_Reports_Model_Flag extends Mage_Core_Model_Flag
 {
     public const REPORT_ORDER_FLAG_CODE    = 'report_order_aggregated';

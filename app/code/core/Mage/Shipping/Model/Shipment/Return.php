@@ -68,4 +68,5 @@ declare(strict_types=1);
  * @method $this setPackageWeight(float $value)
  * @method float getPackageWeight()
  */
+
 class Mage_Shipping_Model_Shipment_Return extends \Maho\DataObject {}

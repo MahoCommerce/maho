@@ -15,6 +15,7 @@ declare(strict_types=1);
  * @method $this setAdmin(Mage_Admin_Model_User $value)
  * @method Mage_Customer_Model_Customer getCustomer()
  */
+
 class Mage_Rss_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()

@@ -16,6 +16,7 @@ declare(strict_types=1);
  * @method int getRatingId()
  * @method $this setRatingOptions(Mage_Rating_Model_Resource_Rating_Option_Collection $options)
  */
+
 class Mage_Rating_Model_Rating_Option_Vote extends Mage_Core_Model_Abstract
 {
     public function __construct()

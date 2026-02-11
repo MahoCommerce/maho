@@ -33,6 +33,7 @@ declare(strict_types=1);
  *
  * @package    Mage_Shipping
  */
+
 class Mage_Shipping_Model_Tracking_Result_Status extends Mage_Shipping_Model_Tracking_Result_Abstract
 {
     /**

@@ -9,6 +9,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 interface Mage_Api_Model_Acl_Assert_Interface
 {
     /**

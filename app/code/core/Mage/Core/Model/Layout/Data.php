@@ -21,6 +21,7 @@ declare(strict_types=1);
  * @method int getSortOrder()
  * @method $this setSortOrder(int $value)
  */
+
 class Mage_Core_Model_Layout_Data extends Mage_Core_Model_Abstract
 {
     #[\Override]

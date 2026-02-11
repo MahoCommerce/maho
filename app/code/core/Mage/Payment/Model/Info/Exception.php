@@ -15,4 +15,5 @@ declare(strict_types=1);
  *
  * Allows dispatching before and after events for each controller action
  */
+
 class Mage_Payment_Model_Info_Exception extends Mage_Core_Exception {}

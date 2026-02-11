@@ -17,4 +17,5 @@ declare(strict_types=1);
  *
  * @method int getStoreId()
  */
+
 class Mage_Customer_Model_Entity_Customer extends Mage_Customer_Model_Resource_Customer {}

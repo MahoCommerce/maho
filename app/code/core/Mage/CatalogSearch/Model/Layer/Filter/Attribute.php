@@ -16,6 +16,7 @@ declare(strict_types=1);
  *
  * @package    Mage_CatalogSearch
  */
+
 class Mage_CatalogSearch_Model_Layer_Filter_Attribute extends Mage_Catalog_Model_Layer_Filter_Attribute
 {
     /**

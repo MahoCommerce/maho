@@ -11,6 +11,7 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
 class Mage_Paypal_Block_Adminhtml_System_Config_Payflowlink_Info extends Mage_Adminhtml_Block_System_Config_Form_Field
 {
     /**

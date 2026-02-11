@@ -23,6 +23,7 @@ declare(strict_types=1);
  * @method int getStatus()
  * @method $this setStatus(int $value)
  */
+
 class Mage_Dataflow_Model_Batch_Import extends Mage_Dataflow_Model_Batch_Abstract
 {
     #[\Override]

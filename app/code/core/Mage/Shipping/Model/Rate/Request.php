@@ -126,4 +126,5 @@ declare(strict_types=1);
  * @method int getWebsiteId()
  * @method $this setWebsiteId(int $value)
  */
+
 class Mage_Shipping_Model_Rate_Request extends \Maho\DataObject {}
