@@ -42,10 +42,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
             $this->_resetConditions();
 
             if ($this->getConditionsSerialized()) {
-                $conditions = $this->getConditionsSerialized();
-                if (is_string($conditions)) {
-                    $conditions = @unserialize($conditions, ['allowed_classes' => false]);
-                }
+                $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->setConditions([])->loadArray($conditions);
                 }
@@ -82,9 +79,14 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     #[\Override]
     protected function _beforeSave(): self
     {
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($this->getConditions()) {
-            $this->setConditionsSerialized(serialize($this->getConditions()->asArray()));
+            try {
+                $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             $this->unsConditions();
         }
 
@@ -132,10 +134,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
         // Initialize conditions from serialized data
         if ($this->getConditionsSerialized()) {
-            $conditions = $this->getConditionsSerialized();
-            if (is_string($conditions)) {
-                $conditions = @unserialize($conditions, ['allowed_classes' => false]);
-            }
+            $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
             if (is_array($conditions) && !empty($conditions)) {
                 // Reset and reload conditions
                 $this->_conditions = $this->getConditionsInstance();

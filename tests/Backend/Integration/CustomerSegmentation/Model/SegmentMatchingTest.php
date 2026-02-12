@@ -867,7 +867,7 @@ describe('Segment Matching Integration', function () {
         $segment->setIsActive(1);
         $segment->setWebsiteIds('1'); // Base website
         $segment->setCustomerGroupIds('0,1,2,3'); // All customer groups
-        $segment->setConditionsSerialized(serialize($conditions));
+        $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');
         $segment->save();
