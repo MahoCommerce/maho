@@ -19,7 +19,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
     #[\Override]
     public function preDispatch()
     {
-        $this->_setForcedFormKeyActions(['delete', 'save', 'massStatus', 'massDelete']);
+        $this->_setForcedFormKeyActions(['delete', 'save', 'test', 'massStatus', 'massDelete']);
         return parent::preDispatch();
     }
 

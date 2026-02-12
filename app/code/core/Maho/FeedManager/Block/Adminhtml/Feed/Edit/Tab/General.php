@@ -230,10 +230,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_General extends Mage_Adminh
      */
     protected function _getUploadScript(): string
     {
-        $uploading = addslashes($this->__('Uploading...'));
-        $uploadNow = addslashes($this->__('Upload Now'));
-        $success = addslashes($this->__('Upload successful!'));
-        $failed = addslashes($this->__('Upload failed'));
+        $uploading = Mage::helper('core')->jsonEncode($this->__('Uploading...'));
+        $uploadNow = Mage::helper('core')->jsonEncode($this->__('Upload Now'));
+        $success = Mage::helper('core')->jsonEncode($this->__('Upload successful!'));
+        $failed = Mage::helper('core')->jsonEncode($this->__('Upload failed'));
 
         return <<<JS
 <script>
@@ -244,7 +244,7 @@ const FeedUploader = {
 
         if (btn) {
             btn.disabled = true;
-            btn.querySelector('span span span').textContent = '{$uploading}';
+            btn.querySelector('span span span').textContent = {$uploading};
         }
         if (status) {
             status.innerHTML = '';
@@ -258,25 +258,25 @@ const FeedUploader = {
         .then(data => {
             if (btn) {
                 btn.disabled = false;
-                btn.querySelector('span span span').textContent = '{$uploadNow}';
+                btn.querySelector('span span span').textContent = {$uploadNow};
             }
             if (data.success) {
                 if (status) {
-                    status.innerHTML = '<span class="fm-status-success">✓ ' + escapeHtml(data.message || '{$success}') + '</span>';
+                    status.innerHTML = '<span class="fm-status-success">✓ ' + escapeHtml(data.message || {$success}) + '</span>';
                 }
             } else {
                 if (status) {
-                    status.innerHTML = '<span class="fm-status-error">✗ ' + escapeHtml(data.message || '{$failed}') + '</span>';
+                    status.innerHTML = '<span class="fm-status-error">✗ ' + escapeHtml(data.message || {$failed}) + '</span>';
                 }
             }
         })
         .catch(error => {
             if (btn) {
                 btn.disabled = false;
-                btn.querySelector('span span span').textContent = '{$uploadNow}';
+                btn.querySelector('span span span').textContent = {$uploadNow};
             }
             if (status) {
-                status.innerHTML = '<span class="fm-status-error">✗ ' + escapeHtml(error.message || '{$failed}') + '</span>';
+                status.innerHTML = '<span class="fm-status-error">✗ ' + escapeHtml(error.message || {$failed}) + '</span>';
             }
         });
     }

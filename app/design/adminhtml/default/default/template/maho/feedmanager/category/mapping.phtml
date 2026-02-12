@@ -101,7 +101,7 @@ const CategoryMapping = {
         autoMap: '<?php echo $this->getAutoMapUrl() ?>',
         searchTaxonomy: '<?php echo $this->getSearchTaxonomyUrl() ?>'
     },
-    currentPlatform: '<?php echo $this->jsQuoteEscape($currentPlatform ?: 'google') ?>',
+    currentPlatform: <?php echo Mage::helper('core')->jsonEncode($currentPlatform ?: 'google') ?>,
     searchTimeout: null,
     bulkMode: false,
     bulkCategoryId: null,
