@@ -61,7 +61,7 @@ try {
 
         // Filter out columns that don't exist in this table
         $tableColumns = $connection->describeTable($tableName);
-        $columns = array_filter($tableConfig['columns'], fn ($col) => isset($tableColumns[$col]));
+        $columns = array_filter($tableConfig['columns'], fn($col) => isset($tableColumns[$col]));
         if (empty($columns)) {
             continue;
         }
