@@ -305,10 +305,12 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
         if (isset($data['type']) && $data['type'] === 'salesrule/rule_condition_product' && isset($data['attribute'])) {
             $result[] = $data['attribute'];
         }
-        if (isset($data['conditions']) && is_array($data['conditions'])) {
-            foreach ($data['conditions'] as $condition) {
-                if (is_array($condition)) {
-                    $this->_collectProductAttributes($condition, $result);
+        foreach (['conditions', 'actions'] as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                foreach ($data[$key] as $child) {
+                    if (is_array($child)) {
+                        $this->_collectProductAttributes($child, $result);
+                    }
                 }
             }
         }

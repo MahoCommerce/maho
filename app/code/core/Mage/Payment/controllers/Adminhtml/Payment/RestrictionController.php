@@ -145,11 +145,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             $conditionsArray = $rule->getConditions()->asArray();
             $data['conditions_serialized'] = Mage::helper('core')->jsonEncode($conditionsArray);
 
-            // Debug logging
-            Mage::log('Payment Restriction Save - Posted Data: ' . print_r($data, true), null, 'payment_restrictions.log');
-            Mage::log('Payment Restriction Save - Conditions Array: ' . print_r($conditionsArray, true), null, 'payment_restrictions.log');
-            Mage::log('Payment Restriction Save - Encoded Length: ' . strlen($data['conditions_serialized']), null, 'payment_restrictions.log');
-
             $model->setData($data);
 
             try {
