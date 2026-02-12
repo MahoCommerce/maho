@@ -956,4 +956,42 @@ interface AdapterInterface
      * @param string|null $timestamp Optional timestamp expression (defaults to current time)
      */
     public function getUnixTimestampExpr(?string $timestamp = null): \Maho\Db\Expr;
+
+    /**
+     * Extract a scalar value from a JSON column at a given path
+     *
+     * Returns a SQL expression that extracts and unquotes a value from JSON data.
+     * The path uses MySQL/SQLite dot notation (e.g., '$.name', '$.address.city').
+     * Platform adapters translate this internally for their native syntax.
+     *
+     * @param string $column The column name containing JSON data
+     * @param string $path The JSON path (e.g., '$.name', '$.address.city')
+     */
+    public function getJsonExtractExpr(string $column, string $path): \Maho\Db\Expr;
+
+    /**
+     * Search for a string value within a JSON column
+     *
+     * Returns a boolean SQL expression that checks if a value exists at the given path.
+     * Supports '$**' recursive wildcard for deep search (e.g., '$**.attribute').
+     * The value parameter is a plain PHP string — quoting is handled internally.
+     *
+     * @param string $column The column name containing JSON data
+     * @param string $value The string value to search for
+     * @param string $path The JSON path, supports '$**' recursive wildcard
+     */
+    public function getJsonSearchExpr(string $column, string $value, string $path): \Maho\Db\Expr;
+
+    /**
+     * Check if a JSON column contains a specific JSON value
+     *
+     * Returns a boolean SQL expression. The value parameter must be a JSON-encoded
+     * string (e.g., '"hello"', '42', 'true'). Optional path scopes the check.
+     * Wildcard paths ('$**') are not supported — use getJsonSearchExpr() instead.
+     *
+     * @param string $column The column name containing JSON data
+     * @param string $value A JSON-encoded value (e.g., '"hello"', '42')
+     * @param string|null $path Optional JSON path to scope the check
+     */
+    public function getJsonContainsExpr(string $column, string $value, ?string $path = null): \Maho\Db\Expr;
 }
