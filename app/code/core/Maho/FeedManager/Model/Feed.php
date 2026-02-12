@@ -167,7 +167,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
         if ($this->hasConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (!empty($conditions)) {
-                $conditions = Mage::helper('core/unserializeArray')->unserialize($conditions);
+                $conditions = Mage::helper('core')->jsonDecode($conditions);
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->loadArray($conditions);
                 }
@@ -226,9 +226,9 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
             $this->setFilename($filename);
         }
 
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($this->_conditions) {
-            $this->setConditionsSerialized(serialize($this->_conditions->asArray()));
+            $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->_conditions->asArray()));
             $this->_conditions = null;
         }
 

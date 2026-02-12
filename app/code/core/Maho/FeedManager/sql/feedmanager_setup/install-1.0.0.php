@@ -127,7 +127,7 @@ $table = $connection
     ], 'Product Filters (JSON)')
     ->addColumn('conditions_serialized', Maho\Db\Ddl\Table::TYPE_TEXT, '1M', [
         'nullable' => true,
-    ], 'Product Conditions (Serialized)')
+    ], 'Product Conditions (JSON)')
     ->addColumn('exclude_disabled', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
         'unsigned' => true,
         'nullable' => false,
