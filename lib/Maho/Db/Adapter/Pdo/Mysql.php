@@ -3533,6 +3533,65 @@ class Mysql extends AbstractPdoAdapter
     }
 
     /**
+     * Extract a scalar value from a JSON column at a given path (MySQL)
+     */
+    #[\Override]
+    public function getJsonExtractExpr(string $column, string $path): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf(
+            'JSON_UNQUOTE(JSON_EXTRACT(%s, %s))',
+            $column,
+            $this->quote($path),
+        ));
+    }
+
+    /**
+     * Search for a string value within a JSON column (MySQL)
+     */
+    #[\Override]
+    public function getJsonSearchExpr(string $column, string $value, string $path): \Maho\Db\Expr
+    {
+        if (str_contains($path, '$**')) {
+            return new \Maho\Db\Expr(sprintf(
+                'JSON_SEARCH(%s, %s, %s, NULL, %s) IS NOT NULL',
+                $column,
+                $this->quote('one'),
+                $this->quote($value),
+                $this->quote($path),
+            ));
+        }
+
+        $extractExpr = $this->getJsonExtractExpr($column, $path);
+        return new \Maho\Db\Expr(sprintf('%s = %s', $extractExpr, $this->quote($value)));
+    }
+
+    /**
+     * Check if a JSON column contains a specific JSON value (MySQL)
+     */
+    #[\Override]
+    public function getJsonContainsExpr(string $column, string $value, ?string $path = null): \Maho\Db\Expr
+    {
+        if ($path !== null && str_contains($path, '$**')) {
+            throw new \InvalidArgumentException('Wildcard paths are not supported in getJsonContainsExpr(). Use getJsonSearchExpr() instead.');
+        }
+
+        if ($path !== null) {
+            return new \Maho\Db\Expr(sprintf(
+                'JSON_CONTAINS(%s, %s, %s)',
+                $column,
+                $this->quote($value),
+                $this->quote($path),
+            ));
+        }
+
+        return new \Maho\Db\Expr(sprintf(
+            'JSON_CONTAINS(%s, %s)',
+            $column,
+            $this->quote($value),
+        ));
+    }
+
+    /**
      * Get update table query using select object for join and update
      *
      * @throws \Maho\Db\Exception

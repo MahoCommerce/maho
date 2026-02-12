@@ -714,6 +714,132 @@ class Pgsql extends AbstractPdoAdapter
         return new \Maho\Db\Expr(sprintf('EXTRACT(EPOCH FROM (%s)::timestamp)::bigint', $timestamp));
     }
 
+    /**
+     * Extract a scalar value from a JSON column at a given path (PostgreSQL)
+     */
+    #[\Override]
+    public function getJsonExtractExpr(string $column, string $path): \Maho\Db\Expr
+    {
+        $keys = $this->convertJsonPathToPostgresKeys($path);
+
+        if ($keys === null) {
+            throw new \InvalidArgumentException('Wildcard paths are not supported in getJsonExtractExpr().');
+        }
+
+        if (count($keys) === 1) {
+            return new \Maho\Db\Expr(sprintf(
+                "%s::jsonb ->> '%s'",
+                $column,
+                $keys[0],
+            ));
+        }
+
+        $pgPath = '{' . implode(',', $keys) . '}';
+        return new \Maho\Db\Expr(sprintf(
+            "%s::jsonb #>> '%s'",
+            $column,
+            $pgPath,
+        ));
+    }
+
+    /**
+     * Search for a string value within a JSON column (PostgreSQL)
+     */
+    #[\Override]
+    public function getJsonSearchExpr(string $column, string $value, string $path): \Maho\Db\Expr
+    {
+        if (str_contains($path, '$**')) {
+            $pgPath = $this->convertJsonPathToPostgresJsonpath($path, $value);
+            return new \Maho\Db\Expr(sprintf(
+                'jsonb_path_exists(%s::jsonb, %s)',
+                $column,
+                $this->quote($pgPath),
+            ));
+        }
+
+        $extractExpr = $this->getJsonExtractExpr($column, $path);
+        return new \Maho\Db\Expr(sprintf('%s = %s', $extractExpr, $this->quote($value)));
+    }
+
+    /**
+     * Check if a JSON column contains a specific JSON value (PostgreSQL)
+     */
+    #[\Override]
+    public function getJsonContainsExpr(string $column, string $value, ?string $path = null): \Maho\Db\Expr
+    {
+        if ($path !== null && str_contains($path, '$**')) {
+            throw new \InvalidArgumentException('Wildcard paths are not supported in getJsonContainsExpr(). Use getJsonSearchExpr() instead.');
+        }
+
+        if ($path !== null) {
+            $keys = $this->convertJsonPathToPostgresKeys($path);
+            if ($keys === null) {
+                throw new \InvalidArgumentException('Invalid path for getJsonContainsExpr().');
+            }
+
+            if (count($keys) === 1) {
+                $extract = sprintf("%s::jsonb -> '%s'", $column, $keys[0]);
+            } else {
+                $pgPath = '{' . implode(',', $keys) . '}';
+                $extract = sprintf("%s::jsonb #> '%s'", $column, $pgPath);
+            }
+
+            return new \Maho\Db\Expr(sprintf(
+                '(%s) @> %s::jsonb',
+                $extract,
+                $this->quote($value),
+            ));
+        }
+
+        return new \Maho\Db\Expr(sprintf(
+            '%s::jsonb @> %s::jsonb',
+            $column,
+            $this->quote($value),
+        ));
+    }
+
+    /**
+     * Convert a MySQL-style JSON path ($.key1.key2) to an array of keys for PostgreSQL #>>/# > operators
+     *
+     * @return string[]|null Returns null for wildcard paths
+     */
+    private function convertJsonPathToPostgresKeys(string $path): ?array
+    {
+        if (str_contains($path, '**')) {
+            return null;
+        }
+
+        $path = ltrim($path, '$.');
+        if ($path === '') {
+            return [];
+        }
+
+        return explode('.', $path);
+    }
+
+    /**
+     * Convert a MySQL-style JSON path with wildcard ($**.attribute) to PostgreSQL jsonpath syntax
+     *
+     * Converts e.g. '$**.attribute' to '$.**."attribute" ? (@ == "value")'
+     */
+    private function convertJsonPathToPostgresJsonpath(string $path, string $value): string
+    {
+        // Replace $** with $.** and quote attribute names
+        $pgPath = str_replace('$**', '$.**', $path);
+
+        // Quote the last segment (the attribute name)
+        $lastDot = strrpos($pgPath, '.');
+        if ($lastDot !== false) {
+            $attr = substr($pgPath, $lastDot + 1);
+            $pgPath = substr($pgPath, 0, $lastDot + 1) . '"' . $attr . '"';
+        }
+
+        // Escape single quotes in value for jsonpath
+        $escapedValue = str_replace("'", "''", $value);
+
+        return $pgPath . ' ? (@ == "' . $escapedValue . '")';
+    }
+
     // =========================================================================
     // Insert Methods - PostgreSQL-specific implementations
     // =========================================================================
