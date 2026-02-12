@@ -436,7 +436,10 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function hasIsValidForAddress($address)
     {
         $addressId = $this->_getAddressId($address);
-        return isset($this->_validatedAddresses[$addressId]) ? true : false;
+        if ($addressId === null) {
+            return false;
+        }
+        return isset($this->_validatedAddresses[$addressId]);
     }
 
     /**
@@ -449,6 +452,9 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function setIsValidForAddress($address, $validationResult)
     {
         $addressId = $this->_getAddressId($address);
+        if ($addressId === null) {
+            return $this;
+        }
         $this->_validatedAddresses[$addressId] = $validationResult;
         return $this;
     }
@@ -462,6 +468,9 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function getIsValidForAddress($address)
     {
         $addressId = $this->_getAddressId($address);
+        if ($addressId === null) {
+            return false;
+        }
         return $this->_validatedAddresses[$addressId] ?? false;
     }
 
