@@ -543,7 +543,9 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
         $attributes = [];
         \Maho\Profiler::start('CONFIGURABLE:' . __METHOD__);
         if ($attributesOption = $this->getProduct($product)->getCustomOption('attributes')) {
-            $data = unserialize($attributesOption->getValue(), ['allowed_classes' => false]);
+            $data = json_validate($attributesOption->getValue())
+                ? Mage::helper('core')->jsonDecode($attributesOption->getValue())
+                : unserialize($attributesOption->getValue(), ['allowed_classes' => false]);
             $this->getUsedProductAttributeIds($product);
 
             $usedAttributes = $this->getProduct($product)->getData($this->_usedAttributes);
@@ -613,7 +615,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
                     $subProduct = $this->getProductByAttributes($attributes, $product);
                 }
                 if ($subProduct) {
-                    $product->addCustomOption('attributes', serialize($attributes));
+                    $product->addCustomOption('attributes', Mage::helper('core')->jsonEncode($attributes));
                     $product->addCustomOption('product_qty_' . $subProduct->getId(), 1, $subProduct);
                     $product->addCustomOption('simple_product', $subProduct->getId(), $subProduct);
                     $_result = $subProduct->getTypeInstance(true)->_prepareProduct(
@@ -673,7 +675,11 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
         $product = $this->getProduct($product);
         $option = $product->getCustomOption('info_buyRequest');
         if ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
-            $buyRequest = new \Maho\DataObject(unserialize($option->getValue(), ['allowed_classes' => false]));
+            $buyRequest = new \Maho\DataObject(
+                json_validate($option->getValue())
+                    ? Mage::helper('core')->jsonDecode($option->getValue())
+                    : unserialize($option->getValue(), ['allowed_classes' => false]),
+            );
             $attributes = $buyRequest->getSuperAttribute();
             if (is_array($attributes)) {
                 foreach ($attributes as $key => $val) {

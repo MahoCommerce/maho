@@ -321,7 +321,11 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
         $product = $this->getProduct($product);
         $option = $product->getCustomOption('info_buyRequest');
         if ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
-            $buyRequest = new \Maho\DataObject(unserialize($option->getValue(), ['allowed_classes' => false]));
+            $buyRequest = new \Maho\DataObject(
+                json_validate($option->getValue())
+                    ? Mage::helper('core')->jsonDecode($option->getValue())
+                    : unserialize($option->getValue(), ['allowed_classes' => false]),
+            );
             if (!$buyRequest->hasLinks()) {
                 if (!$product->getLinksPurchasedSeparately()) {
                     $allLinksIds = Mage::getModel('downloadable/link')
@@ -329,7 +333,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
                         ->addProductToFilter($product->getId())
                         ->getAllIds();
                     $buyRequest->setLinks($allLinksIds);
-                    $product->addCustomOption('info_buyRequest', serialize($buyRequest->getData()));
+                    $product->addCustomOption('info_buyRequest', Mage::helper('core')->jsonEncode($buyRequest->getData()));
                 } else {
                     Mage::throwException(
                         Mage::helper('downloadable')->__('Please specify product link(s).'),

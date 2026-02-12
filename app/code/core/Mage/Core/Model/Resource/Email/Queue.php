@@ -30,7 +30,8 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $object->setRecipients($this->getRecipients($object->getId()));
-        $object->setMessageParameters(unserialize($object->getMessageParameters(), ['allowed_classes' => false]));
+        $messageParams = $object->getMessageParameters();
+        $object->setMessageParameters(json_validate($messageParams) ? Mage::helper('core')->jsonDecode($messageParams) : unserialize($messageParams, ['allowed_classes' => false]));
         return $this;
     }
 
@@ -46,7 +47,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
             $object->setCreatedAt($this->formatDate(true));
         }
         $object->setMessageBodyHash(md5($object->getMessageBody()));
-        $object->setMessageParameters(serialize($object->getMessageParameters()));
+        $object->setMessageParameters(Mage::helper('core')->jsonEncode($object->getMessageParameters()));
 
         return parent::_beforeSave($object);
     }

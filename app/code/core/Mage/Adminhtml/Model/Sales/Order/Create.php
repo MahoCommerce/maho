@@ -435,7 +435,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                     [
                         'product' => $item->getProduct(),
                         'code' => 'additional_options',
-                        'value' => serialize($additionalOptions),
+                        'value' => Mage::helper('core')->jsonEncode($additionalOptions),
                     ],
                 ));
             }
@@ -574,7 +574,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                         $info = $item->getOptionByCode('info_buyRequest');
                         if ($info) {
                             $info = new \Maho\DataObject(
-                                unserialize($info->getValue(), ['allowed_classes' => false]),
+                                json_validate($info->getValue())
+                                    ? Mage::helper('core')->jsonDecode($info->getValue())
+                                    : unserialize($info->getValue(), ['allowed_classes' => false]),
                             );
                             $info->setQty($qty);
                             $info->setOptions($this->_prepareOptionsForRequest($item));
@@ -984,7 +986,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
                 [
                     'product' => $item->getProduct(),
                     'code' => 'additional_options',
-                    'value' => serialize($options['additional_options']),
+                    'value' => Mage::helper('core')->jsonEncode($options['additional_options']),
                 ],
             ));
         }
@@ -1498,7 +1500,9 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
             }
             $addOptions = $item->getOptionByCode('additional_options');
             if ($addOptions) {
-                $options['additional_options'] = unserialize($addOptions->getValue(), ['allowed_classes' => false]);
+                $options['additional_options'] = json_validate($addOptions->getValue())
+                    ? Mage::helper('core')->jsonDecode($addOptions->getValue())
+                    : unserialize($addOptions->getValue(), ['allowed_classes' => false]);
             }
             $item->setProductOrderOptions($options);
         }

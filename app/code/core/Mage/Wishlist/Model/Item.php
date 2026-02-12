@@ -388,7 +388,11 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     public function getBuyRequest()
     {
         $option = $this->getOptionByCode('info_buyRequest');
-        $initialData = $option ? unserialize($option->getValue(), ['allowed_classes' => false]) : null;
+        $initialData = $option
+            ? (json_validate($option->getValue())
+                ? Mage::helper('core')->jsonDecode($option->getValue())
+                : unserialize($option->getValue(), ['allowed_classes' => false]))
+            : null;
 
         // There can be wrong data due to bug in Grouped products - it formed 'info_buyRequest' as \Maho\DataObject
         if ($initialData instanceof \Maho\DataObject) {
@@ -419,7 +423,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
 
         $oldBuyRequest = $this->getBuyRequest()
             ->getData();
-        $sBuyRequest = serialize($buyRequest + $oldBuyRequest);
+        $sBuyRequest = Mage::helper('core')->jsonEncode($buyRequest + $oldBuyRequest);
 
         $option = $this->getOptionByCode('info_buyRequest');
         if ($option) {
@@ -443,7 +447,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     public function setBuyRequest($buyRequest)
     {
         $buyRequest->setId($this->getId());
-        $request = serialize($buyRequest->getData());
+        $request = Mage::helper('core')->jsonEncode($buyRequest->getData());
         $this->setData('buy_request', $request);
         return $this;
     }

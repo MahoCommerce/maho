@@ -539,6 +539,10 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
             return null;
         }
 
+        if (json_validate($str)) {
+            return Mage::helper('core')->jsonDecode($str);
+        }
+
         return unserialize($str, ['allowed_classes' => false]);
     }
 
@@ -550,6 +554,10 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function isSerializedArrayOrObject($data)
     {
+        if (is_string($data) && json_validate($data)) {
+            $firstChar = $data[0] ?? '';
+            return $firstChar === '{' || $firstChar === '[';
+        }
         $pattern =
             '/^a:\d+:\{(i:\d+;|s:\d+:\".+\";|N;|O:\d+:\"\w+\":\d+:\{\w:\d+:)+|^O:\d+:\"\w+\":\d+:\{(s:\d+:\"|i:\d+;)/';
         return is_string($data) && preg_match($pattern, $data);

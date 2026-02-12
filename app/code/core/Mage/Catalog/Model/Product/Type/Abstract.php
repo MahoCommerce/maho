@@ -317,7 +317,7 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
 
         $product->prepareCustomOptions();
         $buyRequest->unsetData('_processing_params'); // One-time params only
-        $product->addCustomOption('info_buyRequest', serialize($buyRequest->getData()));
+        $product->addCustomOption('info_buyRequest', Mage::helper('core')->jsonEncode($buyRequest->getData()));
 
         if ($options) {
             $optionIds = array_keys($options);
@@ -547,7 +547,9 @@ abstract class Mage_Catalog_Model_Product_Type_Abstract
     {
         $optionArr = [];
         if ($info = $this->getProduct($product)->getCustomOption('info_buyRequest')) {
-            $optionArr['info_buyRequest'] = unserialize($info->getValue(), ['allowed_classes' => false]);
+            $optionArr['info_buyRequest'] = json_validate($info->getValue())
+                ? Mage::helper('core')->jsonDecode($info->getValue())
+                : unserialize($info->getValue(), ['allowed_classes' => false]);
         }
 
         if ($optionIds = $this->getProduct($product)->getCustomOption('option_ids')) {

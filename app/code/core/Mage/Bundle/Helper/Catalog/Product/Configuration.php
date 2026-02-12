@@ -70,18 +70,25 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
 
         // get bundle options
         $optionsQuoteItemOption = $item->getOptionByCode('bundle_option_ids');
-        $bundleOptionsIds = $optionsQuoteItemOption ? unserialize($optionsQuoteItemOption->getValue(), ['allowed_classes' => false]) : [];
+        $bundleOptionsIds = $optionsQuoteItemOption
+            ? (json_validate($optionsQuoteItemOption->getValue())
+                ? Mage::helper('core')->jsonDecode($optionsQuoteItemOption->getValue())
+                : unserialize($optionsQuoteItemOption->getValue(), ['allowed_classes' => false]))
+            : [];
         if ($bundleOptionsIds) {
             $optionsCollection = $typeInstance->getOptionsByIds($bundleOptionsIds, $product);
 
             // get and add bundle selections collection
             $selectionsQuoteItemOption = $item->getOptionByCode('bundle_selection_ids');
 
-            $bundleSelectionIds = unserialize($selectionsQuoteItemOption->getValue(), ['allowed_classes' => false]);
+            $selectionValue = $selectionsQuoteItemOption->getValue();
+            $bundleSelectionIds = json_validate($selectionValue)
+                ? Mage::helper('core')->jsonDecode($selectionValue)
+                : unserialize($selectionValue, ['allowed_classes' => false]);
 
             if (!empty($bundleSelectionIds)) {
                 $selectionsCollection = $typeInstance->getSelectionsByIds(
-                    unserialize($selectionsQuoteItemOption->getValue(), ['allowed_classes' => false]),
+                    $bundleSelectionIds,
                     $product,
                 );
 

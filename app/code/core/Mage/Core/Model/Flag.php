@@ -64,7 +64,8 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
     public function getFlagData()
     {
         if ($this->hasFlagData()) {
-            return unserialize($this->getData('flag_data'), ['allowed_classes' => false]);
+            $data = $this->getData('flag_data');
+            return json_validate($data) ? Mage::helper('core')->jsonDecode($data) : unserialize($data, ['allowed_classes' => false]);
         }
         return null;
     }
@@ -77,7 +78,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
      */
     public function setFlagData($value)
     {
-        return $this->setData('flag_data', serialize($value));
+        return $this->setData('flag_data', Mage::helper('core')->jsonEncode($value));
     }
 
     /**

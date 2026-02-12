@@ -182,10 +182,10 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
         }
 
         if (!empty($data['new_data'])) {
-            $previousNewData = unserialize($data['new_data'], ['allowed_classes' => false]);
+            $previousNewData = json_validate($data['new_data']) ? Mage::helper('core')->jsonDecode($data['new_data']) : unserialize($data['new_data'], ['allowed_classes' => false]);
             $currentNewData  = $this->getNewData(false);
             $currentNewData = $this->_mergeNewDataRecursive($previousNewData, $currentNewData);
-            $this->setNewData(serialize($currentNewData));
+            $this->setNewData(Mage::helper('core')->jsonEncode($currentNewData));
         }
         return $this;
     }
@@ -214,7 +214,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
                 }
             }
         }
-        $this->setNewData(serialize($newData));
+        $this->setNewData(Mage::helper('core')->jsonEncode($newData));
 
         return $this;
     }
@@ -229,7 +229,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     {
         $data = $this->_getData('new_data');
         if (is_string($data)) {
-            $data = unserialize($data, ['allowed_classes' => false]);
+            $data = json_validate($data) ? Mage::helper('core')->jsonDecode($data) : unserialize($data, ['allowed_classes' => false]);
         } elseif (empty($data) || !is_array($data)) {
             $data = [];
         }
@@ -293,7 +293,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $newData = $this->getNewData(false);
-        $this->setNewData(serialize($newData));
+        $this->setNewData(Mage::helper('core')->jsonEncode($newData));
         if (!$this->hasCreatedAt()) {
             $this->setCreatedAt($this->_getResource()->formatDate(time(), true));
         }

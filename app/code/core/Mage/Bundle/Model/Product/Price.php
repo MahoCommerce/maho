@@ -68,7 +68,10 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         if ($product->hasCustomOptions()) {
             $customOption = $product->getCustomOption('bundle_selection_ids');
             if ($customOption) {
-                $selectionIds = unserialize($customOption->getValue(), ['allowed_classes' => false]);
+                $optValue = $customOption->getValue();
+                $selectionIds = json_validate($optValue)
+                    ? Mage::helper('core')->jsonDecode($optValue)
+                    : unserialize($optValue, ['allowed_classes' => false]);
                 /** @var Mage_Bundle_Model_Product_Type $productType */
                 $productType = $product->getTypeInstance(true);
                 $selections = $productType->getSelectionsByIds($selectionIds, $product);

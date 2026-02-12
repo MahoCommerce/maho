@@ -154,7 +154,9 @@ class Mage_Sales_Model_Service_Order
                 if (isset($qtys[$orderItem->getParentItemId()])) {
                     $productOptions = $orderItem->getProductOptions();
                     if (isset($productOptions['bundle_selection_attributes'])) {
-                        $bundleSelectionAttributes = unserialize($productOptions['bundle_selection_attributes'], ['allowed_classes' => false]);
+                        $bundleSelectionAttributes = json_validate($productOptions['bundle_selection_attributes'])
+                            ? Mage::helper('core')->jsonDecode($productOptions['bundle_selection_attributes'])
+                            : unserialize($productOptions['bundle_selection_attributes'], ['allowed_classes' => false]);
 
                         if ($bundleSelectionAttributes) {
                             $qty = $bundleSelectionAttributes['qty'] * $qtys[$orderItem->getParentItemId()];

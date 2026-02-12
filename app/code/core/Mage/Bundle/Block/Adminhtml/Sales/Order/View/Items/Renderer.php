@@ -6,6 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -99,7 +100,9 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_View_Items_Renderer extends Mage_A
             $options = $item->getOrderItem()->getProductOptions();
         }
         if (isset($options['bundle_selection_attributes'])) {
-            return unserialize($options['bundle_selection_attributes'], ['allowed_classes' => false]);
+            return json_validate($options['bundle_selection_attributes'])
+                ? Mage::helper('core')->jsonDecode($options['bundle_selection_attributes'])
+                : unserialize($options['bundle_selection_attributes'], ['allowed_classes' => false]);
         }
         return null;
     }

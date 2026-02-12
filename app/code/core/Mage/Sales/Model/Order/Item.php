@@ -600,7 +600,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function setProductOptions(array $options)
     {
-        $this->setData('product_options', serialize($options));
+        $this->setData('product_options', Mage::helper('core')->jsonEncode($options));
         return $this;
     }
 
@@ -612,7 +612,9 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     public function getProductOptions()
     {
         if ($options = $this->_getData('product_options')) {
-            return unserialize($options, ['allowed_classes' => false]);
+            return json_validate($options)
+                ? Mage::helper('core')->jsonDecode($options)
+                : unserialize($options, ['allowed_classes' => false]);
         }
         return [];
     }
@@ -814,7 +816,10 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function getBaseDiscountAppliedForWeeeTax()
     {
-        $weeeTaxAppliedAmounts = unserialize($this->getWeeeTaxApplied(), ['allowed_classes' => false]);
+        $weeeTaxApplied = $this->getWeeeTaxApplied();
+        $weeeTaxAppliedAmounts = json_validate($weeeTaxApplied)
+            ? Mage::helper('core')->jsonDecode($weeeTaxApplied)
+            : unserialize($weeeTaxApplied, ['allowed_classes' => false]);
         $totalDiscount = 0;
         if (!is_array($weeeTaxAppliedAmounts)) {
             return $totalDiscount;
@@ -835,7 +840,10 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function getDiscountAppliedForWeeeTax()
     {
-        $weeeTaxAppliedAmounts = unserialize($this->getWeeeTaxApplied(), ['allowed_classes' => false]);
+        $weeeTaxApplied = $this->getWeeeTaxApplied();
+        $weeeTaxAppliedAmounts = json_validate($weeeTaxApplied)
+            ? Mage::helper('core')->jsonDecode($weeeTaxApplied)
+            : unserialize($weeeTaxApplied, ['allowed_classes' => false]);
         $totalDiscount = 0;
         if (!is_array($weeeTaxAppliedAmounts)) {
             return $totalDiscount;
