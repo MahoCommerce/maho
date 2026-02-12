@@ -854,7 +854,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
 
-        if (!is_array($feedIds)) {
+        if (!is_array($feedIds) || empty($feedIds)) {
             $this->_getSession()->addError($this->__('Please select feeds to generate.'));
             $this->_redirect('*/*/');
             return;
@@ -897,7 +897,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $feedIds = $this->getRequest()->getParam('feed_ids');
         $status = (int) $this->getRequest()->getParam('status');
 
-        if (!is_array($feedIds)) {
+        if (!is_array($feedIds) || empty($feedIds)) {
             $this->_getSession()->addError($this->__('Please select feeds.'));
             $this->_redirect('*/*/');
             return;
@@ -925,7 +925,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
 
-        if (!is_array($feedIds)) {
+        if (!is_array($feedIds) || empty($feedIds)) {
             $this->_getSession()->addError($this->__('Please select feeds to delete.'));
             $this->_redirect('*/*/');
             return;

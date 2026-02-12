@@ -353,13 +353,15 @@ class Maho_FeedManager_Model_Generator
     protected function _generateXmlTemplateFile(string $outputPath): void
     {
         $feed = $this->_feed;
-        $handle = fopen($outputPath, 'w');
-
-        if ($handle === false) {
-            throw new RuntimeException("Cannot open file for writing: {$outputPath}");
-        }
+        $handle = null;
 
         try {
+            $handle = fopen($outputPath, 'w');
+
+            if ($handle === false) {
+                throw new RuntimeException("Cannot open file for writing: {$outputPath}");
+            }
+
             // Write header
             $header = $feed->getXmlHeader();
             if (!empty($header)) {
@@ -451,7 +453,9 @@ class Maho_FeedManager_Model_Generator
             }
 
         } finally {
-            fclose($handle);
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
         }
     }
 
@@ -461,13 +465,15 @@ class Maho_FeedManager_Model_Generator
     protected function _generateXmlStructureFile(string $outputPath): void
     {
         $feed = $this->_feed;
-        $handle = fopen($outputPath, 'w');
-
-        if ($handle === false) {
-            throw new RuntimeException("Cannot open file for writing: {$outputPath}");
-        }
+        $handle = null;
 
         try {
+            $handle = fopen($outputPath, 'w');
+
+            if ($handle === false) {
+                throw new RuntimeException("Cannot open file for writing: {$outputPath}");
+            }
+
             // Write header
             $header = $feed->getXmlHeader();
             if (!empty($header)) {
@@ -553,7 +559,9 @@ class Maho_FeedManager_Model_Generator
             }
 
         } finally {
-            fclose($handle);
+            if (is_resource($handle)) {
+                fclose($handle);
+            }
         }
     }
 

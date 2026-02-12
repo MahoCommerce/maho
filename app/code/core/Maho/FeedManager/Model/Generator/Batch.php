@@ -412,7 +412,12 @@ class Maho_FeedManager_Model_Generator_Batch
         // Parse structure once if using structure mode
         $structure = null;
         if ($isStructureMode) {
-            $structure = Mage::helper('core')->jsonDecode($xmlStructure);
+            try {
+                $structure = Mage::helper('core')->jsonDecode($xmlStructure);
+            } catch (\JsonException $e) {
+                Mage::log("FeedManager: Invalid XML structure JSON for feed '{$this->_feed->getName()}': {$e->getMessage()}", Mage::LOG_ERROR);
+                throw new \RuntimeException("Feed has invalid XML structure configuration: {$e->getMessage()}", 0, $e);
+            }
         }
 
         // For CSV, get headers from CSV columns
@@ -422,7 +427,12 @@ class Maho_FeedManager_Model_Generator_Batch
         if ($isCsvMode) {
             $csvColumns = $this->_feed->getCsvColumns();
             if ($csvColumns) {
-                $columns = Mage::helper('core')->jsonDecode($csvColumns);
+                try {
+                    $columns = Mage::helper('core')->jsonDecode($csvColumns);
+                } catch (\JsonException $e) {
+                    Mage::log("FeedManager: Invalid CSV columns JSON for feed '{$this->_feed->getName()}': {$e->getMessage()}", Mage::LOG_ERROR);
+                    throw new \RuntimeException("Feed has invalid CSV columns configuration: {$e->getMessage()}", 0, $e);
+                }
                 if (is_array($columns) && !empty($columns)) {
                     $csvHeaders = array_column($columns, 'name');
                 }
@@ -442,7 +452,12 @@ class Maho_FeedManager_Model_Generator_Batch
         if ($isJsonMode) {
             $jsonStructureData = $this->_feed->getJsonStructure();
             if ($jsonStructureData) {
-                $jsonStructure = Mage::helper('core')->jsonDecode($jsonStructureData);
+                try {
+                    $jsonStructure = Mage::helper('core')->jsonDecode($jsonStructureData);
+                } catch (\JsonException $e) {
+                    Mage::log("FeedManager: Invalid JSON structure for feed '{$this->_feed->getName()}': {$e->getMessage()}", Mage::LOG_ERROR);
+                    throw new \RuntimeException("Feed has invalid JSON structure configuration: {$e->getMessage()}", 0, $e);
+                }
             }
         }
 
@@ -652,7 +667,12 @@ class Maho_FeedManager_Model_Generator_Batch
             return false;
         }
 
-        $this->_state = Mage::helper('core')->jsonDecode($content);
+        try {
+            $this->_state = Mage::helper('core')->jsonDecode($content);
+        } catch (\JsonException $e) {
+            Mage::log("FeedManager: Corrupt state file for job '{$this->_jobId}': {$e->getMessage()}", Mage::LOG_ERROR);
+            return false;
+        }
 
         return !empty($this->_state);
     }

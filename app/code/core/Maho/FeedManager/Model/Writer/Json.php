@@ -63,6 +63,17 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
             throw new RuntimeException('Writer not opened');
         }
 
+        $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
+        if ($this->_prettyPrint) {
+            $flags |= JSON_PRETTY_PRINT;
+        }
+
+        $json = json_encode($productData, $flags);
+        if ($json === false) {
+            Mage::log('FeedManager: json_encode failed: ' . json_last_error_msg(), Mage::LOG_WARNING);
+            return;
+        }
+
         // Add comma separator if not first product
         if (!$this->_firstProduct) {
             fwrite($this->_handle, ',');
@@ -71,12 +82,7 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
             }
         }
 
-        $flags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
-        if ($this->_prettyPrint) {
-            $flags |= JSON_PRETTY_PRINT;
-        }
-
-        fwrite($this->_handle, json_encode($productData, $flags));
+        fwrite($this->_handle, $json);
         $this->_firstProduct = false;
     }
 
