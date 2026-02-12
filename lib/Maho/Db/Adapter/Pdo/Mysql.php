@@ -3552,11 +3552,13 @@ class Mysql extends AbstractPdoAdapter
     public function getJsonSearchExpr(string $column, string $value, string $path): \Maho\Db\Expr
     {
         if (str_contains($path, '$**')) {
+            // JSON_SEARCH uses LIKE-style matching; escape special LIKE chars for literal match
+            $escapedValue = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
             return new \Maho\Db\Expr(sprintf(
                 'JSON_SEARCH(%s, %s, %s, NULL, %s) IS NOT NULL',
                 $column,
                 $this->quote('one'),
-                $this->quote($value),
+                $this->quote($escapedValue),
                 $this->quote($path),
             ));
         }

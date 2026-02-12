@@ -366,6 +366,8 @@ describe('SQL Helper Methods - JSON Functions', function () {
             ['data' => '{"status":"active","name":"Test"}'],
             ['data' => '{"scores":[10,20,30]}'],
             ['data' => '["apple","banana","cherry"]'],
+            ['data' => '{"conditions":[{"attribute":"8\\" bolt","value":"test"}]}'],
+            ['data' => '{"conditions":[{"attribute":"back\\\\slash","value":"test"}]}'],
         ]);
     });
 
@@ -485,6 +487,26 @@ describe('SQL Helper Methods - JSON Functions', function () {
         );
 
         expect(array_map('intval', $results))->toBe([4, 5]);
+    });
+
+    it('finds a value containing double quotes with recursive wildcard', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', '8" bolt', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 10 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(10);
+    });
+
+    it('finds a value containing backslashes with recursive wildcard', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'back\\slash', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 11 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(11);
     });
 
     // --- getJsonContainsExpr ---

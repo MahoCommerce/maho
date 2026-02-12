@@ -858,32 +858,25 @@ class Sqlite extends AbstractPdoAdapter
         }
 
         if ($path !== null) {
-            $extract = sprintf('JSON_EXTRACT(%s, %s)', $column, $this->quote($path));
-
-            // For arrays, check if value is an element; for scalars, compare directly
+            // JSON_EACH(col, path) handles both arrays (multiple rows) and scalars (single row)
             return new \Maho\Db\Expr(sprintf(
-                '(CASE WHEN JSON_TYPE(%s) = %s THEN EXISTS(SELECT 1 FROM JSON_EACH(%s) WHERE "value" = JSON_EXTRACT(JSON(%s), %s)) ELSE JSON_EXTRACT(%s, %s) = JSON(%s) END)',
-                $extract,
-                $this->quote('array'),
-                $extract,
-                $this->quote($value),
-                $this->quote('$'),
+                'EXISTS(SELECT 1 FROM JSON_EACH(%s, %s) WHERE "value" = JSON_EXTRACT(JSON(%s), %s))',
                 $column,
                 $this->quote($path),
                 $this->quote($value),
+                $this->quote('$'),
             ));
         }
 
-        // Top-level contains: check if the value exists in a top-level array
+        // Top-level: JSON_EACH iterates array elements or object values,
+        // but JSON_CONTAINS should only match array elements, not object values
         return new \Maho\Db\Expr(sprintf(
-            '(CASE WHEN JSON_TYPE(%s) = %s THEN EXISTS(SELECT 1 FROM JSON_EACH(%s) WHERE "value" = JSON_EXTRACT(JSON(%s), %s)) ELSE %s = JSON(%s) END)',
+            '(JSON_TYPE(%s) = %s AND EXISTS(SELECT 1 FROM JSON_EACH(%s) WHERE "value" = JSON_EXTRACT(JSON(%s), %s)))',
             $column,
             $this->quote('array'),
             $column,
             $this->quote($value),
             $this->quote('$'),
-            $column,
-            $this->quote($value),
         ));
     }
 

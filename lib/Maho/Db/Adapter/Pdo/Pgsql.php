@@ -728,13 +728,14 @@ class Pgsql extends AbstractPdoAdapter
 
         if (count($keys) === 1) {
             return new \Maho\Db\Expr(sprintf(
-                "%s::jsonb ->> '%s'",
+                '%s::jsonb ->> %s',
                 $column,
-                $keys[0],
+                $this->quote($keys[0]),
             ));
         }
 
-        $pgPath = '{' . implode(',', $keys) . '}';
+        $escapedKeys = array_map(fn($k) => str_replace("'", "''", $k), $keys);
+        $pgPath = '{' . implode(',', $escapedKeys) . '}';
         return new \Maho\Db\Expr(sprintf(
             "%s::jsonb #>> '%s'",
             $column,
@@ -778,9 +779,10 @@ class Pgsql extends AbstractPdoAdapter
             }
 
             if (count($keys) === 1) {
-                $extract = sprintf("%s::jsonb -> '%s'", $column, $keys[0]);
+                $extract = sprintf('%s::jsonb -> %s', $column, $this->quote($keys[0]));
             } else {
-                $pgPath = '{' . implode(',', $keys) . '}';
+                $escapedKeys = array_map(fn($k) => str_replace("'", "''", $k), $keys);
+                $pgPath = '{' . implode(',', $escapedKeys) . '}';
                 $extract = sprintf("%s::jsonb #> '%s'", $column, $pgPath);
             }
 
@@ -801,6 +803,8 @@ class Pgsql extends AbstractPdoAdapter
     /**
      * Convert a MySQL-style JSON path ($.key1.key2) to an array of keys for PostgreSQL #>>/# > operators
      *
+     * Handles array index notation (e.g., '$.tags[1]' → ['tags', '1']).
+     *
      * @return string[]|null Returns null for wildcard paths
      */
     private function convertJsonPathToPostgresKeys(string $path): ?array
@@ -809,18 +813,36 @@ class Pgsql extends AbstractPdoAdapter
             return null;
         }
 
-        $path = ltrim($path, '$.');
+        if (str_starts_with($path, '$.')) {
+            $path = substr($path, 2);
+        } elseif (str_starts_with($path, '$')) {
+            $path = substr($path, 1);
+        }
+
         if ($path === '') {
             return [];
         }
 
-        return explode('.', $path);
+        $segments = explode('.', $path);
+        $keys = [];
+        foreach ($segments as $segment) {
+            if (preg_match('/^(.+?)\[(\d+)]$/', $segment, $matches)) {
+                $keys[] = $matches[1];
+                $keys[] = $matches[2];
+            } else {
+                $keys[] = $segment;
+            }
+        }
+
+        return $keys;
     }
 
     /**
      * Convert a MySQL-style JSON path with wildcard ($**.attribute) to PostgreSQL jsonpath syntax
      *
      * Converts e.g. '$**.attribute' to '$.**."attribute" ? (@ == "value")'
+     * Escapes backslashes and double quotes for jsonpath string literals.
+     * SQL-level escaping is handled by the caller via $this->quote().
      */
     private function convertJsonPathToPostgresJsonpath(string $path, string $value): string
     {
@@ -834,8 +856,9 @@ class Pgsql extends AbstractPdoAdapter
             $pgPath = substr($pgPath, 0, $lastDot + 1) . '"' . $attr . '"';
         }
 
-        // Escape single quotes in value for jsonpath
-        $escapedValue = str_replace("'", "''", $value);
+        // Escape backslashes and double quotes for jsonpath string literal
+        $escapedValue = str_replace('\\', '\\\\', $value);
+        $escapedValue = str_replace('"', '\\"', $escapedValue);
 
         return $pgPath . ' ? (@ == "' . $escapedValue . '")';
     }
