@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Core
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,12 +20,12 @@ $connection = $installer->getConnection();
 $coreHelper = Mage::helper('core');
 
 $tables = [
-    ['table' => 'salesrule/rule',                      'columns' => ['conditions_serialized', 'actions_serialized']],
-    ['table' => 'catalogrule/rule',                     'columns' => ['conditions_serialized', 'actions_serialized']],
-    ['table' => 'catalog/category_dynamic_rule',        'columns' => ['conditions_serialized']],
-    ['table' => 'cataloglinkrule/rule',                 'columns' => ['source_conditions_serialized', 'target_conditions_serialized']],
-    ['table' => 'customersegmentation/segment',         'columns' => ['conditions_serialized']],
-    ['table' => 'payment/restriction',                  'columns' => ['conditions_serialized']],
+    ['table' => 'salesrule/rule',                'columns' => ['conditions_serialized', 'actions_serialized']],
+    ['table' => 'catalogrule/rule',              'columns' => ['conditions_serialized', 'actions_serialized']],
+    ['table' => 'catalog/category_dynamic_rule', 'columns' => ['conditions_serialized']],
+    ['table' => 'cataloglinkrule/rule',          'columns' => ['source_conditions_serialized', 'target_conditions_serialized']],
+    ['table' => 'customersegmentation/segment',  'columns' => ['conditions_serialized']],
+    ['table' => 'payment/restriction',           'columns' => ['conditions_serialized']],
 ];
 
 foreach ($tables as $tableConfig) {
