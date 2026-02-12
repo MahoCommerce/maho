@@ -81,6 +81,33 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     abstract public function getActionsInstance();
 
     /**
+     * Decode a serialized column value, supporting both JSON and legacy PHP serialize format.
+     * If legacy serialized data is detected, it is converted to JSON and persisted back to the database.
+     */
+    protected function _decodeRuleData(string $value, string $column): ?array
+    {
+        if (json_validate($value)) {
+            return Mage::helper('core')->jsonDecode($value);
+        }
+
+        $data = @unserialize($value, ['allowed_classes' => false]);
+        if (!is_array($data)) {
+            throw new RuntimeException(
+                "Could not decode {$column} in {$this->getResource()->getMainTable()} #{$this->getId()}",
+            );
+        }
+
+        $json = Mage::helper('core')->jsonEncode($data);
+        Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+            $this->getResource()->getMainTable(),
+            [$column => $json],
+            [$this->getResource()->getIdFieldName() . ' = ?' => $this->getId()],
+        );
+
+        return $data;
+    }
+
+    /**
      * Prepare select for condition
      *
      * @param int $storeId
@@ -109,15 +136,25 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             }
         }
 
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($this->getConditions()) {
-            $this->setConditionsSerialized(serialize($this->getConditions()->asArray()));
+            try {
+                $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             $this->unsConditions();
         }
 
-        // Serialize actions
+        // Encode actions as JSON
         if ($this->getActions()) {
-            $this->setActionsSerialized(serialize($this->getActions()->asArray()));
+            try {
+                $this->setActionsSerialized(Mage::helper('core')->jsonEncode($this->getActions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             $this->unsActions();
         }
 
@@ -175,7 +212,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         if ($this->hasConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (!empty($conditions)) {
-                $conditions = Mage::helper('core/unserializeArray')->unserialize($conditions);
+                $conditions = $this->_decodeRuleData($conditions, 'conditions_serialized');
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->loadArray($conditions);
                 }
@@ -214,7 +251,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         if ($this->hasActionsSerialized()) {
             $actions = $this->getActionsSerialized();
             if (!empty($actions)) {
-                $actions = Mage::helper('core/unserializeArray')->unserialize($actions);
+                $actions = $this->_decodeRuleData($actions, 'actions_serialized');
                 if (is_array($actions) && !empty($actions)) {
                     $this->_actions->loadArray($actions);
                 }

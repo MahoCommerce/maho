@@ -180,7 +180,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
      */
     public function addAttributeInConditionFilter($attributeCode)
     {
-        $match = sprintf('%%%s%%', substr(serialize(['attribute' => $attributeCode]), 5, -1));
+        $match = '%"attribute":"' . $attributeCode . '"%';
         $field = $this->_getMappedField('conditions_serialized');
         $cCond = $this->_getConditionSql($field, ['like' => $match]);
         $field = $this->_getMappedField('actions_serialized');
