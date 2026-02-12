@@ -575,7 +575,15 @@ describe('SQL Helper Methods - JSON Functions', function () {
     });
 
     it('throws on wildcard path in getJsonContainsExpr', function () {
-        expect(fn () => $this->adapter->getJsonContainsExpr('data', '"test"', '$**.key'))
+        expect(fn() => $this->adapter->getJsonContainsExpr('data', '"test"', '$**.key'))
+            ->toThrow(\InvalidArgumentException::class);
+    });
+
+    it('throws on wildcard path in getJsonExtractExpr on PostgreSQL', function () {
+        if (!$this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql) {
+            $this->markTestSkipped('PostgreSQL-specific test');
+        }
+        expect(fn() => $this->adapter->getJsonExtractExpr('data', '$**.key'))
             ->toThrow(\InvalidArgumentException::class);
     });
 });
