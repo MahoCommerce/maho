@@ -64,12 +64,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
 
             // Decode conditions from database only when first creating conditions
             if ($this->getConditionsSerialized()) {
-                try {
-                    $conditions = Mage::helper('core')->jsonDecode($this->getConditionsSerialized());
-                } catch (\JsonException $e) {
-                    Mage::logException($e);
-                    throw $e;
-                }
+                $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->loadArray($conditions);
                 }
