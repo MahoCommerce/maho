@@ -96,7 +96,12 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         if ($this->hasConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (!empty($conditions)) {
-                $conditions = Mage::helper('core')->jsonDecode($conditions);
+                try {
+                    $conditions = Mage::helper('core')->jsonDecode($conditions);
+                } catch (\JsonException $e) {
+                    Mage::logException($e);
+                    throw $e;
+                }
                 if (is_array($conditions) && !empty($conditions)) {
                     // Force reset conditions before loading to prevent duplicates
                     $this->_conditions->setConditions([]);

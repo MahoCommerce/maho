@@ -42,7 +42,12 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
             $this->_resetConditions();
 
             if ($this->getConditionsSerialized()) {
-                $conditions = Mage::helper('core')->jsonDecode($this->getConditionsSerialized());
+                try {
+                    $conditions = Mage::helper('core')->jsonDecode($this->getConditionsSerialized());
+                } catch (\JsonException $e) {
+                    Mage::logException($e);
+                    throw $e;
+                }
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->setConditions([])->loadArray($conditions);
                 }
@@ -81,7 +86,12 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     {
         // Encode conditions as JSON
         if ($this->getConditions()) {
-            $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
+            try {
+                $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             $this->unsConditions();
         }
 
@@ -129,7 +139,12 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
         // Initialize conditions from serialized data
         if ($this->getConditionsSerialized()) {
-            $conditions = Mage::helper('core')->jsonDecode($this->getConditionsSerialized());
+            try {
+                $conditions = Mage::helper('core')->jsonDecode($this->getConditionsSerialized());
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             if (is_array($conditions) && !empty($conditions)) {
                 // Reset and reload conditions
                 $this->_conditions = $this->getConditionsInstance();
