@@ -59,13 +59,20 @@ try {
             continue;
         }
 
+        // Filter out columns that don't exist in this table
+        $tableColumns = $connection->describeTable($tableName);
+        $columns = array_filter($tableConfig['columns'], fn ($col) => isset($tableColumns[$col]));
+        if (empty($columns)) {
+            continue;
+        }
+
         $pk = $tableConfig['pk'];
-        $select = $connection->select()->from($tableName, array_merge([$pk], $tableConfig['columns']));
+        $select = $connection->select()->from($tableName, array_merge([$pk], $columns));
         $rows = $connection->fetchAll($select);
 
         foreach ($rows as $row) {
             $updates = [];
-            foreach ($tableConfig['columns'] as $column) {
+            foreach ($columns as $column) {
                 $value = $row[$column];
                 if (empty($value)) {
                     continue;
@@ -102,6 +109,10 @@ try {
 
         $pk = $tableConfig['pk'];
         $column = $tableConfig['column'];
+        $tableColumns = $connection->describeTable($tableName);
+        if (!isset($tableColumns[$column])) {
+            continue;
+        }
         $select = $connection->select()->from($tableName, [$pk, $column]);
         $rows = $connection->fetchAll($select);
 
