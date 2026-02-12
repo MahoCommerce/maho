@@ -109,15 +109,15 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             }
         }
 
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($this->getConditions()) {
-            $this->setConditionsSerialized(serialize($this->getConditions()->asArray()));
+            $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
             $this->unsConditions();
         }
 
-        // Serialize actions
+        // Encode actions as JSON
         if ($this->getActions()) {
-            $this->setActionsSerialized(serialize($this->getActions()->asArray()));
+            $this->setActionsSerialized(Mage::helper('core')->jsonEncode($this->getActions()->asArray()));
             $this->unsActions();
         }
 
@@ -175,7 +175,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         if ($this->hasConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (!empty($conditions)) {
-                $conditions = Mage::helper('core/unserializeArray')->unserialize($conditions);
+                $conditions = Mage::helper('core')->jsonDecode($conditions);
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->loadArray($conditions);
                 }
@@ -214,7 +214,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         if ($this->hasActionsSerialized()) {
             $actions = $this->getActionsSerialized();
             if (!empty($actions)) {
-                $actions = Mage::helper('core/unserializeArray')->unserialize($actions);
+                $actions = Mage::helper('core')->jsonDecode($actions);
                 if (is_array($actions) && !empty($actions)) {
                     $this->_actions->loadArray($actions);
                 }

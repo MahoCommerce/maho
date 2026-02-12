@@ -162,9 +162,9 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object): self
     {
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($object->getConditions()) {
-            $object->setConditionsSerialized(serialize($object->getConditions()->asArray()));
+            $object->setConditionsSerialized(Mage::helper('core')->jsonEncode($object->getConditions()->asArray()));
         }
 
         return parent::_beforeSave($object);
