@@ -726,6 +726,10 @@ class Pgsql extends AbstractPdoAdapter
             throw new \InvalidArgumentException('Wildcard paths are not supported in getJsonExtractExpr().');
         }
 
+        if (count($keys) === 0) {
+            return new \Maho\Db\Expr(sprintf('%s::jsonb::text', $column));
+        }
+
         if (count($keys) === 1) {
             return new \Maho\Db\Expr(sprintf(
                 '%s::jsonb ->> %s',

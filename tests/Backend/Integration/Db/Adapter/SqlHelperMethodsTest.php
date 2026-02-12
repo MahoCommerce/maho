@@ -368,6 +368,7 @@ describe('SQL Helper Methods - JSON Functions', function () {
             ['data' => '["apple","banana","cherry"]'],
             ['data' => '{"conditions":[{"attribute":"8\\" bolt","value":"test"}]}'],
             ['data' => '{"conditions":[{"attribute":"back\\\\slash","value":"test"}]}'],
+            ['data' => '{"conditions":[{"attribute":"special_price","value":"99"}]}'],
         ]);
     });
 
@@ -559,5 +560,22 @@ describe('SQL Helper Methods - JSON Functions', function () {
         );
 
         expect((int) $result)->toBe(8);
+    });
+
+    it('does not false-positive on substring attribute matches with recursive wildcard', function () {
+        // "price" should NOT match row 12 which has "special_price"
+        // This was a bug with the old LIKE '%"attribute":"price"%' approach
+        $expr = $this->adapter->getJsonSearchExpr('data', 'price', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 12 AND {$expr}",
+        );
+
+        expect($result)->toBeFalsy();
+    });
+
+    it('throws on wildcard path in getJsonContainsExpr', function () {
+        expect(fn () => $this->adapter->getJsonContainsExpr('data', '"test"', '$**.key'))
+            ->toThrow(\InvalidArgumentException::class);
     });
 });
