@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,27 +32,34 @@ class ApiPermissionRegistry
 {
     /**
      * Resource definitions with available operations and labels.
-     * Format: 'resource' => ['label' => string, 'operations' => ['op' => 'Label', ...]]
+     * Format: 'resource' => ['label' => string, 'group' => string, 'operations' => ['op' => 'Label', ...]]
      */
     private const RESOURCES = [
-        'products'   => ['label' => 'Products', 'operations' => ['read' => 'View']],
-        'categories' => ['label' => 'Categories', 'operations' => ['read' => 'View']],
-        'orders'     => ['label' => 'Orders', 'operations' => ['read' => 'View', 'create' => 'Place', 'write' => 'Manage']],
-        'customers'  => ['label' => 'Customers', 'operations' => ['read' => 'View', 'create' => 'Register', 'write' => 'Update']],
-        'carts'      => ['label' => 'Carts', 'operations' => ['read' => 'View', 'write' => 'Create & Modify']],
-        'addresses'  => ['label' => 'Addresses', 'operations' => ['read' => 'View', 'write' => 'Manage']],
-        'wishlists'  => ['label' => 'Wishlists', 'operations' => ['read' => 'View', 'write' => 'Add/Remove']],
-        'reviews'    => ['label' => 'Reviews', 'operations' => ['read' => 'View', 'write' => 'Submit']],
-        'shipments'  => ['label' => 'Shipments', 'operations' => ['read' => 'View', 'create' => 'Create']],
-        'giftcards'  => ['label' => 'Gift Cards', 'operations' => ['read' => 'Check Balance', 'create' => 'Create', 'write' => 'Adjust Balance']],
-        'newsletter' => ['label' => 'Newsletter', 'operations' => ['read' => 'View Status', 'write' => 'Subscribe/Unsubscribe']],
-        'cms'        => ['label' => 'CMS Pages & Blocks', 'operations' => ['read' => 'View']],
-        'blog'       => ['label' => 'Blog Posts', 'operations' => ['read' => 'View']],
-        'stores'     => ['label' => 'Store Config', 'operations' => ['read' => 'View']],
-        'countries'  => ['label' => 'Countries', 'operations' => ['read' => 'View']],
-        'url-resolver' => ['label' => 'URL Resolver', 'operations' => ['read' => 'Resolve']],
-        'invoices'   => ['label' => 'Invoices', 'operations' => ['read' => 'View']],
-        'pos'        => ['label' => 'POS', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+        // Storefront resources
+        'products'     => ['label' => 'Products', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'categories'   => ['label' => 'Categories', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'orders'       => ['label' => 'Orders', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Place', 'write' => 'Manage']],
+        'customers'    => ['label' => 'Customers', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Register', 'write' => 'Update']],
+        'carts'        => ['label' => 'Carts', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Create & Modify']],
+        'addresses'    => ['label' => 'Addresses', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+        'wishlists'    => ['label' => 'Wishlists', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Add/Remove']],
+        'reviews'      => ['label' => 'Reviews', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Submit']],
+        'shipments'    => ['label' => 'Shipments', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Create']],
+        'giftcards'    => ['label' => 'Gift Cards', 'group' => 'Storefront', 'operations' => ['read' => 'Check Balance', 'create' => 'Create', 'write' => 'Adjust Balance']],
+        'newsletter'   => ['label' => 'Newsletter', 'group' => 'Storefront', 'operations' => ['read' => 'View Status', 'write' => 'Subscribe/Unsubscribe']],
+        'cms'          => ['label' => 'CMS Pages & Blocks', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'blog'         => ['label' => 'Blog Posts', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'stores'       => ['label' => 'Store Config', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'countries'    => ['label' => 'Countries', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'url-resolver' => ['label' => 'URL Resolver', 'group' => 'Storefront', 'operations' => ['read' => 'Resolve']],
+        'invoices'     => ['label' => 'Invoices', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'pos'          => ['label' => 'POS', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+
+        // Admin content resources
+        'admin/cms-pages'  => ['label' => 'CMS Pages', 'group' => 'Admin', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'admin/cms-blocks' => ['label' => 'CMS Blocks', 'group' => 'Admin', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'admin/blog-posts' => ['label' => 'Blog Posts', 'group' => 'Admin', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'admin/media'      => ['label' => 'Media', 'group' => 'Admin', 'operations' => ['read' => 'List', 'write' => 'Upload', 'delete' => 'Delete']],
     ];
 
     /**
@@ -209,11 +216,26 @@ class ApiPermissionRegistry
     /**
      * Get full resource definitions for admin UI
      *
-     * @return array<string, array{label: string, operations: array<string, string>}>
+     * @return array<string, array{label: string, group: string, operations: array<string, string>}>
      */
     public function getResources(): array
     {
         return self::RESOURCES;
+    }
+
+    /**
+     * Get resource definitions grouped by their group key
+     *
+     * @return array<string, array<string, array{label: string, group: string, operations: array<string, string>}>>
+     */
+    public function getResourcesByGroup(): array
+    {
+        $grouped = [];
+        foreach (self::RESOURCES as $resourceId => $config) {
+            $group = $config['group'];
+            $grouped[$group][$resourceId] = $config;
+        }
+        return $grouped;
     }
 
     /**
