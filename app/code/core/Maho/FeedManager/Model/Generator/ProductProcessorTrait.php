@@ -345,10 +345,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         // Add price data
         $collection->addPriceData();
 
-        if ($this->_feed->getExcludeOutOfStock()) {
-            // Exclude products with zero final price
-            $collection->getSelect()->where('price_index.final_price > 0');
-        } else {
+        // Exclude products with zero final price (invalid for any feed)
+        $collection->getSelect()->where('price_index.final_price > 0');
+
+        if (!$this->_feed->getExcludeOutOfStock()) {
             // Convert price index INNER JOIN to LEFT JOIN so out-of-stock products
             // not in the price index are still included in the collection
             $select = $collection->getSelect();

@@ -137,14 +137,9 @@ const FeedGenerator = {
 
         // Add upload status below the card if available
         if (data.upload_status) {
-            const entry = document.getElementById('gen-feed-0');
-            if (entry) {
-                const uploadClass = data.upload_status === 'success' ? 'success-msg' :
-                    (data.upload_status === 'failed' ? 'error-msg' : 'notice-msg');
-                entry.insertAdjacentHTML('beforeend',
-                    '<div class="' + uploadClass + ' fm-upload-status" style="margin-top:8px">' +
-                    escapeHtml(data.upload_message || data.upload_status) + '</div>');
-            }
+            const uploadClass = data.upload_status === 'success' ? 'success-msg' :
+                (data.upload_status === 'failed' ? 'error-msg' : 'notice-msg');
+            this._showUploadStatus(0, uploadClass, data.upload_message || data.upload_status);
         }
 
         // Build buttons with view/download/upload links
@@ -168,6 +163,16 @@ const FeedGenerator = {
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
     },
 
+    _showUploadStatus(idx, cssClass, message) {
+        const entry = document.getElementById('gen-feed-' + idx);
+        if (entry) {
+            entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
+            entry.insertAdjacentHTML('beforeend',
+                '<div class="' + cssClass + ' fm-upload-status" style="margin-top:8px">' +
+                escapeHtml(message) + '</div>');
+        }
+    },
+
     upload() {
         const btn = document.getElementById('upload-now-btn');
         if (btn) {
@@ -181,22 +186,11 @@ const FeedGenerator = {
             loaderArea: false
         })
         .then(data => {
-            const entry = document.getElementById('gen-feed-0');
             if (data.success) {
-                if (entry) {
-                    entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
-                    entry.insertAdjacentHTML('beforeend',
-                        '<div class="success-msg fm-upload-status" style="margin-top:8px">' +
-                        escapeHtml(data.message) + '</div>');
-                }
+                this._showUploadStatus(0, 'success-msg', data.message);
                 if (btn) btn.remove();
             } else {
-                if (entry) {
-                    entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
-                    entry.insertAdjacentHTML('beforeend',
-                        '<div class="error-msg fm-upload-status" style="margin-top:8px">' +
-                        escapeHtml(data.message || 'Upload failed') + '</div>');
-                }
+                this._showUploadStatus(0, 'error-msg', data.message || 'Upload failed');
                 if (btn) {
                     btn.disabled = false;
                     btn.textContent = this.translations.upload;
@@ -204,13 +198,7 @@ const FeedGenerator = {
             }
         })
         .catch(error => {
-            const entry = document.getElementById('gen-feed-0');
-            if (entry) {
-                entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
-                entry.insertAdjacentHTML('beforeend',
-                    '<div class="error-msg fm-upload-status" style="margin-top:8px">' +
-                    escapeHtml(error.message || 'Upload failed') + '</div>');
-            }
+            this._showUploadStatus(0, 'error-msg', error.message || 'Upload failed');
             if (btn) {
                 btn.disabled = false;
                 btn.textContent = this.translations.upload;

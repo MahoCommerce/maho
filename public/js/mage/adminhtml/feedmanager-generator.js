@@ -114,7 +114,7 @@ const FeedGeneratorBase = {
         if (text) text.textContent = '';
     },
 
-    // -- Dialog management ----------------------------------------------─
+    // -- Dialog management -----------------------------------------------
 
     showDialog(title, content) {
         const self = this;
@@ -149,7 +149,7 @@ const FeedGeneratorBase = {
         }
     },
 
-    // -- Batch processing (shared by single and multi) ------------------─
+    // -- Batch processing (shared by single and multi) -------------------
 
     processBatch() {
         if (this.cancelled) {
@@ -227,7 +227,7 @@ const FeedGeneratorBase = {
         this.closeDialog();
     },
 
-    // -- Default showSuccess / showError for single-feed ----------------─
+    // -- Default showSuccess / showError for single-feed -----------------
     // Pages override these for extra features (upload, view, download).
 
     showSuccess(data) {
