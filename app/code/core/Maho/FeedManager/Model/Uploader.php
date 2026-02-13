@@ -51,9 +51,7 @@ class Maho_FeedManager_Model_Uploader
             return null;
         }
 
-        return 'SFTP requires either the PHP ssh2 extension or phpseclib library. ' .
-               'Install with: sudo apt install php' . PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '-ssh2 ' .
-               'OR composer require phpseclib/phpseclib:^3.0';
+        return 'SFTP requires either the php-ssh2 extension or the phpseclib/phpseclib library.';
     }
 
     /**
