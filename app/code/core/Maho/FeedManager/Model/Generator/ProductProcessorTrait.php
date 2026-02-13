@@ -321,6 +321,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         $collection = Mage::getResourceModel('catalog/product_collection');
         $collection->setStoreId($this->_feed->getStoreId());
 
+        // Filter to products assigned to this store's website
+        $websiteId = Mage::app()->getStore($this->_feed->getStoreId())->getWebsiteId();
+        $collection->addWebsiteFilter($websiteId);
+
         // Add required attributes
         $collection->addAttributeToSelect('*');
 
@@ -338,9 +342,22 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         // Apply product type filter
         $this->_applyProductTypeFilter($collection);
 
-        // Always exclude products with zero final price (invalid for any feed)
+        // Add price data
         $collection->addPriceData();
-        $collection->getSelect()->where('price_index.final_price > 0');
+
+        if ($this->_feed->getExcludeOutOfStock()) {
+            // Exclude products with zero final price
+            $collection->getSelect()->where('price_index.final_price > 0');
+        } else {
+            // Convert price index INNER JOIN to LEFT JOIN so out-of-stock products
+            // not in the price index are still included in the collection
+            $select = $collection->getSelect();
+            $fromPart = $select->getPart(\Maho\Db\Select::FROM);
+            if (isset($fromPart['price_index'])) {
+                $fromPart['price_index']['joinType'] = \Maho\Db\Select::LEFT_JOIN;
+                $select->setPart(\Maho\Db\Select::FROM, $fromPart);
+            }
+        }
 
         // Collect validated attributes from Rule conditions
         $conditions = $this->_feed->getConditions();

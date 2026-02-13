@@ -289,10 +289,12 @@ class Maho_FeedManager_Model_Generator_Batch
                 'status' => self::STATUS_COMPLETED,
                 'file_url' => Mage::helper('feedmanager')->getFeedUrl($this->_feed),
                 'product_count' => $this->_state['product_count'],
+                'total_products' => $this->_state['total_products'],
                 'file_size' => $fileSize,
                 'file_size_formatted' => Mage::helper('feedmanager')->formatFileSize($fileSize),
                 'message' => "Feed generated successfully with {$this->_state['product_count']} products",
                 'errors' => $this->_errors,
+                'has_destination' => (bool) $this->_feed->getDestinationId(),
                 'upload_status' => $uploadResult['status'],
                 'upload_message' => $uploadResult['message'],
             ];

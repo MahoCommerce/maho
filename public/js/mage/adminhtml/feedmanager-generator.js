@@ -17,7 +17,7 @@ const FeedGeneratorBase = {
     cancelled: false,
     dialog: null,
 
-    // ── Card rendering helpers ──────────────────────────────────────────
+    // -- Card rendering helpers ------------------------------------------
 
     _buildFeedCard(idx, feedName, statusText) {
         return '<div class="gen-feed-entry" id="gen-feed-' + idx + '">' +
@@ -34,12 +34,21 @@ const FeedGeneratorBase = {
         '</div>';
     },
 
-    _updateFeedProgress(idx, current, total) {
-        const percent = total > 0 ? Math.round((current / total) * 100) : 0;
+    _updateFeedProgress(idx, processed, total, matched) {
+        const percent = total > 0 ? Math.round((processed / total) * 100) : 0;
         const bar = document.getElementById('gen-feed-bar-' + idx);
         const text = document.getElementById('gen-feed-text-' + idx);
         if (bar) bar.style.width = percent + '%';
-        if (text) text.textContent = current + ' / ' + total + ' (' + percent + '%)';
+        if (text) {
+            if (matched !== undefined && matched !== processed) {
+                const excluded = processed - matched;
+                text.textContent = (this.translations.progress_filtered || '%i included + %e excluded / %t (%p%)')
+                    .replace('%i', matched).replace('%e', excluded).replace('%t', total).replace('%p', percent);
+            } else {
+                text.textContent = (this.translations.progress || '%c / %t (%p%)')
+                    .replace('%c', processed).replace('%t', total).replace('%p', percent);
+            }
+        }
     },
 
     _updateFeedStatus(idx, message) {
@@ -71,7 +80,16 @@ const FeedGeneratorBase = {
         }
 
         const text = document.getElementById('gen-feed-text-' + idx);
-        if (text) text.textContent = '';
+        if (text) {
+            const total = data.total_products || 0;
+            const included = data.product_count || 0;
+            const excluded = total - included;
+            if (excluded > 0) {
+                text.textContent = (this.translations.excluded_summary || '%s excluded due to filters').replace('%s', excluded);
+            } else {
+                text.textContent = '';
+            }
+        }
     },
 
     _markFeedFailed(idx, message) {
@@ -96,7 +114,7 @@ const FeedGeneratorBase = {
         if (text) text.textContent = '';
     },
 
-    // ── Dialog management ───────────────────────────────────────────────
+    // -- Dialog management ----------------------------------------------─
 
     showDialog(title, content) {
         const self = this;
@@ -131,7 +149,7 @@ const FeedGeneratorBase = {
         }
     },
 
-    // ── Batch processing (shared by single and multi) ───────────────────
+    // -- Batch processing (shared by single and multi) ------------------─
 
     processBatch() {
         if (this.cancelled) {
@@ -153,17 +171,18 @@ const FeedGeneratorBase = {
                 return;
             }
 
-            const progress = data.progress || 0;
+            const matched = data.progress || 0;
+            const processed = data.processed || matched;
             const total = data.total || this.totalProducts;
 
             if (data.status === 'finalizing') {
-                this._updateFeedProgress(0, progress, total);
+                this._updateFeedProgress(0, processed, total, matched);
                 this._updateFeedStatus(0, this.translations.finalizing);
                 this.finalize();
             } else if (data.status === 'processing') {
                 const batchNum = data.batches_processed || 0;
                 const batchTotal = data.batches_total || this.batchesTotal;
-                this._updateFeedProgress(0, progress, total);
+                this._updateFeedProgress(0, processed, total, matched);
                 this._updateFeedStatus(0,
                     this.translations.processing.replace('%s', batchNum + 1).replace('%s', batchTotal));
                 this.processBatch();
@@ -208,7 +227,7 @@ const FeedGeneratorBase = {
         this.closeDialog();
     },
 
-    // ── Default showSuccess / showError for single-feed ─────────────────
+    // -- Default showSuccess / showError for single-feed ----------------─
     // Pages override these for extra features (upload, view, download).
 
     showSuccess(data) {

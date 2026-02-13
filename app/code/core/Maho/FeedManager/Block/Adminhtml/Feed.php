@@ -40,6 +40,8 @@ class Maho_FeedManager_Block_Adminhtml_Feed extends Mage_Adminhtml_Block_Widget_
         $cancelUrl = $this->getUrl('*/*/generateCancel');
         $massBatchUrl = $this->getUrl('*/*/massBatchGenerate');
 
+        $uploadUrl = $this->getUrl('*/*/upload');
+
         $translations = Mage::helper('core')->jsonEncode([
             'generating' => $this->__('Generating Feed...'),
             'generating_multiple' => $this->__('Generating Feeds...'),
@@ -55,6 +57,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed extends Mage_Adminhtml_Block_Widget_
             'close' => $this->__('Close'),
             'view' => $this->__('View'),
             'download' => $this->__('Download'),
+            'upload' => $this->__('Upload Now'),
+            'uploading' => $this->__('Uploading...'),
+            'progress' => $this->__('%c / %t (%p%)'),
+            'progress_filtered' => $this->__('%i included + %e excluded / %t (%p%)'),
+            'excluded_summary' => $this->__('%s excluded due to filters'),
             'confirm' => $this->__('Are you sure you want to generate this feed now?'),
             'confirm_multiple' => $this->__('Generate selected feeds?'),
         ]);
@@ -68,10 +75,12 @@ const FeedGenerator = {
         batch: '{$batchUrl}',
         finalize: '{$finalizeUrl}',
         cancel: '{$cancelUrl}',
-        massBatch: '{$massBatchUrl}'
+        massBatch: '{$massBatchUrl}',
+        upload: '{$uploadUrl}'
     },
     translations: {$translations},
     currentJobs: [],
+    currentFeedId: null,
 
     // ── Single feed generation ──────────────────────────────────────────
 
@@ -81,6 +90,7 @@ const FeedGenerator = {
         }
 
         this.cancelled = false;
+        this.currentFeedId = feedId;
 
         // Show dialog with a single initializing card
         this.showDialog(this.translations.generating,
@@ -125,10 +135,28 @@ const FeedGenerator = {
     showSuccess(data) {
         this._markFeedCompleted(0, data);
 
-        // Build buttons with view/download links
+        // Add upload status below the card if available
+        if (data.upload_status) {
+            const entry = document.getElementById('gen-feed-0');
+            if (entry) {
+                const uploadClass = data.upload_status === 'success' ? 'success-msg' :
+                    (data.upload_status === 'failed' ? 'error-msg' : 'notice-msg');
+                entry.insertAdjacentHTML('beforeend',
+                    '<div class="' + uploadClass + ' fm-upload-status" style="margin-top:8px">' +
+                    escapeHtml(data.upload_message || data.upload_status) + '</div>');
+            }
+        }
+
+        // Build buttons with view/download/upload links
         const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
         let buttonsHtml = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog(); window.location.reload();">' +
             this.translations.close + '</button>';
+
+        if (data.has_destination && data.upload_status !== 'success') {
+            buttonsHtml += ' <button type="button" id="upload-now-btn" onclick="FeedGenerator.upload()">' +
+                this.translations.upload + '</button>';
+        }
+
         if (data.file_url) {
             const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
             const fileUrlWithCb = escapeHtml(data.file_url + cacheBuster + Date.now(), true);
@@ -138,6 +166,56 @@ const FeedGenerator = {
                 this.translations.download + '</a>';
         }
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
+    },
+
+    upload() {
+        const btn = document.getElementById('upload-now-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = this.translations.uploading;
+        }
+
+        mahoFetch(this.urls.upload, {
+            method: 'POST',
+            body: new URLSearchParams({ id: this.currentFeedId, form_key: FORM_KEY }),
+            loaderArea: false
+        })
+        .then(data => {
+            const entry = document.getElementById('gen-feed-0');
+            if (data.success) {
+                if (entry) {
+                    entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
+                    entry.insertAdjacentHTML('beforeend',
+                        '<div class="success-msg fm-upload-status" style="margin-top:8px">' +
+                        escapeHtml(data.message) + '</div>');
+                }
+                if (btn) btn.remove();
+            } else {
+                if (entry) {
+                    entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
+                    entry.insertAdjacentHTML('beforeend',
+                        '<div class="error-msg fm-upload-status" style="margin-top:8px">' +
+                        escapeHtml(data.message || 'Upload failed') + '</div>');
+                }
+                if (btn) {
+                    btn.disabled = false;
+                    btn.textContent = this.translations.upload;
+                }
+            }
+        })
+        .catch(error => {
+            const entry = document.getElementById('gen-feed-0');
+            if (entry) {
+                entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
+                entry.insertAdjacentHTML('beforeend',
+                    '<div class="error-msg fm-upload-status" style="margin-top:8px">' +
+                    escapeHtml(error.message || 'Upload failed') + '</div>');
+            }
+            if (btn) {
+                btn.disabled = false;
+                btn.textContent = this.translations.upload;
+            }
+        });
     },
 
     // ── Multi feed generation ───────────────────────────────────────────
@@ -242,19 +320,20 @@ const FeedGenerator = {
                 return;
             }
 
-            const progress = data.progress || 0;
+            const matched = data.progress || 0;
+            const processed = data.processed || matched;
             const total = data.total || this.totalProducts;
 
             if (data.status === 'finalizing') {
                 this._updateFeedStatus(idx, this.translations.finalizing);
-                this._updateFeedProgress(idx, progress, total);
+                this._updateFeedProgress(idx, processed, total, matched);
                 this.finalizeForMultiple();
             } else if (data.status === 'processing') {
                 const batchNum = data.batches_processed || 0;
                 const batchTotal = data.batches_total || this.batchesTotal;
                 this._updateFeedStatus(idx,
                     this.translations.processing.replace('%s', batchNum + 1).replace('%s', batchTotal));
-                this._updateFeedProgress(idx, progress, total);
+                this._updateFeedProgress(idx, processed, total, matched);
                 this.processBatchForMultiple();
             } else if (data.status === 'completed') {
                 this._markFeedCompleted(idx, data);
