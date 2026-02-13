@@ -345,9 +345,6 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         // Add price data
         $collection->addPriceData();
 
-        // Exclude products with zero final price (invalid for any feed)
-        $collection->getSelect()->where('price_index.final_price > 0');
-
         if (!$this->_feed->getExcludeOutOfStock()) {
             // Convert price index INNER JOIN to LEFT JOIN so out-of-stock products
             // not in the price index are still included in the collection
@@ -357,6 +354,11 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
                 $fromPart['price_index']['joinType'] = \Maho\Db\Select::LEFT_JOIN;
                 $select->setPart(\Maho\Db\Select::FROM, $fromPart);
             }
+            // Exclude zero-price products but allow NULL (out-of-stock products missing from price index)
+            $collection->getSelect()->where('price_index.final_price > 0 OR price_index.final_price IS NULL');
+        } else {
+            // Exclude products with zero final price (invalid for any feed)
+            $collection->getSelect()->where('price_index.final_price > 0');
         }
 
         // Collect validated attributes from Rule conditions
