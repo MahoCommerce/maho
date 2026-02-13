@@ -106,12 +106,26 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit_Form extends Mage_Adminhtml
             'class' => 'fieldset-wide',
         ]);
 
-        $adminFieldset->addField('admin_enabled', 'select', [
-            'name' => 'admin_enabled',
-            'label' => Mage::helper('oauth')->__('Enable Admin API Access'),
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'value' => $model->getAdminEnabled(),
-            'note' => Mage::helper('oauth')->__('Allow this consumer to access admin write endpoints'),
+        // Role dropdown
+        $roles = [['value' => '', 'label' => Mage::helper('oauth')->__('-- No API Access --')]];
+        $read = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $roleTable = Mage::getSingleton('core/resource')->getTableName('api/role');
+        $roleRows = $read->fetchAll(
+            $read->select()
+                ->from($roleTable, ['role_id', 'role_name'])
+                ->where('role_type = ?', 'G')
+                ->order('role_name ASC'),
+        );
+        foreach ($roleRows as $row) {
+            $roles[] = ['value' => $row['role_id'], 'label' => $row['role_name']];
+        }
+
+        $adminFieldset->addField('api_role_id', 'select', [
+            'name' => 'api_role_id',
+            'label' => Mage::helper('oauth')->__('API Role'),
+            'values' => $roles,
+            'value' => $model->getData('api_role_id'),
+            'note' => Mage::helper('oauth')->__('Assign an API role to grant permissions. Manage roles at System > Web Services > REST/GraphQL - Roles.'),
         ]);
 
         $adminFieldset->addField('store_ids', 'multiselect', [
@@ -120,37 +134,6 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit_Form extends Mage_Adminhtml
             'values' => Mage::getSingleton('adminhtml/system_store')->getStoreValuesForForm(false, true),
             'value' => $this->_getStoreIdsValue($model),
             'note' => Mage::helper('oauth')->__('Select stores this consumer can access. Leave empty for all stores.'),
-        ]);
-
-        // Get existing permissions for pre-population
-        $permissions = $this->_getPermissionsArray($model);
-
-        $adminFieldset->addField('permission_cms_pages', 'select', [
-            'name' => 'permissions[cms_pages]',
-            'label' => Mage::helper('oauth')->__('CMS Pages'),
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'value' => $permissions['cms_pages'] ?? 0,
-        ]);
-
-        $adminFieldset->addField('permission_cms_blocks', 'select', [
-            'name' => 'permissions[cms_blocks]',
-            'label' => Mage::helper('oauth')->__('CMS Blocks'),
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'value' => $permissions['cms_blocks'] ?? 0,
-        ]);
-
-        $adminFieldset->addField('permission_blog_posts', 'select', [
-            'name' => 'permissions[blog_posts]',
-            'label' => Mage::helper('oauth')->__('Blog Posts'),
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'value' => $permissions['blog_posts'] ?? 0,
-        ]);
-
-        $adminFieldset->addField('permission_media', 'select', [
-            'name' => 'permissions[media]',
-            'label' => Mage::helper('oauth')->__('Media Upload'),
-            'values' => Mage::getModel('adminhtml/system_config_source_yesno')->toOptionArray(),
-            'value' => $permissions['media'] ?? 0,
         ]);
 
         $adminFieldset->addField('expires_at', 'date', [
@@ -180,21 +163,6 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit_Form extends Mage_Adminhtml
             return [];
         }
         $decoded = json_decode($storeIds, true);
-        return is_array($decoded) ? $decoded : [];
-    }
-
-    /**
-     * Get permissions array from model
-     *
-     * @return array
-     */
-    protected function _getPermissionsArray(Mage_Oauth_Model_Consumer $model): array
-    {
-        $permissions = $model->getAdminPermissions();
-        if (empty($permissions)) {
-            return [];
-        }
-        $decoded = json_decode($permissions, true);
         return is_array($decoded) ? $decoded : [];
     }
 }

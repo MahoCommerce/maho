@@ -42,6 +42,13 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
         $collection = Mage::getModel('oauth/consumer')->getCollection();
         $this->setCollection($collection);
 
+        $roleTable = Mage::getSingleton('core/resource')->getTableName('api/role');
+        $collection->getSelect()->joinLeft(
+            ['api_role' => $roleTable],
+            'main_table.api_role_id = api_role.role_id',
+            ['role_name'],
+        );
+
         return parent::_prepareCollection();
     }
 
@@ -51,17 +58,79 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Grid extends Mage_Adminhtml_Bloc
         $this->addColumn('entity_id', [
             'header' => Mage::helper('oauth')->__('ID'),
             'index' => 'entity_id',
+            'width' => '50px',
         ]);
 
         $this->addColumn('name', [
-            'header' => Mage::helper('oauth')->__('Consumer Name'), 'index' => 'name', 'escape' => true,
+            'header' => Mage::helper('oauth')->__('Consumer Name'),
+            'index' => 'name',
+            'escape' => true,
+        ]);
+
+        $this->addColumn('protocol', [
+            'header' => Mage::helper('oauth')->__('Protocol'),
+            'index' => 'api_role_id',
+            'width' => '100px',
+            'sortable' => false,
+            'filter' => false,
+            'frame_callback' => [$this, 'decorateProtocol'],
+        ]);
+
+        $this->addColumn('admin_api', [
+            'header' => Mage::helper('oauth')->__('API Role'),
+            'index' => 'role_name',
+            'width' => '150px',
+            'sortable' => false,
+            'filter' => false,
+            'frame_callback' => [$this, 'decorateApiRole'],
+        ]);
+
+        $this->addColumn('last_used_at', [
+            'header' => Mage::helper('oauth')->__('Last Used'),
+            'index' => 'last_used_at',
+            'type' => 'datetime',
+            'width' => '160px',
+        ]);
+
+        $this->addColumn('expires_at', [
+            'header' => Mage::helper('oauth')->__('Expires'),
+            'index' => 'expires_at',
+            'type' => 'datetime',
+            'width' => '160px',
         ]);
 
         $this->addColumn('created_at', [
-            'header' => Mage::helper('oauth')->__('Created At'), 'index' => 'created_at',
+            'header' => Mage::helper('oauth')->__('Created At'),
+            'index' => 'created_at',
+            'type' => 'datetime',
+            'width' => '160px',
         ]);
 
         return parent::_prepareColumns();
+    }
+
+    /**
+     * Render protocol column — OAuth 2 if api_role_id set, otherwise OAuth 1
+     */
+    public function decorateProtocol(string $value, Mage_Oauth_Model_Consumer $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
+    {
+        $hasRole = !empty($row->getData('api_role_id'));
+        if ($hasRole) {
+            return '<span style="color:#2563eb;font-weight:600">OAuth 2</span>';
+        }
+        return '<span style="color:#6b7280">OAuth 1</span>';
+    }
+
+    /**
+     * Render API role column
+     */
+    public function decorateApiRole(string $value, Mage_Oauth_Model_Consumer $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
+    {
+        $roleName = $row->getData('role_name');
+        if ($roleName) {
+            return '<span style="color:#16a34a">' . $this->escapeHtml($roleName) . '</span>';
+        }
+        return '<span style="color:#9ca3af">None</span>';
     }
 
     /**
