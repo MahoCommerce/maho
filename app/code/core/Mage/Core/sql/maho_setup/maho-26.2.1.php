@@ -50,26 +50,26 @@ $maybeSerializedTables = [
     ['table' => 'core_config_data',             'pk' => 'config_id',  'column' => 'value'],
 ];
 
-$connection->beginTransaction();
-try {
-    // Category A: always-serialized columns
-    foreach ($alwaysSerializedTables as $tableConfig) {
-        $tableName = $installer->getTable($tableConfig['table']);
+// Category A: always-serialized columns
+foreach ($alwaysSerializedTables as $tableConfig) {
+    $tableName = $installer->getTable($tableConfig['table']);
 
-        if (!$connection->isTableExists($tableName)) {
-            continue;
-        }
+    if (!$connection->isTableExists($tableName)) {
+        continue;
+    }
 
-        // Filter out columns that don't exist in this table
-        $tableColumns = $connection->describeTable($tableName);
-        $columns = array_filter($tableConfig['columns'], fn($col) => isset($tableColumns[$col]));
-        if (empty($columns)) {
-            continue;
-        }
+    // Filter out columns that don't exist in this table
+    $tableColumns = $connection->describeTable($tableName);
+    $columns = array_filter($tableConfig['columns'], fn($col) => isset($tableColumns[$col]));
+    if (empty($columns)) {
+        continue;
+    }
 
-        $pk = $tableConfig['pk'];
-        $offset = 0;
+    $pk = $tableConfig['pk'];
+    $offset = 0;
 
+    $connection->beginTransaction();
+    try {
         do {
             $select = $connection->select()
                 ->from($tableName, array_merge([$pk], $columns))
@@ -90,7 +90,7 @@ try {
                     }
 
                     $data = @unserialize($value, ['allowed_classes' => false]);
-                    if ($data !== false) {
+                    if ($data !== false || $value === 'b:0;') {
                         $updates[$column] = $coreHelper->jsonEncode($data);
                     } else {
                         Mage::log(
@@ -107,25 +107,33 @@ try {
 
             $offset += $batchSize;
         } while (count($rows) === $batchSize);
+
+        $connection->commit();
+    } catch (Exception $e) {
+        $connection->rollBack();
+        throw $e;
+    }
+}
+
+// Category B: maybe-serialized columns
+foreach ($maybeSerializedTables as $tableConfig) {
+    $tableName = $installer->getTable($tableConfig['table']);
+
+    if (!$connection->isTableExists($tableName)) {
+        continue;
     }
 
-    // Category B: maybe-serialized columns
-    foreach ($maybeSerializedTables as $tableConfig) {
-        $tableName = $installer->getTable($tableConfig['table']);
+    $pk = $tableConfig['pk'];
+    $column = $tableConfig['column'];
+    $tableColumns = $connection->describeTable($tableName);
+    if (!isset($tableColumns[$column])) {
+        continue;
+    }
 
-        if (!$connection->isTableExists($tableName)) {
-            continue;
-        }
+    $offset = 0;
 
-        $pk = $tableConfig['pk'];
-        $column = $tableConfig['column'];
-        $tableColumns = $connection->describeTable($tableName);
-        if (!isset($tableColumns[$column])) {
-            continue;
-        }
-
-        $offset = 0;
-
+    $connection->beginTransaction();
+    try {
         do {
             $select = $connection->select()
                 ->from($tableName, [$pk, $column])
@@ -159,12 +167,12 @@ try {
 
             $offset += $batchSize;
         } while (count($rows) === $batchSize);
-    }
 
-    $connection->commit();
-} catch (Exception $e) {
-    $connection->rollBack();
-    throw $e;
+        $connection->commit();
+    } catch (Exception $e) {
+        $connection->rollBack();
+        throw $e;
+    }
 }
 
 $installer->endSetup();

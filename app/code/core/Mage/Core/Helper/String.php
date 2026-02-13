@@ -555,8 +555,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     public function isSerializedArrayOrObject($data)
     {
         if (is_string($data) && json_validate($data)) {
-            $firstChar = $data[0] ?? '';
-            return $firstChar === '{' || $firstChar === '[';
+            return $data[0] === '{' || $data[0] === '[';
         }
         $pattern =
             '/^a:\d+:\{(i:\d+;|s:\d+:\".+\";|N;|O:\d+:\"\w+\":\d+:\{\w:\d+:)+|^O:\d+:\"\w+\":\d+:\{(s:\d+:\"|i:\d+;)/';
