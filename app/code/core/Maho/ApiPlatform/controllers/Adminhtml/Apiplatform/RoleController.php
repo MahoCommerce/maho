@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,7 +91,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
         Mage::register('api_role_data', $roleData ?: []);
         Mage::register('api_role_permissions', $permissions);
         $registry = new \Maho\ApiPlatform\Security\ApiPermissionRegistry();
-        Mage::register('api_resources', $registry->getResources());
+        Mage::register('api_resources', $registry->getResourcesByGroup());
 
         $this->_title($roleData ? $roleData['role_name'] : $this->__('New Role'));
 
