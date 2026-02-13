@@ -28,7 +28,8 @@ use Symfony\Component\Security\Http\Authenticator\Passport\SelfValidatingPasspor
 
 /**
  * Admin API Authenticator
- * Validates Bearer key:secret tokens for admin API endpoints using OAuth consumers
+ * Validates Bearer key:secret tokens for admin API endpoints using OAuth consumers.
+ * Permissions are loaded from api_role/api_rule tables at authentication time.
  */
 final class AdminApiAuthenticator extends AbstractAuthenticator
 {
@@ -78,22 +79,42 @@ final class AdminApiAuthenticator extends AbstractAuthenticator
             throw new CustomUserMessageAuthenticationException('Invalid consumer secret');
         }
 
-        if (!$consumer->hasAdminAccess()) {
+        // Check if consumer has an assigned API role
+        $roleId = $consumer->getData('api_role_id');
+        if (!$roleId) {
             throw new CustomUserMessageAuthenticationException('Consumer does not have admin API access');
         }
 
-        if ($consumer->isExpired()) {
+        // Check expiration
+        $expiresAt = $consumer->getData('expires_at');
+        if ($expiresAt && strtotime($expiresAt) < time()) {
             throw new CustomUserMessageAuthenticationException('Consumer token has expired');
         }
 
-        // Update last used timestamp
-        $consumer->touchLastUsed();
+        // Load permissions from api_rule table
+        $permissions = $this->loadPermissions((int) $roleId);
 
-        // Store consumer in request for processors to access
+        // Parse store access
+        $storeIds = $this->parseStoreIds($consumer->getData('store_ids'));
+
+        // Update last used timestamp (inline, no model save for efficiency)
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $write->update(
+            $resource->getTableName('oauth/consumer'),
+            ['last_used_at' => (new \DateTime('now', new \DateTimeZone('UTC')))->format('Y-m-d H:i:s')],
+            ['entity_id = ?' => (int) $consumer->getId()],
+        );
+
+        // Store consumer in request for backward compat (processors that log consumer name)
         $request->attributes->set(self::CONSUMER_ATTRIBUTE, $consumer);
 
         return new SelfValidatingPassport(
-            new UserBadge($consumer->getKey(), fn() => new AdminApiUser($consumer)),
+            new UserBadge($consumer->getKey(), fn() => new AdminApiUser(
+                consumer: $consumer,
+                permissions: $permissions,
+                allowedStoreIds: $storeIds,
+            )),
         );
     }
 
@@ -119,5 +140,52 @@ final class AdminApiAuthenticator extends AbstractAuthenticator
             'hydra:title' => 'Unauthorized',
             'hydra:description' => $exception->getMessage(),
         ], Response::HTTP_UNAUTHORIZED);
+    }
+
+    /**
+     * Load permission strings from api_rule table for a role
+     *
+     * @return array<string>
+     */
+    private function loadPermissions(int $roleId): array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $ruleTable = $resource->getTableName('api/rule');
+
+        $rules = $read->fetchAll(
+            $read->select()
+                ->from($ruleTable, ['resource_id'])
+                ->where('role_id = ?', $roleId)
+                ->where('role_type = ?', 'G')
+                ->where('api_permission = ?', 'allow'),
+        );
+
+        $permissions = [];
+        foreach ($rules as $rule) {
+            if ($rule['resource_id'] === 'all') {
+                return ['all'];
+            }
+            $permissions[] = $rule['resource_id'];
+        }
+
+        return $permissions;
+    }
+
+    /**
+     * Parse store_ids from consumer data
+     *
+     * @return array<int>|null null means all stores
+     */
+    private function parseStoreIds(?string $storeIds): ?array
+    {
+        if (empty($storeIds) || $storeIds === 'all') {
+            return null; // null = all stores allowed
+        }
+        $decoded = json_decode($storeIds, true);
+        if (!is_array($decoded)) {
+            return null;
+        }
+        return array_map('intval', $decoded);
     }
 }
