@@ -815,17 +815,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $this->_redirect('*/*/');
         }
     }
-
-    /**
-     * Mass generate is handled client-side via async batch JS.
-     * This action exists only as a fallback redirect.
-     */
-    public function massGenerateAction(): void
-    {
-        $this->_getSession()->addNotice($this->__('Please use the grid interface to generate feeds.'));
-        $this->_redirect('*/*/');
-    }
-
     public function massStatusAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
