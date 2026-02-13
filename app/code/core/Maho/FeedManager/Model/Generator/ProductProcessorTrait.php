@@ -13,15 +13,306 @@ declare(strict_types=1);
 /**
  * Shared product processing functionality for feed generators
  *
- * This trait provides common methods used by both synchronous (Generator)
+ * This trait provides a unified output engine used by both synchronous (Generator)
  * and batch (Generator_Batch) feed generation classes.
  *
  * Requirements for using classes:
  * - Must have $_feed property of type Maho_FeedManager_Model_Feed
- * - Must have $_mapper property of type Maho_FeedManager_Model_Mapper (for template methods)
+ * - Must have $_mapper property of type Maho_FeedManager_Model_Mapper
+ * - Must have $_platform property of type ?Maho_FeedManager_Model_Platform_AdapterInterface
+ * - Must have $_log property of type ?Maho_FeedManager_Model_Log
+ * - Must have $_batchSize property of type int
+ * - Must have $_errors property of type array
  */
 trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
 {
+    // ──────────────────────────────────────────────────────────────────────
+    // Output engine properties
+    // ──────────────────────────────────────────────────────────────────────
+
+    protected ?Maho_FeedManager_Model_Writer_WriterInterface $_writer = null;
+
+    /** @var resource|null File handle for XML direct modes */
+    protected $_outputHandle = null;
+
+    protected string $_outputMode = 'writer';
+    protected int $_productCount = 0;
+    protected int $_processedCount = 0;
+    protected int $_errorCount = 0;
+
+    /** @var array<int|string, mixed>|null Parsed XML structure for xml_structure mode */
+    protected ?array $_xmlStructureParsed = null;
+
+    protected string $_xmlItemTag = 'item';
+    protected string $_xmlItemTemplate = '';
+
+    /** @var array<int|string, mixed>|null Parsed JSON structure for json format */
+    protected ?array $_jsonStructureParsed = null;
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Output engine: setup, open, resume, pause, close
+    // ──────────────────────────────────────────────────────────────────────
+
+    /**
+     * Determine output mode and prepare format-specific state
+     *
+     * Resolves whether to use a Writer or direct XML output, creates the
+     * writer instance, and parses any structure/template definitions.
+     * Does NOT open a file — call _openOutput() or _resumeOutput() after.
+     */
+    protected function _prepareOutputMode(): void
+    {
+        $format = $this->_feed->getFileFormat();
+
+        if ($format === 'xml' && $this->_feed->getXmlStructure()) {
+            $this->_outputMode = 'xml_structure';
+            $this->_xmlStructureParsed = Mage::helper('core')->jsonDecode($this->_feed->getXmlStructure());
+            $this->_xmlItemTag = trim($this->_feed->getXmlItemTag() ?: 'item');
+        } elseif ($format === 'xml' && $this->_feed->getXmlItemTemplate()) {
+            $this->_outputMode = 'xml_template';
+            $this->_xmlItemTemplate = $this->_feed->getXmlItemTemplate();
+            $this->_xmlItemTag = trim($this->_feed->getXmlItemTag() ?: '');
+        } else {
+            $this->_outputMode = 'writer';
+            $this->_writer = $this->_createWriter($format);
+        }
+
+        // Cache parsed JSON structure for json format
+        if ($format === 'json' && $this->_feed->getJsonStructure()) {
+            $decoded = Mage::helper('core')->jsonDecode($this->_feed->getJsonStructure());
+            if (is_array($decoded) && !empty($decoded)) {
+                $this->_jsonStructureParsed = $decoded;
+            }
+        }
+    }
+
+    /**
+     * Open output for a new file (writes headers/preamble)
+     */
+    protected function _openOutput(string $filePath): void
+    {
+        $this->_prepareOutputMode();
+
+        switch ($this->_outputMode) {
+            case 'xml_structure':
+            case 'xml_template':
+                $this->_outputHandle = fopen($filePath, 'w');
+                if ($this->_outputHandle === false) {
+                    throw new RuntimeException("Cannot open file for writing: {$filePath}");
+                }
+                $header = $this->_feed->getXmlHeader();
+                if (!empty($header)) {
+                    fwrite($this->_outputHandle, $this->_renderHeaderFooter($header, $this->_feed) . "\n");
+                }
+                break;
+
+            case 'writer':
+                $this->_writer->open($filePath, $this->_platform);
+                break;
+        }
+    }
+
+    /**
+     * Resume output on an existing file (append mode, no header)
+     *
+     * Recreates writer/parsed state from feed config, then opens in append mode.
+     */
+    protected function _resumeOutput(string $filePath): void
+    {
+        $this->_prepareOutputMode();
+
+        switch ($this->_outputMode) {
+            case 'xml_structure':
+            case 'xml_template':
+                $this->_outputHandle = fopen($filePath, 'a');
+                if ($this->_outputHandle === false) {
+                    throw new RuntimeException("Cannot open file for appending: {$filePath}");
+                }
+                break;
+
+            case 'writer':
+                $this->_writer->resume($filePath, $this->_platform);
+                break;
+        }
+    }
+
+    /**
+     * Pause output by closing the file handle without writing footer
+     *
+     * Used by batch generation to release handles between HTTP requests.
+     */
+    protected function _pauseOutput(): void
+    {
+        switch ($this->_outputMode) {
+            case 'xml_structure':
+            case 'xml_template':
+                if (is_resource($this->_outputHandle)) {
+                    fclose($this->_outputHandle);
+                    $this->_outputHandle = null;
+                }
+                break;
+
+            case 'writer':
+                $this->_writer->pause();
+                break;
+        }
+    }
+
+    /**
+     * Close output, writing footer/closing tags
+     */
+    protected function _closeOutput(): void
+    {
+        switch ($this->_outputMode) {
+            case 'xml_structure':
+            case 'xml_template':
+                $footer = $this->_feed->getXmlFooter();
+                if (!empty($footer) && is_resource($this->_outputHandle)) {
+                    fwrite($this->_outputHandle, $this->_renderHeaderFooter($footer, $this->_feed) . "\n");
+                }
+                if (is_resource($this->_outputHandle)) {
+                    fclose($this->_outputHandle);
+                    $this->_outputHandle = null;
+                }
+                break;
+
+            case 'writer':
+                $this->_writer->close();
+                break;
+        }
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Core processing: batch loop and per-product writing
+    // ──────────────────────────────────────────────────────────────────────
+
+    /**
+     * Process one page of products
+     *
+     * Iterates through a single page of the product collection, validates
+     * each product against conditions, and writes it to the output.
+     * Updates progress counters and handles per-product errors.
+     *
+     * @return int Number of products successfully written in this batch
+     */
+    protected function _processOneBatch(int $page): int
+    {
+        $collection = $this->_getProductCollection();
+        $collection->setPageSize($this->_batchSize)->setCurPage($page);
+
+        $productIds = $collection->getAllIds();
+        if (!empty($productIds)) {
+            $this->_mapper->preloadParentMappings($productIds);
+        }
+
+        $processedInBatch = 0;
+
+        foreach ($collection as $product) {
+            try {
+                if (!$this->_validateProductConditions($product)) {
+                    $this->_processedCount++;
+                    continue;
+                }
+
+                $this->_writeProduct($product);
+                $this->_processedCount++;
+                $processedInBatch++;
+
+                if ($this->_processedCount % 100 === 0) {
+                    $this->_log->setProductCount($this->_productCount)->save();
+                }
+            } catch (\Throwable $e) {
+                $this->_errorCount++;
+                $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
+                $this->_processedCount++;
+
+                $this->_checkErrorThreshold($this->_errorCount, $this->_processedCount);
+            }
+        }
+
+        $collection->clear();
+        gc_collect_cycles();
+
+        return $processedInBatch;
+    }
+
+    /**
+     * Write a single product to the output using the current output mode
+     */
+    protected function _writeProduct(Mage_Catalog_Model_Product $product): void
+    {
+        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
+        $product->setStockItem($stockItem);
+
+        switch ($this->_outputMode) {
+            case 'xml_structure':
+                $xml = $this->_mapper->mapProductToXmlStructure(
+                    $product,
+                    $this->_xmlStructureParsed,
+                    $this->_xmlItemTag,
+                    1,
+                );
+                fwrite($this->_outputHandle, $xml);
+                break;
+
+            case 'xml_template':
+                $itemXml = $this->_renderItemTemplate($this->_xmlItemTemplate, $product, $this->_feed);
+                if ($this->_xmlItemTag !== '') {
+                    fwrite($this->_outputHandle, "  <{$this->_xmlItemTag}>\n");
+                    fwrite($this->_outputHandle, '    ' . str_replace("\n", "\n    ", trim($itemXml)) . "\n");
+                    fwrite($this->_outputHandle, "  </{$this->_xmlItemTag}>\n");
+                } else {
+                    fwrite($this->_outputHandle, '  ' . trim($itemXml) . "\n");
+                }
+                break;
+
+            case 'writer':
+                if ($this->_jsonStructureParsed !== null) {
+                    $mappedData = $this->_mapper->mapProductToJsonStructure($product, $this->_jsonStructureParsed);
+                } else {
+                    $mappedData = $this->_mapper->mapProduct($product);
+                }
+
+                if ($this->_platform) {
+                    $validationErrors = $this->_platform->validateProductData($mappedData);
+                    if (!empty($validationErrors)) {
+                        foreach ($validationErrors as $error) {
+                            $this->_errors[] = "Product {$product->getSku()}: {$error}";
+                        }
+                    }
+                }
+
+                $this->_writer->writeProduct($mappedData);
+                break;
+        }
+
+        $this->_productCount++;
+    }
+
+    /**
+     * Create appropriate writer for format and configure it from feed
+     */
+    protected function _createWriter(string $format): Maho_FeedManager_Model_Writer_WriterInterface
+    {
+        $writer = match ($format) {
+            'xml' => new Maho_FeedManager_Model_Writer_Xml(),
+            'csv' => new Maho_FeedManager_Model_Writer_Csv(),
+            'json' => new Maho_FeedManager_Model_Writer_Json(),
+            'jsonl' => new Maho_FeedManager_Model_Writer_Jsonl(),
+            default => throw new InvalidArgumentException("Unsupported format: {$format}"),
+        };
+
+        if (method_exists($writer, 'configureFromFeed')) {
+            $writer->configureFromFeed($this->_feed);
+        }
+
+        return $writer;
+    }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Product collection and filtering
+    // ──────────────────────────────────────────────────────────────────────
+
     /**
      * Get product collection with filters applied
      */
@@ -86,6 +377,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
 
         return $conditions->validate($product);
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Template rendering
+    // ──────────────────────────────────────────────────────────────────────
 
     /**
      * Render header or footer template
@@ -282,6 +577,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         };
     }
 
+    // ──────────────────────────────────────────────────────────────────────
+    // Product attribute resolution
+    // ──────────────────────────────────────────────────────────────────────
+
     /**
      * Get product value for template placeholder
      */
@@ -332,6 +631,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
 
         return (string) $value;
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Product URL and image helpers
+    // ──────────────────────────────────────────────────────────────────────
 
     /**
      * Get product URL
@@ -468,6 +771,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         return $result;
     }
 
+    // ──────────────────────────────────────────────────────────────────────
+    // Formatting helpers
+    // ──────────────────────────────────────────────────────────────────────
+
     /**
      * Format price according to feed settings
      */
@@ -516,6 +823,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
 
         return Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . 'catalog/product' . $value;
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // File operations
+    // ──────────────────────────────────────────────────────────────────────
 
     /**
      * Compress file with gzip
@@ -592,6 +903,10 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
             ));
         }
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Generation lock and finalization
+    // ──────────────────────────────────────────────────────────────────────
 
     /**
      * Acquire a generation lock using SELECT FOR UPDATE to prevent race conditions

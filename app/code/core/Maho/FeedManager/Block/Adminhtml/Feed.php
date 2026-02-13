@@ -45,13 +45,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed extends Mage_Adminhtml_Block_Widget_
             'generating_multiple' => $this->__('Generating Feeds...'),
             'initializing' => $this->__('Initializing...'),
             'processing' => $this->__('Processing batch %s of %s...'),
-            'processing_feed' => $this->__('Processing feed %s of %s...'),
             'finalizing' => $this->__('Finalizing...'),
             'completed' => $this->__('Feed generated successfully!'),
-            'completed_multiple' => $this->__('%s feed(s) generated successfully'),
             'failed' => $this->__('Generation failed'),
             'cancelled' => $this->__('Generation cancelled'),
             'products' => $this->__('%s products'),
+            'waiting' => $this->__('Waiting...'),
             'cancel' => $this->__('Cancel'),
             'close' => $this->__('Close'),
             'view' => $this->__('View'),
@@ -74,14 +73,22 @@ const FeedGenerator = {
     translations: {$translations},
     currentJobs: [],
 
+    // ── Single feed generation ──────────────────────────────────────────
+
     start(feedId) {
         if (!confirm(this.translations.confirm)) {
             return false;
         }
 
         this.cancelled = false;
-        this.showDialog(this.translations.generating);
-        this.updateProgress(0, 0, this.translations.initializing);
+
+        // Show dialog with a single initializing card
+        this.showDialog(this.translations.generating,
+            '<div class="gen-multi-list">' +
+                this._buildFeedCard(0, this.translations.initializing, '') +
+            '</div>'
+        );
+        this._markFeedActive(0);
 
         mahoFetch(this.urls.init, {
             method: 'POST',
@@ -98,7 +105,12 @@ const FeedGenerator = {
             this.totalProducts = data.total_products;
             this.batchesTotal = data.batches_total;
 
-            this.updateProgress(0, data.total_products,
+            // Update card with feed name from response
+            const nameEl = document.querySelector('#gen-feed-0 .gen-feed-name');
+            if (nameEl) nameEl.textContent = data.feed_name || '';
+
+            this._updateFeedProgress(0, 0, data.total_products);
+            this._updateFeedStatus(0,
                 this.translations.processing.replace('%s', '1').replace('%s', data.batches_total));
 
             this.processBatch();
@@ -110,155 +122,11 @@ const FeedGenerator = {
         return false;
     },
 
-    startMultiple(feedIds) {
-        if (!confirm(this.translations.confirm_multiple)) {
-            return false;
-        }
-
-        this.cancelled = false;
-        this.currentJobs = [];
-        this.currentJobIndex = 0;
-        this.showDialog(this.translations.generating_multiple);
-        this.updateProgress(0, feedIds.length, this.translations.initializing);
-
-        mahoFetch(this.urls.massBatch, {
-            method: 'POST',
-            body: new URLSearchParams({ 'feed_ids[]': feedIds, form_key: FORM_KEY }),
-            loaderArea: false
-        })
-        .then(data => {
-            if (data.error && !data.jobs) {
-                this.showError(data.message);
-                return;
-            }
-
-            this.currentJobs = data.jobs || [];
-            this.totalJobs = this.currentJobs.length;
-            this.completedJobs = 0;
-            this.failedJobs = data.errors ? data.errors.length : 0;
-
-            if (this.currentJobs.length === 0) {
-                this.showError(data.message || 'No feeds to generate');
-                return;
-            }
-
-            this.processNextJob();
-        })
-        .catch(error => {
-            this.showError(error.message || 'Network error');
-        });
-
-        return false;
-    },
-
-    processNextJob() {
-        if (this.cancelled || this.currentJobIndex >= this.currentJobs.length) {
-            this.showMultipleSuccess();
-            return;
-        }
-
-        const job = this.currentJobs[this.currentJobIndex];
-        this.currentJobId = job.job_id;
-        this.totalProducts = job.total_products;
-        this.batchesTotal = job.batches_total;
-
-        this.updateMultipleProgress(
-            this.translations.processing_feed.replace('%s', this.currentJobIndex + 1).replace('%s', this.totalJobs) +
-            ' (' + job.feed_name + ')'
-        );
-
-        this.processBatchForMultiple();
-    },
-
-    processBatchForMultiple() {
-        if (this.cancelled) {
-            return;
-        }
-
-        mahoFetch(this.urls.batch, {
-            method: 'POST',
-            body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-            loaderArea: false
-        })
-        .then(data => {
-            if (this.cancelled) {
-                return;
-            }
-
-            if (data.status === 'failed') {
-                this.failedJobs++;
-                this.currentJobIndex++;
-                this.processNextJob();
-                return;
-            }
-
-            if (data.status === 'finalizing') {
-                this.finalizeForMultiple();
-            } else if (data.status === 'processing') {
-                this.processBatchForMultiple();
-            } else if (data.status === 'completed') {
-                this.completedJobs++;
-                this.currentJobIndex++;
-                this.processNextJob();
-            }
-        })
-        .catch(error => {
-            this.failedJobs++;
-            this.currentJobIndex++;
-            this.processNextJob();
-        });
-    },
-
-    finalizeForMultiple() {
-        mahoFetch(this.urls.finalize, {
-            method: 'POST',
-            body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
-            loaderArea: false
-        })
-        .then(data => {
-            if (data.status === 'completed') {
-                this.completedJobs++;
-            } else {
-                this.failedJobs++;
-            }
-            this.currentJobIndex++;
-            this.processNextJob();
-        })
-        .catch(error => {
-            this.failedJobs++;
-            this.currentJobIndex++;
-            this.processNextJob();
-        });
-    },
-
-    updateMultipleProgress(message) {
-        const percent = this.totalJobs > 0 ? Math.round((this.currentJobIndex / this.totalJobs) * 100) : 0;
-        const progressBar = document.getElementById('gen-progress-bar');
-        const progressText = document.getElementById('gen-progress-text');
-        const statusEl = document.getElementById('gen-status');
-
-        if (progressBar) progressBar.style.width = percent + '%';
-        if (progressText) progressText.textContent = (this.currentJobIndex) + ' / ' + this.totalJobs + ' feeds';
-        if (statusEl) statusEl.textContent = message;
-    },
-
     showSuccess(data) {
-        const statusEl = document.getElementById('gen-status');
+        this._markFeedCompleted(0, data);
+
+        // Build buttons with view/download links
         const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
-        const progressBar = document.getElementById('gen-progress-bar');
-
-        if (progressBar) progressBar.style.width = '100%';
-
-        let successHtml = '<div class="success-msg">' +
-            this.translations.completed + '<br>' +
-            this.translations.products.replace('%s', data.product_count || 0);
-        if (data.file_size_formatted) {
-            successHtml += ' (' + data.file_size_formatted + ')';
-        }
-        successHtml += '</div>';
-
-        if (statusEl) statusEl.innerHTML = successHtml;
-
         let buttonsHtml = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog(); window.location.reload();">' +
             this.translations.close + '</button>';
         if (data.file_url) {
@@ -272,24 +140,157 @@ const FeedGenerator = {
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
     },
 
-    showMultipleSuccess() {
-        const statusEl = document.getElementById('gen-status');
-        const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
-        const progressBar = document.getElementById('gen-progress-bar');
+    // ── Multi feed generation ───────────────────────────────────────────
 
-        if (progressBar) progressBar.style.width = '100%';
+    startMultiple(feedIds) {
+        this.cancelled = false;
+        this.currentJobs = [];
+        this.currentJobIndex = 0;
 
-        let message = this.translations.completed_multiple.replace('%s', this.completedJobs);
-        if (this.failedJobs > 0) {
-            message += ' (' + this.failedJobs + ' failed)';
+        this.showDialog(this.translations.generating_multiple,
+            '<div id="gen-multi-list" class="gen-multi-list">' +
+                this._buildFeedCard(0, this.translations.initializing, '') +
+            '</div>' +
+            '<div id="gen-multi-errors"></div>'
+        );
+        this._markFeedActive(0);
+
+        const params = new URLSearchParams();
+        feedIds.forEach(id => params.append('feed_ids[]', id));
+        params.append('form_key', FORM_KEY);
+
+        mahoFetch(this.urls.massBatch, {
+            method: 'POST',
+            body: params,
+            loaderArea: false
+        })
+        .then(data => {
+            if (data.error || !data.jobs || data.jobs.length === 0) {
+                this.showError(data.message || 'No feeds to generate');
+                return;
+            }
+
+            this.currentJobs = data.jobs;
+
+            // Build the per-feed cards
+            const list = document.getElementById('gen-multi-list');
+            if (list) {
+                list.innerHTML = this.currentJobs.map((job, i) =>
+                    this._buildFeedCard(i, job.feed_name, this.translations.waiting)
+                ).join('');
+            }
+
+            // Show init errors if any
+            if (data.errors && data.errors.length > 0) {
+                const errorsEl = document.getElementById('gen-multi-errors');
+                if (errorsEl) {
+                    errorsEl.innerHTML = data.errors.map(e =>
+                        '<div class="error-msg">' + escapeHtml(e) + '</div>'
+                    ).join('');
+                }
+            }
+
+            this.processNextJob();
+        })
+        .catch(error => {
+            this.showError(error.message || 'Network error');
+        });
+
+        return false;
+    },
+
+    processNextJob() {
+        if (this.cancelled || this.currentJobIndex >= this.currentJobs.length) {
+            this._showCloseButton('FeedGenerator.closeDialog(); window.location.reload();');
+            return;
         }
 
-        let successHtml = '<div class="success-msg">' + message + '</div>';
-        if (statusEl) statusEl.innerHTML = successHtml;
+        const job = this.currentJobs[this.currentJobIndex];
+        const idx = this.currentJobIndex;
+        this.currentJobId = job.job_id;
+        this.totalProducts = job.total_products;
+        this.batchesTotal = job.batches_total;
 
-        let buttonsHtml = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog(); window.location.reload();">' +
-            this.translations.close + '</button>';
-        if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
+        this._markFeedActive(idx);
+        this._updateFeedStatus(idx,
+            this.translations.processing.replace('%s', '1').replace('%s', this.batchesTotal));
+        this._updateFeedProgress(idx, 0, job.total_products);
+
+        const entry = document.getElementById('gen-feed-' + idx);
+        if (entry) entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+        this.processBatchForMultiple();
+    },
+
+    processBatchForMultiple() {
+        if (this.cancelled) return;
+
+        const idx = this.currentJobIndex;
+
+        mahoFetch(this.urls.batch, {
+            method: 'POST',
+            body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
+            loaderArea: false
+        })
+        .then(data => {
+            if (this.cancelled) return;
+
+            if (data.status === 'failed') {
+                this._markFeedFailed(idx, data.message || this.translations.failed);
+                this.currentJobIndex++;
+                this.processNextJob();
+                return;
+            }
+
+            const progress = data.progress || 0;
+            const total = data.total || this.totalProducts;
+
+            if (data.status === 'finalizing') {
+                this._updateFeedStatus(idx, this.translations.finalizing);
+                this._updateFeedProgress(idx, progress, total);
+                this.finalizeForMultiple();
+            } else if (data.status === 'processing') {
+                const batchNum = data.batches_processed || 0;
+                const batchTotal = data.batches_total || this.batchesTotal;
+                this._updateFeedStatus(idx,
+                    this.translations.processing.replace('%s', batchNum + 1).replace('%s', batchTotal));
+                this._updateFeedProgress(idx, progress, total);
+                this.processBatchForMultiple();
+            } else if (data.status === 'completed') {
+                this._markFeedCompleted(idx, data);
+                this.currentJobIndex++;
+                this.processNextJob();
+            }
+        })
+        .catch(error => {
+            this._markFeedFailed(idx, error.message || 'Network error');
+            this.currentJobIndex++;
+            this.processNextJob();
+        });
+    },
+
+    finalizeForMultiple() {
+        const idx = this.currentJobIndex;
+
+        mahoFetch(this.urls.finalize, {
+            method: 'POST',
+            body: new URLSearchParams({ job_id: this.currentJobId, form_key: FORM_KEY }),
+            loaderArea: false
+        })
+        .then(data => {
+            if (data.status === 'completed') {
+                this._markFeedCompleted(idx, data);
+            } else {
+                this._markFeedFailed(idx, data.message || this.translations.failed);
+            }
+            this.currentJobIndex++;
+            this.processNextJob();
+        })
+        .catch(error => {
+            this._markFeedFailed(idx, error.message || 'Network error');
+            this.currentJobIndex++;
+            this.processNextJob();
+        });
     }
 };
 
@@ -315,22 +316,25 @@ varienGridAction.execute = function(select) {
 };
 
 // Override mass action for generate
-document.addEventListener('DOMContentLoaded', function() {
-    const massactionForm = document.getElementById('feedmanagerFeedGrid_massaction-form');
-    if (massactionForm) {
-        massactionForm.addEventListener('submit', function(e) {
-            const select = this.querySelector('select[name="massaction"]');
-            if (select && select.value === 'generate') {
-                e.preventDefault();
-                const checkboxes = document.querySelectorAll('#feedmanagerFeedGrid_table input[type="checkbox"]:checked');
-                const feedIds = Array.from(checkboxes).map(cb => cb.value).filter(v => v && v !== 'on');
-                if (feedIds.length > 0) {
-                    FeedGenerator.startMultiple(feedIds);
-                }
-            }
-        });
+const _origMassactionApply = varienGridMassaction.prototype.apply;
+varienGridMassaction.prototype.apply = function() {
+    const item = this.getSelectedItem();
+    if (item && item.id === 'generate') {
+        if (varienStringArray.count(this.checkedString) === 0) {
+            alert(this.errorText);
+            return;
+        }
+        if (item.confirm && !window.confirm(item.confirm)) {
+            return;
+        }
+        const feedIds = this.checkedString.split(',').filter(Boolean);
+        if (feedIds.length > 0) {
+            FeedGenerator.startMultiple(feedIds);
+        }
+        return;
     }
-});
+    _origMassactionApply.call(this);
+};
 </script>
 HTML;
     }

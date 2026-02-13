@@ -87,6 +87,27 @@ class Maho_FeedManager_Model_Writer_Json implements Maho_FeedManager_Model_Write
     }
 
     #[\Override]
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void
+    {
+        $this->_handle = fopen($filePath, 'a');
+
+        if ($this->_handle === false) {
+            throw new RuntimeException("Cannot open file for appending: {$filePath}");
+        }
+
+        $this->_firstProduct = false;
+    }
+
+    #[\Override]
+    public function pause(): void
+    {
+        if ($this->_handle) {
+            fclose($this->_handle);
+            $this->_handle = null;
+        }
+    }
+
+    #[\Override]
     public function close(): void
     {
         if (!$this->_handle) {

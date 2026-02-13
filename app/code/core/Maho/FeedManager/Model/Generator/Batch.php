@@ -14,7 +14,8 @@ declare(strict_types=1);
  * Batch Generator - Handles AJAX batch-by-batch feed generation
  *
  * This class manages stateful batch processing across multiple HTTP requests.
- * State is persisted to a JSON file between requests.
+ * State is persisted to a JSON file between requests. Uses the shared output
+ * engine from ProductProcessorTrait for all format handling.
  */
 class Maho_FeedManager_Model_Generator_Batch
 {
@@ -51,6 +52,7 @@ class Maho_FeedManager_Model_Generator_Batch
         $this->_batchSize = Mage::helper('feedmanager')->getBatchSize();
         $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($feed->getPlatform());
         $this->_mapper = new Maho_FeedManager_Model_Mapper($feed);
+        $this->_configureMapperFromBuilder();
 
         // Generate unique job ID
         $this->_jobId = 'feed_' . $feed->getId() . '_' . uniqid();
@@ -65,26 +67,10 @@ class Maho_FeedManager_Model_Generator_Batch
         // Calculate batches
         $batchesTotal = (int) ceil($totalProducts / $this->_batchSize);
 
-        // Initialize temp file
+        // Open output (writes header), then pause (releases file handle)
         $tempPath = $this->_getTempFilePath();
-
-        // Write header for XML structure/template mode
-        $xmlStructure = $feed->getXmlStructure();
-        $xmlTemplate = $feed->getXmlItemTemplate();
-        $isXmlMode = $feed->getFileFormat() === 'xml' && (!empty($xmlStructure) || !empty($xmlTemplate));
-
-        if ($isXmlMode) {
-            $header = $feed->getXmlHeader();
-            if (!empty($header)) {
-                $renderedHeader = $this->_renderHeaderFooter($header, $feed);
-                file_put_contents($tempPath, $renderedHeader . "\n");
-            } else {
-                file_put_contents($tempPath, '');
-            }
-        } else {
-            // For non-XML modes, initialize with empty file
-            file_put_contents($tempPath, '');
-        }
+        $this->_openOutput($tempPath);
+        $this->_pauseOutput();
 
         // Save state
         $this->_state = [
@@ -168,27 +154,42 @@ class Maho_FeedManager_Model_Generator_Batch
                 ];
             }
 
-            // Load feed
+            // Load feed and log
             $this->_feed = Mage::getModel('feedmanager/feed')->load($this->_state['feed_id']);
             if (!$this->_feed->getId()) {
                 return $this->_failWithError('Feed no longer exists');
             }
-
-            // Load log
             $this->_log = Mage::getModel('feedmanager/log')->load($this->_state['log_id']);
 
             // Initialize mapper and platform
             $this->_mapper = new Maho_FeedManager_Model_Mapper($this->_feed);
             $this->_configureMapperFromBuilder();
             $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($this->_feed->getPlatform());
+            $this->_batchSize = $this->_state['batch_size'];
 
-            // Update status
+            // Restore counters from state
+            $this->_productCount = $this->_state['product_count'];
+            $this->_processedCount = $this->_state['processed_count'];
+            $this->_errorCount = count($this->_state['errors']);
+            $this->_errors = $this->_state['errors'];
+
+            // Resume output (recreates writer/parses XML, opens in append mode)
+            $this->_resumeOutput($this->_state['temp_path']);
+
+            // Update status and page
             $this->_state['status'] = self::STATUS_PROCESSING;
             $this->_state['current_page']++;
 
-            // Process this batch
-            $processedInBatch = $this->_processBatchProducts();
+            // Process this batch using the shared engine
+            $processedInBatch = $this->_processOneBatch($this->_state['current_page']);
 
+            // Pause output (releases file handle)
+            $this->_pauseOutput();
+
+            // Save counters back to state
+            $this->_state['product_count'] = $this->_productCount;
+            $this->_state['processed_count'] = $this->_processedCount;
+            $this->_state['errors'] = $this->_errors;
             $this->_state['batches_processed']++;
             $this->_saveState();
 
@@ -257,32 +258,20 @@ class Maho_FeedManager_Model_Generator_Batch
                 return $this->_failWithError('Feed no longer exists');
             }
 
-            $tempPath = $this->_state['temp_path'];
+            // Initialize platform (needed for XML writer close)
+            $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($this->_feed->getPlatform());
+            $this->_errors = $this->_state['errors'];
 
-            // Write footer for XML structure/template mode
-            $xmlStructure = $this->_feed->getXmlStructure();
-            $xmlTemplate = $this->_feed->getXmlItemTemplate();
-            $isXmlMode = $this->_feed->getFileFormat() === 'xml' && (!empty($xmlStructure) || !empty($xmlTemplate));
-
-            if ($isXmlMode) {
-                $footer = $this->_feed->getXmlFooter();
-                if (!empty($footer)) {
-                    $renderedFooter = $this->_renderHeaderFooter($footer, $this->_feed);
-                    file_put_contents($tempPath, $renderedFooter . "\n", FILE_APPEND);
-                }
-            }
-
-            // Close JSON array if needed
-            if ($this->_feed->getFileFormat() === 'json' && ($this->_state['json_started'] ?? false)) {
-                file_put_contents($tempPath, "\n]}", FILE_APPEND);
-            }
+            // Resume and close output (writes footer/closing tags)
+            $this->_resumeOutput($this->_state['temp_path']);
+            $this->_closeOutput();
 
             // Validate, move to output, and compress
-            $finalPath = $this->_validateAndMoveToOutput($tempPath, $this->_state['errors']);
+            $finalPath = $this->_validateAndMoveToOutput($this->_state['temp_path'], $this->_errors);
 
             // Finalize: update log, feed, and reset notifier
             $fileSize = file_exists($finalPath) ? filesize($finalPath) : 0;
-            $this->_finalizeGenerationSuccess($this->_state['product_count'], $fileSize, $this->_state['errors']);
+            $this->_finalizeGenerationSuccess($this->_state['product_count'], $fileSize, $this->_errors);
 
             // Handle upload if configured
             $uploadResult = $this->_handleUpload();
@@ -290,9 +279,6 @@ class Maho_FeedManager_Model_Generator_Batch
             // Update state
             $this->_state['status'] = self::STATUS_COMPLETED;
             $this->_saveState();
-
-            // Cleanup state file after short delay (let final response be sent)
-            // State file will be cleaned up by cron or next init
 
             Mage::log(
                 "FeedManager: Completed batch generation for feed '{$this->_feed->getName()}' with {$this->_state['product_count']} products",
@@ -306,7 +292,7 @@ class Maho_FeedManager_Model_Generator_Batch
                 'file_size' => $fileSize,
                 'file_size_formatted' => Mage::helper('feedmanager')->formatFileSize($fileSize),
                 'message' => "Feed generated successfully with {$this->_state['product_count']} products",
-                'errors' => $this->_state['errors'],
+                'errors' => $this->_errors,
                 'upload_status' => $uploadResult['status'],
                 'upload_message' => $uploadResult['message'],
             ];
@@ -380,196 +366,9 @@ class Maho_FeedManager_Model_Generator_Batch
         ];
     }
 
-    /**
-     * Process products for current batch
-     */
-    protected function _processBatchProducts(): int
-    {
-        $collection = $this->_getProductCollection();
-        $collection->setPageSize($this->_state['batch_size']);
-        $collection->setCurPage($this->_state['current_page']);
-
-        // Preload parent mappings for this batch to avoid N+1 queries
-        $productIds = $collection->getAllIds();
-        if (!empty($productIds)) {
-            $this->_mapper->preloadParentMappings($productIds);
-        }
-
-        $tempPath = $this->_state['temp_path'];
-        $processedInBatch = 0;
-        $format = $this->_feed->getFileFormat();
-
-        // Determine generation mode
-        $xmlStructure = $this->_feed->getXmlStructure();
-        $xmlTemplate = $this->_feed->getXmlItemTemplate();
-        $isStructureMode = !empty($xmlStructure) && $format === 'xml';
-        $isTemplateMode = !empty($xmlTemplate) && $format === 'xml' && !$isStructureMode;
-        $isCsvMode = $format === 'csv';
-        $isJsonMode = $format === 'json';
-        $isJsonlMode = $format === 'jsonl';
-        $itemTag = trim($this->_feed->getXmlItemTag() ?: 'item');
-
-        // Parse structure once if using structure mode
-        $structure = null;
-        if ($isStructureMode) {
-            try {
-                $structure = Mage::helper('core')->jsonDecode($xmlStructure);
-            } catch (\JsonException $e) {
-                Mage::log("FeedManager: Invalid XML structure JSON for feed '{$this->_feed->getName()}': {$e->getMessage()}", Mage::LOG_ERROR);
-                throw new \RuntimeException("Feed has invalid XML structure configuration: {$e->getMessage()}", 0, $e);
-            }
-        }
-
-        // For CSV, get headers from CSV columns
-        $csvHeaders = [];
-        $csvDelimiter = ',';
-        $csvEnclosure = '"';
-        if ($isCsvMode) {
-            $csvColumns = $this->_feed->getCsvColumns();
-            if ($csvColumns) {
-                try {
-                    $columns = Mage::helper('core')->jsonDecode($csvColumns);
-                } catch (\JsonException $e) {
-                    Mage::log("FeedManager: Invalid CSV columns JSON for feed '{$this->_feed->getName()}': {$e->getMessage()}", Mage::LOG_ERROR);
-                    throw new \RuntimeException("Feed has invalid CSV columns configuration: {$e->getMessage()}", 0, $e);
-                }
-                if (is_array($columns) && !empty($columns)) {
-                    $csvHeaders = array_column($columns, 'name');
-                }
-            }
-            $delimiter = $this->_feed->getCsvDelimiter();
-            if ($delimiter !== null && $delimiter !== '') {
-                $csvDelimiter = $delimiter === '&#9;' ? "\t" : $delimiter;
-            }
-            $enclosure = $this->_feed->getCsvEnclosure();
-            if ($enclosure !== null) {
-                $csvEnclosure = $enclosure === '&quot;' ? '"' : ($enclosure === '&#39;' ? "'" : $enclosure);
-            }
-        }
-
-        // For JSON, get structure if available
-        $jsonStructure = null;
-        if ($isJsonMode) {
-            $jsonStructureData = $this->_feed->getJsonStructure();
-            if ($jsonStructureData) {
-                try {
-                    $jsonStructure = Mage::helper('core')->jsonDecode($jsonStructureData);
-                } catch (\JsonException $e) {
-                    Mage::log("FeedManager: Invalid JSON structure for feed '{$this->_feed->getName()}': {$e->getMessage()}", Mage::LOG_ERROR);
-                    throw new \RuntimeException("Feed has invalid JSON structure configuration: {$e->getMessage()}", 0, $e);
-                }
-            }
-        }
-
-        foreach ($collection as $product) {
-            try {
-                // Validate against Rule conditions
-                if (!$this->_validateProductConditions($product)) {
-                    $this->_state['processed_count']++;
-                    continue;
-                }
-
-                // Load stock item
-                $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
-                $product->setStockItem($stockItem);
-
-                if ($isStructureMode) {
-                    // New visual builder XML generation
-                    $output = $this->_mapper->mapProductToXmlStructure($product, $structure, $itemTag, 1);
-                    file_put_contents($tempPath, $output, FILE_APPEND);
-                } elseif ($isTemplateMode) {
-                    // Legacy template-based XML generation
-                    $itemXml = $this->_renderItemTemplate($xmlTemplate, $product, $this->_feed);
-
-                    if ($itemTag !== '') {
-                        $output = "  <{$itemTag}>\n";
-                        $output .= '    ' . str_replace("\n", "\n    ", trim($itemXml)) . "\n";
-                        $output .= "  </{$itemTag}>\n";
-                    } else {
-                        $output = '  ' . trim($itemXml) . "\n";
-                    }
-
-                    file_put_contents($tempPath, $output, FILE_APPEND);
-                } elseif ($isCsvMode) {
-                    // CSV generation
-                    $mappedData = $this->_mapper->mapProduct($product);
-
-                    // Write header row on first product
-                    if (!($this->_state['csv_header_written'] ?? false)) {
-                        if (empty($csvHeaders)) {
-                            $csvHeaders = array_keys($mappedData);
-                        }
-                        if ($this->_feed->getCsvIncludeHeader() !== false) {
-                            $this->_writeCsvRow($tempPath, $csvHeaders, $csvDelimiter, $csvEnclosure);
-                        }
-                        $this->_state['csv_header_written'] = true;
-                        $this->_state['csv_headers'] = $csvHeaders;
-                    }
-
-                    // Write data row in header order
-                    $row = [];
-                    foreach ($this->_state['csv_headers'] as $header) {
-                        $value = $mappedData[$header] ?? '';
-                        if (is_array($value)) {
-                            $value = implode(',', $value);
-                        }
-                        $row[] = (string) $value;
-                    }
-                    $this->_writeCsvRow($tempPath, $row, $csvDelimiter, $csvEnclosure);
-                } elseif ($isJsonMode) {
-                    // JSON generation
-                    if ($jsonStructure) {
-                        $mappedData = $this->_mapper->mapProductToJsonStructure($product, $jsonStructure);
-                    } else {
-                        $mappedData = $this->_mapper->mapProduct($product);
-                    }
-
-                    // Handle JSON array structure
-                    $isFirstProduct = !($this->_state['json_started'] ?? false);
-                    if ($isFirstProduct) {
-                        file_put_contents($tempPath, '{"products":[' . "\n", FILE_APPEND);
-                        $this->_state['json_started'] = true;
-                    } else {
-                        file_put_contents($tempPath, ",\n", FILE_APPEND);
-                    }
-                    file_put_contents($tempPath, json_encode($mappedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE), FILE_APPEND);
-                } elseif ($isJsonlMode) {
-                    // JSONL generation — one JSON object per line
-                    $mappedData = $this->_mapper->mapProduct($product);
-                    $json = json_encode($mappedData, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
-                    file_put_contents($tempPath, $json . "\n", FILE_APPEND);
-                }
-
-                $this->_state['product_count']++;
-                $processedInBatch++;
-                $this->_state['processed_count']++;
-
-            } catch (\Throwable $e) {
-                $this->_state['errors'][] = "Product {$product->getSku()}: {$e->getMessage()}";
-                $this->_state['processed_count']++;
-
-                // Check error threshold (percentage-based)
-                $this->_checkErrorThreshold(count($this->_state['errors']), $this->_state['processed_count']);
-            }
-        }
-
-        $collection->clear();
-        gc_collect_cycles();
-
-        return $processedInBatch;
-    }
-
-    /**
-     * Write a CSV row to file
-     */
-    protected function _writeCsvRow(string $filePath, array $row, string $delimiter = ',', string $enclosure = '"'): void
-    {
-        $handle = fopen($filePath, 'a');
-        if ($handle) {
-            fputcsv($handle, $row, $delimiter, $enclosure);
-            fclose($handle);
-        }
-    }
+    // ──────────────────────────────────────────────────────────────────────
+    // State and lock management
+    // ──────────────────────────────────────────────────────────────────────
 
     /**
      * Get temp file path
@@ -691,6 +490,10 @@ class Maho_FeedManager_Model_Generator_Batch
             unlink($lockPath);
         }
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Error handling and upload
+    // ──────────────────────────────────────────────────────────────────────
 
     /**
      * Fail with error message
@@ -826,6 +629,10 @@ class Maho_FeedManager_Model_Generator_Batch
             ];
         }
     }
+
+    // ──────────────────────────────────────────────────────────────────────
+    // Cleanup
+    // ──────────────────────────────────────────────────────────────────────
 
     /**
      * Clean up stale running jobs for a feed

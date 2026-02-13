@@ -8,11 +8,130 @@
 /**
  * Shared base for FeedGenerator on both grid and edit pages.
  * Page-specific objects spread this and add their own methods/overrides.
+ *
+ * Uses a unified card-based UI for both single and multi-feed generation.
+ * Each feed is rendered as a card with its own name, progress bar, and status.
  */
 const FeedGeneratorBase = {
     currentJobId: null,
     cancelled: false,
     dialog: null,
+
+    // ── Card rendering helpers ──────────────────────────────────────────
+
+    _buildFeedCard(idx, feedName, statusText) {
+        return '<div class="gen-feed-entry" id="gen-feed-' + idx + '">' +
+            '<div class="gen-feed-header">' +
+                '<span class="gen-feed-name">' + escapeHtml(feedName) + '</span>' +
+                '<span class="gen-feed-status" id="gen-feed-status-' + idx + '">' + escapeHtml(statusText) + '</span>' +
+            '</div>' +
+            '<div class="progress-container">' +
+                '<div class="progress-bar-bg">' +
+                    '<div class="progress-bar" id="gen-feed-bar-' + idx + '"></div>' +
+                '</div>' +
+                '<div class="progress-text" id="gen-feed-text-' + idx + '"></div>' +
+            '</div>' +
+        '</div>';
+    },
+
+    _updateFeedProgress(idx, current, total) {
+        const percent = total > 0 ? Math.round((current / total) * 100) : 0;
+        const bar = document.getElementById('gen-feed-bar-' + idx);
+        const text = document.getElementById('gen-feed-text-' + idx);
+        if (bar) bar.style.width = percent + '%';
+        if (text) text.textContent = current + ' / ' + total + ' (' + percent + '%)';
+    },
+
+    _updateFeedStatus(idx, message) {
+        const el = document.getElementById('gen-feed-status-' + idx);
+        if (el) el.textContent = message;
+    },
+
+    _markFeedActive(idx) {
+        const entry = document.getElementById('gen-feed-' + idx);
+        if (entry) entry.classList.add('active');
+    },
+
+    _markFeedCompleted(idx, data) {
+        const entry = document.getElementById('gen-feed-' + idx);
+        if (entry) {
+            entry.classList.remove('active');
+            entry.classList.add('completed');
+        }
+
+        const bar = document.getElementById('gen-feed-bar-' + idx);
+        if (bar) bar.style.width = '100%';
+
+        let info = this.translations.products.replace('%s', data.product_count || 0);
+        if (data.file_size_formatted) info += ' (' + data.file_size_formatted + ')';
+
+        const statusEl = document.getElementById('gen-feed-status-' + idx);
+        if (statusEl) {
+            statusEl.innerHTML = '<span class="gen-status-ok">' + escapeHtml(info) + '</span>';
+        }
+
+        const text = document.getElementById('gen-feed-text-' + idx);
+        if (text) text.textContent = '';
+    },
+
+    _markFeedFailed(idx, message) {
+        const entry = document.getElementById('gen-feed-' + idx);
+        if (entry) {
+            entry.classList.remove('active');
+            entry.classList.add('failed');
+        }
+
+        const bar = document.getElementById('gen-feed-bar-' + idx);
+        if (bar) {
+            bar.style.width = '100%';
+            bar.classList.add('error');
+        }
+
+        const statusEl = document.getElementById('gen-feed-status-' + idx);
+        if (statusEl) {
+            statusEl.innerHTML = '<span class="gen-status-err">' + escapeHtml(message) + '</span>';
+        }
+
+        const text = document.getElementById('gen-feed-text-' + idx);
+        if (text) text.textContent = '';
+    },
+
+    // ── Dialog management ───────────────────────────────────────────────
+
+    showDialog(title, content) {
+        const self = this;
+        title = title || this.translations.generating;
+        this.dialog = Dialog.info(content, {
+            title: title,
+            className: 'feed-generator-dialog',
+            width: 500,
+            extraButtons: [
+                { id: 'gen-cancel-btn', class: 'cancel', label: this.translations.cancel }
+            ],
+            onOpen(dialog) {
+                dialog.querySelector('#gen-cancel-btn')?.addEventListener('click', () => self.cancel());
+            }
+        });
+    },
+
+    closeDialog() {
+        if (this.dialog) {
+            this.dialog.remove();
+            this.dialog = null;
+        }
+        this.currentJobId = null;
+    },
+
+    _showCloseButton(onclick) {
+        const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
+        if (buttonsEl) {
+            buttonsEl.innerHTML = '<button type="button" class="cancel" onclick="' +
+                (onclick || 'FeedGenerator.closeDialog()') + '">' +
+                this.translations.close + '</button>';
+        }
+    },
+
+    // ── Batch processing (shared by single and multi) ───────────────────
 
     processBatch() {
         if (this.cancelled) {
@@ -38,12 +157,14 @@ const FeedGeneratorBase = {
             const total = data.total || this.totalProducts;
 
             if (data.status === 'finalizing') {
-                this.updateProgress(progress, total, this.translations.finalizing);
+                this._updateFeedProgress(0, progress, total);
+                this._updateFeedStatus(0, this.translations.finalizing);
                 this.finalize();
             } else if (data.status === 'processing') {
                 const batchNum = data.batches_processed || 0;
                 const batchTotal = data.batches_total || this.batchesTotal;
-                this.updateProgress(progress, total,
+                this._updateFeedProgress(0, progress, total);
+                this._updateFeedStatus(0,
                     this.translations.processing.replace('%s', batchNum + 1).replace('%s', batchTotal));
                 this.processBatch();
             } else if (data.status === 'completed') {
@@ -87,65 +208,16 @@ const FeedGeneratorBase = {
         this.closeDialog();
     },
 
-    showDialog(title) {
-        const self = this;
-        title = title || this.translations.generating;
-        this.dialog = Dialog.info(this.getDialogContent(), {
-            title: title,
-            className: 'feed-generator-dialog',
-            width: 450,
-            height: 'auto',
-            extraButtons: [
-                { id: 'gen-cancel-btn', class: 'cancel', label: this.translations.cancel }
-            ],
-            onOpen(dialog) {
-                dialog.style.height = 'auto';
-                dialog.querySelector('#gen-cancel-btn')?.addEventListener('click', () => self.cancel());
-            }
-        });
-    },
+    // ── Default showSuccess / showError for single-feed ─────────────────
+    // Pages override these for extra features (upload, view, download).
 
-    closeDialog() {
-        if (this.dialog) {
-            this.dialog.remove();
-            this.dialog = null;
-        }
-        this.currentJobId = null;
-    },
-
-    getDialogContent() {
-        return `
-            <div class="status" id="gen-status"></div>
-            <div class="progress-container">
-                <div class="progress-bar-bg">
-                    <div class="progress-bar" id="gen-progress-bar"></div>
-                </div>
-                <div class="progress-text" id="gen-progress-text"></div>
-            </div>
-        `;
-    },
-
-    updateProgress(current, total, message) {
-        const percent = total > 0 ? Math.round((current / total) * 100) : 0;
-        const progressBar = document.getElementById('gen-progress-bar');
-        const progressText = document.getElementById('gen-progress-text');
-        const statusEl = document.getElementById('gen-status');
-
-        if (progressBar) progressBar.style.width = percent + '%';
-        if (progressText) progressText.textContent = current + ' / ' + total + ' (' + percent + '%)';
-        if (statusEl) statusEl.textContent = message;
+    showSuccess(data) {
+        this._markFeedCompleted(0, data);
+        this._showCloseButton('FeedGenerator.closeDialog(); window.location.reload();');
     },
 
     showError(message) {
-        const statusEl = document.getElementById('gen-status');
-        const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
-
-        if (statusEl) {
-            statusEl.innerHTML = '<div class="error-msg">' + escapeHtml(message) + '</div>';
-        }
-        if (buttonsEl) {
-            buttonsEl.innerHTML = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog()">' +
-                this.translations.close + '</button>';
-        }
+        this._markFeedFailed(0, message);
+        this._showCloseButton();
     }
 };

@@ -95,6 +95,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 
         // Check if feed has a destination configured
         $hasDestination = (bool) $this->_getFeed()->getDestinationId();
+        $feedName = Mage::helper('core')->jsonEncode($this->_getFeed()->getName() ?: '');
 
         $translations = Mage::helper('core')->jsonEncode([
             'generating' => $this->__('Generating Feed...'),
@@ -161,6 +162,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                 },
                 translations: {$translations},
                 hasDestination: {$this->_boolToJs($hasDestination)},
+                feedName: {$feedName},
                 currentFeedId: null,
 
                 saveAndGenerate(feedId) {
@@ -186,8 +188,13 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                 start(feedId, force) {
                     this.cancelled = false;
                     this.currentFeedId = feedId;
-                    this.showDialog();
-                    this.updateProgress(0, 0, this.translations.initializing);
+
+                    this.showDialog(this.translations.generating,
+                        '<div class="gen-multi-list">' +
+                            this._buildFeedCard(0, this.feedName || this.translations.initializing, '') +
+                        '</div>'
+                    );
+                    this._markFeedActive(0);
 
                     const params = { id: feedId, form_key: FORM_KEY };
                     if (force) {
@@ -209,7 +216,12 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                         this.totalProducts = data.total_products;
                         this.batchesTotal = data.batches_total;
 
-                        this.updateProgress(0, data.total_products,
+                        // Update card name from response if available
+                        const nameEl = document.querySelector('#gen-feed-0 .gen-feed-name');
+                        if (nameEl && data.feed_name) nameEl.textContent = data.feed_name;
+
+                        this._updateFeedProgress(0, 0, data.total_products);
+                        this._updateFeedStatus(0,
                             this.translations.processing.replace('%s', '1').replace('%s', data.batches_total));
 
                         this.processBatch();
@@ -242,36 +254,25 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                 },
 
                 showSuccess(data) {
-                    const statusEl = document.getElementById('gen-status');
-                    const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
-                    const progressBar = document.getElementById('gen-progress-bar');
+                    this._markFeedCompleted(0, data);
 
-                    if (progressBar) progressBar.style.width = '100%';
-
-                    let successHtml = '<div class="success-msg">' +
-                        this.translations.completed + '<br>' +
-                        this.translations.products.replace('%s', data.product_count || 0);
-                    if (data.file_size_formatted) {
-                        successHtml += ' (' + data.file_size_formatted + ')';
-                    }
-                    successHtml += '</div>';
-
-                    // Show upload status if available
+                    // Add upload status below the card if available
                     if (data.upload_status) {
-                        const uploadStatusClass = data.upload_status === 'success' ? 'success-msg' :
-                            (data.upload_status === 'failed' ? 'error-msg' : 'notice-msg');
-                        const uploadIcon = data.upload_status === 'success' ? '✓' :
-                            (data.upload_status === 'failed' ? '✗' : '⊘');
-                        successHtml += '<div class="' + uploadStatusClass + ' fm-upload-status">' +
-                            uploadIcon + ' Upload: ' + (data.upload_message || data.upload_status) + '</div>';
+                        const entry = document.getElementById('gen-feed-0');
+                        if (entry) {
+                            const uploadClass = data.upload_status === 'success' ? 'success-msg' :
+                                (data.upload_status === 'failed' ? 'error-msg' : 'notice-msg');
+                            entry.insertAdjacentHTML('beforeend',
+                                '<div class="' + uploadClass + ' fm-upload-status" style="margin-top:8px">' +
+                                (data.upload_message || data.upload_status) + '</div>');
+                        }
                     }
 
-                    if (statusEl) statusEl.innerHTML = successHtml;
-
+                    // Build buttons
+                    const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
                     let buttonsHtml = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog()">' +
                         this.translations.close + '</button>';
 
-                    // Show Upload Now button if destination is configured and upload wasn't successful
                     if (this.hasDestination && data.upload_status !== 'success') {
                         buttonsHtml += ' <button type="button" id="upload-now-btn" onclick="FeedGenerator.upload()">' +
                             this.translations.upload + '</button>';
@@ -301,15 +302,14 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
                         loaderArea: false
                     })
                     .then(data => {
-                        const statusEl = document.getElementById('gen-status');
+                        const entry = document.getElementById('gen-feed-0');
                         if (data.success) {
-                            // Update status area with success
-                            const existingContent = statusEl ? statusEl.innerHTML : '';
-                            const uploadHtml = '<div class="success-msg fm-upload-status">✓ ' +
-                                escapeHtml(data.message) + '</div>';
-                            if (statusEl) {
-                                // Remove any existing upload status and add new one
-                                statusEl.innerHTML = existingContent.replace(/<div class="(success|error|notice)-msg fm-upload-status">.*?<\\/div>/g, '') + uploadHtml;
+                            if (entry) {
+                                // Remove any existing upload status and add success
+                                entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
+                                entry.insertAdjacentHTML('beforeend',
+                                    '<div class="success-msg fm-upload-status" style="margin-top:8px">' +
+                                    escapeHtml(data.message) + '</div>');
                             }
                             if (btn) btn.remove();
                         } else {

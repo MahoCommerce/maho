@@ -38,6 +38,25 @@ interface Maho_FeedManager_Model_Writer_WriterInterface
     public function writeProduct(array $productData): void;
 
     /**
+     * Resume writing to an existing file in append mode
+     *
+     * Used by batch generation to reopen a file across HTTP requests.
+     * Must be called instead of open() when continuing a previously started file.
+     *
+     * @param string $filePath Path to existing output file
+     * @param Maho_FeedManager_Model_Platform_AdapterInterface|null $platform Platform adapter (needed by XML writer)
+     */
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void;
+
+    /**
+     * Pause writing by closing the file handle without writing footer/closing tags
+     *
+     * Used by batch generation to release the file handle between HTTP requests.
+     * The file can be resumed later with resume().
+     */
+    public function pause(): void;
+
+    /**
      * Close the writer and finalize output
      */
     public function close(): void;

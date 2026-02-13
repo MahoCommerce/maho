@@ -872,6 +872,62 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
+    public function massGenerateAction(): void
+    {
+        $feedIds = $this->getRequest()->getParam('feed_ids');
+
+        if (!is_array($feedIds) || empty($feedIds)) {
+            $this->_getSession()->addError($this->__('Please select feeds to generate.'));
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        $generated = 0;
+        $errors = 0;
+
+        foreach ($feedIds as $feedId) {
+            try {
+                $feed = Mage::getModel('feedmanager/feed')->load($feedId);
+                if (!$feed->getId()) {
+                    continue;
+                }
+
+                if (Maho_FeedManager_Model_Generator::isGenerating((int) $feedId)) {
+                    $this->_getSession()->addNotice(
+                        $this->__("Feed '%s' is already being generated, skipped.", $feed->getName()),
+                    );
+                    continue;
+                }
+
+                $generator = new Maho_FeedManager_Model_Generator();
+                $log = $generator->generate($feed);
+
+                if ($log->getStatus() === 'completed') {
+                    $generated++;
+                } else {
+                    $errors++;
+                    $this->_getSession()->addError(
+                        $this->__("Feed '%s' generation failed: %s", $feed->getName(), $log->getErrorMessage()),
+                    );
+                }
+            } catch (Exception $e) {
+                $errors++;
+                $this->_getSession()->addError(
+                    $this->__('Failed to generate feed %s: %s', $feedId, $e->getMessage()),
+                );
+                Mage::logException($e);
+            }
+        }
+
+        if ($generated) {
+            $this->_getSession()->addSuccess(
+                $this->__('%d feed(s) generated successfully.', $generated),
+            );
+        }
+
+        $this->_redirect('*/*/');
+    }
+
     public function logsGridAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -924,6 +980,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             $this->_sendJsonResponse([
                 'success' => true,
+                'feed_name' => $feed->getName(),
                 'job_id' => $result['job_id'],
                 'log_id' => $result['log_id'],
                 'total_products' => $result['total_products'],

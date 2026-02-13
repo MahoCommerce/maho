@@ -97,6 +97,34 @@ class Maho_FeedManager_Model_Writer_Xml implements Maho_FeedManager_Model_Writer
     }
 
     #[\Override]
+    public function resume(string $filePath, ?Maho_FeedManager_Model_Platform_AdapterInterface $platform = null): void
+    {
+        $this->_platform = $platform;
+        $this->_handle = fopen($filePath, 'a');
+
+        if ($this->_handle === false) {
+            throw new RuntimeException("Cannot open file for appending: {$filePath}");
+        }
+
+        // Restore platform-derived settings for writeProduct() and close()
+        if ($platform) {
+            $this->_itemElement = $platform->getItemElement();
+            $this->_namespacedAttributes = $platform->getNamespacedAttributes();
+            $this->_namespaces = $platform->getNamespaces();
+            $this->_isRss = ($platform->getRootElement() === 'rss');
+        }
+    }
+
+    #[\Override]
+    public function pause(): void
+    {
+        if ($this->_handle) {
+            fclose($this->_handle);
+            $this->_handle = null;
+        }
+    }
+
+    #[\Override]
     public function close(): void
     {
         if (!$this->_handle) {

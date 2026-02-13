@@ -14,6 +14,7 @@ declare(strict_types=1);
  * Feed Generator
  *
  * Orchestrates feed generation with streaming/batching support for large catalogs.
+ * Uses the shared output engine from ProductProcessorTrait for all format handling.
  *
  * Error Handling Pattern:
  * - generate(): Returns Log model with status, catches all exceptions internally
@@ -27,12 +28,9 @@ class Maho_FeedManager_Model_Generator
 
     protected Maho_FeedManager_Model_Feed $_feed;
     protected Maho_FeedManager_Model_Mapper $_mapper;
-    protected ?Maho_FeedManager_Model_Writer_WriterInterface $_writer = null;
     protected ?Maho_FeedManager_Model_Platform_AdapterInterface $_platform = null;
     protected ?Maho_FeedManager_Model_Log $_log = null;
     protected int $_batchSize = 1000;
-    protected int $_productCount = 0;
-    protected int $_errorCount = 0;
     protected array $_errors = [];
     protected ?string $_tempPath = null;
 
@@ -46,7 +44,10 @@ class Maho_FeedManager_Model_Generator
         $this->_feed = $feed;
         $this->_platform = Maho_FeedManager_Model_Platform::getAdapter($feed->getPlatform());
         $this->_batchSize = Mage::helper('feedmanager')->getBatchSize();
+        $this->_mapper = new Maho_FeedManager_Model_Mapper($feed);
+        $this->_configureMapperFromBuilder();
         $this->_productCount = 0;
+        $this->_processedCount = 0;
         $this->_errorCount = 0;
         $this->_errors = [];
 
@@ -56,45 +57,31 @@ class Maho_FeedManager_Model_Generator
             return $existingLog;
         }
 
+        $outputPath = $this->_getOutputPath();
+        $outputDir = dirname($outputPath);
+        $this->_tempPath = $outputDir . DS . 'feed_' . $feed->getId() . '.tmp';
+
         try {
-            // Initialize mapper
-            $this->_mapper = new Maho_FeedManager_Model_Mapper($feed);
+            $this->_openOutput($this->_tempPath);
 
-            // Configure mapper with builder definitions if available
-            $this->_configureMapperFromBuilder();
+            $totalProducts = $this->_getProductCollection()->getSize();
+            $this->_log->setData('total_products', $totalProducts)->save();
 
-            // Get output path and create temp path for atomic writes
-            $outputPath = $this->_getOutputPath();
-            $outputDir = dirname($outputPath);
-            $this->_tempPath = $outputDir . DS . 'feed_' . $feed->getId() . '.tmp';
+            Mage::log(
+                "FeedManager: Processing {$totalProducts} products for feed '{$feed->getName()}'",
+                Mage::LOG_INFO,
+            );
 
-            // Check XML generation mode
-            $xmlStructure = $feed->getXmlStructure();
-            $xmlTemplate = $feed->getXmlItemTemplate();
-
-            if (!empty($xmlStructure) && $feed->getFileFormat() === 'xml') {
-                // New visual builder XML generation
-                $this->_generateXmlStructureFile($this->_tempPath);
-            } elseif (!empty($xmlTemplate) && $feed->getFileFormat() === 'xml') {
-                // Legacy template-based XML generation
-                $this->_generateXmlTemplateFile($this->_tempPath);
-            } else {
-                // Standard writer-based generation
-                $this->_writer = $this->_createWriter($feed->getFileFormat());
-
-                // Open writer
-                $this->_writer->open($this->_tempPath, $this->_platform);
-
-                // Process products in batches
-                $this->_processProducts();
-
-                // Close writer
-                $this->_writer->close();
+            $page = 1;
+            while ($this->_processedCount < $totalProducts) {
+                $this->_processOneBatch($page++);
             }
+
+            $this->_closeOutput();
 
             // Validate, move to output, and compress
             $finalPath = $this->_validateAndMoveToOutput($this->_tempPath, $this->_errors);
-            $this->_tempPath = null; // Clear temp path after successful move
+            $this->_tempPath = null;
 
             // Finalize: update log, feed, and reset notifier
             $fileSize = file_exists($finalPath) ? filesize($finalPath) : 0;
@@ -129,71 +116,6 @@ class Maho_FeedManager_Model_Generator
         }
 
         return $this->_log;
-    }
-
-    /**
-     * Process products in batches
-     */
-    protected function _processProducts(): void
-    {
-        $collection = $this->_getProductCollection();
-        $totalProducts = $collection->getSize();
-
-        // Store total for progress tracking
-        $this->_log->setData('total_products', $totalProducts)->save();
-
-        Mage::log(
-            "FeedManager: Processing {$totalProducts} products for feed '{$this->_feed->getName()}'",
-            Mage::LOG_INFO,
-        );
-
-        $page = 1;
-        $processed = 0;
-
-        while ($processed < $totalProducts) {
-            $collection = $this->_getProductCollection();
-            $collection->setPageSize($this->_batchSize);
-            $collection->setCurPage($page);
-
-            // Preload parent mappings for this batch to avoid N+1 queries
-            $productIds = $collection->getAllIds();
-            if (!empty($productIds)) {
-                $this->_mapper->preloadParentMappings($productIds);
-            }
-
-            foreach ($collection as $product) {
-                try {
-                    // Validate against Rule conditions
-                    if (!$this->_validateProductConditions($product)) {
-                        $processed++;
-                        continue;
-                    }
-
-                    $this->_processProduct($product);
-                    $processed++;
-
-                    // Update progress every 100 products
-                    if ($processed % 100 === 0) {
-                        $this->_log->setProductCount($this->_productCount)->save();
-                    }
-                } catch (\Throwable $e) {
-                    $this->_errorCount++;
-                    $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
-                    $processed++;
-
-                    // Check error threshold (percentage-based)
-                    $this->_checkErrorThreshold($this->_errorCount, $processed);
-                }
-            }
-
-            $collection->clear();
-            $page++;
-
-            // Memory cleanup
-            if ($page % 10 === 0) {
-                gc_collect_cycles();
-            }
-        }
     }
 
     /**
@@ -285,283 +207,6 @@ class Maho_FeedManager_Model_Generator
                 ->addError('Generation timed out after 30 minutes')
                 ->save();
             break;
-        }
-    }
-
-    /**
-     * Process a single product
-     */
-    protected function _processProduct(Mage_Catalog_Model_Product $product): void
-    {
-        // Load stock item
-        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
-        $product->setStockItem($stockItem);
-
-        // Map product data - use JSON structure if available for JSON format
-        $format = $this->_feed->getFileFormat();
-        if ($format === 'json' && $this->_feed->getJsonStructure()) {
-            $structure = Mage::helper('core')->jsonDecode($this->_feed->getJsonStructure());
-            if (is_array($structure) && !empty($structure)) {
-                $mappedData = $this->_mapper->mapProductToJsonStructure($product, $structure);
-            } else {
-                $mappedData = $this->_mapper->mapProduct($product);
-            }
-        } else {
-            $mappedData = $this->_mapper->mapProduct($product);
-        }
-
-        // Validate if platform supports it
-        if ($this->_platform) {
-            $validationErrors = $this->_platform->validateProductData($mappedData);
-            if (!empty($validationErrors)) {
-                // Log validation errors but still include product if it has required fields
-                foreach ($validationErrors as $error) {
-                    $this->_errors[] = "Product {$product->getSku()}: {$error}";
-                }
-            }
-        }
-
-        // Write to output
-        $this->_writer->writeProduct($mappedData);
-        $this->_productCount++;
-    }
-
-    /**
-     * Create appropriate writer for format
-     */
-    protected function _createWriter(string $format): Maho_FeedManager_Model_Writer_WriterInterface
-    {
-        $writer = match ($format) {
-            'xml' => new Maho_FeedManager_Model_Writer_Xml(),
-            'csv' => new Maho_FeedManager_Model_Writer_Csv(),
-            'json' => new Maho_FeedManager_Model_Writer_Json(),
-            'jsonl' => new Maho_FeedManager_Model_Writer_Jsonl(),
-            default => throw new InvalidArgumentException("Unsupported format: {$format}"),
-        };
-
-        // Configure writer from feed if available
-        if (method_exists($writer, 'configureFromFeed')) {
-            $writer->configureFromFeed($this->_feed);
-        }
-
-        return $writer;
-    }
-
-    /**
-     * Generate XML file using template-based approach
-     */
-    protected function _generateXmlTemplateFile(string $outputPath): void
-    {
-        $feed = $this->_feed;
-        $handle = null;
-
-        try {
-            $handle = fopen($outputPath, 'w');
-
-            if ($handle === false) {
-                throw new RuntimeException("Cannot open file for writing: {$outputPath}");
-            }
-
-            // Write header
-            $header = $feed->getXmlHeader();
-            if (!empty($header)) {
-                fwrite($handle, $this->_renderHeaderFooter($header, $feed) . "\n");
-            }
-
-            // Get product collection
-            $collection = $this->_getProductCollection();
-            $totalProducts = $collection->getSize();
-
-            // Store total for progress tracking
-            $this->_log->setData('total_products', $totalProducts)->save();
-
-            Mage::log(
-                "FeedManager: Processing {$totalProducts} products for feed '{$feed->getName()}' (template mode)",
-                Mage::LOG_INFO,
-            );
-
-            $itemTemplate = $feed->getXmlItemTemplate();
-            $itemTag = trim($feed->getXmlItemTag() ?: '');
-            $page = 1;
-            $processed = 0;
-
-            while ($processed < $totalProducts) {
-                $collection = $this->_getProductCollection();
-                $collection->setPageSize($this->_batchSize);
-                $collection->setCurPage($page);
-
-                // Preload parent mappings for this batch to avoid N+1 queries
-                $productIds = $collection->getAllIds();
-                if (!empty($productIds)) {
-                    $this->_mapper->preloadParentMappings($productIds);
-                }
-
-                foreach ($collection as $product) {
-                    try {
-                        // Validate against Rule conditions
-                        if (!$this->_validateProductConditions($product)) {
-                            $processed++;
-                            continue;
-                        }
-
-                        // Load stock item
-                        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
-                        $product->setStockItem($stockItem);
-
-                        // Render item content
-                        $itemXml = $this->_renderItemTemplate($itemTemplate, $product, $feed);
-
-                        // Wrap with item tag if configured
-                        if ($itemTag !== '') {
-                            fwrite($handle, "  <{$itemTag}>\n");
-                            fwrite($handle, '    ' . str_replace("\n", "\n    ", trim($itemXml)) . "\n");
-                            fwrite($handle, "  </{$itemTag}>\n");
-                        } else {
-                            fwrite($handle, '  ' . trim($itemXml) . "\n");
-                        }
-                        $this->_productCount++;
-
-                        $processed++;
-
-                        // Update progress every 100 products
-                        if ($processed % 100 === 0) {
-                            $this->_log->setProductCount($this->_productCount)->save();
-                        }
-                    } catch (Exception $e) {
-                        $this->_errorCount++;
-                        $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
-                        $processed++;
-
-                        // Check error threshold (percentage-based)
-                        $this->_checkErrorThreshold($this->_errorCount, $processed);
-                    }
-                }
-
-                $collection->clear();
-                $page++;
-
-                // Memory cleanup
-                if ($page % 10 === 0) {
-                    gc_collect_cycles();
-                }
-            }
-
-            // Write footer
-            $footer = $feed->getXmlFooter();
-            if (!empty($footer)) {
-                fwrite($handle, $this->_renderHeaderFooter($footer, $feed) . "\n");
-            }
-
-        } finally {
-            if (is_resource($handle)) {
-                fclose($handle);
-            }
-        }
-    }
-
-    /**
-     * Generate XML file using visual builder structure
-     */
-    protected function _generateXmlStructureFile(string $outputPath): void
-    {
-        $feed = $this->_feed;
-        $handle = null;
-
-        try {
-            $handle = fopen($outputPath, 'w');
-
-            if ($handle === false) {
-                throw new RuntimeException("Cannot open file for writing: {$outputPath}");
-            }
-
-            // Write header
-            $header = $feed->getXmlHeader();
-            if (!empty($header)) {
-                fwrite($handle, $this->_renderHeaderFooter($header, $feed) . "\n");
-            }
-
-            // Get product collection
-            $collection = $this->_getProductCollection();
-            $totalProducts = $collection->getSize();
-
-            // Store total for progress tracking
-            $this->_log->setData('total_products', $totalProducts)->save();
-
-            Mage::log(
-                "FeedManager: Processing {$totalProducts} products for feed '{$feed->getName()}' (XML structure mode)",
-                Mage::LOG_INFO,
-            );
-
-            // Parse the XML structure
-            $structureJson = $feed->getXmlStructure();
-            $structure = Mage::helper('core')->jsonDecode($structureJson);
-            $itemTag = trim($feed->getXmlItemTag() ?: 'item');
-            $page = 1;
-            $processed = 0;
-
-            while ($processed < $totalProducts) {
-                $collection = $this->_getProductCollection();
-                $collection->setPageSize($this->_batchSize);
-                $collection->setCurPage($page);
-
-                // Preload parent mappings for this batch to avoid N+1 queries
-                $productIds = $collection->getAllIds();
-                if (!empty($productIds)) {
-                    $this->_mapper->preloadParentMappings($productIds);
-                }
-
-                foreach ($collection as $product) {
-                    try {
-                        // Validate against Rule conditions
-                        if (!$this->_validateProductConditions($product)) {
-                            $processed++;
-                            continue;
-                        }
-
-                        // Load stock item
-                        $stockItem = Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
-                        $product->setStockItem($stockItem);
-
-                        // Generate XML using Mapper
-                        $itemXml = $this->_mapper->mapProductToXmlStructure($product, $structure, $itemTag, 1);
-                        fwrite($handle, $itemXml);
-
-                        $this->_productCount++;
-                        $processed++;
-
-                        // Update progress every 100 products
-                        if ($processed % 100 === 0) {
-                            $this->_log->setProductCount($this->_productCount)->save();
-                        }
-                    } catch (Exception $e) {
-                        $this->_errorCount++;
-                        $this->_errors[] = "Product {$product->getSku()}: {$e->getMessage()}";
-                        $processed++;
-
-                        // Check error threshold (percentage-based)
-                        $this->_checkErrorThreshold($this->_errorCount, $processed);
-                    }
-                }
-
-                $collection->clear();
-                $page++;
-
-                // Memory cleanup
-                if ($page % 10 === 0) {
-                    gc_collect_cycles();
-                }
-            }
-
-            // Write footer
-            $footer = $feed->getXmlFooter();
-            if (!empty($footer)) {
-                fwrite($handle, $this->_renderHeaderFooter($footer, $feed) . "\n");
-            }
-
-        } finally {
-            if (is_resource($handle)) {
-                fclose($handle);
-            }
         }
     }
 
