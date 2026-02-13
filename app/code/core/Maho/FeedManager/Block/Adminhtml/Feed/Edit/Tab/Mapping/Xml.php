@@ -78,17 +78,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
 
         </div>
 
-        <div id="xml-import-modal" class="fm-modal-overlay">
-            <div class="fm-modal">
-                <h3 class="fm-modal-title">' . $this->__('Import XML Structure') . '</h3>
-                <p>' . $this->__('Paste a sample XML item:') . '</p>
-                <textarea id="xml-import-input" class="fm-modal-textarea" placeholder=\'<item><g:id>SKU123</g:id><title>Product Name</title></item>\'></textarea>
-                <div class="fm-modal-footer">
-                    <button type="button" class="scalable" onclick="XmlBuilder.hideImportModal()"><span>' . $this->__('Cancel') . '</span></button>
-                    <button type="button" class="scalable save" onclick="XmlBuilder.importStructure()"><span>' . $this->__('Import') . '</span></button>
-                </div>
-            </div>
-        </div>
 
         <script type="text/javascript">
         var XmlBuilder = {
@@ -439,29 +428,30 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
             },
 
             showImportModal: function() {
-                document.getElementById("xml-import-modal").style.display = "block";
-            },
-
-            hideImportModal: function() {
-                document.getElementById("xml-import-modal").style.display = "none";
-                document.getElementById("xml-import-input").value = "";
-            },
-
-            importStructure: function() {
-                try {
-                    var input = document.getElementById("xml-import-input").value.trim();
-                    var parser = new DOMParser();
-                    var doc = parser.parseFromString(input, "text/xml");
-                    var errorNode = doc.querySelector("parsererror");
-                    if (errorNode) {
-                        throw new Error("Invalid XML");
+                var self = this;
+                Dialog.confirm("<p>' . $this->__('Paste a sample XML item:') . '</p><textarea id=\"xml-import-input\" style=\"width:100%;height:200px;font-family:monospace;font-size:13px;\" placeholder=\"<item><g:id>SKU123</g:id><title>Product Name</title></item>\"></textarea>", {
+                    title: "' . $this->__('Import XML Structure') . '",
+                    className: "xml-import-dialog",
+                    width: 600,
+                    height: 400,
+                    okLabel: "' . $this->__('Import') . '",
+                    onOk: function() {
+                        try {
+                            var input = document.getElementById("xml-import-input").value.trim();
+                            var parser = new DOMParser();
+                            var doc = parser.parseFromString(input, "text/xml");
+                            var errorNode = doc.querySelector("parsererror");
+                            if (errorNode) {
+                                throw new Error("Invalid XML");
+                            }
+                            self.structure = self.convertXmlToStructure(doc.documentElement);
+                            self.render();
+                        } catch (e) {
+                            alert("Invalid XML: " + e.message);
+                            return false;
+                        }
                     }
-                    this.structure = this.convertXmlToStructure(doc.documentElement);
-                    this.render();
-                    this.hideImportModal();
-                } catch (e) {
-                    alert("Invalid XML: " + e.message);
-                }
+                });
             },
 
             convertXmlToStructure: function(element) {

@@ -129,7 +129,21 @@ abstract class Maho_FeedManager_Model_Platform_AbstractAdapter implements Maho_F
             return null;
         }
 
-        return Mage::getBaseDir('lib') . DS . 'Maho' . DS . 'FeedManager' . DS . $this->_taxonomyFile;
+        $relativePath = 'Maho' . DS . 'FeedManager' . DS . $this->_taxonomyFile;
+
+        // Check project lib dir (non-Composer installs)
+        $path = Mage::getBaseDir('lib') . DS . $relativePath;
+        if (file_exists($path)) {
+            return $path;
+        }
+
+        // Fallback to vendor package dir (Composer installs)
+        $vendorPath = Mage::getBaseDir() . DS . 'vendor' . DS . 'mahocommerce' . DS . 'maho' . DS . 'lib' . DS . $relativePath;
+        if (file_exists($vendorPath)) {
+            return $vendorPath;
+        }
+
+        return $path;
     }
 
     #[\Override]

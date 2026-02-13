@@ -78,17 +78,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
 
         </div>
 
-        <div id="json-import-modal" class="fm-modal-overlay">
-            <div class="fm-modal">
-                <h3 class="fm-modal-title">' . $this->__('Import JSON Structure') . '</h3>
-                <p>' . $this->__('Paste a sample JSON object:') . '</p>
-                <textarea id="json-import-input" class="fm-modal-textarea" placeholder=\'{"id": "SKU123", "title": "Product Name"}\'></textarea>
-                <div class="fm-modal-footer">
-                    <button type="button" class="scalable" onclick="JsonBuilder.hideImportModal()"><span>' . $this->__('Cancel') . '</span></button>
-                    <button type="button" class="scalable save" onclick="JsonBuilder.importStructure()"><span>' . $this->__('Import') . '</span></button>
-                </div>
-            </div>
-        </div>
 
         <script type="text/javascript">
         var JsonBuilder = {
@@ -430,24 +419,25 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Json extends Maho_F
             },
 
             showImportModal: function() {
-                document.getElementById("json-import-modal").style.display = "block";
-            },
-
-            hideImportModal: function() {
-                document.getElementById("json-import-modal").style.display = "none";
-                document.getElementById("json-import-input").value = "";
-            },
-
-            importStructure: function() {
-                try {
-                    var input = document.getElementById("json-import-input").value.trim();
-                    var parsed = JSON.parse(input);
-                    this.structure = this.convertToBuilderFormat(parsed);
-                    this.render();
-                    this.hideImportModal();
-                } catch (e) {
-                    alert("Invalid JSON: " + e.message);
-                }
+                var self = this;
+                Dialog.confirm("<p>' . $this->__('Paste a sample JSON object:') . '</p><textarea id=\"json-import-input\" style=\"width:100%;height:200px;font-family:monospace;font-size:13px;\" placeholder=\'{\"id\": \"SKU123\", \"title\": \"Product Name\"}\'></textarea>", {
+                    title: "' . $this->__('Import JSON Structure') . '",
+                    className: "json-import-dialog",
+                    width: 600,
+                    height: 400,
+                    okLabel: "' . $this->__('Import') . '",
+                    onOk: function() {
+                        try {
+                            var input = document.getElementById("json-import-input").value.trim();
+                            var parsed = JSON.parse(input);
+                            self.structure = self.convertToBuilderFormat(parsed);
+                            self.render();
+                        } catch (e) {
+                            alert("Invalid JSON: " + e.message);
+                            return false;
+                        }
+                    }
+                });
             },
 
             convertToBuilderFormat: function(obj) {

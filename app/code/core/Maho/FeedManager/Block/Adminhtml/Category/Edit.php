@@ -65,6 +65,7 @@ class Maho_FeedManager_Block_Adminhtml_Category_Edit extends Mage_Adminhtml_Bloc
         $collection = Mage::getModel('catalog/category')->getCollection()
             ->addAttributeToSelect('name')
             ->addAttributeToFilter('level', ['gt' => 0])
+            ->addAttributeToFilter('is_active', 1)
             ->addOrderField('path');
 
         $tree = [];

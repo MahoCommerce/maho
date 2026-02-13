@@ -86,6 +86,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         $collection = Mage::getModel('catalog/category')->getCollection()
             ->addAttributeToSelect('name')
             ->addAttributeToFilter('level', ['gt' => 0])
+            ->addAttributeToFilter('is_active', 1)
             ->addOrderField('path');
 
         $categories = [];

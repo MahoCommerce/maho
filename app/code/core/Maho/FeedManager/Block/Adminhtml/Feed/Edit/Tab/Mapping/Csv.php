@@ -71,21 +71,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
 
         </div>
 
-        <div id="csv-import-modal" class="fm-modal-overlay">
-            <div class="fm-modal">
-                <h3 class="fm-modal-title">' . $this->__('Import CSV Structure') . '</h3>
-                <p>' . $this->__('Paste a header row or sample CSV:') . '</p>
-                <textarea id="csv-import-input" class="fm-modal-textarea fm-modal-textarea-sm" placeholder="id,title,price,description,link"></textarea>
-                <div class="fm-modal-footer">
-                    <button type="button" class="scalable" onclick="CsvBuilder.hideImportModal()">
-                        <span>' . $this->__('Cancel') . '</span>
-                    </button>
-                    <button type="button" class="scalable save" onclick="CsvBuilder.importColumns()">
-                        <span>' . $this->__('Import Columns') . '</span>
-                    </button>
-                </div>
-            </div>
-        </div>
 
         <script type="text/javascript">
         var CsvBuilder = {
@@ -312,30 +297,26 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
             },
 
             showImportModal: function() {
-                document.getElementById("csv-import-modal").style.display = "block";
-            },
-
-            hideImportModal: function() {
-                document.getElementById("csv-import-modal").style.display = "none";
-                document.getElementById("csv-import-input").value = "";
-            },
-
-            importColumns: function() {
-                var input = document.getElementById("csv-import-input").value.trim();
-                if (!input) return;
-
-                // Parse first line as headers
-                var firstLine = input.split("\n")[0];
-                var headers = firstLine.split(/[,\t;|]/).map(function(h) {
-                    return h.trim().replace(/^["\']+|["\']+$/g, "");
+                var self = this;
+                Dialog.confirm("<p>' . $this->__('Paste a header row or sample CSV:') . '</p><textarea id=\"csv-import-input\" style=\"width:100%;height:120px;font-family:monospace;font-size:13px;\" placeholder=\"id,title,price,description,link\"></textarea>", {
+                    title: "' . $this->__('Import CSV Structure') . '",
+                    className: "csv-import-dialog",
+                    width: 600,
+                    height: 300,
+                    okLabel: "' . $this->__('Import Columns') . '",
+                    onOk: function() {
+                        var input = document.getElementById("csv-import-input").value.trim();
+                        if (!input) return false;
+                        var firstLine = input.split("\n")[0];
+                        var headers = firstLine.split(/[,\t;|]/).map(function(h) {
+                            return h.trim().replace(/^["\']+|["\']+$/g, "");
+                        });
+                        self.columns = headers.map(function(h) {
+                            return {name: h, source_type: "attribute", source_value: "", use_parent: "", transformers: ""};
+                        });
+                        self.render();
+                    }
                 });
-
-                this.columns = headers.map(function(h) {
-                    return {name: h, source_type: "attribute", source_value: "", use_parent: "", transformers: ""};
-                });
-
-                this.render();
-                this.hideImportModal();
             },
 
             showPreview: function() {
