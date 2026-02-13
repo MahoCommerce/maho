@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,19 +39,19 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
     #[\Override]
     protected function _prepareForm(): static
     {
-        $resources = Mage::registry('api_resources') ?: [];
+        $resourcesByGroup = Mage::registry('api_resources') ?: [];
         $currentPermissions = Mage::registry('api_role_permissions') ?: [];
         $hasAll = in_array('all', $currentPermissions, true);
 
         $form = new Maho\Data\Form();
         $form->setHtmlIdPrefix('perm_');
 
-        $fieldset = $form->addFieldset('permissions_fieldset', [
-            'legend' => $this->__('Resource Permissions'),
+        // Full access checkbox in its own fieldset
+        $mainFieldset = $form->addFieldset('permissions_main', [
+            'legend' => $this->__('Resource Access'),
         ]);
 
-        // Full access checkbox
-        $fieldset->addField('perm_all', 'checkbox', [
+        $mainFieldset->addField('perm_all', 'checkbox', [
             'name'    => 'permissions[]',
             'label'   => $this->__('Full Access (All Resources)'),
             'value'   => 'all',
@@ -59,27 +59,35 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
             'onclick' => 'toggleAllPermissions(this)',
         ]);
 
-        // Per-resource permission checkboxes (one per operation)
-        foreach ($resources as $resourceId => $config) {
-            $label = $config['label'] ?? (string) $resourceId;
-            $operations = $config['operations'] ?? ['read' => 'View', 'write' => 'Manage'];
+        // Per-group fieldsets with checkboxes per operation
+        foreach ($resourcesByGroup as $groupName => $resources) {
+            $groupKey = strtolower(str_replace(' ', '_', $groupName));
+            $fieldset = $form->addFieldset('permissions_' . $groupKey, [
+                'legend' => $this->__('%s Resources', $groupName),
+            ]);
 
-            foreach ($operations as $operation => $operationLabel) {
-                $permValue = $resourceId . '/' . $operation;
-                $isChecked = $hasAll || in_array($permValue, $currentPermissions, true);
+            foreach ($resources as $resourceId => $config) {
+                $label = $config['label'];
+                $operations = $config['operations'];
 
-                $fieldset->addField('perm_' . $resourceId . '_' . $operation, 'checkbox', [
-                    'name'    => 'permissions[]',
-                    'label'   => $this->__('%s - %s', $label, $operationLabel),
-                    'value'   => $permValue,
-                    'checked' => $isChecked,
-                    'class'   => 'resource-permission',
-                ]);
+                foreach ($operations as $operation => $operationLabel) {
+                    $permValue = $resourceId . '/' . $operation;
+                    $isChecked = $hasAll || in_array($permValue, $currentPermissions, true);
+                    $fieldId = str_replace(['/', '-'], '_', $resourceId) . '_' . $operation;
+
+                    $fieldset->addField('perm_' . $fieldId, 'checkbox', [
+                        'name'    => 'permissions[]',
+                        'label'   => $this->__('%s - %s', $label, $operationLabel),
+                        'value'   => $permValue,
+                        'checked' => $isChecked,
+                        'class'   => 'resource-permission',
+                    ]);
+                }
             }
         }
 
         // JavaScript for "All" toggle
-        $fieldset->addField('permissions_js', 'note', [
+        $mainFieldset->addField('permissions_js', 'note', [
             'text' => '<script type="text/javascript">
                 function toggleAllPermissions(el) {
                     var checkboxes = document.querySelectorAll(".resource-permission");
