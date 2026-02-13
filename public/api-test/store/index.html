@@ -750,16 +750,16 @@
                                             <span x-show="product.specialPrice && product.specialPrice < product.price" class="text-xs sm:text-sm text-gray-400 line-through"
                                                   x-text="formatPrice(product.price)"></span>
                                         </div>
-                                        <!-- Products needing options: configurable or has required options -->
-                                        <template x-if="product.type === 'configurable' || product.hasRequiredOptions">
+                                        <!-- Products needing options: configurable, grouped, bundle, downloadable, or has required options -->
+                                        <template x-if="['configurable','grouped','bundle','downloadable'].includes(product.type) || product.hasRequiredOptions">
                                             <button @click="viewProduct(product.id, product.urlKey)"
                                                     :disabled="product.stockStatus === 'out_of_stock'"
                                                     class="w-full mt-2 sm:mt-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition">
                                                 <span x-text="product.stockStatus !== 'out_of_stock' ? 'Select Options' : 'Out of Stock'"></span>
                                             </button>
                                         </template>
-                                        <!-- Simple products without required options: direct add to cart -->
-                                        <template x-if="product.type !== 'configurable' && !product.hasRequiredOptions">
+                                        <!-- Simple/virtual products without required options: direct add to cart -->
+                                        <template x-if="!['configurable','grouped','bundle','downloadable'].includes(product.type) && !product.hasRequiredOptions">
                                             <button @click="addToCart(product.sku)"
                                                     :disabled="product.stockStatus === 'out_of_stock'"
                                                     class="w-full mt-2 sm:mt-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition">
@@ -1376,13 +1376,13 @@
                                 <p class="text-sm text-gray-500 mt-1" x-text="item.productSku"></p>
                                 <p class="text-lg font-bold text-gray-900 mt-2" x-text="formatPrice(item.productPrice)"></p>
                                 <div class="flex gap-2 mt-3">
-                                    <template x-if="item.productType === 'configurable'">
+                                    <template x-if="['configurable','grouped','bundle','downloadable'].includes(item.productType)">
                                         <button @click="viewProduct(item.productId)"
                                                 class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg text-sm font-medium transition">
                                             Select Options
                                         </button>
                                     </template>
-                                    <template x-if="item.productType !== 'configurable'">
+                                    <template x-if="!['configurable','grouped','bundle','downloadable'].includes(item.productType)">
                                         <button @click="moveWishlistToCart(item.id)"
                                                 :disabled="!item.inStock"
                                                 class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white py-2 rounded-lg text-sm font-medium transition">
@@ -2528,13 +2528,13 @@
                                                     <p class="text-sm font-semibold text-gray-900" x-text="formatPrice(item.productPrice)"></p>
                                                 </div>
                                                 <div class="flex items-center gap-2">
-                                                    <template x-if="item.productType === 'configurable'">
+                                                    <template x-if="['configurable','grouped','bundle','downloadable'].includes(item.productType)">
                                                         <button @click="viewProduct(item.productId)"
                                                                 class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm">
                                                             Select Options
                                                         </button>
                                                     </template>
-                                                    <template x-if="item.productType !== 'configurable'">
+                                                    <template x-if="!['configurable','grouped','bundle','downloadable'].includes(item.productType)">
                                                         <button @click="moveWishlistToCart(item.id)"
                                                                 :disabled="!item.inStock"
                                                                 class="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-300 text-white px-3 py-1.5 rounded text-sm">

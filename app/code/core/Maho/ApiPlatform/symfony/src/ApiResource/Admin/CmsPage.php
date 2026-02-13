@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\State\Admin\CmsPageProcessor;
+use Maho\ApiPlatform\State\Admin\CmsPageProvider;
 
 #[ApiResource(
     uriTemplate: '/admin/cms-pages',
@@ -24,6 +25,7 @@ use Maho\ApiPlatform\State\Admin\CmsPageProcessor;
 #[ApiResource(
     uriTemplate: '/admin/cms-pages/{id}',
     shortName: 'AdminCmsPage',
+    provider: CmsPageProvider::class,
     operations: [
         new Put(
             processor: CmsPageProcessor::class,

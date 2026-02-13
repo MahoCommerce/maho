@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -487,7 +487,6 @@ final class OrderProcessor implements ProcessorInterface
                 $shipmentDto = new Shipment();
                 $shipmentDto->id = (int) $shipment->getId();
                 $shipmentDto->incrementId = $shipment->getIncrementId();
-                /** @phpstan-ignore-next-line */
                 $shipmentDto->orderId = (int) $order->getId();
                 $shipmentDto->totalQty = (int) $shipment->getTotalQty();
                 $shipmentDto->createdAt = $shipment->getCreatedAt();

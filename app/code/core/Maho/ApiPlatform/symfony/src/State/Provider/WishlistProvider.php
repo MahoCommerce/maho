@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -120,7 +120,7 @@ final class WishlistProvider implements ProviderInterface
             $wishlistItem->productSku = $product->getSku();
             $wishlistItem->productPrice = (float) $product->getFinalPrice();
             $wishlistItem->productImageUrl = $this->getProductImageUrl($product);
-            $wishlistItem->productUrl = $product->getProductUrl();
+            $wishlistItem->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
             $wishlistItem->productType = $product->getTypeId();
             $wishlistItem->qty = (int) ($item->getQty() ?: 1);
             $wishlistItem->description = $item->getDescription();
@@ -171,7 +171,7 @@ final class WishlistProvider implements ProviderInterface
         $wishlistItem->productSku = $product->getSku();
         $wishlistItem->productPrice = (float) $product->getFinalPrice();
         $wishlistItem->productImageUrl = $this->getProductImageUrl($product);
-        $wishlistItem->productUrl = $product->getProductUrl();
+        $wishlistItem->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
         $wishlistItem->productType = $product->getTypeId();
         $wishlistItem->qty = (int) ($item->getQty() ?: 1);
         $wishlistItem->description = $item->getDescription();

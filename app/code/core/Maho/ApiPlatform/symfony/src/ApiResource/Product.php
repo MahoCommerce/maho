@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -49,6 +49,7 @@ use Maho\ApiPlatform\State\Provider\ProductProvider;
                 'sortDir' => ['type' => 'String', 'description' => 'Sort direction (asc, desc)'],
                 'pageSize' => ['type' => 'Int', 'description' => 'Items per page (max 100)'],
                 'page' => ['type' => 'Int', 'description' => 'Page number'],
+                'attributeFilters' => ['type' => 'String', 'description' => 'JSON-encoded attribute filters: {"brand_id":"10","series":"1877"}'],
             ],
             description: 'Get products with filtering and sorting',
         ),

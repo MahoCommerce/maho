@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\State\Admin\BlogPostProcessor;
+use Maho\ApiPlatform\State\Admin\BlogPostProvider;
 
 #[ApiResource(
     uriTemplate: '/admin/blog-posts',
@@ -33,6 +34,7 @@ use Maho\ApiPlatform\State\Admin\BlogPostProcessor;
 #[ApiResource(
     uriTemplate: '/admin/blog-posts/{id}',
     shortName: 'AdminBlogPost',
+    provider: BlogPostProvider::class,
     operations: [
         new Put(
             processor: BlogPostProcessor::class,
@@ -60,4 +62,6 @@ class BlogPost
     public ?string $metaDescription = null;
     /** @var string[] */
     public array $stores = ['all'];
+    /** @var string|null Image path relative to media/blog/ or full URL to copy */
+    public ?string $image = null;
 }

@@ -9,6 +9,7 @@ use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\State\Admin\CmsBlockProcessor;
+use Maho\ApiPlatform\State\Admin\CmsBlockProvider;
 
 #[ApiResource(
     uriTemplate: '/admin/cms-blocks',
@@ -24,6 +25,7 @@ use Maho\ApiPlatform\State\Admin\CmsBlockProcessor;
 #[ApiResource(
     uriTemplate: '/admin/cms-blocks/{id}',
     shortName: 'AdminCmsBlock',
+    provider: CmsBlockProvider::class,
     operations: [
         new Put(
             processor: CmsBlockProcessor::class,

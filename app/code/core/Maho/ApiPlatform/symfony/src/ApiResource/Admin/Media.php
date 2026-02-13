@@ -20,6 +20,7 @@ use Maho\ApiPlatform\State\Admin\MediaProvider;
         new Post(
             processor: MediaProcessor::class,
             inputFormats: ['multipart' => ['multipart/form-data']],
+            deserialize: false,
             openapi: new Operation(
                 summary: 'Upload an image',
                 description: 'Uploads an image file, auto-converts to WebP. Max 10MB. Allowed types: jpg, jpeg, png, gif, webp.',

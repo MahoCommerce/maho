@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -107,8 +107,8 @@ final class CmsPageProvider implements ProviderInterface
             $collection->addFieldToFilter('identifier', $filters['identifier']);
         }
 
-        // Apply search filter on title and content
-        if ($search) {
+        // Apply search filter on title and content (min 3 chars to avoid slow full-table LIKE scans)
+        if ($search && mb_strlen($search) >= 3) {
             $collection->addFieldToFilter(
                 ['title', 'content', 'identifier'],
                 [

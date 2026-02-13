@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -81,12 +81,12 @@ final class StoreConfigProvider implements ProviderInterface
         $dto->defaultTitle = \Mage::getStoreConfig('design/head/default_title', $storeId) ?: null;
         $dto->defaultDescription = \Mage::getStoreConfig('design/head/default_description', $storeId) ?: null;
 
-        // Cache for 1 hour
+        // Cache for 24 hours (store config rarely changes, auto-cleaned on save)
         \Mage::app()->getCache()->save(
             json_encode($this->dtoToArray($dto)),
             $cacheKey,
             ['API_STORE_CONFIG'],
-            3600,
+            86400,
         );
 
         return $dto;

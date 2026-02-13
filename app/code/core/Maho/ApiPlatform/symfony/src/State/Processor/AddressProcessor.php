@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -252,10 +252,31 @@ final class AddressProcessor implements ProcessorInterface
     }
 
     /**
+     * Normalize address data types from frontend input
+     * - street: string -> array
+     * - regionId: string -> int|null
+     */
+    private function normalizeAddressData(Address $data): void
+    {
+        // Normalize street to array
+        if (is_string($data->street)) {
+            $data->street = [$data->street];
+        }
+
+        // Normalize regionId to int or null
+        if ($data->regionId !== null && !is_int($data->regionId)) {
+            $data->regionId = $data->regionId !== '' ? (int) $data->regionId : null;
+        }
+    }
+
+    /**
      * Validate address data
      */
     private function validateAddress(Address $data): void
     {
+        // Normalize data types before validation
+        $this->normalizeAddressData($data);
+
         $errors = [];
 
         if (empty($data->firstName)) {

@@ -884,9 +884,18 @@ final class ProductProvider implements ProviderInterface
      */
     private function getLinkedProducts(\Mage_Catalog_Model_Resource_Product_Collection $collection): array
     {
-        $collection->addAttributeToSelect(['name', 'price', 'special_price', 'small_image', 'status', 'visibility'])
+        $collection->addAttributeToSelect(['name', 'price', 'special_price', 'image', 'small_image', 'thumbnail', 'url_key', 'status', 'visibility'])
             ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->setPageSize(20);
+
+        // Filter by visibility (catalog or both)
+        \Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($collection);
+
+        // Filter out-of-stock products using the stock STATUS index (not the stock item's
+        // is_in_stock field which can be stale). Respects "Display Out of Stock Products" config.
+        if (!\Mage::getStoreConfigFlag('cataloginventory/options/show_out_of_stock')) {
+            \Mage::getModel('cataloginventory/stock_status')->addIsInStockFilterToCollection($collection);
+        }
 
         $products = [];
         foreach ($collection as $product) {
