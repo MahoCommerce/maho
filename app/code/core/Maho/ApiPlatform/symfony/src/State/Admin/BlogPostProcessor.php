@@ -18,9 +18,9 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Core_Model_Store;
-use Mage_Oauth_Model_Consumer;
 use Maho\ApiPlatform\ApiResource\Admin\BlogPost;
 use Maho\ApiPlatform\Security\AdminApiAuthenticator;
+use Maho\ApiPlatform\Security\AdminApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Maho_Blog_Model_Post;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -44,20 +44,20 @@ final class BlogPostProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?BlogPost
     {
         $request = $this->requestStack->getCurrentRequest();
-        $consumer = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
+        $user = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
 
-        if (!$consumer || !$consumer->hasPermission('blog_posts')) {
-            throw new AccessDeniedHttpException('Token does not have permission for blog_posts');
+        if (!$user instanceof AdminApiUser || !$user->hasPermission('admin/blog-posts/write')) {
+            throw new AccessDeniedHttpException('Token does not have write permission for blog_posts');
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete($uriVariables['id'], $consumer);
+            return $this->handleDelete($uriVariables['id'], $user);
         }
 
         assert($data instanceof BlogPost);
 
         // Resolve store IDs
-        $storeIds = $this->resolveStoreIds($data->stores, $consumer);
+        $storeIds = $this->resolveStoreIds($data->stores, $user);
 
         // Sanitize content fields
         $sanitizedContent = $this->contentSanitizer->sanitize($data->content);
@@ -72,11 +72,11 @@ final class BlogPostProcessor implements ProcessorInterface
                 $storeIds,
                 $sanitizedContent,
                 $sanitizedShortContent,
-                $consumer,
+                $user,
             );
         }
 
-        return $this->handleCreate($data, $storeIds, $sanitizedContent, $sanitizedShortContent, $consumer);
+        return $this->handleCreate($data, $storeIds, $sanitizedContent, $sanitizedShortContent, $user);
     }
 
     private function handleCreate(
@@ -84,7 +84,7 @@ final class BlogPostProcessor implements ProcessorInterface
         array $storeIds,
         string $sanitizedContent,
         ?string $sanitizedShortContent,
-        Mage_Oauth_Model_Consumer $consumer,
+        AdminApiUser $user,
     ): BlogPost {
         /** @var Maho_Blog_Model_Post $post */
         $post = Mage::getModel('blog/post');
@@ -105,20 +105,21 @@ final class BlogPostProcessor implements ProcessorInterface
             $postData['publish_date'] = $data->publishedAt;
         }
 
-        // Note: shortContent and author fields may need custom attributes or schema updates
-        // if they don't exist in the blog model. The model currently doesn't have these fields.
-        // TODO: Add short_content and author attributes to blog model if needed
-
         $post->setData($postData);
 
         try {
             $post->save();
+
+            // Save image directly to EAV since backend only handles file uploads
+            if ($data->image !== null) {
+                $this->saveImageAttribute($post, $this->processImage($data->image));
+            }
         } catch (\Exception $e) {
             throw new UnprocessableEntityHttpException('Failed to create blog post: ' . $e->getMessage());
         }
 
         // Log activity
-        $this->logActivity('create', null, $post, $consumer);
+        $this->logActivity('create', null, $post, $user);
 
         $data->id = (int) $post->getId();
         $data->content = $sanitizedContent;
@@ -132,7 +133,7 @@ final class BlogPostProcessor implements ProcessorInterface
         array $storeIds,
         string $sanitizedContent,
         ?string $sanitizedShortContent,
-        Mage_Oauth_Model_Consumer $consumer,
+        AdminApiUser $user,
     ): BlogPost {
         /** @var Maho_Blog_Model_Post $post */
         $post = Mage::getModel('blog/post')->load($id);
@@ -142,7 +143,7 @@ final class BlogPostProcessor implements ProcessorInterface
         }
 
         // Check store access
-        $this->validateStoreAccess($post, $consumer);
+        $this->validateStoreAccess($post, $user);
 
         $oldData = $post->getData();
 
@@ -165,12 +166,17 @@ final class BlogPostProcessor implements ProcessorInterface
 
         try {
             $post->save();
+
+            // Save image directly to EAV since backend only handles file uploads
+            if ($data->image !== null) {
+                $this->saveImageAttribute($post, $this->processImage($data->image));
+            }
         } catch (\Exception $e) {
             throw new UnprocessableEntityHttpException('Failed to update blog post: ' . $e->getMessage());
         }
 
         // Log activity
-        $this->logActivity('update', $oldData, $post, $consumer);
+        $this->logActivity('update', $oldData, $post, $user);
 
         $data->id = (int) $post->getId();
         $data->content = $sanitizedContent;
@@ -178,7 +184,7 @@ final class BlogPostProcessor implements ProcessorInterface
         return $data;
     }
 
-    private function handleDelete(int $id, Mage_Oauth_Model_Consumer $consumer): null
+    private function handleDelete(int $id, AdminApiUser $user): null
     {
         /** @var Maho_Blog_Model_Post $post */
         $post = Mage::getModel('blog/post')->load($id);
@@ -188,7 +194,7 @@ final class BlogPostProcessor implements ProcessorInterface
         }
 
         // Check store access
-        $this->validateStoreAccess($post, $consumer);
+        $this->validateStoreAccess($post, $user);
 
         $oldData = $post->getData();
 
@@ -199,16 +205,16 @@ final class BlogPostProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('delete', $oldData, null, $consumer);
+        $this->logActivity('delete', $oldData, null, $user);
 
         return null;
     }
 
-    private function resolveStoreIds(array $stores, Mage_Oauth_Model_Consumer $consumer): array
+    private function resolveStoreIds(array $stores, AdminApiUser $user): array
     {
         if (in_array('all', $stores, true)) {
-            $allowedStores = $consumer->getAllowedStoreIds();
-            if ($allowedStores === 'all') {
+            $allowedStores = $user->getAllowedStoreIds();
+            if ($allowedStores === null) {
                 return [0]; // Admin store = all stores
             }
             return $allowedStores;
@@ -221,7 +227,7 @@ final class BlogPostProcessor implements ProcessorInterface
             $store = Mage::app()->getStore($storeCode);
             $storeId = (int) $store->getId();
 
-            if (!$consumer->canAccessStore($storeId)) {
+            if (!$user->canAccessStore($storeId)) {
                 throw new AccessDeniedHttpException("Token does not have access to store: {$storeCode}");
             }
 
@@ -231,22 +237,22 @@ final class BlogPostProcessor implements ProcessorInterface
         return $storeIds;
     }
 
-    private function validateStoreAccess(Maho_Blog_Model_Post $post, Mage_Oauth_Model_Consumer $consumer): void
+    private function validateStoreAccess(Maho_Blog_Model_Post $post, AdminApiUser $user): void
     {
         $postStores = $post->getStores();
 
-        // If post is on all stores (0), check if consumer has 'all' access
+        // If post is on all stores (0), check if user has all-stores access
         if (in_array(0, $postStores, true)) {
-            $allowedStores = $consumer->getAllowedStoreIds();
-            if ($allowedStores !== 'all') {
+            $allowedStores = $user->getAllowedStoreIds();
+            if ($allowedStores !== null) {
                 throw new AccessDeniedHttpException('Token does not have access to all-stores content');
             }
             return;
         }
 
-        // Check if consumer can access at least one of the post's stores
+        // Check if user can access at least one of the post's stores
         foreach ($postStores as $storeId) {
-            if ($consumer->canAccessStore((int) $storeId)) {
+            if ($user->canAccessStore((int) $storeId)) {
                 return;
             }
         }
@@ -254,11 +260,82 @@ final class BlogPostProcessor implements ProcessorInterface
         throw new AccessDeniedHttpException('Token does not have access to this post\'s stores');
     }
 
+    /**
+     * Process image field - handles URLs and relative paths
+     * If URL points to media/wysiwyg, copies file to media/blog/
+     */
+    private function processImage(string $image): string
+    {
+        // If it's already a relative path (no http), use as-is
+        if (!str_starts_with($image, 'http://') && !str_starts_with($image, 'https://')) {
+            return $image;
+        }
+
+        // Extract filename from URL
+        $urlPath = parse_url($image, PHP_URL_PATH);
+        $filename = basename($urlPath);
+
+        // Check if this is a wysiwyg media URL we can copy locally
+        if (str_contains($image, '/media/wysiwyg/')) {
+            // Extract path after wysiwyg/
+            if (preg_match('#/media/wysiwyg/(.+)$#', $image, $matches)) {
+                $sourceFile = Mage::getBaseDir('media') . '/wysiwyg/' . $matches[1];
+                $destDir = Mage::getBaseDir('media') . '/blog/';
+                $destFile = $destDir . $filename;
+
+                if (file_exists($sourceFile) && !file_exists($destFile)) {
+                    if (!is_dir($destDir)) {
+                        mkdir($destDir, 0755, true);
+                    }
+                    copy($sourceFile, $destFile);
+                }
+                return $filename;
+            }
+        }
+
+        // For external URLs, just use the filename (assumes it exists or will be uploaded separately)
+        return $filename;
+    }
+
+    /**
+     * Save image value directly to EAV table since backend model only handles file uploads
+     */
+    private function saveImageAttribute(Maho_Blog_Model_Post $post, string $imageValue): void
+    {
+        try {
+            // Get the image attribute
+            $attribute = Mage::getSingleton('eav/config')->getAttribute('blog_post', 'image');
+            if (!$attribute || !$attribute->getId()) {
+                return;
+            }
+
+            $table = $attribute->getBackend()->getTable();
+            $entityTypeId = $attribute->getEntityTypeId();
+            $attributeId = $attribute->getId();
+            $entityId = (int) $post->getId();
+
+            /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
+            $adapter = $post->getResource()->getWriteConnection(); /** @phpstan-ignore method.notFound */
+
+            $data = [
+                'entity_type_id' => $entityTypeId,
+                'attribute_id' => $attributeId,
+                'store_id' => 0,
+                'entity_id' => $entityId,
+                'value' => $imageValue,
+            ];
+
+            $adapter->insertOnDuplicate($table, $data, ['value']);
+        } catch (\Exception $e) {
+            Mage::logException($e);
+        }
+    }
+
     private function logActivity(
         string $action,
         ?array $oldData,
         ?Maho_Blog_Model_Post $post,
-        Mage_Oauth_Model_Consumer $consumer,
+        AdminApiUser $user,
     ): void {
         try {
             /** @var \Maho_AdminActivityLog_Model_Activity $activity */
@@ -269,8 +346,8 @@ final class BlogPostProcessor implements ProcessorInterface
                 'entity_id' => $post ? (int) $post->getId() : ($oldData['entity_id'] ?? 0),
                 'old_data' => $oldData,
                 'new_data' => $post?->getData(),
-                'consumer_id' => $consumer->getId(),
-                'username' => 'API: ' . $consumer->getName(),
+                'consumer_id' => $user->getConsumer()->getId(),
+                'username' => 'API: ' . $user->getConsumerName(),
             ]);
         } catch (\Exception $e) {
             // Log but don't fail the request

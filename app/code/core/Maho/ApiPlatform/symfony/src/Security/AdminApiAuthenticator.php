@@ -106,15 +106,17 @@ final class AdminApiAuthenticator extends AbstractAuthenticator
             ['entity_id = ?' => (int) $consumer->getId()],
         );
 
-        // Store consumer in request for backward compat (processors that log consumer name)
-        $request->attributes->set(self::CONSUMER_ATTRIBUTE, $consumer);
+        $user = new AdminApiUser(
+            consumer: $consumer,
+            permissions: $permissions,
+            allowedStoreIds: $storeIds,
+        );
+
+        // Store on request for processor access
+        $request->attributes->set(self::CONSUMER_ATTRIBUTE, $user);
 
         return new SelfValidatingPassport(
-            new UserBadge($consumer->getKey(), fn() => new AdminApiUser(
-                consumer: $consumer,
-                permissions: $permissions,
-                allowedStoreIds: $storeIds,
-            )),
+            new UserBadge($consumer->getKey(), fn() => $user),
         );
     }
 

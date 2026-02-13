@@ -9,9 +9,9 @@ use ApiPlatform\State\ProviderInterface;
 use Mage;
 use Mage_Cms_Model_Wysiwyg_Config;
 use Mage_Core_Model_Store;
-use Mage_Oauth_Model_Consumer;
 use Maho\ApiPlatform\ApiResource\Admin\Media;
 use Maho\ApiPlatform\Security\AdminApiAuthenticator;
+use Maho\ApiPlatform\Security\AdminApiUser;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -38,10 +38,10 @@ final class MediaProvider implements ProviderInterface
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $request = $this->requestStack->getCurrentRequest();
-        $consumer = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
+        $user = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
 
-        if (!$consumer || !$consumer->hasPermission('media')) {
-            throw new AccessDeniedHttpException('Token does not have permission for media');
+        if (!$user instanceof AdminApiUser || !$user->hasPermission('admin/media/read')) {
+            throw new AccessDeniedHttpException('Token does not have read permission for media');
         }
 
         return $this->listFiles();

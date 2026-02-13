@@ -11,9 +11,9 @@ use Mage;
 use Mage_Cms_Model_Wysiwyg_Config;
 use Mage_Core_Model_File_Uploader;
 use Mage_Core_Model_Store;
-use Mage_Oauth_Model_Consumer;
 use Maho\ApiPlatform\ApiResource\Admin\Media;
 use Maho\ApiPlatform\Security\AdminApiAuthenticator;
+use Maho\ApiPlatform\Security\AdminApiUser;
 use Maho\Io\File as IoFile;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -42,20 +42,20 @@ final class MediaProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Media
     {
         $request = $this->requestStack->getCurrentRequest();
-        $consumer = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
+        $user = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
 
-        if (!$consumer || !$consumer->hasPermission('media')) {
-            throw new AccessDeniedHttpException('Token does not have permission for media');
+        if (!$user instanceof AdminApiUser || !$user->hasPermission('admin/media/write')) {
+            throw new AccessDeniedHttpException('Token does not have write permission for media');
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete($uriVariables['path'], $consumer);
+            return $this->handleDelete($uriVariables['path'], $user);
         }
 
-        return $this->handleUpload($consumer);
+        return $this->handleUpload($user);
     }
 
-    private function handleUpload(Mage_Oauth_Model_Consumer $consumer): Media
+    private function handleUpload(AdminApiUser $user): Media
     {
         $request = $this->requestStack->getCurrentRequest();
 
@@ -168,7 +168,7 @@ final class MediaProcessor implements ProcessorInterface
         $directive = sprintf('{{media url="%s"}}', $relativePath);
 
         // Log activity
-        $this->logActivity('upload', $relativePath, $consumer);
+        $this->logActivity('upload', $relativePath, $user);
 
         // Return result
         $media = new Media();
@@ -182,7 +182,7 @@ final class MediaProcessor implements ProcessorInterface
         return $media;
     }
 
-    private function handleDelete(string $path, Mage_Oauth_Model_Consumer $consumer): null
+    private function handleDelete(string $path, AdminApiUser $user): null
     {
         // Sanitize path
         $path = $this->sanitizeFolderPath($path);
@@ -228,7 +228,7 @@ final class MediaProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('delete', $path, $consumer);
+        $this->logActivity('delete', $path, $user);
 
         return null;
     }
@@ -299,7 +299,7 @@ final class MediaProcessor implements ProcessorInterface
         return $path;
     }
 
-    private function logActivity(string $action, string $path, Mage_Oauth_Model_Consumer $consumer): void
+    private function logActivity(string $action, string $path, AdminApiUser $user): void
     {
         try {
             /** @var \Maho_AdminActivityLog_Model_Activity $activity */
@@ -310,8 +310,8 @@ final class MediaProcessor implements ProcessorInterface
                 'entity_id' => 0,
                 'old_data' => $action === 'delete' ? ['path' => $path] : null,
                 'new_data' => $action === 'upload' ? ['path' => $path] : null,
-                'consumer_id' => $consumer->getId(),
-                'username' => 'API: ' . $consumer->getName(),
+                'consumer_id' => $user->getConsumer()->getId(),
+                'username' => 'API: ' . $user->getConsumerName(),
             ]);
         } catch (\Exception $e) {
             // Log but don't fail the request

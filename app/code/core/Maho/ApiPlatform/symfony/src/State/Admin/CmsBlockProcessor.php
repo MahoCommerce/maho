@@ -10,9 +10,9 @@ use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Cms_Model_Block;
 use Mage_Core_Model_Store;
-use Mage_Oauth_Model_Consumer;
 use Maho\ApiPlatform\ApiResource\Admin\CmsBlock;
 use Maho\ApiPlatform\Security\AdminApiAuthenticator;
+use Maho\ApiPlatform\Security\AdminApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -35,32 +35,32 @@ final class CmsBlockProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?CmsBlock
     {
         $request = $this->requestStack->getCurrentRequest();
-        $consumer = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
+        $user = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
 
-        if (!$consumer || !$consumer->hasPermission('cms_blocks')) {
-            throw new AccessDeniedHttpException('Token does not have permission for cms_blocks');
+        if (!$user instanceof AdminApiUser || !$user->hasPermission('admin/cms-blocks/write')) {
+            throw new AccessDeniedHttpException('Token does not have write permission for cms_blocks');
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete($uriVariables['id'], $consumer);
+            return $this->handleDelete($uriVariables['id'], $user);
         }
 
         assert($data instanceof CmsBlock);
 
         // Resolve store IDs
-        $storeIds = $this->resolveStoreIds($data->stores, $consumer);
+        $storeIds = $this->resolveStoreIds($data->stores, $user);
 
         // Sanitize content
         $sanitizedContent = $this->contentSanitizer->sanitize($data->content);
 
         if (isset($uriVariables['id'])) {
-            return $this->handleUpdate((int) $uriVariables['id'], $data, $storeIds, $sanitizedContent, $consumer);
+            return $this->handleUpdate((int) $uriVariables['id'], $data, $storeIds, $sanitizedContent, $user);
         }
 
-        return $this->handleCreate($data, $storeIds, $sanitizedContent, $consumer);
+        return $this->handleCreate($data, $storeIds, $sanitizedContent, $user);
     }
 
-    private function handleCreate(CmsBlock $data, array $storeIds, string $sanitizedContent, Mage_Oauth_Model_Consumer $consumer): CmsBlock
+    private function handleCreate(CmsBlock $data, array $storeIds, string $sanitizedContent, AdminApiUser $user): CmsBlock
     {
         /** @var Mage_Cms_Model_Block $block */
         $block = Mage::getModel('cms/block');
@@ -80,14 +80,14 @@ final class CmsBlockProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('create', null, $block, $consumer);
+        $this->logActivity('create', null, $block, $user);
 
         $data->id = (int) $block->getId();
         $data->content = $sanitizedContent;
         return $data;
     }
 
-    private function handleUpdate(int $id, CmsBlock $data, array $storeIds, string $sanitizedContent, Mage_Oauth_Model_Consumer $consumer): CmsBlock
+    private function handleUpdate(int $id, CmsBlock $data, array $storeIds, string $sanitizedContent, AdminApiUser $user): CmsBlock
     {
         /** @var Mage_Cms_Model_Block $block */
         $block = Mage::getModel('cms/block')->load($id);
@@ -97,7 +97,7 @@ final class CmsBlockProcessor implements ProcessorInterface
         }
 
         // Check store access
-        $this->validateStoreAccess($block, $consumer);
+        $this->validateStoreAccess($block, $user);
 
         $oldData = $block->getData();
 
@@ -116,14 +116,14 @@ final class CmsBlockProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('update', $oldData, $block, $consumer);
+        $this->logActivity('update', $oldData, $block, $user);
 
         $data->id = (int) $block->getId();
         $data->content = $sanitizedContent;
         return $data;
     }
 
-    private function handleDelete(int $id, Mage_Oauth_Model_Consumer $consumer): null
+    private function handleDelete(int $id, AdminApiUser $user): null
     {
         /** @var Mage_Cms_Model_Block $block */
         $block = Mage::getModel('cms/block')->load($id);
@@ -133,7 +133,7 @@ final class CmsBlockProcessor implements ProcessorInterface
         }
 
         // Check store access
-        $this->validateStoreAccess($block, $consumer);
+        $this->validateStoreAccess($block, $user);
 
         $oldData = $block->getData();
 
@@ -144,16 +144,16 @@ final class CmsBlockProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('delete', $oldData, null, $consumer);
+        $this->logActivity('delete', $oldData, null, $user);
 
         return null;
     }
 
-    private function resolveStoreIds(array $stores, Mage_Oauth_Model_Consumer $consumer): array
+    private function resolveStoreIds(array $stores, AdminApiUser $user): array
     {
         if (in_array('all', $stores, true)) {
-            $allowedStores = $consumer->getAllowedStoreIds();
-            if ($allowedStores === 'all') {
+            $allowedStores = $user->getAllowedStoreIds();
+            if ($allowedStores === null) {
                 return [0]; // Admin store = all stores
             }
             return $allowedStores;
@@ -166,7 +166,7 @@ final class CmsBlockProcessor implements ProcessorInterface
             $store = Mage::app()->getStore($storeCode);
             $storeId = (int) $store->getId();
 
-            if (!$consumer->canAccessStore($storeId)) {
+            if (!$user->canAccessStore($storeId)) {
                 throw new AccessDeniedHttpException("Token does not have access to store: {$storeCode}");
             }
 
@@ -176,25 +176,25 @@ final class CmsBlockProcessor implements ProcessorInterface
         return $storeIds;
     }
 
-    private function validateStoreAccess(Mage_Cms_Model_Block $block, Mage_Oauth_Model_Consumer $consumer): void
+    private function validateStoreAccess(Mage_Cms_Model_Block $block, AdminApiUser $user): void
     {
         $blockStores = $block->getStoreId();
         if (!is_array($blockStores)) {
             $blockStores = [$blockStores];
         }
 
-        // If block is on all stores (0), check if consumer has 'all' access
+        // If block is on all stores (0), check if user has all-stores access
         if (in_array(0, $blockStores, true)) {
-            $allowedStores = $consumer->getAllowedStoreIds();
-            if ($allowedStores !== 'all') {
+            $allowedStores = $user->getAllowedStoreIds();
+            if ($allowedStores !== null) {
                 throw new AccessDeniedHttpException('Token does not have access to all-stores content');
             }
             return;
         }
 
-        // Check if consumer can access at least one of the block's stores
+        // Check if user can access at least one of the block's stores
         foreach ($blockStores as $storeId) {
-            if ($consumer->canAccessStore((int) $storeId)) {
+            if ($user->canAccessStore((int) $storeId)) {
                 return;
             }
         }
@@ -202,7 +202,7 @@ final class CmsBlockProcessor implements ProcessorInterface
         throw new AccessDeniedHttpException('Token does not have access to this block\'s stores');
     }
 
-    private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Block $block, Mage_Oauth_Model_Consumer $consumer): void
+    private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Block $block, AdminApiUser $user): void
     {
         try {
             /** @var \Maho_AdminActivityLog_Model_Activity $activity */
@@ -213,8 +213,8 @@ final class CmsBlockProcessor implements ProcessorInterface
                 'entity_id' => $block ? (int) $block->getId() : ($oldData['block_id'] ?? 0),
                 'old_data' => $oldData,
                 'new_data' => $block?->getData(),
-                'consumer_id' => $consumer->getId(),
-                'username' => 'API: ' . $consumer->getName(),
+                'consumer_id' => $user->getConsumer()->getId(),
+                'username' => 'API: ' . $user->getConsumerName(),
             ]);
         } catch (\Exception $e) {
             // Log but don't fail the request
