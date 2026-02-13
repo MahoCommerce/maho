@@ -64,8 +64,7 @@ class Mage_Core_Model_Flag extends Mage_Core_Model_Abstract
     public function getFlagData()
     {
         if ($this->hasFlagData()) {
-            $data = $this->getData('flag_data');
-            return json_validate($data) ? Mage::helper('core')->jsonDecode($data) : unserialize($data, ['allowed_classes' => false]);
+            return Mage::helper('core/string')->unserialize($this->getData('flag_data'));
         }
         return null;
     }

@@ -612,9 +612,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     public function getProductOptions()
     {
         if ($options = $this->_getData('product_options')) {
-            return json_validate($options)
-                ? Mage::helper('core')->jsonDecode($options)
-                : unserialize($options, ['allowed_classes' => false]);
+            return Mage::helper('core/string')->unserialize($options);
         }
         return [];
     }
@@ -816,10 +814,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function getBaseDiscountAppliedForWeeeTax()
     {
-        $weeeTaxApplied = $this->getWeeeTaxApplied();
-        $weeeTaxAppliedAmounts = json_validate($weeeTaxApplied)
-            ? Mage::helper('core')->jsonDecode($weeeTaxApplied)
-            : unserialize($weeeTaxApplied, ['allowed_classes' => false]);
+        $weeeTaxAppliedAmounts = Mage::helper('core/string')->unserialize($this->getWeeeTaxApplied());
         $totalDiscount = 0;
         if (!is_array($weeeTaxAppliedAmounts)) {
             return $totalDiscount;
@@ -840,10 +835,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function getDiscountAppliedForWeeeTax()
     {
-        $weeeTaxApplied = $this->getWeeeTaxApplied();
-        $weeeTaxAppliedAmounts = json_validate($weeeTaxApplied)
-            ? Mage::helper('core')->jsonDecode($weeeTaxApplied)
-            : unserialize($weeeTaxApplied, ['allowed_classes' => false]);
+        $weeeTaxAppliedAmounts = Mage::helper('core/string')->unserialize($this->getWeeeTaxApplied());
         $totalDiscount = 0;
         if (!is_array($weeeTaxAppliedAmounts)) {
             return $totalDiscount;

@@ -130,10 +130,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
         $skuParts = [$sku];
         if ($this->getProduct($product)->hasCustomOptions()) {
             $customOption = $this->getProduct($product)->getCustomOption('bundle_selection_ids');
-            $optValue = $customOption->getValue();
-            $selectionIds = json_validate($optValue)
-                ? Mage::helper('core')->jsonDecode($optValue)
-                : unserialize($optValue, ['allowed_classes' => false]);
+            $selectionIds = Mage::helper('core/string')->unserialize($customOption->getValue());
             if (!empty($selectionIds)) {
                 $selections = $this->getSelectionsByIds($selectionIds, $product);
                 foreach ($selections->getItems() as $selection) {
@@ -159,10 +156,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
         $weight = 0;
         if ($this->getProduct($product)->hasCustomOptions()) {
             $customOption = $this->getProduct($product)->getCustomOption('bundle_selection_ids');
-            $optValue = $customOption->getValue();
-            $selectionIds = json_validate($optValue)
-                ? Mage::helper('core')->jsonDecode($optValue)
-                : unserialize($optValue, ['allowed_classes' => false]);
+            $selectionIds = Mage::helper('core/string')->unserialize($customOption->getValue());
             $selections = $this->getSelectionsByIds($selectionIds, $product);
             foreach ($selections->getItems() as $selection) {
                 $qtyOption = $this->getProduct($product)
@@ -188,10 +182,7 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
     {
         if ($this->getProduct($product)->hasCustomOptions()) {
             $customOption = $this->getProduct($product)->getCustomOption('bundle_selection_ids');
-            $optValue = $customOption->getValue();
-            $selectionIds = json_validate($optValue)
-                ? Mage::helper('core')->jsonDecode($optValue)
-                : unserialize($optValue, ['allowed_classes' => false]);
+            $selectionIds = Mage::helper('core/string')->unserialize($customOption->getValue());
             $selections = $this->getSelectionsByIds($selectionIds, $product);
             $virtualCount = 0;
             foreach ($selections->getItems() as $selection) {
@@ -785,16 +776,10 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
 
         if ($product->hasCustomOptions()) {
             $customOption = $product->getCustomOption('bundle_option_ids');
-            $optValue = $customOption->getValue();
-            $optionIds = json_validate($optValue)
-                ? Mage::helper('core')->jsonDecode($optValue)
-                : unserialize($optValue, ['allowed_classes' => false]);
+            $optionIds = Mage::helper('core/string')->unserialize($customOption->getValue());
             $options = $this->getOptionsByIds($optionIds, $product);
             $customOption = $product->getCustomOption('bundle_selection_ids');
-            $selValue = $customOption->getValue();
-            $selectionIds = json_validate($selValue)
-                ? Mage::helper('core')->jsonDecode($selValue)
-                : unserialize($selValue, ['allowed_classes' => false]);
+            $selectionIds = Mage::helper('core/string')->unserialize($customOption->getValue());
             $selections = $this->getSelectionsByIds($selectionIds, $product);
             foreach ($selections->getItems() as $selection) {
                 if ($selection->isSalable()) {
@@ -937,16 +922,10 @@ class Mage_Bundle_Model_Product_Type extends Mage_Catalog_Model_Product_Type_Abs
         $productOptionIds   = $this->getOptionsIds($product);
         $productSelections  = $this->getSelectionsCollection($productOptionIds, $product);
         $selectionIds       = $product->getCustomOption('bundle_selection_ids');
-        $selValue           = $selectionIds->getValue();
-        $selectionIds       = (array) (json_validate($selValue)
-            ? Mage::helper('core')->jsonDecode($selValue)
-            : unserialize($selValue, ['allowed_classes' => false]));
+        $selectionIds       = (array) Mage::helper('core/string')->unserialize($selectionIds->getValue());
         $buyRequest         = $product->getCustomOption('info_buyRequest');
-        $brValue            = $buyRequest->getValue();
         $buyRequest         = new \Maho\DataObject(
-            json_validate($brValue)
-                ? Mage::helper('core')->jsonDecode($brValue)
-                : unserialize($brValue, ['allowed_classes' => false]),
+            Mage::helper('core/string')->unserialize($buyRequest->getValue()),
         );
         $bundleOption       = $buyRequest->getBundleOption();
 

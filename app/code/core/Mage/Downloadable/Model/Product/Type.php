@@ -322,9 +322,7 @@ class Mage_Downloadable_Model_Product_Type extends Mage_Catalog_Model_Product_Ty
         $option = $product->getCustomOption('info_buyRequest');
         if ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
             $buyRequest = new \Maho\DataObject(
-                json_validate($option->getValue())
-                    ? Mage::helper('core')->jsonDecode($option->getValue())
-                    : unserialize($option->getValue(), ['allowed_classes' => false]),
+                Mage::helper('core/string')->unserialize($option->getValue()),
             );
             if (!$buyRequest->hasLinks()) {
                 if (!$product->getLinksPurchasedSeparately()) {

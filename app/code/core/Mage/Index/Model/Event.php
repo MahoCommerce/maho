@@ -182,7 +182,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
         }
 
         if (!empty($data['new_data'])) {
-            $previousNewData = json_validate($data['new_data']) ? Mage::helper('core')->jsonDecode($data['new_data']) : unserialize($data['new_data'], ['allowed_classes' => false]);
+            $previousNewData = Mage::helper('core/string')->unserialize($data['new_data']);
             $currentNewData  = $this->getNewData(false);
             $currentNewData = $this->_mergeNewDataRecursive($previousNewData, $currentNewData);
             $this->setNewData(Mage::helper('core')->jsonEncode($currentNewData));
@@ -229,7 +229,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     {
         $data = $this->_getData('new_data');
         if (is_string($data)) {
-            $data = json_validate($data) ? Mage::helper('core')->jsonDecode($data) : unserialize($data, ['allowed_classes' => false]);
+            $data = Mage::helper('core/string')->unserialize($data);
         } elseif (empty($data) || !is_array($data)) {
             $data = [];
         }

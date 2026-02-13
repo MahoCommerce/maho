@@ -389,9 +389,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     {
         $option = $this->getOptionByCode('info_buyRequest');
         $initialData = $option
-            ? (json_validate($option->getValue())
-                ? Mage::helper('core')->jsonDecode($option->getValue())
-                : unserialize($option->getValue(), ['allowed_classes' => false]))
+            ? Mage::helper('core/string')->unserialize($option->getValue())
             : null;
 
         // There can be wrong data due to bug in Grouped products - it formed 'info_buyRequest' as \Maho\DataObject

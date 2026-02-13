@@ -255,8 +255,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         if (empty($data)) {
             return [];
         }
-        $data = $item->getWeeeTaxApplied();
-        return json_validate($data) ? Mage::helper('core')->jsonDecode($data) : unserialize($data, ['allowed_classes' => false]);
+        return Mage::helper('core/string')->unserialize($data);
     }
 
     /**

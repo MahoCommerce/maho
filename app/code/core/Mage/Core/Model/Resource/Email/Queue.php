@@ -30,8 +30,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $object->setRecipients($this->getRecipients($object->getId()));
-        $messageParams = $object->getMessageParameters();
-        $object->setMessageParameters(json_validate($messageParams) ? Mage::helper('core')->jsonDecode($messageParams) : unserialize($messageParams, ['allowed_classes' => false]));
+        $object->setMessageParameters(Mage::helper('core/string')->unserialize($object->getMessageParameters()));
         return $this;
     }
 

@@ -18,10 +18,11 @@ $installer->startSetup();
 
 $connection = $installer->getConnection();
 $coreHelper = Mage::helper('core');
+$batchSize = 1000;
 
 /**
  * Category A: Tables where the column value is always serialized.
- * Non-empty, non-JSON values must be unserializable or it's an error.
+ * Non-empty, non-JSON values are expected to be PHP serialized arrays.
  */
 $alwaysSerializedTables = [
     ['table' => 'sales_flat_order_payment',             'pk' => 'entity_id',      'columns' => ['additional_information']],
@@ -53,7 +54,7 @@ $connection->beginTransaction();
 try {
     // Category A: always-serialized columns
     foreach ($alwaysSerializedTables as $tableConfig) {
-        $tableName = $tableConfig['table'];
+        $tableName = $installer->getTable($tableConfig['table']);
 
         if (!$connection->isTableExists($tableName)) {
             continue;
@@ -67,41 +68,50 @@ try {
         }
 
         $pk = $tableConfig['pk'];
-        $select = $connection->select()->from($tableName, array_merge([$pk], $columns));
-        $rows = $connection->fetchAll($select);
+        $offset = 0;
 
-        foreach ($rows as $row) {
-            $updates = [];
-            foreach ($columns as $column) {
-                $value = $row[$column];
-                if (empty($value)) {
-                    continue;
+        do {
+            $select = $connection->select()
+                ->from($tableName, array_merge([$pk], $columns))
+                ->limit($batchSize, $offset);
+            $rows = $connection->fetchAll($select);
+
+            foreach ($rows as $row) {
+                $updates = [];
+                foreach ($columns as $column) {
+                    $value = $row[$column];
+                    if (empty($value)) {
+                        continue;
+                    }
+
+                    // Skip if already valid JSON
+                    if (json_validate($value)) {
+                        continue;
+                    }
+
+                    $data = @unserialize($value, ['allowed_classes' => false]);
+                    if ($data !== false) {
+                        $updates[$column] = $coreHelper->jsonEncode($data);
+                    } else {
+                        Mage::log(
+                            "Could not unserialize {$column} in {$tableName} row {$row[$pk]}, skipping",
+                            Mage::LOG_WARNING,
+                        );
+                    }
                 }
 
-                // Skip if already valid JSON
-                if (json_validate($value)) {
-                    continue;
-                }
-
-                $data = @unserialize($value, ['allowed_classes' => false]);
-                if (is_array($data)) {
-                    $updates[$column] = $coreHelper->jsonEncode($data);
-                } else {
-                    throw new RuntimeException(
-                        "Could not unserialize {$column} in {$tableName} row {$row[$pk]}",
-                    );
+                if (!empty($updates)) {
+                    $connection->update($tableName, $updates, [$pk . ' = ?' => $row[$pk]]);
                 }
             }
 
-            if (!empty($updates)) {
-                $connection->update($tableName, $updates, [$pk . ' = ?' => $row[$pk]]);
-            }
-        }
+            $offset += $batchSize;
+        } while (count($rows) === $batchSize);
     }
 
     // Category B: maybe-serialized columns
     foreach ($maybeSerializedTables as $tableConfig) {
-        $tableName = $tableConfig['table'];
+        $tableName = $installer->getTable($tableConfig['table']);
 
         if (!$connection->isTableExists($tableName)) {
             continue;
@@ -113,33 +123,42 @@ try {
         if (!isset($tableColumns[$column])) {
             continue;
         }
-        $select = $connection->select()->from($tableName, [$pk, $column]);
-        $rows = $connection->fetchAll($select);
 
-        foreach ($rows as $row) {
-            $value = $row[$column];
-            if (empty($value)) {
-                continue;
+        $offset = 0;
+
+        do {
+            $select = $connection->select()
+                ->from($tableName, [$pk, $column])
+                ->limit($batchSize, $offset);
+            $rows = $connection->fetchAll($select);
+
+            foreach ($rows as $row) {
+                $value = $row[$column];
+                if (empty($value)) {
+                    continue;
+                }
+
+                // Skip if already valid JSON
+                if (json_validate($value)) {
+                    continue;
+                }
+
+                // Only attempt conversion if it looks like a PHP serialized array
+                if (!preg_match('/^a:\d+:\{/', $value)) {
+                    continue;
+                }
+
+                $data = @unserialize($value, ['allowed_classes' => false]);
+                if (!is_array($data)) {
+                    // Not a valid serialized array, skip silently
+                    continue;
+                }
+
+                $connection->update($tableName, [$column => $coreHelper->jsonEncode($data)], [$pk . ' = ?' => $row[$pk]]);
             }
 
-            // Skip if already valid JSON
-            if (json_validate($value)) {
-                continue;
-            }
-
-            // Only attempt conversion if it looks like a PHP serialized array
-            if (!preg_match('/^a:\d+:\{/', $value)) {
-                continue;
-            }
-
-            $data = @unserialize($value, ['allowed_classes' => false]);
-            if (!is_array($data)) {
-                // Not a valid serialized array, skip silently
-                continue;
-            }
-
-            $connection->update($tableName, [$column => $coreHelper->jsonEncode($data)], [$pk . ' = ?' => $row[$pk]]);
-        }
+            $offset += $batchSize;
+        } while (count($rows) === $batchSize);
     }
 
     $connection->commit();

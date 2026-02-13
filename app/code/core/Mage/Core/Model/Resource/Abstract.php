@@ -189,7 +189,7 @@ abstract class Mage_Core_Model_Resource_Abstract
         $value = $object->getData($field);
         if (empty($value)) {
             $object->setData($field, $defaultValue);
-        } elseif (!is_array($value) && !is_object($value)) {
+        } elseif (is_string($value)) {
             if (json_validate($value)) {
                 $object->setData($field, Mage::helper('core')->jsonDecode($value));
             } else {

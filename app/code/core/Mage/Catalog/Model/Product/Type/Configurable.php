@@ -543,9 +543,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
         $attributes = [];
         \Maho\Profiler::start('CONFIGURABLE:' . __METHOD__);
         if ($attributesOption = $this->getProduct($product)->getCustomOption('attributes')) {
-            $data = json_validate($attributesOption->getValue())
-                ? Mage::helper('core')->jsonDecode($attributesOption->getValue())
-                : unserialize($attributesOption->getValue(), ['allowed_classes' => false]);
+            $data = Mage::helper('core/string')->unserialize($attributesOption->getValue());
             $this->getUsedProductAttributeIds($product);
 
             $usedAttributes = $this->getProduct($product)->getData($this->_usedAttributes);
@@ -676,9 +674,7 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
         $option = $product->getCustomOption('info_buyRequest');
         if ($option instanceof Mage_Sales_Model_Quote_Item_Option) {
             $buyRequest = new \Maho\DataObject(
-                json_validate($option->getValue())
-                    ? Mage::helper('core')->jsonDecode($option->getValue())
-                    : unserialize($option->getValue(), ['allowed_classes' => false]),
+                Mage::helper('core/string')->unserialize($option->getValue()),
             );
             $attributes = $buyRequest->getSuperAttribute();
             if (is_array($attributes)) {

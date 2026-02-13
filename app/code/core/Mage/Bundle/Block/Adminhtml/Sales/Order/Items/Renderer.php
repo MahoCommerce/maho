@@ -138,9 +138,7 @@ class Mage_Bundle_Block_Adminhtml_Sales_Order_Items_Renderer extends Mage_Adminh
             $options = $item->getOrderItem()->getProductOptions();
         }
         if (isset($options['bundle_selection_attributes'])) {
-            return json_validate($options['bundle_selection_attributes'])
-                ? Mage::helper('core')->jsonDecode($options['bundle_selection_attributes'])
-                : unserialize($options['bundle_selection_attributes'], ['allowed_classes' => false]);
+            return Mage::helper('core/string')->unserialize($options['bundle_selection_attributes']);
         }
         return null;
     }
