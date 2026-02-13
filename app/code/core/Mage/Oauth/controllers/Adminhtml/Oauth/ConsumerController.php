@@ -198,13 +198,8 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
         try {
             $model->addData($data);
 
-            // Handle admin API permissions
-            $permissions = $this->getRequest()->getPost('permissions', []);
-            if (!empty($permissions)) {
-                $model->setAdminPermissions(json_encode($permissions));
-            } else {
-                $model->setAdminPermissions(null);
-            }
+            $apiRoleId = $this->getRequest()->getPost('api_role_id');
+            $model->setData('api_role_id', $apiRoleId ?: null);
 
             $storeIds = $this->getRequest()->getPost('store_ids', []);
             if (!empty($storeIds)) {
