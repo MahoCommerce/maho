@@ -10,9 +10,9 @@ use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Cms_Model_Page;
 use Mage_Core_Model_Store;
-use Mage_Oauth_Model_Consumer;
 use Maho\ApiPlatform\ApiResource\Admin\CmsPage;
 use Maho\ApiPlatform\Security\AdminApiAuthenticator;
+use Maho\ApiPlatform\Security\AdminApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -35,32 +35,32 @@ final class CmsPageProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?CmsPage
     {
         $request = $this->requestStack->getCurrentRequest();
-        $consumer = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
+        $user = $request?->attributes->get(AdminApiAuthenticator::CONSUMER_ATTRIBUTE);
 
-        if (!$consumer || !$consumer->hasPermission('cms_pages')) {
-            throw new AccessDeniedHttpException('Token does not have permission for cms_pages');
+        if (!$user instanceof AdminApiUser || !$user->hasPermission('admin/cms-pages/write')) {
+            throw new AccessDeniedHttpException('Token does not have write permission for cms_pages');
         }
 
         if ($operation instanceof DeleteOperationInterface) {
-            return $this->handleDelete($uriVariables['id'], $consumer);
+            return $this->handleDelete($uriVariables['id'], $user);
         }
 
         assert($data instanceof CmsPage);
 
         // Resolve store IDs
-        $storeIds = $this->resolveStoreIds($data->stores, $consumer);
+        $storeIds = $this->resolveStoreIds($data->stores, $user);
 
         // Sanitize content
         $sanitizedContent = $this->contentSanitizer->sanitize($data->content);
 
         if (isset($uriVariables['id'])) {
-            return $this->handleUpdate((int) $uriVariables['id'], $data, $storeIds, $sanitizedContent, $consumer);
+            return $this->handleUpdate((int) $uriVariables['id'], $data, $storeIds, $sanitizedContent, $user);
         }
 
-        return $this->handleCreate($data, $storeIds, $sanitizedContent, $consumer);
+        return $this->handleCreate($data, $storeIds, $sanitizedContent, $user);
     }
 
-    private function handleCreate(CmsPage $data, array $storeIds, string $sanitizedContent, Mage_Oauth_Model_Consumer $consumer): CmsPage
+    private function handleCreate(CmsPage $data, array $storeIds, string $sanitizedContent, AdminApiUser $user): CmsPage
     {
         /** @var Mage_Cms_Model_Page $page */
         $page = Mage::getModel('cms/page');
@@ -83,14 +83,14 @@ final class CmsPageProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('create', null, $page, $consumer);
+        $this->logActivity('create', null, $page, $user);
 
         $data->id = (int) $page->getId();
         $data->content = $sanitizedContent;
         return $data;
     }
 
-    private function handleUpdate(int $id, CmsPage $data, array $storeIds, string $sanitizedContent, Mage_Oauth_Model_Consumer $consumer): CmsPage
+    private function handleUpdate(int $id, CmsPage $data, array $storeIds, string $sanitizedContent, AdminApiUser $user): CmsPage
     {
         /** @var Mage_Cms_Model_Page $page */
         $page = Mage::getModel('cms/page')->load($id);
@@ -100,7 +100,7 @@ final class CmsPageProcessor implements ProcessorInterface
         }
 
         // Check store access
-        $this->validateStoreAccess($page, $consumer);
+        $this->validateStoreAccess($page, $user);
 
         $oldData = $page->getData();
 
@@ -122,14 +122,14 @@ final class CmsPageProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('update', $oldData, $page, $consumer);
+        $this->logActivity('update', $oldData, $page, $user);
 
         $data->id = (int) $page->getId();
         $data->content = $sanitizedContent;
         return $data;
     }
 
-    private function handleDelete(int $id, Mage_Oauth_Model_Consumer $consumer): null
+    private function handleDelete(int $id, AdminApiUser $user): null
     {
         /** @var Mage_Cms_Model_Page $page */
         $page = Mage::getModel('cms/page')->load($id);
@@ -139,7 +139,7 @@ final class CmsPageProcessor implements ProcessorInterface
         }
 
         // Check store access
-        $this->validateStoreAccess($page, $consumer);
+        $this->validateStoreAccess($page, $user);
 
         $oldData = $page->getData();
 
@@ -150,16 +150,16 @@ final class CmsPageProcessor implements ProcessorInterface
         }
 
         // Log activity
-        $this->logActivity('delete', $oldData, null, $consumer);
+        $this->logActivity('delete', $oldData, null, $user);
 
         return null;
     }
 
-    private function resolveStoreIds(array $stores, Mage_Oauth_Model_Consumer $consumer): array
+    private function resolveStoreIds(array $stores, AdminApiUser $user): array
     {
         if (in_array('all', $stores, true)) {
-            $allowedStores = $consumer->getAllowedStoreIds();
-            if ($allowedStores === 'all') {
+            $allowedStores = $user->getAllowedStoreIds();
+            if ($allowedStores === null) {
                 return [0]; // Admin store = all stores
             }
             return $allowedStores;
@@ -172,7 +172,7 @@ final class CmsPageProcessor implements ProcessorInterface
             $store = Mage::app()->getStore($storeCode);
             $storeId = (int) $store->getId();
 
-            if (!$consumer->canAccessStore($storeId)) {
+            if (!$user->canAccessStore($storeId)) {
                 throw new AccessDeniedHttpException("Token does not have access to store: {$storeCode}");
             }
 
@@ -182,25 +182,25 @@ final class CmsPageProcessor implements ProcessorInterface
         return $storeIds;
     }
 
-    private function validateStoreAccess(Mage_Cms_Model_Page $page, Mage_Oauth_Model_Consumer $consumer): void
+    private function validateStoreAccess(Mage_Cms_Model_Page $page, AdminApiUser $user): void
     {
         $pageStores = $page->getStoreId();
         if (!is_array($pageStores)) {
             $pageStores = [$pageStores];
         }
 
-        // If page is on all stores (0), check if consumer has 'all' access
+        // If page is on all stores (0), check if user has all-stores access
         if (in_array(0, $pageStores, true)) {
-            $allowedStores = $consumer->getAllowedStoreIds();
-            if ($allowedStores !== 'all') {
+            $allowedStores = $user->getAllowedStoreIds();
+            if ($allowedStores !== null) {
                 throw new AccessDeniedHttpException('Token does not have access to all-stores content');
             }
             return;
         }
 
-        // Check if consumer can access at least one of the page's stores
+        // Check if user can access at least one of the page's stores
         foreach ($pageStores as $storeId) {
-            if ($consumer->canAccessStore((int) $storeId)) {
+            if ($user->canAccessStore((int) $storeId)) {
                 return;
             }
         }
@@ -208,7 +208,7 @@ final class CmsPageProcessor implements ProcessorInterface
         throw new AccessDeniedHttpException('Token does not have access to this page\'s stores');
     }
 
-    private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Page $page, Mage_Oauth_Model_Consumer $consumer): void
+    private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Page $page, AdminApiUser $user): void
     {
         try {
             /** @var \Maho_AdminActivityLog_Model_Activity $activity */
@@ -219,8 +219,8 @@ final class CmsPageProcessor implements ProcessorInterface
                 'entity_id' => $page ? (int) $page->getId() : ($oldData['page_id'] ?? 0),
                 'old_data' => $oldData,
                 'new_data' => $page?->getData(),
-                'consumer_id' => $consumer->getId(),
-                'username' => 'API: ' . $consumer->getName(),
+                'consumer_id' => $user->getConsumer()->getId(),
+                'username' => 'API: ' . $user->getConsumerName(),
             ]);
         } catch (\Exception $e) {
             // Log but don't fail the request
