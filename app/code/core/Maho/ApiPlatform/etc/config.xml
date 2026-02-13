@@ -163,7 +163,7 @@
                 <legacy_sunset_date>2028-01-01</legacy_sunset_date>
             </general>
             <cache>
-                <ttl>300</ttl>
+                <ttl>3600</ttl>
                 <auto_clean>all</auto_clean>
             </cache>
             <graphql>
@@ -173,6 +173,12 @@
                 <token_lifetime>3600</token_lifetime>
                 <refresh_token_lifetime>86400</refresh_token_lifetime>
             </oauth2>
+            <contact>
+                <enabled>1</enabled>
+                <captcha_provider>none</captcha_provider>
+                <honeypot_enabled>1</honeypot_enabled>
+                <rate_limit>3</rate_limit>
+            </contact>
         </maho_apiplatform>
     </default>
 </config>

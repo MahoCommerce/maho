@@ -263,7 +263,8 @@ class ProductService
         //     $filterStrings[] = "store_id = {$storeId}";
         // }
 
-        if (isset($filters['status']) && $filters['status'] === 'ENABLED') {
+        // Always filter to enabled products (non-POS index is storefront-only)
+        if (!$usePosIndex) {
             $filterStrings[] = 'status = enabled';
         }
 
@@ -466,18 +467,10 @@ class ProductService
             ]);
         }
 
-        // Apply filters
-        // For POS fallback search, skip status filter to find disabled products
-        if (isset($filters['status']) && !$includeDisabled) {
-            $status = $filters['status'] === 'ENABLED'
-                ? \Mage_Catalog_Model_Product_Status::STATUS_ENABLED
-                : \Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
-            $collection->addAttributeToFilter('status', $status);
-        }
-
-        // Filter by visibility - exclude "Not Visible Individually" products (configurable children)
-        // unless explicitly requesting all products (POS mode)
+        // Apply status/visibility filters
+        // Always enforce enabled + visible for storefront requests (non-POS)
         if (!$includeDisabled) {
+            $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
             // Include: Catalog (2), Search (3), Catalog,Search (4) - exclude: Not Visible Individually (1)
             $collection->addAttributeToFilter('visibility', ['neq' => \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE]);
         }

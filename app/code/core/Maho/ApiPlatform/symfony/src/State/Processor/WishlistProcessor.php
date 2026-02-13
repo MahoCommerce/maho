@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -149,17 +149,17 @@ final class WishlistProcessor implements ProcessorInterface
 
         $wishlist = $this->getWishlist($customerId);
 
-        // Check if already in wishlist
-        $existingItem = null;
-        foreach ($wishlist->getItemsCollection() as $item) {
-            if ((int) $item->getProductId() === $productId) {
-                $existingItem = $item;
-                break;
-            }
-        }
+        // Check if already in wishlist — use a fresh unfiltered collection query
+        // (the wishlist's own getItemsCollection() applies setVisibilityFilter() which can miss items)
+        // Must use setWishlist() instead of addFieldToFilter('wishlist_id') to initialize the typed property
+        /** @var \Mage_Wishlist_Model_Item|null $existingItem */ /** @phpstan-ignore varTag.type */
+        $existingItem = \Mage::getModel('wishlist/item')->getCollection()
+            ->setWishlist($wishlist)
+            ->addFieldToFilter('product_id', $productId)
+            ->setPageSize(1)
+            ->getFirstItem();
 
-        if ($existingItem) {
-            // Update qty if already exists
+        if ($existingItem && $existingItem->getId()) {
             $existingItem->setQty($existingItem->getQty() + $qty);
             if ($description !== null) {
                 $existingItem->setDescription($description);
@@ -167,15 +167,18 @@ final class WishlistProcessor implements ProcessorInterface
             $existingItem->save();
             $item = $existingItem;
         } else {
-            // Add new item
-            $item = $wishlist->addNewItem($product);
-            if ($item instanceof \Mage_Wishlist_Model_Item) {
-                $item->setQty($qty);
-                if ($description !== null) {
-                    $item->setDescription($description);
-                }
-                $item->save();
+            // Add new item directly (skip core's addNewItem which has its own flawed dedup)
+            /** @var \Mage_Wishlist_Model_Item $item */
+            $item = \Mage::getModel('wishlist/item');
+            $item->setWishlistId((int) $wishlist->getId());
+            $item->setProductId($productId);
+            $item->setStoreId((int) \Mage::app()->getStore()->getId());
+            $item->setQty($qty);
+            if ($description !== null) {
+                $item->setDescription($description);
             }
+            $item->setAddedAt(\Mage_Core_Model_Locale::now());
+            $item->save();
         }
 
         $wishlist->save();
@@ -367,7 +370,7 @@ final class WishlistProcessor implements ProcessorInterface
         $wishlistItem->productSku = $product->getSku();
         $wishlistItem->productPrice = (float) $product->getFinalPrice();
         $wishlistItem->productImageUrl = $this->getProductImageUrl($product);
-        $wishlistItem->productUrl = $product->getProductUrl();
+        $wishlistItem->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
         $wishlistItem->productType = $product->getTypeId();
         $wishlistItem->qty = (int) ($item->getQty() ?: 1);
         $wishlistItem->description = $item->getDescription();

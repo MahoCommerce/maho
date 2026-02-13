@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -68,6 +68,11 @@ use Maho\ApiPlatform\State\Processor\AddressProcessor;
             name: 'create_me_address',
             uriTemplate: '/customers/me/addresses',
             description: 'Create a new address for the authenticated customer',
+        ),
+        new Get(
+            name: 'get_me_address',
+            uriTemplate: '/customers/me/addresses/{id}',
+            description: 'Get an address for the authenticated customer',
         ),
         new Put(
             name: 'update_me_address',
@@ -169,10 +174,12 @@ class Address
     public string $firstName = '';
     public string $lastName = '';
     public ?string $company = null;
-    public array $street = [];
+    /** @var string[]|string Street lines (accepts string or array, normalized to array in processor) */
+    public mixed $street = [];
     public string $city = '';
     public ?string $region = null;
-    public ?int $regionId = null;
+    /** @var int|null Region ID (accepts string from frontend, normalized to int in processor) */
+    public mixed $regionId = null;
     public string $postcode = '';
     public string $countryId = '';
     public string $telephone = '';

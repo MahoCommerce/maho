@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -125,6 +125,15 @@ final class UrlResolverProvider implements ProviderInterface
             return $result;
         }
 
+        // Check for blog post by URL key
+        $blogPost = $this->findBlogPostByUrlKey($path, $storeId);
+        if ($blogPost) {
+            $result->type = 'blog_post';
+            $result->id = (int) $blogPost->getId();
+            $result->identifier = $blogPost->getUrlKey();
+            return $result;
+        }
+
         // Not found
         $result->type = 'not_found';
         return $result;
@@ -219,5 +228,31 @@ final class UrlResolverProvider implements ProviderInterface
 
         /** @phpstan-ignore return.type */
         return $product->getId() ? $product : null;
+    }
+
+    private function findBlogPostByUrlKey(string $urlKey, int $storeId): ?\Mage_Core_Model_Abstract
+    {
+        // Check if blog module exists
+        if (!\Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
+            return null;
+        }
+
+        try {
+            $collection = \Mage::getModel('blog/post')->getCollection();
+            if (!$collection) {
+                return null;
+            }
+            $collection->addFieldToFilter('url_key', $urlKey);
+            $collection->addFieldToFilter('is_active', 1);
+            $collection->addStoreFilter($storeId); /** @phpstan-ignore method.notFound */
+            $collection->setPageSize(1);
+
+            /** @var \Mage_Core_Model_Abstract $post */
+            $post = $collection->getFirstItem();
+
+            return $post->getId() ? $post : null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

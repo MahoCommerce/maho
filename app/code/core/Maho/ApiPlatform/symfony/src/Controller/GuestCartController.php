@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_ApiPlatform
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -265,7 +265,7 @@ class GuestCartController extends AbstractController
             }
 
             $data = json_decode($request->getContent(), true);
-            $couponCode = $data['couponCode'] ?? '';
+            $couponCode = $data['code'] ?? '';
 
             if (!$couponCode) {
                 return new JsonResponse([
@@ -276,10 +276,7 @@ class GuestCartController extends AbstractController
 
             $quote = $this->cartService->applyCoupon($quote, $couponCode);
 
-            return new JsonResponse([
-                'success' => true,
-                'couponCode' => $quote->getCouponCode(),
-            ]);
+            return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -306,7 +303,7 @@ class GuestCartController extends AbstractController
             }
 
             $data = json_decode($request->getContent(), true);
-            $giftcardCode = trim($data['giftcardCode'] ?? '');
+            $giftcardCode = trim($data['code'] ?? '');
 
             if (!$giftcardCode) {
                 return new JsonResponse([
@@ -367,10 +364,7 @@ class GuestCartController extends AbstractController
             $quote->setGiftcardCodes(json_encode($appliedCodes));
             $quote->collectTotals()->save();
 
-            return new JsonResponse([
-                'success' => true,
-                'appliedGiftcards' => $this->mapAppliedGiftcards($quote),
-            ]);
+            return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -383,8 +377,8 @@ class GuestCartController extends AbstractController
     /**
      * Remove gift card code
      */
-    #[Route('/api/guest-carts/{cartId}/giftcard', name: 'api_guest_cart_remove_giftcard', methods: ['DELETE'])]
-    public function removeGiftcard(string $cartId, Request $request): JsonResponse
+    #[Route('/api/guest-carts/{cartId}/giftcard/{code}', name: 'api_guest_cart_remove_giftcard', methods: ['DELETE'])]
+    public function removeGiftcard(string $cartId, string $code): JsonResponse
     {
         try {
             $quote = $this->loadCart($cartId);
@@ -396,8 +390,7 @@ class GuestCartController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $data = json_decode($request->getContent(), true);
-            $giftcardCode = trim($data['giftcardCode'] ?? '');
+            $giftcardCode = trim($code);
 
             if (!$giftcardCode) {
                 return new JsonResponse([
@@ -430,7 +423,7 @@ class GuestCartController extends AbstractController
 
             $quote->collectTotals()->save();
 
-            return new JsonResponse(['success' => true]);
+            return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -458,7 +451,7 @@ class GuestCartController extends AbstractController
 
             $quote = $this->cartService->removeCoupon($quote);
 
-            return new JsonResponse(['success' => true]);
+            return new JsonResponse($this->mapCartToArray($quote));
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -799,6 +792,12 @@ class GuestCartController extends AbstractController
                 }
             }
 
+            // URL key for product links
+            $urlKey = $product->getUrlKey();
+            if ($urlKey) {
+                $itemData['urlKey'] = $urlKey;
+            }
+
             // Stock status
             $stockItem = \Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
             $itemData['stockStatus'] = $stockItem->getIsInStock() ? 'in_stock' : 'out_of_stock';
@@ -851,12 +850,15 @@ class GuestCartController extends AbstractController
             return null;
         }
 
+        $quoteCurrency = $quote->getQuoteCurrencyCode();
         $cards = [];
-        foreach ($giftcardCodes as $code => $balance) {
+        foreach ($giftcardCodes as $code => $appliedAmount) {
+            $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
+            $balance = $giftcard->getId() ? $giftcard->getBalance($quoteCurrency) : 0.0;
             $cards[] = [
                 'code' => (string) $code,
                 'balance' => (float) $balance,
-                'appliedAmount' => 0.0,
+                'appliedAmount' => (float) $appliedAmount,
             ];
         }
 
