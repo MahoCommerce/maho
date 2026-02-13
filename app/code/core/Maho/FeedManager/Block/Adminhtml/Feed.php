@@ -54,6 +54,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed extends Mage_Adminhtml_Block_Widget_
             'products' => $this->__('%s products'),
             'cancel' => $this->__('Cancel'),
             'close' => $this->__('Close'),
+            'view' => $this->__('View'),
             'download' => $this->__('Download'),
             'confirm' => $this->__('Are you sure you want to generate this feed now?'),
             'confirm_multiple' => $this->__('Generate selected feeds?'),
@@ -262,7 +263,10 @@ const FeedGenerator = {
             this.translations.close + '</button>';
         if (data.file_url) {
             const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
-            buttonsHtml += ' <a href="' + escapeHtml(data.file_url + cacheBuster + Date.now(), true) + '" class="form-button" target="_blank">' +
+            const fileUrlWithCb = escapeHtml(data.file_url + cacheBuster + Date.now(), true);
+            buttonsHtml += ' <a href="' + fileUrlWithCb + '" class="form-button" target="_blank">' +
+                this.translations.view + '</a>';
+            buttonsHtml += ' <a href="' + fileUrlWithCb + '" class="form-button" download>' +
                 this.translations.download + '</a>';
         }
         if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
@@ -289,17 +293,26 @@ const FeedGenerator = {
     }
 };
 
-// Intercept Generate link clicks in the grid
-document.addEventListener('click', function(e) {
-    const link = e.target.closest('a');
-    if (link && link.href && link.href.includes('/generate/id/')) {
-        e.preventDefault();
-        const match = link.href.match(/\/id\/(\d+)/);
-        if (match) {
-            FeedGenerator.start(match[1]);
+// Intercept grid action dropdown for Generate (async batch) and View (new tab)
+const _origGridActionExecute = varienGridAction.execute;
+varienGridAction.execute = function(select) {
+    if (!select.value) return;
+    try {
+        const config = JSON.parse(select.value);
+        if (config.href && config.href.includes('/generate/id/')) {
+            select.options[0].selected = true;
+            const match = config.href.match(/\/id\/(\d+)/);
+            if (match) FeedGenerator.start(match[1]);
+            return;
         }
-    }
-});
+        if (config.href && config.href.includes('/view/id/')) {
+            select.options[0].selected = true;
+            window.open(config.href, '_blank');
+            return;
+        }
+    } catch (e) {}
+    _origGridActionExecute(select);
+};
 
 // Override mass action for generate
 document.addEventListener('DOMContentLoaded', function() {

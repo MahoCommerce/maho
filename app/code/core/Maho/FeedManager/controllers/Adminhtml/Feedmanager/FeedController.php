@@ -23,7 +23,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             'delete',
             'save',
             'duplicate',
-            'generate',
             'generateInit',
             'generateBatch',
             'generateFinalize',
@@ -337,99 +336,28 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
+    /**
+     * Generate action - redirects to edit page where async batch JS handles generation
+     */
     public function generateAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
-        $async = (bool) $this->getRequest()->getParam('async');
 
         if (!$id) {
-            if ($async) {
-                $this->_sendJsonResponse(['error' => true, 'message' => 'Feed ID required']);
-                return;
-            }
             $this->_getSession()->addError($this->__('Unable to find a feed to generate.'));
             $this->_redirect('*/*/');
             return;
         }
 
-        try {
-            $feed = Mage::getModel('feedmanager/feed')->load($id);
+        $feed = Mage::getModel('feedmanager/feed')->load($id);
 
-            if (!$feed->getId()) {
-                if ($async) {
-                    $this->_sendJsonResponse(['error' => true, 'message' => 'Feed not found']);
-                    return;
-                }
-                $this->_getSession()->addError($this->__('This feed no longer exists.'));
-                $this->_redirect('*/*/');
-                return;
-            }
-
-            // Check if already running
-            if (Maho_FeedManager_Model_Generator::isGenerating($id)) {
-                if ($async) {
-                    $this->_sendJsonResponse([
-                        'error' => true,
-                        'message' => 'Feed is already being generated',
-                        'status' => Maho_FeedManager_Model_Generator::getGenerationStatus($id),
-                    ]);
-                    return;
-                }
-                $this->_getSession()->addNotice($this->__('Feed is already being generated.'));
-                $this->_redirect('*/*/edit', ['id' => $id]);
-                return;
-            }
-
-            // For async requests, start generation in background
-            if ($async) {
-                // Start generation (this will block, but frontend will poll for status)
-                $generator = new Maho_FeedManager_Model_Generator();
-                $log = $generator->generate($feed);
-
-                $this->_sendJsonResponse([
-                    'success' => $log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED,
-                    'status' => Maho_FeedManager_Model_Generator::getGenerationStatus($id),
-                ]);
-                return;
-            }
-
-            // Synchronous generation for non-AJAX requests
-            $generator = new Maho_FeedManager_Model_Generator();
-            $log = $generator->generate($feed);
-
-            if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
-                $this->_getSession()->addSuccess(
-                    $this->__('Feed generated successfully with %d products.', $log->getProductCount()),
-                );
-                // Show any warnings
-                $errors = $log->getErrorMessagesArray();
-                if (!empty($errors)) {
-                    foreach ($errors as $error) {
-                        if (str_contains($error, 'Warning')) {
-                            $this->_getSession()->addNotice($error);
-                        }
-                    }
-                }
-            } else {
-                $errors = $log->getErrorMessagesArray();
-                if (!empty($errors)) {
-                    foreach ($errors as $error) {
-                        $this->_getSession()->addError($error);
-                    }
-                } else {
-                    $this->_getSession()->addError($this->__('Feed generation failed. Check logs for details.'));
-                }
-            }
-
-        } catch (Exception $e) {
-            if ($async) {
-                $this->_sendJsonResponse(['error' => true, 'message' => $e->getMessage()]);
-                return;
-            }
-            $this->_getSession()->addError($e->getMessage());
+        if (!$feed->getId()) {
+            $this->_getSession()->addError($this->__('This feed no longer exists.'));
+            $this->_redirect('*/*/');
+            return;
         }
 
-        $this->_redirect('*/*/edit', ['id' => $id]);
+        $this->_redirect('*/*/edit', ['id' => $id, 'generate' => '1']);
     }
 
     /**
@@ -805,6 +733,43 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
+    public function viewAction(): void
+    {
+        $id = (int) $this->getRequest()->getParam('id');
+
+        if (!$id) {
+            $this->_getSession()->addError($this->__('Unable to find feed.'));
+            $this->_redirect('*/*/');
+            return;
+        }
+
+        try {
+            $feed = Mage::getModel('feedmanager/feed')->load($id);
+
+            if (!$feed->getId()) {
+                $this->_getSession()->addError($this->__('This feed no longer exists.'));
+                $this->_redirect('*/*/');
+                return;
+            }
+
+            $filePath = $feed->getOutputFilePath();
+            $outputDir = Mage::helper('feedmanager')->getOutputDirectory();
+            $validPath = \Maho\Io::validatePath($filePath, $outputDir);
+
+            if ($validPath === false) {
+                $this->_getSession()->addError($this->__('Feed file not found. Please generate the feed first.'));
+                $this->_redirect('*/*/');
+                return;
+            }
+
+            $this->_redirectUrl(Mage::helper('feedmanager')->getFeedUrl($feed));
+
+        } catch (Exception $e) {
+            $this->_getSession()->addError($e->getMessage());
+            $this->_redirect('*/*/');
+        }
+    }
+
     public function downloadAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -830,7 +795,8 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
 
             if ($validPath === false) {
                 $this->_getSession()->addError($this->__('Feed file not found. Please generate the feed first.'));
-                $this->_redirect('*/*/edit', ['id' => $id]);
+                $this->_redirect('*/*/');
+
                 return;
             }
 
@@ -850,45 +816,13 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
+    /**
+     * Mass generate is handled client-side via async batch JS.
+     * This action exists only as a fallback redirect.
+     */
     public function massGenerateAction(): void
     {
-        $feedIds = $this->getRequest()->getParam('feed_ids');
-
-        if (!is_array($feedIds) || empty($feedIds)) {
-            $this->_getSession()->addError($this->__('Please select feeds to generate.'));
-            $this->_redirect('*/*/');
-            return;
-        }
-
-        $generated = 0;
-        $failed = 0;
-
-        foreach ($feedIds as $feedId) {
-            try {
-                $feed = Mage::getModel('feedmanager/feed')->load($feedId);
-                if ($feed->getId()) {
-                    $generator = new Maho_FeedManager_Model_Generator();
-                    $log = $generator->generate($feed);
-
-                    if ($log->getStatus() === Maho_FeedManager_Model_Log::STATUS_COMPLETED) {
-                        $generated++;
-                    } else {
-                        $failed++;
-                    }
-                }
-            } catch (Exception $e) {
-                $failed++;
-                Mage::logException($e);
-            }
-        }
-
-        if ($generated) {
-            $this->_getSession()->addSuccess($this->__('%d feed(s) generated successfully.', $generated));
-        }
-        if ($failed) {
-            $this->_getSession()->addError($this->__('%d feed(s) failed to generate.', $failed));
-        }
-
+        $this->_getSession()->addNotice($this->__('Please use the grid interface to generate feeds.'));
         $this->_redirect('*/*/');
     }
 

@@ -81,11 +81,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
         return $id ? (string) $id : 'null';
     }
 
-    public function getGenerateUrl(): string
-    {
-        return $this->getUrl('*/*/generate', ['id' => $this->_getFeed()->getId()]);
-    }
-
     /**
      * Get form scripts including batch generation JavaScript
      */
@@ -112,6 +107,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
             'products' => $this->__('%s products'),
             'cancel' => $this->__('Cancel'),
             'close' => $this->__('Close'),
+            'view' => $this->__('View'),
             'download' => $this->__('Download'),
             'upload' => $this->__('Upload Now'),
             'uploading' => $this->__('Uploading...'),
@@ -283,7 +279,10 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Wi
 
                     if (data.file_url) {
                         const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
-                        buttonsHtml += ' <a href="' + escapeHtml(data.file_url + cacheBuster + Date.now(), true) + '" class="form-button" target="_blank">' +
+                        const fileUrlWithCb = escapeHtml(data.file_url + cacheBuster + Date.now(), true);
+                        buttonsHtml += ' <a href="' + fileUrlWithCb + '" class="form-button" target="_blank">' +
+                            this.translations.view + '</a>';
+                        buttonsHtml += ' <a href="' + fileUrlWithCb + '" class="form-button" download>' +
                             this.translations.download + '</a>';
                     }
                     if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;

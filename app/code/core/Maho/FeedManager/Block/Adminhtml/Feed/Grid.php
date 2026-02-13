@@ -119,6 +119,11 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid extends Mage_Adminhtml_Block_Wi
                     'confirm' => $this->__('Are you sure you want to generate this feed now?'),
                 ],
                 [
+                    'caption' => $this->__('View'),
+                    'url' => ['base' => '*/*/view'],
+                    'field' => 'id',
+                ],
+                [
                     'caption' => $this->__('Download'),
                     'url' => ['base' => '*/*/download'],
                     'field' => 'id',
