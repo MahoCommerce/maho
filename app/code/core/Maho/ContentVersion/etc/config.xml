@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_ContentVersion
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_ContentVersion>
+            <version>1.0.0</version>
+        </Maho_ContentVersion>
+    </modules>
+    <global>
+        <models>
+            <contentversion>
+                <class>Maho_ContentVersion_Model</class>
+                <resourceModel>contentversion_resource</resourceModel>
+            </contentversion>
+            <contentversion_resource>
+                <class>Maho_ContentVersion_Model_Resource</class>
+                <entities>
+                    <version>
+                        <table>content_version</table>
+                    </version>
+                </entities>
+            </contentversion_resource>
+        </models>
+        <helpers>
+            <contentversion>
+                <class>Maho_ContentVersion_Helper</class>
+            </contentversion>
+        </helpers>
+        <resources>
+            <contentversion_setup>
+                <setup>
+                    <module>Maho_ContentVersion</module>
+                </setup>
+            </contentversion_setup>
+        </resources>
+        <events>
+            <model_save_before>
+                <observers>
+                    <contentversion_snapshot>
+                        <class>contentversion/observer</class>
+                        <method>beforeSave</method>
+                    </contentversion_snapshot>
+                </observers>
+            </model_save_before>
+        </events>
+        <blocks>
+            <contentversion>
+                <class>Maho_ContentVersion_Block</class>
+            </contentversion>
+        </blocks>
+    </global>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Maho_ContentVersion before="Mage_Adminhtml">Maho_ContentVersion_Adminhtml</Maho_ContentVersion>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    <adminhtml>
+        <layout>
+            <updates>
+                <contentversion>
+                    <file>contentversion.xml</file>
+                </contentversion>
+            </updates>
+        </layout>
+    </adminhtml>
+    <default>
+        <general>
+            <contentversion>
+                <max_versions>20</max_versions>
+                <max_age_days>90</max_age_days>
+            </contentversion>
+        </general>
+    </default>
+</config>
