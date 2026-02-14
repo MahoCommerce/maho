@@ -9888,7 +9888,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
 
-
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
@@ -9900,7 +9899,6 @@ parameters:
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
-
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Observer::loadCustomerQuote() has no return type specified.'
@@ -12205,7 +12203,6 @@ parameters:
 			identifier: method.childParameterType
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
-
 
 		-
 			rawMessage: Property Mage_Customer_Model_Group::$_taxClassIds has no type specified.
