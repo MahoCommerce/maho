@@ -13,7 +13,7 @@
 class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resource_Db_Abstract implements IteratorAggregate
 {
     /**
-     * @var Iterator|null
+     * @var Iterator<int, array>|null
      */
     protected $_iterator = null;
 
@@ -26,7 +26,7 @@ class Mage_ImportExport_Model_Resource_Import_Data extends Mage_Core_Model_Resou
     /**
      * Retrieve an external iterator
      *
-     * @return Iterator
+     * @return Iterator<int, array>
      */
     #[\ReturnTypeWillChange]
     #[\Override]

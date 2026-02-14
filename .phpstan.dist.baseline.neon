@@ -9888,17 +9888,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
 
-		-
-			rawMessage: 'Strict comparison using !== between array<string, mixed> and null will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
-			count: 2
-			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
-
-		-
-			rawMessage: Unreachable statement - code above always terminates.
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
@@ -9912,17 +9901,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
 
-		-
-			rawMessage: 'Strict comparison using !== between array<string, mixed> and null will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
-
-		-
-			rawMessage: Unreachable statement - code above always terminates.
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Observer::loadCustomerQuote() has no return type specified.'
@@ -12228,17 +12206,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
 
-		-
-			rawMessage: 'Strict comparison using !== between array<string, mixed> and null will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
-
-		-
-			rawMessage: Unreachable statement - code above always terminates.
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
 
 		-
 			rawMessage: Property Mage_Customer_Model_Group::$_taxClassIds has no type specified.
