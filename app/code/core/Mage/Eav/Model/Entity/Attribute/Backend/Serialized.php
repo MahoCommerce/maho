@@ -24,7 +24,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
         // parent::beforeSave() is not called intentionally
         $attrCode = $this->getAttribute()->getAttributeCode();
         if ($object->hasData($attrCode)) {
-            $object->setData($attrCode, serialize($object->getData($attrCode)));
+            $object->setData($attrCode, Mage::helper('core')->jsonEncode($object->getData($attrCode)));
         }
 
         return $this;

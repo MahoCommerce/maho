@@ -141,7 +141,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
             'modified'  => Mage_Core_Model_Locale::now(),
-            'extra'     => serialize($this->getExtra()),
+            'extra'     => Mage::helper('core')->jsonEncode($this->getExtra()),
         ];
 
         if ($this->getId() > 0) {
@@ -207,7 +207,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function saveExtra($data)
     {
         if (is_array($data)) {
-            $data = serialize($data);
+            $data = Mage::helper('core')->jsonEncode($data);
         }
         $this->_getResource()->saveExtra($this, $data);
         return $this;

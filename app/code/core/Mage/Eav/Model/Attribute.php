@@ -108,7 +108,7 @@ abstract class Mage_Eav_Model_Attribute extends Mage_Eav_Model_Entity_Attribute
         if (empty($rules)) {
             $rules = null;
         } elseif (is_array($rules)) {
-            $rules = serialize($rules);
+            $rules = Mage::helper('core')->jsonEncode($rules);
         }
         $this->setData('validate_rules', $rules);
 

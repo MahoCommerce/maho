@@ -33,7 +33,7 @@ class Mage_Payment_Model_Method_Checkmo extends Mage_Payment_Model_Method_Abstra
             $details['mailing_address'] = $this->getMailingAddress();
         }
         if (!empty($details)) {
-            $this->getInfoInstance()->setAdditionalData(serialize($details));
+            $this->getInfoInstance()->setAdditionalData(Mage::helper('core')->jsonEncode($details));
         }
         return $this;
     }

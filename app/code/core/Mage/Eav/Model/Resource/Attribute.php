@@ -36,7 +36,7 @@ abstract class Mage_Eav_Model_Resource_Attribute extends Mage_Eav_Model_Resource
     {
         $validateRules = $object->getData('validate_rules');
         if (is_array($validateRules)) {
-            $object->setData('validate_rules', serialize($validateRules));
+            $object->setData('validate_rules', Mage::helper('core')->jsonEncode($validateRules));
         }
         return parent::_beforeSave($object);
     }

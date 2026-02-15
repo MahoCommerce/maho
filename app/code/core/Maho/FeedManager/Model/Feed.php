@@ -44,10 +44,6 @@ declare(strict_types=1);
  * @method $this setSchedule(string|null $schedule)
  * @method string|null getProductFilters()
  * @method $this setProductFilters(string|null $filters)
- * @method string|null getConditionsSerialized()
- * @method $this setConditionsSerialized(string|null $conditions)
- * @method bool hasConditionsSerialized()
- * @method $this unsConditionsSerialized()
  * @method int getExcludeDisabled()
  * @method $this setExcludeDisabled(int $value)
  * @method int getExcludeOutOfStock()
@@ -109,7 +105,7 @@ declare(strict_types=1);
  * @method Maho_FeedManager_Model_Resource_Feed getResource()
  * @method Maho_FeedManager_Model_Resource_Feed _getResource()
  */
-class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
+class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
 {
     public const CONFIGURABLE_MODE_SIMPLE_ONLY = 'simple_only';
     public const CONFIGURABLE_MODE_CHILDREN_ONLY = 'children_only';
@@ -121,89 +117,29 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
     protected $_eventPrefix = 'feedmanager_feed';
     protected $_eventObject = 'feed';
 
-    /**
-     * Store rule combine conditions model
-     */
-    protected ?Mage_Rule_Model_Condition_Combine $_conditions = null;
-
-    /**
-     * Store rule form instance (needed for conditions UI)
-     */
-    protected ?Maho\Data\Form $_form = null;
-
     #[\Override]
     protected function _construct(): void
     {
         $this->_init('feedmanager/feed');
     }
 
-    /**
-     * Get conditions instance
-     */
+    #[\Override]
     public function getConditionsInstance(): Maho_FeedManager_Model_Rule_Condition_Combine
     {
         return Mage::getModel('feedmanager/rule_condition_combine');
     }
 
-    /**
-     * Set rule conditions model
-     */
-    public function setConditions(Mage_Rule_Model_Condition_Combine $conditions): self
+    #[\Override]
+    public function getActionsInstance(): Mage_Rule_Model_Action_Collection
     {
-        $this->_conditions = $conditions;
-        return $this;
-    }
-
-    /**
-     * Get rule combine conditions model
-     */
-    public function getConditions(): Mage_Rule_Model_Condition_Combine
-    {
-        if (empty($this->_conditions)) {
-            $this->_resetConditions();
-        }
-
-        // Load conditions if serialized data exists
-        if ($this->hasConditionsSerialized()) {
-            $conditions = $this->getConditionsSerialized();
-            if (!empty($conditions)) {
-                $conditions = Mage::helper('core')->jsonDecode($conditions);
-                if (is_array($conditions) && !empty($conditions)) {
-                    $this->_conditions->loadArray($conditions);
-                }
-            }
-            $this->unsConditionsSerialized();
-        }
-
-        return $this->_conditions;
-    }
-
-    /**
-     * Reset conditions
-     */
-    protected function _resetConditions(): self
-    {
-        $this->_conditions = $this->getConditionsInstance();
-        $this->_conditions->setRule($this)->setId('1')->setPrefix('conditions');
-        return $this;
-    }
-
-    /**
-     * Get form instance for conditions rendering
-     */
-    public function getForm(): Maho\Data\Form
-    {
-        if (!$this->_form) {
-            $this->_form = new Maho\Data\Form();
-        }
-        return $this->_form;
+        return Mage::getModel('rule/action_collection');
     }
 
     /**
      * Prepare data before saving
      */
     #[\Override]
-    protected function _beforeSave(): self
+    protected function _beforeSave()
     {
         // Sanitize filename to prevent path traversal
         $filename = $this->getFilename();
@@ -224,12 +160,6 @@ class Maho_FeedManager_Model_Feed extends Mage_Core_Model_Abstract
                 Mage::throwException(Mage::helper('feedmanager')->__('Invalid filename.'));
             }
             $this->setFilename($filename);
-        }
-
-        // Encode conditions as JSON
-        if ($this->_conditions) {
-            $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->_conditions->asArray()));
-            $this->_conditions = null;
         }
 
         $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);

@@ -1186,7 +1186,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      */
     public function setAppliedTaxes($data)
     {
-        return $this->setData('applied_taxes', serialize($data));
+        return $this->setData('applied_taxes', Mage::helper('core')->jsonEncode($data));
     }
 
     /**

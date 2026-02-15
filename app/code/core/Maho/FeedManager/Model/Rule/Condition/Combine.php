@@ -12,37 +12,10 @@ declare(strict_types=1);
 
 class Maho_FeedManager_Model_Rule_Condition_Combine extends Mage_Rule_Model_Condition_Combine
 {
-    /**
-     * Local form instance (since DynamicRule doesn't extend Mage_Rule_Model_Abstract)
-     */
-    protected ?\Maho\Data\Form $_form = null;
-
     public function __construct()
     {
         parent::__construct();
         $this->setType('feedmanager/rule_condition_combine');
-    }
-
-    /**
-     * Override getForm to use local form instance
-     * (DynamicRule no longer extends Mage_Rule_Model_Abstract)
-     */
-    #[\Override]
-    public function getForm(): \Maho\Data\Form
-    {
-        if ($this->_form === null) {
-            $this->_form = new \Maho\Data\Form();
-        }
-        return $this->_form;
-    }
-
-    /**
-     * Set the form instance
-     */
-    public function setForm(\Maho\Data\Form $form): self
-    {
-        $this->_form = $form;
-        return $this;
     }
 
     /**

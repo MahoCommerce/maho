@@ -255,7 +255,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         if (empty($data)) {
             return [];
         }
-        return unserialize($item->getWeeeTaxApplied(), ['allowed_classes' => false]);
+        return Mage::helper('core/string')->unserialize($data);
     }
 
     /**
@@ -267,7 +267,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function setApplied($item, $value)
     {
-        $item->setWeeeTaxApplied(serialize($value));
+        $item->setWeeeTaxApplied(Mage::helper('core')->jsonEncode($value));
         return $this;
     }
 
@@ -493,7 +493,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
                 $weeeTaxAppliedAmount[$property] = $value;
             }
         }
-        $item->setWeeeTaxApplied(serialize($weeeTaxAppliedAmounts));
+        $item->setWeeeTaxApplied(Mage::helper('core')->jsonEncode($weeeTaxAppliedAmounts));
     }
 
     /**
