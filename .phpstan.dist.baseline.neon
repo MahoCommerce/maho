@@ -23176,12 +23176,6 @@ parameters:
 			path: lib/Maho/Io/File.php
 
 		-
-			rawMessage: 'Method Maho\Io\File::streamLock() has parameter $exclusive with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/Io/File.php
-
-		-
 			rawMessage: 'Method Maho\Io\File::streamOpen() has parameter $chmod with no type specified.'
 			identifier: missingType.parameter
 			count: 1
