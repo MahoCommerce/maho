@@ -81,6 +81,9 @@ final class StoreConfigProvider implements ProviderInterface
         $dto->defaultTitle = \Mage::getStoreConfig('design/head/default_title', $storeId) ?: null;
         $dto->defaultDescription = \Mage::getStoreConfig('design/head/default_description', $storeId) ?: null;
 
+        // Homepage CMS page identifier
+        $dto->cmsHomePage = \Mage::getStoreConfig('web/default/cms_home_page', $storeId) ?: 'home';
+
         // Cache for 24 hours (store config rarely changes, auto-cleaned on save)
         \Mage::app()->getCache()->save(
             json_encode($this->dtoToArray($dto)),
@@ -117,6 +120,7 @@ final class StoreConfigProvider implements ProviderInterface
             'logoAlt' => $dto->logoAlt,
             'defaultTitle' => $dto->defaultTitle,
             'defaultDescription' => $dto->defaultDescription,
+            'cmsHomePage' => $dto->cmsHomePage,
         ];
     }
 
@@ -145,6 +149,7 @@ final class StoreConfigProvider implements ProviderInterface
         $dto->logoAlt = $data['logoAlt'] ?? null;
         $dto->defaultTitle = $data['defaultTitle'] ?? null;
         $dto->defaultDescription = $data['defaultDescription'] ?? null;
+        $dto->cmsHomePage = $data['cmsHomePage'] ?? 'home';
         return $dto;
     }
 }

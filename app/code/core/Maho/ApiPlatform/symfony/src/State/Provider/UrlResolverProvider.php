@@ -88,6 +88,16 @@ final class UrlResolverProvider implements ProviderInterface
             return $this->processRewrite($rewrite, $result);
         }
 
+        // Try without .html suffix (rewrites may be stored without it)
+        if (str_ends_with($path, '.html')) {
+            $pathWithoutHtml = substr($path, 0, -5);
+            $rewrite->loadByRequestPath($pathWithoutHtml);
+            /** @phpstan-ignore if.alwaysFalse */
+            if ($rewrite->getId()) {
+                return $this->processRewrite($rewrite, $result);
+            }
+        }
+
         // Check for CMS page by identifier directly
         $cmsPage = \Mage::getModel('cms/page');
         $pageId = $cmsPage->checkIdentifier($path, $storeId);
@@ -160,8 +170,13 @@ final class UrlResolverProvider implements ProviderInterface
         $identifier = $this->extractIdentifierFromPath($rewrite->getRequestPath());
 
         if (preg_match('#^catalog/product/view/id/(\d+)#', $targetPath, $matches)) {
+            $productId = (int) $matches[1];
+
+            // Check if this is a simple product with a configurable parent
+            $productId = $this->resolveParentProductId($productId);
+
             $result->type = 'product';
-            $result->id = (int) $matches[1];
+            $result->id = $productId;
             $result->identifier = $identifier;
             return $result;
         }
@@ -224,10 +239,75 @@ final class UrlResolverProvider implements ProviderInterface
         $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
         $collection->setPageSize(1);
 
+        /** @var \Mage_Catalog_Model_Product $product */
         $product = $collection->getFirstItem();
 
-        /** @phpstan-ignore return.type */
-        return $product->getId() ? $product : null;
+        if (!$product->getId()) {
+            return null;
+        }
+
+        // If this is a simple product, check if it has a parent (configurable, grouped, or bundle)
+        // and return the parent instead (for proper display)
+        if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+            $parent = $this->findParentProduct($product->getId());
+            if ($parent) {
+                return $parent;
+            }
+        }
+
+        return $product;
+    }
+
+    /**
+     * If product is a simple with a parent (configurable, grouped, or bundle), return the parent ID
+     */
+    private function resolveParentProductId(int $productId): int
+    {
+        $product = \Mage::getModel('catalog/product')->load($productId);
+
+        if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE) {
+            $parent = $this->findParentProduct($productId);
+            if ($parent) {
+                return (int) $parent->getId();
+            }
+        }
+
+        return $productId;
+    }
+
+    /**
+     * Find parent product (configurable, grouped, or bundle) for a simple product
+     */
+    private function findParentProduct(int $childId): ?\Mage_Catalog_Model_Product
+    {
+        // Check configurable parent
+        $parentIds = \Mage::getModel('catalog/product_type_configurable')
+            ->getParentIdsByChild($childId);
+
+        // Check grouped parent
+        if (empty($parentIds)) {
+            $parentIds = \Mage::getModel('catalog/product_type_grouped')
+                ->getParentIdsByChild($childId);
+        }
+
+        // Check bundle parent
+        if (empty($parentIds)) {
+            $parentIds = \Mage::getModel('bundle/product_type')
+                ->getParentIdsByChild($childId);
+        }
+
+        if (!empty($parentIds)) {
+            $parentId = reset($parentIds);
+            $parent = \Mage::getModel('catalog/product')->load($parentId);
+
+            if ($parent->getId()
+                && $parent->getStatus() == \Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+            ) {
+                return $parent;
+            }
+        }
+
+        return null;
     }
 
     private function findBlogPostByUrlKey(string $urlKey, int $storeId): ?\Mage_Core_Model_Abstract

@@ -98,4 +98,7 @@ class StoreConfig
 
     #[ApiProperty(description: 'Default meta description for SEO')]
     public ?string $defaultDescription = null;
+
+    #[ApiProperty(description: 'CMS page identifier for the homepage')]
+    public string $cmsHomePage = 'home';
 }
