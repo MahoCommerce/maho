@@ -147,6 +147,9 @@ final class BlogPostProcessor implements ProcessorInterface
 
         $oldData = $post->getData();
 
+        // Create content version before updating (for rollback capability)
+        $this->createContentVersion($post, 'blog_post', $user);
+
         $updateData = [
             'url_key' => $data->identifier,
             'title' => $data->title,
@@ -327,6 +330,18 @@ final class BlogPostProcessor implements ProcessorInterface
 
             $adapter->insertOnDuplicate($table, $data, ['value']);
         } catch (\Exception $e) {
+            Mage::logException($e);
+        }
+    }
+
+    private function createContentVersion(\Mage_Core_Model_Abstract $model, string $entityType, AdminApiUser $user): void
+    {
+        try {
+            /** @var \Maho_ContentVersion_Model_Service $versionService */
+            $versionService = Mage::getSingleton('contentversion/service');
+            $versionService->createVersion($model, $entityType, 'API: ' . $user->getConsumerName());
+        } catch (\Exception $e) {
+            // Log but don't fail the request - versioning is not critical
             Mage::logException($e);
         }
     }
