@@ -36,23 +36,35 @@ final class ContentSanitizer
     public function __construct()
     {
         $config = \HTMLPurifier_Config::createDefault();
-        $config->set('HTML.Allowed', implode(',', [
-            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-            'p', 'br', 'hr',
-            'strong', 'b', 'em', 'i', 'u', 's', 'small', 'mark',
-            'a[href|title|target]',
-            'img[src|alt|width|height|class]',
-            'ul', 'ol', 'li', 'dl', 'dt', 'dd',
-            'table', 'thead', 'tbody', 'tr', 'th', 'td',
-            'div[class]', 'span[class]',
-            'blockquote', 'pre', 'code',
-            'figure', 'figcaption',
-        ]));
-        $config->set('HTML.SafeIframe', false);
-        $config->set('HTML.SafeObject', false);
-        $config->set('HTML.SafeEmbed', false);
-        $config->set('Attr.AllowedFrameTargets', ['_blank']);
-        $config->set('URI.AllowedSchemes', ['http', 'https', 'mailto']);
+
+        // Trust admin API content - allow most HTML with specific dangerous elements removed
+        // This is appropriate because admin API requires authentication and specific permissions
+        $config->set('HTML.Trusted', true);
+        $config->set('CSS.Trusted', true);
+        $config->set('Attr.AllowedFrameTargets', ['_blank', '_self', '_parent', '_top']);
+        $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true, 'data' => true]);
+
+        // Remove dangerous elements (scripts, objects, etc.)
+        $config->set('HTML.ForbiddenElements', ['script', 'object', 'embed', 'applet', 'iframe', 'frame', 'frameset', 'base', 'meta', 'link']);
+        $config->set('HTML.ForbiddenAttributes', ['*@on*']); // Remove all event handlers
+
+        // Add HTML5 elements - must be done last before creating purifier
+        $config->set('HTML.DefinitionID', 'maho-admin-api');
+        $config->set('HTML.DefinitionRev', 1);
+        $config->set('Cache.DefinitionImpl', null); // Disable caching for development
+        if ($def = $config->maybeGetRawHTMLDefinition()) {
+            $def->addElement('section', 'Block', 'Flow', 'Common');
+            $def->addElement('article', 'Block', 'Flow', 'Common');
+            $def->addElement('header', 'Block', 'Flow', 'Common');
+            $def->addElement('footer', 'Block', 'Flow', 'Common');
+            $def->addElement('nav', 'Block', 'Flow', 'Common');
+            $def->addElement('aside', 'Block', 'Flow', 'Common');
+            $def->addElement('main', 'Block', 'Flow', 'Common');
+            $def->addElement('figure', 'Block', 'Flow', 'Common');
+            $def->addElement('figcaption', 'Inline', 'Flow', 'Common');
+            $def->addElement('mark', 'Inline', 'Inline', 'Common');
+            $def->addElement('time', 'Inline', 'Inline', 'Common', ['datetime' => 'Text']);
+        }
 
         $this->purifier = new \HTMLPurifier($config);
     }
@@ -62,11 +74,80 @@ final class ContentSanitizer
      */
     public function sanitize(string $content): string
     {
-        // First, extract and validate Maho directives
+        // First, extract and validate Maho directives, storing them for later restoration
+        $directives = [];
+        $content = $this->extractDirectives($content, $directives);
+
+        // Process (validate) directives that remain in the content
         $content = $this->processDirectives($content);
 
-        // Then sanitize HTML
-        return $this->purifier->purify($content);
+        // Protect <style> tags from HTMLPurifier (it doesn't handle them well)
+        $styles = [];
+        $content = $this->extractStyles($content, $styles);
+
+        // Sanitize HTML
+        $content = $this->purifier->purify($content);
+
+        // Restore protected elements
+        $content = $this->restoreDirectives($content, $directives);
+        return $this->restoreStyles($content, $styles);
+    }
+
+    /**
+     * Extract <style> tags before HTMLPurifier processes them
+     */
+    private function extractStyles(string $content, array &$styles): string
+    {
+        return preg_replace_callback(
+            '/<style[^>]*>.*?<\/style>/is',
+            function ($matches) use (&$styles) {
+                $placeholder = '___MAHO_STYLE_' . count($styles) . '___';
+                $styles[$placeholder] = $matches[0];
+                return $placeholder;
+            },
+            $content,
+        );
+    }
+
+    /**
+     * Restore <style> tags after HTMLPurifier has processed the content
+     */
+    private function restoreStyles(string $content, array $styles): string
+    {
+        return str_replace(array_keys($styles), array_values($styles), $content);
+    }
+
+    /**
+     * Extract directives from content before HTMLPurifier processes it
+     * This prevents HTMLPurifier from URL-encoding the directives
+     */
+    private function extractDirectives(string $content, array &$directives): string
+    {
+        return preg_replace_callback(
+            '/\{\{(\w+)([^}]*)\}\}/',
+            function ($matches) use (&$directives) {
+                $directive = strtolower($matches[1]);
+
+                // Only protect allowed directives
+                if (!in_array($directive, self::ALLOWED_DIRECTIVES, true)) {
+                    return $matches[0]; // Let processDirectives handle stripping
+                }
+
+                // Generate placeholder and store directive
+                $placeholder = '___MAHO_DIRECTIVE_' . count($directives) . '___';
+                $directives[$placeholder] = $matches[0];
+                return $placeholder;
+            },
+            $content,
+        );
+    }
+
+    /**
+     * Restore directives after HTMLPurifier has processed the content
+     */
+    private function restoreDirectives(string $content, array $directives): string
+    {
+        return str_replace(array_keys($directives), array_values($directives), $content);
     }
 
     /**
