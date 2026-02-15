@@ -50,4 +50,8 @@ class CmsPage
     public bool $isActive = true;
     /** @var string[] */
     public array $stores = ['all'];
+    /**
+     * Page layout template: one_column, two_columns_left, two_columns_right, three_columns, empty
+     */
+    public ?string $rootTemplate = null;
 }
