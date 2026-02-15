@@ -41,6 +41,7 @@ final class CmsPageProvider implements ProviderInterface
         $dto->metaKeywords = $page->getMetaKeywords();
         $dto->metaDescription = $page->getMetaDescription();
         $dto->isActive = (bool) $page->getIsActive();
+        $dto->rootTemplate = $page->getRootTemplate();
 
         return $dto;
     }

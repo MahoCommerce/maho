@@ -65,7 +65,7 @@ final class CmsPageProcessor implements ProcessorInterface
         /** @var Mage_Cms_Model_Page $page */
         $page = Mage::getModel('cms/page');
 
-        $page->setData([
+        $pageData = [
             'identifier' => $data->identifier,
             'title' => $data->title,
             'content_heading' => $data->contentHeading,
@@ -74,7 +74,14 @@ final class CmsPageProcessor implements ProcessorInterface
             'meta_description' => $data->metaDescription,
             'is_active' => $data->isActive ? 1 : 0,
             'stores' => $storeIds,
-        ]);
+        ];
+
+        // Add root_template if provided
+        if ($data->rootTemplate !== null) {
+            $pageData['root_template'] = $data->rootTemplate;
+        }
+
+        $page->setData($pageData);
 
         try {
             $page->save();
@@ -104,7 +111,10 @@ final class CmsPageProcessor implements ProcessorInterface
 
         $oldData = $page->getData();
 
-        $page->addData([
+        // Create content version before updating (for rollback capability)
+        $this->createContentVersion($page, 'cms_page', $user);
+
+        $updateData = [
             'identifier' => $data->identifier,
             'title' => $data->title,
             'content_heading' => $data->contentHeading,
@@ -113,7 +123,14 @@ final class CmsPageProcessor implements ProcessorInterface
             'meta_description' => $data->metaDescription,
             'is_active' => $data->isActive ? 1 : 0,
             'stores' => $storeIds,
-        ]);
+        ];
+
+        // Add root_template if provided
+        if ($data->rootTemplate !== null) {
+            $updateData['root_template'] = $data->rootTemplate;
+        }
+
+        $page->addData($updateData);
 
         try {
             $page->save();
@@ -206,6 +223,18 @@ final class CmsPageProcessor implements ProcessorInterface
         }
 
         throw new AccessDeniedHttpException('Token does not have access to this page\'s stores');
+    }
+
+    private function createContentVersion(\Mage_Core_Model_Abstract $model, string $entityType, AdminApiUser $user): void
+    {
+        try {
+            /** @var \Maho_ContentVersion_Model_Service $versionService */
+            $versionService = Mage::getSingleton('contentversion/service');
+            $versionService->createVersion($model, $entityType, 'API: ' . $user->getConsumerName());
+        } catch (\Exception $e) {
+            // Log but don't fail the request - versioning is not critical
+            Mage::logException($e);
+        }
     }
 
     private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Page $page, AdminApiUser $user): void
