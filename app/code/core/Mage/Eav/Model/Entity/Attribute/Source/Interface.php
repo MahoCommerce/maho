@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -13,6 +15,7 @@
  * Entity attribute select source interface
  * Source is providing the selection options for user interface
  */
+
 interface Mage_Eav_Model_Entity_Attribute_Source_Interface
 {
     /**

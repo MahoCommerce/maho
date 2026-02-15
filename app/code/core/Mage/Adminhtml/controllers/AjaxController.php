@@ -32,7 +32,10 @@ class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Check is allowed access to action
+     * Allow access to all admin users
+     *
+     * Inline translation is a dev tool available to any authenticated admin.
+     * The feature is gated by its own config flag (dev/translate_inline).
      *
      * @return true
      */

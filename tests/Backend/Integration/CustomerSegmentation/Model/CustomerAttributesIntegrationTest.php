@@ -1033,7 +1033,7 @@ describe('Customer Attributes Integration Tests', function () {
         $segment->setIsActive(1);
         $segment->setWebsiteIds('1');
         $segment->setCustomerGroupIds('0,1,2,3');
-        $segment->setConditionsSerialized(serialize($conditions));
+        $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);

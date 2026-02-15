@@ -62,15 +62,11 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
             $this->_conditions->setRule($this);
             $this->_conditions->setId('1')->setPrefix('conditions');
 
-            // Try to deserialize conditions from database only when first creating conditions
+            // Decode conditions from database only when first creating conditions
             if ($this->getConditionsSerialized()) {
-                try {
-                    $conditions = unserialize($this->getConditionsSerialized(), ['allowed_classes' => false]);
-                    if (is_array($conditions) && !empty($conditions)) {
-                        $this->_conditions->loadArray($conditions);
-                    }
-                } catch (Exception $e) {
-                    Mage::logException($e);
+                $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
+                if (is_array($conditions) && !empty($conditions)) {
+                    $this->_conditions->loadArray($conditions);
                 }
             }
         }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -24,6 +26,7 @@
  * @method string getRoleName()
  * @method $this setRoleName(string $value)
  */
+
 class Mage_Admin_Model_Acl_Role extends Mage_Core_Model_Abstract
 {
     #[\Override]

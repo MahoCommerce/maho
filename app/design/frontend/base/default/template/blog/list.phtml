@@ -21,7 +21,7 @@ $posts = $this->getPosts();
                 <?php if ($post->hasImage()): ?>
                     <img src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" />
                 <?php endif ?>
-                <strong><?= $post->getTitle() ?></strong>
+                <strong><?= $this->escapeHtml($post->getTitle()) ?></strong>
                 <div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
                 <?php $excerpt = Mage::helper('blog')->truncateContent($post); ?>
                 <?php if ($excerpt): ?>

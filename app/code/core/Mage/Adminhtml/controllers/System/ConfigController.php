@@ -264,7 +264,6 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
             $session = Mage::getSingleton('admin/session');
             $resourceLookup = "admin/system/config/{$section}";
             if ($session->getData('acl') instanceof Mage_Admin_Model_Acl) {
-                /** @var Mage_Admin_Model_Acl $acl */
                 $acl = $session->getData('acl');
                 $resource = $acl->getResource($resourceLookup);
                 $resourceId = $resource->getResourceId();

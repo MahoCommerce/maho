@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -28,6 +30,7 @@
  * @method $this setCreated(string $value)
  * @method $this setModified(string $value)
  */
+
 class Mage_Api_Model_Role extends Mage_Core_Model_Abstract
 {
     /**

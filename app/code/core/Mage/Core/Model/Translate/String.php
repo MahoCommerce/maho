@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -22,6 +24,7 @@
  * @method string getLocale()
  * @method $this setLocale(string $value)
  */
+
 class Mage_Core_Model_Translate_String extends Mage_Core_Model_Abstract
 {
     #[\Override]
