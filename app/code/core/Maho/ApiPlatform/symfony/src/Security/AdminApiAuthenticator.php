@@ -115,6 +115,14 @@ final class AdminApiAuthenticator extends AbstractAuthenticator
         // Store on request for processor access
         $request->attributes->set(self::CONSUMER_ATTRIBUTE, $user);
 
+        // Register in Mage registry for other modules (e.g., ContentVersion, AdminActivityLog)
+        // This allows any module to detect the API user without direct coupling
+        Mage::register('current_api_user', [
+            'type' => 'api',
+            'name' => $consumer->getName(),
+            'consumer_id' => (int) $consumer->getId(),
+        ], true);
+
         return new SelfValidatingPassport(
             new UserBadge($consumer->getKey(), fn() => $user),
         );
