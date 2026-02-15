@@ -810,6 +810,76 @@ class Sqlite extends AbstractPdoAdapter
         return new \Maho\Db\Expr(sprintf("CAST(STRFTIME('%%s', %s) AS INTEGER)", $timestamp));
     }
 
+    /**
+     * Extract a scalar value from a JSON column at a given path (SQLite)
+     */
+    #[\Override]
+    public function getJsonExtractExpr(string $column, string $path): \Maho\Db\Expr
+    {
+        return new \Maho\Db\Expr(sprintf(
+            'JSON_EXTRACT(%s, %s)',
+            $column,
+            $this->quote($path),
+        ));
+    }
+
+    /**
+     * Search for a string value within a JSON column (SQLite)
+     */
+    #[\Override]
+    public function getJsonSearchExpr(string $column, string $value, string $path): \Maho\Db\Expr
+    {
+        if (str_contains($path, '$**')) {
+            // Extract the key name from the wildcard path (e.g., '$**.attribute' -> 'attribute')
+            $lastDot = strrpos($path, '.');
+            $key = $lastDot !== false ? substr($path, $lastDot + 1) : ltrim($path, '$*.');
+
+            return new \Maho\Db\Expr(sprintf(
+                'EXISTS(SELECT 1 FROM JSON_TREE(%s) WHERE "key" = %s AND "value" = %s AND "type" != %s)',
+                $column,
+                $this->quote($key),
+                $this->quote($value),
+                $this->quote('object'),
+            ));
+        }
+
+        $extractExpr = $this->getJsonExtractExpr($column, $path);
+        return new \Maho\Db\Expr(sprintf('%s = %s', $extractExpr, $this->quote($value)));
+    }
+
+    /**
+     * Check if a JSON column contains a specific JSON value (SQLite)
+     */
+    #[\Override]
+    public function getJsonContainsExpr(string $column, string $value, ?string $path = null): \Maho\Db\Expr
+    {
+        if ($path !== null && str_contains($path, '$**')) {
+            throw new \InvalidArgumentException('Wildcard paths are not supported in getJsonContainsExpr(). Use getJsonSearchExpr() instead.');
+        }
+
+        if ($path !== null) {
+            // JSON_EACH(col, path) handles both arrays (multiple rows) and scalars (single row)
+            return new \Maho\Db\Expr(sprintf(
+                'EXISTS(SELECT 1 FROM JSON_EACH(%s, %s) WHERE "value" = JSON_EXTRACT(JSON(%s), %s))',
+                $column,
+                $this->quote($path),
+                $this->quote($value),
+                $this->quote('$'),
+            ));
+        }
+
+        // Top-level: JSON_EACH iterates array elements or object values,
+        // but JSON_CONTAINS should only match array elements, not object values
+        return new \Maho\Db\Expr(sprintf(
+            '(JSON_TYPE(%s) = %s AND EXISTS(SELECT 1 FROM JSON_EACH(%s) WHERE "value" = JSON_EXTRACT(JSON(%s), %s)))',
+            $column,
+            $this->quote('array'),
+            $column,
+            $this->quote($value),
+            $this->quote('$'),
+        ));
+    }
+
     // =========================================================================
     // Insert Methods - SQLite-specific implementations
     // =========================================================================

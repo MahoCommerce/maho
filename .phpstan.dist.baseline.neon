@@ -9889,18 +9889,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
 
 		-
-			rawMessage: 'Strict comparison using !== between array<string, mixed> and null will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
-			count: 2
-			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
-
-		-
-			rawMessage: Unreachable statement - code above always terminates.
-			identifier: deadCode.unreachable
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Customer/Api/V2.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
 			count: 1
@@ -9909,18 +9897,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $data (object) of method Mage_Checkout_Model_Cart_Payment_Api_V2::_preparePaymentData() should be compatible with parameter $data (array) of method Mage_Checkout_Model_Cart_Payment_Api::_preparePaymentData()'
 			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
-
-		-
-			rawMessage: 'Strict comparison using !== between array<string, mixed> and null will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
-
-		-
-			rawMessage: Unreachable statement - code above always terminates.
-			identifier: deadCode.unreachable
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
 
@@ -12225,18 +12201,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $data (stdClass) of method Mage_Customer_Model_Customer_Api_V2::_prepareData() should be compatible with parameter $data (array) of method Mage_Customer_Model_Customer_Api::_prepareData()'
 			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
-
-		-
-			rawMessage: 'Strict comparison using !== between array<string, mixed> and null will always evaluate to true.'
-			identifier: notIdentical.alwaysTrue
-			count: 1
-			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
-
-		-
-			rawMessage: Unreachable statement - code above always terminates.
-			identifier: deadCode.unreachable
 			count: 1
 			path: app/code/core/Mage/Customer/Model/Customer/Api/V2.php
 
@@ -23207,12 +23171,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Maho\Io\File::rmdir() has parameter $recursive with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: lib/Maho/Io/File.php
-
-		-
-			rawMessage: 'Method Maho\Io\File::streamLock() has parameter $exclusive with no type specified.'
 			identifier: missingType.parameter
 			count: 1
 			path: lib/Maho/Io/File.php

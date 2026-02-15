@@ -139,16 +139,24 @@ class File extends \Maho\Io
     /**
      * Lock file
      *
+     * @param bool $exclusive
+     * @param bool $blocking
      * @return bool
      */
-    public function streamLock($exclusive = true)
+    public function streamLock($exclusive = true, $blocking = true)
     {
         if (!$this->_streamHandler) {
             return false;
         }
-        $this->_streamLocked = true;
         $lock = $exclusive ? LOCK_EX : LOCK_SH;
-        return flock($this->_streamHandler, $lock);
+        if (!$blocking) {
+            $lock |= LOCK_NB;
+        }
+        $result = flock($this->_streamHandler, $lock);
+        if ($result) {
+            $this->_streamLocked = true;
+        }
+        return $result;
     }
 
     /**
