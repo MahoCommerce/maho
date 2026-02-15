@@ -61,7 +61,7 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
         if (empty($conditions)) {
             return [];
         }
-        return Mage::helper('core')->jsonDecode($conditions) ?: [];
+        return Mage::helper('core/string')->unserialize($conditions) ?: [];
     }
 
     /**
@@ -82,7 +82,7 @@ class Maho_FeedManager_Model_AttributeMapping extends Mage_Core_Model_Abstract
         if (empty($transformers)) {
             return [];
         }
-        return Mage::helper('core')->jsonDecode($transformers) ?: [];
+        return Mage::helper('core/string')->unserialize($transformers) ?: [];
     }
 
     /**
