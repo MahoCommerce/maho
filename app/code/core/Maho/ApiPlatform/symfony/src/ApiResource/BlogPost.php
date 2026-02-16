@@ -14,10 +14,14 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\ApiResource;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\State\Processor\BlogPostProcessor;
 use Maho\ApiPlatform\State\Provider\BlogPostProvider;
 
 #[ApiResource(
@@ -32,6 +36,24 @@ use Maho\ApiPlatform\State\Provider\BlogPostProvider;
         new GetCollection(
             uriTemplate: '/blog-posts',
             description: 'Get blog post collection',
+        ),
+        new Post(
+            uriTemplate: '/blog-posts',
+            processor: BlogPostProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Creates a new blog post',
+        ),
+        new Put(
+            uriTemplate: '/blog-posts/{id}',
+            processor: BlogPostProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Updates a blog post',
+        ),
+        new Delete(
+            uriTemplate: '/blog-posts/{id}',
+            processor: BlogPostProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Deletes a blog post',
         ),
     ],
     graphQlOperations: [
@@ -50,13 +72,19 @@ class BlogPost
     public string $title = '';
     public string $urlKey = '';
     public ?string $content = null;
+    public ?string $shortContent = null;
     public ?string $excerpt = null;
+    public ?string $image = null;
     public ?string $imageUrl = null;
     public ?string $publishDate = null;
+    public ?string $publishedAt = null;
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;
     public string $status = 'enabled';
+    public bool $isActive = true;
+    /** @var string[] */
+    public array $stores = ['all'];
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
 }
