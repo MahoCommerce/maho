@@ -37,6 +37,10 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  * Handles create, update, and delete operations for products.
  * Requires JWT authentication with products/write or products/delete permission.
  *
+ * Supports a fast-update mode (via X-Fast-Update header or ?fast=true query param)
+ * that uses bulk EAV updateAttributes() and direct SQL for stock/categories,
+ * bypassing model save for significantly faster updates.
+ *
  * @implements ProcessorInterface<Product, Product|null>
  */
 final class ProductProcessor implements ProcessorInterface
@@ -67,6 +71,12 @@ final class ProductProcessor implements ProcessorInterface
         assert($data instanceof Product);
 
         if (isset($uriVariables['id'])) {
+            $fastMode = ($context['request'] ?? null)?->headers->get('X-Fast-Update') === 'true'
+                || ($context['request'] ?? null)?->query->get('fast') === 'true';
+
+            if ($fastMode) {
+                return $this->handleFastUpdate((int) $uriVariables['id'], $data, $user);
+            }
             return $this->handleUpdate((int) $uriVariables['id'], $data, $user);
         }
 
@@ -107,7 +117,7 @@ final class ProductProcessor implements ProcessorInterface
 
         try {
             $product->save();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new UnprocessableEntityHttpException('Failed to create product: ' . $e->getMessage());
         }
 
@@ -169,7 +179,7 @@ final class ProductProcessor implements ProcessorInterface
 
         try {
             $product->save();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new UnprocessableEntityHttpException('Failed to update product: ' . $e->getMessage());
         }
 
@@ -179,6 +189,124 @@ final class ProductProcessor implements ProcessorInterface
 
         $this->updateStockData($product, $data);
         $this->invalidateCache((int) $product->getId());
+        $this->logActivity('update', $oldData, $product, $user);
+
+        return $this->refreshDto($product, $data);
+    }
+
+    /**
+     * Fast update using bulk EAV updateAttributes() and direct SQL.
+     *
+     * Bypasses model save, observers, and URL rewrites for significantly faster updates.
+     * Modeled on DataSync's _updateProductFast() pattern.
+     */
+    private function handleFastUpdate(int $id, Product $data, ApiUser $user): Product
+    {
+        StoreContext::ensureStore();
+        $storeId = StoreContext::getStoreId();
+
+        /** @var Mage_Catalog_Model_Product $product */
+        $product = Mage::getModel('catalog/product');
+        if ($storeId) {
+            $product->setStoreId($storeId);
+        }
+        $product->load($id);
+
+        if (!$product->getId()) {
+            throw new NotFoundHttpException('Product not found');
+        }
+
+        $oldData = $product->getData();
+
+        // Build attribute data array (only non-null fields from the DTO)
+        $attrData = [];
+        if ($data->name !== '') {
+            $attrData['name'] = $data->name;
+        }
+        if ($data->description !== null) {
+            $attrData['description'] = $data->description;
+        }
+        if ($data->shortDescription !== null) {
+            $attrData['short_description'] = $data->shortDescription;
+        }
+        if ($data->price !== null) {
+            $attrData['price'] = $data->price;
+        }
+        if ($data->specialPrice !== null) {
+            $attrData['special_price'] = $data->specialPrice;
+        }
+        if ($data->weight !== null) {
+            $attrData['weight'] = $data->weight;
+        }
+        if ($data->urlKey !== null) {
+            $attrData['url_key'] = $data->urlKey;
+        }
+        if ($data->metaTitle !== null) {
+            $attrData['meta_title'] = $data->metaTitle;
+        }
+        if ($data->metaDescription !== null) {
+            $attrData['meta_description'] = $data->metaDescription;
+        }
+        if ($data->metaKeywords !== null) {
+            $attrData['meta_keyword'] = $data->metaKeywords;
+        }
+        if ($data->visibility !== 'catalog_search' || isset($oldData['visibility'])) {
+            $attrData['visibility'] = self::VISIBILITY_MAP[$data->visibility] ?? (int) $oldData['visibility'];
+        }
+        $attrData['status'] = $data->isActive
+            ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
+            : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
+
+        if ($data->barcode !== null) {
+            /** @phpstan-ignore-next-line */
+            $posHelper = Mage::helper('maho_pos');
+            $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
+                ? $posHelper->getBarcodeAttributeCode()
+                : 'barcode';
+            $attrData[$barcodeAttr] = $data->barcode;
+        }
+        if ($data->pageLayout !== null) {
+            $attrData['page_layout'] = $data->pageLayout;
+        }
+
+        // Filter to only non-static EAV attributes (updateAttributes only works with EAV value tables)
+        $attributes = $product->getAttributes();
+        $validAttrCodes = [];
+        foreach ($attributes as $attrCode => $attribute) {
+            $backendType = $attribute->getBackendType();
+            if ($backendType && $backendType !== 'static') {
+                $validAttrCodes[] = $attrCode;
+            }
+        }
+        $attrData = array_filter($attrData, fn($key) => in_array($key, $validAttrCodes), ARRAY_FILTER_USE_KEY);
+
+        // Bulk EAV update — bypasses model save, observers, URL rewrites
+        if (!empty($attrData)) {
+            try {
+                Mage::getSingleton('catalog/product_action')
+                    ->updateAttributes([$id], $attrData, $storeId ?: 0);
+            } catch (\Throwable $e) {
+                throw new UnprocessableEntityHttpException('Failed to update product: ' . $e->getMessage());
+            }
+        }
+
+        // Direct SQL for stock
+        if ($data->stockQty !== null || $data->stockData !== null) {
+            $this->updateStockDirect($id, $data);
+        }
+
+        // Direct SQL for categories
+        if ($data->categoryIds !== []) {
+            $this->updateCategoriesDirect($id, $data->categoryIds);
+        }
+
+        // Website IDs still use model (infrequent, complex)
+        if ($data->websiteIds !== null) {
+            $product->setWebsiteIds($data->websiteIds);
+            $product->save();
+        }
+
+        $this->invalidateCache($id);
         $this->logActivity('update', $oldData, $product, $user);
 
         return $this->refreshDto($product, $data);
@@ -195,10 +323,20 @@ final class ProductProcessor implements ProcessorInterface
 
         $oldData = $product->getData();
 
+        // Register isSecureArea to bypass _protectFromNonAdmin() check
+        $wasSecure = Mage::registry('isSecureArea');
+        if (!$wasSecure) {
+            Mage::register('isSecureArea', true);
+        }
+
         try {
             $product->delete();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             throw new UnprocessableEntityHttpException('Failed to delete product: ' . $e->getMessage());
+        } finally {
+            if (!$wasSecure) {
+                Mage::unregister('isSecureArea');
+            }
         }
 
         $this->invalidateCache($id);
@@ -307,6 +445,95 @@ final class ProductProcessor implements ProcessorInterface
             $stockItem->save();
         } catch (\Exception $e) {
             Mage::logException($e);
+        }
+    }
+
+    /**
+     * Direct SQL stock update for fast-update mode.
+     */
+    private function updateStockDirect(int $productId, Product $data): void
+    {
+        $qty = null;
+        $isInStock = null;
+
+        if ($data->stockData !== null) {
+            $qty = isset($data->stockData['qty']) ? (float) $data->stockData['qty'] : null;
+            $isInStock = isset($data->stockData['is_in_stock']) ? (bool) $data->stockData['is_in_stock'] : null;
+        }
+
+        if ($qty === null && $data->stockQty !== null) {
+            $qty = $data->stockQty;
+        }
+
+        if ($qty === null && $isInStock === null) {
+            return;
+        }
+
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $table = $resource->getTableName('cataloginventory/stock_item');
+
+        $stockData = ['manage_stock' => 1];
+        if ($qty !== null) {
+            if ($qty < 0 || $qty > 99999999) {
+                throw new BadRequestHttpException('Invalid stock quantity');
+            }
+            $stockData['qty'] = $qty;
+            if ($isInStock === null) {
+                $isInStock = $qty > 0;
+            }
+        }
+        if ($isInStock !== null) {
+            $stockData['is_in_stock'] = $isInStock ? 1 : 0;
+        }
+
+        $stockItemId = $write->fetchOne(
+            "SELECT item_id FROM {$table} WHERE product_id = ? AND stock_id = 1",
+            [$productId],
+        );
+
+        if ($stockItemId) {
+            $write->update($table, $stockData, 'item_id = ' . (int) $stockItemId);
+        } else {
+            $stockData['product_id'] = $productId;
+            $stockData['stock_id'] = 1;
+            $write->insert($table, $stockData);
+        }
+    }
+
+    /**
+     * Direct SQL category update for fast-update mode.
+     */
+    private function updateCategoriesDirect(int $productId, array $categoryIds): void
+    {
+        $categoryIds = array_map('intval', $categoryIds);
+
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $table = $resource->getTableName('catalog/category_product');
+
+        $existing = $write->fetchCol(
+            "SELECT category_id FROM {$table} WHERE product_id = ?",
+            [$productId],
+        );
+        $existing = array_map('intval', $existing);
+
+        $toAdd = array_diff($categoryIds, $existing);
+        $toRemove = array_diff($existing, $categoryIds);
+
+        foreach ($toAdd as $catId) {
+            $write->insertOnDuplicate($table, [
+                'category_id' => $catId,
+                'product_id' => $productId,
+                'position' => 0,
+            ]);
+        }
+
+        if (!empty($toRemove)) {
+            $write->delete($table, [
+                'product_id = ?' => $productId,
+                'category_id IN (?)' => $toRemove,
+            ]);
         }
     }
 

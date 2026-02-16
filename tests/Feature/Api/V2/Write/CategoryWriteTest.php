@@ -7,9 +7,6 @@ declare(strict_types=1);
  *
  * End-to-end tests for category create, update, and delete via REST.
  *
- * Known issue: Category DELETE returns 422 "Cannot complete this operation
- * from non-admin area." — same Maho catalog model limitation as products.
- *
  * @group write
  */
 
@@ -46,10 +43,10 @@ describe('Category Permission Enforcement (REST)', function () {
 
 });
 
-describe('Category Create & Update Lifecycle (REST)', function () {
+describe('Category CRUD Lifecycle (REST)', function () {
 
-    it('creates a category and reads it back', function () {
-        $writeToken = serviceToken(['categories/write', 'categories/delete']);
+    it('creates a category, updates it, and deletes it', function () {
+        $token = serviceToken(['categories/write', 'categories/delete']);
         $suffix = substr(uniqid(), -8);
 
         // 1. Create
@@ -57,7 +54,7 @@ describe('Category Create & Update Lifecycle (REST)', function () {
             'name' => "Pest Test Category {$suffix}",
             'isActive' => true,
             'urlKey' => "pest-test-category-{$suffix}",
-        ], $writeToken);
+        ], $token);
 
         expect($create['status'])->toBeIn([200, 201]);
         expect($create['json'])->toHaveKey('id');
@@ -74,13 +71,21 @@ describe('Category Create & Update Lifecycle (REST)', function () {
         // 3. Update
         $update = apiPut("/api/categories/{$categoryId}", [
             'name' => "Pest Test Category Updated {$suffix}",
-        ], $writeToken);
+        ], $token);
         expect($update['status'])->toBe(200);
 
         // 4. Verify update
         $verify = apiGet("/api/categories/{$categoryId}");
         expect($verify['status'])->toBe(200);
         expect($verify['json']['name'])->toBe("Pest Test Category Updated {$suffix}");
+
+        // 5. Delete
+        $delete = apiDelete("/api/categories/{$categoryId}", $token);
+        expect($delete['status'])->toBeIn([200, 204]);
+
+        // 6. Confirm gone
+        $gone = apiGet("/api/categories/{$categoryId}");
+        expect($gone['status'])->toBe(404);
     });
 
     it('denies delete with only write permission', function () {
@@ -98,33 +103,6 @@ describe('Category Create & Update Lifecycle (REST)', function () {
         // Delete with only write = denied
         $deny = apiDelete("/api/categories/{$categoryId}", $writeToken);
         expect($deny['status'])->toBeForbidden();
-    });
-
-});
-
-describe('Category Delete (known bug: 422 non-admin area)', function () {
-
-    /**
-     * Known bug: Category DELETE returns 422 with
-     * "Cannot complete this operation from non-admin area."
-     * Same Maho catalog model limitation as product delete.
-     */
-    it('category delete returns 422 non-admin area (known bug)', function () {
-        $token = serviceToken(['categories/write', 'categories/delete']);
-
-        // Create a throwaway category
-        $create = apiPost('/api/categories', [
-            'name' => 'Pest Delete Bug Test',
-            'isActive' => true,
-        ], $token);
-        expect($create['status'])->toBeIn([200, 201]);
-        $categoryId = $create['json']['id'];
-        trackCreated('category', $categoryId);
-
-        // Delete returns 422 (known bug)
-        $delete = apiDelete("/api/categories/{$categoryId}", $token);
-        expect($delete['status'])->toBe(422);
-        expect($delete['json']['message'] ?? '')->toContain('non-admin area');
     });
 
 });
