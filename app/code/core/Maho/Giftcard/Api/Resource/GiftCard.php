@@ -6,12 +6,12 @@ declare(strict_types=1);
  * Maho
  *
  * @category   Maho
- * @package    Maho_ApiPlatform
+ * @package    Maho_Giftcard
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Giftcard\Api\Resource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
@@ -21,8 +21,8 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use Maho\ApiPlatform\State\Provider\GiftCardProvider;
-use Maho\ApiPlatform\State\Processor\GiftCardProcessor;
+use Maho\Giftcard\Api\State\Provider\GiftCardProvider;
+use Maho\Giftcard\Api\State\Processor\GiftCardProcessor;
 
 #[ApiResource(
     shortName: 'GiftCard',

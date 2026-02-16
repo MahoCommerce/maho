@@ -6,16 +6,16 @@ declare(strict_types=1);
  * Maho
  *
  * @category   Maho
- * @package    Maho_ApiPlatform
+ * @package    Maho_Giftcard
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Maho\Giftcard\Api\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use Maho\ApiPlatform\ApiResource\GiftCard;
+use Maho\Giftcard\Api\Resource\GiftCard;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
