@@ -148,8 +148,9 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
                     'role_type = ?' => 'G',
                 ]);
 
-                // Insert new permission rules
-                $permissions = $data['permissions'] ?? [];
+                // Parse permissions from tree (comma-separated string) or checkbox array
+                $permissions = $this->parsePermissions($data);
+
                 if (in_array('all', $permissions, true)) {
                     $write->insert($ruleTable, [
                         'role_id'        => $id,
@@ -161,6 +162,9 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
                     ]);
                 } else {
                     foreach ($permissions as $permission) {
+                        if ($permission === '') {
+                            continue;
+                        }
                         $write->insert($ruleTable, [
                             'role_id'        => $id,
                             'resource_id'    => $permission,
@@ -224,5 +228,43 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
         }
 
         $this->_redirect('*/*/');
+    }
+
+    /**
+     * Parse permissions from POST data.
+     *
+     * Supports both:
+     * - Tree format: permissions_tree = "all" or comma-separated permission IDs
+     * - Legacy checkbox format: permissions[] array
+     *
+     * Tree node IDs prefixed with "group_" or "resource_" are intermediate nodes
+     * and are filtered out — only leaf permission IDs (e.g. "products/read") are saved.
+     *
+     * @return string[]
+     */
+    private function parsePermissions(array $data): array
+    {
+        // Tree format (new)
+        if (isset($data['permissions_tree'])) {
+            $treeValue = trim((string) $data['permissions_tree']);
+            if ($treeValue === 'all') {
+                return ['all'];
+            }
+            if ($treeValue === '') {
+                return [];
+            }
+            // Filter out intermediate group/resource node IDs
+            return array_values(array_filter(
+                explode(',', $treeValue),
+                fn(string $id) => !str_starts_with($id, 'group_') && !str_starts_with($id, 'resource_'),
+            ));
+        }
+
+        // Legacy checkbox format
+        if (isset($data['permissions']) && is_array($data['permissions'])) {
+            return $data['permissions'];
+        }
+
+        return [];
     }
 }
