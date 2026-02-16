@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Checkout\Api\Resource;
 
 /**
  * CartPrices DTO - Data transfer object for cart totals and pricing

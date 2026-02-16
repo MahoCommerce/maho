@@ -11,12 +11,12 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Maho\Checkout\Api\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use Maho\ApiPlatform\ApiResource\Cart;
-use Maho\ApiPlatform\ApiResource\CartItem;
+use Maho\Checkout\Api\Resource\Cart;
+use Maho\Checkout\Api\Resource\CartItem;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
