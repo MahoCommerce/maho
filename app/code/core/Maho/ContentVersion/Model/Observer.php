@@ -19,21 +19,25 @@ class Maho_ContentVersion_Model_Observer
      */
     public const REGISTRY_EDITOR = 'contentversion_editor';
 
-    private const ENTITY_TYPE_MAP = [
-        'Mage_Cms_Model_Page' => 'cms_page',
-        'Mage_Cms_Model_Block' => 'cms_block',
-        'Maho_Blog_Model_Post' => 'blog_post',
-    ];
+    public function beforeCmsPageSave(Maho\Event\Observer $observer): void
+    {
+        $this->createVersionFromEvent($observer, 'cms_page');
+    }
 
-    public function beforeSave(Maho\Event\Observer $observer): void
+    public function beforeCmsBlockSave(Maho\Event\Observer $observer): void
+    {
+        $this->createVersionFromEvent($observer, 'cms_block');
+    }
+
+    public function beforeBlogPostSave(Maho\Event\Observer $observer): void
+    {
+        $this->createVersionFromEvent($observer, 'blog_post');
+    }
+
+    private function createVersionFromEvent(Maho\Event\Observer $observer, string $entityType): void
     {
         /** @var Mage_Core_Model_Abstract $object */
         $object = $observer->getEvent()->getData('object');
-
-        $entityType = $this->getEntityType($object);
-        if ($entityType === null) {
-            return;
-        }
 
         // Only version existing entities (updates, not creates)
         if (!$object->getId() || $object->isObjectNew()) {
@@ -46,16 +50,6 @@ class Maho_ContentVersion_Model_Observer
         } catch (\Exception $e) {
             Mage::logException($e);
         }
-    }
-
-    private function getEntityType(Mage_Core_Model_Abstract $object): ?string
-    {
-        foreach (self::ENTITY_TYPE_MAP as $class => $type) {
-            if (class_exists($class) && $object instanceof $class) {
-                return $type;
-            }
-        }
-        return null;
     }
 
     private function detectEditor(): string
