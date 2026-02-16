@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
-use Maho\ApiPlatform\ApiResource\Address;
+use Maho\Customer\Api\Resource\Address;
 
 /**
  * Centralized address mapping service

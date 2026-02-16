@@ -19,7 +19,7 @@ use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\ApiResource\Order;
 use Maho\ApiPlatform\ApiResource\OrderItem;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
-use Maho\ApiPlatform\ApiResource\Address;
+use Maho\Customer\Api\Resource\Address;
 use Maho\ApiPlatform\ApiResource\PosPayment;
 use Maho\ApiPlatform\ApiResource\PaymentSummary;
 use Maho\ApiPlatform\ApiResource\Shipment;

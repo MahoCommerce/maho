@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\ApiPlatform\State\Provider\OrderProvider;
+use Maho\Customer\Api\Resource\Address;
 use Maho\ApiPlatform\State\Processor\OrderProcessor;
 
 #[ApiResource(
