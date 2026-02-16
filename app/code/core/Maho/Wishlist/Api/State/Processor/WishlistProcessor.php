@@ -11,15 +11,15 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Maho\Wishlist\Api\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\State\ProcessorInterface;
-use Maho\ApiPlatform\ApiResource\WishlistItem;
+use Maho\Wishlist\Api\Resource\WishlistItem;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\CartService;
-use Maho\ApiPlatform\State\Provider\WishlistProvider;
+use Maho\Wishlist\Api\State\Provider\WishlistProvider;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

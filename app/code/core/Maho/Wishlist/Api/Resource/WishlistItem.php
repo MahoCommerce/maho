@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Wishlist\Api\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -21,8 +21,8 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
-use Maho\ApiPlatform\State\Provider\WishlistProvider;
-use Maho\ApiPlatform\State\Processor\WishlistProcessor;
+use Maho\Wishlist\Api\State\Provider\WishlistProvider;
+use Maho\Wishlist\Api\State\Processor\WishlistProcessor;
 
 #[ApiResource(
     shortName: 'WishlistItem',

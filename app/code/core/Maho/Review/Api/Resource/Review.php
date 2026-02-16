@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Review\Api\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
@@ -22,8 +22,8 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
-use Maho\ApiPlatform\State\Provider\ReviewProvider;
-use Maho\ApiPlatform\State\Processor\ReviewProcessor;
+use Maho\Review\Api\State\Provider\ReviewProvider;
+use Maho\Review\Api\State\Processor\ReviewProcessor;
 
 #[ApiResource(
     shortName: 'Review',
