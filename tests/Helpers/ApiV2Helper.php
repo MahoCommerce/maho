@@ -89,6 +89,53 @@ class ApiV2Helper
             }
         }
 
+        // Delete CMS pages
+        if (!empty(self::$createdEntities['cms_page'])) {
+            $ids = self::$createdEntities['cms_page'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM cms_page_store WHERE page_id IN ({$idList})");
+                $write->query("DELETE FROM cms_page WHERE page_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        // Delete CMS blocks
+        if (!empty(self::$createdEntities['cms_block'])) {
+            $ids = self::$createdEntities['cms_block'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM cms_block_store WHERE block_id IN ({$idList})");
+                $write->query("DELETE FROM cms_block WHERE block_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        // Delete blog posts
+        if (!empty(self::$createdEntities['blog_post'])) {
+            $ids = self::$createdEntities['blog_post'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM blog_post_store WHERE post_id IN ({$idList})");
+                $write->query("DELETE FROM blog_post WHERE post_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
+        // Delete categories
+        if (!empty(self::$createdEntities['category'])) {
+            $ids = self::$createdEntities['category'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                $write->query("DELETE FROM catalog_category_entity WHERE entity_id IN ({$idList})");
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
+
         // Delete orders and related records
         if (!empty(self::$createdEntities['order'])) {
             $ids = self::$createdEntities['order'];
@@ -278,6 +325,96 @@ class ApiV2Helper
         $merged = array_filter($merged, fn($v) => $v !== null);
 
         return JWT::encode($merged, $secret, 'HS256');
+    }
+
+    /**
+     * HTTP POST multipart/form-data request (for file uploads)
+     *
+     * @param array<string, string> $fields Form fields
+     * @param array<string, string> $files File fields (name => filepath)
+     * @return array{status: int, json: array, raw: string, headers: array}
+     */
+    public static function postMultipart(string $path, array $fields, array $files, ?string $token = null): array
+    {
+        $url = self::getBaseUrl() . $path;
+        $boundary = 'boundary' . uniqid();
+
+        $body = '';
+        foreach ($fields as $name => $value) {
+            $body .= "--{$boundary}\r\n";
+            $body .= "Content-Disposition: form-data; name=\"{$name}\"\r\n\r\n";
+            $body .= "{$value}\r\n";
+        }
+        foreach ($files as $name => $filepath) {
+            $filename = basename($filepath);
+            $mime = mime_content_type($filepath) ?: 'application/octet-stream';
+            $content = file_get_contents($filepath);
+            $body .= "--{$boundary}\r\n";
+            $body .= "Content-Disposition: form-data; name=\"{$name}\"; filename=\"{$filename}\"\r\n";
+            $body .= "Content-Type: {$mime}\r\n\r\n";
+            $body .= "{$content}\r\n";
+        }
+        $body .= "--{$boundary}--\r\n";
+
+        $headers = [
+            "Content-Type: multipart/form-data; boundary={$boundary}",
+            'Accept: application/json',
+        ];
+
+        if ($token !== null) {
+            $headers[] = 'Authorization: Bearer ' . $token;
+        } else {
+            $headers[] = 'Authorization: Basic ' . base64_encode('tenniswarehouse:tenniswarehouse');
+        }
+
+        $options = [
+            'http' => [
+                'method' => 'POST',
+                'header' => implode("\r\n", $headers),
+                'content' => $body,
+                'ignore_errors' => true,
+                'timeout' => 30,
+                'follow_location' => false,
+            ],
+        ];
+
+        // For Bearer token auth, embed nginx basic auth in URL
+        $requestUrl = $url;
+        if ($token !== null) {
+            $parsed = parse_url($url);
+            $scheme = $parsed['scheme'] ?? 'https';
+            $host = $parsed['host'] ?? 'localhost';
+            $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
+            $pathPart = ($parsed['path'] ?? '') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
+            $requestUrl = "{$scheme}://tenniswarehouse:tenniswarehouse@{$host}{$port}{$pathPart}";
+        }
+
+        $context = stream_context_create($options);
+        $raw = @file_get_contents($requestUrl, false, $context);
+
+        $status = 500;
+        $responseHeaders = $http_response_header ?? [];
+        if (!empty($responseHeaders)) {
+            if (preg_match('/HTTP\/\d+\.?\d*\s+(\d+)/', $responseHeaders[0], $matches)) {
+                $status = (int) $matches[1];
+            }
+        }
+
+        if ($raw === false) {
+            return [
+                'status' => $status,
+                'json' => ['error' => 'connection_failed', 'message' => 'Failed to connect to API'],
+                'raw' => '',
+                'headers' => $responseHeaders,
+            ];
+        }
+
+        return [
+            'status' => $status,
+            'json' => json_decode($raw, true) ?? [],
+            'raw' => $raw,
+            'headers' => $responseHeaders,
+        ];
     }
 
     /**
