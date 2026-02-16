@@ -25,14 +25,6 @@ security:
             pattern: ^/api/admin/graphql
             security: false
 
-        # Admin Content API - OAuth consumer key:secret auth
-        admin_api:
-            pattern: ^/api/admin/
-            stateless: true
-            provider: maho_admin
-            custom_authenticators:
-                - Maho\ApiPlatform\Security\AdminApiAuthenticator
-
         # Public GraphQL endpoint - OAuth2 auth
         api_graphql:
             pattern: ^/api/graphql
@@ -51,7 +43,6 @@ security:
 
     access_control:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
-        - { path: ^/api/admin/graphql, roles: ROLE_ADMIN }
         - { path: ^/api/graphql$, roles: PUBLIC_ACCESS, methods: [GET] }
         # GraphQL endpoint is public — per-operation security handles authorization
         - { path: ^/api/graphql$, roles: PUBLIC_ACCESS, methods: [POST] }
