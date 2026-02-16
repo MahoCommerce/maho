@@ -28,9 +28,6 @@ services:
     Maho\ApiPlatform\State\Provider\CustomerProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CustomerProvider' }
-    Maho\ApiPlatform\State\Provider\CartProvider:
-        tags:
-            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CartProvider' }
     Maho\ApiPlatform\State\Provider\OrderProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\OrderProvider' }
