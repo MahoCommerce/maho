@@ -98,6 +98,9 @@ class Product
     #[ApiProperty(description: 'SEO meta keywords')]
     public ?string $metaKeywords = null;
 
+    #[ApiProperty(description: 'Page layout template (e.g. one_column, two_columns_left)')]
+    public ?string $pageLayout = null;
+
     #[ApiProperty(description: 'Product name')]
     public string $name = '';
 

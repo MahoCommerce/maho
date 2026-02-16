@@ -6,6 +6,8 @@ namespace Maho\ApiPlatform\ApiResource\Admin;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\State\Admin\CmsPageProcessor;
@@ -15,6 +17,10 @@ use Maho\ApiPlatform\State\Admin\CmsPageProvider;
     uriTemplate: '/admin/cms-pages',
     shortName: 'AdminCmsPage',
     operations: [
+        new GetCollection(
+            provider: CmsPageProvider::class,
+            description: 'Lists all CMS pages',
+        ),
         new Post(
             processor: CmsPageProcessor::class,
             description: 'Creates a new CMS page with content sanitization',
@@ -27,6 +33,9 @@ use Maho\ApiPlatform\State\Admin\CmsPageProvider;
     shortName: 'AdminCmsPage',
     provider: CmsPageProvider::class,
     operations: [
+        new Get(
+            description: 'Gets a single CMS page',
+        ),
         new Put(
             processor: CmsPageProcessor::class,
             description: 'Updates an existing CMS page with content sanitization',

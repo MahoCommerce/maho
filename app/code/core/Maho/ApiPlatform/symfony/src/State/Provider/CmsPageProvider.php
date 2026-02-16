@@ -149,6 +149,7 @@ final class CmsPageProvider implements ProviderInterface
 
         $dto->metaKeywords = $page->getMetaKeywords();
         $dto->metaDescription = $page->getMetaDescription();
+        $dto->rootTemplate = $page->getRootTemplate();
         $dto->status = $page->getIsActive() ? 'enabled' : 'disabled';
         $dto->createdAt = $page->getCreationTime();
         $dto->updatedAt = $page->getUpdateTime();

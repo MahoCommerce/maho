@@ -77,6 +77,7 @@ class Category
     public ?string $metaTitle = null;
     public ?string $metaKeywords = null;
     public ?string $metaDescription = null;
+    public ?string $pageLayout = null;
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
 }

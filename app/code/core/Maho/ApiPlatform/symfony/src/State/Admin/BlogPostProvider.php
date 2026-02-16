@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\State\Admin;
 
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Mage;
 use Maho\ApiPlatform\ApiResource\Admin\BlogPost;
+use Maho_Blog_Model_Post;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -16,18 +18,48 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final class BlogPostProvider implements ProviderInterface
 {
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?BlogPost
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|array|null
     {
+        if ($operation instanceof GetCollection) {
+            return $this->getCollection();
+        }
+
         if (!isset($uriVariables['id'])) {
             return null;
         }
 
-        $post = Mage::getModel('blog/post')->load($uriVariables['id']);
+        return $this->getItem((int) $uriVariables['id']);
+    }
+
+    /**
+     * @return BlogPost[]
+     */
+    private function getCollection(): array
+    {
+        $collection = Mage::getResourceModel('blog/post_collection')
+            ->setOrder('publish_date', 'DESC');
+
+        $posts = [];
+        foreach ($collection as $post) {
+            $posts[] = $this->mapPostToDto($post);
+        }
+
+        return $posts;
+    }
+
+    private function getItem(int $id): BlogPost
+    {
+        $post = Mage::getModel('blog/post')->load($id);
 
         if (!$post->getId()) {
             throw new NotFoundHttpException('Blog post not found');
         }
 
+        return $this->mapPostToDto($post);
+    }
+
+    private function mapPostToDto(Maho_Blog_Model_Post $post): BlogPost
+    {
         $dto = new BlogPost();
         $dto->id = (int) $post->getId();
         $dto->identifier = $post->getData('url_key') ?? '';
