@@ -25,31 +25,45 @@ class Maho_ContentVersion_Model_Resource_Version extends Mage_Core_Model_Resourc
      * Uses INSERT...SELECT COALESCE(MAX(version_number),0)+1 via Maho's
      * cross-database insertFromSelect() so concurrent saves for the same
      * entity cannot produce duplicate numbers. The unique index on
-     * (entity_type, entity_id, version_number) acts as a final safety net.
+     * (entity_type, entity_id, version_number) acts as a final safety net;
+     * on duplicate key the insert is retried with a fresh MAX().
      */
     public function insertWithNextVersionNumber(array $data): int
     {
         $adapter = $this->_getWriteAdapter();
         $table = $this->getMainTable();
 
-        $select = $adapter->select()
-            ->from($table, [
-                'entity_type' => new Maho\Db\Expr($adapter->quote($data['entity_type'])),
-                'entity_id' => new Maho\Db\Expr($adapter->quote($data['entity_id'])),
-                'version_number' => new Maho\Db\Expr('COALESCE(MAX(version_number), 0) + 1'),
-                'content_data' => new Maho\Db\Expr($adapter->quote($data['content_data'])),
-                'editor' => new Maho\Db\Expr($adapter->quote($data['editor'])),
-            ])
-            ->where('entity_type = ?', $data['entity_type'])
-            ->where('entity_id = ?', $data['entity_id']);
+        $maxRetries = 3;
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $select = $adapter->select()
+                    ->from($table, [
+                        'entity_type' => new Maho\Db\Expr($adapter->quote($data['entity_type'])),
+                        'entity_id' => new Maho\Db\Expr($adapter->quote($data['entity_id'])),
+                        'version_number' => new Maho\Db\Expr('COALESCE(MAX(version_number), 0) + 1'),
+                        'content_data' => new Maho\Db\Expr($adapter->quote($data['content_data'])),
+                        'editor' => new Maho\Db\Expr($adapter->quote($data['editor'])),
+                    ])
+                    ->where('entity_type = ?', $data['entity_type'])
+                    ->where('entity_id = ?', $data['entity_id']);
 
-        $query = $select->insertFromSelect(
-            $table,
-            ['entity_type', 'entity_id', 'version_number', 'content_data', 'editor'],
-            false,
-        );
-        $adapter->query($query);
+                $query = $select->insertFromSelect(
+                    $table,
+                    ['entity_type', 'entity_id', 'version_number', 'content_data', 'editor'],
+                    false,
+                );
+                $adapter->query($query);
 
-        return (int) $adapter->lastInsertId($table);
+                return (int) $adapter->lastInsertId($table);
+            } catch (\Exception $e) {
+                // Retry on duplicate key (unique index collision from concurrent save)
+                if ($attempt >= $maxRetries || !str_contains($e->getMessage(), 'Duplicate entry')) {
+                    throw $e;
+                }
+            }
+        }
+
+        // Unreachable, but satisfies static analysis
+        throw new \RuntimeException('Failed to insert version after retries');
     }
 }

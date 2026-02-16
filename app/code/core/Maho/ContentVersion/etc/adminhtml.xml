@@ -18,14 +18,6 @@
                         <children>
                             <contentversion translate="title" module="contentversion">
                                 <title>Content Versioning</title>
-                                <children>
-                                    <preview translate="title" module="contentversion">
-                                        <title>Preview Versions</title>
-                                    </preview>
-                                    <restore translate="title" module="contentversion">
-                                        <title>Restore Versions</title>
-                                    </restore>
-                                </children>
                             </contentversion>
                         </children>
                     </cms>
