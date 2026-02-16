@@ -35,31 +35,46 @@ class ApiPermissionRegistry
      * Format: 'resource' => ['label' => string, 'group' => string, 'operations' => ['op' => 'Label', ...]]
      */
     private const RESOURCES = [
-        // Storefront resources
-        'products'     => ['label' => 'Products', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
-        'categories'   => ['label' => 'Categories', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
-        'orders'       => ['label' => 'Orders', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Place', 'write' => 'Manage']],
-        'customers'    => ['label' => 'Customers', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Register', 'write' => 'Update']],
-        'carts'        => ['label' => 'Carts', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Create & Modify']],
-        'addresses'    => ['label' => 'Addresses', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Manage']],
-        'wishlists'    => ['label' => 'Wishlists', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Add/Remove']],
-        'reviews'      => ['label' => 'Reviews', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Submit']],
-        'shipments'    => ['label' => 'Shipments', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Create']],
-        'giftcards'    => ['label' => 'Gift Cards', 'group' => 'Storefront', 'operations' => ['read' => 'Check Balance', 'create' => 'Create', 'write' => 'Adjust Balance']],
-        'newsletter'   => ['label' => 'Newsletter', 'group' => 'Storefront', 'operations' => ['read' => 'View Status', 'write' => 'Subscribe/Unsubscribe']],
-        'cms'          => ['label' => 'CMS Pages & Blocks', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
-        'blog'         => ['label' => 'Blog Posts', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
-        'stores'       => ['label' => 'Store Config', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
-        'countries'    => ['label' => 'Countries', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
-        'url-resolver' => ['label' => 'URL Resolver', 'group' => 'Storefront', 'operations' => ['read' => 'Resolve']],
-        'invoices'     => ['label' => 'Invoices', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
-        'pos'          => ['label' => 'POS', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+        // ── Catalog ──
+        'products'           => ['label' => 'Products', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'product-attributes' => ['label' => 'Product Attributes', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'product-images'     => ['label' => 'Product Images', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Upload & Update', 'delete' => 'Delete']],
+        'product-links'      => ['label' => 'Product Links', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+        'product-options'    => ['label' => 'Custom Options', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Manage', 'delete' => 'Delete']],
+        'tier-prices'        => ['label' => 'Tier Prices', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+        'categories'         => ['label' => 'Categories', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
 
-        // Admin content resources
-        'admin/cms-pages'  => ['label' => 'CMS Pages', 'group' => 'Admin', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
-        'admin/cms-blocks' => ['label' => 'CMS Blocks', 'group' => 'Admin', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
-        'admin/blog-posts' => ['label' => 'Blog Posts', 'group' => 'Admin', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
-        'admin/media'      => ['label' => 'Media', 'group' => 'Admin', 'operations' => ['read' => 'List', 'write' => 'Upload', 'delete' => 'Delete']],
+        // ── Orders & Fulfillment ──
+        'orders'          => ['label' => 'Orders', 'group' => 'Storefront', 'section' => 'Sales', 'operations' => ['read' => 'View', 'create' => 'Place', 'write' => 'Manage']],
+        'order-comments'  => ['label' => 'Order Comments', 'group' => 'Storefront', 'section' => 'Sales', 'operations' => ['read' => 'View', 'write' => 'Add']],
+        'invoices'        => ['label' => 'Invoices', 'group' => 'Storefront', 'section' => 'Sales', 'operations' => ['read' => 'View', 'create' => 'Create']],
+        'shipments'       => ['label' => 'Shipments', 'group' => 'Storefront', 'section' => 'Sales', 'operations' => ['read' => 'View', 'create' => 'Create']],
+        'credit-memos'    => ['label' => 'Credit Memos', 'group' => 'Storefront', 'section' => 'Sales', 'operations' => ['read' => 'View', 'create' => 'Create']],
+        'payments'        => ['label' => 'Payments', 'group' => 'Storefront', 'section' => 'Sales', 'operations' => ['read' => 'View', 'write' => 'Record']],
+
+        // ── Customers ──
+        'customers' => ['label' => 'Customers', 'group' => 'Storefront', 'section' => 'Customers', 'operations' => ['read' => 'View', 'create' => 'Register', 'write' => 'Update']],
+        'addresses' => ['label' => 'Addresses', 'group' => 'Storefront', 'section' => 'Customers', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+        'carts'     => ['label' => 'Carts', 'group' => 'Storefront', 'section' => 'Customers', 'operations' => ['read' => 'View', 'write' => 'Create & Modify']],
+        'wishlists' => ['label' => 'Wishlists', 'group' => 'Storefront', 'section' => 'Customers', 'operations' => ['read' => 'View', 'write' => 'Add/Remove']],
+        'reviews'   => ['label' => 'Reviews', 'group' => 'Storefront', 'section' => 'Customers', 'operations' => ['read' => 'View', 'write' => 'Submit']],
+
+        // ── Store & Config ──
+        'stores'    => ['label' => 'Stores & Store Views', 'group' => 'Storefront', 'section' => 'System', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+        'countries' => ['label' => 'Countries', 'group' => 'Storefront', 'section' => 'System', 'operations' => ['read' => 'View']],
+
+        // ── Other ──
+        'giftcards'    => ['label' => 'Gift Cards', 'group' => 'Storefront', 'section' => 'Other', 'operations' => ['read' => 'Check Balance', 'create' => 'Create', 'write' => 'Adjust Balance']],
+        'newsletter'   => ['label' => 'Newsletter', 'group' => 'Storefront', 'section' => 'Other', 'operations' => ['read' => 'View Status', 'write' => 'Subscribe/Unsubscribe']],
+
+        'url-resolver' => ['label' => 'URL Resolver', 'group' => 'Storefront', 'section' => 'System', 'operations' => ['read' => 'Resolve']],
+        'pos'          => ['label' => 'POS', 'group' => 'Storefront', 'section' => 'Other', 'operations' => ['read' => 'View', 'write' => 'Manage']],
+
+        // ── Content ──
+        'cms-pages'  => ['label' => 'CMS Pages', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'cms-blocks' => ['label' => 'CMS Blocks', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'blog-posts' => ['label' => 'Blog Posts', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'media'      => ['label' => 'Media', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'List', 'write' => 'Upload', 'delete' => 'Delete']],
     ];
 
     /**
@@ -67,8 +82,8 @@ class ApiPermissionRegistry
      * These are listed in security.yaml as PUBLIC_ACCESS for GET.
      */
     private const PUBLIC_READ_RESOURCES = [
-        'products', 'categories', 'cms', 'blog', 'stores',
-        'countries', 'url-resolver', 'invoices',
+        'products', 'categories', 'cms-pages', 'cms-blocks', 'blog-posts', 'stores',
+        'countries', 'url-resolver',
     ];
 
     /**
@@ -101,10 +116,10 @@ class ApiPermissionRegistry
         'reviews'      => 'reviews',
         'giftcards'    => 'giftcards',
         'newsletter'   => 'newsletter',
-        'cms-pages'    => 'admin/cms-pages',
-        'cms-blocks'   => 'admin/cms-blocks',
-        'blog-posts'   => 'admin/blog-posts',
-        'media'        => 'admin/media',
+        'cms-pages'    => 'cms-pages',
+        'cms-blocks'   => 'cms-blocks',
+        'blog-posts'   => 'blog-posts',
+        'media'        => 'media',
         'stores'       => 'stores',
         'store-config' => 'stores',
         'countries'    => 'countries',
@@ -210,14 +225,14 @@ class ApiPermissionRegistry
         'subscribeNewsletter'   => 'newsletter',
         'unsubscribeNewsletter' => 'newsletter',
         // CMS
-        'cmsPage'            => 'admin/cms-pages',
-        'cmsPages'           => 'admin/cms-pages',
-        'cmsBlock'           => 'admin/cms-blocks',
-        'cmsBlocks'          => 'admin/cms-blocks',
-        'cmsBlockByIdentifier' => 'admin/cms-blocks',
+        'cmsPage'            => 'cms-pages',
+        'cmsPages'           => 'cms-pages',
+        'cmsBlock'           => 'cms-blocks',
+        'cmsBlocks'          => 'cms-blocks',
+        'cmsBlockByIdentifier' => 'cms-blocks',
         // Blog
-        'blogPost'           => 'admin/blog-posts',
-        'blogPosts'          => 'admin/blog-posts',
+        'blogPost'           => 'blog-posts',
+        'blogPosts'          => 'blog-posts',
         // Stores
         'storeConfig'        => 'stores',
         // Countries
@@ -304,22 +319,22 @@ class ApiPermissionRegistry
      * - Skips read operations on publicly-readable resources
      * - Groups as 'Storefront Operations' and 'Content Management'
      *
-     * @return array<string, array<string, array{label: string, operations: array<string, string>}>>
+     * @return array<string, array<string, array<string, array{label: string, operations: array<string, string>}>>>
      */
     public function getServicePermissionsByGroup(): array
     {
         $groupLabels = [
             'Storefront' => 'Storefront Operations',
-            'Admin' => 'Content Management',
         ];
 
+        /** @var array<string, array<string, array<string, array{label: string, operations: array<string, string>}>>> $grouped */
         $grouped = [];
         foreach (self::RESOURCES as $resourceId => $config) {
             $operations = $config['operations'];
 
             // Skip resources that are entirely public read-only
-            /** @phpstan-ignore isset.offset */
-            if ($this->isPublicRead($resourceId) && count($operations) === 1 && isset($operations['read'])) {
+            /** @phpstan-ignore function.alreadyNarrowedType */
+            if ($this->isPublicRead($resourceId) && count($operations) === 1 && array_key_exists('read', $operations)) {
                 continue;
             }
 
@@ -334,7 +349,9 @@ class ApiPermissionRegistry
 
             /** @phpstan-ignore nullCoalesce.offset */
             $groupKey = $groupLabels[$config['group']] ?? $config['group'];
-            $grouped[$groupKey][$resourceId] = [
+            /** @phpstan-ignore nullCoalesce.offset */
+            $section = $config['section'] ?? $groupKey;
+            $grouped[$groupKey][$section][$resourceId] = [
                 'label' => $config['label'],
                 'operations' => $operations,
             ];

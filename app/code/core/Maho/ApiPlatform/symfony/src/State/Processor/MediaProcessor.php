@@ -34,7 +34,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  * Media State Processor
  *
  * Handles file uploads (POST) and deletions (DELETE) for the media gallery.
- * Requires JWT authentication with admin/media/write permission.
+ * Requires JWT authentication with media/write permission.
  *
  * @implements ProcessorInterface<Media, Media|null>
  */
@@ -53,7 +53,7 @@ final class MediaProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Media
     {
         $user = $this->getAuthorizedUser();
-        $this->requirePermission($user, 'admin/media/write');
+        $this->requirePermission($user, 'media/write');
 
         if ($operation instanceof DeleteOperationInterface) {
             return $this->handleDelete($uriVariables['path'], $user);

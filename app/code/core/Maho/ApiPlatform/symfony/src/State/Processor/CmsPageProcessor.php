@@ -31,7 +31,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  * CMS Page State Processor
  *
  * Handles create, update, and delete operations for CMS pages.
- * Requires JWT authentication with admin/cms-pages/write permission.
+ * Requires JWT authentication with cms-pages/write permission.
  *
  * @implements ProcessorInterface<CmsPage, CmsPage|null>
  */
@@ -48,11 +48,11 @@ final class CmsPageProcessor implements ProcessorInterface
         $user = $this->getAuthorizedUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'admin/cms-pages/delete');
+            $this->requirePermission($user, 'cms-pages/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-        $this->requirePermission($user, 'admin/cms-pages/write');
+        $this->requirePermission($user, 'cms-pages/write');
 
         assert($data instanceof CmsPage);
 

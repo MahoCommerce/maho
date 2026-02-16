@@ -29,7 +29,7 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  * Media State Provider
  *
  * Lists files in a media folder.
- * Requires JWT authentication with admin/media/read permission.
+ * Requires JWT authentication with media/read permission.
  *
  * @implements ProviderInterface<Media>
  */
@@ -50,8 +50,8 @@ final class MediaProvider implements ProviderInterface
     {
         $user = $this->security->getUser();
 
-        if (!$user instanceof ApiUser || !$user->hasPermission('admin/media/read')) {
-            throw new AccessDeniedHttpException('Missing permission: admin/media/read');
+        if (!$user instanceof ApiUser || !$user->hasPermission('media/read')) {
+            throw new AccessDeniedHttpException('Missing permission: media/read');
         }
 
         return $this->listFiles();

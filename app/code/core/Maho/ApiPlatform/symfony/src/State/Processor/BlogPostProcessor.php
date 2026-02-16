@@ -31,7 +31,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  * Blog Post State Processor
  *
  * Handles create, update, and delete operations for blog posts.
- * Requires JWT authentication with admin/blog-posts/write permission.
+ * Requires JWT authentication with blog-posts/write permission.
  *
  * @implements ProcessorInterface<BlogPost, BlogPost|null>
  */
@@ -48,11 +48,11 @@ final class BlogPostProcessor implements ProcessorInterface
         $user = $this->getAuthorizedUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'admin/blog-posts/delete');
+            $this->requirePermission($user, 'blog-posts/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-        $this->requirePermission($user, 'admin/blog-posts/write');
+        $this->requirePermission($user, 'blog-posts/write');
 
         assert($data instanceof BlogPost);
 
