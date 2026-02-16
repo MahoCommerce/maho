@@ -228,9 +228,10 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     public function getNewData($useNamespace = true)
     {
         $data = $this->_getData('new_data');
-        if (is_string($data)) {
+        if (is_string($data) && $data !== '') {
             $data = Mage::helper('core/string')->unserialize($data);
-        } elseif (empty($data) || !is_array($data)) {
+        }
+        if (empty($data) || !is_array($data)) {
             $data = [];
         }
         if ($useNamespace && $this->_dataNamespace) {
