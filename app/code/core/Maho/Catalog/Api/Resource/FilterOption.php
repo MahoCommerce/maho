@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Catalog\Api\Resource;
 
 /**
  * Filter option DTO — embedded in LayeredFilter, not a separate API resource

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Maho\Catalog\Api\State\Processor;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
@@ -22,7 +22,7 @@ use Mage_Catalog_Model_Product_Status;
 use Mage_Catalog_Model_Product_Type;
 use Mage_Catalog_Model_Product_Visibility;
 use Mage_CatalogInventory_Model_Stock_Item;
-use Maho\ApiPlatform\ApiResource\Product;
+use Maho\Catalog\Api\Resource\Product;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;

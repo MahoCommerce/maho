@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Maho\Catalog\Api\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
@@ -19,7 +19,7 @@ use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\ProductService;
 use Maho\ApiPlatform\Service\StoreContext;
-use Maho\ApiPlatform\ApiResource\Product;
+use Maho\Catalog\Api\Resource\Product;
 
 /**
  * Product State Provider - Fetches product data for API Platform
