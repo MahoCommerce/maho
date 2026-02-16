@@ -61,9 +61,6 @@ services:
     Maho\ApiPlatform\State\Provider\ProductProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\ProductProvider' }
-    Maho\ApiPlatform\State\Provider\GiftCardProvider:
-        tags:
-            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\GiftCardProvider' }
     Maho\ApiPlatform\State\Provider\StoreConfigProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\StoreConfigProvider' }

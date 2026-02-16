@@ -6,17 +6,17 @@ declare(strict_types=1);
  * Maho
  *
  * @category   Maho
- * @package    Maho_ApiPlatform
+ * @package    Maho_Giftcard
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Maho\Giftcard\Api\State\Provider;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
-use Maho\ApiPlatform\ApiResource\GiftCard;
+use Maho\Giftcard\Api\Resource\GiftCard;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
 
 /**
