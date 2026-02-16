@@ -144,6 +144,21 @@ final class BlogPostProvider implements ProviderInterface
         $dto->metaDescription = $post->getMetaDescription();
         $dto->metaKeywords = $post->getMetaKeywords();
         $dto->status = $post->getIsActive() ? 'enabled' : 'disabled';
+        $dto->isActive = (bool) $post->getIsActive();
+
+        // Map store IDs for admin consumers
+        $postStores = $post->getStores();
+        if (in_array(0, $postStores)) {
+            $dto->stores = ['all'];
+        } else {
+            $dto->stores = array_map(function ($id) {
+                try {
+                    return \Mage::app()->getStore($id)->getCode();
+                } catch (\Exception $e) {
+                    return (string) $id;
+                }
+            }, $postStores);
+        }
         $dto->createdAt = $post->getCreatedAt();
         $dto->updatedAt = $post->getUpdatedAt();
 
