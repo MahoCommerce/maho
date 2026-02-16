@@ -54,7 +54,7 @@ $confirmMsg = $this->jsQuoteEscape(
 
 <div class="entry-edit" style="margin-top: 1rem;">
     <div class="entry-edit-head"><h4><?= $this->__('Snapshot Data') ?></h4></div>
-    <fieldset>
+    <fieldset class="fieldset-wide">
         <table class="form-list" cellspacing="0">
             <?php foreach ($data as $field => $value): ?>
             <tr>
@@ -64,7 +64,8 @@ $confirmMsg = $this->jsQuoteEscape(
                         <iframe
                             srcdoc="<?= $this->escapeHtml((string) $value) ?>"
                             sandbox=""
-                            style="width: 100%; min-height: 400px; border: 1px solid #ddd; border-radius: 4px; background: #fff;"
+                            style="width: 100%; border: 1px solid #ddd; border-radius: 4px; background: #fff;"
+                            onload="this.style.height = this.contentDocument.documentElement.scrollHeight + 'px'"
                         ></iframe>
                     <?php elseif (is_array($value)): ?>
                         <?= $this->escapeHtml(implode(', ', $value)) ?>

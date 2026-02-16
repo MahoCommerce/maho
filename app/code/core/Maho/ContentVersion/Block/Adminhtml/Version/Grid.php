@@ -76,12 +76,6 @@ class Maho_ContentVersion_Block_Adminhtml_Version_Grid extends Mage_Adminhtml_Bl
             'getter' => 'getId',
             'actions' => [
                 [
-                    'caption' => Mage::helper('contentversion')->__('Preview'),
-                    'url' => ['base' => 'adminhtml/contentversion/preview'],
-                    'field' => 'version_id',
-                    'target' => '_blank',
-                ],
-                [
                     'caption' => Mage::helper('contentversion')->__('Restore'),
                     'confirm' => Mage::helper('contentversion')->__('Are you sure you want to restore this version? The current content will be saved as a new version first.'),
                     'url' => ['base' => 'adminhtml/contentversion/restore'],
@@ -90,7 +84,7 @@ class Maho_ContentVersion_Block_Adminhtml_Version_Grid extends Mage_Adminhtml_Bl
             ],
             'filter' => false,
             'sortable' => false,
-            'width' => '150px',
+            'width' => '80px',
         ]);
 
         return parent::_prepareColumns();
@@ -99,6 +93,6 @@ class Maho_ContentVersion_Block_Adminhtml_Version_Grid extends Mage_Adminhtml_Bl
     #[\Override]
     public function getRowUrl($row): string
     {
-        return '';
+        return $this->getUrl('adminhtml/contentversion/preview', ['version_id' => $row->getId()]);
     }
 }
