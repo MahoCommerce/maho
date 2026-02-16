@@ -129,6 +129,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
         $adminId = null;
         $apiUserId = null;
         $permissions = [];
+        $allowedStoreIds = null;
 
         if (isset($payload->customer_id)) {
             $customerId = (int) $payload->customer_id;
@@ -146,6 +147,10 @@ class OAuth2Authenticator extends AbstractAuthenticator
             $permissions = $payload->permissions;
         }
 
+        if (isset($payload->allowed_store_ids) && is_array($payload->allowed_store_ids)) {
+            $allowedStoreIds = array_map('intval', $payload->allowed_store_ids);
+        }
+
         return new ApiUser(
             identifier: (string) $payload->sub,
             roles: $roles,
@@ -153,6 +158,7 @@ class OAuth2Authenticator extends AbstractAuthenticator
             adminId: $adminId,
             apiUserId: $apiUserId,
             permissions: $permissions,
+            allowedStoreIds: $allowedStoreIds,
         );
     }
 
