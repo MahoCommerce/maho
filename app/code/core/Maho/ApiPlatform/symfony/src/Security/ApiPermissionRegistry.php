@@ -36,8 +36,8 @@ class ApiPermissionRegistry
      */
     private const RESOURCES = [
         // Storefront resources
-        'products'     => ['label' => 'Products', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
-        'categories'   => ['label' => 'Categories', 'group' => 'Storefront', 'operations' => ['read' => 'View']],
+        'products'     => ['label' => 'Products', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'categories'   => ['label' => 'Categories', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
         'orders'       => ['label' => 'Orders', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Place', 'write' => 'Manage']],
         'customers'    => ['label' => 'Customers', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'create' => 'Register', 'write' => 'Update']],
         'carts'        => ['label' => 'Carts', 'group' => 'Storefront', 'operations' => ['read' => 'View', 'write' => 'Create & Modify']],
@@ -79,9 +79,10 @@ class ApiPermissionRegistry
         'reviews'      => 'reviews',
         'giftcards'    => 'giftcards',
         'newsletter'   => 'newsletter',
-        'cms-pages'    => 'cms',
-        'cms-blocks'   => 'cms',
-        'blog-posts'   => 'blog',
+        'cms-pages'    => 'admin/cms-pages',
+        'cms-blocks'   => 'admin/cms-blocks',
+        'blog-posts'   => 'admin/blog-posts',
+        'media'        => 'admin/media',
         'stores'       => 'stores',
         'store-config' => 'stores',
         'countries'    => 'countries',
@@ -187,14 +188,14 @@ class ApiPermissionRegistry
         'subscribeNewsletter'   => 'newsletter',
         'unsubscribeNewsletter' => 'newsletter',
         // CMS
-        'cmsPage'            => 'cms',
-        'cmsPages'           => 'cms',
-        'cmsBlock'           => 'cms',
-        'cmsBlocks'          => 'cms',
-        'cmsBlockByIdentifier' => 'cms',
+        'cmsPage'            => 'admin/cms-pages',
+        'cmsPages'           => 'admin/cms-pages',
+        'cmsBlock'           => 'admin/cms-blocks',
+        'cmsBlocks'          => 'admin/cms-blocks',
+        'cmsBlockByIdentifier' => 'admin/cms-blocks',
         // Blog
-        'blogPost'           => 'blog',
-        'blogPosts'          => 'blog',
+        'blogPost'           => 'admin/blog-posts',
+        'blogPosts'          => 'admin/blog-posts',
         // Stores
         'storeConfig'        => 'stores',
         // Countries

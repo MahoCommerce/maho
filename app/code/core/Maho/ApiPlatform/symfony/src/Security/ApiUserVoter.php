@@ -86,6 +86,7 @@ class ApiUserVoter extends Voter
         return match (strtoupper($method)) {
             'GET', 'HEAD', 'OPTIONS' => 'read',
             'POST' => $this->registry->resourceHasOperation($resource, 'create') ? 'create' : 'write',
+            'DELETE' => $this->registry->resourceHasOperation($resource, 'delete') ? 'delete' : 'write',
             default => 'write',
         };
     }
