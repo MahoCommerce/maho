@@ -81,21 +81,16 @@ class Maho_ContentVersion_Model_Service
             }
         }
 
+        $entityId = (int) $model->getId();
+
         /** @var Maho_ContentVersion_Model_Resource_Version $resource */
         $resource = Mage::getResourceSingleton('contentversion/version');
-        $entityId = (int) $model->getId();
-        $versionNumber = $resource->getNextVersionNumber($entityType, $entityId);
-
-        /** @var Maho_ContentVersion_Model_Version $version */
-        $version = Mage::getModel('contentversion/version');
-        $version->setData([
+        $resource->insertWithNextVersionNumber([
             'entity_type' => $entityType,
             'entity_id' => $entityId,
-            'version_number' => $versionNumber,
+            'content_data' => Mage::helper('core')->jsonEncode($snapshot),
             'editor' => $editor,
         ]);
-        $version->setContentDataEncoded($snapshot);
-        $version->save();
 
         $this->cleanExpired($entityType, $entityId);
     }
@@ -103,8 +98,10 @@ class Maho_ContentVersion_Model_Service
     /**
      * Restore entity from a version snapshot.
      * Creates a new version of the current state first (so restore is reversible).
+     *
+     * @return array{entity_type: string, entity_id: int}
      */
-    public function restoreVersion(int $versionId): Mage_Core_Model_Abstract
+    public function restoreVersion(int $versionId): array
     {
         /** @var Maho_ContentVersion_Model_Version $version */
         $version = Mage::getModel('contentversion/version')->load($versionId);
@@ -126,7 +123,7 @@ class Maho_ContentVersion_Model_Service
         $model->addData($snapshot);
         $model->save();
 
-        return $model;
+        return ['entity_type' => $entityType, 'entity_id' => $entityId];
     }
 
     private function loadEntity(string $entityType, int $entityId): Mage_Core_Model_Abstract

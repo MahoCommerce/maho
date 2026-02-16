@@ -13,7 +13,14 @@ declare(strict_types=1);
 
 class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'cms';
+    public const ADMIN_RESOURCE = 'cms/contentversion';
+
+    #[\Override]
+    public function preDispatch()
+    {
+        $this->_setForcedFormKeyActions(['restore']);
+        return parent::preDispatch();
+    }
 
     public function restoreAction(): void
     {
@@ -27,13 +34,13 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
         try {
             /** @var Maho_ContentVersion_Model_Service $service */
             $service = Mage::getSingleton('contentversion/service');
-            $model = $service->restoreVersion($versionId);
+            $result = $service->restoreVersion($versionId);
 
             $this->_getSession()->addSuccess(
                 $this->__('Content has been restored from version. The previous state was saved as a new version.'),
             );
 
-            $this->_redirectToEntity($versionId);
+            $this->_redirectToEntity($result['entity_type'], $result['entity_id']);
         } catch (Exception $e) {
             $this->_getSession()->addError($e->getMessage());
             $this->_redirectReferer();
@@ -70,13 +77,8 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
         $this->renderLayout();
     }
 
-    private function _redirectToEntity(int $versionId): void
+    private function _redirectToEntity(string $entityType, int $entityId): void
     {
-        /** @var Maho_ContentVersion_Model_Version $version */
-        $version = Mage::getModel('contentversion/version')->load($versionId);
-        $entityType = $version->getData('entity_type');
-        $entityId = (int) $version->getData('entity_id');
-
         match ($entityType) {
             'cms_page' => $this->_redirect('*/cms_page/edit', ['page_id' => $entityId]),
             'cms_block' => $this->_redirect('*/cms_block/edit', ['block_id' => $entityId]),

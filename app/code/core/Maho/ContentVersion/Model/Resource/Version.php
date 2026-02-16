@@ -19,15 +19,37 @@ class Maho_ContentVersion_Model_Resource_Version extends Mage_Core_Model_Resourc
         $this->_init('contentversion/version', 'version_id');
     }
 
-    public function getNextVersionNumber(string $entityType, int $entityId): int
+    /**
+     * Insert a new version row with an atomically computed version_number.
+     *
+     * Uses INSERT...SELECT COALESCE(MAX(version_number),0)+1 via Maho's
+     * cross-database insertFromSelect() so concurrent saves for the same
+     * entity cannot produce duplicate numbers. The unique index on
+     * (entity_type, entity_id, version_number) acts as a final safety net.
+     */
+    public function insertWithNextVersionNumber(array $data): int
     {
-        $adapter = $this->_getReadAdapter();
-        $select = $adapter->select()
-            ->from($this->getMainTable(), [new Maho\Db\Expr('MAX(version_number)')])
-            ->where('entity_type = ?', $entityType)
-            ->where('entity_id = ?', $entityId);
+        $adapter = $this->_getWriteAdapter();
+        $table = $this->getMainTable();
 
-        $max = (int) $adapter->fetchOne($select);
-        return $max + 1;
+        $select = $adapter->select()
+            ->from($table, [
+                'entity_type' => new Maho\Db\Expr($adapter->quote($data['entity_type'])),
+                'entity_id' => new Maho\Db\Expr($adapter->quote($data['entity_id'])),
+                'version_number' => new Maho\Db\Expr('COALESCE(MAX(version_number), 0) + 1'),
+                'content_data' => new Maho\Db\Expr($adapter->quote($data['content_data'])),
+                'editor' => new Maho\Db\Expr($adapter->quote($data['editor'])),
+            ])
+            ->where('entity_type = ?', $data['entity_type'])
+            ->where('entity_id = ?', $data['entity_id']);
+
+        $query = $select->insertFromSelect(
+            $table,
+            ['entity_type', 'entity_id', 'version_number', 'content_data', 'editor'],
+            false,
+        );
+        $adapter->query($query);
+
+        return (int) $adapter->lastInsertId($table);
     }
 }
