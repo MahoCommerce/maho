@@ -21,6 +21,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Maho\ApiPlatform\Service\CartService;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Guest Cart Controller
@@ -141,6 +142,11 @@ class GuestCartController extends AbstractController
             $quote = $this->cartService->addItem($quote, $sku, $qty, $options);
 
             return new JsonResponse($this->mapCartToArray($quote));
+        } catch (HttpException $e) {
+            return new JsonResponse([
+                'error' => 'error',
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -172,6 +178,11 @@ class GuestCartController extends AbstractController
             $quote = $this->cartService->updateItem($quote, $itemId, $qty);
 
             return new JsonResponse($this->mapCartToArray($quote));
+        } catch (HttpException $e) {
+            return new JsonResponse([
+                'error' => 'error',
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -200,6 +211,11 @@ class GuestCartController extends AbstractController
             $quote = $this->cartService->removeItem($quote, $itemId);
 
             return new JsonResponse($this->mapCartToArray($quote));
+        } catch (HttpException $e) {
+            return new JsonResponse([
+                'error' => 'error',
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -277,6 +293,11 @@ class GuestCartController extends AbstractController
             $quote = $this->cartService->applyCoupon($quote, $couponCode);
 
             return new JsonResponse($this->mapCartToArray($quote));
+        } catch (HttpException $e) {
+            return new JsonResponse([
+                'error' => 'error',
+                'message' => $e->getMessage(),
+            ], $e->getStatusCode());
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([

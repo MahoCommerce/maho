@@ -16,6 +16,9 @@ namespace Maho\ApiPlatform\Service;
 /**
  * Cart Service - Business logic for cart operations
  */
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 class CartService
 {
     /**
@@ -127,17 +130,17 @@ class CartService
     {
         // Validate quantity
         if ($qty <= 0) {
-            throw new \RuntimeException('Quantity must be greater than zero');
+            throw new BadRequestHttpException('Quantity must be greater than zero');
         }
         if ($qty > 10000) {
-            throw new \RuntimeException('Quantity cannot exceed 10,000');
+            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
         // First find product ID by SKU
         $productId = \Mage::getResourceModel('catalog/product')->getIdBySku($sku);
 
         if (!$productId) {
-            throw new \RuntimeException("Product with SKU '{$sku}' not found");
+            throw new NotFoundHttpException("Product with SKU '{$sku}' not found");
         }
 
         \Mage::log("Adding product {$sku} (ID: {$productId}) to quote {$quote->getId()}, quote store_id: {$quote->getStoreId()}");
@@ -148,7 +151,7 @@ class CartService
             ->load($productId);
 
         if (!$product->getId()) {
-            throw new \RuntimeException("Product with SKU '{$sku}' not found");
+            throw new NotFoundHttpException("Product with SKU '{$sku}' not found");
         }
 
         // Check if this simple product is a child of a configurable
@@ -256,7 +259,7 @@ class CartService
         // addProduct returns a string error message on failure
         if (is_string($result)) {
             \Mage::log("Failed to add product: {$result}");
-            throw new \RuntimeException("Failed to add product: {$result}");
+            throw new BadRequestHttpException("Failed to add product: {$result}");
         }
 
         // If price is still 0 after addProduct, manually set it on the quote item
@@ -321,16 +324,16 @@ class CartService
     {
         // Validate quantity
         if ($qty <= 0) {
-            throw new \RuntimeException('Quantity must be greater than zero');
+            throw new BadRequestHttpException('Quantity must be greater than zero');
         }
         if ($qty > 10000) {
-            throw new \RuntimeException('Quantity cannot exceed 10,000');
+            throw new BadRequestHttpException('Quantity cannot exceed 10,000');
         }
 
         $item = $quote->getItemById($itemId);
 
         if (!$item) {
-            throw new \RuntimeException("Cart item with ID '{$itemId}' not found");
+            throw new NotFoundHttpException("Cart item with ID '{$itemId}' not found");
         }
 
         $item->setQty($qty);
@@ -383,7 +386,7 @@ class CartService
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon')->load($couponCode, 'code');
         if (!$coupon->getId()) {
-            throw new \RuntimeException("Coupon code '{$couponCode}' is not valid");
+            throw new BadRequestHttpException("Coupon code '{$couponCode}' is not valid");
         }
 
         $quote->setCouponCode($couponCode);
@@ -392,7 +395,7 @@ class CartService
 
         // Verify coupon was applied successfully
         if ($quote->getCouponCode() !== $couponCode) {
-            throw new \RuntimeException("Coupon code '{$couponCode}' could not be applied");
+            throw new BadRequestHttpException("Coupon code '{$couponCode}' could not be applied");
         }
 
         return $quote;
@@ -484,7 +487,7 @@ class CartService
             }
 
             if (!in_array($shippingMethod, $availableMethods, true)) {
-                throw new \RuntimeException('Shipping method is not available for this address');
+                throw new BadRequestHttpException('Shipping method is not available for this address');
             }
         }
 
@@ -519,7 +522,7 @@ class CartService
             }
 
             if (!$isAvailable) {
-                throw new \RuntimeException('Payment method is not available');
+                throw new BadRequestHttpException('Payment method is not available');
             }
         }
 
@@ -596,7 +599,7 @@ class CartService
         $guestCart = \Mage::getModel('sales/quote')->load($guestCartId);
 
         if (!$guestCart->getId()) {
-            throw new \RuntimeException('Guest cart not found');
+            throw new NotFoundHttpException('Guest cart not found');
         }
 
         $customerCart = $this->getCustomerCart($customerId);
