@@ -151,6 +151,22 @@ final class CmsPageProvider implements ProviderInterface
         $dto->metaDescription = $page->getMetaDescription();
         $dto->rootTemplate = $page->getRootTemplate();
         $dto->status = $page->getIsActive() ? 'enabled' : 'disabled';
+        $dto->isActive = (bool) $page->getIsActive();
+
+        // Map store IDs for admin consumers
+        $storeIds = $page->getResource()->lookupStoreIds($page->getId());
+        if (in_array(0, $storeIds)) {
+            $dto->stores = ['all'];
+        } else {
+            $dto->stores = array_map(function ($id) {
+                try {
+                    return \Mage::app()->getStore($id)->getCode();
+                } catch (\Exception $e) {
+                    return (string) $id;
+                }
+            }, $storeIds);
+        }
+
         $dto->createdAt = $page->getCreationTime();
         $dto->updatedAt = $page->getUpdateTime();
 
