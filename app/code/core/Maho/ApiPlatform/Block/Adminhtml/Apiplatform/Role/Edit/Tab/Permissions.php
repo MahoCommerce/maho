@@ -84,35 +84,45 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
 
         $tree = [];
 
-        foreach ($serviceGroups as $groupName => $resources) {
+        foreach ($serviceGroups as $groupName => $sections) {
             $groupNode = [
                 'text' => $groupName,
                 'id' => 'group_' . strtolower(str_replace(' ', '_', $groupName)),
                 'children' => [],
             ];
 
-            foreach ($resources as $resourceId => $config) {
-                $resourceNode = [
-                    'text' => $config['label'],
-                    'id' => 'resource_' . $resourceId,
+            foreach ($sections as $sectionName => $resources) {
+                $sectionNode = [
+                    'text' => $sectionName,
+                    'id' => 'section_' . strtolower(str_replace(' ', '_', $sectionName)),
                     'children' => [],
                 ];
 
-                foreach ($config['operations'] as $operation => $operationLabel) {
-                    $permValue = $resourceId . '/' . $operation;
-                    $operationNode = [
-                        'text' => $operationLabel,
-                        'id' => $permValue,
+                foreach ($resources as $resourceId => $config) {
+                    $resourceNode = [
+                        'text' => $config['label'],
+                        'id' => 'resource_' . $resourceId,
+                        'children' => [],
                     ];
 
-                    if (in_array($permValue, $currentPermissions, true)) {
-                        $operationNode['checked'] = true;
+                    foreach ($config['operations'] as $operation => $operationLabel) {
+                        $permValue = $resourceId . '/' . $operation;
+                        $operationNode = [
+                            'text' => $operationLabel,
+                            'id' => $permValue,
+                        ];
+
+                        if (in_array($permValue, $currentPermissions, true)) {
+                            $operationNode['checked'] = true;
+                        }
+
+                        $resourceNode['children'][] = $operationNode;
                     }
 
-                    $resourceNode['children'][] = $operationNode;
+                    $sectionNode['children'][] = $resourceNode;
                 }
 
-                $groupNode['children'][] = $resourceNode;
+                $groupNode['children'][] = $sectionNode;
             }
 
             $tree[] = $groupNode;

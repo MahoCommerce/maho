@@ -31,7 +31,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  * CMS Block State Processor
  *
  * Handles create, update, and delete operations for CMS blocks.
- * Requires JWT authentication with admin/cms-blocks/write permission.
+ * Requires JWT authentication with cms-blocks/write permission.
  *
  * @implements ProcessorInterface<CmsBlock, CmsBlock|null>
  */
@@ -48,11 +48,11 @@ final class CmsBlockProcessor implements ProcessorInterface
         $user = $this->getAuthorizedUser();
 
         if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'admin/cms-blocks/delete');
+            $this->requirePermission($user, 'cms-blocks/delete');
             return $this->handleDelete((int) $uriVariables['id'], $user);
         }
 
-        $this->requirePermission($user, 'admin/cms-blocks/write');
+        $this->requirePermission($user, 'cms-blocks/write');
 
         assert($data instanceof CmsBlock);
 

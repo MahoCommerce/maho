@@ -88,7 +88,7 @@ $customerResources = $this->getCustomerResources();
                 <span class="api-resource-tag"><?= $this->escapeHtml($label) ?></span>
             <?php endforeach; ?>
         </div>
-        <p class="api-section-note"><?= $this->__('No permissions needed. This matches how Shopify and Magento 2 expose catalog data.') ?></p>
+        <p class="api-section-note"><?= $this->__('No permissions needed — these are read-only public endpoints.') ?></p>
     </div>
 </div>
 
@@ -120,7 +120,7 @@ $customerResources = $this->getCustomerResources();
     </div>
     <div class="section-body">
         <p style="margin:0 0 8px; font-size:12px; color:#555;">
-            <?= $this->__('These permissions control what API users (service accounts) can do. Grant only the operations each integration needs — e.g. a shipping provider needs Orders (View) + Shipments (Create), a CMS tool needs Content Management access.') ?>
+            <?= $this->__('These permissions control what API users (service accounts) can do. Grant only the operations each integration needs.') ?>
         </p>
         <input type="hidden" name="permissions_tree" id="role_permissions" value="" />
         <div class="api-service-controls">

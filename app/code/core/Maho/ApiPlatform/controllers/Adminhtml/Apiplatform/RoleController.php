@@ -237,8 +237,8 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
      * - Tree format: permissions_tree = "all" or comma-separated permission IDs
      * - Legacy checkbox format: permissions[] array
      *
-     * Tree node IDs prefixed with "group_" or "resource_" are intermediate nodes
-     * and are filtered out — only leaf permission IDs (e.g. "products/read") are saved.
+     * Tree node IDs prefixed with "group_", "section_", or "resource_" are intermediate
+     * nodes and are filtered out — only leaf permission IDs (e.g. "products/read") are saved.
      *
      * @return string[]
      */
@@ -256,7 +256,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
             // Filter out intermediate group/resource node IDs
             return array_values(array_filter(
                 explode(',', $treeValue),
-                fn(string $id) => !str_starts_with($id, 'group_') && !str_starts_with($id, 'resource_'),
+                fn(string $id) => !str_starts_with($id, 'group_') && !str_starts_with($id, 'section_') && !str_starts_with($id, 'resource_'),
             ));
         }
 
