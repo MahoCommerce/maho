@@ -260,7 +260,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             if ($this->getRequest()->getParam('isAjax')) {
                 $this->getResponse()->setBodyJson([
                     'success' => false,
-                    'error' => $e->getMessage(),
+                    'error' => strip_tags($e->getMessage()),
                 ]);
                 return;
             }
@@ -451,7 +451,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
             if ($isAjax) {
                 $this->getResponse()->setBodyJson([
                     'success' => false,
-                    'error' => $e->getMessage(),
+                    'error' => strip_tags($e->getMessage()),
                 ]);
                 return;
             }

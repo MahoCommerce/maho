@@ -72,7 +72,7 @@ class Mage_Payment_Model_Observer
         // add the start datetime as product custom option
         $product->addCustomOption(
             Mage_Payment_Model_Recurring_Profile::PRODUCT_OPTIONS_KEY,
-            serialize(['start_datetime' => $profile->getStartDatetime()]),
+            Mage::helper('core')->jsonEncode(['start_datetime' => $profile->getStartDatetime()]),
         );
 
         // duplicate as 'additional_options' to render with the product statically
@@ -87,7 +87,7 @@ class Mage_Payment_Model_Observer
                 'value' => $info->getSchedule(),
             ];
         }
-        $product->addCustomOption('additional_options', serialize($infoOptions));
+        $product->addCustomOption('additional_options', Mage::helper('core')->jsonEncode($infoOptions));
     }
 
     /**
