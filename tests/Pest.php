@@ -75,6 +75,24 @@ function invalidToken(): string
     return ApiV2Helper::generateInvalidToken();
 }
 
+/**
+ * Generate a service account JWT with specific permissions.
+ * Used for testing permission enforcement on write endpoints.
+ *
+ * @param array $permissions e.g. ['cms-pages/write', 'cms-pages/delete'] or ['all']
+ * @param array|null $storeIds Allowed store IDs, null for all stores
+ */
+function serviceToken(array $permissions = ['all'], ?array $storeIds = null): string
+{
+    return ApiV2Helper::generateToken([
+        'sub' => 'api_user_test',
+        'type' => 'api_user',
+        'api_user_id' => 999,
+        'permissions' => $permissions,
+        'allowed_store_ids' => $storeIds,
+    ]);
+}
+
 function fixtures(string $key): mixed
 {
     return ApiV2Helper::fixtures($key);
@@ -117,6 +135,10 @@ function getItems(array $response): array
 
 expect()->extend('toBeUnauthorized', function () {
     return $this->toBe(401);
+});
+
+expect()->extend('toBeForbidden', function () {
+    return $this->toBe(403);
 });
 
 expect()->extend('toBeNotFound', function () {
