@@ -32,9 +32,7 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
         }
 
         try {
-            /** @var Maho_ContentVersion_Model_Service $service */
-            $service = Mage::getSingleton('contentversion/service');
-            $result = $service->restoreVersion($versionId);
+            $result = Mage::helper('contentversion')->restoreVersion($versionId);
 
             $this->_getSession()->addSuccess(
                 $this->__('Content has been restored from version. The previous state was saved as a new version.'),

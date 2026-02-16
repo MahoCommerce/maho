@@ -41,7 +41,7 @@ class Maho_ContentVersion_Model_Observer
         }
 
         try {
-            Mage::getSingleton('contentversion/service')
+            Mage::helper('contentversion')
                 ->createVersion($object, $entityType, $this->detectEditor());
         } catch (\Exception $e) {
             Mage::logException($e);
