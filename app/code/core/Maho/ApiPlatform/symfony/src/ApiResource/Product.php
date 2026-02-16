@@ -16,10 +16,14 @@ namespace Maho\ApiPlatform\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
+use Maho\ApiPlatform\State\Processor\ProductProcessor;
 use Maho\ApiPlatform\State\Provider\ProductProvider;
 
 #[ApiResource(
@@ -34,6 +38,24 @@ use Maho\ApiPlatform\State\Provider\ProductProvider;
         new GetCollection(
             uriTemplate: '/products',
             description: 'Get product collection',
+        ),
+        new Post(
+            uriTemplate: '/products',
+            processor: ProductProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Creates a new product',
+        ),
+        new Put(
+            uriTemplate: '/products/{id}',
+            processor: ProductProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Updates a product',
+        ),
+        new Delete(
+            uriTemplate: '/products/{id}',
+            processor: ProductProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Deletes a product',
         ),
     ],
     graphQlOperations: [
@@ -234,4 +256,16 @@ class Product
      */
     #[ApiProperty(description: 'Bundle product options and selections (detail only)')]
     public array $bundleOptions = [];
+
+    /** @var int[]|null Website IDs for product assignment (write only) */
+    #[ApiProperty(description: 'Website IDs for product assignment')]
+    public ?array $websiteIds = null;
+
+    /** @var bool Whether product is enabled (write alias for status) */
+    #[ApiProperty(description: 'Whether product is enabled')]
+    public bool $isActive = true;
+
+    /** @var array|null Stock data: {qty: float, is_in_stock: bool} */
+    #[ApiProperty(description: 'Stock data for write operations')]
+    public ?array $stockData = null;
 }
