@@ -152,6 +152,31 @@ class ApiV2Helper
             }
         }
 
+
+        // Delete products (EAV entity, must use model delete for proper cleanup)
+        if (!empty(self::$createdEntities['product'])) {
+            $ids = self::$createdEntities['product'];
+            $idList = implode(',', array_map('intval', $ids));
+            try {
+                // Use admin store emulation for catalog delete
+                $appEmulation = \Mage::getSingleton('core/app_emulation');
+                $initialEnv = $appEmulation->startEnvironmentEmulation(0, 'admin');
+                foreach ($ids as $id) {
+                    try {
+                        $product = \Mage::getModel('catalog/product')->load((int)$id);
+                        if ($product->getId()) {
+                            $product->delete();
+                        }
+                    } catch (\Exception $e) {
+                        // Fallback: direct SQL
+                        $write->query("DELETE FROM catalog_product_entity WHERE entity_id = " . (int)$id);
+                    }
+                }
+                $appEmulation->stopEnvironmentEmulation($initialEnv);
+            } catch (\Exception $e) {
+                // Ignore cleanup errors
+            }
+        }
         self::$createdEntities = [];
     }
 
