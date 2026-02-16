@@ -43,6 +43,7 @@ class ApiPermissionRegistry
         'product-options'    => ['label' => 'Custom Options', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Manage', 'delete' => 'Delete']],
         'tier-prices'        => ['label' => 'Tier Prices', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Manage']],
         'categories'         => ['label' => 'Categories', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'inventory'          => ['label' => 'Inventory', 'group' => 'Storefront', 'section' => 'Catalog', 'operations' => ['read' => 'View Stock', 'write' => 'Update Stock']],
 
         // ── Orders & Fulfillment ──
         'orders'          => ['label' => 'Orders', 'group' => 'Storefront', 'section' => 'Sales', 'operations' => ['read' => 'View', 'create' => 'Place', 'write' => 'Manage']],
@@ -106,6 +107,7 @@ class ApiPermissionRegistry
     private const SEGMENT_MAP = [
         'products'     => 'products',
         'categories'   => 'categories',
+        'inventory'    => 'inventory',
         'orders'       => 'orders',
         'customers'    => 'customers',
         'carts'        => 'carts',
