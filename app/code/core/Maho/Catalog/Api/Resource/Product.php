@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Catalog\Api\Resource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
@@ -23,8 +23,8 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use Maho\ApiPlatform\State\Processor\ProductProcessor;
-use Maho\ApiPlatform\State\Provider\ProductProvider;
+use Maho\Catalog\Api\State\Processor\ProductProcessor;
+use Maho\Catalog\Api\State\Provider\ProductProvider;
 
 #[ApiResource(
     shortName: 'Product',
