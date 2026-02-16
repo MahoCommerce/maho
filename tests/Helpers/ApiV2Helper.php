@@ -163,13 +163,13 @@ class ApiV2Helper
                 $initialEnv = $appEmulation->startEnvironmentEmulation(0, 'admin');
                 foreach ($ids as $id) {
                     try {
-                        $product = \Mage::getModel('catalog/product')->load((int)$id);
+                        $product = \Mage::getModel('catalog/product')->load((int) $id);
                         if ($product->getId()) {
                             $product->delete();
                         }
                     } catch (\Exception $e) {
                         // Fallback: direct SQL
-                        $write->query("DELETE FROM catalog_product_entity WHERE entity_id = " . (int)$id);
+                        $write->query('DELETE FROM catalog_product_entity WHERE entity_id = ' . (int) $id);
                     }
                 }
                 $appEmulation->stopEnvironmentEmulation($initialEnv);
@@ -389,7 +389,7 @@ class ApiV2Helper
         if ($token !== null) {
             $headers[] = 'Authorization: Bearer ' . $token;
         } else {
-            $headers[] = 'Authorization: Basic ' . base64_encode('tenniswarehouse:tenniswarehouse');
+            $headers[] = 'Authorization: Basic ' . base64_encode(getenv('API_TEST_BASIC_AUTH') ?: 'user:pass');
         }
 
         $options = [
@@ -411,7 +411,7 @@ class ApiV2Helper
             $host = $parsed['host'] ?? 'localhost';
             $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
             $pathPart = ($parsed['path'] ?? '') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
-            $requestUrl = "{$scheme}://tenniswarehouse:tenniswarehouse@{$host}{$port}{$pathPart}";
+            $requestUrl = "{$scheme}://" . (getenv('API_TEST_BASIC_AUTH') ?: 'user:pass') . "@{$host}{$port}{$pathPart}";
         }
 
         $context = stream_context_create($options);
@@ -502,7 +502,7 @@ class ApiV2Helper
             'Accept: application/ld+json, application/json',
             'Content-Type: application/json',
             // Basic auth for nginx
-            'Authorization: Basic ' . base64_encode('tenniswarehouse:tenniswarehouse'),
+            'Authorization: Basic ' . base64_encode(getenv('API_TEST_BASIC_AUTH') ?: 'user:pass'),
         ];
 
         // JWT Bearer token overrides basic auth
@@ -536,7 +536,7 @@ class ApiV2Helper
             $host = $parsed['host'] ?? 'localhost';
             $port = isset($parsed['port']) ? ':' . $parsed['port'] : '';
             $pathAndQuery = ($parsed['path'] ?? '') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
-            $requestUrl = "{$scheme}://tenniswarehouse:tenniswarehouse@{$host}{$port}{$pathAndQuery}";
+            $requestUrl = "{$scheme}://" . (getenv('API_TEST_BASIC_AUTH') ?: 'user:pass') . "@{$host}{$port}{$pathAndQuery}";
         }
 
         $context = stream_context_create($options);
@@ -598,7 +598,7 @@ class ApiV2Helper
             // Fall through to default
         }
 
-        self::$baseUrl = 'https://maho.tenniswarehouse.com.au';
+        self::$baseUrl = getenv('API_TEST_BASE_URL') ?: 'https://localhost';
         return self::$baseUrl;
     }
 
