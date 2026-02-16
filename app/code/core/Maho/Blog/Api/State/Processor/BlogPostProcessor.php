@@ -11,14 +11,14 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Maho\Blog\Api\State\Processor;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Core_Model_Store;
-use Maho\ApiPlatform\ApiResource\BlogPost;
+use Maho\Blog\Api\Resource\BlogPost;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Maho_Blog_Model_Post;
