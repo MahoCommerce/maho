@@ -17,7 +17,6 @@
             <depends>
                 <Mage_Cms/>
                 <Mage_Adminhtml/>
-                <Maho_Blog/>
             </depends>
         </Maho_ContentVersion>
     </modules>

@@ -131,9 +131,17 @@ class Maho_ContentVersion_Model_Service
         return match ($entityType) {
             'cms_page' => Mage::getModel('cms/page')->load($entityId),
             'cms_block' => Mage::getModel('cms/block')->load($entityId),
-            'blog_post' => Mage::getModel('blog/post')->load($entityId),
+            'blog_post' => $this->loadBlogPost($entityId),
             default => throw new \InvalidArgumentException("Unknown entity type: {$entityType}"),
         };
+    }
+
+    private function loadBlogPost(int $entityId): Mage_Core_Model_Abstract
+    {
+        if (!Mage::helper('core')->isModuleEnabled('Maho_Blog')) {
+            Mage::throwException(Mage::helper('contentversion')->__('Blog module is not enabled.'));
+        }
+        return Mage::getModel('blog/post')->load($entityId);
     }
 
     private function cleanExpired(string $entityType, int $entityId): void

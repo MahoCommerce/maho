@@ -20,9 +20,9 @@ class Maho_ContentVersion_Model_Observer
     public const REGISTRY_EDITOR = 'contentversion_editor';
 
     private const ENTITY_TYPE_MAP = [
-        Mage_Cms_Model_Page::class => 'cms_page',
-        Mage_Cms_Model_Block::class => 'cms_block',
-        Maho_Blog_Model_Post::class => 'blog_post',
+        'Mage_Cms_Model_Page' => 'cms_page',
+        'Mage_Cms_Model_Block' => 'cms_block',
+        'Maho_Blog_Model_Post' => 'blog_post',
     ];
 
     public function beforeSave(Maho\Event\Observer $observer): void
@@ -51,7 +51,7 @@ class Maho_ContentVersion_Model_Observer
     private function getEntityType(Mage_Core_Model_Abstract $object): ?string
     {
         foreach (self::ENTITY_TYPE_MAP as $class => $type) {
-            if ($object instanceof $class) {
+            if (class_exists($class) && $object instanceof $class) {
                 return $type;
             }
         }
