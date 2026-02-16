@@ -63,6 +63,28 @@ class ApiPermissionRegistry
     ];
 
     /**
+     * Resources with public read access (no auth required for GET).
+     * These are listed in security.yaml as PUBLIC_ACCESS for GET.
+     */
+    private const PUBLIC_READ_RESOURCES = [
+        'products', 'categories', 'cms', 'blog', 'stores',
+        'countries', 'url-resolver', 'invoices',
+    ];
+
+    /**
+     * Resources that use customer JWT tokens (session-bound to logged-in customer).
+     * These are accessible to authenticated customers, not API service accounts.
+     */
+    private const CUSTOMER_RESOURCES = [
+        'carts'     => 'View cart, add/remove items, apply coupons, set shipping & payment',
+        'addresses' => 'View, create, update, and delete saved addresses',
+        'wishlists' => 'View wishlist, add/remove items, move to cart',
+        'orders'    => 'View order history, place orders at checkout',
+        'reviews'   => 'View and submit product reviews',
+        'newsletter' => 'View subscription status, subscribe/unsubscribe',
+    ];
+
+    /**
      * URL path segment → resource name.
      * The resolver finds the last matching segment in the URL path.
      */
@@ -236,6 +258,88 @@ class ApiPermissionRegistry
             $group = $config['group'];
             $grouped[$group][$resourceId] = $config;
         }
+        return $grouped;
+    }
+
+    /**
+     * Get resources that have public read access (no auth required).
+     *
+     * @return array<string, string> resource ID => label
+     */
+    public function getPublicReadResources(): array
+    {
+        $result = [];
+        foreach (self::PUBLIC_READ_RESOURCES as $resourceId) {
+            /** @phpstan-ignore isset.offset */
+            if (isset(self::RESOURCES[$resourceId])) {
+                $result[$resourceId] = self::RESOURCES[$resourceId]['label'];
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Get resources that use customer JWT tokens (session-bound).
+     *
+     * @return array<string, string> resource ID => description
+     */
+    public function getCustomerResources(): array
+    {
+        return self::CUSTOMER_RESOURCES;
+    }
+
+    /**
+     * Check if a resource has public read access
+     */
+    public function isPublicRead(string $resourceId): bool
+    {
+        return in_array($resourceId, self::PUBLIC_READ_RESOURCES, true);
+    }
+
+    /**
+     * Get service-account permissions grouped for the admin role editor UI.
+     *
+     * Returns only resources/operations relevant to API service accounts:
+     * - Skips read-only public resources (no permissions needed)
+     * - Skips read operations on publicly-readable resources
+     * - Groups as 'Storefront Operations' and 'Content Management'
+     *
+     * @return array<string, array<string, array{label: string, operations: array<string, string>}>>
+     */
+    public function getServicePermissionsByGroup(): array
+    {
+        $groupLabels = [
+            'Storefront' => 'Storefront Operations',
+            'Admin' => 'Content Management',
+        ];
+
+        $grouped = [];
+        foreach (self::RESOURCES as $resourceId => $config) {
+            $operations = $config['operations'];
+
+            // Skip resources that are entirely public read-only
+            /** @phpstan-ignore isset.offset */
+            if ($this->isPublicRead($resourceId) && count($operations) === 1 && isset($operations['read'])) {
+                continue;
+            }
+
+            // For public-read resources, exclude the read operation from the tree
+            if ($this->isPublicRead($resourceId)) {
+                unset($operations['read']);
+            }
+
+            if (empty($operations)) {
+                continue;
+            }
+
+            /** @phpstan-ignore nullCoalesce.offset */
+            $groupKey = $groupLabels[$config['group']] ?? $config['group'];
+            $grouped[$groupKey][$resourceId] = [
+                'label' => $config['label'],
+                'operations' => $operations,
+            ];
+        }
+
         return $grouped;
     }
 

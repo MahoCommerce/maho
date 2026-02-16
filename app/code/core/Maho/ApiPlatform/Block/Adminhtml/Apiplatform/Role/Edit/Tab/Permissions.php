@@ -49,20 +49,44 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
     }
 
     /**
-     * Build tree JSON for MahoTree from ApiPermissionRegistry
+     * Get public read resources for the informational section
      *
-     * Structure: group → resource → operations (leaf nodes with permission IDs)
+     * @return array<string, string> resource ID => label
      */
-    public function getResTreeJson(): string
+    public function getPublicReadResources(): array
     {
-        $resourcesByGroup = Mage::registry('api_resources') ?: [];
+        $registry = $this->getRegistry();
+        return $registry->getPublicReadResources();
+    }
+
+    /**
+     * Get customer resources for the informational section
+     *
+     * @return array<string, string> resource ID => description
+     */
+    public function getCustomerResources(): array
+    {
+        $registry = $this->getRegistry();
+        return $registry->getCustomerResources();
+    }
+
+    /**
+     * Build tree JSON for MahoTree from service permissions.
+     *
+     * Only includes resources/operations that need explicit permission grants.
+     * Public-read resources and their read operations are excluded.
+     */
+    public function getServiceTreeJson(): string
+    {
+        $registry = $this->getRegistry();
+        $serviceGroups = $registry->getServicePermissionsByGroup();
         $currentPermissions = Mage::registry('api_role_permissions') ?: [];
 
         $tree = [];
 
-        foreach ($resourcesByGroup as $groupName => $resources) {
+        foreach ($serviceGroups as $groupName => $resources) {
             $groupNode = [
-                'text' => $this->__('%s Resources', $groupName),
+                'text' => $groupName,
                 'id' => 'group_' . strtolower(str_replace(' ', '_', $groupName)),
                 'children' => [],
             ];
@@ -95,5 +119,10 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
         }
 
         return Mage::helper('core')->jsonEncode($tree);
+    }
+
+    private function getRegistry(): \Maho\ApiPlatform\Security\ApiPermissionRegistry
+    {
+        return new \Maho\ApiPlatform\Security\ApiPermissionRegistry();
     }
 }
