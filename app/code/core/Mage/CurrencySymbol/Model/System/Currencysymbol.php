@@ -215,7 +215,7 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
             }
         }
         if ($symbols) {
-            $value['options']['fields']['customsymbol']['value'] = serialize($symbols);
+            $value['options']['fields']['customsymbol']['value'] = Mage::helper('core')->jsonEncode($symbols);
         } else {
             $value['options']['fields']['customsymbol']['inherit'] = 1;
         }

@@ -319,7 +319,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
                                 $_result[0]->addCustomOption('product_type', self::TYPE_CODE, $product);
                                 $_result[0]->addCustomOption(
                                     'info_buyRequest',
-                                    serialize([
+                                    Mage::helper('core')->jsonEncode([
                                         'super_product_config' => [
                                             'product_type'  => self::TYPE_CODE,
                                             'product_id'    => $product->getId(),
@@ -338,7 +338,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
 
             if (!$isStrictProcessMode || count($associatedProductsInfo)) {
                 $product->addCustomOption('product_type', self::TYPE_CODE, $product);
-                $product->addCustomOption('info_buyRequest', serialize($buyRequest->getData()));
+                $product->addCustomOption('info_buyRequest', Mage::helper('core')->jsonEncode($buyRequest->getData()));
 
                 $products[] = $product;
             }

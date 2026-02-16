@@ -70,18 +70,20 @@ class Mage_Bundle_Helper_Catalog_Product_Configuration extends Mage_Core_Helper_
 
         // get bundle options
         $optionsQuoteItemOption = $item->getOptionByCode('bundle_option_ids');
-        $bundleOptionsIds = $optionsQuoteItemOption ? unserialize($optionsQuoteItemOption->getValue(), ['allowed_classes' => false]) : [];
+        $bundleOptionsIds = $optionsQuoteItemOption
+            ? Mage::helper('core/string')->unserialize($optionsQuoteItemOption->getValue())
+            : [];
         if ($bundleOptionsIds) {
             $optionsCollection = $typeInstance->getOptionsByIds($bundleOptionsIds, $product);
 
             // get and add bundle selections collection
             $selectionsQuoteItemOption = $item->getOptionByCode('bundle_selection_ids');
 
-            $bundleSelectionIds = unserialize($selectionsQuoteItemOption->getValue(), ['allowed_classes' => false]);
+            $bundleSelectionIds = Mage::helper('core/string')->unserialize($selectionsQuoteItemOption->getValue());
 
             if (!empty($bundleSelectionIds)) {
                 $selectionsCollection = $typeInstance->getSelectionsByIds(
-                    unserialize($selectionsQuoteItemOption->getValue(), ['allowed_classes' => false]),
+                    $bundleSelectionIds,
                     $product,
                 );
 

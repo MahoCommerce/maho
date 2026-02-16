@@ -112,15 +112,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
         if ($this->_cases === null) {
             $casesJson = $this->getData('cases');
             if ($casesJson) {
-                try {
-                    $this->_cases = Mage::helper('core')->jsonDecode($casesJson) ?: [];
-                } catch (\JsonException $e) {
-                    Mage::log(
-                        'Failed to decode cases JSON for rule ' . $this->getId() . ': ' . $e->getMessage(),
-                        Mage::LOG_WARNING,
-                    );
-                    $this->_cases = [];
-                }
+                $this->_cases = Mage::helper('core/string')->unserialize($casesJson) ?: [];
             } else {
                 $this->_cases = [];
             }
