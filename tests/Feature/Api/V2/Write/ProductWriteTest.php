@@ -8,11 +8,6 @@ declare(strict_types=1);
  * End-to-end tests for product create, update, and delete via REST.
  * Permission enforcement and product type field verification.
  *
- * Known issues:
- * - Product UPDATE (PUT) returns 500 due to _canUpdateAttribute() null origData bug.
- * - Product DELETE returns 422 "Cannot complete this operation from non-admin area."
- *   The catalog model restricts deletion to admin store context.
- *
  * @group write
  */
 
@@ -76,7 +71,7 @@ describe('Product Permission Enforcement (REST)', function () {
 describe('Product Create Lifecycle (REST)', function () {
 
     it('creates a simple product and reads it back', function () {
-        $token = serviceToken(['products/write']);
+        $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
         $create = apiPost('/api/products', [
@@ -104,7 +99,7 @@ describe('Product Create Lifecycle (REST)', function () {
     });
 
     it('creates a simple product with all basic fields', function () {
-        $token = serviceToken(['products/write']);
+        $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
         $create = apiPost('/api/products', [
@@ -136,7 +131,7 @@ describe('Product Create Lifecycle (REST)', function () {
     });
 
     it('creates a virtual product', function () {
-        $token = serviceToken(['products/write']);
+        $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
         $create = apiPost('/api/products', [
@@ -157,7 +152,7 @@ describe('Product Create Lifecycle (REST)', function () {
     });
 
     it('creates a disabled product', function () {
-        $token = serviceToken(['products/write']);
+        $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
         $create = apiPost('/api/products', [
@@ -193,54 +188,60 @@ describe('Product Create Lifecycle (REST)', function () {
 
 });
 
-describe('Product Update (known bug: 500 on PUT)', function () {
+describe('Product Update (REST)', function () {
 
-    /**
-     * Known bug: Product PUT returns 500 because
-     * Mage_Catalog_Model_Resource_Abstract::_canUpdateAttribute()
-     * receives null $origData when the product was loaded without
-     * orig_data being set.
-     */
-    it('product update currently returns 500 (known bug)', function () {
+    it('updates a product name and restores it', function () {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write']);
 
+        // Read original name
+        $original = apiGet("/api/products/{$productId}");
+        expect($original['status'])->toBe(200);
+        $originalName = $original['json']['name'];
+
+        // Update
         $update = apiPut("/api/products/{$productId}", [
             'name' => 'Pest Test Temporary Name',
         ], $token);
+        expect($update['status'])->toBe(200);
 
-        // Document the known bug — this should be 200 once fixed
-        expect($update['status'])->toBe(500);
+        // Verify
+        $verify = apiGet("/api/products/{$productId}");
+        expect($verify['status'])->toBe(200);
+        expect($verify['json']['name'])->toBe('Pest Test Temporary Name');
+
+        // Restore
+        $restore = apiPut("/api/products/{$productId}", [
+            'name' => $originalName,
+        ], $token);
+        expect($restore['status'])->toBe(200);
     });
 
 });
 
-describe('Product Delete (known bug: 422 non-admin area)', function () {
+describe('Product Delete (REST)', function () {
 
-    /**
-     * Known bug: Product DELETE returns 422 with
-     * "Cannot complete this operation from non-admin area."
-     * The Maho catalog model restricts deletion to admin store context.
-     */
-    it('product delete returns 422 non-admin area (known bug)', function () {
+    it('deletes a product successfully', function () {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
         // Create a throwaway product to test delete
         $create = apiPost('/api/products', [
             'sku' => "PEST-DEL-{$suffix}",
-            'name' => 'Pest Delete Bug Test',
+            'name' => 'Pest Delete Test',
             'price' => 1.00,
             'websiteIds' => [1],
         ], $token);
         expect($create['status'])->toBeIn([200, 201]);
         $productId = $create['json']['id'];
-        trackCreated('product', $productId);
 
-        // Delete returns 422 (known bug)
+        // Delete should succeed now
         $delete = apiDelete("/api/products/{$productId}", $token);
-        expect($delete['status'])->toBe(422);
-        expect($delete['json']['message'] ?? '')->toContain('non-admin area');
+        expect($delete['status'])->toBeIn([200, 204]);
+
+        // Confirm gone
+        $gone = apiGet("/api/products/{$productId}");
+        expect($gone['status'])->toBe(404);
     });
 
 });

@@ -175,10 +175,20 @@ final class CategoryProcessor implements ProcessorInterface
 
         $oldData = $category->getData();
 
+        // Register isSecureArea to bypass _protectFromNonAdmin() check
+        $wasSecure = Mage::registry('isSecureArea');
+        if (!$wasSecure) {
+            Mage::register('isSecureArea', true);
+        }
+
         try {
             $category->delete();
         } catch (\Exception $e) {
             throw new UnprocessableEntityHttpException('Failed to delete category: ' . $e->getMessage());
+        } finally {
+            if (!$wasSecure) {
+                Mage::unregister('isSecureArea');
+            }
         }
 
         $this->logActivity('delete', $oldData, null, $user);
