@@ -36,21 +36,6 @@
     const accessSelectEl = document.querySelector('#permissions_fieldset select[name=permissions_access]');
     const containerEl = document.getElementById('permissions_container');
 
-    accessSelectEl.addEventListener('change', (event) => {
-        containerEl.classList.toggle('no-display', event.target.value === '1');
-        updateValue();
-    });
-    accessSelectEl.value = '<?= (int)$this->getEverythingAllowed() ?>';
-    accessSelectEl.dispatchEvent(new Event('change'));
-
-    function updateValue() {
-        if (accessSelectEl.value === '1') {
-            permissionsValueEl.value = 'all';
-        } else {
-            permissionsValueEl.value = tree.getChecked().map((obj) => obj.id).join(',');
-        }
-    }
-
     const tree = new MahoTree('permissions-tree', {
         showRootNode: false,
         selectable: {
@@ -61,5 +46,18 @@
     tree.setRootNode(<?= $this->getResTreeJson() ?>);
     tree.expandAll();
 
-    updateValue();
+    function updateValue() {
+        if (accessSelectEl.value === '1') {
+            permissionsValueEl.value = 'all';
+        } else {
+            permissionsValueEl.value = tree.getChecked().map((obj) => obj.id).join(',');
+        }
+    }
+
+    accessSelectEl.addEventListener('change', (event) => {
+        containerEl.classList.toggle('no-display', event.target.value === '1');
+        updateValue();
+    });
+    accessSelectEl.value = '<?= (int)$this->getEverythingAllowed() ?>';
+    accessSelectEl.dispatchEvent(new Event('change'));
 </script>
