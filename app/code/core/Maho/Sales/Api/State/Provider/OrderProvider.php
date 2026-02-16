@@ -11,20 +11,20 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Maho\Sales\Api\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
-use Maho\ApiPlatform\ApiResource\Order;
-use Maho\ApiPlatform\ApiResource\OrderItem;
+use Maho\Sales\Api\Resource\Order;
+use Maho\Sales\Api\Resource\OrderItem;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\Customer\Api\Resource\Address;
-use Maho\ApiPlatform\ApiResource\PosPayment;
-use Maho\ApiPlatform\ApiResource\PaymentSummary;
-use Maho\ApiPlatform\ApiResource\Shipment;
-use Maho\ApiPlatform\ApiResource\ShipmentTrack;
-use Maho\ApiPlatform\ApiResource\ShipmentItem;
+use Maho\Sales\Api\Resource\PosPayment;
+use Maho\Sales\Api\Resource\PaymentSummary;
+use Maho\Sales\Api\Resource\Shipment;
+use Maho\Sales\Api\Resource\ShipmentTrack;
+use Maho\Sales\Api\Resource\ShipmentItem;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\OrderService;
 use Maho\ApiPlatform\Service\PaymentService;

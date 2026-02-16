@@ -11,16 +11,16 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Maho\Sales\Api\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use Maho\ApiPlatform\ApiResource\Order;
-use Maho\ApiPlatform\ApiResource\OrderItem;
-use Maho\ApiPlatform\ApiResource\PosPayment;
-use Maho\ApiPlatform\ApiResource\PlaceOrderWithSplitPaymentsResult;
-use Maho\ApiPlatform\ApiResource\Invoice;
-use Maho\ApiPlatform\ApiResource\Shipment;
+use Maho\Sales\Api\Resource\Order;
+use Maho\Sales\Api\Resource\OrderItem;
+use Maho\Sales\Api\Resource\PosPayment;
+use Maho\Sales\Api\Resource\PlaceOrderWithSplitPaymentsResult;
+use Maho\Sales\Api\Resource\Invoice;
+use Maho\Sales\Api\Resource\Shipment;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Service\OrderService;
