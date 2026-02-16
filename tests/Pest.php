@@ -50,6 +50,11 @@ function apiDelete(string $path, ?string $token = null): array
     return ApiV2Helper::delete($path, $token);
 }
 
+function apiPostMultipart(string $path, array $fields, array $files, ?string $token = null): array
+{
+    return ApiV2Helper::postMultipart($path, $fields, $files, $token);
+}
+
 function gqlQuery(string $query, array $variables = [], ?string $token = null): array
 {
     return ApiV2Helper::graphql($query, $variables, $token);
