@@ -10,8 +10,14 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions extends Mage_Adminhtml_Block_Widget_Form implements Mage_Adminhtml_Block_Widget_Tab_Interface
+class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions extends Mage_Adminhtml_Block_Widget implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->setTemplate('api-platform/role/permissions.phtml');
+    }
+
     #[\Override]
     public function getTabLabel(): string
     {
@@ -36,73 +42,58 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit_Tab_Permissions ext
         return false;
     }
 
-    #[\Override]
-    protected function _prepareForm(): static
+    public function getEverythingAllowed(): bool
+    {
+        $permissions = Mage::registry('api_role_permissions') ?: [];
+        return in_array('all', $permissions, true);
+    }
+
+    /**
+     * Build tree JSON for MahoTree from ApiPermissionRegistry
+     *
+     * Structure: group → resource → operations (leaf nodes with permission IDs)
+     */
+    public function getResTreeJson(): string
     {
         $resourcesByGroup = Mage::registry('api_resources') ?: [];
         $currentPermissions = Mage::registry('api_role_permissions') ?: [];
-        $hasAll = in_array('all', $currentPermissions, true);
 
-        $form = new Maho\Data\Form();
-        $form->setHtmlIdPrefix('perm_');
+        $tree = [];
 
-        // Full access checkbox in its own fieldset
-        $mainFieldset = $form->addFieldset('permissions_main', [
-            'legend' => $this->__('Resource Access'),
-        ]);
-
-        $mainFieldset->addField('perm_all', 'checkbox', [
-            'name'    => 'permissions[]',
-            'label'   => $this->__('Full Access (All Resources)'),
-            'value'   => 'all',
-            'checked' => $hasAll,
-            'onclick' => 'toggleAllPermissions(this)',
-        ]);
-
-        // Per-group fieldsets with checkboxes per operation
         foreach ($resourcesByGroup as $groupName => $resources) {
-            $groupKey = strtolower(str_replace(' ', '_', $groupName));
-            $fieldset = $form->addFieldset('permissions_' . $groupKey, [
-                'legend' => $this->__('%s Resources', $groupName),
-            ]);
+            $groupNode = [
+                'text' => $this->__('%s Resources', $groupName),
+                'id' => 'group_' . strtolower(str_replace(' ', '_', $groupName)),
+                'children' => [],
+            ];
 
             foreach ($resources as $resourceId => $config) {
-                $label = $config['label'];
-                $operations = $config['operations'];
+                $resourceNode = [
+                    'text' => $config['label'],
+                    'id' => 'resource_' . $resourceId,
+                    'children' => [],
+                ];
 
-                foreach ($operations as $operation => $operationLabel) {
+                foreach ($config['operations'] as $operation => $operationLabel) {
                     $permValue = $resourceId . '/' . $operation;
-                    $isChecked = $hasAll || in_array($permValue, $currentPermissions, true);
-                    $fieldId = str_replace(['/', '-'], '_', $resourceId) . '_' . $operation;
+                    $operationNode = [
+                        'text' => $operationLabel,
+                        'id' => $permValue,
+                    ];
 
-                    $fieldset->addField('perm_' . $fieldId, 'checkbox', [
-                        'name'    => 'permissions[]',
-                        'label'   => $this->__('%s - %s', $label, $operationLabel),
-                        'value'   => $permValue,
-                        'checked' => $isChecked,
-                        'class'   => 'resource-permission',
-                    ]);
+                    if (in_array($permValue, $currentPermissions, true)) {
+                        $operationNode['checked'] = true;
+                    }
+
+                    $resourceNode['children'][] = $operationNode;
                 }
+
+                $groupNode['children'][] = $resourceNode;
             }
+
+            $tree[] = $groupNode;
         }
 
-        // JavaScript for "All" toggle
-        $mainFieldset->addField('permissions_js', 'note', [
-            'text' => '<script type="text/javascript">
-                function toggleAllPermissions(el) {
-                    var checkboxes = document.querySelectorAll(".resource-permission");
-                    for (var i = 0; i < checkboxes.length; i++) {
-                        checkboxes[i].checked = el.checked;
-                        checkboxes[i].disabled = el.checked;
-                    }
-                }
-                var allCheckbox = document.getElementById("perm_perm_all");
-                if (allCheckbox && allCheckbox.checked) { toggleAllPermissions(allCheckbox); }
-            </script>',
-        ]);
-
-        $this->setForm($form);
-
-        return parent::_prepareForm();
+        return Mage::helper('core')->jsonEncode($tree);
     }
 }
