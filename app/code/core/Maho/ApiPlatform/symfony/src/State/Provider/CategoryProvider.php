@@ -109,7 +109,7 @@ final class CategoryProvider implements ProviderInterface
 
         $collection = \Mage::getModel('catalog/category')
             ->getCollection()
-            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page'])
+            ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
             ->addAttributeToFilter('is_active', 1)
             ->setOrder('position', 'ASC');
 
@@ -168,6 +168,7 @@ final class CategoryProvider implements ProviderInterface
         $dto->metaTitle = $category->getMetaTitle();
         $dto->metaKeywords = $category->getMetaKeywords();
         $dto->metaDescription = $category->getMetaDescription();
+        $dto->pageLayout = $category->getPageLayout() ?: null;
         $dto->createdAt = $category->getCreatedAt();
         $dto->updatedAt = $category->getUpdatedAt();
 
@@ -189,7 +190,7 @@ final class CategoryProvider implements ProviderInterface
         if ($includeChildren && !empty($dto->childrenIds)) {
             $childCollection = \Mage::getModel('catalog/category')
                 ->getCollection()
-                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page'])
+                ->addAttributeToSelect(['name', 'url_key', 'url_path', 'image', 'is_active', 'include_in_menu', 'position', 'level', 'description', 'display_mode', 'landing_page', 'page_layout'])
                 ->addAttributeToFilter('entity_id', ['in' => $dto->childrenIds])
                 ->addAttributeToFilter('is_active', 1)
                 ->setOrder('position', 'ASC');

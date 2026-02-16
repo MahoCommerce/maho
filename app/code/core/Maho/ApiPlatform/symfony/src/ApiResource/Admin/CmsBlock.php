@@ -6,6 +6,8 @@ namespace Maho\ApiPlatform\ApiResource\Admin;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\State\Admin\CmsBlockProcessor;
@@ -15,6 +17,10 @@ use Maho\ApiPlatform\State\Admin\CmsBlockProvider;
     uriTemplate: '/admin/cms-blocks',
     shortName: 'AdminCmsBlock',
     operations: [
+        new GetCollection(
+            provider: CmsBlockProvider::class,
+            description: 'Lists all CMS blocks',
+        ),
         new Post(
             processor: CmsBlockProcessor::class,
             description: 'Creates a new static block with content sanitization',
@@ -27,6 +33,9 @@ use Maho\ApiPlatform\State\Admin\CmsBlockProvider;
     shortName: 'AdminCmsBlock',
     provider: CmsBlockProvider::class,
     operations: [
+        new Get(
+            description: 'Gets a single CMS block',
+        ),
         new Put(
             processor: CmsBlockProcessor::class,
             description: 'Updates an existing static block with content sanitization',

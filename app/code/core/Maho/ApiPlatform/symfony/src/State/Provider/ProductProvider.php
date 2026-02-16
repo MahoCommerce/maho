@@ -436,6 +436,7 @@ final class ProductProvider implements ProviderInterface
         $data['bundleOptions'] = $dto->bundleOptions;
         $data['downloadableLinks'] = $dto->downloadableLinks;
         $data['linksTitle'] = $dto->linksTitle;
+        $data['pageLayout'] = $dto->pageLayout;
         $data['linksPurchasedSeparately'] = $dto->linksPurchasedSeparately;
         return $data;
     }
@@ -457,6 +458,7 @@ final class ProductProvider implements ProviderInterface
         $dto->bundleOptions = $data['bundleOptions'] ?? null;
         $dto->downloadableLinks = $data['downloadableLinks'] ?? null;
         $dto->linksTitle = $data['linksTitle'] ?? null;
+        $dto->pageLayout = $data['pageLayout'] ?? null;
         $dto->linksPurchasedSeparately = $data['linksPurchasedSeparately'] ?? null;
         return $dto;
     }
@@ -521,6 +523,7 @@ final class ProductProvider implements ProviderInterface
         $dto->metaTitle = $product->getMetaTitle();
         $dto->metaDescription = $product->getMetaDescription();
         $dto->metaKeywords = $product->getMetaKeyword();
+        $dto->pageLayout = $product->getPageLayout() ?: null;
         $dto->name = $product->getName() ?? '';
         $dto->description = $product->getDescription();
         $dto->shortDescription = $product->getShortDescription();

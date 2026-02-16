@@ -15,6 +15,8 @@ namespace Maho\ApiPlatform\ApiResource\Admin;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\State\Admin\BlogPostProcessor;
@@ -24,6 +26,10 @@ use Maho\ApiPlatform\State\Admin\BlogPostProvider;
     uriTemplate: '/admin/blog-posts',
     shortName: 'AdminBlogPost',
     operations: [
+        new GetCollection(
+            provider: BlogPostProvider::class,
+            description: 'Lists all blog posts',
+        ),
         new Post(
             processor: BlogPostProcessor::class,
             description: 'Creates a new blog post with content sanitization',
@@ -36,6 +42,9 @@ use Maho\ApiPlatform\State\Admin\BlogPostProvider;
     shortName: 'AdminBlogPost',
     provider: BlogPostProvider::class,
     operations: [
+        new Get(
+            description: 'Gets a single blog post',
+        ),
         new Put(
             processor: BlogPostProcessor::class,
             description: 'Updates an existing blog post with content sanitization',

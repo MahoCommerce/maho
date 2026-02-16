@@ -53,6 +53,7 @@ class CmsPage
     public ?string $content = null;
     public ?string $metaKeywords = null;
     public ?string $metaDescription = null;
+    public ?string $rootTemplate = null;
     public string $status = 'enabled';
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
