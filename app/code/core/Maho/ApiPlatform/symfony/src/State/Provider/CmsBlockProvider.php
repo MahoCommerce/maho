@@ -147,6 +147,21 @@ final class CmsBlockProvider implements ProviderInterface
         $dto->content = $this->processContentForApi($block->getContent() ?? '');
 
         $dto->status = $block->getIsActive() ? 'enabled' : 'disabled';
+        $dto->isActive = (bool) $block->getIsActive();
+
+        // Map store IDs for admin consumers
+        $storeIds = $block->getResource()->lookupStoreIds($block->getId());
+        if (in_array(0, $storeIds)) {
+            $dto->stores = ['all'];
+        } else {
+            $dto->stores = array_map(function ($id) {
+                try {
+                    return \Mage::app()->getStore($id)->getCode();
+                } catch (\Exception $e) {
+                    return (string) $id;
+                }
+            }, $storeIds);
+        }
         $dto->createdAt = $block->getCreationTime();
         $dto->updatedAt = $block->getUpdateTime();
 

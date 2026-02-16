@@ -14,11 +14,15 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\ApiResource;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
+use Maho\ApiPlatform\State\Processor\CmsBlockProcessor;
 use Maho\ApiPlatform\State\Provider\CmsBlockProvider;
 
 #[ApiResource(
@@ -26,22 +30,33 @@ use Maho\ApiPlatform\State\Provider\CmsBlockProvider;
     description: 'CMS Block resource',
     provider: CmsBlockProvider::class,
     operations: [
-        new Get(
-            uriTemplate: '/cms-blocks/{id}',
-            description: 'Get a CMS block by ID',
-        ),
-        new GetCollection(
+        new Get(uriTemplate: '/cms-blocks/{id}'),
+        new GetCollection(uriTemplate: '/cms-blocks'),
+        new Post(
             uriTemplate: '/cms-blocks',
-            description: 'Get CMS block collection',
+            processor: CmsBlockProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Creates a new CMS block',
+        ),
+        new Put(
+            uriTemplate: '/cms-blocks/{id}',
+            processor: CmsBlockProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Updates a CMS block',
+        ),
+        new Delete(
+            uriTemplate: '/cms-blocks/{id}',
+            processor: CmsBlockProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Deletes a CMS block',
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'cmsBlock', description: 'Get a CMS block by ID'),
-        new QueryCollection(name: 'cmsBlocks', description: 'Get CMS blocks'),
+        new Query(name: 'cmsBlock'),
+        new QueryCollection(name: 'cmsBlocks'),
         new Query(
             name: 'cmsBlockByIdentifier',
             args: ['identifier' => ['type' => 'String!']],
-            description: 'Get a CMS block by identifier',
             resolver: CustomQueryResolver::class,
         ),
     ],
@@ -53,6 +68,9 @@ class CmsBlock
     public string $title = '';
     public ?string $content = null;
     public string $status = 'enabled';
+    public bool $isActive = true;
+    /** @var string[] */
+    public array $stores = ['all'];
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
 }
