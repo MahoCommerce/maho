@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Core
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,13 +53,13 @@ describe('Legacy serialized data conversion via core/unserializeArray helper', f
     });
 
     it('throws on corrupt legacy serialized data', function () {
-        expect(fn () => $this->helper->unserialize('a:2:{s:3:"key";s:100:"truncated'))
+        expect(fn() => $this->helper->unserialize('a:2:{s:3:"key";s:100:"truncated'))
             ->toThrow(Exception::class);
     });
 
     it('throws on null or empty input', function () {
-        expect(fn () => $this->helper->unserialize(null))->toThrow(Exception::class);
-        expect(fn () => $this->helper->unserialize(''))->toThrow(Exception::class);
+        expect(fn() => $this->helper->unserialize(null))->toThrow(Exception::class);
+        expect(fn() => $this->helper->unserialize(''))->toThrow(Exception::class);
     });
 });
 
