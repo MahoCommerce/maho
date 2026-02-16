@@ -14,11 +14,15 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\ApiResource;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
+use Maho\ApiPlatform\State\Processor\CategoryProcessor;
 use Maho\ApiPlatform\State\Provider\CategoryProvider;
 
 #[ApiResource(
@@ -33,6 +37,24 @@ use Maho\ApiPlatform\State\Provider\CategoryProvider;
         new GetCollection(
             uriTemplate: '/categories',
             description: 'Get category tree',
+        ),
+        new Post(
+            uriTemplate: '/categories',
+            processor: CategoryProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Creates a new category',
+        ),
+        new Put(
+            uriTemplate: '/categories/{id}',
+            processor: CategoryProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Updates a category',
+        ),
+        new Delete(
+            uriTemplate: '/categories/{id}',
+            processor: CategoryProcessor::class,
+            security: "is_granted('ROLE_API_USER')",
+            description: 'Deletes a category',
         ),
     ],
     graphQlOperations: [
