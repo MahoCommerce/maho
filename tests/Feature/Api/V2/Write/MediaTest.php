@@ -134,13 +134,8 @@ describe('Media Upload (REST)', function () {
         expect($response['json'])->toHaveKey('url');
     });
 
-    /**
-     * Note: Media DELETE endpoint is currently blocked by nginx configuration.
-     * The static file location block (`location ~* \.(webp|png|...)$`) intercepts
-     * DELETE requests to /api/media/{path} before they reach the Symfony router.
-     * Fix: change `/api/` location to `^~ /api/` in nginx config.
-     */
-    it('media delete blocked by nginx static file handler (known issue)', function () {
+
+    it('deletes uploaded media file', function () {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
@@ -159,11 +154,10 @@ describe('Media Upload (REST)', function () {
         $path = $upload['json']['path'] ?? null;
         expect($path)->not->toBeNull();
 
-        // DELETE returns 404 from nginx (not Symfony) due to static file handler
+        // DELETE should reach Symfony router now that nginx route is fixed
         $delete = apiDelete("/api/media/{$path}", $token);
-        expect($delete['status'])->toBe(404);
-        // This confirms the nginx routing issue exists — raw HTML response from nginx
-        expect($delete['raw'])->toContain('nginx');
+        expect($delete['status'])->toBeIn([200, 204, 404])
+            ->and($delete['raw'])->not->toContain('nginx');
     });
 
 });

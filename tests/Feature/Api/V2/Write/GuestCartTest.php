@@ -223,7 +223,7 @@ describe('DELETE /api/guest-carts/{id}/items/{itemId} (Remove Item)', function (
         $response = apiDelete("/api/guest-carts/{$cartId}/items/{$itemId}");
 
         expect($response['status'])->toBe(200);
-        expect($response['json']['success'])->toBeTrue();
+        expect($response['json']['items'])->toBeEmpty();
 
         $getResponse = apiGet("/api/guest-carts/{$cartId}");
         expect($getResponse['json']['items'])->toBeEmpty();
@@ -238,7 +238,7 @@ describe('PUT /api/guest-carts/{id}/coupon (Apply Coupon)', function () {
         $cartId = $createResponse['json']['maskedId'];
 
         $response = apiPut("/api/guest-carts/{$cartId}/coupon", [
-            'couponCode' => 'INVALID-COUPON-CODE-12345',
+            'code' => 'INVALID-COUPON-CODE-12345',
         ]);
 
         expect($response['status'])->toBe(400);

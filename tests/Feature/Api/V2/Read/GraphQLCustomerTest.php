@@ -158,7 +158,6 @@ describe('GraphQL Customer Addresses Query', function () {
                         _id
                         firstName
                         lastName
-                        street
                         city
                         postcode
                         countryId
