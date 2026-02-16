@@ -47,6 +47,9 @@
     </adminhtml_apiplatform_role_grid>
 
     <adminhtml_apiplatform_role_edit>
+        <reference name="head">
+            <action method="addJs"><name>maho-tree.js</name></action>
+        </reference>
         <reference name="content">
             <block type="maho_apiplatform/adminhtml_apiplatform_role_edit" name="apiplatform.role.edit"/>
         </reference>
