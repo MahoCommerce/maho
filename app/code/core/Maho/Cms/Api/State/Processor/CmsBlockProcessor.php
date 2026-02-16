@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Maho\Cms\Api\State\Processor;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
@@ -19,7 +19,7 @@ use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Cms_Model_Block;
 use Mage_Core_Model_Store;
-use Maho\ApiPlatform\ApiResource\CmsBlock;
+use Maho\Cms\Api\Resource\CmsBlock;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Symfony\Bundle\SecurityBundle\Security;

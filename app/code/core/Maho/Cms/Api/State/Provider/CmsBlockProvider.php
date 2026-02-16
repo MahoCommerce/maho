@@ -11,12 +11,12 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Maho\Cms\Api\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
-use Maho\ApiPlatform\ApiResource\CmsBlock;
+use Maho\Cms\Api\Resource\CmsBlock;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
