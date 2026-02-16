@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Cms\Api\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -21,54 +21,52 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use Maho\ApiPlatform\State\Processor\CmsPageProcessor;
-use Maho\ApiPlatform\State\Provider\CmsPageProvider;
+use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
+use Maho\Cms\Api\State\Processor\CmsBlockProcessor;
+use Maho\Cms\Api\State\Provider\CmsBlockProvider;
 
 #[ApiResource(
-    shortName: 'CmsPage',
-    description: 'CMS Page resource',
-    provider: CmsPageProvider::class,
+    shortName: 'CmsBlock',
+    description: 'CMS Block resource',
+    provider: CmsBlockProvider::class,
     operations: [
-        new Get(uriTemplate: '/cms-pages/{id}'),
-        new GetCollection(uriTemplate: '/cms-pages'),
+        new Get(uriTemplate: '/cms-blocks/{id}'),
+        new GetCollection(uriTemplate: '/cms-blocks'),
         new Post(
-            uriTemplate: '/cms-pages',
-            processor: CmsPageProcessor::class,
+            uriTemplate: '/cms-blocks',
+            processor: CmsBlockProcessor::class,
             security: "is_granted('ROLE_API_USER')",
-            description: 'Creates a new CMS page',
+            description: 'Creates a new CMS block',
         ),
         new Put(
-            uriTemplate: '/cms-pages/{id}',
-            processor: CmsPageProcessor::class,
+            uriTemplate: '/cms-blocks/{id}',
+            processor: CmsBlockProcessor::class,
             security: "is_granted('ROLE_API_USER')",
-            description: 'Updates a CMS page',
+            description: 'Updates a CMS block',
         ),
         new Delete(
-            uriTemplate: '/cms-pages/{id}',
-            processor: CmsPageProcessor::class,
+            uriTemplate: '/cms-blocks/{id}',
+            processor: CmsBlockProcessor::class,
             security: "is_granted('ROLE_API_USER')",
-            description: 'Deletes a CMS page',
+            description: 'Deletes a CMS block',
         ),
     ],
     graphQlOperations: [
-        new Query(name: 'item_query'),
-        new QueryCollection(name: 'collection_query'),
-        new QueryCollection(
-            name: 'cmsPages',
-            args: ['identifier' => ['type' => 'String'], 'isFooterLink' => ['type' => 'Boolean']],
+        new Query(name: 'cmsBlock'),
+        new QueryCollection(name: 'cmsBlocks'),
+        new Query(
+            name: 'cmsBlockByIdentifier',
+            args: ['identifier' => ['type' => 'String!']],
+            resolver: CustomQueryResolver::class,
         ),
     ],
 )]
-class CmsPage
+class CmsBlock
 {
     public ?int $id = null;
     public string $identifier = '';
     public string $title = '';
-    public ?string $contentHeading = null;
     public ?string $content = null;
-    public ?string $metaKeywords = null;
-    public ?string $metaDescription = null;
-    public ?string $rootTemplate = null;
     public string $status = 'enabled';
     public bool $isActive = true;
     /** @var string[] */
