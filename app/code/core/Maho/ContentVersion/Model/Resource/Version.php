@@ -36,16 +36,26 @@ class Maho_ContentVersion_Model_Resource_Version extends Mage_Core_Model_Resourc
         $maxRetries = 3;
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
-                $select = $adapter->select()
-                    ->from($table, [
-                        'entity_type' => new Maho\Db\Expr($adapter->quote($data['entity_type'])),
-                        'entity_id' => new Maho\Db\Expr($adapter->quote($data['entity_id'])),
-                        'version_number' => new Maho\Db\Expr('COALESCE(MAX(version_number), 0) + 1'),
-                        'content_data' => new Maho\Db\Expr($adapter->quote($data['content_data'])),
-                        'editor' => new Maho\Db\Expr($adapter->quote($data['editor'])),
-                    ])
+                // Compute next version number via subquery to handle the first-version case
+                // (SELECT FROM table WHERE ... returns 0 rows when no versions exist yet,
+                // causing INSERT...SELECT to insert nothing). Using a derived subquery ensures
+                // exactly one row is always returned.
+                $maxExpr = $adapter->select()
+                    ->from($table, [new Maho\Db\Expr('COALESCE(MAX(version_number), 0)')])
                     ->where('entity_type = ?', $data['entity_type'])
                     ->where('entity_id = ?', $data['entity_id']);
+
+                $select = $adapter->select()
+                    ->from(
+                        ['t' => new Maho\Db\Expr('(SELECT 1 AS dummy)')],
+                        [
+                            'entity_type' => new Maho\Db\Expr($adapter->quote($data['entity_type'])),
+                            'entity_id' => new Maho\Db\Expr($adapter->quote($data['entity_id'])),
+                            'version_number' => new Maho\Db\Expr('(' . $maxExpr . ') + 1'),
+                            'content_data' => new Maho\Db\Expr($adapter->quote($data['content_data'])),
+                            'editor' => new Maho\Db\Expr($adapter->quote($data['editor'])),
+                        ],
+                    );
 
                 $query = $select->insertFromSelect(
                     $table,

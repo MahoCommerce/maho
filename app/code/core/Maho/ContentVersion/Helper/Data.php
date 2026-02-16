@@ -47,7 +47,7 @@ class Maho_ContentVersion_Helper_Data extends Mage_Core_Helper_Abstract
         if ($hasOrigData) {
             $changed = false;
             foreach ($snapshot as $field => $origValue) {
-                if ((string) $model->getData($field) !== (string) $origValue) {
+                if ($model->getData($field) != $origValue) {
                     $changed = true;
                     break;
                 }

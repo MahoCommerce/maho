@@ -78,7 +78,7 @@ class Maho_ContentVersion_Block_Adminhtml_Version_Grid extends Mage_Adminhtml_Bl
                 [
                     'caption' => Mage::helper('contentversion')->__('Restore'),
                     'confirm' => Mage::helper('contentversion')->__('Are you sure you want to restore this version? The current content will be saved as a new version first.'),
-                    'url' => ['base' => 'adminhtml/contentversion/restore'],
+                    'url' => ['base' => 'adminhtml/contentversion/restore', 'params' => ['form_key' => Mage::getSingleton('core/session')->getFormKey()]],
                     'field' => 'version_id',
                 ],
             ],
