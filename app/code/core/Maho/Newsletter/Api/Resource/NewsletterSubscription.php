@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Newsletter\Api\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
@@ -20,8 +20,8 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use Maho\ApiPlatform\State\Provider\NewsletterProvider;
-use Maho\ApiPlatform\State\Processor\NewsletterProcessor;
+use Maho\Newsletter\Api\State\Provider\NewsletterProvider;
+use Maho\Newsletter\Api\State\Processor\NewsletterProcessor;
 
 #[ApiResource(
     shortName: 'NewsletterSubscription',

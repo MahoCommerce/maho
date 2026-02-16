@@ -11,14 +11,14 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Maho\Media\Api\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Mage;
 use Mage_Cms_Model_Wysiwyg_Config;
 use Mage_Core_Model_Store;
-use Maho\ApiPlatform\ApiResource\Media;
+use Maho\Media\Api\Resource\Media;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
