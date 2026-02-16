@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Maho\Sales\Api\State\Processor;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use Maho\ApiPlatform\ApiResource\Shipment;
-use Maho\ApiPlatform\ApiResource\ShipmentItem;
-use Maho\ApiPlatform\ApiResource\ShipmentTrack;
+use Maho\Sales\Api\Resource\Shipment;
+use Maho\Sales\Api\Resource\ShipmentItem;
+use Maho\Sales\Api\Resource\ShipmentTrack;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

@@ -28,9 +28,6 @@ services:
     Maho\ApiPlatform\State\Provider\CustomerProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\CustomerProvider' }
-    Maho\ApiPlatform\State\Provider\OrderProvider:
-        tags:
-            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\OrderProvider' }
     Maho\ApiPlatform\State\Provider\ReviewProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\ReviewProvider' }
@@ -67,9 +64,6 @@ services:
     Maho\ApiPlatform\State\Provider\NewsletterProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\NewsletterProvider' }
-    Maho\ApiPlatform\State\Provider\ShipmentProvider:
-        tags:
-            - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\ShipmentProvider' }
     Maho\ApiPlatform\State\Provider\LayeredFilterProvider:
         tags:
             - { name: 'maho.api.state_provider', key: 'Maho\ApiPlatform\State\Provider\LayeredFilterProvider' }

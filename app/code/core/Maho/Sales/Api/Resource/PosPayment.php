@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Sales\Api\Resource;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
@@ -20,8 +20,8 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
-use Maho\ApiPlatform\State\Provider\PaymentProvider;
-use Maho\ApiPlatform\State\Processor\PaymentProcessor;
+use Maho\Sales\Api\State\Provider\PaymentProvider;
+use Maho\Sales\Api\State\Processor\PaymentProcessor;
 
 #[ApiResource(
     shortName: 'PosPayment',

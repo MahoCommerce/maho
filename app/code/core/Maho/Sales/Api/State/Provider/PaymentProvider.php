@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Maho\Sales\Api\State\Provider;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
-use Maho\ApiPlatform\ApiResource\PosPayment;
-use Maho\ApiPlatform\ApiResource\PaymentSummary;
+use Maho\Sales\Api\Resource\PosPayment;
+use Maho\Sales\Api\Resource\PaymentSummary;
 use Maho\ApiPlatform\Service\PaymentService;
 
 /**

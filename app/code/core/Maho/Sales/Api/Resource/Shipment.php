@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Maho\Sales\Api\Resource;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
@@ -23,8 +23,8 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use Maho\ApiPlatform\State\Provider\ShipmentProvider;
-use Maho\ApiPlatform\State\Processor\ShipmentProcessor;
+use Maho\Sales\Api\State\Provider\ShipmentProvider;
+use Maho\Sales\Api\State\Processor\ShipmentProcessor;
 
 #[ApiResource(
     shortName: 'Shipment',
