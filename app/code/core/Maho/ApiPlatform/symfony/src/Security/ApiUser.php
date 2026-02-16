@@ -16,10 +16,13 @@ namespace Maho\ApiPlatform\Security;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
- * API User - Represents an authenticated API user (customer or admin)
+ * API User - Represents an authenticated API user (customer, admin, or API user)
  */
 class ApiUser implements UserInterface
 {
+    /**
+     * @param array<int>|null $allowedStoreIds null means all stores
+     */
     public function __construct(
         private readonly string $identifier,
         private readonly array $roles,
@@ -27,6 +30,7 @@ class ApiUser implements UserInterface
         private readonly ?int $adminId = null,
         private readonly ?int $apiUserId = null,
         private readonly array $permissions = [],
+        private readonly ?array $allowedStoreIds = null,
     ) {}
 
     /**
@@ -134,5 +138,26 @@ class ApiUser implements UserInterface
             return true;
         }
         return in_array($permission, $this->permissions, true);
+    }
+
+    /**
+     * Get allowed store IDs (null means all stores)
+     *
+     * @return array<int>|null
+     */
+    public function getAllowedStoreIds(): ?array
+    {
+        return $this->allowedStoreIds;
+    }
+
+    /**
+     * Check if user can access a specific store
+     */
+    public function canAccessStore(int $storeId): bool
+    {
+        if ($this->allowedStoreIds === null) {
+            return true;
+        }
+        return in_array($storeId, $this->allowedStoreIds, true);
     }
 }
