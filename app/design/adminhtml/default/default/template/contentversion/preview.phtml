@@ -66,6 +66,8 @@ $confirmMsg = $this->jsQuoteEscape(
                             sandbox=""
                             style="width: 100%; min-height: 400px; border: 1px solid #ddd; border-radius: 4px; background: #fff;"
                         ></iframe>
+                    <?php elseif (is_array($value)): ?>
+                        <?= $this->escapeHtml(implode(', ', $value)) ?>
                     <?php else: ?>
                         <?= $this->escapeHtml((string) $value) ?>
                     <?php endif ?>
