@@ -16,9 +16,9 @@
         </reference>
         <reference name="left">
             <block type="blog/adminhtml_post_edit_tabs" name="blog_post_edit_tabs">
-                <block type="blog/adminhtml_post_edit_tab_main" name="blog_post_edit_tab_main"/>
-                <block type="blog/adminhtml_post_edit_tab_meta" name="blog_post_edit_tab_meta"/>
-                <action method="addTab"><name>main_section</name><block>blog_post_edit_tab_main</block></action>
+                <block type="blog/adminhtml_post_edit_tab_content" name="blog_post_edit_tab_content" />
+                <block type="blog/adminhtml_post_edit_tab_meta" name="blog_post_edit_tab_meta" />
+                <action method="addTab"><name>content_section</name><block>blog_post_edit_tab_content</block></action>
                 <action method="addTab"><name>meta_section</name><block>blog_post_edit_tab_meta</block></action>
             </block>
         </reference>

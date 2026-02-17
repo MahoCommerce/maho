@@ -11,6 +11,7 @@ namespace PHPSTORM_META {
         cms_block,
         cms_page,
         config_system_email_template,
+        contentversion_preview,
         controller,
         currency,
         current_activity,
