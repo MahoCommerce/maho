@@ -443,7 +443,6 @@ class Mage_Core_Model_Translate
         }
 
         $templatePath = 'template' . DS . $type . DS . $file;
-
         $filePath = Maho::findFile('app/locale/' . $localeCode . '/' . $templatePath);
 
         // If no template specified for this locale, use store default
