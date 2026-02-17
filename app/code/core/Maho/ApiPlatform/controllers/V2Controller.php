@@ -36,22 +36,26 @@ class Maho_ApiPlatform_V2Controller extends Mage_Core_Controller_Front_Action
         // Load Symfony autoloader
         $symfonyDir = Mage::getModuleDir('', 'Maho_ApiPlatform') . '/symfony';
 
-        // Register API Platform namespace
-        spl_autoload_register(function ($class) use ($symfonyDir): void {
-            $prefix = 'Maho\\ApiPlatform\\';
-            $len = strlen($prefix);
+        // Register API Platform namespace (once only)
+        static $autoloaderRegistered = false;
+        if (!$autoloaderRegistered) {
+            $autoloaderRegistered = true;
+            spl_autoload_register(function ($class) use ($symfonyDir): void {
+                $prefix = 'Maho\\ApiPlatform\\';
+                $len = strlen($prefix);
 
-            if (strncmp($prefix, $class, $len) !== 0) {
-                return;
-            }
+                if (strncmp($prefix, $class, $len) !== 0) {
+                    return;
+                }
 
-            $relativeClass = substr($class, $len);
-            $file = $symfonyDir . '/src/' . str_replace('\\', '/', $relativeClass) . '.php';
+                $relativeClass = substr($class, $len);
+                $file = $symfonyDir . '/src/' . str_replace('\\', '/', $relativeClass) . '.php';
 
-            if (file_exists($file)) {
-                require_once $file;
-            }
-        });
+                if (file_exists($file)) {
+                    require_once $file;
+                }
+            });
+        }
 
         // Hand off to Symfony
         require $symfonyDir . '/public/index.php';
