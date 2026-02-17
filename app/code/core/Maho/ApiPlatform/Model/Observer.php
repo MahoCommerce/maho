@@ -145,7 +145,7 @@ class Maho_ApiPlatform_Model_Observer
     /**
      * Invalidate API cache when a category is saved
      */
-    public function invalidateCategoryCache(\Maho\Event\Observer $observer): void
+    public function invalidateCategoryCache(\Maho\Event\Observer $_observer): void
     {
         $mode = $this->getAutoCleanMode();
         if ($mode === 'all' || $mode === 'product') {
@@ -156,7 +156,7 @@ class Maho_ApiPlatform_Model_Observer
     /**
      * Invalidate API cache when stock is updated
      */
-    public function invalidateStockCache(\Maho\Event\Observer $observer): void
+    public function invalidateStockCache(\Maho\Event\Observer $_observer): void
     {
         $mode = $this->getAutoCleanMode();
         if ($mode === 'all' || $mode === 'inventory') {
@@ -167,7 +167,7 @@ class Maho_ApiPlatform_Model_Observer
     /**
      * Invalidate API cache when prices are updated (catalog rules, etc.)
      */
-    public function invalidatePriceCache(\Maho\Event\Observer $observer): void
+    public function invalidatePriceCache(\Maho\Event\Observer $_observer): void
     {
         $mode = $this->getAutoCleanMode();
         if ($mode === 'all' || $mode === 'product') {
@@ -178,7 +178,7 @@ class Maho_ApiPlatform_Model_Observer
     /**
      * Invalidate API reviews cache when a review is saved/approved
      */
-    public function invalidateReviewCache(\Maho\Event\Observer $observer): void
+    public function invalidateReviewCache(\Maho\Event\Observer $_observer): void
     {
         $mode = $this->getAutoCleanMode();
         if ($mode === 'all') {

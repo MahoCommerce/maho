@@ -134,7 +134,7 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_UserController extends Mage_Adminht
                         'client_id' => $clientId,
                         'client_secret' => password_hash($clientSecret, PASSWORD_BCRYPT),
                     ],
-                    'user_id = ' . (int) $model->getId(),
+                    ['user_id = ?' => (int) $model->getId()],
                 );
 
                 // Store plain secret in session for one-time display

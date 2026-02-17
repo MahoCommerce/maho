@@ -19,7 +19,6 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Form extends Mage_A
             'id'      => 'edit_form',
             'action'  => $this->getUrl('*/*/save', ['user_id' => $this->getRequest()->getParam('user_id')]),
             'method'  => 'post',
-            'enctype' => 'multipart/form-data',
         ]);
         $form->setUseContainer(true);
         $this->setForm($form);
