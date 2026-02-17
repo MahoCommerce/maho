@@ -54,10 +54,16 @@ class Maho_ContentVersion_Model_Observer
 
     private function detectEditor(): string
     {
-        // Check registry hint (set by API processors or other callers)
+        // Check explicit registry hint (set by callers who want custom attribution)
         $registryEditor = Mage::registry(self::REGISTRY_EDITOR);
         if ($registryEditor !== null) {
             return (string) $registryEditor;
+        }
+
+        // Check for API user (set by API Platform authenticator)
+        $apiUser = Mage::registry('current_api_user');
+        if (is_array($apiUser) && !empty($apiUser['name'])) {
+            return 'API: ' . $apiUser['name'];
         }
 
         // Check for admin session

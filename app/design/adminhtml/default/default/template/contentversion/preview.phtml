@@ -13,6 +13,12 @@ if (!$version) {
 }
 $data = $version->getContentDataDecoded();
 $entityType = $version->getData('entity_type');
+
+// Process Maho directives ({{media}}, {{store}}, etc.) for content preview
+$templateProcessor = Mage::helper('cms')->getBlockTemplateProcessor();
+if (isset($data['content'])) {
+    $data['content'] = $templateProcessor->filter($data['content']);
+}
 $versionId = (int) $version->getId();
 $typeLabels = [
     'cms_page' => $this->__('CMS Page'),
