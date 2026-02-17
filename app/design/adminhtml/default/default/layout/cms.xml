@@ -56,6 +56,12 @@
         <reference name="content">
             <block type="adminhtml/cms_block_edit" name="cms_block_edit"></block>
         </reference>
+        <reference name="left">
+            <block type="adminhtml/cms_block_edit_tabs" name="cms_block_edit_tabs">
+                <block type="adminhtml/cms_block_edit_tab_content" name="cms_block_edit_tab_content" />
+                <action method="addTab"><name>content_section</name><block>cms_block_edit_tab_content</block></action>
+            </block>
+        </reference>
     </adminhtml_cms_block_edit>
 
     <adminhtml_cms_wysiwyg_images_index>

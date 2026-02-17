@@ -38,6 +38,7 @@ namespace PHPSTORM_META {
         'configurableswatches/productimg' => \Mage_ConfigurableSwatches_Helper_Productimg::class,
         'configurableswatches/productlist' => \Mage_ConfigurableSwatches_Helper_Productlist::class,
         'configurableswatches/swatchdimensions' => \Mage_ConfigurableSwatches_Helper_Swatchdimensions::class,
+        'contentversion/data' => \Maho_ContentVersion_Helper_Data::class,
         'currencysymbol/data' => \Mage_CurrencySymbol_Helper_Data::class,
         'customersegmentation/coupon' => \Maho_CustomerSegmentation_Helper_Coupon::class,
         'customersegmentation/data' => \Maho_CustomerSegmentation_Helper_Data::class,

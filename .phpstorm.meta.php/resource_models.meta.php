@@ -178,6 +178,8 @@ namespace PHPSTORM_META {
         'configurableswatches_resource/catalog_product_attribute_super_collection' => \Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Attribute_Super_Collection::class,
         'configurableswatches_resource/catalog_product_type_configurable' => \Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Type_Configurable::class,
         'configurableswatches_resource/catalog_product_type_configurable_product_collection' => \Mage_ConfigurableSwatches_Model_Resource_Catalog_Product_Type_Configurable_Product_Collection::class,
+        'contentversion_resource/version' => \Maho_ContentVersion_Model_Resource_Version::class,
+        'contentversion_resource/version_collection' => \Maho_ContentVersion_Model_Resource_Version_Collection::class,
         'core_resource/abstract' => \Mage_Core_Model_Resource_Abstract::class,
         'core_resource/cache' => \Mage_Core_Model_Resource_Cache::class,
         'core_resource/config' => \Mage_Core_Model_Resource_Config::class,
