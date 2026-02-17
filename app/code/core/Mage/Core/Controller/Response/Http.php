@@ -917,7 +917,7 @@ class Mage_Core_Controller_Response_Http
                 return '';
             },
             $html,
-        );
+        ) ?? $html;
 
         // Prepare scripts for bottom insertion
         $scriptsHtml = '';

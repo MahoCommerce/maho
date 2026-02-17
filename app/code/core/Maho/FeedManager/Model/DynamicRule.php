@@ -47,6 +47,11 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     protected ?array $_cases = null;
 
     /**
+     * Conditions model instance
+     */
+    protected ?Maho_FeedManager_Model_Rule_Condition_Combine $_conditions = null;
+
+    /**
      * Form instance for conditions rendering
      */
     protected ?\Maho\Data\Form $_form = null;
@@ -69,6 +74,29 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
     {
         $this->_form = $form;
         return $this;
+    }
+
+    /**
+     * Get conditions model instance (required by rules engine UI)
+     */
+    public function getConditions(): Maho_FeedManager_Model_Rule_Condition_Combine
+    {
+        if ($this->_conditions === null) {
+            $this->_conditions = Mage::getModel('feedmanager/rule_condition_combine');
+            $this->_conditions->setRule($this)->setId('1')->setPrefix('conditions');
+
+            if ($this->hasConditionsSerialized()) {
+                $conditions = $this->getConditionsSerialized();
+                if (!empty($conditions)) {
+                    $decoded = Mage::helper('core')->jsonDecode($conditions);
+                    if (is_array($decoded) && !empty($decoded)) {
+                        $this->_conditions->loadArray($decoded);
+                    }
+                }
+                $this->unsConditionsSerialized();
+            }
+        }
+        return $this->_conditions;
     }
 
     #[\Override]
@@ -112,15 +140,7 @@ class Maho_FeedManager_Model_DynamicRule extends Mage_Core_Model_Abstract
         if ($this->_cases === null) {
             $casesJson = $this->getData('cases');
             if ($casesJson) {
-                try {
-                    $this->_cases = Mage::helper('core')->jsonDecode($casesJson) ?: [];
-                } catch (\JsonException $e) {
-                    Mage::log(
-                        'Failed to decode cases JSON for rule ' . $this->getId() . ': ' . $e->getMessage(),
-                        Mage::LOG_WARNING,
-                    );
-                    $this->_cases = [];
-                }
+                $this->_cases = Mage::helper('core/string')->unserialize($casesJson) ?: [];
             } else {
                 $this->_cases = [];
             }

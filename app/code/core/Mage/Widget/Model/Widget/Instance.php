@@ -148,7 +148,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
             $this->setData('store_ids', implode(',', $this->getData('store_ids')));
         }
         if (is_array($this->getData('widget_parameters'))) {
-            $this->setData('widget_parameters', serialize($this->getData('widget_parameters')));
+            $this->setData('widget_parameters', Mage::helper('core')->jsonEncode($this->getData('widget_parameters')));
         }
         $this->setData('page_groups', $tmpPageGroups);
         $this->setData('page_group_ids', $pageGroupIds);

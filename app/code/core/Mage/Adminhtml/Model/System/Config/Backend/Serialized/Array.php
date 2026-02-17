@@ -20,7 +20,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Serialized_Array extends Mage_A
     protected function _beforeSave()
     {
         try {
-            Mage::helper('core/unserializeArray')->unserialize(serialize($this->getValue()));
+            Mage::helper('core')->jsonEncode($this->getValue());
         } catch (Exception $e) {
             Mage::throwException(Mage::helper('adminhtml')->__('Serialized data is incorrect'));
         }

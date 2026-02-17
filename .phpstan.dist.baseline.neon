@@ -20950,12 +20950,6 @@ parameters:
 			path: app/code/core/Mage/Wishlist/controllers/SharedController.php
 
 		-
-			rawMessage: 'Method Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Main::getStoreSwitcherRenderer() overrides method Mage_Adminhtml_Block_Widget_Form::getStoreSwitcherRenderer() but is missing the #[\Override] attribute.'
-			identifier: method.missingOverride
-			count: 1
-			path: app/code/core/Maho/Blog/Block/Adminhtml/Post/Edit/Tab/Main.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Type_Abstract::getConfigurableAttributeCollection().'
 			identifier: method.notFound
 			count: 1
