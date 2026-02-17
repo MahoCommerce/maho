@@ -442,25 +442,26 @@ class Mage_Core_Model_Translate
             $localeCode = $this->getLocale();
         }
 
-        $filePath = Mage::getBaseDir('locale') . DS
-                  . $localeCode . DS . 'template' . DS . $type . DS . $file;
+        $templatePath = 'template' . DS . $type . DS . $file;
+
+        $filePath = Maho::findFile('app/locale/' . $localeCode . '/' . $templatePath);
 
         // If no template specified for this locale, use store default
-        if (!file_exists($filePath)) {
-            $filePath = Mage::getBaseDir('locale') . DS
-                      . Mage::app()->getLocale()->getDefaultLocale()
-                      . DS . 'template' . DS . $type . DS . $file;
+        if (!$filePath) {
+            $filePath = Maho::findFile('app/locale/' . Mage::app()->getLocale()->getDefaultLocale() . '/' . $templatePath);
         }
 
-        // If no template specified as  store default locale, use en_US
-        if (!file_exists($filePath)) {
-            $filePath = Mage::getBaseDir('locale') . DS
-                      . Mage_Core_Model_Locale::DEFAULT_LOCALE
-                      . DS . 'template' . DS . $type . DS . $file;
+        // If no template specified as store default locale, use en_US
+        if (!$filePath) {
+            $filePath = Maho::findFile('app/locale/' . Mage_Core_Model_Locale::DEFAULT_LOCALE . '/' . $templatePath);
+        }
+
+        if (!$filePath) {
+            return '';
         }
 
         $ioAdapter = new \Maho\Io\File();
-        $ioAdapter->open(['path' => Mage::getBaseDir('locale')]);
+        $ioAdapter->open(['path' => dirname($filePath)]);
 
         return (string) $ioAdapter->read($filePath);
     }
