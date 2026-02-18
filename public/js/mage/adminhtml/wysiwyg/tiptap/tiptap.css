@@ -1169,8 +1169,9 @@
     }
 }
 
-/* Column style: cards */
-.ProseMirror [data-type="maho-columns"][data-style="cards"] [data-type="maho-column"] {
+/* Grid style: cards (shared by columns and bento) */
+.ProseMirror [data-type="maho-columns"][data-style="cards"] [data-type="maho-column"],
+.ProseMirror [data-type="maho-bento"][data-style="cards"] [data-type="maho-bento-cell"] {
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     background: transparent;

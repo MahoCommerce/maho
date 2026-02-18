@@ -180,8 +180,8 @@ export const MahoColumns = Node.create({
 
             onBadgeClick(node, bubbleMenu) {
                 const currentStyle = node.attrs.style || 'none';
-                for (const btn of bubbleMenu.querySelectorAll('[data-col-style]')) {
-                    btn.classList.toggle('is-active', btn.dataset.colStyle === currentStyle);
+                for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
+                    btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
             },
         });

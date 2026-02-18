@@ -8140,8 +8140,9 @@ input[type="datetime-local"]:focus {
     grid-template-columns: 1fr 2fr 1fr;
 }
 
-/* Column style: cards */
-[data-type="maho-columns"][data-style="cards"] [data-type="maho-column"] {
+/* Grid style: cards */
+[data-type="maho-columns"][data-style="cards"] [data-type="maho-column"],
+[data-type="maho-bento"][data-style="cards"] [data-type="maho-bento-cell"] {
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     padding: 1rem;

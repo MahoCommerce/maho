@@ -508,9 +508,9 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Large', icon: 'gap-large', command: 'setColumnsGap', args: ['large'], dataGap: 'large' },
             { type: 'separator' },
             { type: 'label', text: 'Style:' },
-            { type: 'button', title: 'None', icon: 'style-none', command: 'setColumnsStyle', args: ['none'], dataColStyle: 'none' },
-            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], dataColStyle: 'cards' },
-            { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], dataColStyle: 'separated' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setColumnsStyle', args: ['none'], dataGridStyle: 'none' },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], dataGridStyle: 'cards' },
+            { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], dataGridStyle: 'separated' },
             { type: 'separator' },
             { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
         ]);
@@ -528,6 +528,10 @@ class tiptapWysiwygSetup {
             { type: 'button', title: 'Small', icon: 'gap-small', command: 'setBentoGap', args: ['small'], dataGap: 'small' },
             { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setBentoGap', args: ['medium'], dataGap: 'medium' },
             { type: 'button', title: 'Large', icon: 'gap-large', command: 'setBentoGap', args: ['large'], dataGap: 'large' },
+            { type: 'separator' },
+            { type: 'label', text: 'Style:' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setBentoStyle', args: ['none'], dataGridStyle: 'none' },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setBentoStyle', args: ['cards'], dataGridStyle: 'cards' },
             { type: 'separator' },
             { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
         ]);
@@ -657,8 +661,8 @@ class tiptapWysiwygSetup {
                 if (item.dataGap) {
                     button.dataset.gap = item.dataGap;
                 }
-                if (item.dataColStyle) {
-                    button.dataset.colStyle = item.dataColStyle;
+                if (item.dataGridStyle) {
+                    button.dataset.gridStyle = item.dataGridStyle;
                 }
                 group.append(button);
             }

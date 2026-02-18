@@ -240,6 +240,11 @@ export const MahoBentoGrid = Node.create({
                 parseHTML: element => element.getAttribute('data-gap') || 'medium',
                 renderHTML: attributes => ({ 'data-gap': attributes.gap }),
             },
+            style: {
+                default: 'none',
+                parseHTML: element => element.getAttribute('data-style') || 'none',
+                renderHTML: attributes => ({ 'data-style': attributes.style }),
+            },
         };
     },
 
@@ -257,6 +262,7 @@ export const MahoBentoGrid = Node.create({
             'data-type': 'maho-bento',
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
+            'data-style': node.attrs.style,
             'style': style,
         }), 0];
     },
@@ -272,6 +278,7 @@ export const MahoBentoGrid = Node.create({
             setDataAttrs(dom, node) {
                 dom.setAttribute('data-preset', node.attrs.preset);
                 dom.setAttribute('data-gap', node.attrs.gap);
+                dom.setAttribute('data-style', node.attrs.style);
             },
 
             updateGridStyles(contentDOM, node, gap) {
@@ -279,6 +286,13 @@ export const MahoBentoGrid = Node.create({
                 contentDOM.style.gridTemplateColumns = node.attrs.columns;
                 contentDOM.style.gridTemplateRows = node.attrs.rows;
                 contentDOM.style.gap = gap;
+            },
+
+            onBadgeClick(node, bubbleMenu) {
+                const currentStyle = node.attrs.style || 'none';
+                for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
+                    btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
+                }
             },
 
             positionHandles(handles, contentDOM, node, widths, activeCount) {
@@ -371,6 +385,24 @@ export const MahoBentoGrid = Node.create({
                     tr.setNodeMarkup(bentoNode.pos, null, {
                         ...bentoNode.node.attrs,
                         gap,
+                    });
+                    dispatch(tr);
+                }
+
+                return true;
+            },
+
+            setBentoStyle: (style) => ({ editor, state, tr, dispatch }) => {
+                const bentoNode = findParentNodeOfType(state.schema.nodes.mahoBentoGrid)(state.selection);
+
+                if (!bentoNode) {
+                    return false;
+                }
+
+                if (dispatch) {
+                    tr.setNodeMarkup(bentoNode.pos, null, {
+                        ...bentoNode.node.attrs,
+                        style,
                     });
                     dispatch(tr);
                 }
