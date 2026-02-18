@@ -260,7 +260,7 @@ export const MahoBentoGrid = Node.create({
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.style,
-            'style': `display: grid; grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}`,
+            'style': `grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}`,
         }), 0];
     },
 

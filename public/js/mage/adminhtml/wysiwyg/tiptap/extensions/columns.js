@@ -132,13 +132,20 @@ export const MahoColumns = Node.create({
     },
 
     renderHTML({ HTMLAttributes, node }) {
-        return ['div', mergeAttributes(HTMLAttributes, {
+        const attrs = {
             'data-type': 'maho-columns',
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.style,
-            'style': `display: grid; grid-template-columns: ${node.attrs.layout}`,
-        }), 0];
+        };
+
+        // Only inline grid-template-columns for custom (drag-resized) layouts;
+        // standard presets are handled by frontend CSS via data-preset
+        if (node.attrs.preset === 'custom') {
+            attrs.style = `grid-template-columns: ${node.attrs.layout}`;
+        }
+
+        return ['div', mergeAttributes(HTMLAttributes, attrs), 0];
     },
 
     addNodeView() {
