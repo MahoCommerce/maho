@@ -8086,12 +8086,41 @@ input[type="datetime-local"]:focus {
 }
 
 /* ============================================ *
- * WYSIWYG Content - Columns Layout
+ * WYSIWYG Content - Grid Layouts (Columns & Bento)
  * ============================================ */
-[data-type="maho-columns"] {
+
+/* Shared grid base */
+[data-type="maho-columns"],
+[data-type="maho-bento"] {
     display: grid;
     margin: 1rem 0;
 }
+
+/* Shared gap sizes */
+[data-type="maho-columns"][data-gap="none"],
+[data-type="maho-bento"][data-gap="none"] {
+    gap: 0;
+}
+[data-type="maho-columns"][data-gap="small"],
+[data-type="maho-bento"][data-gap="small"] {
+    gap: 0.5rem;
+}
+[data-type="maho-columns"][data-gap="medium"],
+[data-type="maho-bento"][data-gap="medium"] {
+    gap: 1rem;
+}
+[data-type="maho-columns"][data-gap="large"],
+[data-type="maho-bento"][data-gap="large"] {
+    gap: 2rem;
+}
+
+/* Shared cell base */
+[data-type="maho-column"],
+[data-type="maho-bento-cell"] {
+    min-width: 0;
+}
+
+/* Columns presets */
 [data-type="maho-columns"][data-preset="2-equal"] {
     grid-template-columns: 1fr 1fr;
 }
@@ -8109,21 +8138,6 @@ input[type="datetime-local"]:focus {
 }
 [data-type="maho-columns"][data-preset="wide-center"] {
     grid-template-columns: 1fr 2fr 1fr;
-}
-[data-type="maho-columns"][data-gap="none"] {
-    gap: 0;
-}
-[data-type="maho-columns"][data-gap="small"] {
-    gap: 0.5rem;
-}
-[data-type="maho-columns"][data-gap="medium"] {
-    gap: 1rem;
-}
-[data-type="maho-columns"][data-gap="large"] {
-    gap: 2rem;
-}
-[data-type="maho-column"] {
-    min-width: 0;
 }
 
 /* Column style: cards */
@@ -8149,9 +8163,30 @@ input[type="datetime-local"]:focus {
     padding-right: 0;
 }
 
+/* Bento cell specifics */
+[data-type="maho-bento-cell"] {
+    min-height: 0;
+    overflow: hidden;
+}
+[data-type="maho-bento-cell"] img,
+[data-type="maho-bento-cell"] svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Shared responsive collapse */
 @media (max-width: 768px) {
-    [data-type="maho-columns"] {
+    [data-type="maho-columns"],
+    [data-type="maho-bento"] {
         grid-template-columns: 1fr !important;
+    }
+    [data-type="maho-bento"] {
+        grid-template-areas: none !important;
+        grid-template-rows: auto !important;
+    }
+    [data-type="maho-bento-cell"][style] {
+        grid-area: unset !important;
     }
 }
 
