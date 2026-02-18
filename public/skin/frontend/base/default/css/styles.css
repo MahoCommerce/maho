@@ -8182,7 +8182,7 @@ input[type="datetime-local"]:focus {
     container-type: inline-size;
 }
 
-@container (max-width: 768px) {
+@container (max-width: 32rem) {
     [data-type="maho-columns"],
     [data-type="maho-bento"] {
         grid-template-columns: 1fr !important;
