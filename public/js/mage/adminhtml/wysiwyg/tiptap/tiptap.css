@@ -1220,16 +1220,6 @@
     align-items: center;
 }
 
-/* Responsive: stack columns on small screens */
-.ProseMirror:has(> [data-type="maho-columns"]) {
-    container-type: inline-size;
-}
-
-@container (max-width: 768px) {
-    .ProseMirror [data-type="maho-columns"] {
-        grid-template-columns: 1fr !important;
-    }
-}
 
 /* ========================================
    BENTO GRID — SPECIFIC STYLES
@@ -1270,19 +1260,3 @@
     }
 }
 
-/* Responsive: stack bento grids on small screens */
-.ProseMirror:has(> [data-type="maho-bento"]) {
-    container-type: inline-size;
-}
-
-@container (max-width: 768px) {
-    .ProseMirror [data-type="maho-bento"] .grid-inner {
-        grid-template-areas: none !important;
-        grid-template-columns: 1fr !important;
-        grid-template-rows: auto !important;
-    }
-
-    .ProseMirror [data-type="maho-bento-cell"] {
-        grid-area: auto !important;
-    }
-}
