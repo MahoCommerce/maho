@@ -7,7 +7,7 @@
  */
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.20.0';
-import { GAP_SIZES, findParentNodeOfType, createGridNodeView } from './grid-utils.js';
+import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
 
 /**
  * Parse grid-template-areas into a 2D array of area names
@@ -255,15 +255,12 @@ export const MahoBentoGrid = Node.create({
     },
 
     renderHTML({ HTMLAttributes, node }) {
-        const gap = GAP_SIZES[node.attrs.gap] || GAP_SIZES.medium;
-        const style = `display: grid; grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}; gap: ${gap}`;
-
         return ['div', mergeAttributes(HTMLAttributes, {
             'data-type': 'maho-bento',
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.style,
-            'style': style,
+            'style': `display: grid; grid-template-areas: ${node.attrs.areas}; grid-template-columns: ${node.attrs.columns}; grid-template-rows: ${node.attrs.rows}`,
         }), 0];
     },
 
