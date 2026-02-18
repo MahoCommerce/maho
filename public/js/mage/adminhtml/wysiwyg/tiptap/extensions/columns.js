@@ -7,7 +7,7 @@
  */
 
 import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.20.0';
-import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
+import { GAP_SIZES, findParentNodeOfType, createGridNodeView } from './grid-utils.js';
 
 /**
  * Column presets configuration
@@ -110,9 +110,7 @@ export const MahoColumns = Node.create({
                     const match = style.match(/grid-template-columns:\s*([^;]+)/);
                     return match ? match[1].trim() : '1fr 1fr';
                 },
-                renderHTML: attributes => ({
-                    style: `grid-template-columns: ${attributes.layout}`,
-                }),
+                renderHTML: () => ({}),
             },
             gap: {
                 default: 'medium',
@@ -134,11 +132,15 @@ export const MahoColumns = Node.create({
     },
 
     renderHTML({ HTMLAttributes, node }) {
+        const gap = GAP_SIZES[node.attrs.gap] || GAP_SIZES.medium;
+        const style = `display: grid; grid-template-columns: ${node.attrs.layout}; gap: ${gap}`;
+
         return ['div', mergeAttributes(HTMLAttributes, {
             'data-type': 'maho-columns',
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.style,
+            'style': style,
         }), 0];
     },
 
