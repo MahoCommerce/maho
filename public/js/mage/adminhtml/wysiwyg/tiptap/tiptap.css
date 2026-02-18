@@ -42,8 +42,17 @@
     border: 1px solid var(--tt-color-border-light);
     border-radius: var(--tt-radius-lg);
     background-color: var(--tt-color-bg);
-    overflow: hidden;
     box-shadow: var(--tt-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+    overflow: hidden;
+}
+
+.tiptap-content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .tiptap-toolbar {
@@ -54,6 +63,7 @@
     flex-wrap: wrap;
     gap: 0.125rem;
     align-items: center;
+    flex-shrink: 0;
 
     .toolbar-group {
         display: flex;
