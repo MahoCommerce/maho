@@ -1024,61 +1024,124 @@
 }
 
 /* ========================================
-   COLUMNS LAYOUT
+   COLUMNS & BENTO GRID — SHARED STYLES
    ======================================== */
 
+/* Accent color custom properties */
 .ProseMirror [data-type="maho-columns"] {
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+}
+
+.ProseMirror [data-type="maho-bento"] {
+    --accent: #0891b2;
+    --accent-hover: #0e7490;
+}
+
+/* Container */
+.ProseMirror [data-type="maho-columns"],
+.ProseMirror [data-type="maho-bento"] {
     margin: 1rem 0;
+}
 
-    .columns-grid {
-        display: grid;
-        width: 100%;
+/* Grid inner */
+.ProseMirror [data-type="maho-columns"] .columns-grid,
+.ProseMirror [data-type="maho-bento"] .bento-grid {
+    display: grid;
+    width: 100%;
+}
+
+/* Badge */
+.ProseMirror [data-type="maho-columns"] .columns-badge,
+.ProseMirror [data-type="maho-bento"] .bento-badge {
+    position: absolute;
+    top: -12px;
+    left: 8px;
+    background: var(--accent);
+    color: white;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    z-index: 1;
+
+    svg {
+        opacity: 0.8;
     }
 
-    .columns-badge {
-        position: absolute;
-        top: -12px;
-        left: 8px;
-        background: #8b5cf6;
-        color: white;
-        padding: 3px 8px;
-        font-size: 10px;
-        font-weight: 500;
-        line-height: 1;
-        border-radius: 3px;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        opacity: 0;
-        transition: opacity 0.15s, background 0.15s;
-        z-index: 1;
-
-        svg {
-            opacity: 0.8;
-        }
-
-        &:hover {
-            background: #7c3aed;
-        }
-    }
-
-    &:hover .columns-badge,
-    &.ProseMirror-selectednode .columns-badge {
-        opacity: 1;
-    }
-
-    &:hover,
-    &.ProseMirror-selectednode {
-        outline: 2px dashed #8b5cf6;
-        outline-offset: 4px;
-        border-radius: 4px;
+    &:hover {
+        background: var(--accent-hover);
     }
 }
 
-.ProseMirror [data-type="maho-column"] {
-    min-height: 100px;
+/* Badge visibility on hover/selection */
+.ProseMirror [data-type="maho-columns"]:hover .columns-badge,
+.ProseMirror [data-type="maho-columns"].ProseMirror-selectednode .columns-badge,
+.ProseMirror [data-type="maho-bento"]:hover .bento-badge,
+.ProseMirror [data-type="maho-bento"].ProseMirror-selectednode .bento-badge {
+    opacity: 1;
+}
+
+/* Hover/selected outline */
+.ProseMirror [data-type="maho-columns"]:hover,
+.ProseMirror [data-type="maho-columns"].ProseMirror-selectednode,
+.ProseMirror [data-type="maho-bento"]:hover,
+.ProseMirror [data-type="maho-bento"].ProseMirror-selectednode {
+    outline: 2px dashed var(--accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Resize handles */
+.ProseMirror [data-type="maho-columns"] .columns-col-handle,
+.ProseMirror [data-type="maho-bento"] .bento-col-handle {
+    position: absolute;
+    width: 12px;
+    cursor: col-resize;
+    z-index: 2;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.ProseMirror [data-type="maho-columns"] .columns-col-handle-line,
+.ProseMirror [data-type="maho-bento"] .bento-col-handle-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0.4;
+    transform: translateX(-50%);
+    transition: opacity 0.15s;
+    pointer-events: none;
+}
+
+.ProseMirror .columns-col-handle:hover .columns-col-handle-line,
+.ProseMirror .columns-col-handle.dragging .columns-col-handle-line,
+.ProseMirror .bento-col-handle:hover .bento-col-handle-line,
+.ProseMirror .bento-col-handle.dragging .bento-col-handle-line {
+    opacity: 1;
+}
+
+/* Handle visibility on hover */
+.ProseMirror [data-type="maho-columns"]:hover .columns-col-handle,
+.ProseMirror [data-type="maho-bento"]:hover .bento-col-handle {
+    opacity: 1;
+}
+
+/* Cell margin resets */
+.ProseMirror [data-type="maho-column"],
+.ProseMirror [data-type="maho-bento-cell"] {
     padding: 0.75rem;
     border-radius: 4px;
     transition: all 0.15s;
@@ -1090,6 +1153,14 @@
     > *:last-child {
         margin-bottom: 0;
     }
+}
+
+/* ========================================
+   COLUMNS — SPECIFIC STYLES
+   ======================================== */
+
+.ProseMirror [data-type="maho-column"] {
+    min-height: 100px;
 }
 
 /* Column style: none (editor-only dashed outline for visual feedback) */
@@ -1149,38 +1220,6 @@
     }
 }
 
-.ProseMirror [data-type="maho-columns"] .columns-col-handle {
-    position: absolute;
-    width: 12px;
-    cursor: col-resize;
-    z-index: 2;
-    transform: translateX(-50%);
-    opacity: 0;
-    transition: opacity 0.15s;
-
-    .columns-col-handle-line {
-        position: absolute;
-        left: 50%;
-        top: 0;
-        width: 2px;
-        height: 100%;
-        background: #8b5cf6;
-        opacity: 0.4;
-        transform: translateX(-50%);
-        transition: opacity 0.15s;
-        pointer-events: none;
-    }
-
-    &:hover .columns-col-handle-line,
-    &.dragging .columns-col-handle-line {
-        opacity: 1;
-    }
-}
-
-.ProseMirror [data-type="maho-columns"]:hover .columns-col-handle {
-    opacity: 1;
-}
-
 /* Toolbar label */
 .toolbar-label {
     font-size: 0.75rem;
@@ -1199,108 +1238,18 @@
 }
 
 /* ========================================
-   BENTO GRID LAYOUT
+   BENTO GRID — SPECIFIC STYLES
    ======================================== */
 
 .ProseMirror [data-type="maho-bento"] {
     display: block;
-    margin: 1rem 0;
-
-    .bento-grid {
-        display: grid;
-        width: 100%;
-    }
-
-    .bento-badge {
-        position: absolute;
-        top: -12px;
-        left: 8px;
-        background: #0891b2;
-        color: white;
-        padding: 3px 8px;
-        font-size: 10px;
-        font-weight: 500;
-        line-height: 1;
-        border-radius: 3px;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        opacity: 0;
-        transition: opacity 0.15s, background 0.15s;
-        z-index: 1;
-
-        svg {
-            opacity: 0.8;
-        }
-
-        &:hover {
-            background: #0e7490;
-        }
-    }
-
-    &:hover .bento-badge,
-    &.ProseMirror-selectednode .bento-badge {
-        opacity: 1;
-    }
-
-    &:hover,
-    &.ProseMirror-selectednode {
-        outline: 2px dashed #0891b2;
-        outline-offset: 4px;
-        border-radius: 4px;
-    }
-
-    .bento-col-handle {
-        position: absolute;
-        width: 12px;
-        cursor: col-resize;
-        z-index: 2;
-        transform: translateX(-50%);
-        opacity: 0;
-        transition: opacity 0.15s;
-
-        .bento-col-handle-line {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            width: 2px;
-            height: 100%;
-            background: #0891b2;
-            opacity: 0.4;
-            transform: translateX(-50%);
-            transition: opacity 0.15s;
-            pointer-events: none;
-        }
-
-        &:hover .bento-col-handle-line,
-        &.dragging .bento-col-handle-line {
-            opacity: 1;
-        }
-    }
-
-    &:hover .bento-col-handle {
-        opacity: 1;
-    }
 }
 
 .ProseMirror [data-type="maho-bento-cell"] {
     min-height: 80px;
-    padding: 0.75rem;
     border: 1px dashed var(--tt-color-border-light);
-    border-radius: 4px;
     background: rgba(249, 250, 251, 0.5);
-    transition: all 0.15s;
     position: relative;
-
-    > *:first-child {
-        margin-top: 0;
-    }
-
-    > *:last-child {
-        margin-bottom: 0;
-    }
 
     &::before {
         content: attr(data-area);
