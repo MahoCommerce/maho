@@ -1171,6 +1171,7 @@
    ======================================== */
 
 .ProseMirror [data-type="maho-bento"] {
+    display: block;
     margin: 1rem 0;
 
     .bento-grid {
@@ -1217,6 +1218,38 @@
         outline: 2px dashed #0891b2;
         outline-offset: 4px;
         border-radius: 4px;
+    }
+
+    .bento-col-handle {
+        position: absolute;
+        width: 12px;
+        cursor: col-resize;
+        z-index: 2;
+        transform: translateX(-50%);
+        opacity: 0;
+        transition: opacity 0.15s;
+
+        .bento-col-handle-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 2px;
+            height: 100%;
+            background: #0891b2;
+            opacity: 0.4;
+            transform: translateX(-50%);
+            transition: opacity 0.15s;
+            pointer-events: none;
+        }
+
+        &:hover .bento-col-handle-line,
+        &.dragging .bento-col-handle-line {
+            opacity: 1;
+        }
+    }
+
+    &:hover .bento-col-handle {
+        opacity: 1;
     }
 }
 
