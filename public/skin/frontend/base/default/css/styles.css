@@ -8176,8 +8176,13 @@ input[type="datetime-local"]:focus {
     object-fit: cover;
 }
 
-/* Shared responsive collapse */
-@media (max-width: 768px) {
+/* Responsive collapse: use container queries so grids respond to their parent's width */
+:has(> [data-type="maho-columns"]),
+:has(> [data-type="maho-bento"]) {
+    container-type: inline-size;
+}
+
+@container (max-width: 768px) {
     [data-type="maho-columns"],
     [data-type="maho-bento"] {
         grid-template-columns: 1fr !important;

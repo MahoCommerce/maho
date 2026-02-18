@@ -1221,7 +1221,11 @@
 }
 
 /* Responsive: stack columns on small screens */
-@media (max-width: 768px) {
+.ProseMirror:has(> [data-type="maho-columns"]) {
+    container-type: inline-size;
+}
+
+@container (max-width: 768px) {
     .ProseMirror [data-type="maho-columns"] {
         grid-template-columns: 1fr !important;
     }
@@ -1267,7 +1271,11 @@
 }
 
 /* Responsive: stack bento grids on small screens */
-@media (max-width: 768px) {
+.ProseMirror:has(> [data-type="maho-bento"]) {
+    container-type: inline-size;
+}
+
+@container (max-width: 768px) {
     .ProseMirror [data-type="maho-bento"] .grid-inner {
         grid-template-areas: none !important;
         grid-template-columns: 1fr !important;
