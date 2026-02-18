@@ -208,6 +208,10 @@ class tiptapWysiwygSetup {
         const columnsBubbleMenu = this.createColumnsBubbleMenu();
         this.wrapper.appendChild(columnsBubbleMenu);
 
+        // Create bento grid bubble menu
+        const bentoBubbleMenu = this.createBentoBubbleMenu();
+        this.wrapper.appendChild(bentoBubbleMenu);
+
         // Create container for Tiptap editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
@@ -295,6 +299,10 @@ class tiptapWysiwygSetup {
                     bubbleMenu: columnsBubbleMenu,
                 }),
                 TiptapModules.MahoColumn,
+                TiptapModules.MahoBentoGrid.configure({
+                    bubbleMenu: bentoBubbleMenu,
+                }),
+                TiptapModules.MahoBentoCell,
                 TiptapModules.MahoFullscreen,
                 TiptapModules.DragHandle.configure({
                     render: () => {
@@ -403,6 +411,27 @@ class tiptapWysiwygSetup {
                     { title: 'Wide Center', icon: 'columns-wide-center', command: 'insertColumns', args: ['wide-center'] },
                 ],
             },
+            {
+                type: 'dropdown',
+                title: 'Bento Grid',
+                icon: 'bento-grid',
+                showTitle: false,
+                showChevron: false,
+                items: [
+                    { title: 'Hero + 2 Cards', icon: 'bento-hero-2', command: 'insertBentoGrid', args: ['hero-2'] },
+                    { title: 'Feature Left', icon: 'bento-feature-left', command: 'insertBentoGrid', args: ['feature-left'] },
+                    { title: 'Feature Right', icon: 'bento-feature-right', command: 'insertBentoGrid', args: ['feature-right'] },
+                    { title: 'Hero + 3 Cards', icon: 'bento-hero-3', command: 'insertBentoGrid', args: ['hero-3'] },
+                    { title: 'Dashboard', icon: 'bento-dashboard', command: 'insertBentoGrid', args: ['dashboard'] },
+                    { title: 'Magazine', icon: 'bento-magazine', command: 'insertBentoGrid', args: ['magazine'] },
+                    { title: 'Showcase', icon: 'bento-showcase', command: 'insertBentoGrid', args: ['showcase'] },
+                    { title: 'Mosaic', icon: 'bento-mosaic', command: 'insertBentoGrid', args: ['mosaic'] },
+                    { title: 'Hero + 4 Cards', icon: 'bento-hero-4', command: 'insertBentoGrid', args: ['hero-4'] },
+                    { title: 'Gallery', icon: 'bento-gallery', command: 'insertBentoGrid', args: ['gallery'] },
+                    { title: 'Editorial', icon: 'bento-editorial', command: 'insertBentoGrid', args: ['editorial'] },
+                    { title: 'Banner + Cards', icon: 'bento-banner-cards', command: 'insertBentoGrid', args: ['banner-cards'] },
+                ],
+            },
             { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
             { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images && this.config.add_slideshows !== false },
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
@@ -492,6 +521,23 @@ class tiptapWysiwygSetup {
         return bubbleMenu;
     }
 
+    createBentoBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'label', text: 'Gap:' },
+            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setBentoGap', args: ['none'], dataGap: 'none' },
+            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setBentoGap', args: ['small'], dataGap: 'small' },
+            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setBentoGap', args: ['medium'], dataGap: 'medium' },
+            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setBentoGap', args: ['large'], dataGap: 'large' },
+            { type: 'separator' },
+            { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
+        ]);
+
+        bubbleMenu.id = `${this.id}_bento_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
+        return bubbleMenu;
+    }
+
     createToolbar(items) {
         const toolbar = document.createElement('div');
         const addGroup = () => {
@@ -541,6 +587,7 @@ class tiptapWysiwygSetup {
                 toggle.type = 'button';
                 const isIconOnly = item.showTitle === false && item.showChevron === false;
                 toggle.className = 'toolbar-dropdown-toggle' + (isIconOnly ? ' icon-only' : '');
+                toggle.title = this.translate(item.title ?? '');
                 const titleHtml = item.showTitle !== false ? `<span>${this.translate(item.title ?? '')}</span>` : '';
                 const chevronHtml = item.showChevron !== false ? this.getIcon('chevron-down') : '';
                 toggle.innerHTML = this.getIcon(item.icon) + titleHtml + chevronHtml;
@@ -761,6 +808,27 @@ class tiptapWysiwygSetup {
         'style-none': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-dasharray="2 2"/>',
         'style-cards': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor"/>',
         'style-separated': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><path d="M12 4v16" stroke="currentColor" stroke-width="1"/>',
+
+        // Bento grid icon (toolbar button)
+        'bento-grid': '<rect x="2" y="2" width="20" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.1"/><rect x="2" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="13" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/>',
+
+        // Bento preset icons (2-column)
+        'bento-hero-2': '<rect x="2" y="2" width="20" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="2" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="13" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-feature-left': '<rect x="2" y="2" width="12" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16" y="2" width="6" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="13" width="6" height="9" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-feature-right': '<rect x="2" y="2" width="6" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="10" y="2" width="12" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="2" y="13" width="6" height="9" rx="1" stroke="currentColor" fill="none"/>',
+
+        // Bento preset icons (3-column)
+        'bento-hero-3': '<rect x="2" y="2" width="20" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="2" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="9.5" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-dashboard': '<rect x="2" y="2" width="13" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16.5" y="2" width="5.5" height="10" rx="1" stroke="currentColor" fill="none"/><rect x="2" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="9.5" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-magazine': '<rect x="2" y="2" width="13" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16.5" y="2" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="16.5" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-showcase': '<rect x="2" y="2" width="13" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16.5" y="2" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="2" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="9" y="13" width="13" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'bento-mosaic': '<rect x="2" y="2" width="6" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="9.5" y="2" width="12.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="9.5" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="16.5" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/>',
+
+        // Bento preset icons (4-column)
+        'bento-hero-4': '<rect x="1" y="2" width="22" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="1" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="7" y="14" width="4" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="12.5" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="18.5" y="14" width="4.5" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-gallery': '<rect x="1" y="2" width="10.5" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="13" y="2" width="4.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="19" y="2" width="4" height="20" rx="1" stroke="currentColor" fill="none"/><rect x="1" y="13" width="4.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="7" y="13" width="10.5" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'bento-editorial': '<rect x="1" y="2" width="5" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="7.5" y="2" width="9.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="18.5" y="2" width="4.5" height="20" rx="1" stroke="currentColor" fill="none"/><rect x="7.5" y="13" width="9.5" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'bento-banner-cards': '<rect x="1" y="1" width="22" height="7" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="1" y="10" width="10.5" height="6" rx="1" stroke="currentColor" fill="none"/><rect x="12.5" y="10" width="10.5" height="6" rx="1" stroke="currentColor" fill="none"/><rect x="1" y="18" width="5" height="5" rx="1" stroke="currentColor" fill="none"/><rect x="7.5" y="18" width="9.5" height="5" rx="1" stroke="currentColor" fill="none"/><rect x="18.5" y="18" width="4.5" height="5" rx="1" stroke="currentColor" fill="none"/>',
     };
 }
 

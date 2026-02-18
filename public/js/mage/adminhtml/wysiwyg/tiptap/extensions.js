@@ -14,11 +14,13 @@ import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/
 import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.19.0';
 import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.19.0';
 import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
+import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 
 export {
     Editor, Node, Mark, Extension, StarterKit, TextAlign,
     Table, TableRow, TableCell, TableHeader, BubbleMenu, DragHandle,
     MahoColumns, MahoColumn, COLUMN_PRESETS,
+    MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
 };
 
 const parseDirective = (directiveStr) => {
@@ -118,6 +120,7 @@ export const GlobalAttributes = Extension.create({
                     'heading', 'paragraph', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock',
                     'tableRow', 'tableCell', 'tableHeader', 'table',
                     'mahoColumns', 'mahoColumn',
+                    'mahoBentoGrid', 'mahoBentoCell',
                 ],
                 attributes: {
                     class: {

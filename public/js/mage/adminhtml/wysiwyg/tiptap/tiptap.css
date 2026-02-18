@@ -1165,3 +1165,112 @@
         grid-template-columns: 1fr !important;
     }
 }
+
+/* ========================================
+   BENTO GRID LAYOUT
+   ======================================== */
+
+.ProseMirror [data-type="maho-bento"] {
+    margin: 1rem 0;
+
+    .bento-grid {
+        display: grid;
+        width: 100%;
+    }
+
+    .bento-badge {
+        position: absolute;
+        top: -12px;
+        left: 8px;
+        background: #0891b2;
+        color: white;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 500;
+        line-height: 1;
+        border-radius: 3px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        opacity: 0;
+        transition: opacity 0.15s, background 0.15s;
+        z-index: 1;
+
+        svg {
+            opacity: 0.8;
+        }
+
+        &:hover {
+            background: #0e7490;
+        }
+    }
+
+    &:hover .bento-badge,
+    &.ProseMirror-selectednode .bento-badge {
+        opacity: 1;
+    }
+
+    &:hover,
+    &.ProseMirror-selectednode {
+        outline: 2px dashed #0891b2;
+        outline-offset: 4px;
+        border-radius: 4px;
+    }
+}
+
+.ProseMirror [data-type="maho-bento-cell"] {
+    min-height: 80px;
+    padding: 0.75rem;
+    border: 1px dashed var(--tt-color-border-light);
+    border-radius: 4px;
+    background: rgba(249, 250, 251, 0.5);
+    transition: all 0.15s;
+    position: relative;
+
+    > *:first-child {
+        margin-top: 0;
+    }
+
+    > *:last-child {
+        margin-bottom: 0;
+    }
+
+    &::before {
+        content: attr(data-area);
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 9px;
+        font-weight: 500;
+        font-family: var(--tt-font-mono);
+        color: #0891b2;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    &:hover {
+        border-color: #9ca3af;
+        background: rgba(249, 250, 251, 0.8);
+    }
+
+    &:focus-within {
+        border-color: #0891b2;
+        border-style: solid;
+        background: white;
+    }
+}
+
+/* Responsive: stack bento grids on small screens */
+@media (max-width: 768px) {
+    .ProseMirror [data-type="maho-bento"] .bento-grid {
+        grid-template-areas: none !important;
+        grid-template-columns: 1fr !important;
+        grid-template-rows: auto !important;
+    }
+
+    .ProseMirror [data-type="maho-bento-cell"] {
+        grid-area: auto !important;
+    }
+}
