@@ -1045,15 +1045,13 @@
 }
 
 /* Grid inner */
-.ProseMirror [data-type="maho-columns"] .columns-grid,
-.ProseMirror [data-type="maho-bento"] .bento-grid {
+.ProseMirror .grid-inner {
     display: grid;
     width: 100%;
 }
 
 /* Badge */
-.ProseMirror [data-type="maho-columns"] .columns-badge,
-.ProseMirror [data-type="maho-bento"] .bento-badge {
+.ProseMirror .grid-badge {
     position: absolute;
     top: -12px;
     left: 8px;
@@ -1083,26 +1081,21 @@
 }
 
 /* Badge visibility on hover/selection */
-.ProseMirror [data-type="maho-columns"]:hover .columns-badge,
-.ProseMirror [data-type="maho-columns"].ProseMirror-selectednode .columns-badge,
-.ProseMirror [data-type="maho-bento"]:hover .bento-badge,
-.ProseMirror [data-type="maho-bento"].ProseMirror-selectednode .bento-badge {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover .grid-badge,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]).ProseMirror-selectednode .grid-badge {
     opacity: 1;
 }
 
 /* Hover/selected outline */
-.ProseMirror [data-type="maho-columns"]:hover,
-.ProseMirror [data-type="maho-columns"].ProseMirror-selectednode,
-.ProseMirror [data-type="maho-bento"]:hover,
-.ProseMirror [data-type="maho-bento"].ProseMirror-selectednode {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]).ProseMirror-selectednode {
     outline: 2px dashed var(--accent);
     outline-offset: 4px;
     border-radius: 4px;
 }
 
 /* Resize handles */
-.ProseMirror [data-type="maho-columns"] .columns-col-handle,
-.ProseMirror [data-type="maho-bento"] .bento-col-handle {
+.ProseMirror .grid-col-handle {
     position: absolute;
     width: 12px;
     cursor: col-resize;
@@ -1112,8 +1105,7 @@
     transition: opacity 0.15s;
 }
 
-.ProseMirror [data-type="maho-columns"] .columns-col-handle-line,
-.ProseMirror [data-type="maho-bento"] .bento-col-handle-line {
+.ProseMirror .grid-col-handle-line {
     position: absolute;
     left: 50%;
     top: 0;
@@ -1126,16 +1118,13 @@
     pointer-events: none;
 }
 
-.ProseMirror .columns-col-handle:hover .columns-col-handle-line,
-.ProseMirror .columns-col-handle.dragging .columns-col-handle-line,
-.ProseMirror .bento-col-handle:hover .bento-col-handle-line,
-.ProseMirror .bento-col-handle.dragging .bento-col-handle-line {
+.ProseMirror .grid-col-handle:hover .grid-col-handle-line,
+.ProseMirror .grid-col-handle.dragging .grid-col-handle-line {
     opacity: 1;
 }
 
 /* Handle visibility on hover */
-.ProseMirror [data-type="maho-columns"]:hover .columns-col-handle,
-.ProseMirror [data-type="maho-bento"]:hover .bento-col-handle {
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover .grid-col-handle {
     opacity: 1;
 }
 
@@ -1196,7 +1185,7 @@
 }
 
 /* Column style: separated */
-.ProseMirror [data-type="maho-columns"][data-style="separated"] .columns-grid {
+.ProseMirror [data-type="maho-columns"][data-style="separated"] .grid-inner {
     gap: 0 !important;
 }
 .ProseMirror [data-type="maho-columns"][data-style="separated"] [data-type="maho-column"] {
@@ -1278,7 +1267,7 @@
 
 /* Responsive: stack bento grids on small screens */
 @media (max-width: 768px) {
-    .ProseMirror [data-type="maho-bento"] .bento-grid {
+    .ProseMirror [data-type="maho-bento"] .grid-inner {
         grid-template-areas: none !important;
         grid-template-columns: 1fr !important;
         grid-template-rows: auto !important;
