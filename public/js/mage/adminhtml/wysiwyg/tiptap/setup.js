@@ -215,6 +215,7 @@ class tiptapWysiwygSetup {
         // Create container for Tiptap editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
+        container.className = 'tiptap-content';
         this.wrapper.appendChild(container);
 
         // Insert wrapper after textarea
