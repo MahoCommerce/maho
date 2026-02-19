@@ -1163,4 +1163,66 @@ XML;
         $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
     }
+
+    /**
+     * Re-encrypt columns in a table using batched queries to avoid memory exhaustion.
+     *
+     * @param string[] $columns
+     */
+    public function recryptTable(
+        string $table,
+        string $primaryKey,
+        array $columns,
+        callable $encryptCallback,
+        callable $decryptCallback,
+        int $batchSize = 1000,
+    ): void {
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lastId = 0;
+
+        $quotedPk = $readConnection->quoteIdentifier($primaryKey);
+
+        while (true) {
+            $select = $readConnection->select()
+                ->from($table, array_merge([$primaryKey], $columns))
+                ->where("$quotedPk > ?", $lastId)
+                ->order("$quotedPk ASC")
+                ->limit($batchSize);
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $conditions[] = $readConnection->quoteIdentifier($column) . ' IS NOT NULL AND '
+                    . $readConnection->quoteIdentifier($column) . " != ''";
+            }
+            $select->where(implode(' OR ', $conditions));
+
+            $rows = $readConnection->fetchAll($select);
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                $updateData = [];
+                foreach ($columns as $column) {
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $decrypted = $decryptCallback($row[$column]);
+                        if ($decrypted !== '') {
+                            $updateData[$column] = $encryptCallback($decrypted);
+                        }
+                    }
+                }
+                if (!empty($updateData)) {
+                    $writeConnection->update(
+                        $table,
+                        $updateData,
+                        ["$quotedPk = ?" => $row[$primaryKey]],
+                    );
+                }
+                $lastId = $row[$primaryKey];
+            }
+
+            unset($rows);
+        }
+    }
 }
