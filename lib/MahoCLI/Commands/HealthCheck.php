@@ -112,7 +112,10 @@ class HealthCheck extends BaseMahoCommand
         $warnings = [];
 
         // Get themes from all packages (including vendor) for parent validation
-        $allThemes = $this->getAllThemesFromPackages();
+        $packageThemes = $this->getAllThemesFromPackages();
+        $allThemes = $packageThemes['all'];
+        $allDesignThemes = $packageThemes['design'];
+        $allSkinThemes = $packageThemes['skin'];
 
         // Get themes only from the project root for checking issues
         // (we don't want to report issues in vendor packages)
@@ -123,18 +126,22 @@ class HealthCheck extends BaseMahoCommand
         foreach ($projectThemes as $theme) {
             [$package, $themeName] = explode('/', $theme);
 
-            // Check for orphaned directories (only in project, not vendor)
-            $hasDesign = in_array($theme, $projectDesignThemes, true);
-            $hasSkin = in_array($theme, $projectSkinThemes, true);
+            // Check for orphaned directories
+            // A project skin/design directory is not orphaned if a matching counterpart
+            // exists in any package (including vendor)
+            $hasDesignInProject = in_array($theme, $projectDesignThemes, true);
+            $hasSkinInProject = in_array($theme, $projectSkinThemes, true);
+            $hasDesignAnywhere = in_array($theme, $allDesignThemes, true);
+            $hasSkinAnywhere = in_array($theme, $allSkinThemes, true);
 
-            if ($hasDesign && !$hasSkin) {
+            if ($hasDesignInProject && !$hasSkinInProject && !$hasSkinAnywhere) {
                 $warnings[] = "{$theme}: Missing skin directory (expected: " . self::SKIN_PATH . "/{$theme}/)";
-            } elseif (!$hasDesign && $hasSkin) {
+            } elseif (!$hasDesignInProject && $hasSkinInProject && !$hasDesignAnywhere) {
                 $warnings[] = "{$theme}: Orphaned skin directory (no matching design folder at " . self::DESIGN_PATH . "/{$theme}/)";
             }
 
             // Check theme.xml if design directory exists in project
-            if ($hasDesign) {
+            if ($hasDesignInProject) {
                 $themeXmlPath = MAHO_ROOT_DIR . '/' . self::DESIGN_PATH . "/{$package}/{$themeName}/etc/theme.xml";
 
                 if (file_exists($themeXmlPath)) {
@@ -155,27 +162,30 @@ class HealthCheck extends BaseMahoCommand
     /**
      * Get all theme identifiers from all installed packages (including vendor)
      *
-     * @return array<string>
+     * @return array{design: array<string>, skin: array<string>, all: array<string>}
      */
     private function getAllThemesFromPackages(): array
     {
-        $themes = [];
+        $designThemes = [];
+        $skinThemes = [];
 
-        // Get design themes from all packages
         foreach (\Maho::listDirectories(self::DESIGN_PATH) as $packageName) {
             foreach (\Maho::listDirectories(self::DESIGN_PATH . '/' . $packageName) as $themeName) {
-                $themes[] = "{$packageName}/{$themeName}";
+                $designThemes[] = "{$packageName}/{$themeName}";
             }
         }
 
-        // Get skin themes from all packages
         foreach (\Maho::listDirectories(self::SKIN_PATH) as $packageName) {
             foreach (\Maho::listDirectories(self::SKIN_PATH . '/' . $packageName) as $themeName) {
-                $themes[] = "{$packageName}/{$themeName}";
+                $skinThemes[] = "{$packageName}/{$themeName}";
             }
         }
 
-        return array_unique($themes);
+        return [
+            'design' => array_unique($designThemes),
+            'skin' => array_unique($skinThemes),
+            'all' => array_unique(array_merge($designThemes, $skinThemes)),
+        ];
     }
 
     /**
