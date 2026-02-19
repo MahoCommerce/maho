@@ -42,8 +42,17 @@
     border: 1px solid var(--tt-color-border-light);
     border-radius: var(--tt-radius-lg);
     background-color: var(--tt-color-bg);
-    overflow: hidden;
     box-shadow: var(--tt-shadow-sm);
+    display: flex;
+    flex-direction: column;
+    max-height: 70vh;
+    overflow: hidden;
+}
+
+.tiptap-content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .tiptap-toolbar {
@@ -54,6 +63,7 @@
     flex-wrap: wrap;
     gap: 0.125rem;
     align-items: center;
+    flex-shrink: 0;
 
     .toolbar-group {
         display: flex;
@@ -1024,61 +1034,113 @@
 }
 
 /* ========================================
-   COLUMNS LAYOUT
+   COLUMNS & BENTO GRID — SHARED STYLES
    ======================================== */
 
+/* Accent color custom properties */
 .ProseMirror [data-type="maho-columns"] {
+    --accent: #8b5cf6;
+    --accent-hover: #7c3aed;
+}
+
+.ProseMirror [data-type="maho-bento"] {
+    --accent: #0891b2;
+    --accent-hover: #0e7490;
+}
+
+/* Container */
+.ProseMirror [data-type="maho-columns"],
+.ProseMirror [data-type="maho-bento"] {
     margin: 1rem 0;
+}
 
-    .columns-grid {
-        display: grid;
-        width: 100%;
+/* Grid inner */
+.ProseMirror .grid-inner {
+    display: grid;
+    width: 100%;
+}
+
+/* Badge */
+.ProseMirror .grid-badge {
+    position: absolute;
+    top: -12px;
+    left: 8px;
+    background: var(--accent);
+    color: white;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    opacity: 0;
+    transition: opacity 0.15s, background 0.15s;
+    z-index: 1;
+
+    svg {
+        opacity: 0.8;
     }
 
-    .columns-badge {
-        position: absolute;
-        top: -12px;
-        left: 8px;
-        background: #8b5cf6;
-        color: white;
-        padding: 3px 8px;
-        font-size: 10px;
-        font-weight: 500;
-        line-height: 1;
-        border-radius: 3px;
-        border: none;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        opacity: 0;
-        transition: opacity 0.15s, background 0.15s;
-        z-index: 1;
-
-        svg {
-            opacity: 0.8;
-        }
-
-        &:hover {
-            background: #7c3aed;
-        }
-    }
-
-    &:hover .columns-badge,
-    &.ProseMirror-selectednode .columns-badge {
-        opacity: 1;
-    }
-
-    &:hover,
-    &.ProseMirror-selectednode {
-        outline: 2px dashed #8b5cf6;
-        outline-offset: 4px;
-        border-radius: 4px;
+    &:hover {
+        background: var(--accent-hover);
     }
 }
 
-.ProseMirror [data-type="maho-column"] {
-    min-height: 100px;
+/* Badge visibility on hover/selection */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover .grid-badge,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]).ProseMirror-selectednode .grid-badge {
+    opacity: 1;
+}
+
+/* Hover/selected outline */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover,
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]).ProseMirror-selectednode {
+    outline: 2px dashed var(--accent);
+    outline-offset: 4px;
+    border-radius: 4px;
+}
+
+/* Resize handles */
+.ProseMirror .grid-col-handle {
+    position: absolute;
+    width: 12px;
+    cursor: col-resize;
+    z-index: 2;
+    transform: translateX(-50%);
+    opacity: 0;
+    transition: opacity 0.15s;
+}
+
+.ProseMirror .grid-col-handle-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0.4;
+    transform: translateX(-50%);
+    transition: opacity 0.15s;
+    pointer-events: none;
+}
+
+.ProseMirror .grid-col-handle:hover .grid-col-handle-line,
+.ProseMirror .grid-col-handle.dragging .grid-col-handle-line {
+    opacity: 1;
+}
+
+/* Handle visibility on hover */
+.ProseMirror :is([data-type="maho-columns"], [data-type="maho-bento"]):hover .grid-col-handle {
+    opacity: 1;
+}
+
+/* Cell margin resets */
+.ProseMirror [data-type="maho-column"],
+.ProseMirror [data-type="maho-bento-cell"] {
     padding: 0.75rem;
     border-radius: 4px;
     transition: all 0.15s;
@@ -1090,6 +1152,14 @@
     > *:last-child {
         margin-bottom: 0;
     }
+}
+
+/* ========================================
+   COLUMNS — SPECIFIC STYLES
+   ======================================== */
+
+.ProseMirror [data-type="maho-column"] {
+    min-height: 100px;
 }
 
 /* Column style: none (editor-only dashed outline for visual feedback) */
@@ -1109,8 +1179,9 @@
     }
 }
 
-/* Column style: cards */
-.ProseMirror [data-type="maho-columns"][data-style="cards"] [data-type="maho-column"] {
+/* Grid style: cards (shared by columns and bento) */
+.ProseMirror [data-type="maho-columns"][data-style="cards"] [data-type="maho-column"],
+.ProseMirror [data-type="maho-bento"][data-style="cards"] [data-type="maho-bento-cell"] {
     border: 1px solid #e5e7eb;
     border-radius: 4px;
     background: transparent;
@@ -1125,7 +1196,7 @@
 }
 
 /* Column style: separated */
-.ProseMirror [data-type="maho-columns"][data-style="separated"] .columns-grid {
+.ProseMirror [data-type="maho-columns"][data-style="separated"] .grid-inner {
     gap: 0 !important;
 }
 .ProseMirror [data-type="maho-columns"][data-style="separated"] [data-type="maho-column"] {
@@ -1159,9 +1230,43 @@
     align-items: center;
 }
 
-/* Responsive: stack columns on small screens */
-@media (max-width: 768px) {
-    .ProseMirror [data-type="maho-columns"] {
-        grid-template-columns: 1fr !important;
+
+/* ========================================
+   BENTO GRID — SPECIFIC STYLES
+   ======================================== */
+
+.ProseMirror [data-type="maho-bento"] {
+    display: block;
+}
+
+.ProseMirror [data-type="maho-bento-cell"] {
+    min-height: 80px;
+    border: 1px dashed var(--tt-color-border-light);
+    background: rgba(249, 250, 251, 0.5);
+    position: relative;
+
+    &::before {
+        content: attr(data-area);
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        font-size: 9px;
+        font-weight: 500;
+        font-family: var(--tt-font-mono);
+        color: #0891b2;
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    &:hover {
+        border-color: #9ca3af;
+        background: rgba(249, 250, 251, 0.8);
+    }
+
+    &:focus-within {
+        border-color: #0891b2;
+        border-style: solid;
+        background: white;
     }
 }
+

@@ -6,7 +6,8 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.19.0';
+import { Node, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.20.0';
+import { findParentNodeOfType, createGridNodeView } from './grid-utils.js';
 
 /**
  * Column presets configuration
@@ -42,16 +43,6 @@ export const COLUMN_PRESETS = {
         columns: 3,
         layout: '1fr 2fr 1fr',
     },
-};
-
-/**
- * Gap size options
- */
-const GAP_SIZES = {
-    'none': '0',
-    'small': '0.5rem',
-    'medium': '1rem',
-    'large': '2rem',
 };
 
 /**
@@ -119,9 +110,7 @@ export const MahoColumns = Node.create({
                     const match = style.match(/grid-template-columns:\s*([^;]+)/);
                     return match ? match[1].trim() : '1fr 1fr';
                 },
-                renderHTML: attributes => ({
-                    style: `grid-template-columns: ${attributes.layout}`,
-                }),
+                renderHTML: () => ({}),
             },
             gap: {
                 default: 'medium',
@@ -143,100 +132,65 @@ export const MahoColumns = Node.create({
     },
 
     renderHTML({ HTMLAttributes, node }) {
-        return ['div', mergeAttributes(HTMLAttributes, {
+        const attrs = {
             'data-type': 'maho-columns',
             'data-preset': node.attrs.preset,
             'data-gap': node.attrs.gap,
             'data-style': node.attrs.style,
-        }), 0];
+        };
+
+        // Only inline grid-template-columns for custom (drag-resized) layouts;
+        // standard presets are handled by frontend CSS via data-preset
+        if (node.attrs.preset === 'custom') {
+            attrs.style = `grid-template-columns: ${node.attrs.layout}`;
+        }
+
+        return ['div', mergeAttributes(HTMLAttributes, attrs), 0];
     },
 
     addNodeView() {
-        return ({ node, editor, getPos }) => {
-            const gap = GAP_SIZES[node.attrs.gap] || GAP_SIZES.medium;
+        return createGridNodeView({
+            nodeName: 'mahoColumns',
+            storageName: 'mahoColumns',
+            dataType: 'maho-columns',
+            badgeLabel: 'Columns',
+            layoutAttr: 'layout',
 
-            // Wrapper for badge positioning
-            const dom = document.createElement('div');
-            dom.setAttribute('data-type', 'maho-columns');
-            dom.setAttribute('data-preset', node.attrs.preset);
-            dom.setAttribute('data-gap', node.attrs.gap);
-            dom.setAttribute('data-style', node.attrs.style);
-            dom.style.position = 'relative';
-            dom.style.width = '100%';
+            setDataAttrs(dom, node) {
+                dom.setAttribute('data-preset', node.attrs.preset);
+                dom.setAttribute('data-gap', node.attrs.gap);
+                dom.setAttribute('data-style', node.attrs.style);
+            },
 
-            // Badge button
-            const badge = document.createElement('button');
-            badge.type = 'button';
-            badge.className = 'columns-badge';
-            badge.innerHTML = `Columns <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>`;
+            updateGridStyles(contentDOM, node, gap) {
+                contentDOM.style.gridTemplateColumns = node.attrs.layout;
+                contentDOM.style.gap = gap;
+            },
 
-            badge.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
+            positionHandles(handles, contentDOM, node, widths, activeCount) {
+                const styles = getComputedStyle(contentDOM);
+                const colGap = parseFloat(styles.columnGap) || 0;
+                const gridHeight = contentDOM.offsetHeight;
 
-                const bubbleMenu = editor.storage.mahoColumns?.bubbleMenu;
-                if (!bubbleMenu) return;
-
-                // Update gap button active states
-                const currentGap = node.attrs.gap || 'medium';
-                for (const btn of bubbleMenu.querySelectorAll('[data-gap]')) {
-                    btn.classList.toggle('is-active', btn.dataset.gap === currentGap);
+                let cumulative = 0;
+                for (let i = 0; i < activeCount; i++) {
+                    cumulative += widths[i];
+                    const left = cumulative + (colGap * (i + 1)) - (colGap / 2);
+                    const h = handles[i];
+                    h.style.display = 'block';
+                    h.style.left = `${left}px`;
+                    h.style.top = '0';
+                    h.style.height = `${gridHeight}px`;
                 }
+            },
 
-                // Update style button active states
+            onBadgeClick(node, bubbleMenu) {
                 const currentStyle = node.attrs.style || 'none';
-                for (const btn of bubbleMenu.querySelectorAll('[data-col-style]')) {
-                    btn.classList.toggle('is-active', btn.dataset.colStyle === currentStyle);
+                for (const btn of bubbleMenu.querySelectorAll('[data-grid-style]')) {
+                    btn.classList.toggle('is-active', btn.dataset.gridStyle === currentStyle);
                 }
-
-                // Position below the badge
-                const rect = badge.getBoundingClientRect();
-                bubbleMenu.style.position = 'fixed';
-                bubbleMenu.style.top = `${rect.bottom + 6}px`;
-                bubbleMenu.style.left = `${rect.left}px`;
-                bubbleMenu.style.display = 'flex';
-
-                // Close when clicking outside
-                const closeMenu = (event) => {
-                    if (!bubbleMenu.contains(event.target) && event.target !== badge) {
-                        bubbleMenu.style.display = 'none';
-                        document.removeEventListener('click', closeMenu);
-                    }
-                };
-                setTimeout(() => document.addEventListener('click', closeMenu), 0);
-            });
-
-            dom.appendChild(badge);
-
-            // Grid container for columns (contentDOM)
-            const contentDOM = document.createElement('div');
-            contentDOM.className = 'columns-grid';
-            contentDOM.style.cssText = `
-                display: grid;
-                grid-template-columns: ${node.attrs.layout};
-                gap: ${gap};
-            `;
-            dom.appendChild(contentDOM);
-
-            return {
-                dom,
-                contentDOM,
-                update: (updatedNode) => {
-                    if (updatedNode.type.name !== 'mahoColumns') {
-                        return false;
-                    }
-
-                    const updatedGap = GAP_SIZES[updatedNode.attrs.gap] || GAP_SIZES.medium;
-                    dom.setAttribute('data-preset', updatedNode.attrs.preset);
-                    dom.setAttribute('data-gap', updatedNode.attrs.gap);
-                    dom.setAttribute('data-style', updatedNode.attrs.style);
-                    contentDOM.style.gridTemplateColumns = updatedNode.attrs.layout;
-                    contentDOM.style.gap = updatedGap;
-
-                    return true;
-                },
-            };
-        };
+            },
+        });
     },
 
     addCommands() {
@@ -330,25 +284,3 @@ export const MahoColumns = Node.create({
         };
     },
 });
-
-/**
- * Helper function to find parent node of specific type
- */
-function findParentNodeOfType(nodeType) {
-    return (selection) => {
-        const { $from } = selection;
-
-        for (let depth = $from.depth; depth > 0; depth--) {
-            const node = $from.node(depth);
-            if (node.type === nodeType) {
-                return {
-                    node,
-                    pos: $from.before(depth),
-                    depth,
-                };
-            }
-        }
-
-        return null;
-    };
-}
