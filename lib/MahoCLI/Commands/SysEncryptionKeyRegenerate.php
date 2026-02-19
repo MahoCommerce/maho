@@ -123,7 +123,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             $output->writeln('<comment>Skipping re-encryption of existing data (M1 key without mcrypt support).</comment>');
             $output->writeln('<comment>Old encrypted data will no longer be decryptable. New data will use the new key.</comment>');
         } else {
-            $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
+            $this->recryptAdminUserTable($output);
             $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
             Mage::app()->getCache()->clean('config');
 
@@ -151,24 +151,16 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    protected function recryptAdminUserTable(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection, \Maho\Db\Adapter\AdapterInterface $writeConnection): void
+    protected function recryptAdminUserTable(OutputInterface $output): void
     {
         $output->write('Re-encrypting data on admin_user table... ');
-
-        $table = Mage::getSingleton('core/resource')->getTableName('admin_user');
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('twofa_secret IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['twofa_secret' => $this->encrypt($this->decrypt($encryptedDataRow['twofa_secret']))],
-                ['user_id = ?' => $encryptedDataRow['user_id']],
-            );
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('admin_user'),
+            'user_id',
+            ['twofa_secret'],
+            [$this, 'encrypt'],
+            [$this, 'decrypt'],
+        );
         $output->writeln('OK');
     }
 
