@@ -1163,4 +1163,60 @@ XML;
         $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
     }
+
+    /**
+     * Re-encrypt columns in a table using batched queries to avoid memory exhaustion.
+     *
+     * @param string[] $columns
+     */
+    public function recryptTable(
+        string $table,
+        string $primaryKey,
+        array $columns,
+        callable $encryptCallback,
+        callable $decryptCallback,
+        int $batchSize = 1000,
+    ): void {
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lastId = 0;
+
+        while (true) {
+            $select = $readConnection->select()
+                ->from($table, array_merge([$primaryKey], $columns))
+                ->where("$primaryKey > ?", $lastId)
+                ->order("$primaryKey ASC")
+                ->limit($batchSize);
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $conditions[] = "$column IS NOT NULL";
+            }
+            $select->where(implode(' OR ', $conditions));
+
+            $rows = $readConnection->fetchAll($select);
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                $updateData = [];
+                foreach ($columns as $column) {
+                    if ($row[$column] !== null) {
+                        $updateData[$column] = $encryptCallback($decryptCallback($row[$column]));
+                    }
+                }
+                if (!empty($updateData)) {
+                    $writeConnection->update(
+                        $table,
+                        $updateData,
+                        ["$primaryKey = ?" => $row[$primaryKey]],
+                    );
+                }
+                $lastId = $row[$primaryKey];
+            }
+
+            unset($rows);
+        }
+    }
 }
