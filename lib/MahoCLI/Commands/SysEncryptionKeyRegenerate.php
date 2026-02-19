@@ -119,16 +119,21 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
-        $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
-        $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
-        Mage::app()->getCache()->clean('config');
+        if ($this->isOldEncryptionKeyM1 && !function_exists('mcrypt_module_open')) {
+            $output->writeln('<comment>Skipping re-encryption of existing data (M1 key without mcrypt support).</comment>');
+            $output->writeln('<comment>Old encrypted data will no longer be decryptable. New data will use the new key.</comment>');
+        } else {
+            $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
+            $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
+            Mage::app()->getCache()->clean('config');
 
-        Mage::dispatchEvent('encryption_key_regenerated', [
-            'output' => $output,
-            'encrypt_callback' => [$this, 'encrypt'],
-            'decrypt_callback' => [$this, 'decrypt'],
-        ]);
-        Mage::app()->getCache()->clean('config');
+            Mage::dispatchEvent('encryption_key_regenerated', [
+                'output' => $output,
+                'encrypt_callback' => [$this, 'encrypt'],
+                'decrypt_callback' => [$this, 'decrypt'],
+            ]);
+            Mage::app()->getCache()->clean('config');
+        }
 
         if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
             $output->writeln('');
@@ -231,7 +236,11 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
     public function decrypt(#[\SensitiveParameter] string $data): string
     {
-        if ($this->isOldEncryptionKeyM1 && function_exists('mcrypt_module_open')) {
+        if ($this->isOldEncryptionKeyM1) {
+            if (!function_exists('mcrypt_module_open')) {
+                return '';
+            }
+
             $key = $this->oldEncryptionKey;
             $handler = mcrypt_module_open(MCRYPT_BLOWFISH, '', MCRYPT_MODE_ECB, ''); // @phpstan-ignore constant.notFound,constant.notFound
             $initVector = mcrypt_create_iv(mcrypt_enc_get_iv_size($handler), MCRYPT_RAND); // @phpstan-ignore function.notFound,function.notFound,constant.notFound
