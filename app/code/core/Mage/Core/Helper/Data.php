@@ -1181,16 +1181,19 @@ XML;
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $lastId = 0;
 
+        $quotedPk = $readConnection->quoteIdentifier($primaryKey);
+
         while (true) {
             $select = $readConnection->select()
                 ->from($table, array_merge([$primaryKey], $columns))
-                ->where("$primaryKey > ?", $lastId)
-                ->order("$primaryKey ASC")
+                ->where("$quotedPk > ?", $lastId)
+                ->order("$quotedPk ASC")
                 ->limit($batchSize);
 
             $conditions = [];
             foreach ($columns as $column) {
-                $conditions[] = "$column IS NOT NULL";
+                $conditions[] = $readConnection->quoteIdentifier($column) . ' IS NOT NULL AND '
+                    . $readConnection->quoteIdentifier($column) . " != ''";
             }
             $select->where(implode(' OR ', $conditions));
 
@@ -1202,15 +1205,18 @@ XML;
             foreach ($rows as $row) {
                 $updateData = [];
                 foreach ($columns as $column) {
-                    if ($row[$column] !== null) {
-                        $updateData[$column] = $encryptCallback($decryptCallback($row[$column]));
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $decrypted = $decryptCallback($row[$column]);
+                        if ($decrypted !== '') {
+                            $updateData[$column] = $encryptCallback($decrypted);
+                        }
                     }
                 }
                 if (!empty($updateData)) {
                     $writeConnection->update(
                         $table,
                         $updateData,
-                        ["$primaryKey = ?" => $row[$primaryKey]],
+                        ["$quotedPk = ?" => $row[$primaryKey]],
                     );
                 }
                 $lastId = $row[$primaryKey];
