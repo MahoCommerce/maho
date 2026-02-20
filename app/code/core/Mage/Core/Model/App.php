@@ -421,7 +421,7 @@ class Mage_Core_Model_App
             // OpenTelemetry: Record exception in span
             if ($rootSpan) {
                 $rootSpan->recordException($e);
-                $rootSpan->setStatus('error', $e->getMessage());
+                $rootSpan->setStatus('error', $e::class);
             }
             throw $e;
         } finally {

@@ -92,7 +92,7 @@ class Maho_OpenTelemetry_Model_Http_TracedClient extends Mage_Core_Model_Abstrac
             return $response;
         } catch (\Throwable $e) {
             $span->recordException($e);
-            $span->setStatus('error', $e->getMessage());
+            $span->setStatus('error', $e::class);
             throw $e;
         } finally {
             $span->end();
