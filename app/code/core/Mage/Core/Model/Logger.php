@@ -125,18 +125,16 @@ class Mage_Core_Model_Logger
         // Add configured handlers
         static::addConfiguredHandlers($logger, $logFile, $configLevel);
 
-        // OpenTelemetry: Add trace context handler if tracer is available
+        // OpenTelemetry: Add trace context processor if tracer is available
         $tracer = Mage::getTracer();
         if ($tracer && $tracer->isEnabled()) {
             try {
-                // TraceContext handler adds trace_id and span_id to all log records
-                // It doesn't write logs itself - it just enriches them
-                $traceContextHandler = new Maho_OpenTelemetry_Handler_TraceContext($tracer, Level::Debug, true);
-                $logger->pushHandler($traceContextHandler);
+                // TraceContext processor adds trace_id and span_id to all log records
+                $logger->pushProcessor(new Maho_OpenTelemetry_Handler_TraceContext($tracer));
             } catch (\Throwable $e) {
                 // Silently fail - telemetry should never break logging
                 // Use error_log() to avoid re-entrant createLogger() → stack overflow
-                error_log('Failed to add trace context handler: ' . $e->getMessage());
+                error_log('Failed to add trace context processor: ' . $e->getMessage());
             }
         }
 

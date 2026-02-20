@@ -460,8 +460,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
         if (!$this->canAuthorize()) {
             Mage::throwException(Mage::helper('payment')->__('Authorize action is not available.'));
         }
-        \Maho\Profiler::start('payment.authorize', ['payment.method' => $this->getCode(), 'payment.amount' => (string) $amount]);
-        \Maho\Profiler::stop('payment.authorize');
         return $this;
     }
 
@@ -476,8 +474,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
         if (!$this->canCapture()) {
             Mage::throwException(Mage::helper('payment')->__('Capture action is not available.'));
         }
-        \Maho\Profiler::start('payment.capture', ['payment.method' => $this->getCode(), 'payment.amount' => (string) $amount]);
-        \Maho\Profiler::stop('payment.capture');
+
         return $this;
     }
 
@@ -519,8 +516,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
         if (!$this->canRefund()) {
             Mage::throwException(Mage::helper('payment')->__('Refund action is not available.'));
         }
-        \Maho\Profiler::start('payment.refund', ['payment.method' => $this->getCode(), 'payment.amount' => (string) $amount]);
-        \Maho\Profiler::stop('payment.refund');
+
         return $this;
     }
 
@@ -556,8 +552,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
         if (!$this->canVoid($payment)) {
             Mage::throwException(Mage::helper('payment')->__('Void action is not available.'));
         }
-        \Maho\Profiler::start('payment.void', ['payment.method' => $this->getCode()]);
-        \Maho\Profiler::stop('payment.void');
         return $this;
     }
 

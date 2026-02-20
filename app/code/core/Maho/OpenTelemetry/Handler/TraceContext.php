@@ -6,70 +6,35 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Maho_OpenTelemetry
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Monolog\Handler\AbstractProcessingHandler;
-use Monolog\Level;
 use Monolog\LogRecord;
+use Monolog\Processor\ProcessorInterface;
 
 /**
- * Monolog handler that adds OpenTelemetry trace context to log records
+ * Monolog processor that adds OpenTelemetry trace context to log records
  *
- * This handler enriches log records with trace_id and span_id from the
- * active span, enabling correlation between logs and traces.
- *
- * It does NOT export logs itself - it just adds context. Use in combination
- * with other handlers (file, syslog, etc.) to actually write the logs.
+ * Enriches log records with trace_id and span_id from the active span,
+ * enabling correlation between logs and traces.
  */
-class Maho_OpenTelemetry_Handler_TraceContext extends AbstractProcessingHandler
+class Maho_OpenTelemetry_Handler_TraceContext implements ProcessorInterface
 {
-    /**
-     * Tracer instance
-     */
     private ?Maho_OpenTelemetry_Model_Tracer $_tracer = null;
 
-    /**
-     * Constructor
-     *
-     * @param Level|int $level Minimum log level
-     * @param bool $bubble Whether to bubble the record to other handlers
-     */
-    public function __construct(
-        ?Maho_OpenTelemetry_Model_Tracer $tracer = null,
-        Level|int $level = Level::Debug,
-        bool $bubble = true,
-    ) {
-        parent::__construct($level, $bubble);
+    public function __construct(?Maho_OpenTelemetry_Model_Tracer $tracer = null)
+    {
         $this->_tracer = $tracer ?? Mage::getTracer();
     }
 
-    /**
-     * Process the log record by adding trace context
-     */
     #[\Override]
-    protected function write(LogRecord $record): void
+    public function __invoke(LogRecord $record): LogRecord
     {
-        // This handler only adds context, it doesn't write anything
-        // The actual writing is done by other handlers in the stack
-    }
-
-    /**
-     * Add trace context to the record
-     */
-    #[\Override]
-    public function handle(LogRecord $record): bool
-    {
-        if (!$this->isHandling($record)) {
-            return false;
-        }
-
-        // Add trace context if tracer is available
         if ($this->_tracer && $this->_tracer->isEnabled()) {
             $activeSpan = $this->_tracer->getActiveSpan();
             if ($activeSpan && $activeSpan->isRecording()) {
-                $record = $record->with(
+                return $record->with(
                     extra: array_merge($record->extra, [
                         'trace_id' => $activeSpan->getTraceId(),
                         'span_id' => $activeSpan->getSpanId(),
@@ -78,10 +43,6 @@ class Maho_OpenTelemetry_Handler_TraceContext extends AbstractProcessingHandler
             }
         }
 
-        // Process the record through any processors and write
-        $record = $this->processRecord($record);
-        $this->write($record);
-
-        return !$this->bubble;
+        return $record;
     }
 }

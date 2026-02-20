@@ -365,8 +365,8 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
         if (!$this->_hasModelChanged()) {
             return $this;
         }
-
         $this->_getResource()->beginTransaction();
+
         try {
             $this->_beforeSave();
             if ($this->_dataSaveAllowed) {
@@ -381,6 +381,7 @@ abstract class Mage_Core_Model_Abstract extends \Maho\DataObject
             $this->_hasDataChanges = true;
             throw $e;
         }
+
         return $this;
     }
 

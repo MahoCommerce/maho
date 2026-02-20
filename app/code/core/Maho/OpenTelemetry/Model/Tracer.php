@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Maho_OpenTelemetry
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -94,7 +94,7 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
                 'service.version' => Mage::getVersion(),
                 'telemetry.sdk.name' => 'opentelemetry',
                 'telemetry.sdk.language' => 'php',
-                'telemetry.sdk.version' => 'php',
+                'telemetry.sdk.version' => \Composer\InstalledVersions::getVersion('open-telemetry/sdk') ?? 'unknown',
             ])));
 
             // Create OTLP exporter

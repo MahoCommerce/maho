@@ -371,7 +371,7 @@ class Mage_Core_Model_App
             if ($rootSpan) {
                 $rootSpan->setAttributes([
                     'http.status_code' => http_response_code(),
-                    'http.response_size' => ob_get_length() ?: 0,
+                    'http.response_size' => (int) (ob_get_length() ?: 0),
                 ]);
                 $rootSpan->setStatus('ok');
 
