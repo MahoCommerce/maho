@@ -6,7 +6,7 @@
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Product_Attribute_Backend_Price
@@ -26,8 +26,11 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
      */
     protected function _getResource()
     {
-        /** @var Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax */
-        return Mage::getResourceSingleton(self::getBackendModelName());
+        $resource = Mage::getResourceSingleton(self::getBackendModelName());
+        if (!$resource instanceof Mage_Weee_Model_Resource_Attribute_Backend_Weee_Tax) {
+            throw new Mage_Core_Exception('Invalid Weee tax resource model');
+        }
+        return $resource;
     }
 
     /**
@@ -135,7 +138,7 @@ class Mage_Weee_Model_Attribute_Backend_Weee_Tax extends Mage_Catalog_Model_Prod
     }
 
     /**
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract
      */
     #[\Override]

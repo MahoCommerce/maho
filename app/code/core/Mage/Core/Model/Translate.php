@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -290,7 +290,7 @@ class Mage_Core_Model_Translate
     {
         $data = [];
         if (file_exists($file)) {
-            $parser = new Varien_File_Csv();
+            $parser = new \Maho\File\Csv();
             $parser->setDelimiter(self::CSV_SEPARATOR);
             $data = $parser->getDataPairs($file);
         }
@@ -442,25 +442,25 @@ class Mage_Core_Model_Translate
             $localeCode = $this->getLocale();
         }
 
-        $filePath = Mage::getBaseDir('locale') . DS
-                  . $localeCode . DS . 'template' . DS . $type . DS . $file;
+        $templatePath = 'template' . DS . $type . DS . $file;
+        $filePath = Maho::findFile('app/locale/' . $localeCode . '/' . $templatePath);
 
         // If no template specified for this locale, use store default
-        if (!file_exists($filePath)) {
-            $filePath = Mage::getBaseDir('locale') . DS
-                      . Mage::app()->getLocale()->getDefaultLocale()
-                      . DS . 'template' . DS . $type . DS . $file;
+        if (!$filePath) {
+            $filePath = Maho::findFile('app/locale/' . Mage::app()->getLocale()->getDefaultLocale() . '/' . $templatePath);
         }
 
-        // If no template specified as  store default locale, use en_US
-        if (!file_exists($filePath)) {
-            $filePath = Mage::getBaseDir('locale') . DS
-                      . Mage_Core_Model_Locale::DEFAULT_LOCALE
-                      . DS . 'template' . DS . $type . DS . $file;
+        // If no template specified as store default locale, use en_US
+        if (!$filePath) {
+            $filePath = Maho::findFile('app/locale/' . Mage_Core_Model_Locale::DEFAULT_LOCALE . '/' . $templatePath);
         }
 
-        $ioAdapter = new Varien_Io_File();
-        $ioAdapter->open(['path' => Mage::getBaseDir('locale')]);
+        if (!$filePath) {
+            return '';
+        }
+
+        $ioAdapter = new \Maho\Io\File();
+        $ioAdapter->open(['path' => dirname($filePath)]);
 
         return (string) $ioAdapter->read($filePath);
     }

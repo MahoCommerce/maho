@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,7 +21,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals extends Mage_Adminhtml_Block_Sales
     protected function _initTotals()
     {
         parent::_initTotals();
-        $this->_totals['paid'] = new Varien_Object([
+        $this->_totals['paid'] = new \Maho\DataObject([
             'code'      => 'paid',
             'strong'    => true,
             'value'     => $this->getSource()->getTotalPaid(),
@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals extends Mage_Adminhtml_Block_Sales
             'label'     => $this->helper('sales')->__('Total Paid'),
             'area'      => 'footer',
         ]);
-        $this->_totals['refunded'] = new Varien_Object([
+        $this->_totals['refunded'] = new \Maho\DataObject([
             'code'      => 'refunded',
             'strong'    => true,
             'value'     => $this->getSource()->getTotalRefunded(),
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Block_Sales_Order_Totals extends Mage_Adminhtml_Block_Sales
             'label'     => $this->helper('sales')->__('Total Refunded'),
             'area'      => 'footer',
         ]);
-        $this->_totals['due'] = new Varien_Object([
+        $this->_totals['due'] = new \Maho\DataObject([
             'code'      => 'due',
             'strong'    => true,
             'value'     => $this->getSource()->getTotalDue(),

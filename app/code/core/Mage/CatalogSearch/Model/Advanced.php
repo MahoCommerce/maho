@@ -6,7 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -110,20 +110,6 @@ class Mage_CatalogSearch_Model_Advanced extends Mage_Core_Model_Abstract
             $this->setData('attributes', $attributes);
         }
         return $attributes;
-    }
-
-    /**
-     * Prepare search condition for attribute
-     *
-     * @deprecated after 1.4.1.0 - use Mage_CatalogSearch_Model_Resource_Advanced->_prepareCondition()
-     *
-     * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
-     * @param string|array $value
-     * @return mixed
-     */
-    protected function _prepareCondition($attribute, $value)
-    {
-        return $this->_getResource()->prepareCondition($attribute, $value, $this->getProductCollection());
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -105,7 +105,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
     /**
      * Get categories of current store
      *
-     * @return Varien_Data_Tree_Node_Collection
+     * @return \Maho\Data\Tree\Node\Collection
      */
     public function getStoreCategories()
     {
@@ -134,7 +134,7 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
     /**
      * Check whether specified category is active
      *
-     * @param Varien_Object $category
+     * @param \Maho\DataObject $category
      * @return bool
      */
     public function isCategoryActive($category)
@@ -328,20 +328,6 @@ class Mage_Catalog_Block_Navigation extends Mage_Core_Block_Template
 
         $html = implode("\n", $html);
         return $html;
-    }
-
-    /**
-     * Render category to html
-     *
-     * @deprecated deprecated after 1.4
-     * @param Mage_Catalog_Model_Category $category
-     * @param int $level Nesting level number
-     * @param bool $last Whether ot not this item is last, affects list item class
-     * @return string
-     */
-    public function drawItem($category, $level = 0, $last = false)
-    {
-        return $this->_renderCategoryMenuItemHtml($category, $level, $last);
     }
 
     /**

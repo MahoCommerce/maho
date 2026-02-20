@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -68,19 +68,13 @@ class Mage_Tax_Model_Class_Source_Product extends Mage_Eav_Model_Entity_Attribut
     {
         $attributeCode = $this->getAttribute()->getAttributeCode();
         $column = [
+            'type'      => Maho\Db\Ddl\Table::TYPE_INTEGER,
             'unsigned'  => true,
+            'nullable'  => true,
             'default'   => null,
             'extra'     => null,
+            'comment'   => $attributeCode . ' tax column',
         ];
-
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $column['type']     = 'int';
-            $column['is_null']  = true;
-        } else {
-            $column['type']     = Maho\Db\Ddl\Table::TYPE_INTEGER;
-            $column['nullable'] = true;
-            $column['comment']  = $attributeCode . ' tax column';
-        }
 
         return [$attributeCode => $column];
     }

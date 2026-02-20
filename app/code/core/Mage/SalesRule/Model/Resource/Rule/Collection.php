@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -159,7 +159,7 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
      * @return $this
      */
     #[\Override]
-    public function _initSelect()
+    protected function _initSelect()
     {
         parent::_initSelect();
         $this->getSelect()
@@ -180,11 +180,11 @@ class Mage_SalesRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Reso
      */
     public function addAttributeInConditionFilter($attributeCode)
     {
-        $match = sprintf('%%%s%%', substr(serialize(['attribute' => $attributeCode]), 5, -1));
-        $field = $this->_getMappedField('conditions_serialized');
-        $cCond = $this->_getConditionSql($field, ['like' => $match]);
-        $field = $this->_getMappedField('actions_serialized');
-        $aCond = $this->_getConditionSql($field, ['like' => $match]);
+        $adapter = $this->getConnection();
+        $conditionsField = (string) $this->_getMappedField('conditions_serialized');
+        $actionsField = (string) $this->_getMappedField('actions_serialized');
+        $cCond = $adapter->getJsonSearchExpr($conditionsField, $attributeCode, '$**.attribute');
+        $aCond = $adapter->getJsonSearchExpr($actionsField, $attributeCode, '$**.attribute');
 
         $this->getSelect()->where(sprintf('(%s OR %s)', $cCond, $aCond), null, Maho\Db\Select::TYPE_CONDITION);
 

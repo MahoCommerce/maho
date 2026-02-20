@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -107,7 +107,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     public function __construct(array $args = [])
     {
         $this->_config = Mage::getSingleton('tax/config');
-        $this->_app = !empty($args['app']) ? $args['app'] : Mage::app();
+        $this->_app = empty($args['app']) ? Mage::app() : $args['app'];
     }
 
     /**
@@ -402,25 +402,9 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get all tax rates JSON for all product tax classes
-     *
-     * array(
-     *      value_{$productTaxClassId} => $rate
-     * )
-     * @deprecated after 1.4 - please use getAllRatesByProductClass
-     * @return string
-     */
-    public function getTaxRatesByProductClass()
-    {
-        return $this->_getAllRatesByProductClass();
-    }
-
-    /**
      * Get all tax rates JSON for all product tax classes of specific store
      *
-     * array(
-     *      value_{$productTaxClassId} => $rate
-     * )
+     * [value_{$productTaxClassId} => $rate]
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $store
      * @return string
@@ -433,9 +417,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get all tax rates JSON for all product tax classes of specific store
      *
-     * array(
-     *      value_{$productTaxClassId} => $rate
-     * )
+     * [value_{$productTaxClassId} => $rate]
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $store
      * @return string
@@ -456,7 +438,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get product price with all tax settings processing
      *
-     * @param Mage_Catalog_Model_Product|Varien_Object $product
+     * @param Mage_Catalog_Model_Product|\Maho\DataObject $product
      * @param float $price inputted product price
      * @param bool $includingTax return price include tax flag
      * @param null|Mage_Customer_Model_Address $shippingAddress
@@ -593,9 +575,8 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         }
         if ($roundPrice) {
             return $store->roundPrice($price);
-        } else {
-            return $price;
         }
+        return $price;
     }
 
     /**
@@ -661,10 +642,9 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
         if ($type) {
             $taxAmount = $calculator->calcTaxAmount($price, $percent, false, $roundTaxFirst);
             return $price + $taxAmount;
-        } else {
-            $taxAmount = $calculator->calcTaxAmount($price, $percent, true, $roundTaxFirst);
-            return $price - $taxAmount;
         }
+        $taxAmount = $calculator->calcTaxAmount($price, $percent, true, $roundTaxFirst);
+        return $price - $taxAmount;
     }
 
     /**
@@ -773,7 +753,7 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getShippingPrice($price, $includingTax = null, $shippingAddress = null, $ctc = null, $store = null)
     {
-        $pseudoProduct = new Varien_Object();
+        $pseudoProduct = new \Maho\DataObject();
         $pseudoProduct->setTaxClassId($this->getShippingTaxClass($store));
 
         $billingAddress = false;
@@ -961,15 +941,15 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
      * Get calculated taxes for each tax class
      *
      * This method returns array with format:
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'tax_amount'        => $taxAmount,
      *      'base_tax_amount'   => $baseTaxAmount,
      *      'hidden_tax_amount' => $hiddenTaxAmount,
      *      'title'             => $title,
      *      'percent'           => $percent
-     *  )
-     * )
+     *  ]
+     * ]
      *
      * @param Mage_Sales_Model_Order $source
      * @return array
@@ -1061,30 +1041,18 @@ class Mage_Tax_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Retrieve a value from registry by a key
-     *
-     * @param string $key
-     * @return mixed
-     * @deprecated use Mage::registry()
-     */
-    protected function _getFromRegistry($key)
-    {
-        return Mage::registry($key);
-    }
-
-    /**
      * Get calculated Shipping & Handling Tax
      *
      * This method returns array with format:
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'tax_amount'        => $taxAmount,
      *      'base_tax_amount'   => $baseTaxAmount,
      *      'hidden_tax_amount' => $hiddenTaxAmount
      *      'title'             => $title
      *      'percent'           => $percent
-     *  )
-     * )
+     *  ]
+     * ]
      *
      * @param Mage_Sales_Model_Order $source
      * @return array

@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Config_Element extends Varien_Simplexml_Element
+class Mage_Core_Model_Config_Element extends \Maho\Simplexml\Element
 {
     /**
      * @param string $var
@@ -24,9 +24,8 @@ class Mage_Core_Model_Config_Element extends Varien_Simplexml_Element
             $flag = strtolower((string) $flag);
             if (!empty($flag) && $flag !== 'false' && $flag !== 'off') {
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
 
         return !empty($flag) && (strcasecmp((string) $value, (string) $flag) === 0);

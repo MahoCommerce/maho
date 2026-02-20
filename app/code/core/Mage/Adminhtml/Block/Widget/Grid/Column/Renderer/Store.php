@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
      * @return string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         $out = '';
         $skipAllStoresLabel = $this->_getShowAllStoresLabelFlag();
@@ -73,10 +73,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
         if (!is_array($origStores)) {
             $origStores = [$origStores];
         }
-
         if (empty($origStores)) {
             return '';
-        } elseif (in_array(0, $origStores) && count($origStores) == 1 && !$skipAllStoresLabel) {
+        }
+
+        if (in_array(0, $origStores) && count($origStores) == 1 && !$skipAllStoresLabel) {
             return Mage::helper('adminhtml')->__('All Store Views');
         }
 
@@ -101,7 +102,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
      * @return string
      */
     #[\Override]
-    public function renderExport(Varien_Object $row)
+    public function renderExport(\Maho\DataObject $row)
     {
         $out = '';
         $skipAllStoresLabel = $this->_getShowAllStoresLabelFlag();

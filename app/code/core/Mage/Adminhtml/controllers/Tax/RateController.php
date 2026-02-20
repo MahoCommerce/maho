@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -252,7 +252,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     protected function _importRates()
     {
         $fileName   = $_FILES['import_rates_file']['tmp_name'];
-        $csvObject  = new Varien_File_Csv();
+        $csvObject  = new \Maho\File\Csv();
         $csvData = $csvObject->getData($fileName);
 
         /** checks columns */
@@ -371,7 +371,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     public function exportPostAction(): void
     {
         /** start csv content and set template */
-        $headers = new Varien_Object([
+        $headers = new \Maho\DataObject([
             'code'         => Mage::helper('tax')->__('Code'),
             'country_name' => Mage::helper('tax')->__('Country'),
             'region_name'  => Mage::helper('tax')->__('State'),

@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -33,6 +33,18 @@
     </tr>
     <tr>
         <td colspan="2"><div id="adjustment_negative_adv"></div></td>
+    </tr>
+    <?php
+        $orderId = $this->getSource()->getOrderId();
+        $invoiceId = $this->getRequest()->getParam('invoice_id');
+        $updateUrl = $this->getUrl('*/*/updateQty', ['order_id' => $orderId, 'invoice_id' => $invoiceId]);
+    ?>
+    <tr>
+        <td colspan="2" class="a-right" style="padding-top:10px">
+            <button type="button" class="scalable" onclick="submitAndReloadArea(document.getElementById('creditmemo_item_container'),'<?= $updateUrl ?>')">
+                <span><span><span><?= $this->helper('sales')->__('Update Totals') ?></span></span></span>
+            </button>
+        </td>
     </tr>
     <script type="text/javascript">
         Validation.addAllThese([

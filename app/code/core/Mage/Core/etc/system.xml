@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -78,7 +78,7 @@
         <advanced translate="label" module="core">
             <label>Advanced</label>
             <tab>advanced</tab>
-            <sort_order>910</sort_order>
+            <sort_order>30</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
@@ -473,7 +473,7 @@
         <dev translate="label" module="core">
             <label>Developer</label>
             <tab>advanced</tab>
-            <sort_order>920</sort_order>
+            <sort_order>40</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
@@ -856,7 +856,7 @@
             <class>separator-top</class>
             <label>System</label>
             <tab>advanced</tab>
-            <sort_order>900</sort_order>
+            <sort_order>50</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
@@ -944,6 +944,25 @@
                             <show_in_store>1</show_in_store>
                             <depends><enabled separator=",">ses+smtp,ses+https,ses+api,azure+api,scaleway+smtp,scaleway+api,mailgun+smtp,mailgun+https,mailgun+api</enabled></depends>
                         </region>
+                        <enable_queue translate="label comment">
+                            <label>Enable Email Queue</label>
+                            <comment>When enabled, emails are queued for background sending. Automatically disabled in developer mode for immediate feedback.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>95</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enable_queue>
+                        <test_email translate="label button_label">
+                            <label>Test Email Settings</label>
+                            <button_label>Send</button_label>
+                            <frontend_model>adminhtml/system_config_form_field_testEmail</frontend_model>
+                            <sort_order>100</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </test_email>
                     </fields>
                 </smtp>
                 <media_storage_configuration translate="label" module="core">
@@ -1613,31 +1632,6 @@
                         </use_frontend_sid>
                     </fields>
                 </session>
-                <browser_capabilities translate="label">
-                    <label>Browser Capabilities Detection</label>
-                    <sort_order>200</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <cookies translate="label" module="cms">
-                            <label>Redirect to CMS-page if Cookies are Disabled</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>100</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </cookies>
-                        <javascript translate="label" module="cms">
-                            <label>Show Notice if JavaScript is Disabled</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>200</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                        </javascript>
-                    </fields>
-                </browser_capabilities>
             </groups>
         </web>
     </sections>

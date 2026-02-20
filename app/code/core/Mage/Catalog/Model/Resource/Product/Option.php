@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                 if ($optionId) {
                     if ($object->getStoreId() == '0') {
                         $data = $this->_prepareDataForTable(
-                            new Varien_Object(
+                            new \Maho\DataObject(
                                 [
                                     'price'      => $object->getPrice(),
                                     'price_type' => $object->getPriceType()],
@@ -85,7 +85,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                     }
                 } else {
                     $data = $this->_prepareDataForTable(
-                        new Varien_Object(
+                        new \Maho\DataObject(
                             [
                                 'option_id'  => $object->getId(),
                                 'store_id'   => Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID,
@@ -127,7 +127,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
 
                         if ($readAdapter->fetchOne($statement)) {
                             $data = $this->_prepareDataForTable(
-                                new Varien_Object(
+                                new \Maho\DataObject(
                                     [
                                         'price'      => $newPrice,
                                         'price_type' => $object->getPriceType(),
@@ -146,7 +146,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                             );
                         } else {
                             $data = $this->_prepareDataForTable(
-                                new Varien_Object(
+                                new \Maho\DataObject(
                                     [
                                         'option_id'  => $object->getId(),
                                         'store_id'   => $storeId,
@@ -195,7 +195,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
             if ($readAdapter->fetchOne($statement)) {
                 if ($object->getStoreId() == '0') {
                     $data = $this->_prepareDataForTable(
-                        new Varien_Object(
+                        new \Maho\DataObject(
                             [
                                 'title' => $object->getTitle(),
                             ],
@@ -214,7 +214,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                 }
             } else {
                 $data = $this->_prepareDataForTable(
-                    new Varien_Object(
+                    new \Maho\DataObject(
                         [
                             'option_id' => $object->getId(),
                             'store_id'  => Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID,
@@ -236,7 +236,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
 
             if ($readAdapter->fetchOne($statement)) {
                 $data = $this->_prepareDataForTable(
-                    new Varien_Object(
+                    new \Maho\DataObject(
                         [
                             'title' => $object->getTitle(),
                         ],
@@ -254,7 +254,7 @@ class Mage_Catalog_Model_Resource_Product_Option extends Mage_Core_Model_Resourc
                 );
             } else {
                 $data = $this->_prepareDataForTable(
-                    new Varien_Object(
+                    new \Maho\DataObject(
                         [
                             'option_id' => $object->getId(),
                             'store_id'  => $object->getStoreId(),

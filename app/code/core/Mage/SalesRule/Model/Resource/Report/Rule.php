@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,18 +63,4 @@ class Mage_SalesRule_Model_Resource_Report_Rule extends Mage_Reports_Model_Resou
         return $result;
     }
 
-    /**
-     * Aggregate coupons reports by order created at as range
-     *
-     * @deprecated after 1.6.0.0-rc2
-     *
-     * @param mixed $from
-     * @param mixed $to
-     * @return $this
-     */
-    protected function _aggregateByOrderCreatedAt($from, $to)
-    {
-        Mage::getResourceModel('salesrule/report_rule_createdat')->aggregate($from, $to);
-        return $this;
-    }
 }

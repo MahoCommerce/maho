@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -18,7 +18,12 @@
     </modules>
     <global>
         <models>
+            <core>
+                <class>Mage_Core_Model</class>
+                <resourceModel>core_resource</resourceModel>
+            </core>
             <core_resource>
+                <class>Mage_Core_Model_Resource</class>
                 <entities>
                     <website>
                         <table>core_website</table>
@@ -299,6 +304,7 @@
             </cache>
             <smtp>
                 <enabled>sendmail</enabled>
+                <enable_queue>1</enable_queue>
             </smtp>
             <media_storage_configuration>
                 <image_file_type>18</image_file_type>
@@ -394,10 +400,6 @@
                 <use_frontend_sid>1</use_frontend_sid>
                 <use_admin_sid>0</use_admin_sid>
             </session>
-            <browser_capabilities>
-                <cookies>1</cookies>
-                <javascript>1</javascript>
-            </browser_capabilities>
         </web>
         <admin>
             <design>
@@ -462,16 +464,6 @@
                     <shtml>shtml</shtml>
                     <!-- EOF HTML file extensions -->
                 </protected_extensions>
-
-                <!-- Valid Paths to make public files -->
-                <public_files_valid_paths>
-                    <protected>
-                        <app>/app/*/*</app>
-                        <js>/js/*/*</js>
-                        <lib>/lib/*/*</lib>
-                        <skin>/skin/*/*</skin>
-                    </protected>
-                </public_files_valid_paths>
             </file>
             <!-- Additional email for notifications -->
             <additional_notification_emails>

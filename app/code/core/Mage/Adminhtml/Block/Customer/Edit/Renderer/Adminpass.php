@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Customer_Edit_Renderer_Adminpass extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Block_Customer_Edit_Renderer_Adminpass extends Mage_Adminhtml_Block_Abstract implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * Render block
@@ -18,7 +20,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Adminpass extends Mage_Adminht
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $html  = '<tr id="' . $element->getHtmlId() . '_container">';
         $html .= '<td class="label">' . $element->getLabelHtml() . '</td>';
@@ -32,7 +34,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Adminpass extends Mage_Adminht
     /**
      * @return string
      */
-    protected function _getScriptHtml(Varien_Data_Form_Element_Abstract $element)
+    protected function _getScriptHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         return <<<SCRIPT
 <script type="text/javascript">

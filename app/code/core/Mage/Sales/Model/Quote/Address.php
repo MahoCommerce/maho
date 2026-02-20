@@ -5,8 +5,8 @@
  *
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2018-2026 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -159,7 +159,6 @@
  * @method $this setSameAsBilling(int $value)
  * @method int getSaveInAddressBook()
  * @method $this setSaveInAddressBook(int $value)
- * @method float getShippingAmount()
  * @method float getShippingAmountForDiscount()
  * @method $this setShippingAmountForDiscount(float|int $value)
  * @method float getShippingDiscountAmount()
@@ -342,7 +341,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
              * Set same_as_billing to "1" when default shipping address is set as default
              * and it is not equal billing address
              */
-            if (!$this->getId()) {
+            if (!$this->getId() && !$this->hasSameAsBilling()) {
                 $this->setSameAsBilling((int) $this->_isSameAsBilling());
             }
         }
@@ -861,11 +860,11 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
     {
         if ((int) $a[0]->carrier_sort_order < (int) $b[0]->carrier_sort_order) {
             return -1;
-        } elseif ((int) $a[0]->carrier_sort_order > (int) $b[0]->carrier_sort_order) {
-            return 1;
-        } else {
-            return 0;
         }
+        if ((int) $a[0]->carrier_sort_order > (int) $b[0]->carrier_sort_order) {
+            return 1;
+        }
+        return 0;
     }
 
     /**
@@ -1094,6 +1093,9 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      */
     public function getTotals()
     {
+        // Reset totals before fetching to prevent stale entries from previous calls
+        $this->_totals = [];
+
         foreach ($this->getTotalCollector()->getRetrievers() as $model) {
             $model->fetch($this);
         }
@@ -1142,10 +1144,11 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
         if (!Mage::getStoreConfigFlag('sales/minimum_order/active', $storeId)) {
             return true;
         }
-
         if ($this->getQuote()->getIsVirtual() && $this->getAddressType() == self::TYPE_SHIPPING) {
             return true;
-        } elseif (!$this->getQuote()->getIsVirtual() && $this->getAddressType() != self::TYPE_SHIPPING) {
+        }
+
+        if (!$this->getQuote()->getIsVirtual() && $this->getAddressType() != self::TYPE_SHIPPING) {
             return true;
         }
 
@@ -1183,7 +1186,7 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
      */
     public function setAppliedTaxes($data)
     {
-        return $this->setData('applied_taxes', serialize($data));
+        return $this->setData('applied_taxes', Mage::helper('core')->jsonEncode($data));
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -101,7 +101,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
     /**
      * Returns root node and sets 'checked' flag (if necessary)
      *
-     * @return Varien_Data_Tree_Node
+     * @return \Maho\Data\Tree\Node
      */
     public function getRootNode()
     {
@@ -144,7 +144,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
     {
         // create a node from data array
         if (is_array($node)) {
-            $node = new Varien_Data_Tree_Node($node, 'entity_id', new Varien_Data_Tree());
+            $node = new \Maho\Data\Tree\Node($node, 'entity_id', new \Maho\Data\Tree());
         }
 
         $item = parent::_getNodeJson($node, $level);
@@ -161,12 +161,12 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
     /**
      * Check if the node can be moved
      *
-     * @param Varien_Object $node
+     * @param \Maho\DataObject $node
      * @return bool
      */
     protected function _isCategoryMoveable($node)
     {
-        $options = new Varien_Object([
+        $options = new \Maho\DataObject([
             'is_moveable' => true,
             'category' => $node,
         ]);
@@ -190,7 +190,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
             return false;
         }
 
-        $options = new Varien_Object(['is_allow' => true]);
+        $options = new \Maho\DataObject(['is_allow' => true]);
         Mage::dispatchEvent('adminhtml_catalog_category_tree_can_add_root_category', [
             'category' => $this->getCategory(),
             'options'  => $options,
@@ -207,7 +207,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
      */
     public function canAddSubCategory()
     {
-        $options = new Varien_Object(['is_allow' => true]);
+        $options = new \Maho\DataObject(['is_allow' => true]);
         Mage::dispatchEvent('adminhtml_catalog_category_tree_can_add_sub_category', [
             'category' => $this->getCategory(),
             'options'  => $options,
@@ -215,16 +215,5 @@ class Mage_Adminhtml_Block_Catalog_Category_Tree extends Mage_Adminhtml_Block_Ca
         ]);
 
         return (bool) $options->getIsAllow();
-    }
-
-    /**
-     * Check if page loaded by outside link to category edit
-     *
-     * @return bool
-     * @deprecated
-     */
-    public function isClearEdit()
-    {
-        return (bool) $this->getRequest()->getParam('clear');
     }
 }

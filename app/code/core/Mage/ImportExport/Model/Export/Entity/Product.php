@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -405,87 +405,6 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
     }
 
     /**
-     * Prepare configurable product data
-     *
-     * @deprecated since 1.6.1.0
-     * @see Mage_Catalog_Model_Resource_Product_Type_Configurable::getConfigurableOptions()
-     * @return array
-     */
-    protected function _prepareConfigurableProductData(array $productIds)
-    {
-        if (empty($productIds)) {
-            return [];
-        }
-        $resource = Mage::getSingleton('core/resource');
-        $select = $this->_connection->select()
-            ->from(
-                ['cpsl' => $resource->getTableName('catalog/product_super_link')],
-                ['cpsl.parent_id', 'cpe.sku'],
-            )
-            ->joinLeft(
-                ['cpe' => $resource->getTableName('catalog/product')],
-                '(cpe.entity_id = cpsl.product_id)',
-                [],
-            )
-            ->where('parent_id IN (?)', $productIds);
-        $stmt = $this->_connection->query($select);
-        $configurableData = [];
-        while ($cfgLinkRow = $stmt->fetch()) {
-            $configurableData[$cfgLinkRow['parent_id']][] = ['_super_products_sku' => $cfgLinkRow['sku']];
-        }
-
-        return $configurableData;
-    }
-
-    /**
-     * Prepare configurable product price
-     *
-     * @deprecated since 1.6.1.0
-     * @see Mage_Catalog_Model_Resource_Product_Type_Configurable::getConfigurableOptions()
-     * @return array
-     */
-    protected function _prepareConfigurableProductPrice(array $productIds)
-    {
-        if (empty($productIds)) {
-            return [];
-        }
-        $resource = Mage::getSingleton('core/resource');
-        $select = $this->_connection->select()
-            ->from(
-                ['cpsa' => $resource->getTableName('catalog/product_super_attribute')],
-                [
-                    'cpsa.product_id', 'ea.attribute_code', 'eaov.value', 'cpsap.pricing_value', 'cpsap.is_percent',
-                ],
-            )
-            ->joinLeft(
-                ['cpsap' => $resource->getTableName('catalog/product_super_attribute_pricing')],
-                '(cpsap.product_super_attribute_id = cpsa.product_super_attribute_id)',
-                [],
-            )
-            ->joinLeft(
-                ['ea' => $resource->getTableName('eav/attribute')],
-                '(ea.attribute_id = cpsa.attribute_id)',
-                [],
-            )
-            ->joinLeft(
-                ['eaov' => $resource->getTableName('eav/attribute_option_value')],
-                '(eaov.option_id = cpsap.value_index AND store_id = 0)',
-                [],
-            )
-            ->where('cpsa.product_id IN (?)', $productIds);
-        $configurablePrice = [];
-        $stmt = $this->_connection->query($select);
-        while ($priceRow = $stmt->fetch()) {
-            $configurablePrice[$priceRow['product_id']][] = [
-                '_super_attribute_code'       => $priceRow['attribute_code'],
-                '_super_attribute_option'     => $priceRow['value'],
-                '_super_attribute_price_corr' => $priceRow['pricing_value'] . ($priceRow['is_percent'] ? '%' : ''),
-            ];
-        }
-        return $configurablePrice;
-    }
-
-    /**
      * Update data row with information about categories. Return true, if data row was updated
      *
      * @param array $dataRow
@@ -511,29 +430,14 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
     }
 
     /**
-     * Export process and return contents of temporary file.
-     *
-     * @deprecated after ver 1.9.2.4 use $this->exportFile() instead
-     *
-     * @return string
-     */
-    #[\Override]
-    public function export()
-    {
-        $this->_prepareExport();
-
-        return $this->getWriter()->getContents();
-    }
-
-    /**
      * Export process and return temporary file through array.
      *
      * This method will return following array:
      *
-     * array(
+     * [
      *     'rows'  => count of written rows,
      *     'value' => path to created file
-     * )
+     * ]
      *
      * @return array
      */
@@ -848,12 +752,10 @@ class Mage_ImportExport_Model_Export_Entity_Product extends Mage_ImportExport_Mo
                         } else {
                             $row['_custom_option_row_title'] = $value['title'];
                         }
-                        if ($row) {
-                            if ($defaultStoreId != $storeId) {
-                                $row['_custom_option_store'] = $this->_storeIdToCode[$storeId];
-                            }
-                            $customOptionsDataPre[$option['product_id']][$option['option_id']][] = $row;
+                        if ($defaultStoreId != $storeId) {
+                            $row['_custom_option_store'] = $this->_storeIdToCode[$storeId];
                         }
+                        $customOptionsDataPre[$option['product_id']][$option['option_id']][] = $row;
                     }
                     $option = null;
                 }

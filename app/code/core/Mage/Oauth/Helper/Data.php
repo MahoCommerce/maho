@@ -6,7 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,12 +15,10 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Endpoint types with appropriate routes
      */
-    public const ENDPOINT_AUTHORIZE_CUSTOMER        = 'oauth/authorize';
-    public const ENDPOINT_AUTHORIZE_ADMIN           = 'adminhtml/oauth_authorize';
-    public const ENDPOINT_AUTHORIZE_CUSTOMER_SIMPLE = 'oauth/authorize/simple';
-    public const ENDPOINT_AUTHORIZE_ADMIN_SIMPLE    = 'adminhtml/oauth_authorize/simple';
-    public const ENDPOINT_INITIATE                  = 'oauth/initiate';
-    public const ENDPOINT_TOKEN                     = 'oauth/token';
+    public const ENDPOINT_AUTHORIZE_ADMIN        = 'adminhtml/oauth_authorize';
+    public const ENDPOINT_AUTHORIZE_ADMIN_SIMPLE = 'adminhtml/oauth_authorize/simple';
+    public const ENDPOINT_INITIATE               = 'oauth/initiate';
+    public const ENDPOINT_TOKEN                  = 'oauth/token';
 
     /**
      * Cleanup xpath config settings
@@ -50,9 +48,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
      * @var array
      */
     protected $_endpoints = [
-        self::ENDPOINT_AUTHORIZE_CUSTOMER,
         self::ENDPOINT_AUTHORIZE_ADMIN,
-        self::ENDPOINT_AUTHORIZE_CUSTOMER_SIMPLE,
         self::ENDPOINT_AUTHORIZE_ADMIN_SIMPLE,
         self::ENDPOINT_INITIATE,
         self::ENDPOINT_TOKEN,
@@ -158,7 +154,7 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
         } elseif (!$token->getAuthorized()) {
             Mage::throwException('Token is not authorized');
         }
-        $callbackUrl .= (!str_contains($callbackUrl, '?') ? '?' : '&');
+        $callbackUrl .= (str_contains($callbackUrl, '?') ? '&' : '?');
         $callbackUrl .= 'oauth_token=' . $token->getToken() . '&';
         $callbackUrl .= $rejected ? self::QUERY_PARAM_REJECTED . '=1' : 'oauth_verifier=' . $token->getVerifier();
 
@@ -249,30 +245,14 @@ class Mage_Oauth_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Get authorize endpoint url
+     * Get authorize endpoint url for admin
      *
-     * @param string $userType
      * @return string
      */
-    public function getAuthorizeUrl($userType)
+    public function getAuthorizeUrl()
     {
         $simple = $this->_getIsSimple();
-
-        if (Mage_Oauth_Model_Token::USER_TYPE_CUSTOMER == $userType) {
-            if ($simple) {
-                $route = self::ENDPOINT_AUTHORIZE_CUSTOMER_SIMPLE;
-            } else {
-                $route = self::ENDPOINT_AUTHORIZE_CUSTOMER;
-            }
-        } elseif (Mage_Oauth_Model_Token::USER_TYPE_ADMIN == $userType) {
-            if ($simple) {
-                $route = self::ENDPOINT_AUTHORIZE_ADMIN_SIMPLE;
-            } else {
-                $route = self::ENDPOINT_AUTHORIZE_ADMIN;
-            }
-        } else {
-            throw new Exception('Invalid user type.');
-        }
+        $route = $simple ? self::ENDPOINT_AUTHORIZE_ADMIN_SIMPLE : self::ENDPOINT_AUTHORIZE_ADMIN;
 
         return $this->_getUrl($route, ['_query' => ['oauth_token' => $this->getOauthToken()]]);
     }

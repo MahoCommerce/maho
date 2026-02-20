@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Payment
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,7 +16,14 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
     /**
      * Fallback form instance
      */
-    protected ?Varien_Data_Form $_form = null;
+    protected ?\Maho\Data\Form $_form = null;
+
+    /**
+     * Associated rule instance
+     *
+     * @var Mage_Payment_Model_Restriction_Rule|null
+     */
+    protected $_rule;
 
     public function __construct()
     {
@@ -42,7 +49,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         $product = false;
         if ($object->getProduct() instanceof Mage_Catalog_Model_Product) {
@@ -74,7 +81,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product extends Mage_Rule_Mo
 
         // Fallback: create a basic form if rule is not available
         if (!$this->_form) {
-            $this->_form = new Varien_Data_Form();
+            $this->_form = new \Maho\Data\Form();
         }
         return $this->_form;
     }

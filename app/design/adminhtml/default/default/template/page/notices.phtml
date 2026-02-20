@@ -5,22 +5,12 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Page_Notices $this */
 ?>
-<?php if ($this->displayNoscriptNotice()): ?>
-    <noscript>
-        <div class="noscript">
-            <div class="noscript-inner">
-                <p><strong><?= $this->__('JavaScript seems to be disabled in your browser.') ?></strong></p>
-                <p><?= $this->__('You must have JavaScript enabled in your browser to utilize the functionality of this website.') ?></p>
-            </div>
-        </div>
-    </noscript>
-<?php endif ?>
 <?php if ($this->displayDemoNotice()): ?>
-    <p class="demo-notice"><?= $this->__('This is a demo store. Any orders placed through this store will not be honored or fulfilled.') ?></p>
+    <div class="demo-notice"><?= $this->getDemoNoticeContent() ?></div>
 <?php endif ?>

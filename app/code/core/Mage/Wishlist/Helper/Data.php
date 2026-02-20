@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,13 +37,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
      * @var Mage_Wishlist_Model_Wishlist|null
      */
     protected $_wishlist = null;
-
-    /**
-     * Wishlist Product Items Collection
-     *
-     * @var Mage_Wishlist_Model_Resource_Product_Collection|null
-     */
-    protected $_productCollection = null;
 
     /**
      * Wishlist Items Collection
@@ -126,18 +119,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Retrieve wishlist items availability
-     *
-     * @deprecated after 1.6.0.0
-     *
-     * @return bool
-     */
-    public function hasItems()
-    {
-        return $this->getWishlist()->getItemsCount() > 0;
-    }
-
-    /**
      * Retrieve wishlist item count (include config settings)
      * Used in top link menu only
      *
@@ -162,21 +143,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Retrieve wishlist product items collection
-     *
-     * alias for getProductCollection
-     *
-     * @deprecated after 1.4.2.0
-     * @see Mage_Wishlist_Model_Wishlist::getItemCollection()
-     *
-     * @return Mage_Wishlist_Model_Resource_Product_Collection
-     */
-    public function getItemCollection()
-    {
-        return $this->getProductCollection();
-    }
-
-    /**
      * Create wishlist item collection
      *
      * @return Mage_Wishlist_Model_Resource_Item_Collection
@@ -197,26 +163,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
             $this->_wishlistItemCollection = $this->_createWishlistItemCollection();
         }
         return $this->_wishlistItemCollection;
-    }
-
-    /**
-     * Retrieve wishlist product items collection
-     *
-     * @deprecated after 1.4.2.0
-     * @see Mage_Wishlist_Model_Wishlist::getItemCollection()
-     *
-     * @return Mage_Wishlist_Model_Resource_Product_Collection
-     */
-    public function getProductCollection()
-    {
-        if (is_null($this->_productCollection)) {
-            $this->_productCollection = $this->getWishlist()
-                ->getProductCollection();
-
-            Mage::getSingleton('catalog/product_visibility')
-                ->addVisibleInSiteFilterToCollection($this->_productCollection);
-        }
-        return $this->_productCollection;
     }
 
     /**
@@ -340,31 +286,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Return helper instance
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelperInstance($helperName)
-    {
-        return Mage::helper($helperName);
-    }
-
-    /**
-     * Return model instance
-     *
-     * @param string $className
-     * @param array $arguments
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getSingleton()
-     */
-    protected function _getSingletonModel($className, $arguments = [])
-    {
-        return Mage::getSingleton($className, $arguments);
-    }
-
-    /**
      * Retrieve URL for adding item to shoping cart from shared wishlist
      *
      * @param string|Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
@@ -384,18 +305,6 @@ class Mage_Wishlist_Helper_Data extends Mage_Core_Helper_Abstract
             Mage_Core_Controller_Front_Action::PARAM_NAME_URL_ENCODED => $continueUrl,
         ];
         return $this->_getUrlStore($item)->getUrl('wishlist/shared/cart', $params);
-    }
-
-    /**
-     * Retrieve url for adding item to shoping cart with b64 referer
-     *
-     * @deprecated
-     * @param   Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $item
-     * @return  string
-     */
-    public function getAddToCartUrlBase64($item)
-    {
-        return $this->getAddToCartUrl($item);
     }
 
     /**

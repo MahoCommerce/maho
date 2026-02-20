@@ -6,7 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -159,6 +159,7 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
                 $result = false;
             }
         } elseif ($entity == Mage_Core_Model_Config_Data::ENTITY) {
+            /** @var Mage_Core_Model_Config_Data $data */
             $data = $event->getDataObject();
             if ($data && in_array($data->getPath(), $this->_relatedConfigSettings)) {
                 $result = $data->isValueChanged();
@@ -249,7 +250,6 @@ class Mage_CatalogSearch_Model_Indexer_Fulltext extends Mage_Index_Model_Indexer
                 $event->addNewData('catalogsearch_delete_product_id', $product->getId());
                 break;
             case Mage_Index_Model_Event::TYPE_MASS_ACTION:
-                /** @var Varien_Object $actionObject */
                 $actionObject = $event->getDataObject();
                 $attrData     = $actionObject->getAttributesData();
                 $rebuildIndex = false;

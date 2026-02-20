@@ -6,11 +6,11 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
+class Mage_Catalog_Model_Resource_Category_Tree extends \Maho\Data\Tree\Dbp
 {
     public const ID_FIELD    = 'id';
     public const PATH_FIELD  = 'path';
@@ -68,10 +68,10 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
             $resource->getConnection('catalog_write'),
             $resource->getTableName('catalog/category'),
             [
-                Varien_Data_Tree_Dbp::ID_FIELD       => 'entity_id',
-                Varien_Data_Tree_Dbp::PATH_FIELD     => 'path',
-                Varien_Data_Tree_Dbp::ORDER_FIELD    => 'position',
-                Varien_Data_Tree_Dbp::LEVEL_FIELD    => 'level',
+                \Maho\Data\Tree\Dbp::ID_FIELD       => 'entity_id',
+                \Maho\Data\Tree\Dbp::PATH_FIELD     => 'path',
+                \Maho\Data\Tree\Dbp::ORDER_FIELD    => 'position',
+                \Maho\Data\Tree\Dbp::LEVEL_FIELD    => 'level',
             ],
         );
     }
@@ -374,8 +374,8 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      * Move tree before
      *
      * @param Mage_Catalog_Model_Category $category
-     * @param Varien_Data_Tree_Node $newParent
-     * @param Varien_Data_Tree_Node $prevNode
+     * @param \Maho\Data\Tree\Node $newParent
+     * @param \Maho\Data\Tree\Node $prevNode
      * @return $this
      */
     protected function _beforeMove($category, $newParent, $prevNode)
@@ -393,8 +393,8 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      * Executing parents move method and cleaning cache after it
      *
      * @param Mage_Catalog_Model_Category $category
-     * @param Varien_Data_Tree_Node $newParent
-     * @param Varien_Data_Tree_Node $prevNode
+     * @param \Maho\Data\Tree\Node $newParent
+     * @param \Maho\Data\Tree\Node $prevNode
      */
     #[\Override]
     public function move($category, $newParent, $prevNode = null): void
@@ -410,8 +410,8 @@ class Mage_Catalog_Model_Resource_Category_Tree extends Varien_Data_Tree_Dbp
      * Move tree after
      *
      * @param Mage_Catalog_Model_Category $category
-     * @param Varien_Data_Tree_Node $newParent
-     * @param Varien_Data_Tree_Node $prevNode
+     * @param \Maho\Data\Tree\Node $newParent
+     * @param \Maho\Data\Tree\Node $prevNode
      * @return $this
      */
     protected function _afterMove($category, $newParent, $prevNode)

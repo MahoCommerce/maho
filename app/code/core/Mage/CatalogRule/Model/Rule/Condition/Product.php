@@ -6,7 +6,7 @@
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +18,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         $attrCode = $this->getAttribute();
         if ($attrCode == 'category_ids') {
@@ -42,7 +42,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Validate product
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return bool
      */
     protected function _validateProduct($object)
@@ -53,7 +53,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Restore old attribute value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param mixed $oldAttrValue
      */
     protected function _restoreOldAttrValue($object, $oldAttrValue)
@@ -69,7 +69,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
     /**
      * Get attribute value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return mixed
      */
     protected function _getAttributeValue($object)
@@ -91,7 +91,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
      * Prepare datetime attribute value
      *
      * @param mixed $value
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return mixed
      */
     protected function _prepareDatetimeValue($value, $object)
@@ -110,7 +110,7 @@ class Mage_CatalogRule_Model_Rule_Condition_Product extends Mage_Rule_Model_Cond
      * Prepare multiselect attribute value
      *
      * @param mixed $value
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return mixed
      */
     protected function _prepareMultiselectValue($value, $object)

@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -93,8 +93,13 @@ class Mage_Tax_Model_Resource_Report_Tax_Createdat extends Mage_Reports_Model_Re
                 Mage_Sales_Model_Order::STATE_NEW,
             ]);
 
-            if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('e.' . $aggregationField . ' >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('e.' . $aggregationField . ' <= ?', $to);
             }
 
             $select->group([$periodExpr, 'e.store_id', 'code', 'tax.percent', 'e.status']);

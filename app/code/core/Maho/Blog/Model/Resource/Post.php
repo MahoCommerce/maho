@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    Maho_Blog
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -65,7 +65,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     #[\Override]
-    protected function _afterSave(Varien_Object $object)
+    protected function _afterSave(\Maho\DataObject $object)
     {
         if ($object->hasStores()) {
             $this->_saveStoreRelations($object);
@@ -74,7 +74,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         return parent::_afterSave($object);
     }
 
-    protected function _saveStoreRelations(Varien_Object $post): void
+    protected function _saveStoreRelations(\Maho\DataObject $post): void
     {
         $oldStores = $this->lookupStoreIds($post->getId());
         $newStores = (array) $post->getStores();
@@ -149,7 +149,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     }
 
     #[\Override]
-    protected function _beforeSave(Varien_Object $object): self
+    protected function _beforeSave(\Maho\DataObject $object): self
     {
         $coreHelper = Mage::helper('core');
 
@@ -205,7 +205,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
      * Override to handle hybrid EAV/static approach
      */
     #[\Override]
-    public function save(Varien_Object $object)
+    public function save(\Maho\DataObject $object)
     {
         $locale = Mage::app()->getLocale();
 
@@ -223,7 +223,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         return $this;
     }
 
-    protected function _saveStaticAttributes(Varien_Object $object): self
+    protected function _saveStaticAttributes(\Maho\DataObject $object): self
     {
         $adapter = $this->_getWriteAdapter();
         $table = $this->getEntityTable();
@@ -247,7 +247,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
      * Load static attributes from main entity table
      */
     #[\Override]
-    protected function _afterLoad(Varien_Object $object): self
+    protected function _afterLoad(\Maho\DataObject $object): self
     {
         if ($object->getId()) {
             $stores = $this->lookupStoreIds($object->getId());

@@ -6,11 +6,11 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
+abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends \Maho\DataObject
 {
     /**
      * Request variable name with filter value
@@ -106,13 +106,13 @@ abstract class Mage_Catalog_Model_Layer_Filter_Abstract extends Varien_Object
      * Get data array for building filter items
      *
      * result array should have next structure:
-     * array(
-     *      $index => array(
+     * [
+     *      $index => [
      *          'label' => $label,
      *          'value' => $value,
      *          'count' => $count
-     *      )
-     * )
+     *      ]
+     * ]
      *
      * @return array
      */

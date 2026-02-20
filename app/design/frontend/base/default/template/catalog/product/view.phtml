@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -76,9 +76,6 @@
                     <div class="add-to-box">
                         <?php if($_product->isSaleable()): ?>
                             <?= $this->getChildHtml('addtocart') ?>
-                            <?php if( $this->helper('wishlist')->isAllow() || $_compareUrl=$this->helper('catalog/product_compare')->getAddUrl($_product)): ?>
-                                <span class="or"><?= $this->__('OR') ?></span>
-                            <?php endif ?>
                         <?php endif ?>
                         <?= $this->getChildHtml('addto') ?>
                         <?= $this->getChildHtml('sharing') ?>
@@ -101,26 +98,39 @@
         </form>
         <script type="text/javascript">
             var productAddToCartForm = new VarienForm('product_addtocart_form');
-            productAddToCartForm.submit = function(button, url) {
-                if (this.validator.validate()) {
-                    var form = this.form;
-                    var oldUrl = form.action;
+            productAddToCartForm.submit = async function(button, url) {
+                if (!this.validator.validate()) {
+                    return;
+                }
 
-                    if (url) {
-                        form.action = url;
-                    }
-                    var e = null;
-                    try {
-                        this.form.submit();
-                    } catch (e) {
-                    }
-                    this.form.action = oldUrl;
-                    if (e) {
-                        throw e;
-                    }
+                const form = this.form;
+                const targetUrl = url || form.action;
 
+                if (button && button !== 'undefined') {
+                    button.disabled = true;
+                }
+
+                try {
+                    const result = await mahoFetch(targetUrl, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        loaderArea: form.closest('.product-view')
+                    });
+
+                    if (result.success && typeof minicart !== 'undefined') {
+                        minicart.updateCartQty(result.qty);
+                        minicart.updateContent(result);
+                        minicart.init();
+                        minicart.openOffcanvas();
+                        setTimeout(() => minicart.showMessage(result), 100);
+                    } else if (result.error) {
+                        alert(result.error);
+                    }
+                } catch (error) {
+                    alert(error.message || '<?= $this->jsQuoteEscape($this->__('Cannot add the item to shopping cart.')) ?>');
+                } finally {
                     if (button && button !== 'undefined') {
-                        button.disabled = true;
+                        button.disabled = false;
                     }
                 }
             }.bind(productAddToCartForm);
@@ -165,14 +175,14 @@
                     <input type="radio" name="collateral-tab" id="tab-<?= $alias ?>" class="tab-selector" <?= $tabIndex === 0 ? 'checked' : '' ?>>
                     <?php $tabIndex++; ?>
                 <?php endforeach ?>
-                
+
                 <!-- Tab labels -->
                 <ul class="collateral-tab-list">
                     <?php foreach ($detailedInfoGroup as $alias => $html): ?>
                         <li><label for="tab-<?= $alias ?>"><?= $this->escapeHtml($this->getChildData($alias, 'title')) ?></label></li>
                     <?php endforeach ?>
                 </ul>
-                
+
                 <!-- Tab content panels -->
                 <div class="collateral-tabs-content">
                     <?php foreach ($detailedInfoGroup as $alias => $html): ?>

@@ -51,7 +51,7 @@ class Mage_Page_Model_Config
             $this->_pageLayouts = [];
         }
         foreach (Mage::getConfig()->getNode($xmlPath)->children() as $layoutCode => $layoutConfig) {
-            $this->_pageLayouts[$layoutCode] = new Varien_Object([
+            $this->_pageLayouts[$layoutCode] = new \Maho\DataObject([
                 'label'         => Mage::helper('page')->__((string) $layoutConfig->label),
                 'code'          => $layoutCode,
                 'template'      => (string) $layoutConfig->template,
@@ -77,7 +77,7 @@ class Mage_Page_Model_Config
      * Retrieve page layout by code
      *
      * @param string $layoutCode
-     * @return Varien_Object|false
+     * @return \Maho\DataObject|false
      */
     public function getPageLayout($layoutCode)
     {

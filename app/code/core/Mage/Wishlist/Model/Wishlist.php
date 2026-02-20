@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -59,7 +59,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     /**
      * Entity cache tag
      *
-     * @var string
+     * @var string|bool|array
      */
     protected $_cacheTag = 'wishlist';
 
@@ -295,18 +295,6 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     /**
      * Retrieve wishlist item collection
      *
-     * @return Mage_Wishlist_Model_Resource_Item_Collection
-     * @throws Mage_Core_Model_Store_Exception
-     * @deprecated use self::getItemsCollection()
-     */
-    public function getItemCollection()
-    {
-        return $this->getItemsCollection();
-    }
-
-    /**
-     * Retrieve wishlist item collection
-     *
      * @throws Mage_Core_Model_Store_Exception
      */
     public function getItemsCollection(): Mage_Wishlist_Model_Resource_Item_Collection
@@ -355,21 +343,6 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     public function getItemsCount()
     {
         return $this->getItemsCollection()->getSize();
-    }
-
-    /**
-     * Retrieve wishlist item collection
-     *
-     * @param int $itemId
-     * @return Mage_Wishlist_Model_Item|false
-     * @deprecated use self::getItemById(int)
-     */
-    public function getItem($itemId)
-    {
-        if (!$itemId) {
-            return false;
-        }
-        return $this->getItemsCollection()->getItemById($itemId);
     }
 
     /**
@@ -473,11 +446,11 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
     public function addNewItem($product, $buyRequest = null, $forciblySetQty = false)
     {
         if (is_array($buyRequest)) {
-            $buyRequest = new Varien_Object($buyRequest);
+            $buyRequest = new \Maho\DataObject($buyRequest);
         } elseif (is_string($buyRequest)) {
-            $buyRequest = new Varien_Object(unserialize($buyRequest, ['allowed_classes' => false]));
-        } elseif (!$buyRequest instanceof Varien_Object) {
-            $buyRequest = new Varien_Object();
+            $buyRequest = new \Maho\DataObject(unserialize($buyRequest, ['allowed_classes' => false]));
+        } elseif (!$buyRequest instanceof \Maho\DataObject) {
+            $buyRequest = new \Maho\DataObject();
         }
 
         if (!$product instanceof Mage_Catalog_Model_Product) {
@@ -583,7 +556,7 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
      * It's passed to Mage_Catalog_Helper_Product->addParamsToBuyRequest() to compose resulting buyRequest.
      *
      * Basically it can hold
-     * - 'current_config', Varien_Object or array - current buyRequest that configures product in this item,
+     * - 'current_config', \Maho\DataObject or array - current buyRequest that configures product in this item,
      *   used to restore currently attached files
      * - 'files_prefix': string[a-z0-9_] - prefix that was added at frontend to names of file options (file inputs), so they won't
      *   intersect with other submitted options
@@ -591,8 +564,8 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
      * For more options see Mage_Catalog_Helper_Product->addParamsToBuyRequest()
      *
      * @param int|Mage_Wishlist_Model_Item $itemId
-     * @param Varien_Object $buyRequest
-     * @param null|array|Varien_Object $params
+     * @param \Maho\DataObject $buyRequest
+     * @param null|array|\Maho\DataObject $params
      * @return $this
      *
      * @see Mage_Catalog_Helper_Product::addParamsToBuyRequest()
@@ -612,9 +585,9 @@ class Mage_Wishlist_Model_Wishlist extends Mage_Core_Model_Abstract
             ->load($productId);
 
         if (is_array($params)) {
-            $params = new Varien_Object($params);
-        } elseif (!$params instanceof Varien_Object) {
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject($params);
+        } elseif (!$params instanceof \Maho\DataObject) {
+            $params = new \Maho\DataObject();
         }
         $params->setCurrentConfig($item->getBuyRequest());
         $buyRequest = Mage::helper('catalog/product')->addParamsToBuyRequest($buyRequest, $params);

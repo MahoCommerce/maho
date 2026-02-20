@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -83,23 +83,20 @@ class Mage_Adminhtml_Block_Api_Tab_Rolesedit extends Mage_Adminhtml_Block_Widget
             return $item;
         }
 
-        if ($children) {
-            $item['children'] = [];
-            //$item['cls'] = 'fiche-node';
-            foreach ($children as $child) {
-                if ($child->getName() != 'title' && $child->getName() != 'sort_order' && $child->attributes()->module) {
-                    if ($level != 0) {
-                        $item['children'][] = $this->_getNodeJson($child, $level + 1);
-                    } else {
-                        $item = $this->_getNodeJson($child, $level + 1);
-                    }
+        $item['children'] = [];
+        foreach ($children as $child) {
+            if ($child->getName() != 'title' && $child->getName() != 'sort_order' && $child->attributes()->module) {
+                if ($level != 0) {
+                    $item['children'][] = $this->_getNodeJson($child, $level + 1);
+                } else {
+                    $item = $this->_getNodeJson($child, $level + 1);
                 }
             }
-            if (empty($item['children'])) {
-                unset($item['children']);
-            } else {
-                usort($item['children'], [$this, '_sortTree']);
-            }
+        }
+        if (empty($item['children'])) {
+            unset($item['children']);
+        } else {
+            usort($item['children'], [$this, '_sortTree']);
         }
         return $item;
     }

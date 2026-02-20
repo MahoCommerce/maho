@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,10 +26,10 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
 
     /**
      * Getter for schedule info
-     * array(
-     *     <title> => array('blah-blah', 'bla-bla-blah', ...)
+     * [
+     *     <title> => ['blah-blah', 'bla-bla-blah', ...]
      *     <title2> => ...
-     * )
+     * ]
      * @return array
      */
     public function getScheduleInfo()

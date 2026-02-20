@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -85,13 +85,13 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
     /**
      * Add new massaction item
      *
-     * $item = array(
+     * $item = [
      *      'label'    => string,
      *      'complete' => string, // Only for ajax enabled grid (optional)
      *      'url'      => string,
      *      'confirm'  => string, // text of confirmation of this action (optional)
      *      'additional' => string|array|Mage_Core_Block_Abstract // (optional)
-     * );
+     * ];
      *
      * @param string $itemId
      * @return Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract
@@ -221,9 +221,8 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
         if ($selected = $this->getRequest()->getParam($this->getFormFieldNameInternal())) {
             $selected = explode(',', $this->quoteEscape($selected));
             return implode(',', $selected);
-        } else {
-            return '';
         }
+        return '';
     }
 
     /**
@@ -236,9 +235,8 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract extends Mage
         if ($selected = $this->getRequest()->getParam($this->getFormFieldNameInternal())) {
             $selected = explode(',', $this->quoteEscape($selected));
             return $selected;
-        } else {
-            return [];
         }
+        return [];
     }
 
     /**

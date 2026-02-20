@@ -6,7 +6,7 @@
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -171,7 +171,7 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Res
      * @throws Mage_Core_Exception
      * @return $this
      */
-    public function uploadAndImport(Varien_Object $object)
+    public function uploadAndImport(\Maho\DataObject $object)
     {
         if (empty($_FILES['groups']['tmp_name']['tablerate']['fields']['import']['value'])) {
             return $this;
@@ -185,7 +185,7 @@ class Mage_Shipping_Model_Resource_Carrier_Tablerate extends Mage_Core_Model_Res
         $this->_importErrors        = [];
         $this->_importedRows        = 0;
 
-        $io     = new Varien_Io_File();
+        $io     = new \Maho\Io\File();
         $info   = pathinfo($csvFile);
         $io->open(['path' => $info['dirname']]);
         $io->streamOpen($info['basename'], 'r');

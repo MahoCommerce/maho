@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,7 +36,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
     }
 
     #[\Override]
-    public function _beforeToHtml()
+    protected function _beforeToHtml()
     {
         $this->_currency = Mage::getModel('directory/currency')
             ->load(Mage_Directory_Helper_Data::getConfigCurrencyBase());
@@ -87,17 +87,6 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
     public function getTotals()
     {
         return $this->_collection->getTotals();
-    }
-
-    /**
-     * @deprecated after 1.4.0.0-rc1
-     *
-     * @param float $price
-     * @return string
-     */
-    public function getPriceFormatted($price)
-    {
-        return $this->_currency->format($price);
     }
 
     /**

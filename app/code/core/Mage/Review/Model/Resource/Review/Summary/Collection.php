@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Review_Model_Resource_Review_Summary_Collection extends Varien_Data_Collection_Db
+class Mage_Review_Model_Resource_Review_Summary_Collection extends \Maho\Data\Collection\Db
 {
     /**
      * @var string

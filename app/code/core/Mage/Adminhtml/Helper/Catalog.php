@@ -1,18 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Adminhtml_Helper_Catalog extends Mage_Core_Helper_Abstract
 {
-    public const XML_PATH_SITEMAP_VALID_PATHS = 'general/file/sitemap_generate_valid_paths';
-
     protected $_moduleName = 'Mage_Adminhtml';
 
     /**
@@ -71,19 +72,5 @@ class Mage_Adminhtml_Helper_Catalog extends Mage_Core_Helper_Abstract
     {
         $this->_categoryAttributeTabBlock = $attributeTabBlock;
         return $this;
-    }
-
-    /**
-     * Get list valid paths for generate a sitemap XML file
-     *
-     * @return array
-     */
-    public function getSitemapValidPaths()
-    {
-        $path = Mage::getStoreConfig(self::XML_PATH_SITEMAP_VALID_PATHS);
-        /** @var Mage_Core_Helper_Data $helper */
-        $helper = Mage::helper('core');
-        $path = array_merge($path, $helper->getPublicFilesValidPath());
-        return $path;
     }
 }

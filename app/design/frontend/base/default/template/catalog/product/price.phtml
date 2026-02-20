@@ -2,10 +2,10 @@
 /**
  * Maho
  *
- * @package     rwd_default
+ * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
@@ -156,14 +156,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 </span>
 
                 <?php if ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 1)): // show description ?>
-                    <span class="weee">(
-                        <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
-                            <?= $_weeeSeparator ?>
-                            <?= $_weeeTaxAttribute->getName() ?>
-                            : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true) ?>
-                            <?php $_weeeSeparator = ' + '; ?>
-                        <?php endforeach ?>
-                        )</span>
+                    <span class="weee-info" data-tooltip="<?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?><?= $_weeeSeparator ?><?= $this->escapeHtml($_weeeTaxAttribute->getName()) ?> <?= strip_tags($_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true)) ?><?php $_weeeSeparator = ' + '; ?><?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
                 <?php endif ?>
             <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 4)): // incl. + weee ?>
                 <span class="regular-price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
@@ -177,17 +170,11 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <?php endforeach ?>
                     )</span>
             <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 2)): // excl. + weee + final ?>
-                <span class="regular-price"><?= $_coreHelper->formatPrice($_price, true) ?></span><br/>
                 <?php $weeeAmountToDisplay = $_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount ?>
-                <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
-                    <span class="weee">
-                       <?= $_weeeTaxAttribute->getName() ?>
-                        : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true) ?>
-                    </span>
-                <?php endforeach ?>
                 <span class="regular-price" id="product-price-weee-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->currency($_price + $weeeAmountToDisplay, true, true) ?>
                 </span>
+                <span class="weee-info" data-tooltip="<?= strip_tags($_coreHelper->formatPrice($_price, false)) ?><?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?> + <?= $this->escapeHtml($_weeeTaxAttribute->getName()) ?> <?= strip_tags($_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true)) ?><?php endforeach ?>"><?= $this->getIconSvg('info-circle') ?></span>
             <?php else: ?>
                 <span class="regular-price" id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?php if ($_finalPrice == $_price): ?>
@@ -203,11 +190,15 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php $_originalWeeeTaxAmount = $_store->roundPrice($_store->convertPrice($_originalWeeeTaxAmount)) ?>
 
         <?php if ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 0)): // including ?>
+            <?php $_oldPriceDisplay = $_regularPrice + $_originalWeeeTaxAmount; ?>
+            <?php $_newPriceDisplay = $_finalPrice + $_weeeTaxAmount; ?>
+            <?php $_discountPercent = round((($_oldPriceDisplay - $_newPriceDisplay) / $_oldPriceDisplay) * 100); ?>
             <p class="old-price">
                 <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                    <?= $_coreHelper->formatPrice($_regularPrice + $_originalWeeeTaxAmount, false) ?>
+                    <?= $_coreHelper->formatPrice($_oldPriceDisplay, false) ?>
                 </span>
+                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
             </p>
 
             <?php if ($_taxHelper->displayBothPrices()): ?>
@@ -236,11 +227,15 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
             <?php endif ?>
 
         <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 1)): // incl. + weee ?>
+            <?php $_oldPriceDisplay = $_regularPrice + $_originalWeeeTaxAmount; ?>
+            <?php $_newPriceDisplay = $_finalPrice + $_weeeTaxAmount; ?>
+            <?php $_discountPercent = round((($_oldPriceDisplay - $_newPriceDisplay) / $_oldPriceDisplay) * 100); ?>
             <p class="old-price">
                 <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                    <?= $_coreHelper->formatPrice($_regularPrice + $_originalWeeeTaxAmount, false) ?>
+                    <?= $_coreHelper->formatPrice($_oldPriceDisplay, false) ?>
                 </span>
+                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
             </p>
 
             <p class="special-price">
@@ -282,11 +277,15 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
             <?php endif ?>
             </p>
         <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 4)): // incl. + weee ?>
+            <?php $_oldPriceDisplay = $_regularPrice + $_originalWeeeTaxAmount; ?>
+            <?php $_newPriceDisplay = $_finalPrice + $_weeeTaxAmount; ?>
+            <?php $_discountPercent = round((($_oldPriceDisplay - $_newPriceDisplay) / $_oldPriceDisplay) * 100); ?>
             <p class="old-price">
                 <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                    <?= $_coreHelper->formatPrice($_regularPrice + $_originalWeeeTaxAmount, false) ?>
+                    <?= $_coreHelper->formatPrice($_oldPriceDisplay, false) ?>
                 </span>
+                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
             </p>
 
             <p class="special-price">
@@ -294,7 +293,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <span class="price-excluding-tax">
                     <span class="label"><?= $this->helper('tax')->__('Excl. Tax:') ?></span>
                     <span class="price" id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>">
-                        <?= $_coreHelper->formatPrice($_finalPrice + $_weeeTaxAmount, false) ?>
+                        <?= $_coreHelper->formatPrice($_newPriceDisplay, false) ?>
                     </span>
                 </span>
             <span class="weee">(
@@ -312,11 +311,13 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
             </span>
             </p>
         <?php elseif ($_weeeTaxAmount && $_weeeHelper->typeOfDisplay($_product, 2)): // excl. + weee + final ?>
+            <?php $_discountPercent = round((($_regularPrice - $_finalPrice) / $_regularPrice) * 100); ?>
             <p class="old-price">
                 <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_regularPrice, false) ?>
                 </span>
+                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
             </p>
 
             <p class="special-price">
@@ -341,11 +342,13 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 </span>
             </p>
         <?php else: // excl. ?>
+            <?php $_discountPercent = round((($_regularPrice - $_finalPrice) / $_regularPrice) * 100); ?>
             <p class="old-price">
                 <span class="price-label"><?= $this->__('Regular Price:') ?></span>
                 <span class="price" id="old-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                     <?= $_coreHelper->formatPrice($_regularPrice, false) ?>
                 </span>
+                <span class="discount-percent">-<?= $_discountPercent ?>%</span>
             </p>
 
             <?php if ($_taxHelper->displayBothPrices()): ?>
@@ -388,7 +391,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php else: ?>
             <span class="minimal-price-link">
         <?php endif ?>
-        <span class="label"><?= $this->__('As low as:') ?></span>
+        <span class="label"><?= $this->__('From') ?></span>
         <span class="price" id="product-minimal-price-<?= $_id ?><?= $this->getIdSuffix() ?>">
                 <?= $_coreHelper->formatPrice($_minimalPriceDisplayValue, false) ?>
             </span>
@@ -417,7 +420,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <div class="price-box">
             <p<?php if ($showMinPrice): ?> class="minimal-price"<?php endif ?>>
                 <?php if ($showMinPrice): ?>
-                    <span class="price-label"><?= $this->__('Starting at:') ?></span>
+                    <span class="price-label"><?= $this->__('From') ?></span>
                 <?php endif ?>
                 <?php if ($_taxHelper->displayBothPrices()): ?>
                     <span class="price-excluding-tax">

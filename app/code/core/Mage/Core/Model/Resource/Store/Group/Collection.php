@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,14 +16,6 @@
  */
 class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Resource_Db_Collection_Abstract
 {
-    /**
-     * Load default flag
-     *
-     * @deprecated since 1.5.0.0
-     * @var bool
-     */
-    protected $_loadDefault = false;
-
     /**
      * Define resource model
      */
@@ -77,7 +69,7 @@ class Mage_Core_Model_Resource_Store_Group_Collection extends Mage_Core_Model_Re
     }
 
     #[\Override]
-    public function _beforeLoad()
+    protected function _beforeLoad()
     {
         if (!$this->getLoadDefault()) {
             $this->setWithoutDefaultFilter();

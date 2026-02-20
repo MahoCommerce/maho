@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,7 +28,7 @@ use Symfony\Component\Cache\Adapter\RedisAdapter;
  * @method bool|null getSkipEmptySessionCheck()
  * @method $this setSkipEmptySessionCheck(bool $flag)
  */
-class Mage_Core_Model_Session_Abstract extends Varien_Object
+class Mage_Core_Model_Session_Abstract extends \Maho\DataObject
 {
     public const REGISTRY_KEY                          = 'symfony_session';
 
@@ -61,7 +61,7 @@ class Mage_Core_Model_Session_Abstract extends Varien_Object
 
     /**
      * Map of session enabled hosts
-     * @example array('host.name' => true)
+     * @example ['host.name' => true]
      */
     protected array $_sessionHosts = [];
 

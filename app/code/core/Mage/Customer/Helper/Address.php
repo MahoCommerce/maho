@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -64,9 +64,8 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     {
         if (is_string($renderer) && $className = Mage::getConfig()->getBlockClassName($renderer)) {
             return new $className();
-        } else {
-            return $renderer;
         }
+        return $renderer;
     }
 
     /**
@@ -166,14 +165,11 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     {
         $classes = [];
 
-        /** @var Mage_Customer_Model_Attribute $attribute */
         $attribute = $this->getAttribute($attributeCode);
-        if ($attribute) {
-            array_push($classes, ...explode(' ', $attribute->getFrontend()->getClass()));
-        }
+        array_push($classes, ...explode(' ', $attribute->getFrontend()->getClass()));
 
         if (in_array($attributeCode, ['firstname', 'middlename', 'lastname', 'prefix', 'suffix', 'taxvat'])) {
-            if ($attribute && !$attribute->getIsVisible()) {
+            if (!$attribute->getIsVisible()) {
                 $classes = []; // address attribute is not visible thus its validation rules are not applied
             }
 
@@ -190,13 +186,13 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     /**
      * Convert streets array to new street lines count
      * Examples of use:
-     *  $origStreets = array('street1', 'street2', 'street3', 'street4')
+     *  $origStreets = ['street1', 'street2', 'street3', 'street4']
      *  $toCount = 3
      *  Result:
-     *   array('street1 street2', 'street3', 'street4')
+     *   ['street1 street2', 'street3', 'street4']
      *  $toCount = 2
      *  Result:
-     *   array('street1 street2', 'street3 street4')
+     *   ['street1 street2', 'street3 street4']
      *
      * @param array $origStreets
      * @param int   $toCount

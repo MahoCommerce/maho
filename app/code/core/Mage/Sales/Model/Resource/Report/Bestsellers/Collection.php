@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,7 +58,7 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
                     'product_id'      => 'product_id',
                     'product_name'    => 'MAX(product_name)',
                     'product_price'   => 'MAX(product_price)',
-                    'product_type_id' => 'product_type_id',
+                    'product_type_id' => 'MAX(product_type_id)',
                 ];
                 if ($this->_period == 'year') {
                     $this->_selectedColumns['period'] = $adapter->getDateFormatSql('period', '%Y');
@@ -166,8 +166,8 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
 
             // apply date boundaries (before calling $this->_applyDateRangeFilter())
             $dtFormat   = Mage_Core_Model_Locale::DATE_FORMAT;
-            $periodFrom = (!is_null($this->_from) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_from) ?: new DateTime($this->_from) : null);
-            $periodTo   = (!is_null($this->_to) ? DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_to) ?: new DateTime($this->_to) : null);
+            $periodFrom = (is_null($this->_from) ? null : (DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_from) ?: new DateTime($this->_from)));
+            $periodTo   = (is_null($this->_to) ? null : (DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $this->_to) ?: new DateTime($this->_to)));
             if ($this->_period == 'year') {
                 if ($periodFrom) {
                     // not the first day of the year
@@ -295,7 +295,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers_Collection extends Mage_Sales
             if ($selectUnions) {
                 $unionParts = [];
                 $cloneSelect = clone $this->getSelect();
-                /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
                 $helper = Mage::getResourceHelper('core');
                 $unionParts[] = '(' . $cloneSelect . ')';
                 foreach ($selectUnions as $union) {

@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Payment_Model_Observer
     /**
      * Set forced canCreditmemo flag
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function salesOrderBeforeSave($observer)
@@ -48,7 +48,7 @@ class Mage_Payment_Model_Observer
      *
      * Also sets the collected information and schedule as informational static options
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function prepareProductRecurringProfileOptions($observer)
     {
@@ -72,7 +72,7 @@ class Mage_Payment_Model_Observer
         // add the start datetime as product custom option
         $product->addCustomOption(
             Mage_Payment_Model_Recurring_Profile::PRODUCT_OPTIONS_KEY,
-            serialize(['start_datetime' => $profile->getStartDatetime()]),
+            Mage::helper('core')->jsonEncode(['start_datetime' => $profile->getStartDatetime()]),
         );
 
         // duplicate as 'additional_options' to render with the product statically
@@ -87,13 +87,13 @@ class Mage_Payment_Model_Observer
                 'value' => $info->getSchedule(),
             ];
         }
-        $product->addCustomOption('additional_options', serialize($infoOptions));
+        $product->addCustomOption('additional_options', Mage::helper('core')->jsonEncode($infoOptions));
     }
 
     /**
      * Sets current instructions for bank transfer account
      */
-    public function beforeOrderPaymentSave(Varien_Event_Observer $observer)
+    public function beforeOrderPaymentSave(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Payment $payment */
         $payment = $observer->getEvent()->getPayment();
@@ -109,7 +109,7 @@ class Mage_Payment_Model_Observer
      * Will veto the unassignment of the order status if it is currently configured in any of the payment method
      * configurations.
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @throws Mage_Core_Exception
      */
     public function beforeSalesOrderStatusUnassign($observer)
@@ -159,59 +159,31 @@ class Mage_Payment_Model_Observer
         }
     }
 
-    public function encryptionKeyRegenerated(Varien_Event_Observer $observer): void
+    public function encryptionKeyRegenerated(\Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */
         $output = $observer->getEvent()->getOutput();
         $encryptCallback = $observer->getEvent()->getEncryptCallback();
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
-        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $output->write('Re-encrypting data on sales_flat_quote_payment table... ');
-        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_quote_payment');
-
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('cc_number_enc IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['cc_number_enc' => $encryptCallback($decryptCallback($encryptedDataRow['cc_number_enc']))],
-                ['payment_id = ?' => $encryptedDataRow['payment_id']],
-            );
-        }
-
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('cc_cid_enc IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['cc_cid_enc' => $encryptCallback($decryptCallback($encryptedDataRow['cc_cid_enc']))],
-                ['payment_id = ?' => $encryptedDataRow['payment_id']],
-            );
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('sales_flat_quote_payment'),
+            'payment_id',
+            ['cc_number_enc', 'cc_cid_enc'],
+            $encryptCallback,
+            $decryptCallback,
+        );
         $output->writeln('OK');
 
         $output->write('Re-encrypting data on sales_flat_order_payment table... ');
-        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_order_payment');
-
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('cc_number_enc IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['cc_number_enc' => $encryptCallback($decryptCallback($encryptedDataRow['cc_number_enc']))],
-                ['entity_id = ?' => $encryptedDataRow['entity_id']],
-            );
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('sales_flat_order_payment'),
+            'entity_id',
+            ['cc_number_enc', 'cc_cid_enc'],
+            $encryptCallback,
+            $decryptCallback,
+        );
         $output->writeln('OK');
     }
 }

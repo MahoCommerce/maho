@@ -5,21 +5,17 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_System_Email_Template $this */
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td style="width:50%;"><h3><?= $this->getHeaderText() ?></h3></td>
-            <td class="form-buttons">
-                <?= $this->getChildHtml('add_button') ?>
-            </td>
-        </tr>
-    </table>
+    <h3><?= $this->getHeaderText() ?></h3>
+    <p class="content-buttons form-buttons">
+        <?= $this->getChildHtml('add_button') ?>
+    </p>
 </div>
 <div>
     <?= $this->getChildHtml('grid') ?>

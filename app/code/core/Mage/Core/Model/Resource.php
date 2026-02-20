@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -89,7 +89,8 @@ class Mage_Core_Model_Resource
             return $this->_connections[$origName];
         }
 
-        $connection = $this->_newConnection((string) $connConfig->type, $connConfig);
+        $type = $this->_getConnectionType($connConfig);
+        $connection = $this->_newConnection($type, $connConfig);
         if ($connection) {
             if (Mage::app()->getIsCacheLocked()) {
                 $this->_skippedConnections[$name] = true;
@@ -114,6 +115,33 @@ class Mage_Core_Model_Resource
     public function getConnections()
     {
         return $this->_connections;
+    }
+
+    /**
+     * Determine connection type from config
+     *
+     * Supports new 'engine' config (mysql, pgsql, sqlite) which derives type as pdo_{engine},
+     * with backward compatibility for legacy 'type' and 'model' configs.
+     */
+    protected function _getConnectionType(Mage_Core_Model_Config_Element $connConfig): string
+    {
+        // New config: use 'engine' and derive type as pdo_{engine}
+        if (!empty($connConfig->engine)) {
+            return 'pdo_' . (string) $connConfig->engine;
+        }
+
+        // Backward compatibility: use explicit 'type' if set
+        if (!empty($connConfig->type)) {
+            return (string) $connConfig->type;
+        }
+
+        // Backward compatibility: derive from 'model' (legacy name for engine)
+        if (!empty($connConfig->model)) {
+            return 'pdo_' . (string) $connConfig->model;
+        }
+
+        // Default to MySQL for safety
+        return 'pdo_mysql';
     }
 
     /**
@@ -214,7 +242,7 @@ class Mage_Core_Model_Resource
      *
      * @param string $model
      * @param string $entity
-     * @return SimpleXMLElement|Varien_Simplexml_Config
+     * @return SimpleXMLElement|\Maho\Simplexml\Config
      */
     public function getEntity($model, $entity)
     {

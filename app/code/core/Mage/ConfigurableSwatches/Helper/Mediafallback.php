@@ -6,7 +6,7 @@
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,19 +15,6 @@ class Mage_ConfigurableSwatches_Helper_Mediafallback extends Mage_Core_Helper_Ab
     public const MEDIA_GALLERY_ATTRIBUTE_CODE = 'media_gallery';
 
     protected $_moduleName = 'Mage_ConfigurableSwatches';
-
-    /**
-     * Set child_attribute_label_mapping on products with attribute label -> product mapping
-     * Depends on following product data:
-     * - product must have children products attached
-     *
-     * @deprecated use $this->attachProductChildrenAttributeMapping() instead
-     * @param int $storeId
-     */
-    public function attachConfigurableProductChildrenAttributeMapping(array $parentProducts, $storeId)
-    {
-        $this->attachProductChildrenAttributeMapping($parentProducts, $storeId);
-    }
 
     /**
      * Set child_attribute_label_mapping on products with attribute label -> product mapping

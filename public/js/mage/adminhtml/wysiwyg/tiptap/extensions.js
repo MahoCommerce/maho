@@ -2,20 +2,25 @@
  * Maho
  *
  * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.10';
-import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.10';
-import Image from 'https://esm.sh/@tiptap/extension-image@3.10';
-import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.10';
-import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.10';
-import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.8';
+import { Editor, Node, Mark, Extension, mergeAttributes } from 'https://esm.sh/@tiptap/core@3.20.0';
+import StarterKit from 'https://esm.sh/@tiptap/starter-kit@3.20.0';
+import Image from 'https://esm.sh/@tiptap/extension-image@3.20.0';
+import TextAlign from 'https://esm.sh/@tiptap/extension-text-align@3.20.0';
+import { Table, TableRow, TableCell, TableHeader } from 'https://esm.sh/@tiptap/extension-table@3.20.0';
+import BubbleMenu from 'https://esm.sh/@tiptap/extension-bubble-menu@3.20.0';
+import DragHandle from 'https://esm.sh/@tiptap/extension-drag-handle@3.20.0';
+import { MahoColumns, MahoColumn, COLUMN_PRESETS } from './extensions/columns.js';
+import { MahoBentoGrid, MahoBentoCell, BENTO_PRESETS } from './extensions/bento.js';
 
 export {
-    Editor, Node, Mark, StarterKit, TextAlign,
-    Table, TableRow, TableCell, TableHeader, BubbleMenu,
+    Editor, Node, Mark, Extension, StarterKit, TextAlign,
+    Table, TableRow, TableCell, TableHeader, BubbleMenu, DragHandle,
+    MahoColumns, MahoColumn, COLUMN_PRESETS,
+    MahoBentoGrid, MahoBentoCell, BENTO_PRESETS,
 };
 
 const parseDirective = (directiveStr) => {
@@ -114,6 +119,8 @@ export const GlobalAttributes = Extension.create({
                 types: [
                     'heading', 'paragraph', 'bulletList', 'orderedList', 'listItem', 'blockquote', 'codeBlock',
                     'tableRow', 'tableCell', 'tableHeader', 'table',
+                    'mahoColumns', 'mahoColumn',
+                    'mahoBentoGrid', 'mahoBentoCell',
                 ],
                 attributes: {
                     class: {
@@ -143,6 +150,64 @@ export const GlobalAttributes = Extension.create({
                 },
             },
         ];
+    },
+});
+
+/**
+ * Vertical Align Extension for Table Cells
+ *
+ * Adds vertical-align support to table cells (top, middle, bottom)
+ */
+export const VerticalAlign = Extension.create({
+    name: 'verticalAlign',
+
+    addGlobalAttributes() {
+        return [{
+            types: ['tableCell', 'tableHeader'],
+            attributes: {
+                verticalAlign: {
+                    default: null,
+                    parseHTML: element => element.style.verticalAlign || null,
+                    renderHTML: attributes => {
+                        if (!attributes.verticalAlign) {
+                            return {};
+                        }
+                        return {
+                            style: `vertical-align: ${attributes.verticalAlign}`,
+                        };
+                    },
+                },
+            },
+        }];
+    },
+
+    addCommands() {
+        return {
+            setVerticalAlign: (alignment) => ({ chain, state }) => {
+                const { selection } = state;
+                const isCellSelection = selection.constructor.name === 'CellSelection';
+
+                if (isCellSelection) {
+                    // Update all selected cells
+                    return chain()
+                        .updateAttributes('tableCell', { verticalAlign: alignment })
+                        .updateAttributes('tableHeader', { verticalAlign: alignment })
+                        .run();
+                }
+
+                // Single cell - find the parent cell
+                const $pos = selection.$anchor;
+                for (let depth = $pos.depth; depth > 0; depth--) {
+                    const node = $pos.node(depth);
+                    if (node.type.name === 'tableCell' || node.type.name === 'tableHeader') {
+                        return chain()
+                            .updateAttributes(node.type.name, { verticalAlign: alignment })
+                            .run();
+                    }
+                }
+                return false;
+            },
+        };
     },
 });
 
@@ -235,26 +300,13 @@ export const MahoWidgetBlock = Node.create({
                 const { from, to } = state.selection;
                 const type = getWidgetTypeForSelection(state);
 
-                console.log('TipTap calling widgetTools.openDialog with:', this.options.widgetUrl);
-                console.log('TipTap options being passed:', {
-                    onOpen: () => {
-                        widgetTools.initOptionValues(node?.attrs.directiveObj.params);
-                    },
-                    onOk: async () => {
-                        console.log('TipTap onOk called');
-                        // ... rest of onOk
-                    }
-                });
                 widgetTools.openDialog(this.options.widgetUrl, {
                     onOpen: () => {
                         widgetTools.initOptionValues(node?.attrs.directiveObj.params);
                     },
                     onOk: async () => {
-                        console.log('TipTap onOk called');
                         try {
-                            // Get directive from insertWidget method
-                            const directive = await window.wWidget.insertWidget();
-                            console.log('TipTap directive received:', directive);
+                            const directive = await window.wWidget.insertWidget(true);
                             if (directive) {
                                 const directiveObj = parseDirective(directive);
                                 editor.commands.insertContentAt({ from, to }, {
@@ -262,10 +314,10 @@ export const MahoWidgetBlock = Node.create({
                                     attrs: { directiveObj },
                                 });
                             }
-                            return true; // Allow dialog to close
-                        } catch(error) {
-                            console.log('TipTap onOk error:', error);
-                            return false; // Prevent dialog close on error
+                            return true;
+                        } catch (error) {
+                            console.error('Error inserting widget:', error);
+                            return false;
                         }
                     },
                 });
@@ -431,15 +483,16 @@ export const MahoImage = Image.extend({
 
                 const url = setRouteParams(this.options.browserUrl, params);
                 MediabrowserUtility.openDialog(url, null, null, this.options.title, {
-                    onOk: (dialog) => {
-                        //  Parse out the directive and alt text
-                        let match;
+                    ok: false, // Use Insert File button, not dialog OK button
+                    onClose: (dialog) => {
+                        // Dialog was cancelled or closed without selecting a file
                         const returnValue = dialog.returnValue || '';
-
                         if (!returnValue) {
-                            console.error('No return value from media browser dialog');
                             return;
                         }
+
+                        // Parse out the directive and alt text
+                        let match;
 
                         match = returnValue.match(/src="({{.*?}})"/);
                         const directiveObj = parseDirective(match?.[1]);

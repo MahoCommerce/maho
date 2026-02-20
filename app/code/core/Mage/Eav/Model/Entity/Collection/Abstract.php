@@ -6,11 +6,11 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Collection_Db
+abstract class Mage_Eav_Model_Entity_Collection_Abstract extends \Maho\Data\Collection\Db
 {
     /**
      * Array of items with item id key
@@ -216,7 +216,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     /**
      * Set template object for the collection
      *
-     * @param   Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return  $this
      */
     public function setObject($object = null)
@@ -234,7 +234,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * Add an object to the collection
      */
     #[\Override]
-    public function addItem(Varien_Object $object)
+    public function addItem(\Maho\DataObject $object)
     {
         if ($object::class !== $this->_itemObjectClass) {
             throw Mage::exception('Mage_Eav', Mage::helper('eav')->__('Attempt to add an invalid object'));
@@ -261,10 +261,10 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * Add attribute filter to collection
      *
      * If $attribute is an array will add OR condition with following format:
-     * array(
-     *     array('attribute'=>'firstname', 'like'=>'test%'),
-     *     array('attribute'=>'lastname', 'like'=>'test%'),
-     * )
+     * [
+     *     ['attribute'=>'firstname', 'like'=>'test%'],
+     *     ['attribute'=>'lastname', 'like'=>'test%'],
+     * ]
      *
      * @see self::_getConditionSql for $condition
      * @param Mage_Eav_Model_Entity_Attribute_Interface|int|string|array $attribute
@@ -308,7 +308,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     }
 
     /**
-     * Wrapper for compatibility with Varien_Data_Collection_Db
+     * Wrapper for compatibility with \Maho\Data\Collection\Db
      */
     #[\Override]
     public function addFieldToFilter($attribute, $condition = null)
@@ -354,7 +354,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
             }
 
             if (in_array($attrInstance->getFrontendClass(), $this->_castToIntMap)) {
-                /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
                 $helper = Mage::getResourceHelper('eav');
                 $orderExpr = $helper->getCastToIntExpression($this->_prepareOrderExpression($orderExpr));
             }
@@ -663,7 +662,7 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      * @param string $table 'directory/country_name'
      * @param string $field 'name'
      * @param string $bind 'PK(country_id)=FK(shipping_country_id)'
-     * @param string|array $cond "{{table}}.language_code='en'" OR array('language_code'=>'en')
+     * @param string|array $cond "{{table}}.language_code='en'" OR ['language_code'=>'en']
      * @param string $joinType 'left'
      * @return $this
      */
@@ -839,31 +838,31 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
         if ($this->isLoaded()) {
             return $this;
         }
-        \Maho\Profiler::start('eav.collection.before_load');
+        \Maho\Profiler::start('__EAV_COLLECTION_BEFORE_LOAD__');
         Mage::dispatchEvent('eav_collection_abstract_load_before', ['collection' => $this]);
         $this->_beforeLoad();
-        \Maho\Profiler::stop('eav.collection.before_load');
+        \Maho\Profiler::stop('__EAV_COLLECTION_BEFORE_LOAD__');
 
         $this->_renderFilters();
         $this->_renderOrders();
 
-        \Maho\Profiler::start('eav.collection.load_entities');
+        \Maho\Profiler::start('__EAV_COLLECTION_LOAD_ENT__');
         $this->_loadEntities($printQuery, $logQuery);
-        \Maho\Profiler::stop('eav.collection.load_entities');
-        \Maho\Profiler::start('eav.collection.load_attributes');
+        \Maho\Profiler::stop('__EAV_COLLECTION_LOAD_ENT__');
+        \Maho\Profiler::start('__EAV_COLLECTION_LOAD_ATTR__');
         $this->_loadAttributes($printQuery, $logQuery);
-        \Maho\Profiler::stop('eav.collection.load_attributes');
+        \Maho\Profiler::stop('__EAV_COLLECTION_LOAD_ATTR__');
 
-        \Maho\Profiler::start('eav.collection.original_data');
+        \Maho\Profiler::start('__EAV_COLLECTION_ORIG_DATA__');
         foreach ($this->_items as $item) {
             $item->setOrigData();
         }
-        \Maho\Profiler::stop('eav.collection.original_data');
+        \Maho\Profiler::stop('__EAV_COLLECTION_ORIG_DATA__');
 
         $this->_setIsLoaded();
-        \Maho\Profiler::start('eav.collection.after_load');
+        \Maho\Profiler::start('__EAV_COLLECTION_AFTER_LOAD__');
         $this->_afterLoad();
-        \Maho\Profiler::stop('eav.collection.after_load');
+        \Maho\Profiler::stop('__EAV_COLLECTION_AFTER_LOAD__');
         return $this;
     }
 
@@ -899,25 +898,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     public function getAllIds($limit = null, $offset = null)
     {
         return $this->getConnection()->fetchCol($this->_getAllIdsSelect($limit, $offset), $this->_bindParams);
-    }
-
-    /**
-     * Retrieve all ids sql
-     *
-     * @deprecated
-     * @return Maho\Db\Select
-     */
-    public function getAllIdsSql()
-    {
-        $idsSelect = clone $this->getSelect();
-        $idsSelect->reset(Maho\Db\Select::ORDER);
-        $idsSelect->reset(Maho\Db\Select::LIMIT_COUNT);
-        $idsSelect->reset(Maho\Db\Select::LIMIT_OFFSET);
-        $idsSelect->reset(Maho\Db\Select::COLUMNS);
-        $idsSelect->reset(Maho\Db\Select::GROUP);
-        $idsSelect->columns('e.' . $this->getEntity()->getIdFieldName());
-
-        return $idsSelect;
     }
 
     /**
@@ -1094,7 +1074,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
             );
         }
 
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('eav');
         $selectGroups = $helper->getLoadAttributesSelectGroups($selects);
         foreach ($selectGroups as $selects) {
@@ -1152,7 +1131,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
      */
     protected function _addLoadAttributesSelectValues($select, $table, $type)
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('eav');
         $select->columns([
             'value' => $helper->prepareEavAttributeValue($table . '.value', $type),
@@ -1491,7 +1469,6 @@ abstract class Mage_Eav_Model_Entity_Collection_Abstract extends Varien_Data_Col
     public function _prepareSelect(\Maho\Db\Select $select)
     {
         if ($this->_useAnalyticFunction) {
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
             $helper = Mage::getResourceHelper('core');
             return $helper->getQueryUsingAnalyticFunction($select);
         }

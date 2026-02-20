@@ -6,7 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,32 +17,35 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
 
     /**
      * Path to local configuration file
-     *
-     * @var string
      */
-    protected $_localConfigFile;
+    protected string $_localConfigFile;
 
-    protected $_configData = [];
+    /** @var array<string, mixed> */
+    protected array $_configData = [];
 
     public function __construct()
     {
         $this->_localConfigFile = Mage::getBaseDir('etc') . DS . 'local.xml';
     }
 
-    public function setConfigData($data)
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function setConfigData(array $data): self
     {
-        if (is_array($data)) {
-            $this->_configData = $data;
-        }
+        $this->_configData = $data;
         return $this;
     }
 
-    public function getConfigData()
+    /**
+     * @return array<string, mixed>
+     */
+    public function getConfigData(): array
     {
         return $this->_configData;
     }
 
-    public function install()
+    public function install(): void
     {
         $data = $this->getConfigData();
         foreach (Mage::getModel('core/config')->getDistroServerVars() as $index => $value) {
@@ -52,13 +55,13 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         }
 
         if (isset($data['unsecure_base_url'])) {
-            $data['unsecure_base_url'] .= !str_ends_with($data['unsecure_base_url'], '/') ? '/' : '';
+            $data['unsecure_base_url'] .= str_ends_with($data['unsecure_base_url'], '/') ? '' : '/';
             if (!str_starts_with($data['unsecure_base_url'], 'http')) {
                 $data['unsecure_base_url'] = 'http://' . $data['unsecure_base_url'];
             }
         }
         if (isset($data['secure_base_url'])) {
-            $data['secure_base_url'] .= !str_ends_with($data['secure_base_url'], '/') ? '/' : '';
+            $data['secure_base_url'] .= str_ends_with($data['secure_base_url'], '/') ? '' : '/';
             if (!str_starts_with($data['secure_base_url'], 'http')) {
                 $data['secure_base_url'] = 'https://' . $data['secure_base_url'];
             }
@@ -91,7 +94,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         chmod($this->_localConfigFile, 0777);
     }
 
-    public function getFormData()
+    public function getFormData(): Maho\DataObject
     {
         $baseUrl = Mage::helper('core/url')->decodePunycode(Mage::getBaseUrl('web'));
         $urlData = parse_url($baseUrl);
@@ -160,7 +163,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
         return $this;
     }
 
-    public function replaceTmpInstallDate($date = null)
+    public function replaceTmpInstallDate(?string $date = null): self
     {
         $stamp    = strtotime((string) $date);
         $localXml = file_get_contents($this->_localConfigFile);

@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -19,7 +19,7 @@
     <form action="<?= $this->getPostActionUrl() ?>" method="post">
         <?= $this->getBlockHtml('formkey') ?>
         <div class="block-content">
-            <label for="mini-login"><?= $this->__('Email:') ?></label><input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" id="mini-login" class="input-text" />
+            <label for="mini-login"><?= $this->__('Email:') ?></label><input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" id="mini-login" class="input-text" />
             <label for="mini-password"><?= $this->__('Password:') ?></label><input type="password" name="login[password]" id="mini-password" class="input-text" autocomplete="off" />
             <div class="actions">
                 <button type="submit" class="button"><?= $this->__('Login') ?></button>

@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -110,6 +110,22 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
         $option = Mage::getModel('sales/quote_item_option')->load($quoteItemOptionId);
 
         if (!$option->getId()) {
+            $this->_forward('noRoute');
+            return;
+        }
+
+        // Verify the quote belongs to the current customer or session
+        $quoteItem = Mage::getModel('sales/quote_item')->load($option->getItemId());
+        $quote = Mage::getModel('sales/quote')->load($quoteItem->getQuoteId());
+        $customerSession = Mage::getSingleton('customer/session');
+        $checkoutQuoteId = Mage::getSingleton('checkout/session')->getQuoteId();
+
+        if ($quote->getCustomerId()) {
+            if (!$customerSession->isLoggedIn() || $quote->getCustomerId() != $customerSession->getCustomerId()) {
+                $this->_forward('noRoute');
+                return;
+            }
+        } elseif ($quote->getId() != $checkoutQuoteId) {
             $this->_forward('noRoute');
             return;
         }

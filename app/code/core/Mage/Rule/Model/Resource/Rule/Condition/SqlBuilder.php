@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,6 +33,11 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
      */
     public function getOperatorCondition($field, $operator, $value)
     {
+        // Handle FIND_IN_SET operators separately (database-agnostic)
+        if (in_array($operator, ['()', '!()', '[]', '![]'])) {
+            return $this->_buildFindInSetCondition($field, $operator, $value);
+        }
+
         switch ($operator) {
             case '!=':
             case '>=':
@@ -53,16 +58,6 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
                 }
                 break;
 
-            case '[]':
-            case '![]':
-            case '()':
-            case '!()':
-                $selectOperator = 'FIND_IN_SET(?,' . $this->_adapter->quoteIdentifier($field) . ')';
-                if (str_starts_with($operator, '!')) {
-                    $selectOperator = 'NOT ' . $selectOperator;
-                }
-                break;
-
             default:
                 $selectOperator = '=?';
                 break;
@@ -75,19 +70,31 @@ class Mage_Rule_Model_Resource_Rule_Condition_SqlBuilder
                 $results[] = $this->_adapter->quoteInto("{$field}{$selectOperator}", $v);
             }
             $result = implode(' AND ', $results);
-        } elseif (in_array($operator, ['()', '!()', '[]', '![]'])) {
-            if (!is_array($value)) {
-                $value = [$value];
-            }
-
-            $results = [];
-            foreach ($value as $v) {
-                $results[] = $this->_adapter->quoteInto("{$selectOperator}", $v);
-            }
-            $result = implode(in_array($operator, ['()', '!()']) ? ' OR ' : ' AND ', $results);
         } else {
             $result = $this->_adapter->quoteInto("{$field}{$selectOperator}", $value);
         }
         return $result;
+    }
+
+    /**
+     * Build FIND_IN_SET condition using database-agnostic helper
+     */
+    protected function _buildFindInSetCondition(string $field, string $operator, mixed $value): string
+    {
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+
+        $quotedField = $this->_adapter->quoteIdentifier($field);
+        $negate = str_starts_with($operator, '!');
+        $useOr = in_array($operator, ['()', '!()']);
+
+        $results = [];
+        foreach ($value as $v) {
+            $expr = $this->_adapter->getFindInSetExpr($this->_adapter->quote($v), $quotedField);
+            $results[] = ($negate ? 'NOT ' : '') . $expr;
+        }
+
+        return implode($useOr ? ' OR ' : ' AND ', $results);
     }
 }

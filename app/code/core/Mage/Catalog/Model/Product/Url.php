@@ -6,11 +6,11 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Catalog_Model_Product_Url extends Varien_Object
+class Mage_Catalog_Model_Product_Url extends \Maho\DataObject
 {
     public const CACHE_TAG = 'url_rewrite';
 
@@ -45,8 +45,8 @@ class Mage_Catalog_Model_Product_Url extends Varien_Object
      */
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('catalog/factory');
-        $this->_store = !empty($args['store']) ? $args['store'] : Mage::app()->getStore();
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('catalog/factory') : $args['factory'];
+        $this->_store = empty($args['store']) ? Mage::app()->getStore() : $args['store'];
     }
 
     /**
@@ -146,11 +146,12 @@ class Mage_Catalog_Model_Product_Url extends Varien_Object
     public function getUrlPath($product, $category = null)
     {
         $path = $product->getData('url_path');
-
         if (is_null($category)) {
             /** @todo get default category */
             return $path;
-        } elseif (!$category instanceof Mage_Catalog_Model_Category) {
+        }
+
+        if (!$category instanceof Mage_Catalog_Model_Category) {
             Mage::throwException('Invalid category object supplied');
         }
 
@@ -221,10 +222,9 @@ class Mage_Catalog_Model_Product_Url extends Varien_Object
     {
         if (isset($params['_ignore_category'])) {
             return null;
-        } else {
-            return $product->getCategoryId() && !$product->getDoNotUseCategoryId()
-                ? $product->getCategoryId() : null;
         }
+        return $product->getCategoryId() && !$product->getDoNotUseCategoryId()
+            ? $product->getCategoryId() : null;
     }
 
     /**

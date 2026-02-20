@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -85,13 +85,13 @@ class Maho_CustomerSegmentation_Model_EmailSequence extends Mage_Core_Model_Abst
         $minutes = $this->getDelayMinutes();
         if ($minutes < 60) {
             return $minutes . ' ' . Mage::helper('customersegmentation')->__('minutes');
-        } elseif ($minutes < 1440) {
+        }
+        if ($minutes < 1440) {
             $hours = round($minutes / 60);
             return $hours . ' ' . Mage::helper('customersegmentation')->__('hours');
-        } else {
-            $days = round($minutes / 1440);
-            return $days . ' ' . Mage::helper('customersegmentation')->__('days');
         }
+        $days = round($minutes / 1440);
+        return $days . ' ' . Mage::helper('customersegmentation')->__('days');
     }
 
     /**

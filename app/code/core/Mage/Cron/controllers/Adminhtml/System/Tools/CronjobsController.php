@@ -4,12 +4,21 @@
  * Maho
  *
  * @package    Mage_Cron
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml_Controller_Action
 {
+    public const ADMIN_RESOURCE = 'system/tools/cronjobs';
+
+    #[\Override]
+    public function preDispatch(): self
+    {
+        $this->_setForcedFormKeyActions('massDelete');
+        return parent::preDispatch();
+    }
+
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -38,9 +47,32 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         );
     }
 
+    public function massDeleteAction(): void
+    {
+        $scheduleIds = $this->getRequest()->getParam('schedule_ids');
+        if (!is_array($scheduleIds)) {
+            Mage::getSingleton('adminhtml/session')->addError($this->__('Please select cron job(s).'));
+        } else {
+            try {
+                $collection = Mage::getModel('cron/schedule')->getCollection()
+                    ->addFieldToFilter('schedule_id', ['in' => $scheduleIds]);
+                $deletedCount = count($collection);
+                foreach ($collection as $schedule) {
+                    $schedule->delete();
+                }
+                Mage::getSingleton('adminhtml/session')->addSuccess(
+                    $this->__('Total of %d cron job(s) were deleted.', $deletedCount),
+                );
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+            }
+        }
+        $this->_redirect('*/*/index');
+    }
+
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('system/tools/cronjobs');
+        return Mage::getSingleton('admin/session')->isAllowed(self::ADMIN_RESOURCE);
     }
 }

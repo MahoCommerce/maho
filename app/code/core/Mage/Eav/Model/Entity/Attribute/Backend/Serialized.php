@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
     /**
      * Serialize before saving
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -24,7 +24,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
         // parent::beforeSave() is not called intentionally
         $attrCode = $this->getAttribute()->getAttributeCode();
         if ($object->hasData($attrCode)) {
-            $object->setData($attrCode, serialize($object->getData($attrCode)));
+            $object->setData($attrCode, Mage::helper('core')->jsonEncode($object->getData($attrCode)));
         }
 
         return $this;
@@ -33,7 +33,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
     /**
      * Unserialize after saving
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -47,7 +47,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
     /**
      * Unserialize after loading
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -63,7 +63,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Serialized extends Mage_Eav_Model_
      *
      * @return $this
      */
-    protected function _unserialize(Varien_Object $object)
+    protected function _unserialize(\Maho\DataObject $object)
     {
         $attrCode = $this->getAttribute()->getAttributeCode();
         if ($object->getData($attrCode)) {

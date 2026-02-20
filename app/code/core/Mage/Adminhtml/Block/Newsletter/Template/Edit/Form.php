@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
         $identityName = Mage::getStoreConfig('trans_email/ident_' . $identity . '/name');
         $identityEmail = Mage::getStoreConfig('trans_email/ident_' . $identity . '/email');
 
-        $form   = new Varien_Data_Form([
+        $form   = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method'    => 'post',
@@ -108,6 +108,7 @@ class Mage_Adminhtml_Block_Newsletter_Template_Edit_Form extends Mage_Adminhtml_
         $wysiwygConfig = Mage::getSingleton('cms/wysiwyg_config')->getConfig([
             'widget_filters' => $widgetFilters,
             'add_variables' => true,
+            'add_slideshows' => false,
             'variable_window_url' => Mage::getSingleton('adminhtml/url')->getUrl('*/newsletter_template/wysiwygVariable'),
         ]);
         if ($model->isPlain()) {

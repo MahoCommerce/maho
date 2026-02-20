@@ -1,21 +1,23 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset_Element implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends Mage_Adminhtml_Block_Widget_Form_Renderer_Fieldset_Element implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * Form element which re-rendering
      *
-     * @var Varien_Data_Form_Element_Fieldset
+     * @var Maho\Data\Form\Element\AbstractElement
      */
     protected $_element;
 
@@ -28,7 +30,7 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends
     /**
      * Retrieve an element
      *
-     * @return Varien_Data_Form_Element_Fieldset
+     * @return Maho\Data\Form\Element\AbstractElement
      */
     #[\Override]
     public function getElement()
@@ -42,7 +44,7 @@ class Mage_Adminhtml_Block_Store_Switcher_Form_Renderer_Fieldset_Element extends
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->_element = $element;
         return $this->toHtml();

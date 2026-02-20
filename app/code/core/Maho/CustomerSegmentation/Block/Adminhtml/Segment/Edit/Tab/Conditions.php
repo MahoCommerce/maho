@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,7 +17,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit_Tab_Conditions exte
     protected function _prepareForm(): self
     {
         $model = Mage::registry('current_customer_segment');
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setUseContainer(false);
 
         $renderer = Mage::getBlockSingleton('adminhtml/widget_form_renderer_fieldset')

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,12 +36,12 @@ abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abs
     /**
      * Collect file info
      *
-     * Return array(
+     * Return [
      *  filename    => string
      *  content     => string|bool
      *  update_time => string
      *  directory   => string
-     * )
+     * ]
      *
      * @param  string $path
      * @return array
@@ -50,7 +50,7 @@ abstract class Mage_Core_Model_File_Storage_Abstract extends Mage_Core_Model_Abs
     {
         $path = ltrim($path, '\\/');
         $fullPath = $this->getMediaBaseDirectory() . DS . $path;
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         if (!file_exists($fullPath) || !is_file($fullPath)) {
             Mage::throwException(Mage::helper('core')->__('File %s does not exist', $io->getFilteredPath($fullPath)));
         }

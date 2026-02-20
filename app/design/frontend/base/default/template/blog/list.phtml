@@ -4,7 +4,7 @@
  *
  * @category    design
  * @package     base_default
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -21,7 +21,7 @@ $posts = $this->getPosts();
                 <?php if ($post->hasImage()): ?>
                     <img src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" />
                 <?php endif ?>
-                <strong><?= $post->getTitle() ?></strong>
+                <strong><?= $this->escapeHtml($post->getTitle()) ?></strong>
                 <div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
                 <?php $excerpt = Mage::helper('blog')->truncateContent($post); ?>
                 <?php if ($excerpt): ?>
@@ -30,7 +30,7 @@ $posts = $this->getPosts();
             </a>
         <?php endforeach ?>
     </div>
-    
+
     <?php if ($posts->getLastPageNumber() > 1): ?>
         <div class="pager">
             <?= $this->getPagerHtml() ?>

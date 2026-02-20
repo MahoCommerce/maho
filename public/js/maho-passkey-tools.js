@@ -4,7 +4,7 @@
  * @package     js
  * @copyright   Copyright (c) 2018 Thomas Bleeker (CBOR & ByteBuffer part)
  * @copyright   Copyright (c) 2022 Lukas Buchs
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/license/mit  MIT
  */
 

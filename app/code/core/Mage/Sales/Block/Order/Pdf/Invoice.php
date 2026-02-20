@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -174,6 +174,22 @@ class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Sales_Block_Order_Pdf_Abst
             ];
         }
 
+        // Gift Card
+        if (abs((float) $this->_invoice->getGiftcardAmount()) >= 0.01) {
+            $label = $this->__('Gift Card');
+            $giftcardCodes = $this->_order->getGiftcardCodes();
+            if ($giftcardCodes) {
+                $codesArray = json_decode($giftcardCodes, true);
+                if (is_array($codesArray) && $codesArray !== []) {
+                    $label .= ' (' . implode(', ', array_keys($codesArray)) . ')';
+                }
+            }
+            $totals[] = [
+                'label' => $label,
+                'value' => $this->formatPrice(-abs($this->_invoice->getGiftcardAmount())),
+            ];
+        }
+
         // Grand Total
         $totals[] = [
             'label' => $this->__('Grand Total'),
@@ -184,7 +200,8 @@ class Mage_Sales_Block_Order_Pdf_Invoice extends Mage_Sales_Block_Order_Pdf_Abst
         return $totals;
     }
 
-    public function formatPrice(float $price): string
+    #[\Override]
+    public function formatPrice(float $price, ?string $currency = null): string
     {
         return $this->_order->formatPriceTxt($price);
     }

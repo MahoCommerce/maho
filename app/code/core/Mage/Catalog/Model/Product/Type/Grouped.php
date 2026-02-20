@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -77,12 +77,12 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
     /**
      * Return relation info about used products
      *
-     * @return Varien_Object Object with information data
+     * @return \Maho\DataObject Object with information data
      */
     #[\Override]
     public function getRelationInfo()
     {
-        $info = new Varien_Object();
+        $info = new \Maho\DataObject();
         $info->setTable('catalog/product_link')
             ->setParentFieldName('product_id')
             ->setChildFieldName('linked_product_id')
@@ -92,9 +92,9 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
 
     /**
      * Retrieve Required children ids
-     * Return grouped array, ex array(
-     *   group => array(ids)
-     * )
+     * Return grouped array, ex [
+     *   group => [ids]
+     * ]
      *
      * @param int $parentId
      * @param bool $required
@@ -288,7 +288,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
      * @return array|string
      */
     #[\Override]
-    protected function _prepareProduct(Varien_Object $buyRequest, $product, $processMode)
+    protected function _prepareProduct(\Maho\DataObject $buyRequest, $product, $processMode)
     {
         $product = $this->getProduct($product);
         $productsInfo = $buyRequest->getSuperGroup();
@@ -306,7 +306,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
                         if (!empty($qty) && is_numeric($qty)) {
                             $_result = $subProduct->getTypeInstance(true)
                                 ->_prepareProduct($buyRequest, $subProduct, $processMode);
-                            if (is_string($_result) && !is_array($_result)) {
+                            if (is_string($_result)) {
                                 return $_result;
                             }
 
@@ -319,7 +319,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
                                 $_result[0]->addCustomOption('product_type', self::TYPE_CODE, $product);
                                 $_result[0]->addCustomOption(
                                     'info_buyRequest',
-                                    serialize([
+                                    Mage::helper('core')->jsonEncode([
                                         'super_product_config' => [
                                             'product_type'  => self::TYPE_CODE,
                                             'product_id'    => $product->getId(),
@@ -338,7 +338,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
 
             if (!$isStrictProcessMode || count($associatedProductsInfo)) {
                 $product->addCustomOption('product_type', self::TYPE_CODE, $product);
-                $product->addCustomOption('info_buyRequest', serialize($buyRequest->getData()));
+                $product->addCustomOption('info_buyRequest', Mage::helper('core')->jsonEncode($buyRequest->getData()));
 
                 $products[] = $product;
             }
@@ -369,7 +369,7 @@ class Mage_Catalog_Model_Product_Type_Grouped extends Mage_Catalog_Model_Product
      * Prepare selected qty for grouped product's options
      *
      * @param  Mage_Catalog_Model_Product $product
-     * @param  Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return array
      */
     #[\Override]

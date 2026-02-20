@@ -6,14 +6,25 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract implements Mage_Payment_Model_Recurring_Profile_MethodInterface
 {
+    /**
+     * @var string
+     */
     protected $_code  = Mage_Paypal_Model_Config::METHOD_WPP_EXPRESS;
+
+    /**
+     * @var string
+     */
     protected $_formBlockType = 'paypal/express_form';
+
+    /**
+     * @var string
+     */
     protected $_infoBlockType = 'paypal/payment_info';
 
     /**
@@ -66,8 +77,8 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         if ($proInstance instanceof Mage_Paypal_Model_Pro) {
             $this->_pro = $proInstance;
         } else {
-            /** @var Mage_Paypal_Model_Pro $model */
             $model = Mage::getModel($this->_proType);
+            assert($model instanceof \Mage_Paypal_Model_Pro);
             $this->_pro = $model;
         }
         $this->_pro->setMethod($this->_code);
@@ -188,7 +199,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @return $this
      */
     #[\Override]
-    public function order(Varien_Object $payment, $amount)
+    public function order(\Maho\DataObject $payment, $amount)
     {
         $paypalTransactionData = Mage::getSingleton('checkout/session')->getPaypalTransactionData();
         if (!is_array($paypalTransactionData)) {
@@ -259,7 +270,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @return $this
      */
     #[\Override]
-    public function authorize(Varien_Object $payment, $amount)
+    public function authorize(\Maho\DataObject $payment, $amount)
     {
         return $this->_placeOrder($payment, $amount);
     }
@@ -271,7 +282,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @return $this
      */
     #[\Override]
-    public function void(Varien_Object $payment)
+    public function void(\Maho\DataObject $payment)
     {
         //Switching to order transaction if needed
         if ($payment->getAdditionalInformation($this->_isOrderPaymentActionKey)
@@ -298,7 +309,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @return $this
      */
     #[\Override]
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(\Maho\DataObject $payment, $amount)
     {
         $authorizationTransaction = $payment->getAuthorizationTransaction();
         $authorizationPeriod = abs((int) $this->getConfigData('authorization_honor_period'));
@@ -318,7 +329,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
                 $payment->setParentTransactionId($authorizationTransaction->getTxnId());
                 $payment->unsTransactionId();
                 $payment->setVoidOnlyAuthorization(true);
-                $payment->void(new Varien_Object());
+                $payment->void(new \Maho\DataObject());
 
                 //Revert payment state after voiding
                 $payment->unsAuthorizationTransaction();
@@ -394,7 +405,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @return $this
      */
     #[\Override]
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         $this->_pro->refund($payment, $amount);
         return $this;
@@ -407,7 +418,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @return $this
      */
     #[\Override]
-    public function cancel(Varien_Object $payment)
+    public function cancel(\Maho\DataObject $payment)
     {
         $this->void($payment);
 
@@ -505,7 +516,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @param string $referenceId
      */
     #[\Override]
-    public function getRecurringProfileDetails($referenceId, Varien_Object $result)
+    public function getRecurringProfileDetails($referenceId, \Maho\DataObject $result)
     {
         return $this->_pro->getRecurringProfileDetails($referenceId, $result);
     }
@@ -544,7 +555,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
         $key = Mage_Paypal_Model_Express_Checkout::PAYMENT_INFO_TRANSPORT_BILLING_AGREEMENT;
         if (is_array($data)) {
             $this->getInfoInstance()->setAdditionalInformation($key, $data[$key] ?? null);
-        } elseif ($data instanceof Varien_Object) {
+        } elseif ($data instanceof \Maho\DataObject) {
             $this->getInfoInstance()->setAdditionalInformation($key, $data->getData($key));
         }
         return $result;
@@ -611,7 +622,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * @return  bool
      */
     #[\Override]
-    public function canVoid(Varien_Object $payment)
+    public function canVoid(\Maho\DataObject $payment)
     {
         if ($payment instanceof Mage_Sales_Model_Order_Invoice
             || $payment instanceof Mage_Sales_Model_Order_Creditmemo
@@ -674,7 +685,7 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
      * Call DoAuthorize
      *
      * @param int $amount
-     * @param Varien_Object $payment
+     * @param \Maho\DataObject $payment
      * @param string $parentTransactionId
      * @return Mage_Paypal_Model_Api_Abstract
      * @throws Mage_Paypal_Model_Api_ProcessableException

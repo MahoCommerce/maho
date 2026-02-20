@@ -6,7 +6,7 @@
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -106,9 +106,8 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {
             return Mage::getSingleton('customer/session')->getCustomer()->getName();
-        } else {
-            return $this->getEntity()->getBillingAddress()->getName();
         }
+        return $this->getEntity()->getBillingAddress()->getName();
     }
 
     /**
@@ -120,9 +119,8 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
     {
         if ($this->getEntity()->getShippingAddress()) {
             return $this->getEntity()->getShippingAddress()->getName();
-        } else {
-            return $this->getEntity()->getName();
         }
+        return $this->getEntity()->getName();
     }
 
     /**

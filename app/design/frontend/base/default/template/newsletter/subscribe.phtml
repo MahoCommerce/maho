@@ -2,10 +2,10 @@
 /**
  * Maho
  *
- * @package     rwd_default
+ * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -18,7 +18,7 @@
         <div class="block-content">
             <div class="input-box">
                 <label for="newsletter" class="visually-hidden"><?= $this->__('Sign Up for Our Newsletter:') ?></label>
-               <input type="email" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="newsletter" title="<?= $this->quoteEscape($this->__('Sign up for our newsletter')) ?>" class="input-text required-entry validate-email" aria-required="true" />
+               <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="newsletter" title="<?= $this->quoteEscape($this->__('Sign up for our newsletter')) ?>" class="input-text required-entry validate-email" aria-required="true" />
             </div>
             <div class="actions">
                 <button type="submit" title="<?= $this->quoteEscape($this->__('Subscribe')) ?>" class="button"><?= $this->__('Subscribe') ?></button>

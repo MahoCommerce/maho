@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,18 +56,17 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
 
             if (isset($validTypes[$this->getEntity()])) {
                 try {
-                    /** @var Mage_ImportExport_Model_Export_Entity_Abstract $_entityAdapter */
                     $_entityAdapter = Mage::getModel($validTypes[$this->getEntity()]['model']);
+                    if (!$_entityAdapter instanceof Mage_ImportExport_Model_Export_Entity_Abstract) {
+                        Mage::throwException(
+                            Mage::helper('importexport')->__('Entity adapter object must be an instance of Mage_ImportExport_Model_Export_Entity_Abstract'),
+                        );
+                    }
                     $this->_entityAdapter = $_entityAdapter;
                 } catch (Exception $e) {
                     Mage::logException($e);
                     Mage::throwException(
                         Mage::helper('importexport')->__('Invalid entity model'),
-                    );
-                }
-                if (!$this->_entityAdapter instanceof Mage_ImportExport_Model_Export_Entity_Abstract) {
-                    Mage::throwException(
-                        Mage::helper('importexport')->__('Entity adapter obejct must be an instance of Mage_ImportExport_Model_Export_Entity_Abstract'),
                     );
                 }
             } else {
@@ -97,18 +96,17 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
 
             if (isset($validWriters[$this->getFileFormat()])) {
                 try {
-                    /** @var Mage_ImportExport_Model_Export_Adapter_Abstract $_writer */
                     $_writer = Mage::getModel($validWriters[$this->getFileFormat()]['model']);
+                    if (!$_writer instanceof Mage_ImportExport_Model_Export_Adapter_Abstract) {
+                        Mage::throwException(
+                            Mage::helper('importexport')->__('Adapter object must be an instance of %s', 'Mage_ImportExport_Model_Export_Adapter_Abstract'),
+                        );
+                    }
                     $this->_writer = $_writer;
                 } catch (Exception $e) {
                     Mage::logException($e);
                     Mage::throwException(
                         Mage::helper('importexport')->__('Invalid entity model'),
-                    );
-                }
-                if (!$this->_writer instanceof Mage_ImportExport_Model_Export_Adapter_Abstract) {
-                    Mage::throwException(
-                        Mage::helper('importexport')->__('Adapter object must be an instance of %s', 'Mage_ImportExport_Model_Export_Adapter_Abstract'),
                     );
                 }
             } else {
@@ -119,50 +117,15 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
     }
 
     /**
-     * Export data and return contents of temporary file.
-     *
-     * @deprecated after ver 1.9.2.4 use $this->exportFile() instead
-     *
-     * @throws Mage_Core_Exception
-     * @return string
-     */
-    public function export()
-    {
-        if (isset($this->_data[self::FILTER_ELEMENT_GROUP])) {
-            $this->addLogComment(Mage::helper('importexport')->__('Begin export of %s', $this->getEntity()));
-            $result = $this->_getEntityAdapter()
-                ->setWriter($this->_getWriter())
-                ->export();
-            $countRows = substr_count(trim($result), "\n");
-            if (!$countRows) {
-                Mage::throwException(
-                    Mage::helper('importexport')->__('There is no data for export'),
-                );
-            }
-            if ($result) {
-                $this->addLogComment([
-                    Mage::helper('importexport')->__('Exported %s rows.', $countRows),
-                    Mage::helper('importexport')->__('Export has been done.'),
-                ]);
-            }
-            return $result;
-        } else {
-            Mage::throwException(
-                Mage::helper('importexport')->__('No filter data provided'),
-            );
-        }
-    }
-
-    /**
      * Export data and return temporary file through array.
      *
      * This method will return following array:
      *
-     * array(
+     * [
      *     'rows'  => count of written rows,
      *     'value' => path to created file,
      *     'type'  => 'file'
-     * )
+     * ]
      *
      * @throws Mage_Core_Exception
      * @return array
@@ -189,11 +152,10 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
             }
 
             return $result;
-        } else {
-            Mage::throwException(
-                Mage::helper('importexport')->__('No filter data provided'),
-            );
         }
+        Mage::throwException(
+            Mage::helper('importexport')->__('No filter data provided'),
+        );
     }
 
     /**
@@ -217,20 +179,21 @@ class Mage_ImportExport_Model_Export extends Mage_ImportExport_Model_Abstract
     {
         if ($attribute->usesSource() || $attribute->getFilterOptions()) {
             return self::FILTER_TYPE_SELECT;
-        } elseif ($attribute->getBackendType() == 'datetime') {
-            return self::FILTER_TYPE_DATE;
-        } elseif ($attribute->getBackendType() == 'decimal' || $attribute->getBackendType() == 'int') {
-            return self::FILTER_TYPE_NUMBER;
-        } elseif ($attribute->isStatic()
-                  || $attribute->getBackendType() == 'varchar'
-                  || $attribute->getBackendType() == 'text'
-        ) {
-            return self::FILTER_TYPE_INPUT;
-        } else {
-            Mage::throwException(
-                Mage::helper('importexport')->__('Can not determine attribute filter type'),
-            );
         }
+        if ($attribute->getBackendType() == 'datetime') {
+            return self::FILTER_TYPE_DATE;
+        }
+        if ($attribute->getBackendType() == 'decimal' || $attribute->getBackendType() == 'int') {
+            return self::FILTER_TYPE_NUMBER;
+        }
+        if ($attribute->isStatic()
+                  || $attribute->getBackendType() == 'varchar'
+                  || $attribute->getBackendType() == 'text') {
+            return self::FILTER_TYPE_INPUT;
+        }
+        Mage::throwException(
+            Mage::helper('importexport')->__('Can not determine attribute filter type'),
+        );
     }
 
     /**

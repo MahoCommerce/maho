@@ -6,7 +6,7 @@
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,14 +44,14 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest = null;
 
     /**
      * Rate result data
      *
-     * @var Mage_Shipping_Model_Rate_Result|null
+     * @var Mage_Shipping_Model_Rate_Result|Mage_Shipping_Model_Tracking_Result|null
      */
     protected $_result = null;
 
@@ -116,7 +116,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     {
         $this->_request = $request;
 
-        $r = new Varien_Object();
+        $r = new \Maho\DataObject();
 
         if ($request->getLimitMethod()) {
             $r->setAction($this->getCode('action', 'single'));
@@ -316,11 +316,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             $origin = $this->getConfigData('origin_shipment');
         }
         $arr = $this->getCode('originShipment', $origin);
-        if (isset($arr[$code])) {
-            return $arr[$code];
-        } else {
-            return false;
-        }
+        return $arr[$code] ?? false;
     }
 
     /**
@@ -615,10 +611,11 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                 ],
             ],
         ];
-
         if (!isset($codes[$type])) {
             return false;
-        } elseif ($code === '') {
+        }
+
+        if ($code === '') {
             return $codes[$type];
         }
 
@@ -876,7 +873,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     }
 
     #[\Override]
-    protected function _doShipmentRequest(Varien_Object $request): Varien_Object
+    protected function _doShipmentRequest(\Maho\DataObject $request): \Maho\DataObject
     {
         return $this->_doShipmentRequestRest($request);
     }
@@ -884,7 +881,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      */
-    protected function _doShipmentRequestRest(Varien_Object $request): Varien_Object
+    protected function _doShipmentRequestRest(\Maho\DataObject $request): \Maho\DataObject
     {
         $request->setShipperAddressCountryCode(
             $this->getNormalizedCountryCode(
@@ -902,7 +899,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             ),
         );
 
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         $this->_prepareShipmentRequest($request);
         $rawJsonRequest = $this->_formShipmentRestRequest($request);
         try {
@@ -1017,7 +1014,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         return $countryCode;
     }
 
-    protected function _formShipmentRestRequest(Varien_Object $request): string
+    protected function _formShipmentRestRequest(\Maho\DataObject $request): string
     {
         $shipmentDescription = $this->generateShipmentDescription($request->getPackageItems());
         $packageParams = $request->getPackageParams();
@@ -1207,7 +1204,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $itemsDesc = [];
         $itemsShipment = $items;
         foreach ($itemsShipment as $itemShipment) {
-            $item = new Varien_Object();
+            $item = new \Maho\DataObject();
             $item->setData($itemShipment);
             $itemsDesc[] = $item->getName();
         }
@@ -1221,7 +1218,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * @return array|bool
      */
     #[\Override]
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         if ($params == null) {
             return $this->_getAllowedContainers($params);
@@ -1229,12 +1226,10 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         $method             = $params->getMethod();
         $countryShipper     = $params->getCountryShipper();
         $countryRecipient   = $params->getCountryRecipient();
-
         if (($countryShipper == self::USA_COUNTRY_ID && $countryRecipient == self::CANADA_COUNTRY_ID)
             || ($countryShipper == self::CANADA_COUNTRY_ID && $countryRecipient == self::USA_COUNTRY_ID)
             || ($countryShipper == self::MEXICO_COUNTRY_ID && $countryRecipient == self::USA_COUNTRY_ID)
-            && $method == '11' // UPS Standard
-        ) {
+            && $method == '11') {
             $containerTypes = [];
             if ($method == '07' // Worldwide Express
                 || $method == '08' // Worldwide Expedited
@@ -1257,13 +1252,14 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
                 ];
             }
             return ['00' => Mage::helper('usa')->__('Customer Packaging')] + $containerTypes;
-        } elseif ($countryShipper == self::USA_COUNTRY_ID && $countryRecipient == self::PUERTORICO_COUNTRY_ID
+        }
+
+        if ($countryShipper == self::USA_COUNTRY_ID && $countryRecipient == self::PUERTORICO_COUNTRY_ID
             && (
                 $method == '03' // UPS Ground
                 || $method == '02' // UPS Second Day Air
                 || $method == '01' // UPS Next Day Air
-            )
-        ) {
+            )) {
             // Container types should be the same as for domestic
             $params->setCountryRecipient(self::USA_COUNTRY_ID);
             $containerTypes = $this->_getAllowedContainers($params);
@@ -1305,7 +1301,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
      * @return array
      */
     #[\Override]
-    public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
+    public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
         $countryRecipient           = $params != null ? $params->getCountryRecipient() : null;
         $deliveryConfirmationTypes  = [];
@@ -1692,7 +1688,7 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
     /**
      * Setting common request params for Rate Request
      */
-    private function setQuoteRequestData(Varien_Object $rowRequest): array
+    private function setQuoteRequestData(\Maho\DataObject $rowRequest): array
     {
         if (self::USA_COUNTRY_ID == $rowRequest->getDestCountry()) {
             $destPostal = substr((string) $rowRequest->getDestPostal(), 0, 5);

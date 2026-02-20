@@ -6,11 +6,11 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
+class Mage_Core_Model_Design_Config extends \Maho\Simplexml\Config
 {
     protected $_designRoot;
 
@@ -49,7 +49,7 @@ class Mage_Core_Model_Design_Config extends Varien_Simplexml_Config
             }
 
             foreach ($files as $file) {
-                $config = new Varien_Simplexml_Config();
+                $config = new \Maho\Simplexml\Config();
                 $config->loadFile($file);
                 [$area, $package, $theme] = $this->_getThemePathSegments($file);
                 $this->setNode($area . '/' . $package . '/' . $theme, null);

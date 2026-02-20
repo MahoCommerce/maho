@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -212,19 +212,6 @@ class Mage_Paypal_Model_Express_Checkout
     public function setIsBillingAgreementRequested($flag)
     {
         $this->_isBARequested = $flag;
-        return $this;
-    }
-
-    /**
-     * Setter for customer Id
-     *
-     * @param int $id
-     * @return $this
-     * @deprecated please use self::setCustomer
-     */
-    public function setCustomerId($id)
-    {
-        $this->_customerId = $id;
         return $this;
     }
 
@@ -678,17 +665,6 @@ class Mage_Paypal_Model_Express_Checkout
     }
 
     /**
-     * Get checkout method
-     *
-     * @return string
-     * @deprecated use Mage::helper('checkout')->getCheckoutMethod($quote) or $quote->getCheckoutMethod()
-     */
-    public function getCheckoutMethod()
-    {
-        return Mage::helper('checkout')->getCheckoutMethod($this->_quote);
-    }
-
-    /**
      * Sets address data from exported address
      *
      * @param Mage_Sales_Model_Quote_Address $address
@@ -792,7 +768,7 @@ class Mage_Paypal_Model_Express_Checkout
                 $amountExclTax = Mage::helper('tax')->getShippingPrice($amount, false, $address);
                 $amountInclTax = Mage::helper('tax')->getShippingPrice($amount, true, $address);
 
-                $options[$i] = new Varien_Object([
+                $options[$i] = new \Maho\DataObject([
                     'is_default' => $isDefault,
                     'name'       => trim("{$rate->getCarrier()} - {$rate->getMethodTitle()}", ' -'),
                     'code'       => $rate->getCode(),
@@ -816,7 +792,7 @@ class Mage_Paypal_Model_Express_Checkout
         }
 
         if ($mayReturnEmpty && is_null($userSelectedOption)) {
-            $options[] = new Varien_Object([
+            $options[] = new \Maho\DataObject([
                 'is_default' => true,
                 'name'       => Mage::helper('paypal')->__('N/A'),
                 'code'       => 'no_rate',
@@ -850,7 +826,7 @@ class Mage_Paypal_Model_Express_Checkout
      *
      * @return int
      */
-    protected static function cmpShippingOptions(Varien_Object $option1, Varien_Object $option2)
+    protected static function cmpShippingOptions(\Maho\DataObject $option1, \Maho\DataObject $option2)
     {
         return $option1->getAmount() <=> $option2->getAmount();
     }

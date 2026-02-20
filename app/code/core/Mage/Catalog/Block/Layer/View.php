@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -68,18 +68,6 @@ class Mage_Catalog_Block_Layer_View extends Mage_Core_Block_Template
         $this->_attributeFilterBlockName    = 'catalog/layer_filter_attribute';
         $this->_priceFilterBlockName        = 'catalog/layer_filter_price';
         $this->_decimalFilterBlockName      = 'catalog/layer_filter_decimal';
-    }
-
-    /**
-     * Get attribute filter block name
-     *
-     * @deprecated after 1.4.1.0
-     *
-     * @return string
-     */
-    protected function _getAttributeFilterBlockName()
-    {
-        return 'catalog/layer_filter_attribute';
     }
 
     #[\Override]

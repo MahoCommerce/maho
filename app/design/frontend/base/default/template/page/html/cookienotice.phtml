@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -21,11 +21,7 @@
 <script type="text/javascript">
     function allowSaveCookie() {
         Mage.Cookies.set('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>', '<?= Mage::helper('core/cookie')->getAcceptedSaveCookiesWebsiteIds()?>', new Date(new Date().getTime() + <?= Mage::helper('core/cookie')->getCookieRestrictionLifetime() ?> * 1000));
-        if (Mage.Cookies.get('<?= Mage_Core_Helper_Cookie::IS_USER_ALLOWED_SAVE_COOKIE ?>')) {
-            window.location.reload();
-        } else {
-            window.location.href = '<?= Mage::getUrl('cms/index/noCookies') ?>';
-        }
+        window.location.reload();
     }
 
     document.getElementById('notice-cookie-block').style.display = 'block';

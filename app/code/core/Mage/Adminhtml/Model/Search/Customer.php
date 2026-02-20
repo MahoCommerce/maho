@@ -20,7 +20,7 @@
  * @method bool setResults(array $value)
  * @method bool hasStart()
  */
-class Mage_Adminhtml_Model_Search_Customer extends Varien_Object
+class Mage_Adminhtml_Model_Search_Customer extends \Maho\DataObject
 {
     /**
      * Load search results

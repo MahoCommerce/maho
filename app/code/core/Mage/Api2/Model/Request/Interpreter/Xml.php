@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,7 +42,7 @@ class Mage_Api2_Model_Request_Interpreter_Xml implements Mage_Api2_Model_Request
         $body = str_contains($body, '<?xml') ? $body : '<?xml version="1.0"?>' . PHP_EOL . $body;
 
         set_error_handler([$this, '_loadErrorHandler']); // Warnings and errors are suppressed
-        $config = simplexml_load_string($body);
+        $config = simplexml_load_string($body, 'SimpleXMLElement', LIBXML_NONET);
         restore_error_handler();
 
         // Check if there was a error while loading file

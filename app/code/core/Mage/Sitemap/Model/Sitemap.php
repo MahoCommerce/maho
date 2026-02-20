@@ -6,7 +6,7 @@
  * @package    Mage_Sitemap
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -61,24 +61,26 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave()
     {
-        $io = new Varien_Io_File();
-        $realPath = $io->getCleanPath(Mage::getBaseDir() . '/' . $this->getSitemapPath());
+        $io = new \Maho\Io\File();
+        // Sitemap files must be in public directory for web accessibility
+        $publicDir = Mage::getBaseDir('public');
+        $realPath = $io->getCleanPath($publicDir . '/' . $this->getSitemapPath());
 
         /**
-         * Check path is allow
+         * Check path is allowed (must be within public directory)
          */
-        if (!$io->allowedPath($realPath, Mage::getBaseDir())) {
+        if (!\Maho\Io::allowedPath($realPath, $publicDir)) {
             Mage::throwException(Mage::helper('sitemap')->__('Please define correct path'));
         }
         /**
          * Check exists and writeable path
          */
         if (!$io->fileExists($realPath, false)) {
-            Mage::throwException(Mage::helper('sitemap')->__('Please create the specified folder "%s" before saving the sitemap.', Mage::helper('core')->escapeHtml($this->getSitemapPath())));
+            Mage::throwException(Mage::helper('sitemap')->__('Please create the specified folder "%s" inside your public directory before saving the sitemap.', Mage::helper('core')->escapeHtml($this->getSitemapPath())));
         }
 
         if (!$io->isWriteable($realPath)) {
-            Mage::throwException(Mage::helper('sitemap')->__('Please make sure that "%s" is writable by web-server.', $this->getSitemapPath()));
+            Mage::throwException(Mage::helper('sitemap')->__('Please make sure that "%s" inside your public directory is writable by web-server.', $this->getSitemapPath()));
         }
         /**
          * Check allow filename
@@ -89,8 +91,6 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         if (!preg_match('#\.xml$#', $this->getSitemapFilename())) {
             $this->setSitemapFilename($this->getSitemapFilename() . '.xml');
         }
-
-        $this->setSitemapPath(rtrim(str_replace(str_replace('\\', '/', Mage::getBaseDir()), '', $realPath), '/') . '/');
 
         return parent::_beforeSave();
     }
@@ -103,7 +103,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function getPath()
     {
         if (is_null($this->_filePath)) {
-            $this->_filePath = str_replace('//', '/', Mage::getBaseDir() .
+            $this->_filePath = str_replace('//', '/', Mage::getBaseDir('public') . '/' .
                 $this->getSitemapPath());
         }
         return $this->_filePath;
@@ -169,9 +169,8 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
      *
      * @param null|string $lastmod
      * @param null|string $changefreq
-     * @param null|string $priority
      */
-    protected function getSitemapRow(string $url, $lastmod = null, $changefreq = null, $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
+    protected function getSitemapRow(string $url, $lastmod = null, $changefreq = null, ?float $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
     {
         $row = '<loc>' . htmlspecialchars($url) . '</loc>';
         if ($lastmod) {
@@ -198,7 +197,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function generateCategoriesSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
     {
         $changefreq = (string) Mage::getStoreConfig('sitemap/category/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('sitemap/category/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('sitemap/category/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/category/lastmod', $storeId) ? $date : '';
         $includeImages = Mage::getStoreConfigFlag('sitemap/category/include_images', $storeId);
         $categoryResource = Mage::getResourceModel('sitemap/catalog_category');
@@ -224,7 +223,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 }
             }
 
-            $categories = new Varien_Object();
+            $categories = new \Maho\DataObject();
             $categories->setItems($chunk);
             Mage::dispatchEvent('sitemap_categories_generating_before', [
                 'collection' => $categories,
@@ -251,7 +250,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     protected function generateProductsSitemap(int $storeId, string $baseUrl, string $date, int $maxUrlsPerFile): void
     {
         $changefreq = (string) Mage::getStoreConfig('sitemap/product/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('sitemap/product/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('sitemap/product/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/product/lastmod', $storeId) ? $date : '';
         $includeImages = Mage::getStoreConfigFlag('sitemap/product/include_images', $storeId);
         $productResource = Mage::getResourceModel('sitemap/catalog_product');
@@ -277,7 +276,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
                 }
             }
 
-            $products = new Varien_Object();
+            $products = new \Maho\DataObject();
             $products->setItems($chunk);
             Mage::dispatchEvent('sitemap_products_generating_before', [
                 'collection' => $products,
@@ -305,7 +304,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     {
         $homepage = (string) Mage::getStoreConfig('web/default/cms_home_page', $storeId);
         $changefreq = (string) Mage::getStoreConfig('sitemap/page/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('sitemap/page/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('sitemap/page/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('sitemap/page/lastmod', $storeId) ? $date : '';
         $pagesResource = Mage::getResourceModel('sitemap/cms_page');
         $fullCollection = $pagesResource->getCollection($storeId);
@@ -316,7 +315,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
         $totalItems = count($fullCollection);
         $chunks = array_chunk($fullCollection, $maxUrlsPerFile, true);
         foreach ($chunks as $pageNumber => $chunk) {
-            $pages = new Varien_Object();
+            $pages = new \Maho\DataObject();
             $pages->setItems($chunk);
             Mage::dispatchEvent('sitemap_cms_pages_generating_before', [
                 'collection' => $pages,
@@ -351,7 +350,7 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Write a single sitemap file for a collection page
      */
-    protected function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, string $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
+    protected function writeSingleSitemapFile(string $type, array $items, string $baseUrl, string $lastmod, string $changefreq, float $priority, int $pageNumber, int $totalItems, int $maxUrlsPerFile): void
     {
         if (empty($items)) {
             return;
@@ -413,13 +412,13 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
     /**
      * Open and initialize a sitemap file
      */
-    protected function openSitemapFile(string $filename): Varien_Io_File
+    protected function openSitemapFile(string $filename): \Maho\Io\File
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
-        // Files should be saved in public directory for web accessibility
-        $resolvedPath = Mage::getBaseDir('public');
+        // Files should be saved in public/{sitemap_path} for web accessibility
+        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $this->getSitemapPath(), '/');
 
         $io->open(['path' => $resolvedPath]);
 
@@ -443,11 +442,11 @@ class Mage_Sitemap_Model_Sitemap extends Mage_Core_Model_Abstract
             return;
         }
 
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
-        // Files should be saved in public directory for web accessibility
-        $resolvedPath = Mage::getBaseDir('public');
+        // Files should be saved in public/{sitemap_path} for web accessibility
+        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $this->getSitemapPath(), '/');
 
         $io->open(['path' => $resolvedPath]);
 

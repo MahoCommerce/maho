@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -122,7 +122,7 @@ class Mage_Adminhtml_Block_System_Config_Tabs extends Mage_Adminhtml_Block_Widge
      */
     public function addTab($code, $config)
     {
-        $tab = new Varien_Object($config);
+        $tab = new \Maho\DataObject($config);
         $tab->setId($code);
         $this->_tabs[$code] = $tab;
         return $this;
@@ -132,7 +132,7 @@ class Mage_Adminhtml_Block_System_Config_Tabs extends Mage_Adminhtml_Block_Widge
      * Retrieve tab
      *
      * @param string $code
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getTab($code)
     {
@@ -149,9 +149,9 @@ class Mage_Adminhtml_Block_System_Config_Tabs extends Mage_Adminhtml_Block_Widge
     {
         if ($tab = $this->getTab($tabCode)) {
             if (!$tab->getSections()) {
-                $tab->setSections(new Varien_Data_Collection());
+                $tab->setSections(new \Maho\Data\Collection());
             }
-            $section = new Varien_Object($config);
+            $section = new \Maho\DataObject($config);
             $section->setId($code);
             $tab->getSections()->addItem($section);
         }

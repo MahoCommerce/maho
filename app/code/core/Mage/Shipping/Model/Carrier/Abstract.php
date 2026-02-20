@@ -6,7 +6,7 @@
  * @package    Mage_Shipping
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,7 +22,7 @@
  * @method Mage_Core_Model_Store getStore()
  * @method $this setStore(Mage_Core_Model_Store $value)
  */
-abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
+abstract class Mage_Shipping_Model_Carrier_Abstract extends \Maho\DataObject
 {
     /**
      * Carrier's code
@@ -86,7 +86,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest;
 
@@ -139,11 +139,11 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      * Do request to shipment
      * Implementation must be in overridden method
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function requestToShipment(Mage_Shipping_Model_Shipment_Request $request)
     {
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     /**
@@ -151,11 +151,11 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      * Implementation must be in overridden method
      *
      * @param mixed $request
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function returnOfShipment($request)
     {
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     /**
@@ -163,7 +163,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array
      */
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         return [];
     }
@@ -173,7 +173,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array|bool
      */
-    protected function _getAllowedContainers(?Varien_Object $params = null)
+    protected function _getAllowedContainers(?\Maho\DataObject $params = null)
     {
         $containersAll = $this->getContainerTypesAll();
         if (empty($containersAll)) {
@@ -217,7 +217,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
             }
         }
 
-        return !empty($containersFiltered) ? $containersFiltered : $containersAll;
+        return empty($containersFiltered) ? $containersAll : $containersFiltered;
     }
 
     /**
@@ -235,7 +235,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array
      */
-    public function getDeliveryConfirmationTypes(?Varien_Object $params = null)
+    public function getDeliveryConfirmationTypes(?\Maho\DataObject $params = null)
     {
         return [];
     }
@@ -257,21 +257,20 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
             }
             if ($availableCountries && in_array($request->getDestCountryId(), $availableCountries)) {
                 return $this;
-            } elseif ($showMethod && (!$availableCountries || ($availableCountries
-                 && !in_array($request->getDestCountryId(), $availableCountries)))
-            ) {
+            }
+            if ($showMethod && (!$availableCountries || ($availableCountries
+                 && !in_array($request->getDestCountryId(), $availableCountries)))) {
                 $error = Mage::getModel('shipping/rate_result_error');
                 $error->setCarrier($this->_code);
                 $error->setCarrierTitle($this->getConfigData('title'));
                 $errorMsg = $this->getConfigData('specificerrmsg');
                 $error->setErrorMessage($errorMsg ?: Mage::helper('shipping')->__('The shipping module is not available for selected delivery country.'));
                 return $error;
-            } else {
-                /*
-                * The admin set not to show the shipping module if the devliery country is not within specific countries
-                */
-                return false;
             }
+            /*
+             * The admin set not to show the shipping module if the devliery country is not within specific countries
+             */
+            return false;
         }
         return $this;
     }
@@ -584,7 +583,7 @@ abstract class Mage_Shipping_Model_Carrier_Abstract extends Varien_Object
      *
      * @return array
      */
-    public function getContentTypes(Varien_Object $params)
+    public function getContentTypes(\Maho\DataObject $params)
     {
         return [];
     }

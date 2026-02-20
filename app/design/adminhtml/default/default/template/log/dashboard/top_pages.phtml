@@ -1,0 +1,39 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_TopPages $this */
+$pages = $this->getTopPages();
+?>
+<?php if (!empty($pages)): ?>
+<div class="grid">
+    <table cellspacing="0">
+        <thead>
+            <tr class="headings">
+                <th><span class="nobr"><?= $this->__('Page') ?></span></th>
+                <th style="width: 60px;"><span class="nobr"><?= $this->__('Views') ?></span></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($pages as $page): ?>
+                <tr>
+                    <td title="<?= $this->escapeHtml($page['url']) ?>">
+                        <?= $this->escapeHtml($this->getDisplayPath($page['url'])) ?>
+                    </td>
+                    <td class="a-right"><?= (int) $page['views'] ?></td>
+                </tr>
+            <?php endforeach ?>
+        </tbody>
+    </table>
+</div>
+<?php else: ?>
+<p class="a-center" style="padding: 20px; color: #999;">
+    <?= $this->__('No page view data available') ?>
+</p>
+<?php endif ?>

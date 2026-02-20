@@ -6,7 +6,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,7 +67,6 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
         $samplesArr = [];
         /** @var Mage_Downloadable_Model_Product_Type $productType */
         $productType = $this->getProduct()->getTypeInstance(true);
-        /** @var Mage_Downloadable_Model_Sample[] $samples */
         $samples = $productType->getSamples($this->getProduct());
         foreach ($samples as $item) {
             $tmpSampleItem = [
@@ -99,7 +98,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
             if ($this->getProduct() && $item->getStoreTitle()) {
                 $tmpSampleItem['store_title'] = $item->getStoreTitle();
             }
-            $samplesArr[] = new Varien_Object($tmpSampleItem);
+            $samplesArr[] = new \Maho\DataObject($tmpSampleItem);
         }
 
         return $samplesArr;
@@ -201,16 +200,5 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Sa
             ->setId('downloadable_sample_{{id}}_file-delete')
             ->setStyle('display:none')
             ->toHtml();
-    }
-
-    /**
-     * Retrieve config object
-     *
-     * @deprecated
-     * @return $this
-     */
-    public function getConfig()
-    {
-        return $this;
     }
 }

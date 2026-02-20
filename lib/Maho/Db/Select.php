@@ -5,10 +5,10 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @package    Maho_Db
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,7 +56,7 @@ class Select
 
     public const TYPE_CONDITION = 'TYPE_CONDITION';
 
-    protected Adapter\Pdo\Mysql $_adapter;
+    protected Adapter\AdapterInterface $_adapter;
 
     /**
      * The component parts of a SELECT statement
@@ -82,12 +82,18 @@ class Select
      */
     protected array $_tableCols = [];
 
-    public function __construct(Adapter\Pdo\Mysql $adapter)
+    /**
+     * Flag to force explicit column aliases for UNION compatibility
+     * SQLite requires ORDER BY columns to exactly match result set column names
+     */
+    protected bool $_forceExplicitAliases = false;
+
+    public function __construct(Adapter\AdapterInterface $adapter)
     {
         $this->_adapter = $adapter;
     }
 
-    public function getAdapter(): Adapter\Pdo\Mysql
+    public function getAdapter(): Adapter\AdapterInterface
     {
         return $this->_adapter;
     }
@@ -357,9 +363,8 @@ class Select
 
         if ($bool === true) {
             return [self::SQL_AND => $cond];
-        } else {
-            return [self::SQL_OR => $cond];
         }
+        return [self::SQL_OR => $cond];
     }
 
     /**
@@ -422,6 +427,50 @@ class Select
         }
 
         return $this;
+    }
+
+    /**
+     * Expand column aliases in HAVING clause to their expressions.
+     *
+     * PostgreSQL doesn't allow column aliases in HAVING clauses (e.g., HAVING cnt > 1
+     * where cnt is an alias for COUNT(*)). This method replaces aliases with their
+     * actual expressions.
+     */
+    protected function _expandHavingAliases(string $having): string
+    {
+        // Build a map of aliases to their SQL expressions
+        $aliasMap = [];
+        foreach ($this->_parts[self::COLUMNS] as $columnEntry) {
+            [$correlationName, $column, $alias] = $columnEntry;
+            if ($alias !== null) {
+                // Get the SQL expression for this column
+                if ($column instanceof Expr) {
+                    $expr = $column->__toString();
+                } else {
+                    // For regular columns, include the table correlation if present
+                    if ($correlationName) {
+                        $expr = $this->_adapter->quoteIdentifier($correlationName) . '.' .
+                                $this->_adapter->quoteIdentifier($column);
+                    } else {
+                        $expr = $this->_adapter->quoteIdentifier($column);
+                    }
+                }
+                $aliasMap[$alias] = $expr;
+            }
+        }
+
+        // Replace aliases with expressions using word boundaries
+        foreach ($aliasMap as $alias => $expr) {
+            // Use word boundaries to avoid replacing partial matches
+            // e.g., "cnt" should not match "accounts"
+            $having = preg_replace(
+                '/\b' . preg_quote($alias, '/') . '\b/',
+                $expr,
+                $having,
+            );
+        }
+
+        return $having;
     }
 
     /**
@@ -823,6 +872,10 @@ class Select
         if (!$this->_parts[self::COLUMNS]) {
             $queryBuilder->select('*');
         } else {
+            // For UNION queries, we need explicit AS aliases for all columns
+            // SQLite requires ORDER BY columns to exactly match result set column names,
+            // but "table"."column" without AS doesn't work - SQLite can't resolve it
+            $needExplicitAliases = !empty($this->_parts[self::UNION]) || $this->_forceExplicitAliases;
             $columns = [];
             foreach ($this->_parts[self::COLUMNS] as $columnEntry) {
                 [$correlationName, $column, $alias] = $columnEntry;
@@ -831,7 +884,13 @@ class Select
                 } elseif ($column == self::SQL_WILDCARD) {
                     $colStr = ($correlationName ? $this->_adapter->quoteIdentifier($correlationName) . '.' : '') . self::SQL_WILDCARD;
                 } else {
-                    $colStr = $this->_adapter->quoteColumnAs([$correlationName, $column], $alias, true);
+                    // For UNION queries without explicit aliases, add the column name as alias
+                    // This ensures SQLite can match ORDER BY column names to result columns
+                    $effectiveAlias = $alias;
+                    if ($needExplicitAliases && $alias === null && $correlationName && is_string($column)) {
+                        $effectiveAlias = $column;
+                    }
+                    $colStr = $this->_adapter->quoteColumnAs([$correlationName, $column], $effectiveAlias, true);
                 }
                 $columns[] = $colStr;
             }
@@ -955,20 +1014,19 @@ class Select
         // Build HAVING clause
         if ($this->_parts[self::HAVING]) {
             $havingStr = implode(' ', $this->_parts[self::HAVING]);
+            // Expand column aliases to their expressions for PostgreSQL compatibility
+            // (PostgreSQL doesn't allow column aliases in HAVING clauses)
+            $havingStr = $this->_expandHavingAliases($havingStr);
             $queryBuilder->having($havingStr);
         }
 
-        // Build ORDER BY clause
-        if ($this->_parts[self::ORDER]) {
+        // Build ORDER BY clause (but not if we have UNION - it goes after UNION for SQLite compatibility)
+        if ($this->_parts[self::ORDER] && !$this->_parts[self::UNION]) {
             foreach ($this->_parts[self::ORDER] as $term) {
                 if ($term instanceof Expr) {
                     $queryBuilder->addOrderBy($term->__toString());
                 } elseif (is_array($term)) {
-                    if (str_contains($term[0], '(') && str_contains($term[0], ')')) {
-                        $queryBuilder->addOrderBy($term[0], $term[1]);
-                    } else {
-                        $queryBuilder->addOrderBy($this->_adapter->quoteIdentifier($term[0], true), $term[1]);
-                    }
+                    $queryBuilder->addOrderBy($term[0], $term[1]);
                 }
             }
         }
@@ -1007,7 +1065,16 @@ class Select
             foreach ($this->_parts[self::UNION] as $union) {
                 $target = $union['target'];
                 if ($target instanceof Select) {
+                    // Set flag so child Select adds explicit column aliases for SQLite compatibility
+                    $target->_forceExplicitAliases = true;
                     $target = $target->assemble();
+                } elseif (is_string($target)) {
+                    // Strip outer parentheses from string SQL - DBAL handles wrapping internally
+                    // This fixes SQLite compatibility where explicit parentheses cause syntax errors
+                    $target = trim($target);
+                    if (str_starts_with($target, '(') && str_ends_with($target, ')')) {
+                        $target = substr($target, 1, -1);
+                    }
                 }
 
                 $unionType = ($union['type'] === self::SQL_UNION_ALL)
@@ -1023,16 +1090,39 @@ class Select
                 }
             }
 
-            // Add LIMIT/OFFSET after UNION
-            if ($this->_parts[self::LIMIT_COUNT] !== null) {
-                $queryBuilder->setMaxResults((int) $this->_parts[self::LIMIT_COUNT]);
-            }
-            if ($this->_parts[self::LIMIT_OFFSET] !== null) {
-                $queryBuilder->setFirstResult((int) $this->_parts[self::LIMIT_OFFSET]);
-            }
+            // Note: ORDER BY and LIMIT for UNION queries are added manually after getSQL()
+            // because DBAL's handling of ORDER BY column quoting doesn't work well with SQLite
         }
 
         $sql = $queryBuilder->getSQL();
+
+        // For UNION queries, add ORDER BY and LIMIT manually
+        // This ensures column names aren't over-quoted for SQLite compatibility
+        if ($this->_parts[self::UNION]) {
+            // Add ORDER BY
+            if ($this->_parts[self::ORDER]) {
+                $orderParts = [];
+                foreach ($this->_parts[self::ORDER] as $term) {
+                    if ($term instanceof Expr) {
+                        $orderParts[] = $term->__toString();
+                    } elseif (is_array($term)) {
+                        // Use unquoted column names for UNION ORDER BY
+                        $orderParts[] = $term[0] . ' ' . $term[1];
+                    }
+                }
+                if ($orderParts) {
+                    $sql .= ' ORDER BY ' . implode(', ', $orderParts);
+                }
+            }
+
+            // Add LIMIT/OFFSET
+            if ($this->_parts[self::LIMIT_COUNT] !== null) {
+                $sql .= ' LIMIT ' . (int) $this->_parts[self::LIMIT_COUNT];
+                if ($this->_parts[self::LIMIT_OFFSET] !== null) {
+                    $sql .= ' OFFSET ' . (int) $this->_parts[self::LIMIT_OFFSET];
+                }
+            }
+        }
 
         // Add STRAIGHT_JOIN keyword if enabled (MySQL optimization hint)
         // Note: Must be added after getting SQL, as DISTINCT needs to come first (SELECT DISTINCT)
@@ -1114,7 +1204,7 @@ class Select
     /**
      * Executes the current select object and returns the result statement
      */
-    public function query(array $bind = []): Statement\Pdo\Mysql
+    public function query(array $bind = []): Statement\StatementInterface
     {
         return $this->_adapter->query($this, $bind);
     }

@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -182,7 +182,7 @@ class Mage_Paypal_Model_Info
     /**
      * Grab data from source and map it into payment
      *
-     * @param array|Varien_Object|callable $from
+     * @param array|\Maho\DataObject|callable $from
      */
     public function importToPayment($from, Mage_Payment_Model_Info $payment)
     {
@@ -190,19 +190,19 @@ class Mage_Paypal_Model_Info
         if (is_object($from)) {
             $from = [$from, 'getDataUsingMethod'];
         }
-        Varien_Object_Mapper::accumulateByMap($from, [$payment, 'setAdditionalInformation'], $fullMap);
+        \Maho\DataObject\Mapper::accumulateByMap($from, [$payment, 'setAdditionalInformation'], $fullMap);
     }
 
     /**
      * Grab data from payment and map it into target
      *
-     * @param array|Varien_Object|callable $to
-     * @return array|Varien_Object
+     * @param array|\Maho\DataObject|callable $to
+     * @return array|\Maho\DataObject
      */
     public function &exportFromPayment(Mage_Payment_Model_Info $payment, $to, ?array $map = null)
     {
         $fullMap = array_merge($this->_paymentMap, $this->_systemMap);
-        Varien_Object_Mapper::accumulateByMap(
+        \Maho\DataObject\Mapper::accumulateByMap(
             [$payment, 'getAdditionalInformation'],
             $to,
             $map ?: array_flip($fullMap),

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -197,19 +197,12 @@
             </catalog>
         </system>
         <general>
-            <file>
-                <sitemap_generate_valid_paths>
-                    <!-- This data should be merged with public_files_valid_paths -->
-                    <available>
-                        <any_path>/*/*.xml</any_path>
-                    </available>
-                </sitemap_generate_valid_paths>
-            </file>
             <validator_data>
                 <input_types>
-                    <price>price</price>
-                    <media_image>media_image</media_image>
+                    <file>file</file>
                     <gallery>gallery</gallery>
+                    <media_image>media_image</media_image>
+                    <price>price</price>
                 </input_types>
             </validator_data>
         </general>

@@ -30,7 +30,7 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
      * @param Mage_Payment_Model_Info $payment
      * @param string $requestType
      * @param string $lastTransactionId
-     * @param Varien_Object $card
+     * @param \Maho\DataObject $card
      * @param float|false $amount
      * @param string|false $exception
      * @return bool|string
@@ -59,7 +59,7 @@ class Mage_Paygate_Helper_Data extends Mage_Core_Helper_Abstract
      * @param Mage_Payment_Model_Info $payment
      * @param string $requestType
      * @param string|null $lastTransactionId
-     * @param Varien_Object $card
+     * @param \Maho\DataObject $card
      * @param float|false $amount
      * @param string|false $exception
      * @param string|false $additionalMessage Custom message, which will be added to the end of generated message

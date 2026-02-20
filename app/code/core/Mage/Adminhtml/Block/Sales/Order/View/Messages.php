@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,12 +18,15 @@ class Mage_Adminhtml_Block_Sales_Order_View_Messages extends Mage_Adminhtml_Bloc
     }
 
     #[\Override]
-    public function _prepareLayout()
+    protected function _prepareLayout()
     {
         /**
-         * Check customer existing
+         * Check customer existing (only for non-guest orders)
          */
-        $customer = Mage::getModel('customer/customer')->load($this->_getOrder()->getCustomerId());
+        $customerId = $this->_getOrder()->getCustomerId();
+        if ($customerId) {
+            $customer = Mage::getModel('customer/customer')->load($customerId);
+        }
 
         /**
          * Check Item products existing

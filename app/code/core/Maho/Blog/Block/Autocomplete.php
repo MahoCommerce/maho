@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    Maho_Blog
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,15 +15,17 @@ class Maho_Blog_Block_Autocomplete extends Mage_Core_Block_Template
 {
     protected ?Maho_Blog_Model_Resource_Post_Collection $_blogCollection = null;
 
-    public function getBlogCollection(): Maho_Blog_Model_Resource_Post_Collection
+    public function getBlogCollection(): ?Maho_Blog_Model_Resource_Post_Collection
     {
         if ($this->_blogCollection === null) {
             /** @var Mage_CatalogSearch_Helper_Data $helper */
             $helper = Mage::helper('catalogsearch');
             $query = $helper->getQueryText();
 
-            /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
             $collection = Mage::getModel('blog/post')->getCollection();
+            if (!$collection instanceof Maho_Blog_Model_Resource_Post_Collection) {
+                return null;
+            }
 
             // Apply search filter based on configured search type
             $searchType = (int) Mage::getStoreConfig(Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_TYPE);

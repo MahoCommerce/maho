@@ -6,52 +6,16 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_SalesRule_Model_Observer
 {
     /**
-     * Sales Rule Validator
-     *
-     * @var Mage_SalesRule_Model_Validator
-     */
-    protected $_validator;
-
-    /**
-     * Get quote item validator/processor object
-     *
-     * @deprecated
-     * @param   Varien_Event $event
-     * @return  Mage_SalesRule_Model_Validator
-     */
-    public function getValidator($event)
-    {
-        if (!$this->_validator) {
-            $this->_validator = Mage::getModel('salesrule/validator')
-                ->init($event->getWebsiteId(), $event->getCustomerGroupId(), $event->getCouponCode());
-        }
-        return $this->_validator;
-    }
-
-    /**
-     * Process quote item (apply discount to item)
-     *
-     * @deprecated process call moved to total model
-     * @param Varien_Event_Observer $observer
-     */
-    // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
-    public function sales_quote_address_discount_item($observer)
-    {
-        $this->getValidator($observer->getEvent())
-            ->process($observer->getEvent()->getItem());
-    }
-
-    /**
      * Registered callback: called after an order is placed
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
@@ -117,7 +81,7 @@ class Mage_SalesRule_Model_Observer
     /**
      * Registered callback: called after an order payment is canceled
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
     public function sales_order_paymentCancel($observer)
@@ -235,7 +199,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    public function catalogAttributeSaveAfter(Varien_Event_Observer $observer)
+    public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -252,7 +216,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    public function catalogAttributeDeleteAfter(Varien_Event_Observer $observer)
+    public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -268,9 +232,9 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    public function addProductAttributes(Varien_Event_Observer $observer)
+    public function addProductAttributes(\Maho\Event\Observer $observer)
     {
-        /** @var Varien_Object $attributesTransfer */
+        /** @var \Maho\DataObject $attributesTransfer */
         $attributesTransfer = $observer->getEvent()->getAttributes();
 
         $attributes = Mage::getResourceModel('salesrule/rule')
@@ -289,7 +253,7 @@ class Mage_SalesRule_Model_Observer
     /**
      * Add coupon's rule name to order data
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function addSalesRuleNameToOrder($observer)

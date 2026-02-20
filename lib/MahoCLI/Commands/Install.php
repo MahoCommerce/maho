@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    MahoCLI
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -13,6 +13,7 @@ declare(strict_types=1);
 namespace MahoCLI\Commands;
 
 use Exception;
+use Locale;
 use Mage;
 use Mage_Install_Model_Installer_Console;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -45,15 +46,16 @@ class Install extends BaseMahoCommand
         $this->addOption('db_user', null, InputOption::VALUE_REQUIRED, 'Database username');
         $this->addOption('db_pass', null, InputOption::VALUE_REQUIRED, 'Database password');
         $this->addOption('db_prefix', null, InputOption::VALUE_OPTIONAL, 'Database Tables Prefix. No table prefix will be used if not specified', '');
+        $this->addOption('db_engine', null, InputOption::VALUE_OPTIONAL, 'Database engine (mysql, pgsql, or sqlite)', 'mysql');
 
         // Session options
         $this->addOption('session_save', null, InputOption::VALUE_OPTIONAL, 'Where to store session data (files/db)', 'files');
 
         // Web access options
         $this->addOption('admin_frontname', null, InputOption::VALUE_OPTIONAL, 'Admin panel path, "admin" by default', 'admin');
-        $this->addOption('url', null, InputOption::VALUE_REQUIRED, 'URL the store is supposed to be available at');
+        $this->addOption('url', null, InputOption::VALUE_REQUIRED, 'URL the store is supposed to be available at. Ensure the URL ends with a trailing slash (/). For example: http://mydomain.com/maho/');
         $this->addOption('use_secure', null, InputOption::VALUE_OPTIONAL, 'Use Secure URLs (SSL). Enable this option only if you have SSL available.', false);
-        $this->addOption('secure_base_url', null, InputOption::VALUE_OPTIONAL, 'Secure Base URL. Provide a complete base URL for SSL connection. For example: https://mydomain.com/');
+        $this->addOption('secure_base_url', null, InputOption::VALUE_OPTIONAL, 'Secure Base URL. Ensure the URL ends with a trailing slash (/). For example: https://mydomain.com/maho/');
         $this->addOption('use_secure_admin', null, InputOption::VALUE_OPTIONAL, 'Run admin interface with SSL', false);
 
         // Admin user personal information
@@ -82,11 +84,9 @@ class Install extends BaseMahoCommand
             }
         }
 
-        // Reset some options in case we're installing sample data
-        if ($input->getOption('sample_data')) {
+        // Sample data SQL uses hardcoded table names, so db_prefix is not supported
+        if ($input->getOption('sample_data') && $input->getOption('db_prefix')) {
             $options = $input->getOptions();
-            $options['locale'] = 'en_US';
-            $options['default_currency'] = 'USD';
             unset($options['db_prefix']);
 
             $_SERVER['argv'] = ['maho', 'install'];
@@ -120,6 +120,8 @@ class Install extends BaseMahoCommand
             }
             return Command::FAILURE;
         }
+
+        $this->showLocalizationSuggestions($input, $output);
 
         $output->writeln('');
 
@@ -178,34 +180,97 @@ class Install extends BaseMahoCommand
             $dbName = $input->getOption('db_name');
             $dbUser = $input->getOption('db_user');
             $dbPass = $input->getOption('db_pass');
-            $sqlFiles = ['db_preparation.sql', 'db_data.sql'];
+            $dbEngine = $input->getOption('db_engine') ?? 'mysql';
             $sampleDataDir = $targetDir . "/{$sampleDataDirName}";
 
             try {
-                // Create PDO connection
-                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
-                $pdo = new \PDO($dsn, $dbUser, $dbPass);
-                $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                // Create PDO connection based on database engine
+                if ($dbEngine === 'pgsql') {
+                    $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
+                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                    $pdo->exec('SET session_replication_role = replica');
+                } elseif ($dbEngine === 'sqlite') {
+                    $dbPath = $dbName;
+                    if ($dbPath[0] !== '/' && !str_contains($dbPath, ':')) {
+                        $baseDir = defined('BP') ? BP : getcwd();
+                        $dbDir = $baseDir . '/var/db';
+                        if (!is_dir($dbDir)) {
+                            mkdir($dbDir, 0755, true);
+                        }
+                        $dbPath = $dbDir . '/' . $dbPath;
+                    }
+                    $dsn = "sqlite:{$dbPath}";
+                    $pdo = new \PDO($dsn);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                } else {
+                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                    $pdo = new \PDO($dsn, $dbUser, $dbPass);
+                    $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+                }
 
-                foreach ($sqlFiles as $sqlFile) {
-                    $sqlFilePath = $sampleDataDir . '/' . $sqlFile;
-                    $output->writeln("<info>Importing {$sqlFile}...</info>");
+                // Import db_data.sql with attribute ID remapping
+                $dataFilePath = $sampleDataDir . '/db_data.sql';
+                if (file_exists($dataFilePath)) {
+                    $output->writeln('<info>Importing db_data.sql with attribute ID remapping...</info>');
+                    $dataSql = file_get_contents($dataFilePath);
 
-                    // Read SQL file content
-                    $sqlContent = file_get_contents($sqlFilePath);
+                    // Create logger callback for the importer
+                    $logCallback = function (string $message, string $level = 'info') use ($output) {
+                        $tag = match ($level) {
+                            'error' => 'error',
+                            'warning' => 'comment',
+                            default => 'info',
+                        };
+                        $output->writeln("  <{$tag}>{$message}</{$tag}>");
+                    };
 
-                    // Execute the entire file as a single operation
-                    $pdo->exec($sqlContent);
-                    $output->writeln("<info>Successfully imported {$sqlFile}</info>");
+                    $importer = new \MahoCLI\Helper\SampleDataImporter($pdo, $logCallback);
+                    $output->writeln('  Parsing attribute mappings...');
+                    $remappedSql = $importer->import($dataSql);
+
+                    $attrRemap = $importer->getAttributeRemap();
+                    $output->writeln('  Remapped ' . count($attrRemap) . ' attributes');
+
+                    // Execute the remapped SQL
+                    $output->writeln('  Executing remapped SQL...');
+                    $this->executeSqlForEngine($pdo, $remappedSql, $dbEngine, $output);
+
+                    // Merge attribute groups (creates new ones, builds group ID remap)
+                    $importer->mergeAttributeGroups();
+
+                    // Merge sample data's attribute set assignments (adds new ones, preserves existing)
+                    $importer->mergeEntityAttributes();
+
+                    $output->writeln('<info>Successfully imported db_data.sql</info>');
+
+                    // Import db_config.sql with config value remapping
+                    $configFilePath = $sampleDataDir . '/db_config.sql';
+                    if (file_exists($configFilePath)) {
+                        $output->writeln('<info>Importing db_config.sql with config remapping...</info>');
+                        $configSql = file_get_contents($configFilePath);
+
+                        // Remap attribute IDs in config values (like configswatches)
+                        $remappedConfigSql = $importer->remapConfigValuesOnly($configSql);
+
+                        $this->executeSqlForEngine($pdo, $remappedConfigSql, $dbEngine, $output);
+                        $output->writeln('<info>Successfully imported db_config.sql</info>');
+                    }
+                }
+
+                // PostgreSQL post-processing
+                if ($dbEngine === 'pgsql') {
+                    $pdo->exec('SET session_replication_role = DEFAULT');
+                    $output->writeln('<info>Updating PostgreSQL sequences...</info>');
+                    $this->updatePostgresSequences($pdo);
                 }
 
             } catch (\PDOException $e) {
                 $output->writeln("<error>Failed to import sample data: {$e->getMessage()}</error>");
 
-                // If it's a connection error, provide more helpful message
-                if (str_contains($e->getMessage(), 'Unknown database')) {
+                if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
                     $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
                     $output->writeln('<error>Access denied. Please check your database credentials.</error>');
                 }
 
@@ -232,6 +297,43 @@ class Install extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    private function showLocalizationSuggestions(InputInterface $input, OutputInterface $output): void
+    {
+        $locale = $input->getOption('locale');
+
+        if (!$locale || $locale === 'en_US') {
+            return;
+        }
+
+        $parsed = Locale::parseLocale($locale);
+        $countryCode = $parsed['region'] ?? null;
+
+        if (!$countryCode) {
+            return;
+        }
+
+        $countryName = Locale::getDisplayRegion($locale, 'en');
+        $languageName = Locale::getDisplayLanguage($locale, 'en');
+
+        $output->writeln('');
+        $output->writeln('<info>  Localization recommendations for your store</info>');
+        $output->writeln('');
+        $output->writeln("  Your store locale is set to <comment>{$locale}</comment>. To fully localize your");
+        $output->writeln('  store, we recommend running the following commands:');
+        $output->writeln('');
+        $output->writeln("  Import regions/states for {$countryName}:");
+        $output->writeln("    <comment>./maho sys:directory:regions:import -c {$countryCode} -l {$locale}</comment>");
+
+        if (in_array($locale, \Mage_Install_Helper_Data::AVAILABLE_LANGUAGE_PACKS, true)) {
+            $packageName = 'mahocommerce/maho-language-' . strtolower($locale);
+            $output->writeln('');
+            $output->writeln("  Install the {$languageName} language pack:");
+            $output->writeln("    <comment>composer require {$packageName}</comment>");
+        }
+
+        $output->writeln('');
     }
 
     private function handleForceInstall(InputInterface $input, OutputInterface $output): bool
@@ -270,43 +372,79 @@ class Install extends BaseMahoCommand
         $dbName = $input->getOption('db_name');
         $dbUser = $input->getOption('db_user');
         $dbPass = $input->getOption('db_pass');
+        $dbEngine = $input->getOption('db_engine') ?? 'mysql';
 
-        if ($dbHost && $dbName && $dbUser !== null) {
+        // Handle SQLite separately - just delete the database file
+        if ($dbEngine === 'sqlite') {
+            $dbPath = getcwd() . '/var/db/' . $dbName;
+            if (file_exists($dbPath)) {
+                if (is_writable($dbPath)) {
+                    unlink($dbPath);
+                    $output->writeln('<info>Removed existing SQLite database</info>');
+                } else {
+                    $output->writeln('<error>Cannot remove SQLite database - file is not writable</error>');
+                    throw new \RuntimeException('Cannot remove SQLite database - insufficient permissions');
+                }
+            } else {
+                $output->writeln('<info>SQLite database does not exist yet</info>');
+            }
+        } elseif ($dbHost && $dbName && $dbUser !== null) {
             try {
-                $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                $isPostgres = ($dbEngine === 'pgsql');
+                if ($isPostgres) {
+                    $dsn = "pgsql:host={$dbHost};dbname={$dbName}";
+                } else {
+                    $dsn = "mysql:host={$dbHost};dbname={$dbName};charset=utf8";
+                }
                 $pdo = new \PDO($dsn, $dbUser, $dbPass);
                 $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
 
-                // Disable foreign key checks
-                $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+                if ($isPostgres) {
+                    // PostgreSQL: Get all tables and drop them with CASCADE
+                    $stmt = $pdo->query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'");
+                    $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
 
-                // Get all tables
-                $stmt = $pdo->query('SHOW TABLES');
-                $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+                    if (count($tables) > 0) {
+                        $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
 
-                if (count($tables) > 0) {
-                    $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
+                        // Drop all tables with CASCADE to handle foreign keys
+                        foreach ($tables as $table) {
+                            $pdo->exec("DROP TABLE IF EXISTS \"{$table}\" CASCADE");
+                        }
 
-                    // Drop all tables
-                    foreach ($tables as $table) {
-                        $pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+                        $output->writeln('<info>Cleared all tables from the database</info>');
+                    } else {
+                        $output->writeln('<info>Database is already empty</info>');
+                    }
+                } else {
+                    // MySQL: Disable foreign key checks and drop tables
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 0');
+
+                    $stmt = $pdo->query('SHOW TABLES');
+                    $tables = $stmt->fetchAll(\PDO::FETCH_COLUMN);
+
+                    if (count($tables) > 0) {
+                        $output->writeln('<comment>Found ' . count($tables) . ' tables to remove...</comment>');
+
+                        foreach ($tables as $table) {
+                            $pdo->exec("DROP TABLE IF EXISTS `{$table}`");
+                        }
+
+                        $output->writeln('<info>Cleared all tables from the database</info>');
+                    } else {
+                        $output->writeln('<info>Database is already empty</info>');
                     }
 
-                    $output->writeln('<info>Cleared all tables from the database</info>');
-                } else {
-                    $output->writeln('<info>Database is already empty</info>');
+                    $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
                 }
-
-                // Re-enable foreign key checks
-                $pdo->exec('SET FOREIGN_KEY_CHECKS = 1');
 
             } catch (\PDOException $e) {
                 $output->writeln("<error>Failed to clear database: {$e->getMessage()}</error>");
 
                 // If it's a connection error, provide more helpful message
-                if (str_contains($e->getMessage(), 'Unknown database')) {
+                if (str_contains($e->getMessage(), 'Unknown database') || str_contains($e->getMessage(), 'does not exist')) {
                     $output->writeln("<error>Database '{$dbName}' does not exist. Please create it first.</error>");
-                } elseif (str_contains($e->getMessage(), 'Access denied')) {
+                } elseif (str_contains($e->getMessage(), 'Access denied') || str_contains($e->getMessage(), 'authentication failed')) {
                     $output->writeln('<error>Access denied. Please check your database credentials.</error>');
                 }
 
@@ -324,6 +462,50 @@ class Install extends BaseMahoCommand
         Mage::getSingleton('eav/config')->clear();
         Mage::unregister('_singleton/eav/config');
         Mage::unregister('_helper/eav');
+    }
+
+    /**
+     * Update PostgreSQL sequences to be higher than the max ID in each table
+     * This is necessary after importing data with explicit IDs
+     */
+    private function updatePostgresSequences(\PDO $pdo): void
+    {
+        // Get all sequences in the database
+        $stmt = $pdo->query("
+            SELECT
+                seq.relname as sequence_name,
+                tab.relname as table_name,
+                col.attname as column_name
+            FROM pg_class seq
+            JOIN pg_depend dep ON seq.oid = dep.objid
+            JOIN pg_class tab ON dep.refobjid = tab.oid
+            JOIN pg_attribute col ON col.attrelid = tab.oid AND col.attnum = dep.refobjsubid
+            WHERE seq.relkind = 'S'
+            AND dep.deptype = 'a'
+            ORDER BY seq.relname
+        ");
+
+        $sequences = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        foreach ($sequences as $seq) {
+            $sequenceName = $seq['sequence_name'];
+            $tableName = $seq['table_name'];
+            $columnName = $seq['column_name'];
+
+            try {
+                // Get the max ID from the table
+                $maxStmt = $pdo->query("SELECT COALESCE(MAX(\"{$columnName}\"), 0) as max_id FROM \"{$tableName}\"");
+                $maxId = (int) $maxStmt->fetchColumn();
+
+                if ($maxId > 0) {
+                    // Set the sequence to max_id + 1
+                    $pdo->exec("SELECT setval('\"{$sequenceName}\"', {$maxId}, true)");
+                }
+            } catch (\PDOException $e) {
+                // Skip if table doesn't exist or other errors
+                continue;
+            }
+        }
     }
 
     private function importBlogPosts(string $sampleDataDir, OutputInterface $output): void
@@ -373,6 +555,36 @@ class Install extends BaseMahoCommand
             $output->writeln("<info>Successfully imported {$importedCount} blog posts</info>");
         } catch (Exception $e) {
             $output->writeln("<error>Failed to import blog posts: {$e->getMessage()}</error>");
+        }
+    }
+
+    /**
+     * Execute SQL content for the specified database engine
+     */
+    private function executeSqlForEngine(\PDO $pdo, string $sql, string $dbEngine, OutputInterface $output): void
+    {
+        $converter = new \MahoCLI\Helper\SqlConverter();
+        $converter->setPdo($pdo);
+
+        if ($dbEngine === 'pgsql') {
+            $convertedSql = $converter->mysqlToPostgresql($sql);
+            $converter->executeStatements($pdo, $convertedSql, function ($current, $total) use ($output) {
+                if ($current === $total || $current % 500 === 0) {
+                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                }
+            });
+            $output->writeln('');
+        } elseif ($dbEngine === 'sqlite') {
+            $convertedSql = $converter->mysqlToSqlite($sql);
+            $converter->executeStatements($pdo, $convertedSql, function ($current, $total) use ($output) {
+                if ($current === $total || $current % 500 === 0) {
+                    $output->write("\r<comment>  Progress: {$current}/{$total} statements...</comment>");
+                }
+            });
+            $output->writeln('');
+        } else {
+            // MySQL - direct execution
+            $pdo->exec($sql);
         }
     }
 }

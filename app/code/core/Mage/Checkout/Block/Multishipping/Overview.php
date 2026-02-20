@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,13 +66,13 @@ class Mage_Checkout_Block_Multishipping_Overview extends Mage_Sales_Block_Items_
     /**
      * Get object with payment info posted data
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      * @throws Exception
      */
     public function getPayment()
     {
         if (!$this->hasData('payment')) {
-            $payment = new Varien_Object($this->getRequest()->getPost('payment'));
+            $payment = new \Maho\DataObject($this->getRequest()->getPost('payment'));
             $this->setData('payment', $payment);
         }
         return $this->_getData('payment');
@@ -319,7 +319,7 @@ class Mage_Checkout_Block_Multishipping_Overview extends Mage_Sales_Block_Items_
      *
      * @return string
      */
-    public function getRowItemHtml(Varien_Object $item)
+    public function getRowItemHtml(\Maho\DataObject $item)
     {
         $type = $this->_getItemType($item);
         $block = $this->_getRowItemRenderer($type)

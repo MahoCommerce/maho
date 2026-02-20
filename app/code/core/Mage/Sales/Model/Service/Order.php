@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -154,7 +154,7 @@ class Mage_Sales_Model_Service_Order
                 if (isset($qtys[$orderItem->getParentItemId()])) {
                     $productOptions = $orderItem->getProductOptions();
                     if (isset($productOptions['bundle_selection_attributes'])) {
-                        $bundleSelectionAttributes = unserialize($productOptions['bundle_selection_attributes'], ['allowed_classes' => false]);
+                        $bundleSelectionAttributes = Mage::helper('core/string')->unserialize($productOptions['bundle_selection_attributes']);
 
                         if ($bundleSelectionAttributes) {
                             $qty = $bundleSelectionAttributes['qty'] * $qtys[$orderItem->getParentItemId()];
@@ -163,9 +163,8 @@ class Mage_Sales_Model_Service_Order
                             $item->setQty($qty);
                             $shipment->addItem($item);
                             continue;
-                        } else {
-                            $qty = 1;
                         }
+                        $qty = 1;
                     }
                 } else {
                     $qty = 1;
@@ -372,13 +371,13 @@ class Mage_Sales_Model_Service_Order
                     }
                 }
                 return false;
-            } elseif ($item->getParentItem()) {
+            }
+            if ($item->getParentItem()) {
                 $parent = $item->getParentItem();
                 if (empty($qtys)) {
                     return $parent->getQtyToInvoice() > 0;
-                } else {
-                    return isset($qtys[$parent->getId()]) && $qtys[$parent->getId()] > 0;
                 }
+                return isset($qtys[$parent->getId()]) && $qtys[$parent->getId()] > 0;
             }
         } else {
             return $item->getQtyToInvoice() > 0;
@@ -421,13 +420,13 @@ class Mage_Sales_Model_Service_Order
                     }
                 }
                 return false;
-            } elseif ($item->getParentItem()) {
+            }
+            if ($item->getParentItem()) {
                 $parent = $item->getParentItem();
                 if (empty($qtys)) {
                     return $parent->getQtyToShip() > 0;
-                } else {
-                    return isset($qtys[$parent->getId()]) && $qtys[$parent->getId()] > 0;
                 }
+                return isset($qtys[$parent->getId()]) && $qtys[$parent->getId()] > 0;
             }
         } else {
             return $item->getQtyToShip() > 0;
@@ -460,13 +459,13 @@ class Mage_Sales_Model_Service_Order
                     }
                 }
                 return false;
-            } elseif ($item->getParentItem()) {
+            }
+            if ($item->getParentItem()) {
                 $parent = $item->getParentItem();
                 if (empty($qtys)) {
                     return $this->_canRefundNoDummyItem($parent, $invoiceQtysRefundLimits);
-                } else {
-                    return isset($qtys[$parent->getId()]) && $qtys[$parent->getId()] > 0;
                 }
+                return isset($qtys[$parent->getId()]) && $qtys[$parent->getId()] > 0;
             }
         } else {
             return $this->_canRefundNoDummyItem($item, $invoiceQtysRefundLimits);

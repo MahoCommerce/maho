@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -666,6 +666,22 @@
                     </mage_catalog>
                 </observers>
             </admin_system_config_changed_section_catalog>
+            <adminhtml_product_attribute_types>
+                <observers>
+                    <catalog>
+                        <class>catalog/observer</class>
+                        <method>addFileAttributeType</method>
+                    </catalog>
+                </observers>
+            </adminhtml_product_attribute_types>
+            <adminhtml_catalog_product_edit_element_types>
+                <observers>
+                    <catalog>
+                        <class>catalog/observer</class>
+                        <method>addFileElementType</method>
+                    </catalog>
+                </observers>
+            </adminhtml_catalog_product_edit_element_types>
         </events>
     </adminhtml>
     <frontend>
@@ -797,6 +813,8 @@
                 <base_width>1800</base_width>
                 <small_width>210</small_width>
                 <max_dimension>5000</max_dimension>
+                <keep_frame>1</keep_frame>
+                <background_color>#ffffff</background_color>
             </product_image>
             <seo>
                 <product_url_suffix></product_url_suffix>
@@ -813,7 +831,7 @@
                 <forbidden_extensions>php,php3,php4,php5,php7,php8,phtml,phar,exe,bat,cmd,com,scr,vbs,js,jar,py,pl,rb,sh,asp,aspx,jsp,cgi,htaccess</forbidden_extensions>
             </custom_options>
             <layered_navigation>
-                <price_range_calculation>auto</price_range_calculation>
+                <price_range_calculation>input</price_range_calculation>
                 <price_range_step>100</price_range_step>
                 <price_range_max_intervals>10</price_range_max_intervals>
                 <one_price_interval>0</one_price_interval>

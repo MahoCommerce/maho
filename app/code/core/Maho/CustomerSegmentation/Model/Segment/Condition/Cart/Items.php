@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -71,7 +71,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Cart_Items extends Maho_
     }
 
     #[\Override]
-    public function getAttributeElement(): Varien_Data_Form_Element_Abstract
+    public function getAttributeElement(): \Maho\Data\Form\Element\AbstractElement
     {
         if (!$this->hasAttributeOption()) {
             $this->loadAttributeOptions();

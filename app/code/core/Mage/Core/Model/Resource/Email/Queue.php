@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,7 +30,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
     protected function _afterLoad(Mage_Core_Model_Abstract $object)
     {
         $object->setRecipients($this->getRecipients($object->getId()));
-        $object->setMessageParameters(unserialize($object->getMessageParameters(), ['allowed_classes' => false]));
+        $object->setMessageParameters(Mage::helper('core/string')->unserialize($object->getMessageParameters()));
         return $this;
     }
 
@@ -46,7 +46,7 @@ class Mage_Core_Model_Resource_Email_Queue extends Mage_Core_Model_Resource_Db_A
             $object->setCreatedAt($this->formatDate(true));
         }
         $object->setMessageBodyHash(md5($object->getMessageBody()));
-        $object->setMessageParameters(serialize($object->getMessageParameters()));
+        $object->setMessageParameters(Mage::helper('core')->jsonEncode($object->getMessageParameters()));
 
         return parent::_beforeSave($object);
     }

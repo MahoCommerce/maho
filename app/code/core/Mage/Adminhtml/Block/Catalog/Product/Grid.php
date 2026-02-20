@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,7 +67,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/name',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $adminStore,
             );
             $collection->joinAttribute(
@@ -75,7 +75,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/name',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $store->getId(),
             );
             $collection->joinAttribute(
@@ -83,7 +83,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/status',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $store->getId(),
             );
             $collection->joinAttribute(
@@ -91,7 +91,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/visibility',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $store->getId(),
             );
             $collection->joinAttribute(
@@ -104,8 +104,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
             );
         } else {
             $collection->addAttributeToSelect('price');
-            $collection->joinAttribute('status', 'catalog_product/status', 'entity_id', null, 'inner');
-            $collection->joinAttribute('visibility', 'catalog_product/visibility', 'entity_id', null, 'inner');
+            $collection->joinAttribute('status', 'catalog_product/status', 'entity_id', null, 'left');
+            $collection->joinAttribute('visibility', 'catalog_product/visibility', 'entity_id', null, 'left');
         }
 
         $this->setCollection($collection);
@@ -341,7 +341,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                         'label' => Mage::helper('catalog')->__('Attribute Set'),
                         'values' => Mage::getResourceModel('eav/entity_attribute_set_collection')
                             ->setEntityTypeFilter(Mage::getModel('catalog/product')->getResource()->getTypeId())
-                            ->setOrder('attribute_set_name', Varien_Data_Collection::SORT_ORDER_ASC)
+                            ->setOrder('attribute_set_name', \Maho\Data\Collection::SORT_ORDER_ASC)
                             ->toOptionArray(),
                     ],
                 ],

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -144,7 +144,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
      *
      * @return  string
      */
-    public function getRowField(Varien_Object $row)
+    public function getRowField(\Maho\DataObject $row)
     {
         $renderedValue = $this->getRenderer()->render($row);
         if ($this->getHtmlDecorators()) {
@@ -175,7 +175,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
      *
      * @return  string
      */
-    public function getRowFieldExport(Varien_Object $row)
+    public function getRowFieldExport(\Maho\DataObject $row)
     {
         $renderedValue = $this->getRenderer()->renderExport($row);
 
@@ -340,8 +340,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column extends Mage_Adminhtml_Block_Widge
                     return false;
                 }
             }
-            $this->_filter = $this->getLayout()->createBlock($filterClass)
-                ->setColumn($this);
+            $filter = $this->getLayout()->createBlock($filterClass);
+            if ($filter === false) {
+                return false;
+            }
+            $this->_filter = $filter->setColumn($this);
         }
 
         return $this->_filter;

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,13 +75,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public const CACHE_TAG         = 'CONFIG';
 
     /**
-     * Configuration xml
-     *
-     * @var Mage_Core_Model_Config_Element|null
-     */
-    protected $_xml = null;
-
-    /**
      * Flag which allow use cache logic
      *
      * @var bool
@@ -90,9 +83,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
     /**
      * Instructions for spitting config cache
-     * array(
-     *      $sectionName => $recursionLevel
-     * )
+     * [$sectionName => $recursionLevel]
      * Recursion level provide availability cache sub-nodes separately
      *
      * @var array
@@ -199,7 +190,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     protected $_prototype;
 
     /**
-     * Reference to the Varien_Simplexml_Config object where local.xml was loaded in to
+     * Reference to the \Maho\Simplexml\Config object where local.xml was loaded in to
      */
     protected Mage_Core_Model_Config_Base $_refLocalConfigObject;
 
@@ -209,14 +200,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @var bool
      */
     protected $_isLocalConfigLoaded = false;
-
-    /**
-     * Deprecated properties
-     *
-     * @deprecated
-     */
-    protected $_baseDirCache = [];
-    protected $_customEtcDir = null;
 
     /**
      * Active modules array per namespace
@@ -360,9 +343,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadModulesCache()
     {
         if ($this->_canUseCacheForInit()) {
-            \Maho\Profiler::start('app.init.config.load_cache');
+            \Maho\Profiler::start('mage::app::init::config::load_cache');
             $loaded = $this->loadCache();
-            \Maho\Profiler::stop('app.init.config.load_cache');
+            \Maho\Profiler::stop('mage::app::init::config::load_cache');
             if ($loaded) {
                 $this->_useCache = true;
                 return true;
@@ -378,7 +361,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      */
     public function loadModules()
     {
-        \Maho\Profiler::start('config.load_modules');
+        \Maho\Profiler::start('config/load-modules');
         $this->_loadDeclaredModules();
 
         $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
@@ -390,7 +373,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         $this->applyExtends();
-        \Maho\Profiler::stop('config.load_modules');
+        \Maho\Profiler::stop('config/load-modules');
         return $this;
     }
 
@@ -412,10 +395,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadDb()
     {
         if ($this->_isLocalConfigLoaded && Mage::isInstalled()) {
-            \Maho\Profiler::start('config.load_db');
+            \Maho\Profiler::start('config/load-db');
             $dbConf = $this->getResourceModel();
             $dbConf->loadToXml($this);
-            \Maho\Profiler::stop('config.load_db');
+            \Maho\Profiler::stop('config/load-db');
         }
         return $this;
     }
@@ -426,11 +409,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     public function loadEnv(): Mage_Core_Model_Config
     {
         if ($this->_isLocalConfigLoaded && Mage::isInstalled()) {
-            \Maho\Profiler::start('config.load_env');
+            \Maho\Profiler::start('config/load-env');
             /** @var Mage_Core_Helper_EnvironmentConfigLoader $environmentConfigLoaderHelper */
             $environmentConfigLoaderHelper = Mage::helper('core/environmentConfigLoader');
             $environmentConfigLoaderHelper->overrideEnvironment($this);
-            \Maho\Profiler::stop('config.load_env');
+            \Maho\Profiler::stop('config/load-env');
         }
         return $this;
     }
@@ -491,16 +474,16 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection) {
             return;
         }
-        if (!$connection->fetchOne("SELECT GET_LOCK('core_config_cache_save_lock', ?)", [$waitTime])) {
+        if (!$connection->getLock('core_config_cache_save_lock', $waitTime)) {
             if ($ignoreFailure) {
                 return;
-            } elseif (PHP_SAPI === 'cli') {
-                throw new Exception('Could not get lock on cache save operation.');
-            } else {
-                Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Mage::LOG_NOTICE);
-                Maho::errorReport();
-                die();
             }
+            if (PHP_SAPI === 'cli') {
+                throw new Exception('Could not get lock on cache save operation.');
+            }
+            Mage::log(sprintf('Failed to get cache save lock in %d seconds.', $waitTime), Mage::LOG_NOTICE);
+            Maho::errorReport();
+            die();
         }
     }
 
@@ -518,7 +501,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!$connection) {
             return;
         }
-        $connection->fetchOne("SELECT RELEASE_LOCK('core_config_cache_save_lock')");
+        $connection->releaseLock('core_config_cache_save_lock');
     }
 
     /**
@@ -538,6 +521,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         }
 
         if (!empty($this->_cacheSections)) {
+            /** @var Mage_Core_Model_Config_Element $xml */
             $xml = clone $this->_xml;
             foreach ($this->_cacheSections as $sectionName => $level) {
                 $this->_saveSectionCache($this->getCacheId(), $sectionName, $xml, $level, $tags);
@@ -562,7 +546,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $idPrefix cache id prefix
      * @param string $sectionName
-     * @param Varien_Simplexml_Element $source
+     * @param Mage_Core_Model_Config_Element $source
      * @param int $recursionLevel
      * @param array $tags
      * @return Mage_Core_Model_Config
@@ -605,9 +589,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $this->_useCache = false;
             $this->reinit($this->_options);
             return false;
-        } else {
-            return simplexml_load_string($xmlString, $this->_elementClass);
         }
+        return simplexml_load_string($xmlString, $this->_elementClass);
     }
 
     /**
@@ -682,9 +665,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $sectionKey = implode('_', $sectionPath);
 
         if (!isset($this->_cacheLoadedSections[$sectionKey])) {
-            \Maho\Profiler::start('config.init_section.' . $sectionKey);
+            \Maho\Profiler::start('init_config_section:' . $sectionKey);
             $this->_cacheLoadedSections[$sectionKey] = $this->_loadSectionCache($sectionKey);
-            \Maho\Profiler::stop('config.init_section.' . $sectionKey);
+            \Maho\Profiler::stop('init_config_section:' . $sectionKey);
         }
         return $this->_cacheLoadedSections[$sectionKey];
     }
@@ -752,7 +735,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @param string $path separated by slashes
      * @param string $value
      * @param bool $overwrite
-     * @return Varien_Simplexml_Config
+     * @return \Maho\Simplexml\Config
      */
     #[\Override]
     public function setNode($path, $value, $overwrite = true)
@@ -837,9 +820,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         if (empty($this->_allowedModules)) {
             return true;
-        } else {
-            return in_array($moduleName, $this->_allowedModules);
         }
+        return in_array($moduleName, $this->_allowedModules);
     }
 
     /**
@@ -855,7 +837,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             return ;
         }
 
-        \Maho\Profiler::start('config.load_modules_declaration');
+        \Maho\Profiler::start('config/load-modules-declaration');
 
         $unsortedConfig = new Mage_Core_Model_Config_Base();
         $unsortedConfig->loadString('<config/>');
@@ -906,7 +888,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         $this->extend($sortedConfig);
 
-        \Maho\Profiler::stop('config.load_modules_declaration');
+        \Maho\Profiler::stop('config/load-modules-declaration');
         return $this;
     }
 
@@ -1011,9 +993,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * specidied xml file name to one object
      *
      * @param string $fileName
-     * @param null|Mage_Core_Model_Config_Base|Varien_Simplexml_Config $mergeToObject
-     * @param Varien_Simplexml_Config|null $mergeModel
-     * @return Mage_Core_Model_Config_Base|Varien_Simplexml_Config
+     * @param null|Mage_Core_Model_Config_Base|\Maho\Simplexml\Config $mergeToObject
+     * @param \Maho\Simplexml\Config|null $mergeModel
+     * @return Mage_Core_Model_Config_Base|\Maho\Simplexml\Config
      */
     public function loadModulesConfiguration($fileName, $mergeToObject = null, $mergeModel = null)
     {
@@ -1127,9 +1109,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $modules = $this->getNode('modules');
         if ($moduleName === '') {
             return $modules;
-        } else {
-            return $modules->$moduleName;
         }
+        return $modules->$moduleName;
     }
 
     /**
@@ -1284,7 +1265,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
 
         $classArr = explode('/', trim($classAlias));
         $group = $classArr[0];
-        $class = !empty($classArr[1]) ? $classArr[1] : null;
+        $class = empty($classArr[1]) ? null : $classArr[1];
 
         if (isset($this->_classNameCache[$groupRootNode][$group][$class])) {
             return $this->_classNameCache[$groupRootNode][$group][$class];
@@ -1355,9 +1336,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!class_exists($className)) {
             return false;
         }
-        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className();
-        \Maho\Profiler::stop('core.create_object');
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1370,9 +1351,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($className === false || !class_exists($className)) {
             return false;
         }
-        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className($moduleAlias);
-        \Maho\Profiler::stop('core.create_object');
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1428,9 +1409,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if (!class_exists($className)) {
             return false;
         }
-        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className($constructArguments);
-        \Maho\Profiler::stop('core.create_object');
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1474,9 +1455,9 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         if ($className === false || !class_exists($className)) {
             return false;
         }
-        \Maho\Profiler::start('core.create_object', ['class.name' => $className]);
+        \Maho\Profiler::start('CORE::create_object_of::' . $className);
         $obj = new $className($constructArguments);
-        \Maho\Profiler::stop('core.create_object');
+        \Maho\Profiler::stop('CORE::create_object_of::' . $className);
         return $obj;
     }
 
@@ -1506,9 +1487,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             if ($conn) {
                 if (!empty($conn->use)) {
                     return $this->getResourceConnectionConfig((string) $conn->use);
-                } else {
-                    return $conn;
                 }
+                return $conn;
             }
         }
         return false;
@@ -1518,7 +1498,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Retrieve resource type configuration for resource name
      *
      * @param string $type
-     * @return SimpleXMLElement|Varien_Simplexml_Element|Mage_Core_Model_Config_Element
+     * @return SimpleXMLElement|\Maho\Simplexml\Element|Mage_Core_Model_Config_Element
      */
     public function getResourceTypeConfig($type)
     {
@@ -1530,7 +1510,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * if empty $allowValues then retrieve all stores values
      *
-     * return array($storeId=>$pathValue)
+     * return [$storeId=>$pathValue]
      *
      * @param string $path
      * @param array $allowValues
@@ -1543,7 +1523,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $stores = $this->getNode('stores');
         /**
          * @var string $code
-         * @var Varien_Simplexml_Element $store
+         * @var Mage_Core_Model_Config_Element $store
          */
         foreach ($stores->children() as $code => $store) {
             switch ($useAsKey) {
@@ -1608,10 +1588,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     /**
      * Get DB table names prefix
      *
-     * @return Mage_Core_Model_Config_Element
+     * @return Mage_Core_Model_Config_Element|null
      */
     public function getTablePrefix()
     {
+        /** @var Mage_Core_Model_Config_Element|null */
         return $this->_xml->global->resources->db->table_prefix;
     }
 
@@ -1693,12 +1674,11 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     }
 
     /**
-     * Retrieve resource connection model name
+     * Retrieve resource connection model name (database engine)
      *
-     * @param string $moduleName
-     * @return string
+     * Supports new 'engine' config with backward compatibility for legacy 'model' config.
      */
-    protected function _getResourceConnectionModel($moduleName = null)
+    protected function _getResourceConnectionModel(?string $moduleName = null): string
     {
         $config = null;
         if (!is_null($moduleName)) {
@@ -1709,7 +1689,20 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
             $config = $this->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE);
         }
 
-        return (string) $config->model;
+        // New config: use 'engine'
+        if (!empty($config->engine)) {
+            return (string) $config->engine;
+        }
+
+        // Backward compatibility: use 'model'
+        $model = (string) $config->model;
+
+        // Normalize legacy mysql4 model name to mysql for backwards compatibility
+        if ($model === 'mysql4') {
+            $model = 'mysql';
+        }
+
+        return $model ?: 'mysql';
     }
 
     /**
@@ -1760,7 +1753,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      *
      * @param string $area
      */
-    protected function _makeEventsLowerCase($area, Varien_Simplexml_Config $mergeModel)
+    protected function _makeEventsLowerCase($area, \Maho\Simplexml\Config $mergeModel)
     {
         $events = $mergeModel->getNode($area . '/' . Mage_Core_Model_App_Area::PART_EVENTS);
         if ($events !== false) {

@@ -6,15 +6,15 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * WYSIWYG widget options form
  *
- * @method $this setConfig(Varien_Object $value)
- * @method $this setElement(Varien_Data_Form_Element_Abstract $value)
+ * @method $this setConfig(\Maho\DataObject $value)
+ * @method $this setElement(\Maho\Data\Form\Element\AbstractElement $value)
  * @method $this setFieldsetId(string $value)
  * @method string getLabel()
  * @method $this setSourceUrl(string $value)
@@ -47,7 +47,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
     /**
      * Chooser form element getter
      *
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getElement()
     {
@@ -57,19 +57,19 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
     /**
      * Convert Array config to Object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getConfig()
     {
-        if ($this->_getData('config') instanceof Varien_Object) {
+        if ($this->_getData('config') instanceof \Maho\DataObject) {
             return $this->_getData('config');
         }
 
         $configArray = $this->_getData('config');
-        $config = new Varien_Object();
+        $config = new \Maho\DataObject();
         $this->setConfig($config);
         if (!is_array($configArray)) {
-            /** @var Varien_Object $configData */
+            /** @var \Maho\DataObject $configData */
             $configData = $this->_getData('config');
             return $configData;
         }
@@ -91,7 +91,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         }
         $config->setButtons($buttons);
 
-        /** @var Varien_Object $configData */
+        /** @var \Maho\DataObject $configData */
         $configData = $this->_getData('config');
         return $configData;
     }
@@ -135,7 +135,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
     protected function _toHtml()
     {
         $element   = $this->getElement();
-        /** @var Varien_Data_Form_Element_Fieldset $fieldset */
+        /** @var \Maho\Data\Form\Element\Fieldset $fieldset */
         $fieldset  = $element->getForm()->getElement($this->getFieldsetId());
         $chooserId = $this->getUniqId();
         $config    = $this->getConfig();
@@ -147,7 +147,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
         ]);
         $hiddenHtml = '';
         if ($this->getHiddenEnabled()) {
-            $hidden = new Varien_Data_Form_Element_Hidden($element->getData());
+            $hidden = new \Maho\Data\Form\Element\Hidden($element->getData());
             $hidden->setId("{$chooserId}value")->setForm($element->getForm());
             if ($element->getRequired()) {
                 $hidden->addClass('required-entry');

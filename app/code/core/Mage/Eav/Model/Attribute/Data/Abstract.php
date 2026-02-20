@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -184,13 +184,13 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
     /**
      * Return Data Form Input/Output Filter
      *
-     * @return Varien_Data_Form_Filter_Interface|false
+     * @return \Maho\Data\Form\Filter\FilterInterface|false
      */
     protected function _getFormFilter()
     {
         $filterCode = $this->getAttribute()->getInputFilter();
         if ($filterCode) {
-            $filterClass = 'Varien_Data_Form_Filter_' . ucfirst($filterCode);
+            $filterClass = '\Maho\Data\Form\Filter\\' . ucfirst($filterCode);
             if ($filterCode == 'date') {
                 $filter = new $filterClass($this->_dateFilterFormat(), Mage::app()->getLocale()->getLocale());
             } else {
@@ -215,7 +215,8 @@ abstract class Mage_Eav_Model_Attribute_Data_Abstract
                 $this->_dateFilterFormat = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT;
             }
             return Mage::app()->getLocale()->getDateFormat($this->_dateFilterFormat);
-        } elseif ($format === false) {
+        }
+        if ($format === false) {
             // reset value
             $this->_dateFilterFormat = null;
             return $this;

@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,9 +14,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
 {
     /**
      * Associated array of totals
-     * array(
-     *  $totalCode => $totalObject
-     * )
+     * [$totalCode => $totalObject]
      *
      * @var array
      */
@@ -70,7 +68,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
     /**
      * Get totals source object
      *
-     * @return Mage_Sales_Model_Order
+     * @return Mage_Sales_Model_Abstract
      */
     public function getSource()
     {
@@ -87,7 +85,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
         $source = $this->getSource();
 
         $this->_totals = [];
-        $this->_totals['subtotal'] = new Varien_Object([
+        $this->_totals['subtotal'] = new \Maho\DataObject([
             'code'  => 'subtotal',
             'value' => $source->getSubtotal(),
             'label' => $this->__('Subtotal'),
@@ -97,7 +95,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
          * Add shipping
          */
         if (!$source->getIsVirtual() && ((float) $source->getShippingAmount() || $source->getShippingDescription())) {
-            $this->_totals['shipping'] = new Varien_Object([
+            $this->_totals['shipping'] = new \Maho\DataObject([
                 'code'  => 'shipping',
                 'field' => 'shipping_amount',
                 'value' => $this->getSource()->getShippingAmount(),
@@ -114,7 +112,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
             } else {
                 $discountLabel = $this->__('Discount');
             }
-            $this->_totals['discount'] = new Varien_Object([
+            $this->_totals['discount'] = new \Maho\DataObject([
                 'code'  => 'discount',
                 'field' => 'discount_amount',
                 'value' => $source->getDiscountAmount(),
@@ -122,7 +120,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
             ]);
         }
 
-        $this->_totals['grand_total'] = new Varien_Object([
+        $this->_totals['grand_total'] = new \Maho\DataObject([
             'code'  => 'grand_total',
             'field'  => 'grand_total',
             'strong' => true,
@@ -134,7 +132,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
          * Base grandtotal
          */
         if ($this->getOrder()->isCurrencyDifferent()) {
-            $this->_totals['base_grandtotal'] = new Varien_Object([
+            $this->_totals['base_grandtotal'] = new \Maho\DataObject([
                 'code'  => 'base_grandtotal',
                 'value' => $this->getOrder()->formatBasePrice($source->getBaseGrandTotal()),
                 'label' => $this->__('Grand Total to be Charged'),
@@ -150,7 +148,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
      * @param   null|string $after accepted values: 'first', 'last'
      * @return  Mage_Sales_Block_Order_Totals
      */
-    public function addTotal(Varien_Object $total, $after = null)
+    public function addTotal(\Maho\DataObject $total, $after = null)
     {
         if ($after !== null && $after != 'last' && $after != 'first') {
             $totals = [];
@@ -187,7 +185,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
      * @param null|array|string $before
      * @return  Mage_Sales_Block_Order_Totals
      */
-    public function addTotalBefore(Varien_Object $total, $before = null)
+    public function addTotalBefore(\Maho\DataObject $total, $before = null)
     {
         if ($before !== null) {
             if (!is_array($before)) {
@@ -222,7 +220,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
      * Get Total object by code
      *
      * @param string $code
-     * @return Varien_Object|false
+     * @return \Maho\DataObject|false
      */
     public function getTotal($code)
     {
@@ -244,9 +242,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
     /**
      * Apply sort orders to totals array.
      * Array should have next structure
-     * array(
-     *  $totalCode => $totalSortOrder
-     * )
+     * [$totalCode => $totalSortOrder]
      *
      * @param   array $order
      * @return  Mage_Sales_Block_Order_Totals
@@ -282,7 +278,7 @@ class Mage_Sales_Block_Order_Totals extends Mage_Core_Block_Template
     /**
      * Format total value based on order currency
      *
-     * @param   Varien_Object $total
+     * @param \Maho\DataObject $total
      * @return  string
      */
     public function formatValue($total)

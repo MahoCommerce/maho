@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Catalog
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  *
  * @method int getRuleId()
@@ -42,10 +42,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
             $this->_resetConditions();
 
             if ($this->getConditionsSerialized()) {
-                $conditions = $this->getConditionsSerialized();
-                if (is_string($conditions)) {
-                    $conditions = @unserialize($conditions);
-                }
+                $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->setConditions([])->loadArray($conditions);
                 }
@@ -82,9 +79,14 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     #[\Override]
     protected function _beforeSave(): self
     {
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($this->getConditions()) {
-            $this->setConditionsSerialized(serialize($this->getConditions()->asArray()));
+            try {
+                $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             $this->unsConditions();
         }
 
@@ -109,10 +111,9 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
         return $this;
     }
 
-    #[\Override]
     public function asArray(array $arrAttributes = []): array
     {
-        $out = parent::asArray($arrAttributes);
+        $out = [];
         $out['conditions'] = $this->getConditions()->asArray();
 
         return $out;
@@ -133,10 +134,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
 
         // Initialize conditions from serialized data
         if ($this->getConditionsSerialized()) {
-            $conditions = $this->getConditionsSerialized();
-            if (is_string($conditions)) {
-                $conditions = @unserialize($conditions);
-            }
+            $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
             if (is_array($conditions) && !empty($conditions)) {
                 // Reset and reload conditions
                 $this->_conditions = $this->getConditionsInstance();
@@ -149,7 +147,7 @@ class Mage_Catalog_Model_Category_Dynamic_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function validate(Varien_Object $object): bool
+    public function validate(\Maho\DataObject $object): bool
     {
         $conditions = $this->getConditions();
         if (!$conditions || !$conditions->getConditions()) {

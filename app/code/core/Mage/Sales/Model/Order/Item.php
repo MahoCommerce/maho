@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -223,7 +223,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -600,7 +600,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function setProductOptions(array $options)
     {
-        $this->setData('product_options', serialize($options));
+        $this->setData('product_options', Mage::helper('core')->jsonEncode($options));
         return $this;
     }
 
@@ -612,7 +612,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
     public function getProductOptions()
     {
         if ($options = $this->_getData('product_options')) {
-            return unserialize($options, ['allowed_classes' => false]);
+            return Mage::helper('core/string')->unserialize($options);
         }
         return [];
     }
@@ -779,7 +779,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      * Returns formatted buy request - object, holding request received from
      * product view page with keys and options for configured product
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getBuyRequest()
     {
@@ -787,7 +787,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         if (!$option) {
             $option = [];
         }
-        $buyRequest = new Varien_Object($option);
+        $buyRequest = new \Maho\DataObject($option);
         $buyRequest->setQty($this->getQtyOrdered() * 1);
         return $buyRequest;
     }
@@ -814,7 +814,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function getBaseDiscountAppliedForWeeeTax()
     {
-        $weeeTaxAppliedAmounts = unserialize($this->getWeeeTaxApplied(), ['allowed_classes' => false]);
+        $weeeTaxAppliedAmounts = Mage::helper('core/string')->unserialize($this->getWeeeTaxApplied());
         $totalDiscount = 0;
         if (!is_array($weeeTaxAppliedAmounts)) {
             return $totalDiscount;
@@ -822,9 +822,8 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
             if (isset($weeeTaxAppliedAmount['total_base_weee_discount'])) {
                 return $weeeTaxAppliedAmount['total_base_weee_discount'];
-            } else {
-                $totalDiscount += $weeeTaxAppliedAmount['base_weee_discount'] ?? 0;
             }
+            $totalDiscount += $weeeTaxAppliedAmount['base_weee_discount'] ?? 0;
         }
         return $totalDiscount;
     }
@@ -836,7 +835,7 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
      */
     public function getDiscountAppliedForWeeeTax()
     {
-        $weeeTaxAppliedAmounts = unserialize($this->getWeeeTaxApplied(), ['allowed_classes' => false]);
+        $weeeTaxAppliedAmounts = Mage::helper('core/string')->unserialize($this->getWeeeTaxApplied());
         $totalDiscount = 0;
         if (!is_array($weeeTaxAppliedAmounts)) {
             return $totalDiscount;
@@ -844,9 +843,8 @@ class Mage_Sales_Model_Order_Item extends Mage_Core_Model_Abstract
         foreach ($weeeTaxAppliedAmounts as $weeeTaxAppliedAmount) {
             if (isset($weeeTaxAppliedAmount['total_weee_discount'])) {
                 return $weeeTaxAppliedAmount['total_weee_discount'];
-            } else {
-                $totalDiscount += $weeeTaxAppliedAmount['weee_discount'] ?? 0;
             }
+            $totalDiscount += $weeeTaxAppliedAmount['weee_discount'] ?? 0;
         }
         return $totalDiscount;
     }

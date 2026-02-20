@@ -3,16 +3,16 @@
 /**
  * Maho
  *
- * @package    Maho_Io
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 namespace Maho\Io;
 
-class File extends AbstractIo
+class File extends \Maho\Io
 {
     /**
      * Save initial working directory
@@ -139,16 +139,24 @@ class File extends AbstractIo
     /**
      * Lock file
      *
+     * @param bool $exclusive
+     * @param bool $blocking
      * @return bool
      */
-    public function streamLock($exclusive = true)
+    public function streamLock($exclusive = true, $blocking = true)
     {
         if (!$this->_streamHandler) {
             return false;
         }
-        $this->_streamLocked = true;
         $lock = $exclusive ? LOCK_EX : LOCK_SH;
-        return flock($this->_streamHandler, $lock);
+        if (!$blocking) {
+            $lock |= LOCK_NB;
+        }
+        $result = flock($this->_streamHandler, $lock);
+        if ($result) {
+            $this->_streamLocked = true;
+        }
+        return $result;
     }
 
     /**
@@ -293,7 +301,7 @@ class File extends AbstractIo
         }
 
         $this->_iwd = getcwd();
-        $this->cd(!empty($args['path']) ? $args['path'] : $this->_iwd);
+        $this->cd(empty($args['path']) ? $this->_iwd : $args['path']);
         return true;
     }
 
@@ -418,9 +426,8 @@ class File extends AbstractIo
             @chdir($this->_iwd);
             $this->_cwd = realpath($dir);
             return true;
-        } else {
-            throw new \Exception('Unable to list current working directory.');
         }
+        throw new \Exception('Unable to list current working directory.');
     }
 
     /**
@@ -501,7 +508,8 @@ class File extends AbstractIo
             // If its a file we check for null byte
             // If it's not a valid path, file_exists() will return a falsey value, and the @ will keep it from complaining about the bad string.
             return !(@file_exists($src) && str_contains($src, chr(0)));
-        } elseif (is_resource($src)) {
+        }
+        if (is_resource($src)) {
             return true;
         }
 
@@ -760,12 +768,14 @@ class File extends AbstractIo
                 $list_item = [];
 
                 $fullpath = $dir . DIRECTORY_SEPARATOR . $entry;
-
                 if (($grep == self::GREP_DIRS) && (!is_dir($fullpath))) {
                     continue;
-                } elseif (($grep == self::GREP_FILES) && (!is_file($fullpath))) {
+                }
+                if (($grep == self::GREP_FILES) && (!is_file($fullpath))) {
                     continue;
-                } elseif (in_array($entry, $ignoredDirectories)) {
+                }
+
+                if (in_array($entry, $ignoredDirectories)) {
                     continue;
                 }
 

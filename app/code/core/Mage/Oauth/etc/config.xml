@@ -55,14 +55,6 @@
             </oauth_setup>
         </resources>
         <events>
-            <customer_controller_account_login_post_redirect_before>
-                <observers>
-                    <oauth>
-                        <class>oauth/observer</class>
-                        <method>afterCustomerLogin</method>
-                    </oauth>
-                </observers>
-            </customer_controller_account_login_post_redirect_before>
             <admin_session_user_login_success>
                 <observers>
                     <oauth>
@@ -129,13 +121,6 @@
                 </args>
             </oauth>
         </routers>
-        <layout>
-            <updates>
-                <oauth>
-                    <file>oauth.xml</file>
-                </oauth>
-            </updates>
-        </layout>
         <translate>
             <modules>
                 <Mage_Oauth>

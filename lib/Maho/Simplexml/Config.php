@@ -3,10 +3,10 @@
 /**
  * Maho
  *
- * @package    Maho_Simplexml
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,7 +23,7 @@ class Config
     /**
      * Configuration xml
      *
-     * @var Element|SimpleXMLElement|null
+     * @var Element|null
      */
     protected $_xml = null;
 
@@ -119,11 +119,11 @@ class Config
     {
         if (!$this->_xml instanceof Element) {
             return false;
-        } elseif ($path === null) {
-            return $this->_xml;
-        } else {
-            return $this->_xml->descend($path);
         }
+        if ($path === null) {
+            return $this->_xml;
+        }
+        return $this->_xml->descend($path);
     }
 
     /**
@@ -315,6 +315,7 @@ class Config
 
         $xmlString = $this->_loadCache($this->getCacheId());
         if ($xmlString) {
+            /** @var Element|false $xml */
             $xml = simplexml_load_string($xmlString, $this->_elementClass);
             if ($xml) {
                 $this->_xml = $xml;
@@ -473,6 +474,7 @@ class Config
      */
     public function loadDom($dom)
     {
+        /** @var Element|null $xml */
         $xml = simplexml_import_dom($dom, $this->_elementClass);
 
         if ($xml) {

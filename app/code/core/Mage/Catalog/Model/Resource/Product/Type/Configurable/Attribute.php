@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,30 +45,6 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute extends Ma
     public function getCatalogHelper()
     {
         return Mage::helper('catalog');
-    }
-
-    /**
-     * Load attribute labels
-     * @deprecated
-     *
-     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
-     * @return $this
-     */
-    public function loadLabel($attribute)
-    {
-        return $this;
-    }
-
-    /**
-     * Load prices
-     * @deprecated
-     *
-     * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
-     * @return $this
-     */
-    public function loadPrices($attribute)
-    {
-        return $this;
     }
 
     /**
@@ -170,7 +146,7 @@ class Mage_Catalog_Model_Resource_Product_Type_Configurable_Attribute extends Ma
                 'pricing_value' => $v['pricing_value'],
                 'is_percent'    => $v['is_percent'],
                 'website_id'    => $websiteId,
-                'use_default'   => !empty($v['use_default_value']) ? true : false,
+                'use_default'   => empty($v['use_default_value']) ? false : true,
             ];
         }
 

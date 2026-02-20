@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -314,7 +314,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
         /** @var Mage_Catalog_Helper_Product $productHelper */
         $productHelper = Mage::helper('catalog/product');
         foreach ($items as $id => $item) {
-            $buyRequest = new Varien_Object($item);
+            $buyRequest = new \Maho\DataObject($item);
             $params = ['files_prefix' => 'item_' . $id . '_'];
             $buyRequest = $productHelper->addParamsToBuyRequest($buyRequest, $params);
             if ($buyRequest->hasData()) {
@@ -546,7 +546,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     public function configureProductToAddAction()
     {
         $sessionQuote = Mage::getSingleton('adminhtml/session_quote');
-        $configureResult = new Varien_Object([
+        $configureResult = new \Maho\DataObject([
             'ok'                  => true,
             'product_id'          => (int) $this->getRequest()->getParam('id'),
             'current_store_id'    => $sessionQuote->getStore()->getId(),
@@ -582,7 +582,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
 
             $quoteItem->setOptions($optionCollection->getOptionsByItem($quoteItem));
 
-            $configureResult = new Varien_Object([
+            $configureResult = new \Maho\DataObject([
                 'ok'                  => true,
                 'product_id'          => $quoteItem->getProductId(),
                 'buy_request'         => $quoteItem->getBuyRequest(),
@@ -601,25 +601,6 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
         }
 
         return $this;
-    }
-
-    /**
-     * Show item update result from loadBlockAction
-     * to prevent popup alert with resend data question
-     *
-     * @return false|void
-     * @deprecated use `$this->getResponse()->setBodyJson()`
-     */
-    public function showUpdateResultAction()
-    {
-        $session = Mage::getSingleton('adminhtml/session');
-        if ($session->hasUpdateResult() && is_scalar($session->getUpdateResult())) {
-            $this->getResponse()->setBody($session->getUpdateResult());
-            $session->unsUpdateResult();
-        } else {
-            $session->unsUpdateResult();
-            return false;
-        }
     }
 
     /**

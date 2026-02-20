@@ -6,18 +6,18 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Model_Customer_Renderer_Region implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Model_Customer_Renderer_Region implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * Country region collections
      *
-     * array(
-     *      [$countryId] => Varien_Data_Collection_Db
-     * )
+     * [
+     *      [$countryId] => \Maho\Data\Collection\Db
+     * ]
      *
      * @var array
      */
@@ -27,7 +27,7 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements Varien_Data_Form_
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $html = '<tr>' . "\n";
 

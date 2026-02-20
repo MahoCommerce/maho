@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    Maho_AdminActivityLog
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,7 +28,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
 
         // Group by action_group_id to show only one entry per group
         $collection->getSelect()
-            ->group('IFNULL(main_table.action_group_id, main_table.activity_id)')
+            ->group('COALESCE(main_table.action_group_id, main_table.activity_id)')
             ->columns([
                 'activity_count' => new Maho\Db\Expr('COUNT(*)'),
             ]);

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,7 +19,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Columns array
      *
-     * array(
+     * [
      *      'header'    => string,
      *      'width'     => int,
      *      'sortable'  => bool,
@@ -27,7 +27,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      *      //'renderer'  => Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Interface,
      *      'format'    => string
      *      'total'     => string (sum, avg)
-     * )
+     * ]
      * @var array
      */
     protected $_columns = [];
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Collection object
      *
-     * @var Varien_Data_Collection_Db|null
+     * @var \Maho\Data\Collection\Db|null
      */
     protected $_collection = null;
 
@@ -52,10 +52,29 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     protected $_varNameDir      = 'dir';
     protected $_varNameFilter   = 'filter';
 
+    /**
+     * @var int
+     */
     protected $_defaultLimit    = 20;
+
+    /**
+     * @var int
+     */
     protected $_defaultPage     = 1;
+
+    /**
+     * @var string|false
+     */
     protected $_defaultSort     = false;
+
+    /**
+     * @var string
+     */
     protected $_defaultDir      = 'desc';
+
+    /**
+     * @var array
+     */
     protected $_defaultFilter   = [];
 
     /**
@@ -107,6 +126,9 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     protected $_messageBlockVisibility = false;
 
+    /**
+     * @var bool
+     */
     protected $_saveParametersInSession = false;
 
     /**
@@ -126,7 +148,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Totals
      *
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     protected $_varTotals;
 
@@ -289,7 +311,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * set collection object
      *
-     * @param Mage_Core_Model_Resource_Db_Collection_Abstract|Varien_Data_Collection_Db $collection
+     * @param Mage_Core_Model_Resource_Db_Collection_Abstract|\Maho\Data\Collection\Db $collection
      */
     public function setCollection($collection)
     {
@@ -299,7 +321,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * get collection object
      *
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|Varien_Data_Collection_Db
+     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|\Maho\Data\Collection\Db
      */
     public function getCollection()
     {
@@ -410,7 +432,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      * Add column to grid after specified column.
      *
      * @param string $columnId
-     * @param array|Varien_Object $column
+     * @param array|\Maho\DataObject $column
      * @param string $after
      * @return $this
      * @throws Exception
@@ -1003,7 +1025,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     public function addExportType($url, $label)
     {
-        $this->_exportTypes[] = new Varien_Object(
+        $this->_exportTypes[] = new \Maho\DataObject(
             [
                 'url'   => $this->getUrl($url, ['_current' => true]),
                 'label' => $label,
@@ -1050,7 +1072,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     public function addRssList($url, $label)
     {
-        $this->_rssLists[] = new Varien_Object(
+        $this->_rssLists[] = new \Maho\DataObject(
             [
                 'url'   => $this->_getRssUrl($url),
                 'label' => $label,
@@ -1076,7 +1098,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     protected function _getFileContainerContent(array $fileData)
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $path = $io->dirname($fileData['value']);
         $io->open(['path' => $path]);
         return $io->read($fileData['value']);
@@ -1155,7 +1177,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Write item data to csv export file
      */
-    protected function _exportCsvItem(Varien_Object $item, Varien_Io_File $adapter)
+    protected function _exportCsvItem(\Maho\DataObject $item, \Maho\Io\File $adapter)
     {
         $row = [];
         foreach ($this->_columns as $column) {
@@ -1195,7 +1217,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             exit(-1);
         }
 
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
 
         $path = Mage::getBaseDir('var') . DS . 'export' . DS;
         $name = md5(microtime());
@@ -1327,12 +1349,12 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Write item data to Excel 2003 XML export file
      *
-     * @param Varien_Convert_Parser_Xml_Excel $parser
+     * @param \Maho\Convert\Parser\Xml\Excel $parser
      */
-    protected function _exportExcelItem(Varien_Object $item, Varien_Io_File $adapter, $parser = null)
+    protected function _exportExcelItem(\Maho\DataObject $item, \Maho\Io\File $adapter, $parser = null)
     {
         if (is_null($parser)) {
-            $parser = new Varien_Convert_Parser_Xml_Excel();
+            $parser = new \Maho\Convert\Parser\Xml\Excel();
         }
 
         $row = [];
@@ -1369,8 +1391,8 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             exit(-1);
         }
 
-        $parser = new Varien_Convert_Parser_Xml_Excel();
-        $io     = new Varien_Io_File();
+        $parser = new \Maho\Convert\Parser\Xml\Excel();
+        $io     = new \Maho\Io\File();
 
         $path = Mage::getBaseDir('var') . DS . 'export' . DS;
         $name = md5(microtime());
@@ -1457,7 +1479,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
             $data[] = $row;
         }
 
-        $xmlObj = new Varien_Convert_Parser_Xml_Excel();
+        $xmlObj = new \Maho\Convert\Parser\Xml\Excel();
         $xmlObj->setVar('single_sheet', $fileName);
         $xmlObj->setData($data);
         $xmlObj->unparse();
@@ -1480,24 +1502,11 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Grid url getter
      *
-     * @deprecated after 1.3.2.3 Use getAbsoluteGridUrl() method instead
      * @return string current grid url
      */
     public function getGridUrl()
     {
         return $this->getCurrentUrl();
-    }
-
-    /**
-     * Grid url getter
-     * Version of getGridUrl() but with parameters
-     *
-     * @param array $params url parameters
-     * @return string current grid url
-     */
-    public function getAbsoluteGridUrl($params = [])
-    {
-        return $this->getCurrentUrl($params);
     }
 
     /**
@@ -1560,16 +1569,6 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     public function getJsObjectName()
     {
         return $this->getId() . 'JsObject';
-    }
-
-    /**
-     * @param Varien_Object $row
-     * @return string
-     * @deprecated since 1.1.7
-     */
-    public function getRowId($row)
-    {
-        return $this->getRowUrl($row);
     }
 
     /**
@@ -1723,7 +1722,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Set totals
      */
-    public function setTotals(Varien_Object $totals)
+    public function setTotals(\Maho\DataObject $totals)
     {
         $this->_varTotals = $totals;
     }
@@ -1731,7 +1730,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Retrieve totals
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getTotals()
     {
@@ -1774,8 +1773,8 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Retrieve subtotal item
      *
-     * @param Varien_Object $item
-     * @return Varien_Object|string
+     * @param \Maho\DataObject $item
+     * @return \Maho\DataObject|string
      */
     public function getSubTotalItem($item)
     {
@@ -1802,7 +1801,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Check whether subtotal should be rendered
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return bool
      */
     public function shouldRenderSubTotal($item)
@@ -1823,7 +1822,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Retrieve rowspan number
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      * @return int|bool
      */
@@ -1855,7 +1854,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Get children of specified item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return array
      */
     public function getMultipleRows($item)
@@ -1880,7 +1879,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Check whether should render cell
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      * @return bool
      */
@@ -1898,7 +1897,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Check whether should render empty cell
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @param Mage_Adminhtml_Block_Widget_Grid_Column $column
      * @return bool
      */
@@ -1942,7 +1941,7 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     /**
      * Return row url for js event handlers
      *
-     * @param Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return string
      */
     public function getRowUrl($row)

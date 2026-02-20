@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -248,12 +248,11 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $confItem = $this->getConfigurationItem();
         $infoBuyRequest = $confItem->getOptionByCode('info_buyRequest');
         try {
-            $value = unserialize($infoBuyRequest->getValue());
+            $value = unserialize($infoBuyRequest->getValue(), ['allowed_classes' => false]);
             if (is_array($value) && isset($value['options']) && isset($value['options'][$this->getOption()->getId()])) {
                 return $value['options'][$this->getOption()->getId()];
-            } else {
-                return ['date_internal' => $optionValue];
             }
+            return ['date_internal' => $optionValue];
         } catch (Exception $e) {
             return ['date_internal' => $optionValue];
         }
@@ -293,9 +292,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $_range = explode(',', $this->getConfigData('year_range'));
         if (isset($_range[0]) && !empty($_range[0])) {
             return $_range[0];
-        } else {
-            return date('Y');
         }
+        return date('Y');
     }
 
     /**
@@ -308,9 +306,8 @@ class Mage_Catalog_Model_Product_Option_Type_Date extends Mage_Catalog_Model_Pro
         $_range = explode(',', $this->getConfigData('year_range'));
         if (isset($_range[1]) && !empty($_range[1])) {
             return $_range[1];
-        } else {
-            return date('Y');
         }
+        return date('Y');
     }
 
     /**

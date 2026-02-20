@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -399,7 +399,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         $table = $this->_getTierPriceIndexTable();
         $write->delete($table);
 
-        $websiteExpression = $write->getCheckSql('tp.website_id = 0', 'ROUND(tp.value * cwd.rate, 4)', 'tp.value');
+        $websiteExpression = $write->getCheckSql('tp.website_id = 0', $write->getRoundSql('tp.value * cwd.rate', 4), 'tp.value');
         $select = $write->select()
             ->from(
                 ['tp' => $this->getValueTable('catalog/product', 'tier_price')],
@@ -446,7 +446,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
         $table = $this->_getGroupPriceIndexTable();
         $write->delete($table);
 
-        $websiteExpression = $write->getCheckSql('gp.website_id = 0', 'ROUND(gp.value * cwd.rate, 4)', 'gp.value');
+        $websiteExpression = $write->getCheckSql('gp.website_id = 0', $write->getRoundSql('gp.value * cwd.rate', 4), 'gp.value');
         $select = $write->select()
             ->from(
                 ['gp' => $this->getValueTable('catalog/product', 'group_price')],

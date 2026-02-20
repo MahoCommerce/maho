@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -51,7 +51,7 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
         /** @var Mage_Core_Model_Store_Group $groupModel */
         /** @var Mage_Core_Model_Store $storeModel */
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id'        => 'edit_form',
             'action'    => $this->getData('action'),
             'method'    => 'post',
@@ -64,7 +64,6 @@ class Mage_Adminhtml_Block_System_Store_Edit_Form extends Mage_Adminhtml_Block_W
             $fieldset = $form->addFieldset('website_fieldset', [
                 'legend' => Mage::helper('core')->__('Website Information'),
             ]);
-            /** @var Varien_Data_Form $fieldset */
 
             $fieldset->addField('website_name', 'text', [
                 'name'      => 'website[name]',

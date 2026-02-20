@@ -6,7 +6,7 @@
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,10 +17,10 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function setWeeeRendererInForm(Varien_Event_Observer $observer)
+    public function setWeeeRendererInForm(\Maho\Event\Observer $observer)
     {
         //adminhtml_catalog_product_edit_prepare_form
-        /** @var Varien_Data_Form $form */
+        /** @var \Maho\Data\Form $form */
         $form = $observer->getEvent()->getForm();
 
         $attributes = Mage::getSingleton('weee/tax')->getWeeeAttributeCodes(true);
@@ -28,7 +28,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
             $weeeTax = $form->getElement($code);
             if ($weeeTax) {
                 $renderer = Mage::app()->getLayout()->createBlock('weee/renderer_weee_tax');
-                if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+                if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
                     $weeeTax->setRenderer($renderer);
                 }
             }
@@ -42,7 +42,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function updateExcludedFieldList(Varien_Event_Observer $observer)
+    public function updateExcludedFieldList(\Maho\Event\Observer $observer)
     {
         //adminhtml_catalog_product_form_prepare_excluded_field_list
 
@@ -62,7 +62,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function prepareCatalogIndexSelect(Varien_Event_Observer $observer)
+    public function prepareCatalogIndexSelect(\Maho\Event\Observer $observer)
     {
         $storeId = (int) $observer->getEvent()->getStoreId();
         if (!Mage::helper('weee')->isEnabled($storeId)) {
@@ -82,7 +82,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
         $websiteId = (int) Mage::app()->getStore($storeId)->getWebsiteId();
         $customerGroupId = (int) Mage::getSingleton('customer/session')->getCustomerGroupId();
 
-        /** @var Varien_Object $response */
+        /** @var \Maho\DataObject $response */
         $response = $observer->getEvent()->getResponseObject();
         $additionalCalculations = $response->getAdditionalCalculations();
 
@@ -117,7 +117,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
         }
         $response->setAdditionalCalculations($additionalCalculations);
 
-        /** @var Varien_Object $rateRequest */
+        /** @var \Maho\DataObject $rateRequest */
         $rateRequest = Mage::getSingleton('tax/calculation')->getRateRequest();
 
         $attributes = Mage::getSingleton('weee/tax')->getWeeeTaxAttributeCodes();
@@ -165,7 +165,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function addWeeeTaxAttributeType(Varien_Event_Observer $observer)
+    public function addWeeeTaxAttributeType(\Maho\Event\Observer $observer)
     {
         // adminhtml_product_attribute_types
 
@@ -199,7 +199,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function assignBackendModelToAttribute(Varien_Event_Observer $observer)
+    public function assignBackendModelToAttribute(\Maho\Event\Observer $observer)
     {
         $backendModel = Mage_Weee_Model_Attribute_Backend_Weee_Tax::getBackendModelName();
         /** @var Mage_Eav_Model_Entity_Attribute_Abstract $object */
@@ -226,7 +226,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return Mage_Weee_Model_Observer
      */
-    public function updateElementTypes(Varien_Event_Observer $observer)
+    public function updateElementTypes(\Maho\Event\Observer $observer)
     {
         $response = $observer->getEvent()->getResponse();
         $types = $response->getTypes();
@@ -240,7 +240,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function updateDiscountPercents(Varien_Event_Observer $observer)
+    public function updateDiscountPercents(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('weee')->isEnabled()) {
             return $this;
@@ -262,7 +262,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function updateCofigurableProductOptions(Varien_Event_Observer $observer)
+    public function updateCofigurableProductOptions(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Weee_Helper_Data $weeeHelper */
         $weeeHelper = Mage::helper('weee');
@@ -313,7 +313,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    public function updateBundleProductOptions(Varien_Event_Observer $observer)
+    public function updateBundleProductOptions(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Weee_Helper_Data $weeeHelper */
         $weeeHelper = Mage::helper('weee');
@@ -362,7 +362,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    public function setSessionQuoteStore(Varien_Event_Observer $observer)
+    public function setSessionQuoteStore(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Weee_Helper_Data $weeeHelper */
         $weeeHelper = Mage::helper('weee');

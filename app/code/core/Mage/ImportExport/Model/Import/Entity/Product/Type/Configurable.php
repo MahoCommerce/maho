@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -57,17 +57,17 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     /**
      * Array of SKU to array of super attribute values for all products.
      *
-     * array (
-     *     attr_set_name_1 => array(
-     *         product_id_1 => array(
+     * [
+     *     attr_set_name_1 => [
+     *         product_id_1 => [
      *             super_attribute_code_1 => attr_value_1,
      *             ...
      *             super_attribute_code_n => attr_value_n
-     *         ),
+     *         ],
      *         ...
-     *     ),
+     *     ],
      *   ...
-     * )
+     * ]
      *
      * @var array
      */
@@ -76,17 +76,17 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     /**
      * Array of SKU to array of super attributes data for validation new associated products.
      *
-     * array (
-     *     product_id_1 => array(
-     *         super_attribute_id_1 => array(
+     * [
+     *     product_id_1 => [
+     *         super_attribute_id_1 => [
      *             value_index_1 => TRUE,
      *             ...
      *             value_index_n => TRUE
-     *         ),
+     *         ],
      *         ...
-     *     ),
+     *     ],
      *   ...
-     * )
+     * ]
      *
      * @var array
      */
@@ -169,11 +169,13 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
     {
         if (!empty($rowData['_super_attribute_code'])) {
             $superAttrCode = $rowData['_super_attribute_code'];
-
-            if (!$this->_isAttributeSuper($superAttrCode)) { // check attribute superity
+            if (!$this->_isAttributeSuper($superAttrCode)) {
+                // check attribute superity
                 $this->_entityModel->addRowError(self::ERROR_ATTRIBUTE_CODE_IS_NOT_SUPER, $rowNum);
                 return false;
-            } elseif (isset($rowData['_super_attribute_option']) && strlen($rowData['_super_attribute_option'])) {
+            }
+
+            if (isset($rowData['_super_attribute_option']) && strlen($rowData['_super_attribute_option'])) {
                 $optionKey = strtolower($rowData['_super_attribute_option']);
                 if (!isset($this->_superAttributes[$superAttrCode]['options'][$optionKey])) {
                     $this->_entityModel->addRowError(self::ERROR_INVALID_OPTION_VALUE, $rowNum);
@@ -351,7 +353,6 @@ class Mage_ImportExport_Model_Import_Entity_Product_Type_Configurable extends Ma
         $productSuperAttrId = null;
         $productId       = null;
         $productData     = null;
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
         $helper          = Mage::getResourceHelper('importexport');
         $nextAttrId      = $helper->getNextAutoincrement($mainTable);
 

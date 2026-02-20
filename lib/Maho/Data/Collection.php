@@ -3,10 +3,10 @@
 /**
  * Maho
  *
- * @package    Maho_Data
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -192,11 +192,11 @@ class Collection implements IteratorAggregate, Countable
     {
         if ($this->_curPage + $displacement <= 1) {
             return 1;
-        } elseif ($this->_curPage + $displacement > $this->getLastPageNumber()) {
-            return $this->getLastPageNumber();
-        } else {
-            return $this->_curPage + $displacement;
         }
+        if ($this->_curPage + $displacement > $this->getLastPageNumber()) {
+            return $this->getLastPageNumber();
+        }
+        return $this->_curPage + $displacement;
     }
 
     /**
@@ -209,11 +209,11 @@ class Collection implements IteratorAggregate, Countable
         $collectionSize = (int) $this->getSize();
         if (0 === $collectionSize) {
             return 1;
-        } elseif ($this->_pageSize) {
-            return ceil($collectionSize / $this->_pageSize);
-        } else {
-            return 1;
         }
+        if ($this->_pageSize) {
+            return ceil($collectionSize / $this->_pageSize);
+        }
+        return 1;
     }
 
     /**
@@ -724,6 +724,9 @@ class Collection implements IteratorAggregate, Countable
     public function getItemById($idValue)
     {
         $this->load();
+        if ($idValue === null) {
+            return null;
+        }
         return $this->_items[$idValue] ?? null;
     }
 

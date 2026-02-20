@@ -6,11 +6,11 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Sales_Model_Resource_Sale_Collection extends Varien_Data_Collection_Db
+class Mage_Sales_Model_Resource_Sale_Collection extends \Maho\Data\Collection\Db
 {
     /**
      * Totals data
@@ -87,14 +87,14 @@ class Mage_Sales_Model_Resource_Sale_Collection extends Varien_Data_Collection_D
     public function setOrderStateFilter($state, $exclude = false)
     {
         $this->_orderStateCondition = $exclude ? 'NOT IN' : 'IN';
-        $this->_orderStateValue     = !is_array($state) ? [$state] : $state;
+        $this->_orderStateValue     = is_array($state) ? $state : [$state];
         return $this;
     }
 
     /**
      * Before load action
      *
-     * @return Varien_Data_Collection_Db
+     * @return \Maho\Data\Collection\Db
      */
     #[\Override]
     protected function _beforeLoad()
@@ -139,7 +139,7 @@ class Mage_Sales_Model_Resource_Sale_Collection extends Varien_Data_Collection_D
      *
      * @param bool $printQuery
      * @param bool $logQuery
-     * @return  Varien_Data_Collection_Db
+     * @return \Maho\Data\Collection\Db
      * @throws Mage_Core_Model_Store_Exception
      */
     #[\Override]
@@ -166,7 +166,7 @@ class Mage_Sales_Model_Resource_Sale_Collection extends Varien_Data_Collection_D
             ->toOptionHash();
         $this->_items = [];
         foreach ($data as $v) {
-            $storeObject = new Varien_Object($v);
+            $storeObject = new \Maho\DataObject($v);
             $storeId     = $v['store_id'];
             $storeName   = $stores[$storeId] ?? null;
             $storeObject->setStoreName($storeName)
@@ -188,12 +188,12 @@ class Mage_Sales_Model_Resource_Sale_Collection extends Varien_Data_Collection_D
     }
 
     /**
-     * Retrieve totals data converted into Varien_Object
+     * Retrieve totals data converted into \Maho\DataObject
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getTotals()
     {
-        return new Varien_Object($this->_totals);
+        return new \Maho\DataObject($this->_totals);
     }
 }

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -308,20 +308,7 @@ class Mage_Core_Controller_Request_Http
 
     public function __get(string $key): mixed
     {
-        if (isset($this->_params[$key])) {
-            return $this->_params[$key];
-        } elseif (isset($_GET[$key])) {
-            return $_GET[$key];
-        } elseif (isset($_POST[$key])) {
-            return $_POST[$key];
-        } elseif (isset($_COOKIE[$key])) {
-            return $_COOKIE[$key];
-        } elseif (isset($_SERVER[$key])) {
-            return $_SERVER[$key];
-        } elseif (isset($_ENV[$key])) {
-            return $_ENV[$key];
-        }
-        return null;
+        return $this->_params[$key] ?? $_GET[$key] ?? $_POST[$key] ?? $_COOKIE[$key] ?? $_SERVER[$key] ?? $_ENV[$key] ?? null;
     }
 
     public function get(string $key): mixed
@@ -358,8 +345,10 @@ class Mage_Core_Controller_Request_Http
     {
         if (is_array($spec)) {
             $_GET = $spec;
+            $this->symfonyRequest->query->replace($spec);
         } else {
             $_GET[$spec] = $value;
+            $this->symfonyRequest->query->set($spec, $value);
         }
         return $this;
     }
@@ -376,8 +365,10 @@ class Mage_Core_Controller_Request_Http
     {
         if (is_array($spec)) {
             $_POST = $spec;
+            $this->symfonyRequest->request->replace($spec);
         } else {
             $_POST[$spec] = $value;
+            $this->symfonyRequest->request->set($spec, $value);
         }
         return $this;
     }
@@ -395,7 +386,10 @@ class Mage_Core_Controller_Request_Http
         if ($key === null) {
             return $this->symfonyRequest->cookies->all();
         }
-        return $this->symfonyRequest->cookies->get($key, $default);
+        if (!$this->symfonyRequest->cookies->has($key)) {
+            return $default;
+        }
+        return $this->symfonyRequest->cookies->get($key);
     }
 
     public function getServer(string|null $key = null, mixed $default = null): mixed
@@ -941,11 +935,9 @@ class Mage_Core_Controller_Request_Http
     {
         if (is_null($name)) {
             return $this->_beforeForwardInfo;
-        } elseif (isset($this->_beforeForwardInfo[$name])) {
-            return $this->_beforeForwardInfo[$name];
         }
 
-        return null;
+        return $this->_beforeForwardInfo[$name] ?? null;
     }
 
     /**

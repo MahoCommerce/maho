@@ -6,11 +6,11 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Install_Model_Installer extends Varien_Object
+class Mage_Install_Model_Installer extends Maho\DataObject
 {
     /**
      * Installer host response used to check urls
@@ -19,10 +19,8 @@ class Mage_Install_Model_Installer extends Varien_Object
 
     /**
      * Installer data model used to store data between installation steps
-     *
-     * @var Mage_Install_Model_Installer_Data|null
      */
-    protected $_dataModel;
+    protected Mage_Install_Model_Session|Mage_Install_Model_Installer_Data|null $_dataModel = null;
 
     /**
      * Checking install status of application
@@ -37,7 +35,7 @@ class Mage_Install_Model_Installer extends Varien_Object
     /**
      * Get data model
      *
-     * @return Mage_Install_Model_Session
+     * @return Mage_Install_Model_Session|Mage_Install_Model_Installer_Data
      */
     public function getDataModel()
     {
@@ -50,10 +48,10 @@ class Mage_Install_Model_Installer extends Varien_Object
     /**
      * Set data model to store data between installation steps
      *
-     * @param Mage_Install_Model_Installer_Data $model
+     * @param Mage_Install_Model_Session|Mage_Install_Model_Installer_Data $model
      * @return $this
      */
-    public function setDataModel(Varien_Object $model)
+    public function setDataModel(Maho\DataObject $model)
     {
         $this->_dataModel = $model;
         return $this;
@@ -132,10 +130,10 @@ class Mage_Install_Model_Installer extends Varien_Object
         }
 
         if (!empty($data['use_secure'])) {
-            $setupModel->setConfigData(Mage_Core_Model_Store::XML_PATH_SECURE_IN_FRONTEND, 1);
+            $setupModel->setConfigData(Mage_Core_Model_Store::XML_PATH_SECURE_IN_FRONTEND, '1');
             $setupModel->setConfigData(Mage_Core_Model_Store::XML_PATH_SECURE_BASE_URL, $data['secure_base_url']);
             if (!empty($data['use_secure_admin'])) {
-                $setupModel->setConfigData(Mage_Core_Model_Store::XML_PATH_SECURE_IN_ADMINHTML, 1);
+                $setupModel->setConfigData(Mage_Core_Model_Store::XML_PATH_SECURE_IN_ADMINHTML, '1');
             }
         } elseif (!empty($data['unsecure_base_url'])) {
             $setupModel->setConfigData(Mage_Core_Model_Store::XML_PATH_SECURE_BASE_URL, $unsecureBaseUrl);
@@ -248,7 +246,7 @@ class Mage_Install_Model_Installer extends Varien_Object
         return $this;
     }
 
-    public function finish()
+    public function finish(): self
     {
         Mage::getSingleton('install/installer_config')->replaceTmpInstallDate();
         Mage::app()->cleanCache();

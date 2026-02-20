@@ -6,7 +6,7 @@
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,7 +30,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Apply all catalog price rules for specific product
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function applyAllRulesOnProduct($observer)
@@ -50,7 +50,7 @@ class Mage_CatalogRule_Model_Observer
      * Load matched catalog price rules for specific product.
      * Is used for comparison in Mage_CatalogRule_Model_Resource_Rule::applyToProduct method
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function loadProductRules($observer)
@@ -68,7 +68,7 @@ class Mage_CatalogRule_Model_Observer
      * Apply all price rules for current date.
      * Handle catalog_product_import_after event
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      *
      * @return  $this
      */
@@ -89,7 +89,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
-    public function preloadPriceRules(Varien_Event_Observer $observer)
+    public function preloadPriceRules(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getQuote();
@@ -120,7 +120,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Apply catalog price rules to product on frontend
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      *
      * @return  $this
      */
@@ -167,7 +167,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Apply catalog price rules to product in admin
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      *
      * @return  $this
      */
@@ -212,7 +212,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
-    public function catalogProductTypeConfigurablePrice(Varien_Event_Observer $observer)
+    public function catalogProductTypeConfigurablePrice(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
@@ -235,7 +235,7 @@ class Mage_CatalogRule_Model_Observer
      * This method is called from cron process, cron is working in UTC time and
      * we should generate data for interval -1 day ... +1 day
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      *
      * @return  $this
      */
@@ -261,7 +261,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
-    public function prepareCatalogProductPriceIndexTable(Varien_Event_Observer $observer)
+    public function prepareCatalogProductPriceIndexTable(\Maho\Event\Observer $observer)
     {
         $select             = $observer->getEvent()->getSelect();
 
@@ -349,7 +349,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
-    public function catalogAttributeSaveAfter(Varien_Event_Observer $observer)
+    public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -365,7 +365,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
-    public function catalogAttributeDeleteAfter(Varien_Event_Observer $observer)
+    public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -380,7 +380,7 @@ class Mage_CatalogRule_Model_Observer
      * @return $this
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function prepareCatalogProductCollectionPrices(Varien_Event_Observer $observer)
+    public function prepareCatalogProductCollectionPrices(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
         $collection = $observer->getEvent()->getCollection();
@@ -427,7 +427,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Create catalog rule relations for imported products
      */
-    public function createCatalogRulesRelations(Varien_Event_Observer $observer)
+    public function createCatalogRulesRelations(\Maho\Event\Observer $observer)
     {
         /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */
         $adapter = $observer->getEvent()->getAdapter();
@@ -450,7 +450,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Runs Catalog Product Price Reindex
      */
-    public function runCatalogProductPriceReindex(Varien_Event_Observer $observer)
+    public function runCatalogProductPriceReindex(\Maho\Event\Observer $observer)
     {
         $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
         if ($indexProcess) {

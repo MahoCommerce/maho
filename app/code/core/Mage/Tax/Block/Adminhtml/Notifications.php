@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,14 +15,14 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
     /**
      * Factory instance
      *
-     * @var Mage_Core_Model_Factory
+     * @var Mage_Core_Model_Factory|null
      */
     protected $_factory;
 
     /**
      * Application instance
      *
-     * @var Mage_Core_Model_App
+     * @var Mage_Core_Model_App|null
      */
     protected $_app;
 
@@ -31,8 +31,8 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
      */
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('core/factory');
-        $this->_app = !empty($args['app']) ? $args['app'] : Mage::app();
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
+        $this->_app = empty($args['app']) ? Mage::app() : $args['app'];
         unset($args['factory'], $args['app']);
         parent::__construct($args);
     }
@@ -47,8 +47,10 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
     {
         $defaultStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
         //check default store first
-        /** @var Mage_Tax_Model_Config $model */
         $model = $this->_factory->getSingleton('tax/config');
+        if (!$model instanceof Mage_Tax_Model_Config) {
+            return [];
+        }
         if (!$model->checkDisplaySettings($defaultStoreId)) {
             return true;
         }
@@ -108,8 +110,10 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
      */
     public function checkDisplaySettings($store = null)
     {
-        /** @var Mage_Tax_Model_Config $model */
         $model = $this->_factory->getSingleton('tax/config');
+        if (!$model instanceof Mage_Tax_Model_Config) {
+            return false;
+        }
         return $model->checkDisplaySettings($store);
     }
 
@@ -121,8 +125,10 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
      */
     public function getWebsitesWithWrongDiscountSettings()
     {
-        /** @var Mage_Tax_Model_Config $model */
         $model = $this->_factory->getSingleton('tax/config');
+        if (!$model instanceof Mage_Tax_Model_Config) {
+            return [];
+        }
 
         $defaultStoreId = Mage_Catalog_Model_Abstract::DEFAULT_STORE_ID;
         //check default store first
@@ -180,9 +186,8 @@ class Mage_Tax_Block_Adminhtml_Notifications extends Mage_Adminhtml_Block_Templa
     #[\Override]
     protected function _toHtml()
     {
-        /** @var Mage_Admin_Model_Session $model */
         $model = $this->_factory->getSingleton('admin/session');
-        if ($model->isAllowed('system/config/tax')) {
+        if ($model instanceof Mage_Admin_Model_Session && $model->isAllowed('system/config/tax')) {
             return parent::_toHtml();
         }
         return '';

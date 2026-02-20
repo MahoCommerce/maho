@@ -6,6 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,26 +15,22 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
     /**
      * @var Mage_Install_Model_Installer_Db_Abstract|null database
      */
-    protected $_dbResource;
+    protected ?Mage_Install_Model_Installer_Db_Abstract $_dbResource = null;
 
     /**
      * Check database connection
      * and return checked connection data
      *
-     * @param array $data
-     * @return array
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
      */
-    public function checkDbConnectionData($data)
+    public function checkDbConnectionData(array $data): array
     {
         $data = $this->_getCheckedData($data);
 
         try {
-            $dbModel = ($data['db_model']);
-
-            if (!$resource = $this->_getDbResource($dbModel)) {
-                Mage::throwException(Mage::helper('install')->__('No resource for %s DB model.', $dbModel));
-            }
-
+            $dbEngine = $data['db_engine'];
+            $resource = $this->_getDbResource($dbEngine);
             $resource->setConfig($data);
 
             // check required extensions
@@ -50,18 +47,7 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
                 );
             }
 
-            $version    = $resource->getVersion();
-            $requiredVersion = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/min_version', $dbModel));
-
-            // check DB server version
-            if (version_compare($version, $requiredVersion) == -1) {
-                Mage::throwException(
-                    Mage::helper('install')->__('The database server version doesn\'t match system requirements (required: %s, actual: %s).', $requiredVersion, $version),
-                );
-            }
-
-            // check InnoDB support
+            // check InnoDB support (MySQL-specific, PostgreSQL always returns true)
             if (!$resource->supportEngine()) {
                 Mage::throwException(
                     Mage::helper('install')->__('Database server does not support the InnoDB storage engine.'),
@@ -83,10 +69,10 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
     /**
      * Check database connection data
      *
-     * @param  array $data
-     * @return array
+     * @param  array<string, mixed> $data
+     * @return array<string, mixed>
      */
-    protected function _getCheckedData($data)
+    protected function _getCheckedData(array $data): array
     {
         if (!isset($data['db_name']) || empty($data['db_name'])) {
             Mage::throwException(Mage::helper('install')->__('Database Name cannot be empty.'));
@@ -103,23 +89,15 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
                 );
             }
         }
-        //set default db model
-        if (!isset($data['db_model']) || empty($data['db_model'])) {
-            $data['db_model'] = Mage::getConfig()
-                ->getResourceConnectionConfig(Mage_Core_Model_Resource::DEFAULT_SETUP_RESOURCE)->model;
-        }
-        //set db type according the db model
-        if (!isset($data['db_type'])) {
-            $data['db_type'] = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/type', $data['db_model']));
-        }
 
-        $dbResource = $this->_getDbResource($data['db_model']);
-        $data['db_pdo_type'] = $dbResource->getPdoType();
+        // Set default db engine
+        if (empty($data['db_engine'])) {
+            $data['db_engine'] = 'mysql';
+        }
 
         if (!isset($data['db_init_statemants'])) {
             $data['db_init_statemants'] = (string) Mage::getConfig()
-                ->getNode(sprintf('install/databases/%s/initStatements', $data['db_model']));
+                ->getNode(sprintf('install/databases/%s/initStatements', $data['db_engine']));
         }
 
         return $data;
@@ -128,46 +106,21 @@ class Mage_Install_Model_Installer_Db extends Mage_Install_Model_Installer_Abstr
     /**
      * Retrieve the database resource
      *
-     * @param  string $model database type
-     * @return Mage_Install_Model_Installer_Db_Abstract
+     * @param  string $engine database engine (mysql, pgsql)
      * @throws Mage_Core_Exception
      */
-    protected function _getDbResource($model)
+    protected function _getDbResource(string $engine): Mage_Install_Model_Installer_Db_Abstract
     {
         if (!isset($this->_dbResource)) {
-            /** @var Mage_Install_Model_Installer_Db_Abstract $resource */
-            $resource =  Mage::getSingleton(sprintf('install/installer_db_%s', $model));
+            $resource = Mage::getSingleton(sprintf('install/installer_db_%s', $engine));
             if (!$resource) {
                 Mage::throwException(
-                    Mage::helper('install')->__('Installer does not exist for %s database type', $model),
+                    Mage::helper('install')->__('Installer does not exist for %s database engine', $engine),
                 );
             }
+            assert($resource instanceof \Mage_Install_Model_Installer_Db_Abstract);
             $this->_dbResource = $resource;
         }
         return $this->_dbResource;
-    }
-
-    /**
-     * Retrieve Connection Type
-     *
-     * @return string
-     *
-     * @deprecated since 1.5.0.0
-     */
-    protected function _getConnenctionType()
-    {
-        return (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/type');
-    }
-
-    /**
-     * Check database connection
-     *
-     * @param array $data
-     *
-     * @deprecated since 1.5.0.0
-     */
-    public function checkDatabase($data)
-    {
-        $this->checkDbConnectionData($data);
     }
 }

@@ -6,6 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,22 +15,22 @@
  * @method bool getDisplayZero()
  * @method int getFontSize()
  * @method Mage_Sales_Model_Order getOrder()
- * @method Varien_Object getSource()
+ * @method \Maho\DataObject getSource()
  * @method string getSourceField()
  * @method string getTitle()
  * @method string getTitleSourceField()
  */
-class Mage_Sales_Model_Order_Pdf_Total_Default extends Varien_Object
+class Mage_Sales_Model_Order_Pdf_Total_Default extends \Maho\DataObject
 {
     /**
      * Get array of arrays with totals information for display in PDF
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'amount'   => $amount,
      *      'label'    => $label,
      *      'font_size'=> $fontSize
-     *  )
-     * )
+     *  ]
+     * ]
      * @return array
      */
     public function getTotalsForDisplay()
@@ -64,13 +65,13 @@ class Mage_Sales_Model_Order_Pdf_Total_Default extends Varien_Object
 
     /**
      * Get array of arrays with tax information for display in PDF
-     * array(
-     *  $index => array(
+     * [
+     *  $index => [
      *      'amount'   => $amount,
      *      'label'    => $label,
      *      'font_size'=> $fontSize
-     *  )
-     * )
+     *  ]
+     * ]
      * @return array
      */
     public function getFullTaxInfo()

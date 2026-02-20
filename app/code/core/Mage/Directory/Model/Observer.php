@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,7 +36,6 @@ class Mage_Directory_Model_Observer
         }
 
         try {
-            /** @var Mage_Directory_Model_Currency_Import_Abstract $importModel */
             $importModel = Mage::getModel(Mage::getConfig()->getNode('global/currency/import/services/' . $service . '/model')->asArray());
         } catch (Exception $e) {
             $importWarnings[] = Mage::helper('directory')->__('FATAL ERROR:') . ' ' . Mage::throwException(Mage::helper('directory')->__('Unable to initialize the import model.'));
@@ -45,6 +44,7 @@ class Mage_Directory_Model_Observer
         if (!isset($importModel)) {
             return;
         }
+        assert($importModel instanceof \Mage_Directory_Model_Currency_Import_Abstract);
 
         $rates = $importModel->fetchRates();
         $errors = $importModel->getMessages();

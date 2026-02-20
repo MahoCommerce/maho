@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,66 +16,65 @@
  * Model for multi-filtering all data which set to models
  * Example:
  * <code>
- * /** @var Mage_Core_Model_Input_Filter $filter {@*}
  * $filter = Mage::getModel('core/input_filter');
- * $filter->setFilters(array(
- *      'list_values' => array(
- *          'children_filters' => array( //filters will applied to all children
+ * $filter->setFilters([
+ *      'list_values' => [
+ *          'children_filters' => [ //filters will applied to all children
  *              'striptags',  // Simple string filter using core helper
  *              function($value) { return strtoupper($value); }  // Callable filter
- *          )
- *      ),
- *      'list_values_with_name' => array(
- *          'children_filters' => array(
- *              'item1' => array(
+ *          ]
+ *      ],
+ *      'list_values_with_name' => [
+ *          'children_filters' => [
+ *              'item1' => [
  *                  function($value) { return strtoupper($value); }
- *              ),
- *              'item2' => array(
- *                  array('model' => 'core/input_filter_maliciousCode')
- *              ),
- *              'item3' => array(
- *                  array(
+ *              ],
+ *              'item2' => [
+ *                  ['model' => 'core/input_filter_maliciousCode']
+ *              ],
+ *              'item3' => [
+ *                  [
  *                      'helper' => 'core',
  *                      'method' => 'stripTags',
- *                      'args' => array('<p> <div>', true))
- *              )
- *          )
- *      )
- *  ));
+ *                      'args' => ['<p> <div>', true]]
+ *              ]
+ *          ]
+ *      ]
+ *  ]);
  *  $filter->addFilter('name2', function($value) { return preg_replace('/[^a-zA-Z0-9]/', '', $value); });
  *  $filter->addFilter('name1', 'striptags');
  *  $filter->addFilter('name1', 'email');
- *  $filter->addFilters(array(
- *      'list_values_with_name' => array(
- *          'children_filters' => array(
- *              'deep_list' => array(
- *                  'children_filters' => array(
- *                      'sub1' => array(
+ *  $filter->addFilters([
+ *      'list_values_with_name' => [
+ *          'children_filters' => [
+ *              'deep_list' => [
+ *                  'children_filters' => [
+ *                      'sub1' => [
  *                          function($value) { return strtolower($value); }
- *                      ),
- *                      'sub2' => array('int')
- *                  )
- *              )
- *          )
- *      )
- *  ));
- *  $filter->filter(array(
+ *                      ],
+ *                      'sub2' => ['int']
+ *                  ]
+ *              ]
+ *          ]
+ *      ]
+ *  ]);
+ *  $filter->filter([
  *      'name1' => 'some <b>string</b>',
  *      'name2' => '888 555',
- *      'list_values' => array(
+ *      'list_values' => [
  *          'some <b>string2</b>',
  *          'some <p>string3</p>',
- *      ),
- *      'list_values_with_name' => array(
+ *      ],
+ *      'list_values_with_name' => [
  *          'item1' => 'some <b onclick="alert(\'2\')">string4</b>',
  *         'item2' => 'some <b onclick="alert(\'1\')">string5</b>',
  *          'item3' => 'some <p>string5</p> <b>bold</b> <div>div</div>',
- *          'deep_list' => array(
+ *          'deep_list' => [
  *              'sub1' => 'toLowString',
  *              'sub2' => '5 TO INT',
- *          )
- *      )
- *  ));
+ *          ]
+ *      ]
+ *  ]);
  * </code>
  * @see Mage_Core_Model_Input_FilterTest See this class for manual
  */
@@ -130,11 +129,11 @@ class Mage_Core_Model_Input_Filter
      * Add filters
      *
      * Filters data must be has view as
-     *      array(
+     *      [
      *          'key1' => $filters,
-     *          'key2' => array( ... ), //array filters data
+     *          'key2' => [ ... ], //array filters data
      *          'key2' => $filters
-     *      )
+     *      ]
      *
      * @return $this
      */
@@ -165,9 +164,8 @@ class Mage_Core_Model_Input_Filter
     {
         if ($name === null) {
             return $this->_filters;
-        } else {
-            return $this->_filters[$name] ?? null;
         }
+        return $this->_filters[$name] ?? null;
     }
 
     /**

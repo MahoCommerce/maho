@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -464,10 +464,9 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     $pdf,
                     'application/pdf',
                 );
-            } else {
-                $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
-                $this->_redirect('*/*/');
             }
+            $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
+            $this->_redirect('*/*/');
         }
         $this->_redirect('*/*/');
     }
@@ -500,10 +499,9 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     $pdf,
                     'application/pdf',
                 );
-            } else {
-                $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
-                $this->_redirect('*/*/');
             }
+            $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
+            $this->_redirect('*/*/');
         }
         $this->_redirect('*/*/');
     }
@@ -536,10 +534,9 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     $pdf,
                     'application/pdf',
                 );
-            } else {
-                $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
-                $this->_redirect('*/*/');
             }
+            $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
+            $this->_redirect('*/*/');
         }
         $this->_redirect('*/*/');
     }
@@ -602,10 +599,9 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
                     $pdfContent,
                     'application/pdf',
                 );
-            } else {
-                $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
-                $this->_redirect('*/*/');
             }
+            $this->_getSession()->addError($this->__('There are no printable documents related to selected orders.'));
+            $this->_redirect('*/*/');
         }
         $this->_redirect('*/*/');
     }
@@ -620,7 +616,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
         }
         try {
             $order->getPayment()->void(
-                new Varien_Object(), // workaround for backwards compatibility
+                new \Maho\DataObject(), // workaround for backwards compatibility
             );
             $order->save();
             $this->_getSession()->addSuccess($this->__('The payment has been voided.'));

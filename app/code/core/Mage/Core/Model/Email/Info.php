@@ -17,7 +17,7 @@
  *  -Bcc: Blind carbon copy to tertiary recipients who receive the message
  *        without anyone else (including the To, Cc, and Bcc recipients) seeing who the tertiary recipients are
  */
-class Mage_Core_Model_Email_Info extends Varien_Object
+class Mage_Core_Model_Email_Info extends \Maho\DataObject
 {
     /**
      * Name list of "Bcc" recipients

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -89,6 +89,13 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
      * @var array
      */
     protected $_storeCodeToId = [];
+
+    /**
+     * Category path to ID mapping.
+     *
+     * @var array
+     */
+    protected $_pathToId = [];
 
     /**
      * Default attribute set ID for categories.
@@ -200,9 +207,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     {
         if (Mage_ImportExport_Model_Import::BEHAVIOR_DELETE == $this->getBehavior()) {
             return $this->_deleteCategories();
-        } elseif (Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE == $this->getBehavior()) {
+        }
+        if (Mage_ImportExport_Model_Import::BEHAVIOR_REPLACE == $this->getBehavior()) {
             return $this->_saveAndReplaceCategories();
-        } elseif (Mage_ImportExport_Model_Import::BEHAVIOR_APPEND == $this->getBehavior()) {
+        }
+        if (Mage_ImportExport_Model_Import::BEHAVIOR_APPEND == $this->getBehavior()) {
             return $this->_saveCategories();
         }
 
@@ -335,9 +344,16 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 $attributes = array_merge_recursive($attributes, $newCategoryAttributes);
             }
 
-            // Update existing categories
-            if ($entityRowsUp) {
-                $this->_connection->insertOnDuplicate($entityTable, $entityRowsUp, ['updated_at', 'parent_id']);
+            // Update existing categories - use UPDATE instead of insertOnDuplicate
+            // because insertOnDuplicate requires all NOT NULL columns for the INSERT part
+            foreach ($entityRowsUp as $updateRow) {
+                $entityId = $updateRow['entity_id'];
+                unset($updateRow['entity_id']);
+                $this->_connection->update(
+                    $entityTable,
+                    $updateRow,
+                    ['entity_id = ?' => $entityId],
+                );
             }
 
             // Process store scope rows
@@ -395,6 +411,8 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
     {
         $entityTable = Mage::getSingleton('core/resource')->getTableName('catalog_category_entity');
         $newCategoryAttributes = [];
+        $isPostgres = $this->_connection instanceof \Maho\Db\Adapter\Pdo\Pgsql;
+        $isSqlite = $this->_connection instanceof \Maho\Db\Adapter\Pdo\Sqlite;
 
         foreach ($entityRows as &$row) {
             // Extract temporary data before database insert
@@ -402,29 +420,63 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
             $tempRowScope = $row['_temp_row_scope'] ?? null;
             unset($row['_temp_row_data'], $row['_temp_row_scope']);
 
+            // For PostgreSQL and SQLite compatibility, we need to include the path in the initial INSERT
+            // because path is NOT NULL. For auto-generated IDs, we need to get the next sequence value first
+            // (PostgreSQL) or use a placeholder that we update after getting lastInsertId (SQLite).
+            $needsPathUpdate = false;
+            if (!isset($row['entity_id'])) {
+                if ($isPostgres) {
+                    // Get next entity_id from PostgreSQL sequence
+                    $entityId = (int) $this->_connection->fetchOne(
+                        "SELECT nextval(pg_get_serial_sequence('{$entityTable}', 'entity_id'))",
+                    );
+                    $row['entity_id'] = $entityId;
+                } elseif ($isSqlite) {
+                    // SQLite: use placeholder path since we can't get next ID before insert
+                    // but SQLite strictly enforces NOT NULL. Will update after insert.
+                    $row['path'] = '0';
+                    $needsPathUpdate = true;
+                } else {
+                    // MySQL: let auto_increment handle it, will update path after
+                    $needsPathUpdate = true;
+                }
+            }
+
+            // Calculate path before insertion (for PostgreSQL or when entity_id is known)
+            if (isset($row['entity_id'])) {
+                $entityId = (int) $row['entity_id'];
+                $parentPath = '';
+                if ($row['parent_id'] != Mage_Catalog_Model_Category::TREE_ROOT_ID) {
+                    $parentPath = $this->_getPathById($row['parent_id']);
+                }
+                $row['path'] = $parentPath ? $parentPath . '/' . $entityId : (string) $entityId;
+            }
+
             $this->_connection->insert($entityTable, $row);
 
-            // Use specified entity_id if provided, otherwise use auto-generated ID
-            $entityId = isset($row['entity_id']) ? (int) $row['entity_id'] : (int) $this->_connection->lastInsertId();
+            // For MySQL/SQLite without pre-set entity_id, get the auto-generated ID and update path
+            if ($needsPathUpdate) {
+                $entityId = (int) $this->_connection->lastInsertId();
+                $parentPath = '';
+                if ($row['parent_id'] != Mage_Catalog_Model_Category::TREE_ROOT_ID) {
+                    $parentPath = $this->_getPathById($row['parent_id']);
+                }
+                $path = $parentPath ? $parentPath . '/' . $entityId : (string) $entityId;
+
+                $this->_connection->update(
+                    $entityTable,
+                    ['path' => $path],
+                    ['entity_id = ?' => $entityId],
+                );
+                $row['entity_id'] = $entityId;
+            } else {
+                $entityId = (int) $row['entity_id'];
+            }
 
             // Update category ID cache
             $this->_categoryIds[$entityId] = $row['parent_id'];
             $this->_validParentIds[$entityId] = true;
 
-            // Update path
-            $parentPath = '';
-            if ($row['parent_id'] != Mage_Catalog_Model_Category::TREE_ROOT_ID) {
-                $parentPath = $this->_getPathById($row['parent_id']);
-            }
-            $path = $parentPath ? $parentPath . '/' . $entityId : $entityId;
-
-            $this->_connection->update(
-                $entityTable,
-                ['path' => $path],
-                ['entity_id = ?' => $entityId],
-            );
-
-            $row['entity_id'] = $entityId;
             $this->_processedEntitiesCount++;
 
             // Collect attributes for this newly created category
@@ -955,12 +1007,11 @@ class Mage_ImportExport_Model_Import_Entity_Category extends Mage_ImportExport_M
                 parent::validateData();
                 $this->_permanentAttributes = $originalPermanentAttributes;
                 return $this;
-            } else {
-                // Neither column present - add a custom error and return this
-                $this->addRowError(self::ERROR_DELETE_IDENTIFIER_MISSING, 0);
-                $this->_permanentAttributes = $originalPermanentAttributes;
-                return $this;
             }
+            // Neither column present - add a custom error and return this
+            $this->addRowError(self::ERROR_DELETE_IDENTIFIER_MISSING, 0);
+            $this->_permanentAttributes = $originalPermanentAttributes;
+            return $this;
         }
 
         // For non-DELETE behaviors, require parent_id for new categories

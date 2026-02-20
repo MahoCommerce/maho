@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -279,55 +279,6 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
     }
 
     /**
-     * Retrieve catalog product flat columns array in old format (used before MMDB support)
-     *
-     * @return array
-     */
-    protected function _getFlatColumnsOldDefinition()
-    {
-        $columns = [];
-        $columns['entity_id'] = [
-            'type'      => 'int(10)',
-            'unsigned'  => true,
-            'is_null'   => false,
-            'default'   => null,
-            'extra'     => null,
-        ];
-        if ($this->getFlatHelper()->isAddChildData()) {
-            $columns['child_id'] = [
-                'type'      => 'int(10)',
-                'unsigned'  => true,
-                'is_null'   => true,
-                'default'   => null,
-                'extra'     => null,
-            ];
-            $columns['is_child'] = [
-                'type'      => 'tinyint(1)',
-                'unsigned'  => true,
-                'is_null'   => false,
-                'default'   => 0,
-                'extra'     => null,
-            ];
-        }
-        $columns['attribute_set_id'] = [
-            'type'      => 'smallint(5)',
-            'unsigned'  => true,
-            'is_null'   => false,
-            'default'   => 0,
-            'extra'     => null,
-        ];
-        $columns['type_id'] = [
-            'type'      => 'varchar(32)',
-            'unsigned'  => false,
-            'is_null'   => false,
-            'default'   => Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
-            'extra'     => null,
-        ];
-
-        return $columns;
-    }
-
-    /**
      * Retrieve catalog product flat columns array in DDL format
      *
      * @return array
@@ -391,11 +342,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
     public function getFlatColumns()
     {
         if ($this->_columns === null) {
-            if (Mage::helper('core')->useDbCompatibleMode()) {
-                $this->_columns = $this->_getFlatColumnsOldDefinition();
-            } else {
-                $this->_columns = $this->_getFlatColumnsDdlDefinition();
-            }
+            $this->_columns = $this->_getFlatColumnsDdlDefinition();
 
             foreach ($this->getAttributes() as $attribute) {
                 /** @var Mage_Eav_Model_Entity_Attribute_Abstract $attribute */
@@ -408,7 +355,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 }
             }
 
-            $columnsObject = new Varien_Object();
+            $columnsObject = new \Maho\DataObject();
             $columnsObject->setColumns($this->_columns);
             Mage::dispatchEvent(
                 'catalog_product_flat_prepare_columns',
@@ -469,7 +416,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
                 }
             }
 
-            $indexesObject = new Varien_Object();
+            $indexesObject = new \Maho\DataObject();
             $indexesObject->setIndexes($this->_indexes);
             Mage::dispatchEvent('catalog_product_flat_prepare_indexes', [
                 'indexes'   => $indexesObject,
@@ -490,75 +437,8 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
      */
     protected function _compareColumnProperties($column, $describe)
     {
-        /** @var Mage_Catalog_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('catalog');
         return $helper->compareIndexColumnProperties($column, $describe);
-    }
-
-    /**
-     * Retrieve column definition fragment
-     * @deprecated since 1.5.0.0
-     *
-     * Example: `field_name` smallint(5) unsigned NOT NULL default '0'
-     *
-     * @param string $fieldName
-     * @param array $fieldProp
-     * @return string
-     */
-    protected function _sqlColunmDefinition($fieldName, $fieldProp)
-    {
-        $fieldNameQuote = $this->_getWriteAdapter()->quoteIdentifier($fieldName);
-
-        /**
-         * Process the case when 'is_null' prohibits null value, and 'default' proposed to be null
-         * It just means that default value not specified
-         */
-        if ($fieldProp['is_null'] === false && $fieldProp['default'] === null) {
-            $defaultValue = '';
-        } else {
-            $defaultValue = $fieldProp['default'] === null ? ' DEFAULT NULL' : $this->_getReadAdapter()
-                ->quoteInto(' DEFAULT ?', $fieldProp['default']);
-        }
-
-        return "{$fieldNameQuote} {$fieldProp['type']}"
-            . ($fieldProp['unsigned'] ? ' UNSIGNED' : '')
-            . ($fieldProp['extra'] ? ' ' . $fieldProp['extra'] : '')
-            . ($fieldProp['is_null'] === false ? ' NOT NULL' : '')
-            . $defaultValue;
-    }
-
-    /**
-     * Retrieve index definition fragment
-     * @deprecated since 1.5.0.0
-     *
-     * Example: INDEX `IDX_NAME` (`field_id`)
-     *
-     * @param string $indexName
-     * @param array $indexProp
-     * @return string
-     */
-    protected function _sqlIndexDefinition($indexName, $indexProp)
-    {
-        $fields = $indexProp['fields'];
-        if (is_array($fields)) {
-            $fieldSql = [];
-            foreach ($fields as $field) {
-                $fieldSql[] = $this->_getReadAdapter()->quoteIdentifier($field);
-            }
-            $fieldSql = implode(',', $fieldSql);
-        } else {
-            $fieldSql = $this->_getReadAdapter()->quoteIdentifier($fields);
-        }
-
-        $indexNameQuote = $this->_getReadAdapter()->quoteIdentifier($indexName);
-        $condition = match (strtolower($indexProp['type'])) {
-            'primary' => 'PRIMARY KEY',
-            'unique' => 'UNIQUE ' . $indexNameQuote,
-            'fulltext' => 'FULLTEXT ' . $indexNameQuote,
-            default => 'INDEX ' . $indexNameQuote,
-        };
-
-        return sprintf('%s (%s)', $condition, $fieldSql);
     }
 
     /**
@@ -593,14 +473,6 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
 
         // Extract columns we need to have in flat table
         $columns = $this->getFlatColumns();
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
-            $helper = Mage::getResourceHelper('core');
-            /* Convert old format of flat columns to new MMDB format that uses DDL types and definitions */
-            foreach ($columns as $key => $column) {
-                $columns[$key] = $helper->convertOldColumnDefinition($column);
-            }
-        }
 
         // Extract indexes we need to have in flat table
         $indexesNeed  = $this->getFlatIndexes();
@@ -1045,7 +917,7 @@ class Mage_Catalog_Model_Resource_Product_Flat_Indexer extends Mage_Index_Model_
     {
         if ($this->_productTypes === null) {
             $this->_productTypes = [];
-            $productEmulator     = new Varien_Object();
+            $productEmulator     = new \Maho\DataObject();
 
             foreach (array_keys(Mage_Catalog_Model_Product_Type::getTypes()) as $typeId) {
                 $productEmulator->setTypeId($typeId);

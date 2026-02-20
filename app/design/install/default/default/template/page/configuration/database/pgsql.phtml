@@ -1,0 +1,69 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * Install PostgreSQL database configuration template
+ *
+ * @var Mage_Install_Block_Configuration $this
+ */
+?>
+<li>
+    <label for="pgsql_host"><?= $this->__('Host') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_host]"
+           id="pgsql_host"
+           value="<?= $this->getFormData()->getDbHost() ?: 'localhost' ?>"
+           title="<?= $this->quoteEscape($this->__('Database host')) ?>"
+           class="input-text"
+           required>
+    <p class="field-note">
+        <?= $this->__('You can specify server port, ex.: localhost:5432') ?>
+    </p>
+</li>
+<li>
+    <label for="pgsql_dbname"><?= $this->__('Database Name') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_name]"
+           id="pgsql_dbname"
+           value="<?= $this->getFormData()->getDbName() ?>"
+           title="<?= $this->quoteEscape($this->__('Database Name')) ?>"
+           class="input-text"
+           required>
+</li>
+<li>
+    <label for="pgsql_user"><?= $this->__('User Name') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_user]"
+           id="pgsql_user"
+           value="<?= $this->getFormData()->getDbUser() ?: 'postgres' ?>"
+           title="<?= $this->quoteEscape($this->__('Database user name')) ?>"
+           class="input-text"
+           required>
+</li>
+<li>
+    <label for="pgsql_password"><?= $this->__('User Password') ?></label>
+    <input type="password"
+           name="connection[<?= $this->getIdPrefix() ?>][db_pass]"
+           id="pgsql_password"
+           value=""
+           title="<?= $this->quoteEscape($this->__('Database user password')) ?>"
+           class="input-text">
+</li>
+<li>
+    <label for="pgsql_prefix"><?= $this->__('Tables Prefix') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_prefix]"
+           id="pgsql_prefix"
+           value="<?= $this->getFormData()->getDbPrefix() ?>"
+           title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>"
+           class="input-text">
+    <p class="field-note">
+        <?= $this->__('(Optional. Leave blank for no prefix)') ?>
+    </p>
+</li>

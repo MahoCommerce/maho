@@ -60,7 +60,7 @@ abstract class Mage_Adminhtml_Helper_Dashboard_Abstract extends Mage_Core_Helper
                 } else {
                     $result[] = null;
                 }
-            } elseif ($item instanceof Varien_Object) {
+            } elseif ($item instanceof \Maho\DataObject) {
                 $result[] = $item->getData($index);
             } else {
                 $result[] = null;

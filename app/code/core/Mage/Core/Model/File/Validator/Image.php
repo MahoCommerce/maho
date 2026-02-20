@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -93,7 +93,7 @@ class Mage_Core_Model_File_Validator_Image
             return null;
         }
 
-        [$imageWidth, $imageHeight, $fileType] = getimagesize($filePath);
+        [$imageWidth, $imageHeight, $fileType] = \Maho\Io::getImageSize($filePath);
         if ($fileType) {
             if ($fileType === IMAGETYPE_ICO) {
                 return null;
@@ -142,12 +142,9 @@ class Mage_Core_Model_File_Validator_Image
                             break;
                     }
 
-                    imagedestroy($img);
-                    imagedestroy($image);
                     return null;
-                } else {
-                    throw Mage::exception('Mage_Core', Mage::helper('core')->__('Invalid image.'));
                 }
+                throw Mage::exception('Mage_Core', Mage::helper('core')->__('Invalid image.'));
             }
         }
         throw Mage::exception('Mage_Core', Mage::helper('core')->__('Invalid MIME type.'));

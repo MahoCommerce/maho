@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,10 +60,19 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
 
     /**
      * Payment method code
+     *
+     * @var string
      */
     protected $_code = Mage_Paypal_Model_Config::METHOD_PAYFLOWLINK;
 
+    /**
+     * @var string
+     */
     protected $_formBlockType = 'paypal/payflow_link_form';
+
+    /**
+     * @var string
+     */
     protected $_infoBlockType = 'paypal/payflow_link_info';
 
     /**
@@ -135,16 +144,15 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
     {
         if ($this->getConfigData('mobile_optimized')) {
             return self::MOBILE_LAYOUT_TEMPLATE;
-        } else {
-            return self::LAYOUT_TEMPLATE;
         }
+        return self::LAYOUT_TEMPLATE;
     }
 
     /**
      * Instantiate state and set it to state object
      *
      * @param string $paymentAction
-     * @param Varien_Object $stateObject
+     * @param \Maho\DataObject $stateObject
      * @return $this
      */
     #[\Override]
@@ -433,7 +441,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * @return Mage_Paypal_Model_Payflow_Request
      */
     #[\Override]
-    protected function _buildBasicRequest(Varien_Object $payment)
+    protected function _buildBasicRequest(\Maho\DataObject $payment)
     {
         $request = Mage::getModel('paypal/payflow_request');
         $cscEditable = $this->getConfigData('csc_editable');
@@ -500,7 +508,7 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * If response is failed throw exception
      * Set token data in payment object
      *
-     * @param Varien_Object $response
+     * @param \Maho\DataObject $response
      * @param Mage_Payment_Model_Info|Mage_Sales_Model_Order_Payment $payment
      * @throws Mage_Core_Exception
      */
@@ -539,79 +547,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
         $secureHash = md5(Mage::helper('core')->getRandomString(10));
         $payment->setAdditionalInformation($this->_secureSilentPostHashKey, $secureHash);
         return $secureHash;
-    }
-
-    /**
-     * Add transaction with correct transaction Id
-     *
-     * @deprecated since 1.6.2.0
-     * @param Varien_Object $payment
-     * @param string $txnId
-     */
-    protected function _addTransaction($payment, $txnId) {}
-
-    /**
-     * Initialize request
-     *
-     * @deprecated since 1.6.2.0
-     * @param mixed $amount
-     * @return $this
-     */
-    protected function _initialize(Varien_Object $payment, $amount)
-    {
-        return $this;
-    }
-
-    /**
-     * Check whether order review has enough data to initialize
-     *
-     * @deprecated since 1.6.2.0
-     * @param string $token
-     */
-    public function prepareOrderReview($token = null) {}
-
-    /**
-     * Additional authorization logic for Account Verification
-     *
-     * @deprecated since 1.6.2.0
-     * @param mixed $amount
-     * @param Mage_Paypal_Model_Payment_Transaction $transaction
-     * @param string $txnId
-     * @return $this
-     */
-    protected function _authorize(Varien_Object $payment, $amount, $transaction, $txnId)
-    {
-        return $this;
-    }
-
-    /**
-     * Operate with order or quote using information from silent post
-     *
-     * @deprecated since 1.6.2.0
-     */
-    protected function _process(Varien_Object $document) {}
-
-    /**
-     * Check Transaction
-     *
-     * @deprecated since 1.6.2.0
-     * @param Mage_Paypal_Model_Payment_Transaction $transaction
-     * @param mixed $amount
-     * @return $this
-     */
-    protected function _checkTransaction($transaction, $amount)
-    {
-        return $this;
-    }
-
-    /**
-     * Check response from Payflow gateway.
-     *
-     * @deprecated since 1.6.2.0
-     */
-    protected function _getDocumentFromResponse()
-    {
-        return null;
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -165,6 +165,11 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         }
 
         foreach ($value['values'] as $mediaAttrCode => $attrData) {
+            // Skip null keys - array_key_exists() doesn't accept null in PHP 8.1+
+            if ($attrData === null) {
+                continue;
+            }
+
             if (array_key_exists($attrData, $newImages)) {
                 $object->setData($mediaAttrCode, $newImages[$attrData]['new_file']);
                 $label = $newImages[$attrData]['label'] === null || !empty($newImages[$attrData]['label_use_default']) ? $newImages[$attrData]['label_default'] : $newImages[$attrData]['label'];
@@ -308,7 +313,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         Mage::dispatchEvent('catalog_product_media_add_image', ['product' => $product, 'image' => $file]);
 
         $pathinfo = pathinfo($file);
-        if (!isset($pathinfo['extension']) || !in_array(strtolower($pathinfo['extension']), Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS)) {
+        if (!isset($pathinfo['extension']) || !in_array(strtolower($pathinfo['extension']), \Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS)) {
             Mage::throwException(Mage::helper('catalog')->__('Invalid image file type.'));
         }
 
@@ -318,7 +323,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
 
         $fileName = $this->_getNotDuplicatedFilename($fileName, $dispretionPath);
 
-        $ioAdapter = new Varien_Io_File();
+        $ioAdapter = new \Maho\Io\File();
         $ioAdapter->setAllowCreateFolders(true);
         $distanationDirectory = dirname($this->_getConfig()->getTmpMediaPath($fileName));
 
@@ -573,7 +578,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
      */
     protected function _moveImageFromTmp($file)
     {
-        $ioObject = new Varien_Io_File();
+        $ioObject = new \Maho\Io\File();
         $destDirectory = dirname($this->_getConfig()->getMediaPath($file));
         try {
             $ioObject->open(['path' => $destDirectory]);
@@ -620,7 +625,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
     protected function _copyImage($file)
     {
         try {
-            $ioObject = new Varien_Io_File();
+            $ioObject = new \Maho\Io\File();
             $destDirectory = dirname($this->_getConfig()->getMediaPath($file));
             $ioObject->open(['path' => $destDirectory]);
 
@@ -636,7 +641,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
             );
         } catch (Exception $e) {
             $file = $this->_getConfig()->getMediaPath($file);
-            $io = new Varien_Io_File();
+            $io = new \Maho\Io\File();
             Mage::throwException(
                 Mage::helper('catalog')->__(
                     'Failed to copy file %s. Please, delete media with non-existing images and try again.',
@@ -688,7 +693,8 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Media extends Mage_Eav_Model_
         if ($fileMediaName != $fileTmpMediaName) {
             if ($fileMediaName != $fileName) {
                 return $this->_getNotDuplicatedFilename($fileMediaName, $dispretionPath);
-            } elseif ($fileTmpMediaName != $fileName) {
+            }
+            if ($fileTmpMediaName != $fileName) {
                 return $this->_getNotDuplicatedFilename($fileTmpMediaName, $dispretionPath);
             }
         }

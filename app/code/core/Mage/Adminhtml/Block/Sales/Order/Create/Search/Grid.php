@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -173,17 +173,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid extends Mage_Adminhtml
     protected function _getSelectedProducts()
     {
         return $this->getRequest()->getPost('products', []);
-    }
-
-    /**
-     * Retrieve gift message save model
-     *
-     * @deprecated after 1.4.2.0
-     * @return Mage_Adminhtml_Model_Giftmessage_Save
-     */
-    protected function _getGiftmessageSaveModel()
-    {
-        return Mage::getSingleton('adminhtml/giftmessage_save');
     }
 
     /**

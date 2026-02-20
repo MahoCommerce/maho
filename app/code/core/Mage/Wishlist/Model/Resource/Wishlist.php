@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,22 +91,5 @@ class Mage_Wishlist_Model_Resource_Wishlist extends Mage_Core_Model_Resource_Db_
     {
         $this->_customerIdFieldName = $fieldName;
         return $this;
-    }
-
-    /**
-     * Retrieve wishlist items count
-     *
-     * @deprecated after 1.6.0.0-rc2
-     * @see Mage_Wishlist_Model_Wishlist::getItemsCount()
-     *
-     * @return int
-     */
-    public function fetchItemsCount(Mage_Wishlist_Model_Wishlist $wishlist)
-    {
-        if (is_null($this->_itemsCount)) {
-            $this->_itemsCount = $wishlist->getItemsCount();
-        }
-
-        return $this->_itemsCount;
     }
 }

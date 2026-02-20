@@ -3,10 +3,10 @@
 /**
  * Maho
  *
- * @package    Maho_Io
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,7 +14,7 @@ namespace Maho\Io;
 
 use phpseclib\Net\SFTP as PhpSecLibSftp;
 
-class Sftp extends AbstractIo implements IoInterface
+class Sftp extends \Maho\Io
 {
     public const REMOTE_TIMEOUT = 10;
     public const SSH2_PORT = 22;
@@ -81,9 +81,8 @@ class Sftp extends AbstractIo implements IoInterface
             }
             $this->_connection->chdir($cwd); // @phpstan-ignore class.notFound
             return $no_errors;
-        } else {
-            return $this->_connection->mkdir($dir); // @phpstan-ignore class.notFound
         }
+        return $this->_connection->mkdir($dir); // @phpstan-ignore class.notFound
     }
 
     /**
@@ -103,21 +102,19 @@ class Sftp extends AbstractIo implements IoInterface
                 // Go back
                 $this->_connection->chdir($cwd); // @phpstan-ignore class.notFound
                 return $this->rmdir($dir, false);
-            } else {
-                foreach ($list as $filename) {
-                    if ($this->_connection->chdir($filename)) { // This is a directory @phpstan-ignore class.notFound
-                        $this->_connection->chdir('..'); // @phpstan-ignore class.notFound
-                        $no_errors = $no_errors && $this->rmdir($filename, $recursive);
-                    } else {
-                        $no_errors = $no_errors && $this->rm($filename);
-                    }
+            }
+            foreach ($list as $filename) {
+                if ($this->_connection->chdir($filename)) { // This is a directory @phpstan-ignore class.notFound
+                    $this->_connection->chdir('..'); // @phpstan-ignore class.notFound
+                    $no_errors = $no_errors && $this->rmdir($filename, $recursive);
+                } else {
+                    $no_errors = $no_errors && $this->rm($filename);
                 }
             }
             $no_errors = $no_errors && ($this->_connection->chdir($cwd) && $this->_connection->rmdir($dir)); // @phpstan-ignore class.notFound, class.notFound
             return $no_errors;
-        } else {
-            return $this->_connection->rmdir($dir); // @phpstan-ignore class.notFound
         }
+        return $this->_connection->rmdir($dir); // @phpstan-ignore class.notFound
     }
 
     /**

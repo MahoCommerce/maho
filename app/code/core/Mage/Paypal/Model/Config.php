@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -126,16 +126,6 @@ class Mage_Paypal_Model_Config
     public const PAYMENT_ACTION_SALE  = 'Sale';
     public const PAYMENT_ACTION_ORDER = 'Order';
     public const PAYMENT_ACTION_AUTH  = 'Authorization';
-
-    /**
-     * Authorization amounts for Account Verification
-     *
-     * @deprecated since 1.6.2.0
-     * @var int
-     */
-    public const AUTHORIZATION_AMOUNT_ZERO = 0;
-    public const AUTHORIZATION_AMOUNT_ONE = 1;
-    public const AUTHORIZATION_AMOUNT_FULL = 2;
 
     /**
      * Require Billing Address
@@ -1375,17 +1365,6 @@ class Mage_Paypal_Model_Config
     }
 
     /**
-     * Returns array of possible Authorization Amounts for Account Verification
-     *
-     * @deprecated since 1.6.2.0
-     * @return array
-     */
-    public function getAuthorizationAmounts()
-    {
-        return [];
-    }
-
-    /**
      * Express Checkout "solution types" source getter
      * "sole" = "Express Checkout for Auctions" - PayPal allows guest checkout
      * "mark" = "Normal Express Checkout" - PayPal requires to checkout with PayPal buyer account only
@@ -1527,7 +1506,7 @@ class Mage_Paypal_Model_Config
     /**
      * Export page style current settings to specified object
      */
-    public function exportExpressCheckoutStyleSettings(Varien_Object $to)
+    public function exportExpressCheckoutStyleSettings(\Maho\DataObject $to)
     {
         foreach ($this->_ecStyleConfigMap as $key => $exportKey) {
             if ($this->$key) {

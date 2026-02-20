@@ -6,7 +6,7 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,7 +44,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     protected $_specificEntitiesLayoutHandles = [];
 
     /**
-     * @var Varien_Simplexml_Element
+     * @var \Maho\Simplexml\Element
      */
     protected $_widgetConfigXml = null;
 
@@ -86,7 +86,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -148,7 +148,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
             $this->setData('store_ids', implode(',', $this->getData('store_ids')));
         }
         if (is_array($this->getData('widget_parameters'))) {
-            $this->setData('widget_parameters', serialize($this->getData('widget_parameters')));
+            $this->setData('widget_parameters', Mage::helper('core')->jsonEncode($this->getData('widget_parameters')));
         }
         $this->setData('page_groups', $tmpPageGroups);
         $this->setData('page_group_ids', $pageGroupIds);
@@ -240,18 +240,6 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     public function getPackageTheme()
     {
         return $this->_getData('package_theme');
-    }
-
-    /**
-     * Replace '_' to '/', if was set from request(GET request)
-     *
-     * @deprecated after 1.6.1.0-alpha1
-     *
-     * @return $this
-     */
-    protected function _preparePackageTheme()
-    {
-        return $this;
     }
 
     /**
@@ -362,7 +350,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
     /**
      * Load widget XML config and merge with theme widget config
      *
-     * @return Varien_Simplexml_Element|null
+     * @return \Maho\Simplexml\Element|null
      */
     public function getWidgetConfig()
     {
@@ -378,7 +366,7 @@ class Mage_Widget_Model_Widget_Instance extends Mage_Core_Model_Abstract
                 ]) . DS . 'widget.xml';
                 $configFile = Maho::findFile($configFile);
                 if (is_readable($configFile)) {
-                    $themeWidgetsConfig = new Varien_Simplexml_Config();
+                    $themeWidgetsConfig = new \Maho\Simplexml\Config();
                     $themeWidgetsConfig->loadFile($configFile);
                     if ($themeWidgetTypeConfig = $themeWidgetsConfig->getNode($this->_widgetConfigXml->getName())) {
                         $this->_widgetConfigXml->extend($themeWidgetTypeConfig);

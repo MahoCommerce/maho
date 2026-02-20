@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -98,7 +98,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @return $this
      */
     #[\Override]
-    protected function _beforeDelete(Varien_Object $object)
+    protected function _beforeDelete(\Maho\DataObject $object)
     {
         parent::_beforeDelete($object);
 
@@ -121,7 +121,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      *
      * @return $this
      */
-    public function deleteChildren(Varien_Object $object)
+    public function deleteChildren(\Maho\DataObject $object)
     {
         $adapter = $this->_getWriteAdapter();
         $pathField = $adapter->quoteIdentifier('path');
@@ -154,7 +154,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @return $this
      */
     #[\Override]
-    protected function _beforeSave(Varien_Object $object)
+    protected function _beforeSave(\Maho\DataObject $object)
     {
         parent::_beforeSave($object);
 
@@ -175,13 +175,15 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
             }
             $object->setPath($object->getPath() . '/');
 
-            $toUpdateChild = explode('/', $object->getPath());
+            $toUpdateChild = array_filter(explode('/', $object->getPath()), fn($v) => $v !== '');
 
-            $this->_getWriteAdapter()->update(
-                $this->getEntityTable(),
-                ['children_count'  => new Maho\Db\Expr('children_count+1')],
-                ['entity_id IN(?)' => $toUpdateChild],
-            );
+            if (!empty($toUpdateChild)) {
+                $this->_getWriteAdapter()->update(
+                    $this->getEntityTable(),
+                    ['children_count'  => new Maho\Db\Expr('children_count+1')],
+                    ['entity_id IN(?)' => $toUpdateChild],
+                );
+            }
         }
         return $this;
     }
@@ -193,7 +195,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @param Mage_Catalog_Model_Category $object
      */
     #[\Override]
-    protected function _afterSave(Varien_Object $object)
+    protected function _afterSave(\Maho\DataObject $object)
     {
         /**
          * Add identifier for new category
@@ -520,12 +522,9 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
                 ['main_table' => $productTable],
                 [new Maho\Db\Expr('COUNT(main_table.product_id)')],
             )
-            ->where('main_table.category_id = :category_id');
+            ->where('main_table.category_id = ?', (int) $category->getId());
 
-        $bind = ['category_id' => (int) $category->getId()];
-        $counts = $this->getReadConnection()->fetchOne($select, $bind);
-
-        return (int) $counts;
+        return (int) $this->getReadConnection()->fetchOne($select);
     }
 
     /**
@@ -536,7 +535,7 @@ class Mage_Catalog_Model_Resource_Category extends Mage_Catalog_Model_Resource_A
      * @param bool|string $sorted
      * @param bool $asCollection
      * @param bool $toLoad
-     * @return Varien_Data_Tree_Node_Collection|Mage_Catalog_Model_Resource_Category_Collection
+     * @return \Maho\Data\Tree\Node\Collection|Mage_Catalog_Model_Resource_Category_Collection
      */
     public function getCategories($parent, $recursionLevel = 0, $sorted = false, $asCollection = false, $toLoad = true)
     {

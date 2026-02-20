@@ -2,10 +2,10 @@
 /**
  * Maho
  *
- * @package     rwd_default
+ * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -18,11 +18,9 @@ if(empty($_cartQty)) {
     $_cartQty = 0;
 }
 ?>
-<div id="minicart-error-message" class="minicart-message"></div>
-<div id="minicart-success-message" class="minicart-message"></div>
-
 <div class="minicart-wrapper">
-
+    <div id="minicart-error-message" class="minicart-message"></div>
+    <div id="minicart-success-message" class="minicart-message"></div>
 
     <?php $_items = $this->getItems() ?>
     <?php $countItems = count($_items); ?>
@@ -35,15 +33,6 @@ if(empty($_cartQty)) {
                     <?php endforeach ?>
                 </ul>
             </div>
-            <script type="text/javascript">
-                truncateOptions();
-                document.addEventListener('DOMContentLoaded', function() {
-                    var Mini = new Minicart({
-                        formKey: "<?= $this->getFormKey() ?>"
-                    });
-                    Mini.init();
-                });
-            </script>
 
             <div id="minicart-widgets">
                 <?= $this->getChildHtml('cart_promotion') ?>
@@ -62,7 +51,6 @@ if(empty($_cartQty)) {
             </div>
         </div>
 
-
         <div class="minicart-actions">
             <?php if($_cartQty && $this->isPossibleOnepageCheckout()): ?>
                 <ul class="checkout-types minicart">
@@ -78,8 +66,17 @@ if(empty($_cartQty)) {
                 <?= $this->__('View Shopping Cart') ?>
             </a>
         </div>
-
     <?php else: ?>
         <p class="empty"><?= $this->__('You have no items in your shopping cart.') ?></p>
     <?php endif ?>
 </div>
+
+<script type="text/javascript">
+    if (typeof truncateOptions === 'function') truncateOptions();
+    document.addEventListener('DOMContentLoaded', function() {
+        window.minicart = new Minicart({
+            formKey: "<?= $this->getFormKey() ?>"
+        });
+        minicart.init();
+    });
+</script>

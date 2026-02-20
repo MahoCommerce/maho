@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -100,17 +100,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
     }
 
     /**
-     * Retrieve Attribute Set Group Tree HTML
-     *
-     * @return string
-     * @deprecated
-     */
-    public function getGroupTreeHtml()
-    {
-        return '';
-    }
-
-    /**
      * Retrieve Attribute Set Edit Form HTML
      *
      * @return string
@@ -131,17 +120,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
     protected function _getHeader()
     {
         return Mage::helper('catalog')->__("Edit Attribute Set '%s'", $this->_getAttributeSet()->getAttributeSetName());
-    }
-
-    /**
-     * Retrieve Attribute Set Save URL
-     *
-     * @return string
-     * @deprecated use self::getSaveUrl()
-     */
-    public function getMoveUrl()
-    {
-        return $this->getSaveUrl();
     }
 
     /**
@@ -400,17 +378,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Attribute_Set_Main extends Mage_Admin
             $this->setData('is_current_set_default', $isDefault);
         }
         return $isDefault;
-    }
-
-    /**
-     * Retrieve current Attribute Set object
-     *
-     * @deprecated use _getAttributeSet
-     * @return Mage_Eav_Model_Entity_Attribute_Set
-     */
-    protected function _getSetData()
-    {
-        return $this->_getAttributeSet();
     }
 
     #[\Override]

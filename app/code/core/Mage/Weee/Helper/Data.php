@@ -6,7 +6,7 @@
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -198,21 +198,19 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
 
         if (is_null($compareTo)) {
             return $type;
-        } else {
-            if (is_array($compareTo)) {
-                return in_array($type, $compareTo);
-            } else {
-                return $type == $compareTo;
-            }
         }
+        if (is_array($compareTo)) {
+            return in_array($type, $compareTo);
+        }
+        return $type == $compareTo;
     }
 
     /**
      * Proxy for Mage_Weee_Model_Tax::getProductWeeeAttributes()
      *
      * @param Mage_Catalog_Model_Product $product
-     * @param null|false|Varien_Object   $shipping
-     * @param null|false|Varien_Object   $billing
+     * @param null|false|\Maho\DataObject $shipping
+     * @param null|false|\Maho\DataObject $billing
      * @param int|Mage_Core_Model_Website|null|string|true $website
      * @param bool                       $calculateTaxes
      * @return array
@@ -231,7 +229,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Returns applied weee taxes
      *
-     * @param Mage_Sales_Model_Quote_Item_Abstract|Varien_Object $item
+     * @param Mage_Sales_Model_Quote_Item_Abstract|\Maho\DataObject $item
      * @return array
      */
     public function getApplied($item)
@@ -257,7 +255,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         if (empty($data)) {
             return [];
         }
-        return unserialize($item->getWeeeTaxApplied(), ['allowed_classes' => false]);
+        return Mage::helper('core/string')->unserialize($data);
     }
 
     /**
@@ -269,7 +267,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function setApplied($item, $value)
     {
-        $item->setWeeeTaxApplied(serialize($value));
+        $item->setWeeeTaxApplied(Mage::helper('core')->jsonEncode($value));
         return $this;
     }
 
@@ -291,8 +289,8 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * Get Product Weee attributes for price renderer
      *
      * @param Mage_Catalog_Model_Product $product
-     * @param null|false|Varien_Object $shipping Shipping Address
-     * @param null|false|Varien_Object $billing Billing Address
+     * @param null|false|\Maho\DataObject $shipping Shipping Address
+     * @param null|false|\Maho\DataObject $billing Billing Address
      * @param int|Mage_Core_Model_Website|null|string|true $website
      * @param mixed $calculateTaxes
      * @return array
@@ -336,7 +334,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
             if (is_array($attributes)) {
                 $amount = 0;
                 foreach ($attributes as $attribute) {
-                    /** @var Varien_Object $attribute */
+                    /** @var \Maho\DataObject $attribute */
                     $amount += $attribute->getAmount();
                 }
                 return $amount;
@@ -437,7 +435,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
      * Returns all summed weee taxes with all local taxes applied
      *
      * @throws Mage_Core_Exception
-     * @param array $attributes Array of Varien_Object, result from getProductWeeeAttributes()
+     * @param array $attributes Array of \Maho\DataObject, result from getProductWeeeAttributes()
      * @return float
      */
     public function getAmountInclTaxes($attributes)
@@ -445,7 +443,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
         if (is_array($attributes)) {
             $amount = 0;
             foreach ($attributes as $attribute) {
-                /** @var Varien_Object $attribute */
+                /** @var \Maho\DataObject $attribute */
                 $amount += $attribute->getAmount() + $attribute->getTaxAmount();
             }
         } else {
@@ -495,7 +493,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
                 $weeeTaxAppliedAmount[$property] = $value;
             }
         }
-        $item->setWeeeTaxApplied(serialize($weeeTaxAppliedAmounts));
+        $item->setWeeeTaxApplied(Mage::helper('core')->jsonEncode($weeeTaxAppliedAmounts));
     }
 
     /**
@@ -599,7 +597,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get the Total tax applied for Weee
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return float
      */
     public function getTotalRowTaxAppliedForWeeeTax($item)
@@ -616,7 +614,7 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get the Total tax applied in base for Weee
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return float
      */
     public function getBaseTotalRowTaxAppliedForWeeeTax($item)
@@ -670,17 +668,5 @@ class Mage_Weee_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
         return $baseWeeeAmountInclDiscount;
-    }
-
-    /**
-     * Get The Helper with the name provider
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
     }
 }

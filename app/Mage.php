@@ -6,7 +6,7 @@
  * @package    Mage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -80,14 +80,14 @@ final class Mage
     /**
      * Event Collection Object
      *
-     * @var Varien_Event_Collection|null
+     * @var \Maho\Event\Collection|null
      */
     private static $_events;
 
     /**
      * Object cache instance
      *
-     * @var Varien_Object_Cache|null
+     * @var \Maho\DataObject\Cache|null
      */
     private static $_objects;
 
@@ -134,7 +134,7 @@ final class Mage
      */
     public static function getVersion(): string
     {
-        return '26.1.0';
+        return '26.3.0';
     }
 
     /**
@@ -239,7 +239,7 @@ final class Mage
     /**
      * Retrieve Events Collection
      *
-     * @return Varien_Event_Collection $collection
+     * @return \Maho\Event\Collection $collection
      */
     public static function getEvents()
     {
@@ -250,18 +250,17 @@ final class Mage
      * Varien Objects Cache
      *
      * @param string $key optional, if specified will load this key
-     * @return Varien_Object_Cache
+     * @return \Maho\DataObject\Cache
      */
     public static function objects($key = null)
     {
         if (!self::$_objects) {
-            self::$_objects = new Varien_Object_Cache();
+            self::$_objects = new \Maho\DataObject\Cache();
         }
         if (is_null($key)) {
             return self::$_objects;
-        } else {
-            return self::$_objects->load($key);
         }
+        return self::$_objects->load($key);
     }
 
     /**
@@ -328,9 +327,8 @@ final class Mage
         $flag = is_string($flag) ? strtolower($flag) : $flag;
         if (!empty($flag) && $flag !== 'false') {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -385,13 +383,13 @@ final class Mage
      * @param array $data
      * @param string $observerName
      * @param class-string|'' $observerClass
-     * @return Varien_Event_Collection
+     * @return \Maho\Event\Collection
      * @throws Mage_Core_Exception
      */
     public static function addObserver($eventName, $callback, $data = [], $observerName = '', $observerClass = '')
     {
         if ($observerClass == '') {
-            $observerClass = 'Varien_Event_Observer';
+            $observerClass = \Maho\Event\Observer::class;
         }
         if (!class_exists($observerClass)) {
             self::throwException("Invalid observer class: $observerClass");
@@ -608,7 +606,7 @@ final class Mage
         if (self::$_app === null) {
             self::$_app = new Mage_Core_Model_App();
             self::setRoot();
-            self::$_events = new Varien_Event_Collection();
+            self::$_events = new \Maho\Event\Collection();
             self::_setIsInstalled($options);
             self::_setConfigModel($options);
 
@@ -671,6 +669,7 @@ final class Mage
         \Maho\Profiler::start('http.request', $attributes);
 
         try {
+            \Maho\Profiler::start('mage');
             self::setRoot();
             self::$_app = new Mage_Core_Model_App();
             if (isset($options['request'])) {
@@ -679,7 +678,7 @@ final class Mage
             if (isset($options['response'])) {
                 self::$_app->setResponse($options['response']);
             }
-            self::$_events = new Varien_Event_Collection();
+            self::$_events = new \Maho\Event\Collection();
             self::_setIsInstalled($options);
             self::_setConfigModel($options);
             self::$_app->run([
@@ -687,7 +686,7 @@ final class Mage
                 'scope_type' => $type,
                 'options'    => $options,
             ]);
-            \Maho\Profiler::stop('http.request');
+            \Maho\Profiler::stop('mage');
         } catch (Mage_Core_Model_Session_Exception $e) {
             \Maho\Profiler::stop('http.request');
             header('Location: ' . self::getBaseUrl());
@@ -952,7 +951,7 @@ final class Mage
             print '</pre>';
         } else {
             $reportData = [
-                (!empty($extra) ? $extra . "\n\n" : '') . $e->getMessage(),
+                (empty($extra) ? '' : $extra . "\n\n") . $e->getMessage(),
                 $e->getTraceAsString(),
             ];
 
@@ -1012,9 +1011,8 @@ final class Mage
             if ($exitIfNot) {
                 // exit because of infinity loop
                 exit($errorMessage);
-            } else {
-                self::printException(new Exception(), $errorMessage);
             }
+            self::printException(new Exception(), $errorMessage);
         }
 
         return $baseUrl;

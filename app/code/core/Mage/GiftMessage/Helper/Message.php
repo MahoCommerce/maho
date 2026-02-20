@@ -6,7 +6,7 @@
  * @package    Mage_GiftMessage
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,32 +42,13 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     protected $_innerCache = [];
 
     /**
-     * Retrieve old stule edit button html for editing of giftmessage in popup
-     *
-     * @param string $type
-     * @return string
-     */
-    public function getButton($type, Varien_Object $entity)
-    {
-        if (!$this->isMessagesAvailable($type, $entity)) {
-            return '&nbsp;';
-        }
-
-        return Mage::getSingleton('core/layout')->createBlock('giftmessage/message_helper')
-            ->setId('giftmessage_button_' . $this->_nextId++)
-            ->setCanDisplayContainer(true)
-            ->setEntity($entity)
-            ->setType($type)->toHtml();
-    }
-
-    /**
      * Retrieve inline giftmessage edit form for specified entity
      *
      * @param string $type
      * @param bool $dontDisplayContainer
      * @return string
      */
-    public function getInline($type, Varien_Object $entity, $dontDisplayContainer = false)
+    public function getInline($type, \Maho\DataObject $entity, $dontDisplayContainer = false)
     {
         if (!in_array($type, ['onepage_checkout','multishipping_adress'])
             && !$this->isMessagesAvailable($type, $entity)
@@ -89,7 +70,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * @param bool|int|Mage_Core_Model_Store|null|string $store
      * @return bool
      */
-    public function isMessagesAvailable($type, Varien_Object $entity, $store = null)
+    public function isMessagesAvailable($type, \Maho\DataObject $entity, $store = null)
     {
         switch ($type) {
             case self::TYPE_ITEMS:
@@ -154,9 +135,8 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
         $result = Mage::getStoreConfigFlag(self::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS, $store);
         if ($productGiftMessageAllow === '' || is_null($productGiftMessageAllow)) {
             return $result;
-        } else {
-            return $productGiftMessageAllow;
         }
+        return $productGiftMessageAllow;
     }
 
     /**
@@ -166,7 +146,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      * @param bool|int|Mage_Core_Model_Store|null|string $store
      * @return bool
      */
-    public function getIsMessagesAvailable($type, Varien_Object $entity, $store = null)
+    public function getIsMessagesAvailable($type, \Maho\DataObject $entity, $store = null)
     {
         return $this->isMessagesAvailable($type, $entity, $store);
     }
@@ -176,7 +156,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      *
      * @return string|null
      */
-    public function getEscapedGiftMessage(Varien_Object $entity)
+    public function getEscapedGiftMessage(\Maho\DataObject $entity)
     {
         $message = $this->getGiftMessageForEntity($entity);
         if ($message) {
@@ -190,7 +170,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      *
      * @return Mage_GiftMessage_Model_Message
      */
-    public function getGiftMessageForEntity(Varien_Object $entity)
+    public function getGiftMessageForEntity(\Maho\DataObject $entity)
     {
         if ($entity->getGiftMessageId() && !$entity->getGiftMessage()) {
             $message = $this->getGiftMessage($entity->getGiftMessageId());

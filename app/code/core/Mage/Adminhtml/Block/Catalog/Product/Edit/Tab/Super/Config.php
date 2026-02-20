@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -137,21 +137,20 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Super_Config extends Mage_Ad
         $attributes = $productType->getConfigurableAttributesAsArray($this->_getProduct());
         if (!$attributes) {
             return '[]';
-        } else {
-            // Hide price if needed
-            foreach ($attributes as &$attribute) {
-                $attribute['label'] = $this->escapeHtml($attribute['label']);
-                $attribute['frontend_label'] = $this->escapeHtml($attribute['frontend_label']);
-                $attribute['store_label'] = $this->escapeHtml($attribute['store_label']);
-                if (isset($attribute['values']) && is_array($attribute['values'])) {
-                    foreach ($attribute['values'] as &$attributeValue) {
-                        if (!$this->getCanReadPrice()) {
-                            $attributeValue['pricing_value'] = '';
-                            $attributeValue['is_percent'] = 0;
-                        }
-                        $attributeValue['can_edit_price'] = $this->getCanEditPrice();
-                        $attributeValue['can_read_price'] = $this->getCanReadPrice();
+        }
+        // Hide price if needed
+        foreach ($attributes as &$attribute) {
+            $attribute['label'] = $this->escapeHtml($attribute['label']);
+            $attribute['frontend_label'] = $this->escapeHtml($attribute['frontend_label']);
+            $attribute['store_label'] = $this->escapeHtml($attribute['store_label']);
+            if (isset($attribute['values']) && is_array($attribute['values'])) {
+                foreach ($attribute['values'] as &$attributeValue) {
+                    if (!$this->getCanReadPrice()) {
+                        $attributeValue['pricing_value'] = '';
+                        $attributeValue['is_percent'] = 0;
                     }
+                    $attributeValue['can_edit_price'] = $this->getCanEditPrice();
+                    $attributeValue['can_read_price'] = $this->getCanReadPrice();
                 }
             }
         }

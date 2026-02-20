@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -231,11 +231,12 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
     public function getChildTransactions($types = null, $txnId = null, $recursive = false)
     {
         $this->_loadChildren();
-
         // grab all transactions
         if (empty($types) && $txnId === null) {
             return $this->_children;
-        } elseif ($types && !is_array($types)) {
+        }
+
+        if ($types && !is_array($types)) {
             $types = [$types];
         }
 
@@ -369,7 +370,8 @@ class Mage_Sales_Model_Order_Payment_Transaction extends Mage_Core_Model_Abstrac
         if ($whetherHasChild !== null) {
             $this->_hasChild = (bool) $whetherHasChild;
             return $this;
-        } elseif ($this->_hasChild === null) {
+        }
+        if ($this->_hasChild === null) {
             if ($this->getChildTransactions()) {
                 $this->_hasChild = true;
             } else {

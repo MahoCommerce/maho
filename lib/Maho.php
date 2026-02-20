@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Maho
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -150,6 +150,46 @@ final class Maho
     public static function findClassFile(string $class): string|false
     {
         return realpath(self::getComposerAutoloader()->findFile($class));
+    }
+
+    /**
+     * Display the maintenance page and exit
+     *
+     * Looks for templates using Maho's fallback system:
+     * 1. app/design/maintenance/{store_code}.phtml (if MAGE_RUN_CODE is set)
+     * 2. app/design/maintenance/default.phtml
+     */
+    public static function maintenancePage(): never
+    {
+        header('HTTP/1.1 503 Service Unavailable', true, 503);
+        header('Retry-After: 3600');
+        header('X-Robots-Tag: noindex');
+        header('Content-Type: text/html; charset=UTF-8');
+
+        $template = self::findMaintenanceTemplate();
+
+        if ($template !== false) {
+            include $template;
+        }
+
+        exit;
+    }
+
+    /**
+     * Find the maintenance template file using Maho's fallback system
+     */
+    private static function findMaintenanceTemplate(): string|false
+    {
+        $runCode = $_SERVER['MAGE_RUN_CODE'] ?? '';
+
+        if ($runCode !== '') {
+            $storeTemplate = self::findFile("app/design/maintenance/{$runCode}.phtml");
+            if ($storeTemplate !== false) {
+                return $storeTemplate;
+            }
+        }
+
+        return self::findFile('app/design/maintenance/default.phtml');
     }
 
     /**

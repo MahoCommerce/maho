@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,11 +31,11 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Customer address attributes parameters.
      *
-     *  [attr_code_1] => array(
-     *      'options' => array(),
+     *  [attr_code_1] => [
+     *      'options' => [],
      *      'type' => 'text', 'price', 'textarea', 'select', etc.
      *      'id' => ..
-     *  ),
+     *  ],
      *  ...
      *
      * @var array
@@ -45,16 +45,16 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
     /**
      * Countrys and its regions.
      *
-     * array(
-     *   [country_id_lowercased_1] => array(
+     * [
+     *   [country_id_lowercased_1] => [
      *     [region_code_lowercased_1]         => region_id_1,
      *     [region_default_name_lowercased_1] => region_id_1,
      *     ...,
      *     [region_code_lowercased_n]         => region_id_n,
      *     [region_default_name_lowercased_n] => region_id_n
-     *   ),
+     *   ],
      *   ...
-     * )
+     * ]
      *
      * @var array
      */
@@ -139,7 +139,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
         /** @var Mage_Customer_Model_Address $resource */
         $resource       = Mage::getModel('customer/address');
         $table          = $resource->getResource()->getEntityTable();
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextEntityId   = $helper->getNextAutoincrement($table);
         $customerId     = null;
@@ -365,7 +364,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer_Address extends Mage_Import
                 }
                 $this->_connection->delete(
                     $this->_entityTable,
-                    $this->_connection->quoteInto('`parent_id` IN (?)', array_keys($customersToClean)),
+                    $this->_connection->quoteInto('parent_id IN (?)', array_keys($customersToClean)),
                 );
             }
             $this->_connection->insertMultiple($this->_entityTable, $entityRows);

@@ -6,7 +6,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,7 +17,7 @@ class Mage_Downloadable_Model_Observer
     /**
      * Prepare product to save
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  Mage_Downloadable_Model_Observer
      */
     public function prepareProductSave($observer)
@@ -38,7 +38,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
-    public function saveDownloadableOrderItem(Varien_Event_Observer $observer)
+    public function saveDownloadableOrderItem(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
         $orderItem = $observer->getEvent()->getItem();
@@ -113,7 +113,7 @@ class Mage_Downloadable_Model_Observer
     /**
      * Set checkout session flag if order has downloadable product(s)
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function setHasDownloadableProducts($observer)
@@ -139,7 +139,7 @@ class Mage_Downloadable_Model_Observer
     /**
      * Set status of link
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function setLinkStatus($observer)
@@ -243,7 +243,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
-    public function isAllowedGuestCheckout(Varien_Event_Observer $observer)
+    public function isAllowedGuestCheckout(\Maho\Event\Observer $observer)
     {
         $quote  = $observer->getEvent()->getQuote();
         /** @var Mage_Sales_Model_Quote $quote */
@@ -272,7 +272,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
-    public function initOptionRenderer(Varien_Event_Observer $observer)
+    public function initOptionRenderer(\Maho\Event\Observer $observer)
     {
         $block = $observer->getBlock();
         $block->addOptionsRenderCfg('downloadable', 'downloadable/catalog_product_configuration');

@@ -2,10 +2,10 @@
 /**
  * Maho
  *
- * @package     rwd_default
+ * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -22,16 +22,17 @@ $_swatchOuterHeight = $this->getSwatchOuterHeight();
 
 $_swatchUrl = $this->getSwatchUrl();
 ?>
-<li class="swatch-current">
-    <span class="label"><?= $this->__($_filter->getName()) ?>:</span>
-    <span class="value">
-        <span class="swatch-link" style="height:<?= $_swatchOuterHeight ?>px; width:<?= $_swatchOuterWidth ?>px;">
-            <span class="swatch-label" style="height:<?= $_swatchInnerHeight ?>px; width:<?= $_swatchInnerWidth ?>px; line-height:<?= $_swatchInnerHeight ?>px;">
-                <img src="<?= $_swatchUrl ?>" alt="<?= $_label ?>" title="<?= $_label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
+<li class="filter-tag filter-tag-swatch">
+    <a href="<?= $_filter->getRemoveUrl() ?>" class="filter-tag-link" title="<?= $this->quoteEscape($this->__('Remove filter: %s', $_label)) ?>">
+        <span class="filter-tag-label"><?= $this->__($_filter->getName()) ?></span>
+        <span class="filter-tag-value">
+            <span class="swatch-link" style="height:<?= $_swatchOuterHeight ?>px; width:<?= $_swatchOuterWidth ?>px;">
+                <span class="swatch-label" style="height:<?= $_swatchInnerHeight ?>px; width:<?= $_swatchInnerWidth ?>px; line-height:<?= $_swatchInnerHeight ?>px;">
+                    <img src="<?= $_swatchUrl ?>" alt="<?= $_label ?>" title="<?= $_label ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
+                </span>
             </span>
+            <?= $_label ?>
         </span>
-    </span>
-    <a href="<?= $_filter->getRemoveUrl() ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>">
         <?= $this->getIconSvg('x') ?>
     </a>
 </li>

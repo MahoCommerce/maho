@@ -6,7 +6,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -55,12 +55,11 @@ Default layout, loads most of the pages
                 <action method="addJs"><script>mage/adminhtml/uploader.js</script></action>
                 <action method="addJs"><script>mage/adminhtml/product.js</script></action>
 
-                <action method="addCss"><name>reset.css</name></action>
-                <action method="addCss"><name>boxes.css</name></action>
-                <action method="addCss"><name>print.css</name><params>media="print"</params></action>
-                <action method="addItem"><type>skin_css</type><name>menu.css</name><params>media="screen, projection"</params></action>
-                <action method="addItem"><type>skin_css</type><name>override.css</name></action>
+
+                <action method="addItem"><type>skin_css</type><name>base.css</name></action>
                 <action method="addItem"><type>skin_css</type><name>form.css</name></action>
+                <action method="addItem"><type>skin_css</type><name>menu.css</name><params>media="screen, projection"</params></action>
+                <action method="addCss"><name>print.css</name><params>media="print"</params></action>
 
                 <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name><params/><if/><condition>can_load_rules_js</condition></action>
             </block>
@@ -77,8 +76,7 @@ Default layout, loads most of the pages
             <!--<update handle="formkey"/> this won't work, see the try/catch and a jammed exception in Mage_Core_Model_Layout::createBlock() -->
             <block type="core/template" name="formkey" as="formkey" template="formkey.phtml"/>
 
-            <!-- deprecated since 1.7.0.0 see Mage_Page_Block_Js_Translate -->
-            <block type="page/js_translate" name="js_translate" as="js_translate" template="page/js/translate.phtml"/>
+            <block type="core/template" name="js_translate" as="js_translate" template="page/js/translate.phtml"/>
             <block type="core/text_list" name="left" as="left"/>
             <block type="core/text_list" name="content" as="content"/>
             <block type="core/messages" name="messages" as="messages"/>
@@ -219,6 +217,42 @@ Base preview layout
             <block type="adminhtml/dashboard_tab_products_viewed" name="adminhtml.dashboard.tab.products.viewed"/>
         </block>
     </adminhtml_dashboard_productsviewed>
+
+    <adminhtml_dashboard_devices>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_devices" name="adminhtml.dashboard.tab.devices"/>
+        </block>
+    </adminhtml_dashboard_devices>
+
+    <adminhtml_dashboard_engagement>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_engagement" name="adminhtml.dashboard.tab.engagement"/>
+        </block>
+    </adminhtml_dashboard_engagement>
+
+    <adminhtml_dashboard_entryexit>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_entryexit" name="adminhtml.dashboard.tab.entryexit"/>
+        </block>
+    </adminhtml_dashboard_entryexit>
+
+    <adminhtml_dashboard_languages>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_languages" name="adminhtml.dashboard.tab.languages"/>
+        </block>
+    </adminhtml_dashboard_languages>
+
+    <adminhtml_dashboard_toppages>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_toppages" name="adminhtml.dashboard.tab.toppages"/>
+        </block>
+    </adminhtml_dashboard_toppages>
+
+    <adminhtml_dashboard_trafficsources>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="log/dashboard_sources" name="adminhtml.dashboard.tab.trafficsources"/>
+        </block>
+    </adminhtml_dashboard_trafficsources>
 
     <adminhtml_index_login>
         <block type="core/text_list" name="root" output="toHtml">

@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -49,8 +49,8 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     protected function _construct()
     {
         parent::_construct();
-        /** @var Mage_Paypal_Model_Config $classInstance */
         $classInstance = Mage::getModel($this->_configType, [$this->_configMethod]);
+        assert($classInstance instanceof \Mage_Paypal_Model_Config);
         $this->_config = $classInstance;
     }
 
@@ -445,11 +445,11 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
             Mage::throwException(Mage::helper('paypal')->__('Unable to initialize Express Checkout.'));
         }
 
-        /** @var Mage_Paypal_Model_Express_Checkout $classInstance */
         $classInstance = Mage::getSingleton($this->_checkoutType, [
             'config' => $this->_config,
             'quote'  => $quote,
         ]);
+        assert($classInstance instanceof \Mage_Paypal_Model_Express_Checkout);
         $this->_checkout = $classInstance;
         return $this->_checkout;
     }

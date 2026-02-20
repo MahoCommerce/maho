@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Core
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,7 +38,7 @@ trait Mage_Core_Model_Pdf_Trait
             $this->dompdfOptions->set('default_media_type', $config['default_media_type'] ?? 'print');
             $this->dompdfOptions->set('default_paper_size', $config['default_paper_size'] ?? 'a4');
             $this->dompdfOptions->set('default_paper_orientation', $config['default_paper_orientation'] ?? 'portrait');
-            $this->dompdfOptions->set('default_font', $config['default_font'] ?? 'DejaVu Sans');
+            $this->dompdfOptions->set('default_font', $config['default_font'] ?? 'Helvetica');
             $this->dompdfOptions->set('dpi', (int) ($config['dpi'] ?? 96));
             $this->dompdfOptions->set('font_height_ratio', (float) ($config['font_height_ratio'] ?? 1.1));
 
@@ -52,10 +52,8 @@ trait Mage_Core_Model_Pdf_Trait
             $this->dompdfOptions->set('debug_png', $config['debug_png'] ?? false);
             $this->dompdfOptions->set('debug_keep_temp', $config['debug_keep_temp'] ?? false);
 
-            // Set paths
+            // Set paths - use DomPDF's built-in fonts from vendor
             $this->dompdfOptions->set('temp_dir', Mage::getBaseDir('var') . DS . 'tmp');
-            $this->dompdfOptions->set('font_dir', Mage::getBaseDir('lib') . DS . 'dompdf' . DS . 'fonts');
-            $this->dompdfOptions->set('font_cache', Mage::getBaseDir('var') . DS . 'cache' . DS . 'dompdf');
             $this->dompdfOptions->set('chroot', Mage::getBaseDir());
             $this->dompdfOptions->set('log_output_file', Mage::getBaseDir('var') . DS . 'log' . DS . 'dompdf.log');
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -16,4 +18,5 @@
  *
  * @method int getId()
  */
+
 class Mage_Customer_Model_Entity_Attribute extends Mage_Customer_Model_Resource_Attribute {}

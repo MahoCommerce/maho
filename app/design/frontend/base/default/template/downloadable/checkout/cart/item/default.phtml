@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -34,31 +34,26 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
     </div>
 
     <?php if ($_options = $this->getOptionList()): ?>
-        <dl class="item-options">
-            <?php foreach ($_options as $_option) : ?>
-                <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
-                <dt><?= $this->escapeHtml($_option['label']) ?></dt>
-                <dd<?php if (isset($_formatedOptionValue['full_view'])): ?> class="truncated"<?php endif ?>><?= $_formatedOptionValue['value'] ?>
-                    <?php if (isset($_formatedOptionValue['full_view'])): ?>
-                        <div class="truncated_full_value">
-                            <dl class="item-options">
-                                <dt><?= $this->escapeHtml($_option['label']) ?></dt>
-                                <dd><?= $_formatedOptionValue['full_view'] ?></dd>
-                            </dl>
-                        </div>
-                    <?php endif ?>
-                </dd>
-            <?php endforeach ?>
-        </dl>
+        <?php foreach ($_options as $_option) : ?>
+            <?php $_formatedOptionValue = $this->getFormatedOptionValue($_option) ?>
+            <div class="product-cart-sku<?php if (isset($_formatedOptionValue['full_view'])): ?> truncated<?php endif ?>">
+                <span class="label"><?= $this->escapeHtml($_option['label']) ?>:</span>
+                <?= $_formatedOptionValue['value'] ?>
+                <?php if (isset($_formatedOptionValue['full_view'])): ?>
+                <div class="truncated_full_value">
+                    <span class="label"><?= $this->escapeHtml($_option['label']) ?>:</span>
+                    <?= $_formatedOptionValue['full_view'] ?>
+                </div>
+                <?php endif ?>
+            </div>
+        <?php endforeach ?>
     <?php endif ?>
     <!-- downloadable -->
     <?php if ($links = $this->getLinks()): ?>
-        <dl class="item-options">
-            <dt><?= $this->escapeHtml($this->getLinksTitle()) ?></dt>
-            <?php foreach ($links as $link): ?>
-                <dd><?= $this->escapeHtml($link->getTitle()) ?></dd>
-            <?php endforeach ?>
-        </dl>
+        <div class="product-cart-sku">
+            <span class="label"><?= $this->escapeHtml($this->getLinksTitle()) ?>:</span>
+            <?= implode(', ', array_map(fn($link) => (string) $this->escapeHtml($link->getTitle()), $links)) ?>
+        </div>
     <?php endif ?>
     <!-- EOF downloadable -->
 

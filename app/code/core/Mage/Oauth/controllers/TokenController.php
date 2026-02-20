@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,7 +22,6 @@ class Mage_Oauth_TokenController extends Mage_Core_Controller_Front_Action
     {
         $this->setFlag('', self::FLAG_NO_START_SESSION, 1);
         $this->setFlag('', self::FLAG_NO_CHECK_INSTALLATION, 1);
-        $this->setFlag('', self::FLAG_NO_COOKIES_REDIRECT, 0);
         $this->setFlag('', self::FLAG_NO_PRE_DISPATCH, 1);
         $this->setFlag('', self::FLAG_NO_POST_DISPATCH, 1);
 

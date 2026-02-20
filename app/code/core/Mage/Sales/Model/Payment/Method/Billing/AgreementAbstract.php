@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -69,7 +69,7 @@ abstract class Mage_Sales_Model_Payment_Method_Billing_AgreementAbstract extends
         $id = false;
         if (is_array($data) && isset($data[$key])) {
             $id = $data[$key];
-        } elseif ($data instanceof Varien_Object && $data->getData($key)) {
+        } elseif ($data instanceof \Maho\DataObject && $data->getData($key)) {
             $id = $data->getData($key);
         }
         if ($id) {

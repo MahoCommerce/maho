@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -104,6 +104,15 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tabs extends Mage_Adminhtml_Bloc
                 'url'       => $this->getUrl('*/*/crosssell', ['_current' => true]),
                 'class'     => 'ajax',
             ]);
+
+            // Parent Products tab - only for non-composite products (simple, virtual, downloadable)
+            if ($product->getId() && !$product->isComposite()) {
+                $this->addTab('parent_products', [
+                    'label'     => Mage::helper('catalog')->__('Parent Products'),
+                    'url'       => $this->getUrl('*/*/parentProducts', ['_current' => true]),
+                    'class'     => 'ajax',
+                ]);
+            }
 
             $storeId = 0;
             if ($this->getRequest()->getParam('store')) {

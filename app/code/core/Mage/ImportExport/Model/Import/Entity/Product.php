@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -313,12 +313,12 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Dry-ran products information from import file.
      *
-     * [SKU] => array(
+     * [SKU] => [
      *     'type_id'        => (string) product type
      *     'attr_set_id'    => (int) product attribute set ID
      *     'entity_id'      => (int) product ID (value for new products will be set after entity save)
      *     'attr_set_code'  => (string) attribute set code
-     * )
+     * ]
      *
      * @var array
      */
@@ -327,12 +327,12 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     /**
      * Existing products SKU-related information in form of array:
      *
-     * [SKU] => array(
+     * [SKU] => [
      *     'type_id'        => (string) product type
      *     'attr_set_id'    => (int) product attribute set ID
      *     'entity_id'      => (int) product ID
      *     'supported_type' => (bool) is product type supported by current version of import module
-     * )
+     * ]
      *
      * @var array
      */
@@ -454,7 +454,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             if ($idToDelete) {
                 $this->_connection->query(
                     $this->_connection->quoteInto(
-                        "DELETE FROM `{$productEntityTable}` WHERE `entity_id` IN (?)",
+                        "DELETE FROM {$productEntityTable} WHERE entity_id IN (?)",
                         $idToDelete,
                     ),
                 );
@@ -710,21 +710,21 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             if (!isset($rowData['_tier_price_website']) || !isset($rowData['_tier_price_customer_group'])
                     || !isset($rowData['_tier_price_qty']) || !isset($rowData['_tier_price_price'])
                     || !strlen($rowData['_tier_price_website']) || !strlen($rowData['_tier_price_customer_group'])
-                    || !strlen($rowData['_tier_price_qty']) || !strlen($rowData['_tier_price_price'])
-            ) {
+                    || !strlen($rowData['_tier_price_qty']) || !strlen($rowData['_tier_price_price'])) {
                 $this->addRowError(self::ERROR_TIER_DATA_INCOMPLETE, $rowNum);
                 return false;
-            } elseif ($rowData['_tier_price_website'] != self::VALUE_ALL
-                    && !isset($this->_websiteCodeToId[$rowData['_tier_price_website']])
-            ) {
+            }
+            if ($rowData['_tier_price_website'] != self::VALUE_ALL
+                    && !isset($this->_websiteCodeToId[$rowData['_tier_price_website']])) {
                 $this->addRowError(self::ERROR_INVALID_TIER_PRICE_SITE, $rowNum);
                 return false;
-            } elseif ($rowData['_tier_price_customer_group'] != self::VALUE_ALL
-                    && !isset($this->_customerGroups[$rowData['_tier_price_customer_group']])
-            ) {
+            }
+            if ($rowData['_tier_price_customer_group'] != self::VALUE_ALL
+                    && !isset($this->_customerGroups[$rowData['_tier_price_customer_group']])) {
                 $this->addRowError(self::ERROR_INVALID_TIER_PRICE_GROUP, $rowNum);
                 return false;
-            } elseif ($rowData['_tier_price_qty'] <= 0 || $rowData['_tier_price_price'] <= 0) {
+            }
+            if ($rowData['_tier_price_qty'] <= 0 || $rowData['_tier_price_price'] <= 0) {
                 $this->addRowError(self::ERROR_INVALID_TIER_PRICE_QTY, $rowNum);
                 return false;
             }
@@ -746,18 +746,17 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         ) {
             if (!isset($rowData['_group_price_website']) || !isset($rowData['_group_price_customer_group'])
                 || !strlen($rowData['_group_price_website']) || !strlen($rowData['_group_price_customer_group'])
-                || !strlen($rowData['_group_price_price'])
-            ) {
+                || !strlen($rowData['_group_price_price'])) {
                 $this->addRowError(self::ERROR_GROUP_PRICE_DATA_INCOMPLETE, $rowNum);
                 return false;
-            } elseif ($rowData['_group_price_website'] != self::VALUE_ALL
-                && !isset($this->_websiteCodeToId[$rowData['_group_price_website']])
-            ) {
+            }
+            if ($rowData['_group_price_website'] != self::VALUE_ALL
+                && !isset($this->_websiteCodeToId[$rowData['_group_price_website']])) {
                 $this->addRowError(self::ERROR_INVALID_GROUP_PRICE_SITE, $rowNum);
                 return false;
-            } elseif ($rowData['_group_price_customer_group'] != self::VALUE_ALL
-                && !isset($this->_customerGroups[$rowData['_group_price_customer_group']])
-            ) {
+            }
+            if ($rowData['_group_price_customer_group'] != self::VALUE_ALL
+                && !isset($this->_customerGroups[$rowData['_group_price_customer_group']])) {
                 $this->addRowError(self::ERROR_INVALID_GROUP_PRICE_GROUP, $rowNum);
                 return false;
             }
@@ -817,7 +816,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $typePriceTable = $coreResource->getTableName('catalog/product_option_type_price');
         $typeTitleTable = $coreResource->getTableName('catalog/product_option_type_title');
         $typeValueTable = $coreResource->getTableName('catalog/product_option_type_value');
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextOptionId   = $helper->getNextAutoincrement($optionTable);
         $nextValueId    = $helper->getNextAutoincrement($typeValueTable);
@@ -829,7 +827,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             'time'      => ['price', 'sku'],
             'field'     => ['price', 'sku', 'max_characters'],
             'area'      => ['price', 'sku', 'max_characters'],
-            //'file'      => array('price', 'sku', 'file_extension', 'image_size_x', 'image_size_y'),
+            //'file'      => ['price', 'sku', 'file_extension', 'image_size_x', 'image_size_y'],
             'drop_down' => true,
             'radio'     => true,
             'checkbox'  => true,
@@ -956,8 +954,8 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                             'option_type_id' => $nextValueId,
                             'sort_order'     => empty($rowData['_custom_option_row_sort'])
                                 ? 0 : abs($rowData['_custom_option_row_sort']),
-                            'sku'            => !empty($rowData['_custom_option_row_sku'])
-                                ? $rowData['_custom_option_row_sku'] : '',
+                            'sku'            => empty($rowData['_custom_option_row_sku'])
+                                ? '' : $rowData['_custom_option_row_sku'],
                         ];
                         if (!isset($customOptions[$typeTitleTable][$nextValueId][0])) { // ensure default title is set
                             $customOptions[$typeTitleTable][$nextValueId][0] = $rowData['_custom_option_row_title'];
@@ -1125,7 +1123,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
         $resource       = Mage::getResourceModel('catalog/product_link');
         $mainTable      = $resource->getMainTable();
         $positionAttrId = [];
-        /** @var Maho\Db\Adapter\AdapterInterface $adapter */
         $adapter = $this->_connection;
 
         // pre-load 'position' attributes ID for each link type once
@@ -1143,7 +1140,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
             $positionAttrId[$linkId] = $adapter->fetchOne($select, $bind);
         }
 
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('importexport');
         $nextLinkId = $helper->getNextAutoincrement($mainTable);
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {
@@ -1208,7 +1204,7 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     $linkRows,
                     ['link_id'],
                 );
-                $adapter->changeTableAutoIncrement($mainTable, (string) $nextLinkId);
+                $adapter->changeTableAutoIncrement($mainTable, (int) $nextLinkId);
             }
             if ($positionRows) { // process linked product positions
                 $adapter->insertOnDuplicate(
@@ -1378,8 +1374,10 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
                     // 1. Entity phase
                     if (isset($this->_oldSku[$rowSku])) { // existing row
                         $entityRowsUp[] = [
-                            'updated_at' => $now,
-                            'entity_id'  => $this->_oldSku[$rowSku]['entity_id'],
+                            'updated_at'       => $now,
+                            'entity_id'        => $this->_oldSku[$rowSku]['entity_id'],
+                            'entity_type_id'   => $this->_entityTypeId,
+                            'attribute_set_id' => $this->_oldSku[$rowSku]['attr_set_id'],
                         ];
                     } else { // new row
                         if (!$productLimit || $productsQty < $productLimit) {
@@ -1828,42 +1826,6 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     }
 
     /**
-     * Returns resource model
-     *
-     * @param string $resourceModelName
-     * @return Mage_Core_Model_Resource_Db_Collection_Abstract|false
-     * @deprecated use Mage::getResourceModel()
-     */
-    protected function getResourceModel($resourceModelName)
-    {
-        return Mage::getResourceModel($resourceModelName);
-    }
-
-    /**
-     * Returns helper
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function getHelper($helperName)
-    {
-        return Mage::helper($helperName);
-    }
-
-    /**
-     * Returns model
-     *
-     * @param string $modelName
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getModel()
-     */
-    protected function getModel($modelName)
-    {
-        return Mage::getModel($modelName);
-    }
-
-    /**
      * Stock item saving.
      *
      * @return $this
@@ -2041,11 +2003,11 @@ class Mage_ImportExport_Model_Import_Entity_Product extends Mage_ImportExport_Mo
     {
         if (isset($rowData[self::COL_SKU]) && strlen(trim($rowData[self::COL_SKU]))) {
             return self::SCOPE_DEFAULT;
-        } elseif (empty($rowData[self::COL_STORE])) {
-            return self::SCOPE_NULL;
-        } else {
-            return self::SCOPE_STORE;
         }
+        if (empty($rowData[self::COL_STORE])) {
+            return self::SCOPE_NULL;
+        }
+        return self::SCOPE_STORE;
     }
 
     /**

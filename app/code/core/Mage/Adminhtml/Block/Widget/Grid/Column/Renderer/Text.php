@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,7 +25,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminht
      * @return mixed
      */
     #[\Override]
-    public function _getValue(Varien_Object $row)
+    protected function _getValue(\Maho\DataObject $row)
     {
         $format = $this->getColumn()->getFormat() ?: null;
         $defaultValue = $this->getColumn()->getDefault();
@@ -34,7 +34,8 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminht
             $data = parent::_getValue($row);
             $string = $data ?? $defaultValue ?? '';
             return $this->escapeHtml($string);
-        } elseif (preg_match_all($this->_variablePattern, $format, $matches)) {
+        }
+        if (preg_match_all($this->_variablePattern, $format, $matches)) {
             // Parsing of format string
             $formattedString = $format;
             foreach ($matches[0] as $matchIndex => $match) {
@@ -42,8 +43,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Text extends Mage_Adminht
                 $formattedString = str_replace($match, $value, $formattedString);
             }
             return $formattedString;
-        } else {
-            return $this->escapeHtml($format);
         }
+        return $this->escapeHtml($format);
     }
 }

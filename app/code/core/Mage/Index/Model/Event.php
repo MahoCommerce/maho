@@ -6,7 +6,7 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,8 +22,8 @@
  * @method $this setCreatedAt(string $value)
  * @method $this setOldData(string|array $value)
  * @method $this setNewData(string|array $value)
- * @method Mage_Core_Model_Store|Mage_Core_Model_Store_Group getDataObject()
- * @method $this setDataObject(Varien_Object $value)
+ * @method Mage_Core_Model_Abstract getDataObject()
+ * @method $this setDataObject(\Maho\DataObject $value)
  * @method bool hasCreatedAt()
  */
 class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
@@ -182,10 +182,10 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
         }
 
         if (!empty($data['new_data'])) {
-            $previousNewData = unserialize($data['new_data'], ['allowed_classes' => false]);
+            $previousNewData = Mage::helper('core/string')->unserialize($data['new_data']);
             $currentNewData  = $this->getNewData(false);
             $currentNewData = $this->_mergeNewDataRecursive($previousNewData, $currentNewData);
-            $this->setNewData(serialize($currentNewData));
+            $this->setNewData(Mage::helper('core')->jsonEncode($currentNewData));
         }
         return $this;
     }
@@ -214,21 +214,9 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
                 }
             }
         }
-        $this->setNewData(serialize($newData));
+        $this->setNewData(Mage::helper('core')->jsonEncode($newData));
 
         return $this;
-    }
-
-    /**
-     * Get event old data array
-     *
-     * @deprecated since 1.6.2.0
-     * @param bool $useNamespace
-     * @return array
-     */
-    public function getOldData($useNamespace = true)
-    {
-        return [];
     }
 
     /**
@@ -240,28 +228,16 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     public function getNewData($useNamespace = true)
     {
         $data = $this->_getData('new_data');
-        if (is_string($data)) {
-            $data = unserialize($data, ['allowed_classes' => false]);
-        } elseif (empty($data) || !is_array($data)) {
+        if (is_string($data) && $data !== '') {
+            $data = Mage::helper('core/string')->unserialize($data);
+        }
+        if (empty($data) || !is_array($data)) {
             $data = [];
         }
         if ($useNamespace && $this->_dataNamespace) {
             return $data[$this->_dataNamespace] ?? [];
         }
         return $data;
-    }
-
-    /**
-     * Add new values to old data array (overwrite if value with same key exist)
-     *
-     * @param array|string $key
-     * @param null|mixed $value
-     * @return $this
-     * @deprecated since 1.6.2.0
-     */
-    public function addOldData($key, $value = null)
-    {
-        return $this;
     }
 
     /**
@@ -318,7 +294,7 @@ class Mage_Index_Model_Event extends Mage_Core_Model_Abstract
     protected function _beforeSave()
     {
         $newData = $this->getNewData(false);
-        $this->setNewData(serialize($newData));
+        $this->setNewData(Mage::helper('core')->jsonEncode($newData));
         if (!$this->hasCreatedAt()) {
             $this->setCreatedAt($this->_getResource()->formatDate(time(), true));
         }

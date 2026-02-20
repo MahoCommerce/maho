@@ -6,7 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -177,11 +177,11 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
     {
         if ($this->getAdminId()) {
             return self::USER_TYPE_ADMIN;
-        } elseif ($this->getCustomerId()) {
-            return self::USER_TYPE_CUSTOMER;
-        } else {
-            Mage::throwException('User type is unknown');
         }
+        if ($this->getCustomerId()) {
+            return self::USER_TYPE_CUSTOMER;
+        }
+        Mage::throwException('User type is unknown');
     }
 
     /**
@@ -223,9 +223,9 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
     {
         if (Mage_Oauth_Model_Server::CALLBACK_ESTABLISHED !== $this->getCallbackUrl()) {
             $callbackUrl = $this->getConsumer()->getCallbackUrl();
-            $isWhitelisted = $callbackUrl && str_starts_with($this->getCallbackUrl(), $callbackUrl);
+            $isOnAllowlist = $callbackUrl && str_starts_with($this->getCallbackUrl(), $callbackUrl);
             $validatorUrl = Mage::getSingleton('core/url_validator');
-            if (!$isWhitelisted && !$validatorUrl->isValid($this->getCallbackUrl())) {
+            if (!$isOnAllowlist && !$validatorUrl->isValid($this->getCallbackUrl())) {
                 $messages = $validatorUrl->getMessages();
                 Mage::throwException(array_shift($messages));
             }

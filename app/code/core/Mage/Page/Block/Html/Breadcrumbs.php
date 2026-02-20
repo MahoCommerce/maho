@@ -6,7 +6,7 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,15 +15,15 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     /**
      * Array of breadcrumbs
      *
-     * array(
-     *  [$index] => array(
+     * [
+     *  [$index] => [
      *                  ['label']
      *                  ['title']
      *                  ['link']
      *                  ['first']
      *                  ['last']
-     *              )
-     * )
+     *              ]
+     * ]
      *
      * @var array
      */
@@ -45,7 +45,7 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     /**
      * @param string $crumbName
      * @param array $crumbInfo
-     * @param string|bool $after
+     * @param string|false $after
      * @return $this
      */
     public function addCrumb($crumbName, $crumbInfo, $after = false)
@@ -65,7 +65,7 @@ class Mage_Page_Block_Html_Breadcrumbs extends Mage_Core_Block_Template
     /**
      * @param string $crumbName
      * @param array $crumbInfo
-     * @param bool $before
+     * @param string|false $before
      */
     public function addCrumbBefore($crumbName, $crumbInfo, $before = false)
     {

@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -142,23 +142,28 @@ class Mage_Bundle_Model_Resource_Indexer_Stock extends Mage_CatalogInventory_Mod
         $condition = $adapter->quoteInto('=?', Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
         $this->_addAttributeToSelect($select, 'status', 'e.entity_id', 'cs.store_id', $condition);
 
+        // Use COALESCE for is_in_stock to handle NULL values from LEFT JOIN
+        $isInStockExpr = $adapter->getIfNullSql('cisi.is_in_stock', '0');
+
         if ($this->_isManageStock()) {
             $statusExpr = $adapter->getCheckSql(
                 'cisi.use_config_manage_stock = 0 AND cisi.manage_stock = 0',
                 '1',
-                'cisi.is_in_stock',
+                $isInStockExpr,
             );
         } else {
             $statusExpr = $adapter->getCheckSql(
                 'cisi.use_config_manage_stock = 0 AND cisi.manage_stock = 1',
-                'cisi.is_in_stock',
+                $isInStockExpr,
                 '1',
             );
         }
 
+        // Wrap MIN() with COALESCE to handle cases where there are no rows (MIN returns NULL for empty set)
+        // SQLite's MIN() in scalar context also returns NULL if any argument is NULL
         $select->columns(['status' => $adapter->getLeastSql([
-            new Maho\Db\Expr('MIN(' . $adapter->getCheckSql('o.stock_status IS NOT NULL', 'o.stock_status', '0') . ')'),
-            new Maho\Db\Expr('MIN(' . $statusExpr . ')'),
+            new Maho\Db\Expr($adapter->getIfNullSql('MIN(' . $adapter->getCheckSql('o.stock_status IS NOT NULL', 'o.stock_status', '0') . ')', '0')),
+            new Maho\Db\Expr($adapter->getIfNullSql('MIN(' . $statusExpr . ')', '0')),
         ])]);
 
         if (!is_null($entityIds)) {

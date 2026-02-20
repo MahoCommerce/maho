@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -130,7 +130,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function getImageInfo(): array
     {
         if ($this->imageInfo === null) {
-            $info = @getimagesize($this->_baseFile);
+            $info = @\Maho\Io::getImageSize($this->_baseFile);
             if ($info === false) {
                 throw new RuntimeException('Failed to read image at ' . $this->_baseFile);
             }
@@ -409,14 +409,14 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         }
 
         if ($this->_width && $this->_height) {
-            $this->getImage()->pad($this->_width, $this->_height);
+            $this->getImage()->pad($this->_width, $this->_height, $this->_backgroundColorStr);
         } elseif ($this->_keepFrame) {
             if ($this->_width) {
                 $this->setHeight($this->_width);
             } else {
                 $this->setWidth($this->_height);
             }
-            $this->getImage()->pad($this->_width, $this->_height);
+            $this->getImage()->pad($this->_width, $this->_height, $this->_backgroundColorStr);
         } else {
             $this->getImage()->scaleDown($this->_width, $this->_height);
         }
@@ -643,7 +643,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function clearCache(): void
     {
         $directory = Mage::getBaseDir('media') . DS . 'catalog' . DS . 'product' . DS . 'cache' . DS;
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->rmdir($directory, true);
 
     }

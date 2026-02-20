@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -70,9 +70,8 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
     {
         if ($parentNodeCategory === null && $this->getCategoryIds()) {
             return $this->getRootByIds($this->getCategoryIds(), $recursionLevel);
-        } else {
-            return parent::getRoot($parentNodeCategory, $recursionLevel);
         }
+        return parent::getRoot($parentNodeCategory, $recursionLevel);
     }
 
     #[\Override]
@@ -100,18 +99,6 @@ class Mage_Adminhtml_Block_Urlrewrite_Category_Tree extends Mage_Adminhtml_Block
             return !empty(array_intersect($children, $this->getCategoryIds()));
         }
         return false;
-    }
-
-    /**
-     * Convert categories tree to array recursively
-     *
-     * @param  Varien_Data_Tree_Node $node
-     * @return array
-     * @deprecated use self::_getNodeJson()
-     */
-    protected function _getNodesArray($node)
-    {
-        return $this->_getNodeJson($node);
     }
 
     /**

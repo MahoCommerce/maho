@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Api2
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -202,7 +202,8 @@ class Mage_Api2_Model_Route_Base
         foreach ($this->_variables as $var) {
             if (!array_key_exists($var, $return)) {
                 return false;
-            } elseif ($return[$var] === '' || $return[$var] === null) {
+            }
+            if ($return[$var] === '' || $return[$var] === null) {
                 // Empty variable? Replace with the default value.
                 $return[$var] = $this->_defaults[$var] ?? null;
             }

@@ -5,18 +5,15 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_System_Cache_Edit $this */
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td><h3><?= Mage::helper('adminhtml')->__($this->getTitle()) ?></h3></td><td class="form-buttons"><?= $this->getSaveButtonHtml() ?></td>
-         </tr>
-    </table>
+    <h3><?= Mage::helper('adminhtml')->__($this->getTitle()) ?></h3>
+    <p class="content-buttons form-buttons"><?= $this->getSaveButtonHtml() ?></p>
 </div>
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="config_edit_form" enctype="multipart/form-data">
     <?= $this->getBlockHtml('formkey') ?>

@@ -6,7 +6,7 @@
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -57,7 +57,7 @@ class Mage_ConfigurableSwatches_Block_Catalog_Product_List_Price extends Mage_Co
             $config['products'][$product->getId()] = $compositeProductHelper->prepareJsonProductConfig($product);
             $config['products'][$product->getId()]['swatchPrices'] = $product->getSwatchPrices();
 
-            $responseObject = new Varien_Object();
+            $responseObject = new \Maho\DataObject();
             Mage::dispatchEvent('catalog_product_view_config', [
                 'response_object' => $responseObject,
                 'product' => $product,

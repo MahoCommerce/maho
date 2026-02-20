@@ -6,17 +6,18 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Install_Model_Config extends Varien_Simplexml_Config
+class Mage_Install_Model_Config extends Maho\Simplexml\Config
 {
     public const XML_PATH_WIZARD_STEPS     = 'wizard/steps';
     public const XML_PATH_CHECK_WRITEABLE  = 'check/filesystem/writeable';
     public const XML_PATH_CHECK_EXTENSIONS = 'check/php/extensions';
 
-    protected $_optionsMapping = [self::XML_PATH_CHECK_WRITEABLE => [
+    /** @var array<string, array<string, string>> */
+    protected array $_optionsMapping = [self::XML_PATH_CHECK_WRITEABLE => [
         'app_etc' => 'etc_dir',
         'var'     => 'var_dir',
         'media'   => 'media_dir',
@@ -32,48 +33,19 @@ class Mage_Install_Model_Config extends Varien_Simplexml_Config
     /**
      * Get array of wizard steps
      *
-     * array($inndex => Varien_Object )
+     * [$index => Maho\DataObject ]
      *
-     * @return array
+     * @return array<Maho\DataObject>
      */
-    public function getWizardSteps()
+    public function getWizardSteps(): array
     {
         $steps = [];
         foreach ((array) $this->getNode(self::XML_PATH_WIZARD_STEPS) as $stepName => $step) {
-            $stepObject = new Varien_Object((array) $step);
+            $stepObject = new Maho\DataObject((array) $step);
             $stepObject->setName($stepName);
             $steps[] = $stepObject;
         }
         return $steps;
-    }
-
-    /**
-     * Retrieve writable path for checking
-     *
-     * array(
-     *      ['writeable'] => array(
-     *          [$index] => array(
-     *              ['path']
-     *              ['recursive']
-     *          )
-     *      )
-     * )
-     *
-     * @deprecated since 1.7.1.0
-     *
-     * @return array
-     */
-    public function getPathForCheck()
-    {
-        $res = [];
-
-        $items = (array) $this->getNode(self::XML_PATH_CHECK_WRITEABLE);
-
-        foreach ($items as $item) {
-            $res['writeable'][] = (array) $item;
-        }
-
-        return $res;
     }
 
     /**

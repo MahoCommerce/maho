@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -87,7 +87,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
      * @return string
      */
     #[\Override]
-    protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
+    protected function _getElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->setElement($element);
         $html = $this->_toHtml();
@@ -98,7 +98,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
     /**
      * Prepare existing row data object
      */
-    protected function _prepareArrayRow(Varien_Object $row)
+    protected function _prepareArrayRow(\Maho\DataObject $row)
     {
         // override in descendants
     }
@@ -106,7 +106,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
     /**
      * Obtain existing data from form element
      *
-     * Each row will be instance of Varien_Object
+     * Each row will be instance of \Maho\DataObject
      *
      * @return array
      */
@@ -116,7 +116,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
             return $this->_arrayRowsCache;
         }
         $result = [];
-        /** @var Varien_Data_Form_Element_Abstract $element */
+        /** @var \Maho\Data\Form\Element\AbstractElement $element */
         $element = $this->getElement();
         if ($element->getValue() && is_array($element->getValue())) {
             foreach ($element->getValue() as $rowId => $row) {
@@ -124,7 +124,7 @@ abstract class Mage_Adminhtml_Block_System_Config_Form_Field_Array_Abstract exte
                     $row[$key] = $this->escapeHtml($value);
                 }
                 $row['_id'] = $rowId;
-                $result[$rowId] = new Varien_Object($row);
+                $result[$rowId] = new \Maho\DataObject($row);
                 $this->_prepareArrayRow($result[$rowId]);
             }
         }

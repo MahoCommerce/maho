@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -96,7 +96,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
         if ($this->hasConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (!empty($conditions)) {
-                $conditions = Mage::helper('core/unserializeArray')->unserialize($conditions);
+                $conditions = $this->_decodeRuleData($conditions, 'conditions_serialized');
                 if (is_array($conditions) && !empty($conditions)) {
                     // Force reset conditions before loading to prevent duplicates
                     $this->_conditions->setConditions([]);
@@ -237,7 +237,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    public function validate(?Varien_Object $object = null): bool
+    public function validate(?\Maho\DataObject $object = null): bool
     {
         $errors = [];
 

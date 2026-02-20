@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
     /**
      * Validate process
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return bool
      */
     #[\Override]
@@ -54,8 +54,8 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
                 if (!is_array($available)) {
                     $available = explode(',', $available);
                 }
-                $data = (!in_array('default_sort_by', $postDataConfig)) ? $object->getData($attributeCode) :
-                       Mage::getStoreConfig('catalog/frontend/default_sort_by');
+                $data = (in_array('default_sort_by', $postDataConfig)) ? Mage::getStoreConfig('catalog/frontend/default_sort_by') :
+                       $object->getData($attributeCode);
                 if (!in_array($data, $available)) {
                     Mage::throwException(Mage::helper('eav')->__('Default Product Listing Sort by does not exist in Available Product Listing Sort By.'));
                 }
@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
     /**
      * Before Attribute Save Process
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     #[\Override]
@@ -93,7 +93,7 @@ class Mage_Catalog_Model_Category_Attribute_Backend_Sortby extends Mage_Eav_Mode
     }
 
     /**
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this|Mage_Eav_Model_Entity_Attribute_Backend_Abstract
      */
     #[\Override]

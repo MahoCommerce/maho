@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,9 +53,8 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
     {
         if ($this->getIsValid() && $this->getUserValue()) {
             return is_array($this->getUserValue()) ? implode(',', $this->getUserValue()) : $this->getUserValue();
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -125,7 +124,7 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
                 }
             }
             $result = Mage::helper('core/string')->substr($result, 0, -2);
-        } elseif ($this->_isSingleSelection()) {
+        } else {
             if ($_result = $option->getValueById($optionValue)) {
                 $result = $_result->getTitle();
             } else {
@@ -138,8 +137,6 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
                 }
                 $result = '';
             }
-        } else {
-            $result = $optionValue;
         }
         return $result;
     }
@@ -167,9 +164,8 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
         }
         if (count($_values)) {
             return implode(',', $_values);
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -269,21 +265,18 @@ class Mage_Catalog_Model_Product_Option_Type_Select extends Mage_Catalog_Model_P
                 }
             }
             $result = implode($skuDelimiter, $skus);
-        } elseif ($this->_isSingleSelection()) {
+        } else {
             if ($result = $option->getValueById($optionValue)) {
                 return $result->getSku();
-            } else {
-                if ($this->getListener()) {
-                    $this->getListener()
-                            ->setHasError(true)
-                            ->setMessage(
-                                $this->_getWrongConfigurationMessage(),
-                            );
-                }
-                return '';
             }
-        } else {
-            $result = parent::getOptionSku($optionValue, $skuDelimiter);
+            if ($this->getListener()) {
+                $this->getListener()
+                        ->setHasError(true)
+                        ->setMessage(
+                            $this->_getWrongConfigurationMessage(),
+                        );
+            }
+            return '';
         }
 
         return $result;

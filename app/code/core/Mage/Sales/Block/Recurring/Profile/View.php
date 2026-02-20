@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -107,7 +107,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
             return;
         }
 
-        $request = unserialize($request);
+        $request = unserialize($request, ['allowed_classes' => false]);
         if (empty($request['options'])) {
             return;
         }
@@ -124,7 +124,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
 
             $group = $option->groupFactory($option->getType())
                 ->setOption($option)
-                ->setRequest(new Varien_Object($request))
+                ->setRequest(new \Maho\DataObject($request))
                 ->setProduct($productMock)
                 ->setUseQuotePath(true)
                 ->setQuoteItemOption($quoteItemOptionMock)
@@ -251,30 +251,30 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
         $this->setChild('pager', $pager);
 
         $this->setGridColumns([
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'increment_id',
                 'title' => $this->__('Order #'),
                 'is_nobr' => true,
                 'width' => 1,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'created_at',
                 'title' => $this->__('Date'),
                 'is_nobr' => true,
                 'width' => 1,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'customer_name',
                 'title' => $this->__('Customer Name'),
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'base_grand_total',
                 'title' => $this->__('Order Total'),
                 'is_nobr' => true,
                 'width' => 1,
                 'is_amount' => true,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'status',
                 'title' => $this->__('Order Status'),
                 'is_nobr' => true,
@@ -284,7 +284,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
 
         $orders = [];
         foreach ($this->_relatedOrders as $order) {
-            $orders[] = new Varien_Object([
+            $orders[] = new \Maho\DataObject([
                 'increment_id' => $order->getIncrementId(),
                 'created_at' => $this->formatDate($order->getCreatedAt()),
                 'customer_name' => $order->getCustomerName(),
@@ -303,7 +303,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
      *
      * @return string
      */
-    public function renderRowValue(Varien_Object $row)
+    public function renderRowValue(\Maho\DataObject $row)
     {
         $value = $row->getValue();
         if ($value === null) {
@@ -341,7 +341,7 @@ class Mage_Sales_Block_Recurring_Profile_View extends Mage_Core_Block_Template
      */
     protected function _addInfo(array $data, $key = null)
     {
-        $object = new Varien_Object($data);
+        $object = new \Maho\DataObject($data);
         if ($key) {
             $this->_info[$key] = $object;
         } else {

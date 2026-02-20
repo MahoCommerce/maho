@@ -5,39 +5,13 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Sales_Block_Order_View $this */
 ?>
 <div class="order-items order-details">
-    <?php if ($this->canDisplayGiftmessageItems()): ?>
-    <script type="text/javascript">
-        function giftMessageToogle(giftMessageIdentifier) {
-            const link = document.getElementById('order-item-gift-message-link-' + giftMessageIdentifier);
-            const container = document.getElementById('order-item-gift-message-' + giftMessageIdentifier);
-            const row = document.getElementById('order-item-row-' + giftMessageIdentifier);
-
-            if (link.expanded) {
-                link.expanded = false;
-                link.classList.remove('expanded');
-                if (container.classList.contains('last')) {
-                    row.classList.add('last');
-                }
-                container.style.display = 'none';
-            } else {
-                link.expanded = true;
-                link.classList.add('expanded');
-                if (container.classList.contains('last')) {
-                    row.classList.remove('last');
-                }
-                container.style.display = 'block';
-            }
-            return false;
-        }
-    </script>
-    <?php endif ?>
     <?php $_order = $this->getOrder() ?>
     <h2 class="table-caption"><?= $this->__('Items Ordered') ?>
         <?php if ($_order->getTracksCollection()->count()) : ?>
@@ -48,15 +22,20 @@
     <?= $this->getChildHtml('order_items') ?>
 
     <?php if($this->canDisplayGiftmessageOrder()): ?>
-    <div class="order-additional order-gift-message">
-        <h2 class="sub-title"><?= $this->__('Gift Message for This Order') ?></h2>
-        <?php $_giftMessage=$this->helper('giftmessage/message')->getGiftMessageForEntity($_order); ?>
-        <dl class="gift-message">
-            <dt><strong><?= $this->__('From:') ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?></dt>
-            <dt><strong><?= $this->__('To:') ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?></dt>
-            <dd><?= $this->helper('giftmessage/message')->getEscapedGiftMessage($_order) ?></dd>
-        </dl>
-    </div>
+        <?php $_giftMessage = $this->helper('giftmessage/message')->getGiftMessageForEntity($_order); ?>
+        <details class="gift-message order-level">
+            <summary class="toggle">
+                <?= $this->getIconSvg('gift') ?>
+                <?= $this->__('Gift Message for This Order') ?>
+            </summary>
+            <div class="content">
+                <div class="header">
+                    <span><strong><?= $this->__('From:') ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?></span>
+                    <span><strong><?= $this->__('To:') ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?></span>
+                </div>
+                <blockquote class="text"><?= $this->helper('giftmessage/message')->getEscapedGiftMessage($_order) ?></blockquote>
+            </div>
+        </details>
     <?php endif ?>
     <?php $_history = $this->getOrder()->getVisibleStatusHistory() ?>
     <?php if (count($_history)): ?>

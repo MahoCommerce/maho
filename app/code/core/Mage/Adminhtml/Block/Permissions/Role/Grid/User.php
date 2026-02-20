@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -107,19 +107,19 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
 
         /*
          $this->addColumn('grid_actions',
-             array(
+             [
                  'header'=>Mage::helper('adminhtml')->__('Actions'),
                  'width'=>5,
                  'sortable'=>false,
                  'filter'    =>false,
                  'type' => 'action',
-                 'actions'   => array(
-                                     array(
+                 'actions'   => [
+                                     [
                                          'caption' => Mage::helper('adminhtml')->__('Remove'),
                                          'onClick' => 'role.deleteFromRole($role_id);'
-                                     )
-                                 )
-             )
+                                     ]
+                                 ]
+             ]
          );
          */
 
@@ -147,15 +147,12 @@ class Mage_Adminhtml_Block_Permissions_Role_Grid_User extends Mage_Adminhtml_Blo
                     $jsonUsers[$usrid] = 0;
                 }
                 return Mage::helper('core')->jsonEncode((object) $jsonUsers);
-            } else {
-                return array_values($users);
             }
-        } else {
-            if ($json) {
-                return '{}';
-            } else {
-                return [];
-            }
+            return array_values($users);
         }
+        if ($json) {
+            return '{}';
+        }
+        return [];
     }
 }

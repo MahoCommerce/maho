@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -381,7 +381,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
             <?php else: ?>
                 <span class="minimal-price-link">
             <?php endif ?>
-            <span class="label"><?= $this->__('As low as:') ?></span>
+            <span class="label"><?= $this->__('From') ?></span>
             <span class="price"
                   id="product-minimal-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_minimalPriceDisplayValue, true, false) ?></span>
             <?php if ($this->getUseLinkForAsLowAs()): ?>
@@ -400,7 +400,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
         <?php if ($this->getDisplayMinimalPrice() && $_minimalPriceValue): ?>
             <div class="price-box">
                 <p class="minimal-price">
-                    <span class="price-label"><?= $this->__('Starting at:') ?></span>
+                    <span class="price-label"><?= $this->__('From') ?></span>
                     <?php if ($this->helper('tax')->displayBothPrices()): ?>
                         <span class="price-excluding-tax">
                     <span class="label"><?= Mage::helper('tax')->__('Excl. Tax:') ?></span>

@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,7 +44,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
     /**
      * Request which can be used for tax rate calculation
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_storeTaxRequest = null;
 
@@ -192,60 +192,4 @@ class Mage_Tax_Model_Sales_Total_Quote_Shipping extends Mage_Sales_Model_Quote_A
         $delta = $deltas[$key][$rate] ?? 0;
         return $this->_calculator->round($price + $delta);
     }
-
-    /**
-     * Get request for fetching store tax rate
-     *
-     * @deprecated after 1.4.0.0
-     * @param   Mage_Sales_Model_Quote_Address $address
-     * @return  Varien_Object
-     */
-    protected function _getStoreTaxRequest($address)
-    {
-        if (is_null($this->_storeTaxRequest)) {
-            $this->_storeTaxRequest = $this->_calculator->getRateOriginRequest($address->getQuote()->getStore());
-        }
-        return $this->_storeTaxRequest;
-    }
-
-    /**
-     * Get request for fetching address tax rate
-     *
-     * @deprecated after 1.4.0.0
-     * @param   Mage_Sales_Model_Quote_Address $address
-     * @return  Varien_Object
-     */
-    protected function _getAddressTaxRequest($address)
-    {
-        return $this->_calculator->getRateRequest(
-            $address,
-            $address->getQuote()->getBillingAddress(),
-            $address->getQuote()->getCustomerTaxClassId(),
-            $address->getQuote()->getStore(),
-        );
-    }
-
-    /**
-     * Check if we need subtract store tax amount from shipping
-     *
-     * @deprecated after 1.4.0.0
-     * @param Mage_Sales_Model_Quote_Address $address
-     * @return bool
-     */
-    protected function _needSubtractShippingTax($address)
-    {
-        $store = $address->getQuote()->getStore();
-        if ($this->_config->shippingPriceIncludesTax($store) || $this->_config->getNeedUseShippingExcludeTax()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Calculate shipping price without store tax
-     *
-     * @param Mage_Sales_Model_Quote_Address $address
-     * @deprecated after 1.4.0.0
-     */
-    protected function _processShippingAmount($address) {}
 }

@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -40,7 +40,7 @@
  * @method array getValueOption()
  * @method $this setValueOption(array $value)
  */
-abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implements Mage_Rule_Model_Condition_Interface
+abstract class Mage_Rule_Model_Condition_Abstract extends \Maho\DataObject implements Mage_Rule_Model_Condition_Interface
 {
     /**
      * Flag to enable translation for loadOperatorOptions/loadValueOptions/loadAggregatorOptions/getDefaultOperatorOptions
@@ -160,7 +160,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     }
 
     /**
-     * @return Varien_Data_Form
+     * @return \Maho\Data\Form
      */
     public function getForm()
     {
@@ -463,7 +463,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getTypeElement()
     {
@@ -484,7 +484,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getAttributeElement()
     {
@@ -503,7 +503,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
         ]);
 
         $renderer = Mage::getBlockSingleton('rule/editable');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $element->setRenderer($renderer);
         }
 
@@ -522,7 +522,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
      * Retrieve Condition Operator element Instance
      * If the operator value is empty - define first available operator value as default
      *
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getOperatorElement()
     {
@@ -544,7 +544,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
         ]);
 
         $renderer = Mage::getBlockSingleton('rule/editable');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
             $element->setRenderer($renderer);
         }
 
@@ -562,7 +562,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     /**
      * Value element type will define renderer for condition value element
      *
-     * @see Varien_Data_Form_Element
+     * @see \Maho\Data\Form\Element
      * @return string
      */
     public function getValueElementType()
@@ -582,7 +582,7 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     public function getValueElement()
     {
@@ -726,18 +726,16 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
             case '>':
                 if (!is_scalar($validatedValue)) {
                     return false;
-                } else {
-                    $result = $validatedValue <= $value;
                 }
+                $result = $validatedValue <= $value;
                 break;
 
             case '>=':
             case '<':
                 if (!is_scalar($validatedValue)) {
                     return false;
-                } else {
-                    $result = $validatedValue >= $value;
                 }
+                $result = $validatedValue >= $value;
                 break;
 
             case '{}':
@@ -809,20 +807,19 @@ abstract class Mage_Rule_Model_Condition_Abstract extends Varien_Object implemen
     {
         if ($strict && is_numeric($validatedValue) && is_numeric($value)) {
             return $validatedValue == $value;
-        } else {
-            $validatedValue ??= '';
-            $validatePattern = preg_quote($validatedValue, '~');
-            if ($strict) {
-                $validatePattern = '^' . $validatePattern . '$';
-            }
-            return (bool) preg_match('~' . $validatePattern . '~iu', $value);
         }
+        $validatedValue ??= '';
+        $validatePattern = preg_quote($validatedValue, '~');
+        if ($strict) {
+            $validatePattern = '^' . $validatePattern . '$';
+        }
+        return (bool) preg_match('~' . $validatePattern . '~iu', $value);
     }
 
     /**
      * @return bool
      */
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         return $this->validateAttribute($object->getData($this->getAttribute()));
     }

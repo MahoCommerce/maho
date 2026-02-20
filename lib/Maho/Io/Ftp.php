@@ -3,10 +3,10 @@
 /**
  * Maho
  *
- * @package    Maho_Io
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,7 +14,7 @@ namespace Maho\Io;
 
 use FTP\Connection;
 
-class Ftp extends AbstractIo
+class Ftp extends \Maho\Io
 {
     public const ERROR_EMPTY_HOST = 1;
     public const ERROR_INVALID_CONNECTION = 2;
@@ -236,24 +236,22 @@ class Ftp extends AbstractIo
     {
         if (is_string($src) && is_readable($src)) {
             return @ftp_put($this->_conn, $filename, $src, $this->_config['file_mode']);
-        } else {
-            if (is_string($src)) {
-                $stream = tmpfile();
-                fputs($stream, $src);
-                fseek($stream, 0);
-            } elseif (is_resource($src)) {
-                $stream = $src;
-            } else {
-                $this->_error = self::ERROR_INVALID_SOURCE;
-                return false;
-            }
-
-            $result = ftp_fput($this->_conn, $filename, $stream, $this->_config['file_mode']);
-            if (is_string($src)) {
-                fclose($stream);
-            }
-            return $result;
         }
+        if (is_string($src)) {
+            $stream = tmpfile();
+            fputs($stream, $src);
+            fseek($stream, 0);
+        } elseif (is_resource($src)) {
+            $stream = $src;
+        } else {
+            $this->_error = self::ERROR_INVALID_SOURCE;
+            return false;
+        }
+        $result = ftp_fput($this->_conn, $filename, $stream, $this->_config['file_mode']);
+        if (is_string($src)) {
+            fclose($stream);
+        }
+        return $result;
     }
 
     /**

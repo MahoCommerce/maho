@@ -6,7 +6,7 @@
  * @package    Mage_GoogleAnalytics
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_GoogleAnalytics_Model_Observer
     /**
      * Add order information into GA block to render on checkout success pages
      */
-    public function setGoogleAnalyticsOnOrderSuccessPageView(Varien_Event_Observer $observer)
+    public function setGoogleAnalyticsOnOrderSuccessPageView(\Maho\Event\Observer $observer)
     {
         $orderIds = $observer->getEvent()->getOrderIds();
         if (empty($orderIds) || !is_array($orderIds)) {
@@ -30,7 +30,7 @@ class Mage_GoogleAnalytics_Model_Observer
     /**
      * Process items added or removed from cart for GA4 block to render event on cart view
      */
-    public function processItemsAddedOrRemovedFromCart(Varien_Event_Observer $observer): void
+    public function processItemsAddedOrRemovedFromCart(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sales_Model_Quote_Item $item */
         $item = $observer->getEvent()->getItem();

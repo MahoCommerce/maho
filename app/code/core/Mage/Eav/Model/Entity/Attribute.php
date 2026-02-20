@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -77,17 +77,27 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     }
 
     /**
-     * Retrieve default attribute source model
-     *
-     * @return string
+     * Get default source model
      */
     #[\Override]
-    protected function _getDefaultSourceModel()
+    public function getDefaultSourceModel(): string
     {
         if ($this->getAttributeCode() == 'store_id') {
             return 'eav/entity_attribute_source_store';
         }
-        return parent::_getDefaultSourceModel();
+        return parent::getDefaultSourceModel();
+    }
+
+    /**
+     * Retrieve default attribute source model
+     *
+     * @return string
+     * @deprecated since 26.1 use getDefaultSourceModel() instead
+     */
+    #[\Override]
+    protected function _getDefaultSourceModel()
+    {
+        return $this->getDefaultSourceModel();
     }
 
     /**
@@ -205,7 +215,7 @@ class Mage_Eav_Model_Entity_Attribute extends Mage_Eav_Model_Entity_Attribute_Ab
     {
         $field = null;
         $field = match ($type) {
-            'text', 'gallery', 'media_image' => 'varchar',
+            'text', 'gallery', 'media_image', 'file' => 'varchar',
             'image', 'textarea', 'multiselect' => 'text',
             'date' => 'datetime',
             'select', 'boolean' => 'int',

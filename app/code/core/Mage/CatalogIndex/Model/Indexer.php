@@ -6,7 +6,7 @@
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -193,9 +193,8 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
         if ($flag->getState() == Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_RUNNING) {
             /*if ($flag->getState() == Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_QUEUED)*/
             return $this;
-        } else {
-            $flag->setState(Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_RUNNING)->save();
         }
+        $flag->setState(Mage_CatalogIndex_Model_Catalog_Index_Flag::STATE_RUNNING)->save();
 
         try {
             /**
@@ -217,7 +216,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                 foreach ($stores as $one) {
                     $websites[] = Mage::app()->getStore($one)->getWebsiteId();
                 }
-            } elseif (!is_array($stores)) {
+            } else {
                 Mage::throwException('Invalid stores supplied for indexing');
             }
 
@@ -357,7 +356,8 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                     $this->_afterPlainReindex($storeObject->getId(), $products);
                 }
                 return $this;
-            } elseif ($store instanceof Mage_Core_Model_Store) {
+            }
+            if ($store instanceof Mage_Core_Model_Store) {
                 $store = $store->getId();
             } elseif (is_array($store)) { // array of stores
                 foreach ($store as $storeObject) {
@@ -577,7 +577,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
      */
     public function buildEntityPriceFilter($attributes, $values, &$filteredAttributes, $productCollection)
     {
-        $additionalCalculations = [];
         $filter = [];
         $store = Mage::app()->getStore()->getId();
         $website = Mage::app()->getStore()->getWebsiteId();
@@ -603,17 +602,6 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
                                 $filter[$code]->from($table, ['entity_id']);
                                 $filter[$code]->distinct(true);
 
-                                $response = new Varien_Object();
-                                $response->setAdditionalCalculations([]);
-                                $args = [
-                                    'select' => $filter[$code],
-                                    'table' => $table,
-                                    'store_id' => $store,
-                                    'response_object' => $response,
-                                ];
-                                Mage::dispatchEvent('catalogindex_prepare_price_select', $args);
-                                $additionalCalculations[$code] = $response->getAdditionalCalculations();
-
                                 if ($indexer->isAttributeIdUsed()) {
                                     //$filter[$code]->where("$table.attribute_id = ?", $attribute->getId());
                                 }
@@ -633,16 +621,14 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
 
                                     if ((string) $values[$code]['from'] !== '') {
                                         $filter[$code]->where(
-                                            "($table.min_price"
-                                            . implode('', $additionalCalculations[$code]) . ")*{$rateConversion} >= ?",
+                                            "($table.min_price)*{$rateConversion} >= ?",
                                             $values[$code]['from'],
                                         );
                                     }
 
                                     if ((string) $values[$code]['to'] !== '') {
                                         $filter[$code]->where(
-                                            "($table.min_price"
-                                            . implode('', $additionalCalculations[$code]) . ")*{$rateConversion} <= ?",
+                                            "($table.min_price)*{$rateConversion} <= ?",
                                             $values[$code]['to'],
                                         );
                                     }
@@ -746,28 +732,11 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Add indexable attributes to product collection select
-     *
-     * @deprecated
-     * @param   Mage_Catalog_Model_Resource_Product_Collection $collection
-     * @return  Mage_CatalogIndex_Model_Indexer
-     */
-    protected function _addFilterableAttributesToCollection($collection)
-    {
-        $attributeCodes = $this->_getIndexableAttributeCodes();
-        foreach ($attributeCodes as $code) {
-            $collection->addAttributeToSelect($code);
-        }
-
-        return $this;
-    }
-
-    /**
      * Prepare Catalog Product Flat Columns
      *
      * @return $this
      */
-    public function prepareCatalogProductFlatColumns(Varien_Object $object)
+    public function prepareCatalogProductFlatColumns(\Maho\DataObject $object)
     {
         $this->_getResource()->prepareCatalogProductFlatColumns($object);
 
@@ -779,7 +748,7 @@ class Mage_CatalogIndex_Model_Indexer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    public function prepareCatalogProductFlatIndexes(Varien_Object $object)
+    public function prepareCatalogProductFlatIndexes(\Maho\DataObject $object)
     {
         $this->_getResource()->prepareCatalogProductFlatIndexes($object);
 

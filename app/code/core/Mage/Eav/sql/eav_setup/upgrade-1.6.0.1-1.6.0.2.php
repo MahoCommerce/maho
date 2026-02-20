@@ -5,7 +5,7 @@
  *
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,7 +38,7 @@ $table = $installer->getConnection()
         'default'   => null,
     ], 'Filename')
     ->addIndex(
-        $installer->getIdxName('eav/attribute_option_value', ['option_id']),
+        $installer->getIdxName('eav/attribute_option_swatch', ['option_id']),
         ['option_id'],
         ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )

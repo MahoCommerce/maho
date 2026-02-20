@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,19 +34,6 @@ class Mage_Wishlist_Block_Links extends Mage_Page_Block_Template_Links_Block
             return parent::_toHtml();
         }
         return '';
-    }
-
-    /**
-     * Define label, title and url for wishlist link
-     *
-     * @deprecated after 1.6.2.0
-     */
-    public function initLinkProperties()
-    {
-        $text = $this->_createLabel($this->_getItemCount());
-        $this->_label = $text;
-        $this->_title = $text;
-        $this->_url = $this->getUrl('wishlist');
     }
 
     /**
@@ -78,17 +65,6 @@ class Mage_Wishlist_Block_Links extends Mage_Page_Block_Template_Links_Block
         }
 
         return $this->__('My Wishlist');
-    }
-
-    /**
-     * @return Mage_Wishlist_Block_Links
-     * @see Mage_Wishlist_Block_Links::__construct
-     *
-     * @deprecated after 1.4.2.0
-     */
-    public function addWishlistLink()
-    {
-        return $this;
     }
 
     /**

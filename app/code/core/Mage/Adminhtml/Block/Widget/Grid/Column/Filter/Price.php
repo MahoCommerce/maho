@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,18 +36,16 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Price extends Mage_Adminhtm
     {
         if (!is_null($this->getColumn()->getData('display_currency_select'))) {
             return $this->getColumn()->getData('display_currency_select');
-        } else {
-            return true;
         }
+        return true;
     }
 
     public function getCurrencyAffect()
     {
         if (!is_null($this->getColumn()->getData('currency_affect'))) {
             return $this->getColumn()->getData('currency_affect');
-        } else {
-            return true;
         }
+        return true;
     }
 
     protected function _getCurrencyModel()

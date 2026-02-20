@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -94,7 +94,7 @@ class Mage_Core_Model_App_Area
         if (isset($this->_loadedParts[$part])) {
             return $this;
         }
-        \Maho\Profiler::start('dispatch.controller.action.predispatch.load_area.' . $this->_code . '.' . $part);
+        \Maho\Profiler::start('mage::dispatch::controller::action::predispatch::load_area::' . $this->_code . '::' . $part);
         switch ($part) {
             case self::PART_CONFIG:
                 $this->_initConfig();
@@ -110,7 +110,7 @@ class Mage_Core_Model_App_Area
                 break;
         }
         $this->_loadedParts[$part] = true;
-        \Maho\Profiler::stop('dispatch.controller.action.predispatch.load_area.' . $this->_code . '.' . $part);
+        \Maho\Profiler::stop('mage::dispatch::controller::action::predispatch::load_area::' . $this->_code . '::' . $part);
         return $this;
     }
 

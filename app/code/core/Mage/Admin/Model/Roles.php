@@ -6,7 +6,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,7 +67,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     /**
      * Return tree of acl resources
      *
-     * @return Varien_Simplexml_Element|array
+     * @return \Maho\Simplexml\Element|array
      */
     public function getResourcesTree()
     {
@@ -77,7 +77,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     /**
      * Return list of acl resources
      *
-     * @return Varien_Simplexml_Element|array
+     * @return \Maho\Simplexml\Element|array
      */
     public function getResourcesList()
     {
@@ -87,7 +87,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
     /**
      * Return list of acl resources in 2D format
      *
-     * @return Varien_Simplexml_Element|array
+     * @return \Maho\Simplexml\Element|array
      */
     public function getResourcesList2D()
     {
@@ -112,10 +112,10 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
      * @param  null|mixed $represent2Darray
      * @param  bool $rawNodes
      * @param  string $module
-     * @return Varien_Simplexml_Element|false|array
+     * @return \Maho\Simplexml\Element|false|array
      */
     protected function _buildResourcesArray(
-        ?Varien_Simplexml_Element $resource = null,
+        ?\Maho\Simplexml\Element $resource = null,
         $parentName = null,
         $level = 0,
         $represent2Darray = null,
@@ -163,8 +163,7 @@ class Mage_Admin_Model_Roles extends Mage_Core_Model_Abstract
 
         if ($rawNodes) {
             return $resource;
-        } else {
-            return $result;
         }
+        return $result;
     }
 }

@@ -6,7 +6,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,9 +35,8 @@ class Mage_Downloadable_Model_Link_Api_Uploader extends Mage_Core_Model_File_Upl
         $this->_setUploadFile($file);
         if (!file_exists($this->_file['tmp_name'])) {
             throw new Exception('', 'file_not_uploaded');
-        } else {
-            $this->_fileExists = true;
         }
+        $this->_fileExists = true;
     }
 
     /**
@@ -65,7 +64,7 @@ class Mage_Downloadable_Model_Link_Api_Uploader extends Mage_Core_Model_File_Upl
     {
         $tmpFileName = $this->_getTmpFilePath();
 
-        $file = new Varien_Io_File();
+        $file = new \Maho\Io\File();
         $file->open(['path' => sys_get_temp_dir()]);
         $file->streamOpen($tmpFileName);
         $file->streamWrite(base64_decode($fileInfo['base64_content']));

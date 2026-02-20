@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -266,9 +266,8 @@ class Mage_Core_Model_Cache
 
         if (isset($this->allowedCacheOptions[$typeCode])) {
             return (bool) $this->allowedCacheOptions[$typeCode];
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -325,7 +324,7 @@ class Mage_Core_Model_Cache
         $config = Mage::getConfig()->getNode(self::XML_PATH_TYPES);
         if ($config) {
             foreach ($config->children() as $type => $node) {
-                $types[$type] = new Varien_Object([
+                $types[$type] = new \Maho\DataObject([
                     'id'            => $type,
                     'cache_type'    => Mage::helper('core')->__((string) $node->label),
                     'description'   => Mage::helper('core')->__((string) $node->description),

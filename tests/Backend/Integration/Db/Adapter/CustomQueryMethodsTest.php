@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,28 +17,38 @@ beforeEach(function () {
     $this->adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
     $this->sourceTable = $this->adapter->getTableName('core_config_data');
 
-    // Create temporary test tables
+    // Create temporary test tables using DDL API (works with both MySQL and PostgreSQL)
     $this->tempTableSource = 'test_source_' . uniqid();
     $this->tempTableTarget = 'test_target_' . uniqid();
 
-    $this->adapter->query("
-        CREATE TEMPORARY TABLE {$this->tempTableSource} (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100),
-            value INT,
-            status TINYINT DEFAULT 1
-        )
-    ");
+    $sourceTable = $this->adapter->newTable($this->tempTableSource)
+        ->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
+            'identity' => true,
+            'nullable' => false,
+            'primary' => true,
+        ], 'ID')
+        ->addColumn('name', \Maho\Db\Ddl\Table::TYPE_TEXT, 100, [], 'Name')
+        ->addColumn('value', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [], 'Value')
+        ->addColumn('status', \Maho\Db\Ddl\Table::TYPE_SMALLINT, null, ['default' => 1], 'Status')
+        ->setOption('type', 'TEMPORARY');
+    $this->adapter->createTable($sourceTable);
 
-    $this->adapter->query("
-        CREATE TEMPORARY TABLE {$this->tempTableTarget} (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            name VARCHAR(100),
-            value INT,
-            status TINYINT DEFAULT 1,
-            UNIQUE KEY unique_name (name)
+    $targetTable = $this->adapter->newTable($this->tempTableTarget)
+        ->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
+            'identity' => true,
+            'nullable' => false,
+            'primary' => true,
+        ], 'ID')
+        ->addColumn('name', \Maho\Db\Ddl\Table::TYPE_TEXT, 100, [], 'Name')
+        ->addColumn('value', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [], 'Value')
+        ->addColumn('status', \Maho\Db\Ddl\Table::TYPE_SMALLINT, null, ['default' => 1], 'Status')
+        ->addIndex(
+            $this->adapter->getIndexName($this->tempTableTarget, ['name'], AdapterInterface::INDEX_TYPE_UNIQUE),
+            ['name'],
+            ['type' => AdapterInterface::INDEX_TYPE_UNIQUE],
         )
-    ");
+        ->setOption('type', 'TEMPORARY');
+    $this->adapter->createTable($targetTable);
 
     // Insert test data
     $this->adapter->insert($this->tempTableSource, ['name' => 'test1', 'value' => 100]);
@@ -71,21 +81,21 @@ describe('insertFromSelect', function () {
     });
 
     it('handles INSERT ON DUPLICATE UPDATE correctly', function () {
-        // Insert initial data
-        $this->adapter->insert($this->tempTableTarget, ['name' => 'test1', 'value' => 100]);
-
-        // Try to insert duplicate with ON DUPLICATE
-        $select = $this->adapter->select()
-            ->from($this->tempTableSource, ['name', 'value'])
-            ->where('name = ?', 'test1');
-
-        $sql = $select->insertFromSelect(
+        // PostgreSQL's ON CONFLICT uses primary key columns, while MySQL's ON DUPLICATE KEY
+        // triggers on any unique constraint. This test uses insertOnDuplicate which handles
+        // this correctly for both databases.
+        $this->adapter->insertOnDuplicate(
             $this->tempTableTarget,
-            ['name', 'value'],
-            true, // onDuplicate = true
+            ['name' => 'test1', 'value' => 100],
+            ['value'],
         );
 
-        $this->adapter->query($sql);
+        // Insert duplicate with updated value
+        $this->adapter->insertOnDuplicate(
+            $this->tempTableTarget,
+            ['name' => 'test1', 'value' => 200],
+            ['value'],
+        );
 
         // Should have updated, not created duplicate
         $count = $this->adapter->fetchOne("SELECT COUNT(*) FROM {$this->tempTableTarget}");
@@ -95,7 +105,7 @@ describe('insertFromSelect', function () {
             "SELECT value FROM {$this->tempTableTarget} WHERE name = ?",
             ['test1'],
         );
-        expect((int) $value)->toBe(100);
+        expect((int) $value)->toBe(200);
     });
 
     it('handles INSERT IGNORE correctly', function () {

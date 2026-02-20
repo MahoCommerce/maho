@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,27 +16,24 @@
         <ul class="note-list">
         <?php foreach ($this->getFullHistory() as $_item): ?>
             <li>
-                <strong><?= $this->getItemCreatedAt($_item) ?></strong>
-                <?= $this->getItemCreatedAt($_item, 'time') ?><span class="separator">|</span>
-                <?php if ($this->getItemTitle($_item)): ?>
-                <strong><?= $this->getItemTitle($_item) ?></strong>
-                <span class="separator">|</span>
-                <?php endif ?>
-                <small>
-                    <?= $this->helper('sales')->__('Customer') ?>
-                    <strong class="subdue">
-                    <?php if ($this->isCustomerNotificationNotApplicable($_item)): ?>
-                        <?= $this->helper('sales')->__('Notification Not Applicable') ?>
-                    <?php elseif ($this->isItemNotified($_item)): ?>
-                        <?= $this->helper('sales')->__('Notified') ?>
-                        <img src="<?= $this->getSkinUrl('images/ico_success.gif') ?>" width="16px" height="16px" alt="" />
-                    <?php else: ?>
-                        <?= $this->helper('sales')->__('Not Notified') ?>
+                <div class="note-header">
+                    <span>
+                        <strong><?= $this->getItemCreatedAt($_item) ?></strong>
+                        <?= $this->getItemCreatedAt($_item, 'time') ?>
+                    </span>
+                    <?php if ($this->getItemTitle($_item)): ?>
+                    <strong><?= $this->getItemTitle($_item) ?></strong>
                     <?php endif ?>
-                    </strong>
-                </small>
+                    <?php if ($this->isCustomerNotificationNotApplicable($_item)): ?>
+                    <span class="icon" title="<?= $this->helper('sales')->__('Customer Notification Not Applicable') ?>"><?= $this->getIconSvg('message-question') ?></span>
+                    <?php elseif ($this->isItemNotified($_item)): ?>
+                    <span class="icon" title="<?= $this->helper('sales')->__('Customer Notified') ?>"><?= $this->getIconSvg('message') ?></span>
+                    <?php else: ?>
+                    <span class="icon" title="<?= $this->helper('sales')->__('Customer Not Notified') ?>"><?= $this->getIconSvg('message-off') ?></span>
+                    <?php endif ?>
+                </div>
                 <?php if ($_comment = $this->getItemComment($_item)): ?>
-                    <br/><?= $_comment ?>
+                    <div><?= $_comment ?></div>
                 <?php endif ?>
             </li>
         <?php endforeach ?>

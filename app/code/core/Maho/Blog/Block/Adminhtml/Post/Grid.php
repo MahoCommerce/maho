@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    Maho_Blog
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,8 +23,10 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
     #[\Override]
     protected function _prepareCollection()
     {
-        /** @var Maho_Blog_Model_Resource_Post_Collection $collection */
         $collection = Mage::getModel('blog/post')->getCollection();
+        if (!$collection instanceof Maho_Blog_Model_Resource_Post_Collection) {
+            return $this;
+        }
 
         // Static attributes are automatically selected from main table
         // Only need to select EAV attributes explicitly

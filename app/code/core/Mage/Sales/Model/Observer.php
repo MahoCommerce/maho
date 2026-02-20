@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -81,7 +81,7 @@ class Mage_Sales_Model_Observer
      * @throws Exception
      * @return $this
      */
-    public function substractQtyFromQuotes(Varien_Event_Observer $observer)
+    public function substractQtyFromQuotes(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
@@ -94,7 +94,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    public function markQuotesRecollectOnCatalogRules(Varien_Event_Observer $observer)
+    public function markQuotesRecollectOnCatalogRules(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
@@ -123,7 +123,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    public function catalogProductSaveAfter(Varien_Event_Observer $observer)
+    public function catalogProductSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
         $product = $observer->getEvent()->getProduct();
@@ -141,7 +141,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    public function catalogProductStatusUpdate(Varien_Event_Observer $observer)
+    public function catalogProductStatusUpdate(\Maho\Event\Observer $observer)
     {
         $status     = $observer->getEvent()->getStatus();
         if ($status == Mage_Catalog_Model_Product_Status::STATUS_ENABLED) {
@@ -231,7 +231,7 @@ class Mage_Sales_Model_Observer
     /**
      * Add the recurring profile form when editing a product
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function prepareProductEditFormRecurringProfile($observer)
     {
@@ -260,7 +260,7 @@ class Mage_Sales_Model_Observer
     /**
      * Block admin ability to use customer billing agreements
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function restrictAdminBillingAgreementUsage($observer)
     {
@@ -278,7 +278,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    public function customerSaveAfter(Varien_Event_Observer $observer)
+    public function customerSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = $observer->getEvent()->getCustomer();
@@ -313,7 +313,7 @@ class Mage_Sales_Model_Observer
     /**
      * Set Quote information about MSRP price enabled
      */
-    public function setQuoteCanApplyMsrp(Varien_Event_Observer $observer)
+    public function setQuoteCanApplyMsrp(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();
@@ -334,7 +334,7 @@ class Mage_Sales_Model_Observer
     /**
      * Add VAT validation request date and identifier to order comments
      */
-    public function addVatRequestParamsOrderComment(Varien_Event_Observer $observer)
+    public function addVatRequestParamsOrderComment(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $orderInstance */
         $orderInstance = $observer->getOrder();
@@ -394,7 +394,7 @@ class Mage_Sales_Model_Observer
     /**
      * Handle customer VAT number if needed on collect_totals_before event of quote address
      */
-    public function changeQuoteCustomerGroupId(Varien_Event_Observer $observer)
+    public function changeQuoteCustomerGroupId(\Maho\Event\Observer $observer)
     {
         $addressHelper = Mage::helper('customer/address');
 
@@ -463,7 +463,7 @@ class Mage_Sales_Model_Observer
                 ->save();
         } else {
             // Restore validation results from corresponding quote address
-            $gatewayResponse = new Varien_Object([
+            $gatewayResponse = new \Maho\DataObject([
                 'is_valid' => (int) $quoteAddress->getVatIsValid(),
                 'request_identifier' => (string) $quoteAddress->getVatRequestId(),
                 'request_date' => (string) $quoteAddress->getVatRequestDate(),
@@ -492,7 +492,7 @@ class Mage_Sales_Model_Observer
     /**
      * Restore initial customer group ID in quote if needed on collect_totals_after event of quote address
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function restoreQuoteCustomerGroupId($observer)
     {

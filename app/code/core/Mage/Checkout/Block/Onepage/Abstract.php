@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -179,39 +179,13 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
     }
 
     /**
-     * @deprecated
-     * @return bool|mixed
-     * @throws Mage_Core_Model_Store_Exception
-     */
-    public function getCountryOptions()
-    {
-        $options    = false;
-        $useCache   = Mage::app()->useCache('config');
-        if ($useCache) {
-            $cacheId    = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
-            $cacheTags  = ['config'];
-            if ($optionsCache = Mage::app()->loadCache($cacheId)) {
-                $options = $optionsCache;
-            }
-        }
-
-        if ($options == false) {
-            $options = $this->getCountryCollection()->toOptionArray();
-            if ($useCache) {
-                Mage::app()->saveCache($options, $cacheId, $cacheTags);
-            }
-        }
-        return $options;
-    }
-
-    /**
      * Get checkout steps codes
      *
      * @return array
      */
     protected function _getStepCodes()
     {
-        return ['login', 'billing', 'shipping', 'shipping_method', 'payment', 'review'];
+        return ['billing', 'shipping', 'shipping_method', 'payment', 'review'];
     }
 
     /**

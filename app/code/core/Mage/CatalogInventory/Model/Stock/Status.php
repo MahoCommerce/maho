@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,7 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     {
         if (is_null($this->_productTypes)) {
             $this->_productTypes = [];
-            $productEmulator     = new Varien_Object();
+            $productEmulator     = new \Maho\DataObject();
 
             foreach (array_keys(Mage_Catalog_Model_Product_Type::getTypes()) as $typeId) {
                 $productEmulator->setTypeId($typeId);
@@ -182,9 +182,12 @@ class Mage_CatalogInventory_Model_Stock_Status extends Mage_Core_Model_Abstract
     public function assignProduct(Mage_Catalog_Model_Product $product, $stockId = 1, $stockStatus = null)
     {
         if (is_null($stockStatus)) {
-            $websiteId = $product->getStore()->getWebsiteId();
-            $status = $this->getProductStatus($product->getId(), $websiteId, $stockId);
-            $stockStatus = $status[$product->getId()] ?? null;
+            $productId = $product->getId();
+            if ($productId !== null) {
+                $websiteId = $product->getStore()->getWebsiteId();
+                $status = $this->getProductStatus($productId, $websiteId, $stockId);
+                $stockStatus = $status[$productId] ?? null;
+            }
         }
 
         $product->setIsSalable($stockStatus);

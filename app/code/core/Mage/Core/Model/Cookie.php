@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -154,6 +154,7 @@ class Mage_Core_Model_Cookie
         // Do not permit SameSite=None on unsecure pages, upgrade to Lax
         // https://developers.google.com/search/blog/2020/01/get-ready-for-new-samesitenone-secure
         if ($value === 'None' && $this->isSecure() === false) {
+            Mage::log('SameSite cookie attribute downgraded from None to Lax: HTTPS is required for SameSite=None', Mage::LOG_WARNING);
             return 'Lax';
         }
 

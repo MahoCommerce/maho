@@ -6,17 +6,13 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_GUEST_CHECKOUT = 'checkout/options/guest_checkout';
-    public const XML_PATH_REDIRECT_REGISTER = 'checkout/options/redirect_register';
-
-    /** @deprecated 24.11.0 use XML_PATH_REDIRECT_REGISTER instead */
-    public const XML_PATH_CUSTOMER_MUST_BE_LOGGED = 'checkout/options/customer_must_be_logged';
 
     protected $_moduleName = 'Mage_Checkout';
 
@@ -94,7 +90,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
      * Get sales item (quote item, order item etc) price including tax based on row total and tax amount
      * excluding weee tax
      *
-     * @param   Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return  float
      */
     public function getPriceInclTax($item)
@@ -111,7 +107,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get sales item (quote item, order item etc) row total price including tax
      *
-     * @param   Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return  float
      */
     public function getSubtotalInclTax($item)
@@ -139,7 +135,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get the base price of the item including tax , excluding weee
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return float
      */
     public function getBasePriceInclTax($item)
@@ -152,7 +148,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Get sales item (quote item, order item etc) row total price including tax excluding wee
      *
-     * @param Mage_Core_Model_Abstract|Varien_Object $item
+     * @param Mage_Core_Model_Abstract|\Maho\DataObject $item
      * @return float
      */
     public function getBaseSubtotalInclTax($item)
@@ -326,7 +322,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
         $guestCheckout = Mage::getStoreConfigFlag(self::XML_PATH_GUEST_CHECKOUT, $store);
 
         if ($guestCheckout == true) {
-            $result = new Varien_Object();
+            $result = new \Maho\DataObject();
             $result->setIsAllowed($guestCheckout);
             Mage::dispatchEvent('checkout_allow_guest', [
                 'quote'  => $quote,
@@ -348,22 +344,5 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
     public function isContextCheckout()
     {
         return (Mage::app()->getRequest()->getParam('context') == 'checkout');
-    }
-
-    /**
-     * Check if we should redirect the user to a separate register step during checkout
-     */
-    public function isRedirectRegisterStep(): bool
-    {
-        return Mage::getStoreConfigFlag(self::XML_PATH_REDIRECT_REGISTER);
-    }
-
-    /**
-     * Check if user must be logged during checkout process
-     * @deprecated 24.11.0 use isRedirectRegisterStep() instead
-     */
-    public function isCustomerMustBeLogged(): bool
-    {
-        return $this->isRedirectRegisterStep();
     }
 }

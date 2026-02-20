@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -555,15 +555,15 @@
                 <account_new_email_template>customer_password_link_account_new_email_template</account_new_email_template>
                 <email_template>customer_password_link_email_template</email_template>
             </password_link>
-            <magic_link>
-                <enabled>0</enabled>
-                <token_expiration>10</token_expiration>
-                <rate_limit_email>3</rate_limit_email>
-                <rate_limit_ip>10</rate_limit_ip>
-                <email_identity>general</email_identity>
-                <email_template>customer_magic_link_email_template</email_template>
-                <registration_mode>no_password</registration_mode>
-            </magic_link>
+            <login>
+                <magic_link_enabled>0</magic_link_enabled>
+                <magic_link_token_expiration>10</magic_link_token_expiration>
+                <magic_link_rate_limit_email>3</magic_link_rate_limit_email>
+                <magic_link_rate_limit_ip>10</magic_link_rate_limit_ip>
+                <magic_link_email_identity>general</magic_link_email_identity>
+                <magic_link_email_template>customer_magic_link_email_template</magic_link_email_template>
+                <magic_link_registration_mode>no_password</magic_link_registration_mode>
+            </login>
             <address>
                 <street_lines>2</street_lines>
                 <prefix_show/>

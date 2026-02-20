@@ -6,6 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,5 +63,59 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
             $output = $this->getLayout()->createBlock('adminhtml/dashboard_' . $blockTab)->toHtml();
         }
         $this->getResponse()->setBody($output);
+    }
+
+    /**
+     * Gets devices & browsers breakdown
+     */
+    public function devicesAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Gets engagement metrics
+     */
+    public function engagementAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Gets entry & exit pages
+     */
+    public function entryExitAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Gets language breakdown
+     */
+    public function languagesAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Gets top pages
+     */
+    public function topPagesAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Gets traffic sources
+     */
+    public function trafficSourcesAction(): void
+    {
+        $this->loadLayout();
+        $this->renderLayout();
     }
 }

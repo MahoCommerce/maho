@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Api2_Model_Observer
     /**
      * Save relation of admin user to API2 role
      */
-    public function saveAdminToRoleRelation(Varien_Event_Observer $observer)
+    public function saveAdminToRoleRelation(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Admin_Model_User $user Object */
         $user = $observer->getObject();
@@ -38,7 +38,7 @@ class Mage_Api2_Model_Observer
      *
      * @return $this
      */
-    public function catalogAttributeSaveAfter(Varien_Event_Observer $observer)
+    public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -63,7 +63,7 @@ class Mage_Api2_Model_Observer
     /**
      * Upgrade API key hash when api user has logged in
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function upgradeApiKey($observer)
     {

@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -45,7 +45,20 @@
         <?php endif ?>
         <?= $this->escapeHtml($_item->getDescription()) ?>
         <?php if($this->canDisplayGiftmessage()): ?>
-            <a href="#" id="order-item-gift-message-link-<?= $_item->getId() ?>" class="gift-message-link" onclick="return giftMessageToogle('<?= $_item->getId() ?>')"><?= $this->__('Gift Message') ?></a>
+            <?php $_giftMessage = $this->helper('giftmessage/message')->getGiftMessageForEntity($_item); ?>
+            <details class="gift-message">
+                <summary class="toggle">
+                    <?= $this->getIconSvg('gift') ?>
+                    <?= $this->__('Gift Message') ?>
+                </summary>
+                <div class="content">
+                    <div class="header">
+                        <span><strong><?= $this->__('From:') ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?></span>
+                        <span><strong><?= $this->__('To:') ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?></span>
+                    </div>
+                    <blockquote class="text"><?= $this->helper('giftmessage/message')->getEscapedGiftMessage($_item) ?></blockquote>
+                </div>
+            </details>
         <?php endif ?>
     </td>
     <td data-rwd-label="<?= $this->__('SKU') ?>"><?= $this->escapeHtml(Mage::helper('core/string')->splitInjection($this->getSku())) ?></td>

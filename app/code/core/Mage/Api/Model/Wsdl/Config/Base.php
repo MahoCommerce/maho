@@ -6,16 +6,16 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
+class Mage_Api_Model_Wsdl_Config_Base extends \Maho\Simplexml\Config
 {
     protected $_handler = '';
 
     /**
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     protected $_wsdlVariables = null;
 
@@ -30,7 +30,7 @@ class Mage_Api_Model_Wsdl_Config_Base extends Varien_Simplexml_Config
         unset($queryParams['wsdl']);
 
         // set up default WSDL template variables
-        $this->_wsdlVariables = new Varien_Object(
+        $this->_wsdlVariables = new \Maho\DataObject(
             [
                 'name' => 'Maho',
                 'url'  => Mage::helper('api')->getServiceUrl('*/*/*', ['_query' => $queryParams], true),

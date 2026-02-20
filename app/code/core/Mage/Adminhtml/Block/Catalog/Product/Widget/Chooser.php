@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -36,10 +36,10 @@ class Mage_Adminhtml_Block_Catalog_Product_Widget_Chooser extends Mage_Adminhtml
     /**
      * Prepare chooser element HTML
      *
-     * @param Varien_Data_Form_Element_Abstract $element Form Element
-     * @return Varien_Data_Form_Element_Abstract
+     * @param \Maho\Data\Form\Element\AbstractElement $element Form Element
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
-    public function prepareElementHtml(Varien_Data_Form_Element_Abstract $element)
+    public function prepareElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $uniqId = Mage::helper('core')->uniqHash($element->getId());
         $sourceUrl = $this->getUrl('*/catalog_product_widget/chooser', [

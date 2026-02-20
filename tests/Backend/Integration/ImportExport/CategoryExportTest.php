@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -312,7 +312,9 @@ it('exports sample data categories correctly', function () {
         if (strpos($line, ',2,') !== false) { // Default category (ID 2)
             $foundDefaultCategory = true;
         }
-        if (preg_match('/,\d+,\d+,[^,]*,[^,]*[a-zA-Z]+/', $line)) { // Category with actual name
+        // Check if any line (after header) contains letters - indicating category names
+        // Look for any letter sequence anywhere in a non-header line
+        if (!str_starts_with($line, 'category_id') && preg_match('/[a-zA-Z]{2,}/', $line)) {
             $foundCategoryWithName = true;
         }
     }

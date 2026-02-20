@@ -6,7 +6,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -123,17 +123,6 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
     }
 
     /**
-     * Return true if price in website scope
-     *
-     * @deprecated since 1.14.2.0
-     * @return bool
-     */
-    public function getIsPriceWebsiteScope()
-    {
-        return Mage::helper('downloadable')->getIsPriceWebsiteScope();
-    }
-
-    /**
      * Return array of links
      *
      * @return array
@@ -211,7 +200,7 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             if ($this->getProduct()->getStoreId() && $priceWebsiteScope) {
                 $tmpLinkItem['website_price'] = $item->getWebsitePrice();
             }
-            $linkArr[] = new Varien_Object($tmpLinkItem);
+            $linkArr[] = new \Maho\DataObject($tmpLinkItem);
         }
         return $linkArr;
     }
@@ -314,16 +303,5 @@ class Mage_Downloadable_Block_Adminhtml_Catalog_Product_Edit_Tab_Downloadable_Li
             ->setId("downloadable_link_{{id}}_{$type}file-delete")
             ->setStyle('display:none')
             ->toHtml();
-    }
-
-    /**
-     * Retrieve config object
-     *
-     * @deprecated
-     * @return $this
-     */
-    public function getConfig()
-    {
-        return $this;
     }
 }

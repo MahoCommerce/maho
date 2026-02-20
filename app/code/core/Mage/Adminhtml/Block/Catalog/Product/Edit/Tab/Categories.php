@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     /**
      * Cache for selected tree nodes
      *
-     * list<Varien_Data_Tree_Node>
+     * list<\Maho\Data\Tree\Node>
      */
     protected $_selectedNodes = null;
 
@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     /**
      * Returns root node and sets 'checked' flag (if necessary)
      *
-     * @return Varien_Data_Tree_Node
+     * @return \Maho\Data\Tree\Node
      */
     public function getRootNode()
     {
@@ -84,9 +84,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     {
         if ($parentNodeCategory === null && $this->getCategoryIds()) {
             return $this->getRootByIds($this->getCategoryIds(), $recursionLevel);
-        } else {
-            return parent::getRoot($parentNodeCategory, $recursionLevel);
         }
+        return parent::getRoot($parentNodeCategory, $recursionLevel);
     }
 
     #[\Override]
@@ -138,18 +137,6 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     }
 
     /**
-     * Returns JSON-encoded array of category children
-     *
-     * @param int $categoryId
-     * @return string
-     * @deprecated use self::getTreeJson()
-     */
-    public function getCategoryChildrenJson($categoryId)
-    {
-        return $this->getTreeJson($categoryId);
-    }
-
-    /**
      * Returns URL for loading tree
      *
      * @param null $expanded deprecated
@@ -159,43 +146,5 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Categories extends Mage_Admi
     public function getLoadTreeUrl($expanded = null)
     {
         return $this->getUrl('*/*/categoriesJson', ['_current' => ['id', 'store']]);
-    }
-
-    /**
-     * Return distinct path ids of selected categories
-     *
-     * @param mixed $rootId Root category Id for context
-     * @return array
-     * @deprecated Mage_Catalog_Model_Resource_Category_Tree::loadByIds() already loads parent ids
-     */
-    public function getSelectedCategoriesPathIds($rootId = false)
-    {
-        $ids = [];
-        $categoryIds = $this->getCategoryIds();
-        if (empty($categoryIds)) {
-            return [];
-        }
-        $collection = Mage::getResourceModel('catalog/category_collection');
-
-        if ($rootId) {
-            $collection->addFieldToFilter([
-                ['attribute' => 'parent_id', 'eq' => $rootId],
-                ['attribute' => 'entity_id', 'in' => $categoryIds],
-            ]);
-        } else {
-            $collection->addFieldToFilter('entity_id', ['in' => $categoryIds]);
-        }
-
-        foreach ($collection as $item) {
-            if ($rootId && !in_array($rootId, $item->getPathIds())) {
-                continue;
-            }
-            foreach ($item->getPathIds() as $id) {
-                if (!in_array($id, $ids)) {
-                    $ids[] = $id;
-                }
-            }
-        }
-        return $ids;
     }
 }

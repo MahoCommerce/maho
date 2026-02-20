@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -153,10 +153,17 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
             return false;
         }
 
+        // For datetime tables with equality operator, use DATE() for SQLite compatibility
+        // (datetime stored as '1990-06-15 00:00:00' won't match '1990-06-15' as exact string)
+        $field = 'attr.value';
+        if (str_ends_with($attributeData['table'], '_datetime') && in_array($operator, ['=', '=='], true)) {
+            $field = (string) $adapter->getDatePartSql($field);
+        }
+
         $subselect = $adapter->select()
             ->from(['attr' => $attributeData['table']], ['entity_id'])
             ->where('attr.attribute_id = ?', $attributeData['attribute_id'])
-            ->where($this->buildSqlCondition($adapter, 'attr.value', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, $field, $operator, $value));
 
         return 'e.entity_id IN (' . $subselect . ')';
     }
@@ -164,7 +171,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     protected function buildDaysSinceCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
         $currentDate = Mage_Core_Model_Locale::now();
-        return $this->buildSqlCondition($adapter, "DATEDIFF('{$currentDate}', {$field})", $operator, $value);
+        $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", $field);
+        return $this->buildSqlCondition($adapter, (string) $dateDiff, $operator, $value);
     }
 
     protected function buildDaysUntilBirthdayCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $operator, mixed $value): string|false
@@ -191,22 +199,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Attributes exte
     {
         $currentDate = Mage_Core_Model_Locale::now();
 
-        // Calculate next birthday by properly handling year differences to avoid BIGINT overflow
-        // This handles cases where birth year > current year (test data) or birth year < current year (real data)
-        return "CASE
-            WHEN YEAR(attr.value) > YEAR('{$currentDate}') THEN
-                DATEDIFF(DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}'), '-%m-%d')), '{$currentDate}')
-            ELSE
-                DATEDIFF(
-                    CASE
-                        WHEN DAYOFYEAR('{$currentDate}') > DAYOFYEAR(attr.value) THEN
-                            DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}') + 1, '-%m-%d'))
-                        ELSE
-                            DATE_FORMAT(attr.value, CONCAT(YEAR('{$currentDate}'), '-%m-%d'))
-                    END,
-                    '{$currentDate}'
-                )
-            END";
+        // Use the adapter's platform-specific implementation for anniversary calculation
+        // This handles MySQL vs PostgreSQL differences and leap year edge cases
+        return (string) $adapter->getDaysUntilAnniversarySql('attr.value', $currentDate);
     }
 
     #[\Override]

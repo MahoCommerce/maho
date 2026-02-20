@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,7 +42,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         try {
             if (isset($optionInfo['option_value'])) {
                 return $this->_getOptionHtml($optionInfo['option_value']);
-            } elseif (isset($optionInfo['value'])) {
+            }
+            if (isset($optionInfo['value'])) {
                 return $optionInfo['value'];
             }
         } catch (Exception $e) {
@@ -54,20 +55,20 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     /**
      * Returns additional params for processing options
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getProcessingParams()
     {
         $buyRequest = $this->getRequest();
         $params = $buyRequest->getData('_processing_params');
         /*
-         * Notice check for params to be Varien_Object - by using object we protect from
+         * Notice check for params to be \Maho\DataObject - by using object we protect from
          * params being forged and contain data from user frontend input
          */
-        if ($params instanceof Varien_Object) {
+        if ($params instanceof \Maho\DataObject) {
             return $params;
         }
-        return new Varien_Object();
+        return new \Maho\DataObject();
     }
 
     /**
@@ -136,9 +137,8 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             if ($this->getSkipCheckRequiredOption()) {
                 $this->setUserValue(null);
                 return $this;
-            } else {
-                Mage::throwException($e->getMessage());
             }
+            Mage::throwException($e->getMessage());
         }
         return $this;
     }
@@ -270,7 +270,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             $_width = 0;
             $_height = 0;
             if (is_readable($fileInfo['tmp_name'])) {
-                $_imageSize = @getimagesize($fileInfo['tmp_name']);
+                $_imageSize = @\Maho\Io::getImageSize($fileInfo['tmp_name']);
                 if ($_imageSize) {
                     $_width = $_imageSize[0];
                     $_height = $_imageSize[1];
@@ -383,7 +383,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return false;
         }
         if (count($_dimentions) > 0) {
-            $imageInfo = getimagesize($fileFullPath);
+            $imageInfo = \Maho\Io::getImageSize($fileFullPath);
             if ($imageInfo !== false) {
                 [$width, $height] = $imageInfo;
                 if (isset($_dimentions['maxwidth']) && $width > $_dimentions['maxwidth']) {
@@ -434,9 +434,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
             // Save option in request, because we have no $_FILES['options']
             $requestOptions[$this->getOption()->getId()] = $value;
-            $result = serialize($value);
+            $result = Mage::helper('core')->jsonEncode($value);
             try {
-                Mage::helper('core/unserializeArray')->unserialize($result);
+                Mage::helper('core')->jsonDecode($result);
             } catch (Exception $e) {
                 Mage::throwException(Mage::helper('catalog')->__('File options format is not valid.'));
             }
@@ -481,7 +481,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 $value['url'] = ['route' => $this->_customOptionDownloadUrl, 'params' => $customOptionUrlParams];
 
                 $this->_formattedOptionValue = $this->_getOptionHtml($value);
-                $this->getConfigurationItemOption()->setValue(serialize($value));
+                $this->getConfigurationItemOption()->setValue(Mage::helper('core')->jsonEncode($value));
                 return $this->_formattedOptionValue;
             } catch (Exception $e) {
                 return $optionValue;
@@ -509,9 +509,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 $sizes = '';
             }
 
-            $urlRoute = !empty($value['url']['route']) ? $value['url']['route'] : '';
-            $urlParams = !empty($value['url']['params']) ? $value['url']['params'] : '';
-            $title = !empty($value['title']) ? $value['title'] : '';
+            $urlRoute = empty($value['url']['route']) ? '' : $value['url']['route'];
+            $urlParams = empty($value['url']['params']) ? '' : $value['url']['params'];
+            $title = empty($value['title']) ? '' : $value['title'];
 
             return sprintf(
                 '<a href="%s" target="_blank">%s</a> %s',
@@ -534,11 +534,11 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
     {
         if (is_array($value)) {
             return $value;
-        } elseif (is_string($value) && !empty($value)) {
-            return Mage::helper('core/unserializeArray')->unserialize($value);
-        } else {
-            return [];
         }
+        if (is_string($value) && !empty($value)) {
+            return Mage::helper('core/unserializeArray')->unserialize($value);
+        }
+        return [];
     }
 
     /**
@@ -699,7 +699,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         $this->_createWriteableDir($this->getOrderTargetDir());
 
         // Directory listing and hotlink secure
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->cd($this->getTargetDir());
         if (!$io->fileExists($this->getTargetDir() . DS . '.htaccess')) {
             $io->streamOpen($this->getTargetDir() . DS . '.htaccess');
@@ -718,7 +718,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
      */
     protected function _createWriteableDir($path)
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         if (!$io->isWriteable($path) && !$io->mkdir($path, 0777, true)) {
             Mage::throwException(Mage::helper('catalog')->__("Cannot create writeable directory '%s'.", $path));
         }
@@ -777,7 +777,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         if (!is_readable($fileInfo)) {
             return false;
         }
-        $imageInfo = getimagesize($fileInfo);
+        $imageInfo = \Maho\Io::getImageSize($fileInfo);
         if (!$imageInfo) {
             return false;
         }

@@ -6,7 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,7 +53,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
                 'locale'              => ['required' => true, 'comment' => ''],
                 'timezone'            => ['required' => true, 'comment' => ''],
                 'default_currency'    => ['required' => true, 'comment' => ''],
-                'db_model'            => ['comment' => ''],
+                'db_engine'           => ['comment' => ''],
                 'db_host'             => ['required' => true, 'comment' => ''],
                 'db_name'             => ['required' => true, 'comment' => ''],
                 'db_user'             => ['required' => true, 'comment' => ''],
@@ -91,11 +91,16 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
 
         /**
          * Parse arguments
+         * Supports both --key value and --key=value formats
          */
         $currentArg = false;
         $match = false;
         foreach ($args as $arg) {
-            if (preg_match('/^--(.*)$/', $arg, $match)) {
+            if (preg_match('/^--([^=]+)=(.*)$/', $arg, $match)) {
+                // argument with value in --key=value format
+                $args[$match[1]] = $match[2];
+                $currentArg = false;
+            } elseif (preg_match('/^--(.*)$/', $arg, $match)) {
                 // argument name
                 $currentArg = $match[1];
                 // in case if argument doesn't need a value
@@ -116,8 +121,16 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
 
         /**
          * Check required arguments
+         * Some parameters are not required for SQLite
          */
+        $isSqlite = isset($args['db_engine']) && $args['db_engine'] === 'sqlite';
+        $sqliteOptionalParams = ['db_host', 'db_user', 'use_secure', 'secure_base_url', 'use_secure_admin'];
+
         foreach ($this->_getOptions() as $name => $option) {
+            // Skip validation for SQLite-optional parameters
+            if ($isSqlite && in_array($name, $sqliteOptionalParams)) {
+                continue;
+            }
             if (isset($option['required']) && $option['required'] && !isset($args[$name])) {
                 $error = 'ERROR: ' . 'You should provide the value for --' . $name . ' parameter';
                 if (!empty($option['comment'])) {
@@ -252,7 +265,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
          * Database and web config
          */
         $this->_getDataModel()->setConfigData([
-            'db_model'            => $this->_args['db_model'],
+            'db_engine'           => $this->_args['db_engine'],
             'db_host'             => $this->_args['db_host'],
             'db_name'             => $this->_args['db_name'],
             'db_user'             => $this->_args['db_user'],
@@ -312,6 +325,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->installConfig($this->_getDataModel()->getConfigData());
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -328,6 +342,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->installDb();
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -341,6 +356,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $user = $installer->validateAndPrepareAdministrator($this->_getDataModel()->getAdminData());
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -350,6 +366,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->createAdministrator($user);
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -359,6 +376,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->installEnryptionKey();
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }
@@ -368,6 +386,7 @@ class Mage_Install_Model_Installer_Console extends Mage_Install_Model_Installer_
              */
             $installer->finish();
 
+            // @phpstan-ignore if.alwaysFalse (defensive check - errors can be added by sub-components)
             if ($this->hasErrors()) {
                 return false;
             }

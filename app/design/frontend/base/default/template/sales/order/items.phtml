@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -37,19 +37,6 @@
         <?php if ($_item->getParentItem()) continue; ?>
         <tbody>
             <?= $this->getItemHtml($_item) ?>
-            <?php if($this->canDisplayGiftmessage($_item)): ?>
-            <tr class="border<?= ($_index++ > $_count ?' last':'') ?>" id="order-item-gift-message-<?= $_item->getId() ?>" style="display:none;">
-                <?php $_giftMessage=$this->helper('giftmessage/message')->getGiftMessageForEntity($_item); ?>
-                <td class="gift-message-row" colspan="7">
-                    <a href="#" title="<?= $this->quoteEscape($this->__('Close')) ?>" onclick="return giftMessageToogle('<?= $_item->getId() ?>');" class="btn-close"><?= $this->__('Close') ?></a>
-                    <dl class="gift-message">
-                        <dt><strong><?= $this->__('From:') ?></strong> <?= $this->escapeHtml($_giftMessage->getSender()) ?></dt>
-                        <dt><strong><?= $this->__('To:') ?></strong> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?></dt>
-                        <dd><?= $this->helper('giftmessage/message')->getEscapedGiftMessage($_item) ?></dd>
-                    </dl>
-                </td>
-            </tr>
-            <?php endif ?>
         </tbody>
         <?php endforeach ?>
 </table>

@@ -6,7 +6,7 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,18 +91,6 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
     }
 
     /**
-     * Create temporary table for index data pregeneration
-     *
-     * @deprecated since 1.5.0.0
-     * @param bool $asOriginal
-     * @return Mage_Index_Model_Resource_Abstract
-     */
-    public function cloneIndexTable($asOriginal = false)
-    {
-        return $this;
-    }
-
-    /**
      * Copy data from source table of read adapter to destination table of index adapter
      *
      * @param string $sourceTable
@@ -121,7 +109,6 @@ abstract class Mage_Index_Model_Resource_Abstract extends Mage_Core_Model_Resour
         }
         $select = $this->_getIndexAdapter()->select()->from($sourceTable, $sourceColumns);
 
-        /** @var Mage_Index_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('index');
         $helper->insertData($this, $select, $destTable, $targetColumns, $readToIndex);
         return $this;

@@ -39,7 +39,8 @@
         "altcha-org/altcha": "^1.1.0",
         "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
-        "doctrine/dbal": "^4.0",
+        "cbschuld/browser.php": "^2.0",
+        "doctrine/dbal": "^4.4",
         "dompdf/dompdf": "^3.1",
         "ezyang/htmlpurifier": "^4.17",
         "intervention/image": "^3.11",
@@ -49,18 +50,19 @@
         "mahocommerce/maho-composer-plugin": "^3",
         "matthiasmullie/minify": "^1.3",
         "monolog/monolog": "^3.9",
-        "pelago/emogrifier": "^7",
+        "pelago/emogrifier": "^8",
         "php-units-of-measure/php-units-of-measure": "^2.2",
         "spomky-labs/otphp": "^11.3",
-        "symfony/cache": "^7.3",
-        "symfony/console": "^7.3",
-        "symfony/http-client": "^7.3",
-        "symfony/http-foundation": "^7.3",
-        "symfony/mailer": "^7.3",
+        "symfony/cache": "^7.4",
+        "symfony/console": "^7.4",
+        "symfony/filesystem": "^7.4",
+        "symfony/http-client": "^7.4",
+        "symfony/http-foundation": "^7.4",
+        "symfony/mailer": "^7.4",
         "symfony/polyfill-php84": "^1.31",
         "symfony/polyfill-php85": "^1.32",
-        "symfony/validator": "^7.3",
-        "symfony/var-dumper": "^7.3"
+        "symfony/validator": "^7.4",
+        "symfony/var-dumper": "^7.4"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
@@ -78,20 +80,25 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
-        "mahocommerce/maho-phpstan-plugin": "^4",
+        "mahocommerce/maho-phpstan-plugin": "^4.1",
         "phpstan/phpstan": "^2.0",
         "phpstan/phpstan-deprecation-rules": "^2.0",
+        "phpstan/phpstan-strict-rules": "^2.0",
         "rector/rector": "^2",
         "pestphp/pest": "^4",
         "psy/psysh": "^0.12.10"
     },
     "suggest": {
+        "ext-pdo_pgsql": "Required for PostgreSQL database support",
+        "ext-pdo_sqlite": "Required for SQLite database support",
         "fballiano/openmage-cloudflare-turnstile": "Turnstile: Cloudflare captcha-like antispam solution",
         "laminas/laminas-json-server": "Install this package if you need JSON-RPC web services functionality",
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
         "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
+        "mahocommerce/module-braintree": "Braintree payment gateway integration",
         "open-telemetry/sdk": "OpenTelemetry SDK for distributed tracing and observability",
-        "open-telemetry/exporter-otlp": "OTLP exporter for OpenTelemetry (required for sending traces to collectors)"
+        "open-telemetry/exporter-otlp": "OTLP exporter for OpenTelemetry (required for sending traces to collectors)",
+        "picqer/php-barcode-generator": "Required for gift card barcode generation"
     },
     "conflict": {
         "colinmollenhour/cache-backend-redis": "*",
@@ -111,7 +118,9 @@
         }
     },
     "scripts": {
-        "test": "php tests/pest-with-test-db.php"
+        "test": "php tests/pest-with-test-db.php",
+        "test:pgsql": "MAHO_DB_TYPE=pgsql php tests/pest-with-test-db.php",
+        "test:sqlite": "MAHO_DB_TYPE=sqlite php tests/pest-with-test-db.php"
     },
     "config": {
         "allow-plugins": {

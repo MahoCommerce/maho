@@ -6,7 +6,7 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,6 +18,9 @@
  */
 abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstract
 {
+    /**
+     * @var array
+     */
     protected $_matchedEntities = [];
 
     /**
@@ -101,11 +104,14 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
      */
     public function matchEntityAndType($entity, $type)
     {
-        if (isset($this->_matchedEntities[$entity])) {
-            if (in_array($type, $this->_matchedEntities[$entity])) {
-                return true;
-            }
+        if (!isset($this->_matchedEntities[$entity])) {
+            return false;
         }
+
+        if (in_array($type, $this->_matchedEntities[$entity])) {
+            return true;
+        }
+
         return false;
     }
 
@@ -210,7 +216,7 @@ abstract class Mage_Index_Model_Indexer_Abstract extends Mage_Core_Model_Abstrac
             $resourceModel->reindexProducts($entityIds);
         } elseif ($this->matchEntityAndType(Mage_Catalog_Model_Product::ENTITY, Mage_Index_Model_Event::TYPE_MASS_ACTION)) {
             // Create comprehensive mass action data object that all indexers expect
-            $actionObject = new class ($entityIds) extends Varien_Object {
+            $actionObject = new class ($entityIds) extends \Maho\DataObject {
                 private array $productIds;
 
                 public function __construct(array $productIds)

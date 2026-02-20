@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Shipping_Model_Config extends Varien_Object
+class Mage_Shipping_Model_Config extends \Maho\DataObject
 {
     /**
      * Shipping origin settings
@@ -91,9 +91,8 @@ class Mage_Shipping_Model_Config extends Varien_Object
             return false;
         }
         $modelName = $config['model'];
-        /** @var Mage_Shipping_Model_Carrier_Abstract $carrier */
         $carrier = Mage::getModel($modelName);
-        if (!$carrier) {
+        if (!$carrier instanceof Mage_Shipping_Model_Carrier_Abstract) {
             return false;
         }
         $carrier->setId($code)->setStore($store);

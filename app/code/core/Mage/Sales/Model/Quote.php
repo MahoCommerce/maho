@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -178,7 +178,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * When you use true - all cache will be clean
      *
-     * @var string|true
+     * @var string|bool|array
      */
     protected $_cacheTag = 'quote';
 
@@ -237,7 +237,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -393,7 +393,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
                 // Check if this is a file option
                 if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
                     try {
-                        $optionValue = @unserialize($option->getValue());
+                        $optionValue = @unserialize($option->getValue(), ['allowed_classes' => false]);
                         if (is_array($optionValue) && isset($optionValue['quote_path'])) {
                             $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
                             if (file_exists($filePath) && is_file($filePath)) {
@@ -552,11 +552,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     {
         if ($this->hasData('customer_group_id')) {
             return $this->getData('customer_group_id');
-        } elseif ($this->getCustomerId()) {
-            return $this->getCustomer()->getGroupId();
-        } else {
-            return Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
         }
+        if ($this->getCustomerId()) {
+            return $this->getCustomer()->getGroupId();
+        }
+        return Mage_Customer_Model_Group::NOT_LOGGED_IN_ID;
     }
 
     /**
@@ -922,12 +922,11 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
         $quoteItem = null;
         if ($quoteItem = $this->getItemsCollection()->getItemById($itemId)) {
             return $quoteItem;
-        } else {
-            foreach ($this->getItemsCollection() as $item) {
-                if ($item->getId() == $itemId) {
-                    $quoteItem = $item;
-                    return $quoteItem;
-                }
+        }
+        foreach ($this->getItemsCollection() as $item) {
+            if ($item->getId() == $itemId) {
+                $quoteItem = $item;
+                return $quoteItem;
             }
         }
         return $quoteItem;
@@ -1046,7 +1045,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * Advanced func to add product to quote - processing mode can be specified there.
      * Returns error message if product type instance can't prepare product.
      *
-     * @param null|float|Varien_Object $request
+     * @param null|float|\Maho\DataObject $request
      * @param null|string $processMode
      * @return Mage_Sales_Model_Quote_Item|string
      */
@@ -1056,9 +1055,9 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
             $request = 1;
         }
         if (is_numeric($request)) {
-            $request = new Varien_Object(['qty' => $request]);
+            $request = new \Maho\DataObject(['qty' => $request]);
         }
-        if (!($request instanceof Varien_Object)) {
+        if (!($request instanceof \Maho\DataObject)) {
             Mage::throwException(Mage::helper('sales')->__('Invalid request for adding product to quote.'));
         }
 
@@ -1129,7 +1128,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      *
      * return error message if product type instance can't prepare product
      *
-     * @param null|float|Varien_Object $request
+     * @param null|float|\Maho\DataObject $request
      * @return Mage_Sales_Model_Quote_Item|string
      */
     public function addProduct(Mage_Catalog_Model_Product $product, $request = null)
@@ -1188,7 +1187,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * It's passed to Mage_Catalog_Helper_Product->addParamsToBuyRequest() to compose resulting buyRequest.
      *
      * Basically it can hold
-     * - 'current_config', Varien_Object or array - current buyRequest that configures product in this item,
+     * - 'current_config', \Maho\DataObject or array - current buyRequest that configures product in this item,
      *   used to restore currently attached files
      * - 'files_prefix': string[a-z0-9_] - prefix that was added at frontend to names of file options (file inputs), so they won't
      *   intersect with other submitted options
@@ -1196,8 +1195,8 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * For more options see Mage_Catalog_Helper_Product->addParamsToBuyRequest()
      *
      * @param int $itemId
-     * @param Varien_Object $buyRequest
-     * @param null|array|Varien_Object $params
+     * @param \Maho\DataObject $buyRequest
+     * @param null|array|\Maho\DataObject $params
      * @return Mage_Sales_Model_Quote_Item
      *
      * @see Mage_Catalog_Helper_Product::addParamsToBuyRequest()
@@ -1217,9 +1216,9 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
             ->load($productId);
 
         if (!$params) {
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject();
         } elseif (is_array($params)) {
-            $params = new Varien_Object($params);
+            $params = new \Maho\DataObject($params);
         }
         $params->setCurrentConfig($item->getBuyRequest());
         $buyRequest = Mage::helper('catalog/product')->addParamsToBuyRequest($buyRequest, $params);
@@ -1650,7 +1649,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      * @param string|null $origin Usually a name of module, that embeds error
      * @param int|null $code Error code, unique for origin, that sets it
      * @param string|null $message Error message
-     * @param Varien_Object|null $additionalData Any additional data, that caller would like to store
+     * @param \Maho\DataObject|null $additionalData Any additional data, that caller would like to store
      * @return $this
      */
     public function addErrorInfo($type = 'error', $origin = null, $code = null, $message = null, $additionalData = null)

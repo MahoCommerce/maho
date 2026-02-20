@@ -99,7 +99,7 @@ class Mage_ConfigurableSwatches_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function attrIsSwatchType($attr)
     {
-        if ($attr instanceof Varien_Object) {
+        if ($attr instanceof \Maho\DataObject) {
             $attr = $attr->getId();
         }
         $configAttrs = $this->getSwatchAttributeIds();

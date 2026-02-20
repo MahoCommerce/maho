@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -76,13 +76,6 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     protected $_useIsObjectNew = false;
 
     /**
-     * Fields List for update in forsedSave
-     *
-     * @var array
-     */
-    protected $_fieldsForUpdate = [];
-
-    /**
      * Fields of main table
      *
      * @var array
@@ -91,16 +84,16 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
 
     /**
      * Main table unique keys field names
-     * could array(
-     *   array('field' => 'db_field_name1', 'title' => 'Field 1 should be unique')
-     *   array('field' => 'db_field_name2', 'title' => 'Field 2 should be unique')
-     *   array(
-     *      'field' => array('db_field_name3', 'db_field_name3'),
+     * could [
+     *   ['field' => 'db_field_name1', 'title' => 'Field 1 should be unique']
+     *   ['field' => 'db_field_name2', 'title' => 'Field 2 should be unique']
+     *   [
+     *      'field' => ['db_field_name3', 'db_field_name3'],
      *      'title' => 'Field 3 and Field 4 combination should be unique'
-     *   )
-     * )
+     *   ]
+     * ]
      * or string 'my_field_name' - will be autoconverted to
-     *      array( array( 'field' => 'my_field_name', 'title' => 'my_field_name' ) )
+     *      [ [ 'field' => 'my_field_name', 'title' => 'my_field_name' ] ]
      *
      * @var array|null
      */
@@ -108,13 +101,13 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
 
     /**
      * Serializable fields declaration
-     * Structure: array(
-     *     <field_name> => array(
+     * Structure: [
+     *     <field_name> => [
      *         <default_value_for_serialization>,
      *         <default_for_unserialization>,
      *         <whether_to_unset_empty_when serializing> // optional parameter
-     *     ),
-     * )
+     *     ],
+     * ]
      *
      * @var array
      */
@@ -457,33 +450,6 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
     }
 
     /**
-     * Forced save object data
-     * forced update If duplicate unique key data
-     *
-     * @deprecated
-     * @return $this
-     */
-    public function forsedSave(Mage_Core_Model_Abstract $object)
-    {
-        $this->_beforeSave($object);
-        $bind = $this->_prepareDataForSave($object);
-        $adapter = $this->_getWriteAdapter();
-        // update
-        if (!is_null($object->getId()) && $this->_isPkAutoIncrement) {
-            unset($bind[$this->getIdFieldName()]);
-            $condition = $adapter->quoteInto($this->getIdFieldName() . '=?', $object->getId());
-            $adapter->update($this->getMainTable(), $bind, $condition);
-        } else {
-            $adapter->insertOnDuplicate($this->getMainTable(), $bind, $this->_fieldsForUpdate);
-            $object->setId($adapter->lastInsertId($this->getMainTable()));
-        }
-
-        $this->_afterSave($object);
-
-        return $this;
-    }
-
-    /**
      * Delete the object
      *
      * @return $this
@@ -628,7 +594,7 @@ abstract class Mage_Core_Model_Resource_Db_Abstract extends Mage_Core_Model_Reso
                 ];
             }
 
-            $data = new Varien_Object($this->_prepareDataForSave($object));
+            $data = new \Maho\DataObject($this->_prepareDataForSave($object));
             $select = $this->_getWriteAdapter()->select()
                 ->from($this->getMainTable());
 

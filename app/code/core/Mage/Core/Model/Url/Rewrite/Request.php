@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -64,13 +64,13 @@ class Mage_Core_Model_Url_Rewrite_Request
      */
     public function __construct(array $args)
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getModel('core/factory');
-        $this->_app     = !empty($args['app']) ? $args['app'] : Mage::app();
-        $this->_config  = !empty($args['config']) ? $args['config'] : Mage::getConfig();
-        $this->_request = !empty($args['request'])
-            ? $args['request'] : Mage::app()->getFrontController()->getRequest();
-        $this->_rewrite = !empty($args['rewrite'])
-            ? $args['rewrite'] : $this->_factory->getModel('core/url_rewrite');
+        $this->_factory = empty($args['factory']) ? Mage::getModel('core/factory') : $args['factory'];
+        $this->_app     = empty($args['app']) ? Mage::app() : $args['app'];
+        $this->_config  = empty($args['config']) ? Mage::getConfig() : $args['config'];
+        $this->_request = empty($args['request'])
+            ? Mage::app()->getFrontController()->getRequest() : $args['request'];
+        $this->_rewrite = empty($args['rewrite'])
+            ? $this->_factory->getModel('core/url_rewrite') : $args['rewrite'];
 
         if (!empty($args['routers'])) {
             $this->_routers = $args['routers'];
@@ -89,14 +89,14 @@ class Mage_Core_Model_Url_Rewrite_Request
         }
 
         if (!$this->_request->isStraight()) {
-            \Maho\Profiler::start('dispatch.db_url_rewrite');
+            \Maho\Profiler::start('mage::dispatch::db_url_rewrite');
             $this->_rewriteDb();
-            \Maho\Profiler::stop('dispatch.db_url_rewrite');
+            \Maho\Profiler::stop('mage::dispatch::db_url_rewrite');
         }
 
-        \Maho\Profiler::start('dispatch.config_url_rewrite');
+        \Maho\Profiler::start('mage::dispatch::config_url_rewrite');
         $this->_rewriteConfig();
-        \Maho\Profiler::stop('dispatch.config_url_rewrite');
+        \Maho\Profiler::stop('mage::dispatch::config_url_rewrite');
 
         return true;
     }
@@ -303,9 +303,8 @@ class Mage_Core_Model_Url_Rewrite_Request
             }
             if ($hasChanges) {
                 return http_build_query($queryParams);
-            } else {
-                return $_SERVER['QUERY_STRING'];
             }
+            return $_SERVER['QUERY_STRING'];
         }
         return false;
     }

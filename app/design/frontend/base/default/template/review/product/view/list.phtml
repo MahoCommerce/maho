@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,48 +16,66 @@
 <?php $userIcon = $this->getIconSvg('user') ?>
 <div class="box-collateral box-reviews" id="customer-reviews">
     <?php if (count($_items)): ?>
-        <a href="<?= Mage::getUrl('review/product/list', ['id' => $this->getProduct()->getId(), 'category' => $this->getProduct()->getCategoryId(),]) ?>#review-form"><?= $this->__('Add Your Review') ?></a>
-        <dl>
-        <?php foreach ($_items as $_review):?>
+        <div class="rv-header">
+            <span class="rv-count"><?= $this->__('%d Review(s)', count($_items)) ?></span>
+            <button type="button" class="button" onclick="document.getElementById('review-dialog').showModal()">
+                <?= $this->__('Write a Review') ?>
+            </button>
+        </div>
+        <div class="rv-list">
+        <?php foreach ($_items as $_review): ?>
             <?php $_votes = $_review->getRatingVotes() ?>
-            <dt style="position: relative;">
-                <?= $userIcon ?>
-                <?= $this->escapeHtml($_review->getNickname()) ?> -
-                <em><?= $this->formatDate($_review->getCreatedAt()) ?></em>
-            </dt>
-            <dd>
-                <?php if (count($_votes) == 1): ?>
-                    <?php foreach ($_votes as $_vote): ?>
-                        <div class="rating-box">
-                            <div class="rating" style="width:<?= $_vote->getPercent() ?>%"></div>
+            <article class="rv-card">
+                <header class="rc-header">
+                    <div class="rc-author">
+                        <span class="rc-avatar"><?= $userIcon ?></span>
+                        <div class="rc-meta">
+                            <span class="rc-name"><?= $this->escapeHtml($_review->getNickname()) ?></span>
+                            <time class="rc-date"><?= $this->formatDate($_review->getCreatedAt()) ?></time>
                         </div>
-                    <?php endforeach ?>
-                <?php endif ?>
-                <strong><?= $this->escapeHtml(ucfirst($_review->getTitle())) ?></strong><br />
-                <?= nl2br($this->escapeHtml(ucfirst($_review->getDetail()))) ?>
-
-                <?php if (count($_votes) > 1): ?>
-                <table class="ratings-table">
-                    <caption><?= $this->__('Rating:') ?></caption>
-                    <tbody>
+                    </div>
+                    <?php if (count($_votes) == 1): ?>
                         <?php foreach ($_votes as $_vote): ?>
-                        <tr>
-                            <th><?= $this->escapeHtml($_vote->getRatingCode()) ?></th>
-                            <td>
+                            <div class="rc-rating">
                                 <div class="rating-box">
                                     <div class="rating" style="width:<?= $_vote->getPercent() ?>%"></div>
                                 </div>
-                            </td>
-                        </tr>
+                            </div>
                         <?php endforeach ?>
-                    </tbody>
-                </table>
+                    <?php endif ?>
+                </header>
+                <div class="rc-content">
+                    <h4 class="rc-title"><?= $this->escapeHtml(ucfirst($_review->getTitle())) ?></h4>
+                    <p class="rc-text"><?= nl2br($this->escapeHtml(ucfirst($_review->getDetail()))) ?></p>
+                </div>
+                <?php if (count($_votes) > 1): ?>
+                <footer class="rc-footer">
+                    <div class="rc-ratings">
+                        <?php foreach ($_votes as $_vote): ?>
+                        <div class="rc-rating-item">
+                            <span class="rc-rating-label"><?= $this->escapeHtml($_vote->getRatingCode()) ?></span>
+                            <div class="rating-box">
+                                <div class="rating" style="width:<?= $_vote->getPercent() ?>%"></div>
+                            </div>
+                        </div>
+                        <?php endforeach ?>
+                    </div>
+                </footer>
                 <?php endif ?>
-            </dd>
+            </article>
         <?php endforeach ?>
-        </dl>
+        </div>
     <?php elseif($this->getParentBlock()): ?>
-        <?= $this->getParentBlock()->getReviewsSummaryHtml($this->getProduct(), 'short', true) ?>
+        <div class="rv-header empty">
+            <?php
+            /** @var Mage_Catalog_Block_Product_Abstract $parent */
+            $parent = $this->getParentBlock();
+            ?>
+            <?= $parent->getReviewsSummaryHtml($this->getProduct(), 'short', true) ?>
+            <button type="button" class="button" onclick="document.getElementById('review-dialog').showModal()">
+                <?= $this->__('Be the First to Review') ?>
+            </button>
+        </div>
     <?php endif ?>
     <?= $this->getChildHtml('review_form') ?>
 </div>

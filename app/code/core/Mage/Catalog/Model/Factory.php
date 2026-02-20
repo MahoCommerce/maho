@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -38,10 +40,12 @@ class Mage_Catalog_Model_Factory extends Mage_Core_Model_Factory
      */
     public function getCategoryUrlRewriteHelper()
     {
-        /** @var Mage_Catalog_Helper_Category_Url_Rewrite_Interface $model */
         $model = $this->getHelper(
             (string) $this->_config->getNode(self::XML_PATH_CATEGORY_URL_REWRITE_HELPER_CLASS),
         );
+        if (!$model instanceof Mage_Catalog_Helper_Category_Url_Rewrite_Interface) {
+            throw new Mage_Core_Exception('Invalid category URL rewrite helper configured');
+        }
         return $model;
     }
 
@@ -52,10 +56,12 @@ class Mage_Catalog_Model_Factory extends Mage_Core_Model_Factory
      */
     public function getProductUrlRewriteHelper()
     {
-        /** @var Mage_Catalog_Helper_Product_Url_Rewrite_Interface $model */
         $model = $this->getHelper(
             (string) $this->_config->getNode(self::XML_PATH_PRODUCT_URL_REWRITE_HELPER_CLASS),
         );
+        if (!$model instanceof Mage_Catalog_Helper_Product_Url_Rewrite_Interface) {
+            throw new Mage_Core_Exception('Invalid product URL rewrite helper configured');
+        }
         return $model;
     }
 
@@ -66,10 +72,10 @@ class Mage_Catalog_Model_Factory extends Mage_Core_Model_Factory
      */
     public function getProductUrlInstance()
     {
-        /** @var Mage_Catalog_Model_Product_Url $model */
         $model = $this->getModel(
             (string) $this->_config->getNode(self::XML_PATH_PRODUCT_URL_MODEL),
         );
+        assert($model instanceof \Mage_Catalog_Model_Product_Url);
         return $model;
     }
 
@@ -80,10 +86,10 @@ class Mage_Catalog_Model_Factory extends Mage_Core_Model_Factory
      */
     public function getCategoryUrlInstance()
     {
-        /** @var Mage_Catalog_Model_Category_Url $model */
         $model = $this->getModel(
             (string) $this->_config->getNode(self::XML_PATH_CATEGORY_URL_MODEL),
         );
+        assert($model instanceof \Mage_Catalog_Model_Category_Url);
         return $model;
     }
 }

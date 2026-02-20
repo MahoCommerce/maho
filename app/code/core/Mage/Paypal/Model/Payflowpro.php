@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -133,7 +133,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function authorize(Varien_Object $payment, $amount)
+    public function authorize(\Maho\DataObject $payment, $amount)
     {
         $request = $this->_buildPlaceRequest($payment, $amount);
         $request->setTrxtype(self::TRXTYPE_AUTH_ONLY);
@@ -175,7 +175,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(\Maho\DataObject $payment, $amount)
     {
         if ($payment->getReferenceTransactionId()) {
             $request = $this->_buildPlaceRequest($payment, $amount);
@@ -218,7 +218,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function void(Varien_Object $payment)
+    public function void(\Maho\DataObject $payment)
     {
         $request = $this->_buildBasicRequest($payment);
         $request->setTrxtype(self::TRXTYPE_DELAYED_VOID);
@@ -241,7 +241,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @return  bool
      */
     #[\Override]
-    public function canVoid(Varien_Object $payment)
+    public function canVoid(\Maho\DataObject $payment)
     {
         if ($payment instanceof Mage_Sales_Model_Order_Invoice
             || $payment instanceof Mage_Sales_Model_Order_Creditmemo
@@ -261,7 +261,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @return $this|false
      */
     #[\Override]
-    public function cancel(Varien_Object $payment)
+    public function cancel(\Maho\DataObject $payment)
     {
         if (!$payment->getOrder()->getInvoiceCollection()->count()) {
             return $this->void($payment);
@@ -277,7 +277,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         $request = $this->_buildBasicRequest($payment);
         $request->setTrxtype(self::TRXTYPE_CREDIT);
@@ -356,13 +356,13 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
     /**
      * Post request to gateway and return response
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    protected function _postRequest(Varien_Object $request)
+    protected function _postRequest(\Maho\DataObject $request)
     {
         $debugData = ['request' => $request->getData()];
 
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
 
         $_config = [
             'max_redirects' => 5,
@@ -432,14 +432,14 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      *
      * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    protected function _buildPlaceRequest(Varien_Object $payment, $amount)
+    protected function _buildPlaceRequest(\Maho\DataObject $payment, $amount)
     {
         $request = $this->_buildBasicRequest($payment);
         $request->setAmt(round($amount, 2));
         $request->setAcct($payment->getCcNumber());
-        $request->setExpdate(sprintf('%02d', $payment->getCcExpMonth()) . substr($payment->getCcExpYear(), -2, 2));
+        $request->setExpdate(sprintf('%02d', (int) $payment->getCcExpMonth()) . substr($payment->getCcExpYear(), -2, 2));
         $request->setCvv2($payment->getCcCid());
 
         $order = $payment->getOrder();
@@ -486,11 +486,11 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * Return request object with basic information for gateway request
      *
      * @param Mage_Sales_Model_Order_Payment $payment
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    protected function _buildBasicRequest(Varien_Object $payment)
+    protected function _buildBasicRequest(\Maho\DataObject $payment)
     {
-        $request = new Varien_Object();
+        $request = new \Maho\DataObject();
         $bnCode = Mage::getModel('paypal/config')->getBuildNotationCode();
         $request
             ->setUser($this->getConfigData('user'))
@@ -519,13 +519,13 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      *
      * @throws Mage_Core_Exception
      */
-    protected function _processErrors(Varien_Object $response)
+    protected function _processErrors(\Maho\DataObject $response)
     {
         if ($response->getResultCode() == self::RESPONSE_CODE_VOID_ERROR) {
             throw new Mage_Paypal_Exception(Mage::helper('paypal')->__('You cannot void a verification transaction'));
-        } elseif ($response->getResultCode() != self::RESPONSE_CODE_APPROVED
-            && $response->getResultCode() != self::RESPONSE_CODE_FRAUDSERVICE_FILTER
-        ) {
+        }
+        if ($response->getResultCode() != self::RESPONSE_CODE_APPROVED
+            && $response->getResultCode() != self::RESPONSE_CODE_FRAUDSERVICE_FILTER) {
             Mage::throwException($response->getRespmsg());
         }
     }
@@ -534,7 +534,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
      * Adopt specified address object to be compatible with Paypal
      * Puerto Rico should be as state of USA and not as a country
      */
-    protected function _applyCountryWorkarounds(Varien_Object $address)
+    protected function _applyCountryWorkarounds(\Maho\DataObject $address)
     {
         if ($address->getCountry() == 'PR') {
             $address->setCountry('US');
@@ -545,10 +545,10 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
     /**
      * Set reference transaction data into request
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return $this
      */
-    protected function _setReferenceTransaction(Varien_Object $payment, $request)
+    protected function _setReferenceTransaction(\Maho\DataObject $payment, $request)
     {
         return $this;
     }

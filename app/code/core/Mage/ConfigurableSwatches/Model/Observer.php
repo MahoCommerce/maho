@@ -6,7 +6,7 @@
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +18,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return void
      */
-    public function productListCollectionLoadAfter(Varien_Event_Observer $observer)
+    public function productListCollectionLoadAfter(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) {
             return;
@@ -63,7 +63,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Attach children products after product load
      * Observes: catalog_product_load_after
      */
-    public function productLoadAfter(Varien_Event_Observer $observer)
+    public function productLoadAfter(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) { // functionality disabled
             return; // exit without loading swatch functionality
@@ -89,13 +89,13 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * if config swatches enabled.
      * Observes: catalog_product_attribute_backend_media_load_gallery_before
      */
-    public function loadChildProductImagesOnMediaLoad(Varien_Event_Observer $observer)
+    public function loadChildProductImagesOnMediaLoad(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) { // functionality disabled
             return; // exit without loading swatch functionality
         }
 
-        /** @var Varien_Object $eventWrapper */
+        /** @var \Maho\DataObject $eventWrapper */
         $eventWrapper = $observer->getEventObjectWrapper();
         /** @var Mage_Catalog_Model_Product $product */
         $product = $eventWrapper->getProduct();
@@ -128,7 +128,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Convert a catalog layer block with the right templates
      * Observes: controller_action_layout_generate_blocks_after
      */
-    public function convertLayerBlock(Varien_Event_Observer $observer)
+    public function convertLayerBlock(\Maho\Event\Observer $observer)
     {
         $front = Mage::app()->getRequest()->getRouteName();
         $controller = Mage::app()->getRequest()->getControllerName();

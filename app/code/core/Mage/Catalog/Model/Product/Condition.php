@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,7 +20,7 @@
  * @method string getPkFieldName()
  * @method $this setPkFieldName(string $fieldName)
  */
-class Mage_Catalog_Model_Product_Condition extends Varien_Object implements Mage_Catalog_Model_Product_Condition_Interface
+class Mage_Catalog_Model_Product_Condition extends \Maho\DataObject implements Mage_Catalog_Model_Product_Condition_Interface
 {
     /**
      * @param Mage_Catalog_Model_Resource_Product_Collection $collection

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -231,9 +231,8 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
                 return $this->getData('apply_to');
             }
             return explode(',', $this->getData('apply_to'));
-        } else {
-            return [];
         }
+        return [];
     }
 
     /**
@@ -244,11 +243,14 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     public function getSourceModel()
     {
         $model = $this->getData('source_model');
-        if (empty($model)) {
-            if ($this->getBackendType() == 'int' && $this->getFrontendInput() == 'select') {
-                return $this->_getDefaultSourceModel();
-            }
+        if (!empty($model)) {
+            return $model;
         }
+
+        if ($this->getBackendType() == 'int' && $this->getFrontendInput() == 'select') {
+            return $this->getDefaultSourceModel();
+        }
+
         return $model;
     }
 
@@ -283,50 +285,22 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
     }
 
     /**
-     * Get Attribute translated label for store
-     *
-     * @deprecated
-     * @return string
-     */
-    protected function _getLabelForStore()
-    {
-        return $this->getFrontendLabel();
-    }
-
-    /**
-     * Initialize store Labels for attributes
-     *
-     * @deprecated
-     * @param int $storeId
-     */
-    public static function initLabels($storeId = null)
-    {
-        if (is_null(self::$_labels)) {
-            if (is_null($storeId)) {
-                $storeId = Mage::app()->getStore()->getId();
-            }
-            $attributeLabels = [];
-            $attributes = Mage::getResourceSingleton('catalog/product')->getAttributesByCode();
-            foreach ($attributes as $attribute) {
-                if ((string) $attribute->getData('frontend_label') !== '') {
-                    $attributeLabels[] = $attribute->getData('frontend_label');
-                }
-            }
-
-            self::$_labels = Mage::app()->getTranslator()->getResource()
-                ->getTranslationArrayByStrings($attributeLabels, $storeId);
-        }
-    }
-
-    /**
      * Get default attribute source model
-     *
-     * @return string
      */
     #[\Override]
-    public function _getDefaultSourceModel()
+    public function getDefaultSourceModel(): string
     {
         return 'eav/entity_attribute_source_table';
+    }
+
+    /**
+     * @return string
+     * @deprecated since 26.1 use getDefaultSourceModel() instead
+     */
+    #[\Override]
+    protected function _getDefaultSourceModel()
+    {
+        return $this->getDefaultSourceModel();
     }
 
     /**
@@ -347,12 +321,14 @@ class Mage_Catalog_Model_Resource_Eav_Attribute extends Mage_Eav_Model_Entity_At
 
         $backendType    = $this->getBackendType();
         $frontendInput  = $this->getFrontendInput();
-
         if ($backendType == 'int' && $frontendInput == 'select') {
             return true;
-        } elseif (($backendType == 'varchar' || $backendType == 'text') && $frontendInput == 'multiselect') {
+        }
+        if (($backendType == 'varchar' || $backendType == 'text') && $frontendInput == 'multiselect') {
             return true;
-        } elseif ($backendType == 'decimal') {
+        }
+
+        if ($backendType == 'decimal') {
             return true;
         }
 

@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -295,22 +295,6 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
     }
 
     /**
-     * Check item is in stock
-     *
-     * @deprecated after 1.4.2.0-beta1
-     * @return bool
-     */
-    public function getIsInStock()
-    {
-        if ($this->getItem()->getProduct()->isSaleable()) {
-            if ($this->getItem()->getProduct()->getStockItem()->getQty() >= $this->getItem()->getQty()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Get checkout session
      *
      * @return Mage_Checkout_Model_Session
@@ -374,9 +358,9 @@ class Mage_Checkout_Block_Cart_Item_Renderer extends Mage_Core_Block_Template
      * @param mixed $optionValue
      * Method works well with these $optionValue format:
      *      1. String
-     *      2. Indexed array e.g. array(val1, val2, ...)
+     *      2. Indexed array e.g. [val1, val2, ...]
      *      3. Associative array, containing additional option info, including option value, e.g.
-     *          array
+     *          [
      *          (
      *              [label] => ...,
      *              [value] => ...,

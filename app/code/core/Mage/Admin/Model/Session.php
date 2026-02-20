@@ -6,7 +6,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -70,14 +70,14 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
      */
     public function __construct($parameters = [])
     {
-        $this->_urlPolicy = (!empty($parameters['redirectPolicy'])) ?
-            $parameters['redirectPolicy'] : Mage::getModel('admin/redirectpolicy');
+        $this->_urlPolicy = (empty($parameters['redirectPolicy'])) ?
+            Mage::getModel('admin/redirectpolicy') : $parameters['redirectPolicy'];
 
-        $this->_response = (!empty($parameters['response'])) ?
-            $parameters['response'] : new Mage_Core_Controller_Response_Http();
+        $this->_response = (empty($parameters['response'])) ?
+            new Mage_Core_Controller_Response_Http() : $parameters['response'];
 
-        $this->_factory = (!empty($parameters['factory'])) ?
-            $parameters['factory'] : Mage::getModel('core/factory');
+        $this->_factory = (empty($parameters['factory'])) ?
+            Mage::getModel('core/factory') : $parameters['factory'];
 
         $this->init('admin');
         $this->logoutIndirect();
@@ -307,11 +307,11 @@ class Mage_Admin_Model_Session extends Mage_Core_Model_Session_Abstract
     {
         if (Mage::getSingleton('adminhtml/url')->useSecretKey()) {
             return Mage::getSingleton('adminhtml/url')->getUrl('*/*/*', ['_current' => true]);
-        } elseif ($request) {
-            return $request->getRequestUri();
-        } else {
-            return null;
         }
+        if ($request) {
+            return $request->getRequestUri();
+        }
+        return null;
     }
 
     /**

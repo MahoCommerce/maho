@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -49,7 +49,18 @@
             } else {
                 const messagesElement = document.getElementById('messages');
                 if (messagesElement) {
-                    messagesElement.innerHTML = `<ul class="messages"><li class="error-msg"><ul><li>${response.message}</li></ul></li></ul>`;
+                    messagesElement.textContent = '';
+                    const ul = document.createElement('ul');
+                    ul.className = 'messages';
+                    const li = document.createElement('li');
+                    li.className = 'error-msg';
+                    const innerUl = document.createElement('ul');
+                    const innerLi = document.createElement('li');
+                    innerLi.textContent = response.message;
+                    innerUl.appendChild(innerLi);
+                    li.appendChild(innerUl);
+                    ul.appendChild(li);
+                    messagesElement.appendChild(ul);
                 }
             }
         } else {

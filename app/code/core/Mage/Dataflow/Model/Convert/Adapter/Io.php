@@ -6,23 +6,21 @@
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert_Adapter_Abstract
 {
-    public const XML_PATH_EXPORT_LOCAL_VALID_PATH = 'general/file/importexport_local_valid_paths';
-
     /**
-     * @return Varien_Io_Abstract|false
+     * @return \Maho\Io\IoInterface|false
      */
     #[\Override]
     public function getResource($forWrite = false)
     {
         if (!$this->_resource) {
             $type = $this->getVar('type', 'file');
-            $className = 'Varien_Io_' . ucwords($type);
+            $className = '\Maho\Io\\' . ucwords($type);
             $this->_resource = new $className();
 
             $isError = false;
@@ -30,25 +28,19 @@ class Mage_Dataflow_Model_Convert_Adapter_Io extends Mage_Dataflow_Model_Convert
             $ioConfig = $this->getVars();
             switch (strtolower($this->getVar('type', 'file'))) {
                 case 'file':
-                    //validate export/import path
-                    $path = rtrim($ioConfig['path'], '\\/')
-                          . DS . $ioConfig['filename'];
-                    /** @var Mage_Core_Model_File_Validator_AvailablePath $validator */
-                    $validator = Mage::getModel('core/file_validator_availablePath');
-                    $validator->setPaths(Mage::getStoreConfig(self::XML_PATH_EXPORT_LOCAL_VALID_PATH));
-                    if (!$validator->isValid($path)) {
-                        foreach ($validator->getMessages() as $message) {
-                            Mage::throwException($message);
-                        }
-                    }
+                    $path = \Symfony\Component\Filesystem\Path::makeAbsolute(
+                        $this->getVar('path'),
+                        Mage::getBaseDir(),
+                    );
 
-                    if (preg_match('#^' . preg_quote(DS, '#') . '#', $this->getVar('path')) ||
-                        preg_match('#^[a-z]:' . preg_quote(DS, '#') . '#i', $this->getVar('path'))
-                    ) {
-                        $path = $this->_resource->getCleanPath($this->getVar('path'));
-                    } else {
-                        $baseDir = Mage::getBaseDir();
-                        $path = $this->_resource->getCleanPath($baseDir . DS . trim($this->getVar('path'), DS));
+                    // Validate path is within allowed directories (var/export or var/import)
+                    $varDir = Mage::getBaseDir('var');
+                    $isInExport = \Maho\Io::allowedPath($path, $varDir . DS . 'export');
+                    $isInImport = \Maho\Io::allowedPath($path, $varDir . DS . 'import');
+                    if (!$isInExport && !$isInImport) {
+                        Mage::throwException(
+                            Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $ioConfig['path']),
+                        );
                     }
 
                     $this->_resource->checkAndCreateFolder($path);

@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -27,15 +27,15 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
 
     /**
      * All attribute values as array in form:
-     * array(
-     *   [entity_id_1] => array(
+     * [
+     *   [entity_id_1] => [
      *          [store_id_1] => store_value_1,
      *          [store_id_2] => store_value_2,
      *          ...
      *          [store_id_n] => store_value_n
-     *   ),
+     *   ],
      *   ...
-     * )
+     * ]
      *
      * Will be set only for not global scope attribute
      *
@@ -142,7 +142,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
             $obj = Mage::getSingleton('eav/config')
                 ->getAttribute(Mage_Catalog_Model_Product::ENTITY, $this->getAttribute());
         } catch (Exception $e) {
-            $obj = new Varien_Object();
+            $obj = new \Maho\DataObject();
             $obj->setEntity(Mage::getResourceSingleton('catalog/product'))
                 ->setFrontendInput('text');
         }
@@ -193,8 +193,8 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Prepares values options to be used as select options or hashed array
      * Result is stored in following keys:
-     *  'value_select_options' - normal select array: array(array('value' => $value, 'label' => $label), ...)
-     *  'value_option' - hashed array: array($value => $label, ...),
+     *  'value_select_options' - normal select array: [['value' => $value, 'label' => $label], ...]
+     *  'value_option' - hashed array: [$value => $label, ...],
      *
      * @return $this
      */
@@ -264,7 +264,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     public function getValueOption($option = null)
     {
         $this->_prepareValueOptions();
-        return $this->getData('value_option' . (!is_null($option) ? '/' . $option : ''));
+        return $this->getData('value_option' . (is_null($option) ? '' : '/' . $option));
     }
 
     /**
@@ -303,7 +303,7 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
     /**
      * Retrieve attribute element
      *
-     * @return Varien_Data_Form_Element_Abstract
+     * @return \Maho\Data\Form\Element\AbstractElement
      */
     #[\Override]
     public function getAttributeElement()
@@ -469,63 +469,58 @@ abstract class Mage_Rule_Model_Condition_Product_Abstract extends Mage_Rule_Mode
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         $attrCode = $this->getAttribute();
         if (!($object instanceof Mage_Catalog_Model_Product)) {
             $object = Mage::getModel('catalog/product')->load($object->getId());
         }
-
         if ($attrCode == 'category_ids') {
             return $this->validateAttribute($object->getCategoryIds());
-        } elseif (!isset($this->_entityAttributeValues[$object->getId()])) {
+        }
+
+        if (!isset($this->_entityAttributeValues[$object->getId()])) {
             if (!$object->getResource()) {
                 return false;
             }
             $attr = $object->getResource()->getAttribute($attrCode);
-
             if ($attr && $attr->getBackendType() == 'datetime' && !is_int($this->getValue())) {
                 $this->setValue(strtotime($this->getValue()));
                 $value = strtotime($object->getData($attrCode));
                 return $this->validateAttribute($value);
             }
-
             if ($attr && $attr->getFrontendInput() == 'multiselect') {
                 $value = $object->getData($attrCode);
                 $value = strlen($value) ? explode(',', $value) : [];
                 return $this->validateAttribute($value);
             }
-
             return parent::validate($object);
-        } else {
-            $result = false; // any valid value will set it to TRUE
-            // remember old attribute state
-            $oldAttrValue = $object->hasData($attrCode) ? $object->getData($attrCode) : null;
-
-            foreach ($this->_entityAttributeValues[$object->getId()] as $storeId => $value) {
-                $attr = $object->getResource()->getAttribute($attrCode);
-                if ($attr && $attr->getBackendType() == 'datetime') {
-                    $value = strtotime($value);
-                } elseif ($attr && $attr->getFrontendInput() == 'multiselect') {
-                    $value = strlen($value) ? explode(',', $value) : [];
-                }
-
-                $object->setData($attrCode, $value);
-                $result |= parent::validate($object);
-
-                if ($result) {
-                    break;
-                }
-            }
-
-            if (is_null($oldAttrValue)) {
-                $object->unsetData($attrCode);
-            } else {
-                $object->setData($attrCode, $oldAttrValue);
-            }
-
-            return (bool) $result;
         }
+        $result = false;
+        // any valid value will set it to TRUE
+        // remember old attribute state
+        $oldAttrValue = $object->hasData($attrCode) ? $object->getData($attrCode) : null;
+        foreach ($this->_entityAttributeValues[$object->getId()] as $storeId => $value) {
+            $attr = $object->getResource()->getAttribute($attrCode);
+            if ($attr && $attr->getBackendType() == 'datetime') {
+                $value = strtotime($value);
+            } elseif ($attr && $attr->getFrontendInput() == 'multiselect') {
+                $value = strlen($value) ? explode(',', $value) : [];
+            }
+
+            $object->setData($attrCode, $value);
+            $result |= parent::validate($object);
+
+            if ($result) {
+                break;
+            }
+        }
+        if (is_null($oldAttrValue)) {
+            $object->unsetData($attrCode);
+        } else {
+            $object->setData($attrCode, $oldAttrValue);
+        }
+        return (bool) $result;
     }
 
     /**

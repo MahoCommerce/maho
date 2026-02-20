@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -193,11 +193,14 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      */
     protected function _getPriceBlockTemplate($productTypeId)
     {
-        if (isset($this->_priceBlockTypes[$productTypeId])) {
-            if ($this->_priceBlockTypes[$productTypeId]['template'] != '') {
-                return $this->_priceBlockTypes[$productTypeId]['template'];
-            }
+        if (!isset($this->_priceBlockTypes[$productTypeId])) {
+            return $this->_priceBlockDefaultTemplate;
         }
+
+        if ($this->_priceBlockTypes[$productTypeId]['template'] != '') {
+            return $this->_priceBlockTypes[$productTypeId]['template'];
+        }
+
         return $this->_priceBlockDefaultTemplate;
     }
 
@@ -574,7 +577,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
     /**
      * Retrieve current page layout
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getPageLayout()
     {
@@ -601,7 +604,7 @@ abstract class Mage_Catalog_Block_Product_Abstract extends Mage_Core_Block_Templ
      */
     public function displayProductStockStatus()
     {
-        $statusInfo = new Varien_Object(['display_status' => true]);
+        $statusInfo = new \Maho\DataObject(['display_status' => true]);
         Mage::dispatchEvent('catalog_block_product_status_display', ['status' => $statusInfo]);
         return (bool) $statusInfo->getDisplayStatus();
     }

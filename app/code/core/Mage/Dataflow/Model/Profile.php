@@ -6,7 +6,7 @@
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -108,18 +108,19 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
                         . '.' . ($guiData['parse']['type'] == 'csv' ? $guiData['parse']['type'] : 'xml');
                 }
 
-                //validate export available path
-                $path = rtrim($guiData['file']['path'], '\\/')
-                      . DS . $guiData['file']['filename'];
-                /** @var Mage_Core_Model_File_Validator_AvailablePath $validator */
-                $validator = Mage::getModel('core/file_validator_availablePath');
-                /** @var Mage_ImportExport_Helper_Data $helperImportExport */
-                $helperImportExport = Mage::helper('importexport');
-                $validator->setPaths($helperImportExport->getLocalValidPaths());
-                if (!$validator->isValid($path)) {
-                    foreach ($validator->getMessages() as $message) {
-                        Mage::throwException($message);
-                    }
+                // Validate path is within allowed directories (var/export or var/import)
+                $filePath = \Symfony\Component\Filesystem\Path::makeAbsolute(
+                    $guiData['file']['path'],
+                    Mage::getBaseDir(),
+                );
+
+                $varDir = Mage::getBaseDir('var');
+                $isInExport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'export');
+                $isInImport = \Maho\Io::allowedPath($filePath, $varDir . DS . 'import');
+                if (!$isInExport && !$isInImport) {
+                    Mage::throwException(
+                        Mage::helper('dataflow')->__('Path "%s" is not allowed. Files must be in var/export or var/import.', $guiData['file']['path']),
+                    );
                 }
 
                 $this->setGuiData($guiData);
@@ -159,7 +160,7 @@ class Mage_Dataflow_Model_Profile extends Mage_Core_Model_Abstract
             ->setProfileId($this->getId())
             ->setActionCode($this->getOrigData('profile_id') ? 'update' : 'create')
             ->save();
-        $csvParser = new Varien_File_Csv();
+        $csvParser = new \Maho\File\Csv();
         $delimiter = trim($this->getData('gui_data/parse/delimiter') ?? '');
         if ($delimiter) {
             $csvParser->setDelimiter($delimiter);

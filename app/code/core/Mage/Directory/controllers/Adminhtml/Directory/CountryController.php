@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Mage_Directory
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,7 +23,7 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
     protected function _initCountry(): Mage_Directory_Model_Country|false
     {
-        $id = $this->getRequest()->getUserParam('id');
+        $id = $this->getRequest()->getParam('id');
         $model = Mage::getModel('directory/country');
 
         if ($id) {

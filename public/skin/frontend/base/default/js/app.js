@@ -1,10 +1,10 @@
 /**
  * Maho
  *
- * @package    rwd_default
+ * @package     base_default
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -673,124 +673,115 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-// ==============================================
-// PDP - image zoom - needs to be available outside document.ready scope
-// ==============================================
-
 var ProductMediaManager = {
-    IMAGE_ZOOM_THRESHOLD: 20,
-    imageWrapper: null,
+    overlay: null,
+    handlers: {},
 
-    createZoom: function(image) {
-        if (PointerManager.getPointer() == PointerManager.TOUCH_POINTER_TYPE
-            || window.matchMedia("screen and (max-width:" + bp.medium + "px)").matches) {
-            return;
-        }
-
-        if (!image) {
-            return;
-        }
-
-        if (image.naturalWidth && image.naturalHeight) {
-            let widthDiff = image.naturalWidth - image.width - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
-            let heightDiff = image.naturalHeight - image.height - ProductMediaManager.IMAGE_ZOOM_THRESHOLD;
-            let parentImage = image.closest('.product-image');
-
-            if (widthDiff < 0 && heightDiff < 0) {
-                parentImage.classList.remove('zoom-available');
-                return;
-            } else {
-                parentImage.classList.add('zoom-available');
-            }
-        }
-
-        const container = document.querySelector(".product-image-gallery");
-        container.addEventListener("mousemove", onZoom);
-        container.addEventListener("mouseover", onZoom);
-        container.addEventListener("mouseleave", offZoom);
-
-        function onZoom(e) {
-            const rect = container.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const img = document.querySelector(".product-image-gallery img.visible");
-            img.style.transformOrigin = `${x}px ${y}px`;
-            img.style.transform = "scale(2.5)";
-        }
-
-        function offZoom(e) {
-            const img = document.querySelector(".product-image-gallery img.visible");
-            img.style.transformOrigin = `center center`;
-            img.style.transform = "scale(1)";
-        }
+    getGalleryImages: () => {
+        const images = [...document.querySelectorAll('.product-image-gallery .gallery-image')];
+        return images.length > 1 ? images.slice(1) : images;
     },
 
-    swapImage: function(targetImage) {
-        targetImage.classList.add('gallery-image');
-        const imageGallery = document.querySelector('.product-image-gallery');
+    openFullscreen: function(startIndex = 0) {
+        const images = this.getGalleryImages();
+        if (!images.length) return;
 
-        const swapAndZoom = () => {
-            imageGallery.querySelectorAll('.gallery-image').forEach(image => {
-                image.classList.remove('visible');
-            });
+        document.body.insertAdjacentHTML('beforeend', `
+            <div class="fullscreen-gallery" role="dialog" aria-modal="true">
+                <button class="fg-close" aria-label="Close">&times;</button>
+                <div class="fg-scroll">
+                    ${images.map(() => `<div class="fg-slide"><img draggable="false"></div>`).join('')}
+                </div>
+            </div>
+        `);
 
-            // Append targetImage to the gallery
-            imageGallery.appendChild(targetImage);
-            targetImage.classList.add('visible');
-            ProductMediaManager.createZoom(targetImage);
-        };
-
-        // Remove the loading attribute
-        targetImage.removeAttribute('loading'); // Remove lazy load
-        if (targetImage.complete) {
-            // Image already loaded, swap immediately
-            swapAndZoom();
-        } else {
-            // Need to wait for image to load
-            imageGallery.classList.add('loading');
-            imageGallery.appendChild(targetImage);
-
-            targetImage.onload = function() {
-                imageGallery.classList.remove('loading');
-                swapAndZoom();
-            };
-        }
-    },
-
-    wireThumbnails: function() {
-        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(function(link) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                let imageIndex = link.getAttribute('data-image-index');
-                let target = document.querySelector('#image-' + imageIndex);
-                ProductMediaManager.swapImage(target);
-            });
+        this.overlay = document.body.lastElementChild;
+        const container = this.overlay.querySelector('.fg-scroll');
+        container.querySelectorAll('img').forEach((imgEl, i) => {
+            imgEl.src = images[i].dataset.zoomImage || images[i].src;
+            imgEl.alt = images[i].alt;
         });
+        document.body.style.overflow = 'hidden';
+
+        requestAnimationFrame(() => container.scrollLeft = startIndex * container.firstElementChild.offsetWidth);
+        this.wireEvents(container);
     },
 
-    initZoom: function() {
-        ProductMediaManager.createZoom(document.querySelector(".gallery-image.visible"));
+    closeFullscreen: function() {
+        const self = ProductMediaManager;
+        if (!self.overlay) return;
+        ['keydown', 'mouseup', 'mousemove'].forEach(e => document.removeEventListener(e, self.handlers[e]));
+        self.overlay.remove();
+        self.overlay = null;
+        document.body.style.overflow = '';
+    },
+
+    wireEvents: function(container) {
+        const self = this;
+        let dragging = false, dragged = false, startX = 0, scrollStart = 0;
+
+        self.overlay.querySelector('.fg-close').addEventListener('click', self.closeFullscreen);
+        self.overlay.addEventListener('click', e => {
+            if (dragged) { dragged = false; return; }
+            if (e.target.closest('.fg-slide') || e.target === container) self.closeFullscreen();
+        });
+
+        self.handlers.keydown = e => e.key === 'Escape' && self.closeFullscreen();
+        document.addEventListener('keydown', self.handlers.keydown);
+
+        container.addEventListener('mousedown', e => {
+            dragging = true; dragged = false;
+            container.classList.add('dragging');
+            startX = e.clientX; scrollStart = container.scrollLeft;
+        });
+
+        self.handlers.mouseup = e => {
+            if (!dragging) return;
+            dragging = false;
+            const dx = e.clientX - startX, w = container.firstElementChild.offsetWidth;
+            const curr = Math.round(scrollStart / w), max = container.children.length - 1;
+            const target = Math.max(0, Math.min(curr + (dx < -50 ? 1 : dx > 50 ? -1 : 0), max));
+            container.scrollTo({ left: target * w, behavior: 'smooth' });
+            container.addEventListener('scrollend', () => container.classList.remove('dragging'), { once: true });
+        };
+        document.addEventListener('mouseup', self.handlers.mouseup);
+
+        self.handlers.mousemove = e => {
+            if (!dragging) return;
+            const dx = e.clientX - startX;
+            if (Math.abs(dx) > 5) dragged = true;
+            container.scrollLeft = scrollStart - dx;
+        };
+        document.addEventListener('mousemove', self.handlers.mousemove);
+    },
+
+    swapImage: function(target) {
+        document.querySelectorAll('.product-image-gallery .gallery-image').forEach(img => img.classList.remove('visible'));
+        target.classList.add('gallery-image', 'visible');
+        target.removeAttribute('loading');
     },
 
     init: function() {
-        ProductMediaManager.imageWrapper = document.querySelector('.product-img-box');
+        const gallery = document.querySelector('.product-image-gallery');
+        if (!gallery) return;
 
-        // Re-initialize zoom on viewport size change since resizing causes problems with zoom and since smaller
-        // viewport sizes shouldn't have zoom
-        window.addEventListener('delayed-resize', function(e) {
-            ProductMediaManager.initZoom();
+        gallery.addEventListener('click', () => {
+            const match = gallery.querySelector('.gallery-image.visible')?.id?.match(/image-(\d+)/);
+            ProductMediaManager.openFullscreen(match ? parseInt(match[1]) : 0);
         });
 
-        ProductMediaManager.initZoom();
-        ProductMediaManager.wireThumbnails();
-        const event = new CustomEvent('product-media-loaded', { detail: ProductMediaManager });
-        document.dispatchEvent(event);
+        document.querySelectorAll('.product-image-thumbs .thumb-link').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                ProductMediaManager.swapImage(document.querySelector('#image-' + link.dataset.imageIndex));
+            });
+        });
+
+        document.dispatchEvent(new CustomEvent('product-media-loaded', { detail: this }));
     }
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    ProductMediaManager.init();
-});
+document.addEventListener('DOMContentLoaded', () => ProductMediaManager.init());
 
 // Slideshow management
 document.addEventListener('DOMContentLoaded', () => {

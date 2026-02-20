@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,8 +29,8 @@ class Mage_Adminhtml_Block_Tax_Rate_Form extends Mage_Adminhtml_Block_Widget_For
     #[\Override]
     protected function _prepareForm()
     {
-        $rateObject = new Varien_Object(Mage::getSingleton('tax/calculation_rate')->getData());
-        $form = new Varien_Data_Form();
+        $rateObject = new \Maho\DataObject(Mage::getSingleton('tax/calculation_rate')->getData());
+        $form = new \Maho\Data\Form();
 
         $countries = Mage::getModel('adminhtml/system_config_source_country')->toOptionArray();
         unset($countries[0]);

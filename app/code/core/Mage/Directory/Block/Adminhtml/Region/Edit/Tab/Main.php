@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Mage_Directory
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +18,7 @@ class Mage_Directory_Block_Adminhtml_Region_Edit_Tab_Main extends Mage_Adminhtml
         $region = Mage::registry('current_region');
         $isUpdate = (bool) $region->getId();
 
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $fieldset = $form->addFieldset('base_fieldset', [
             'legend' => Mage::helper('directory')->__('Region Information'),

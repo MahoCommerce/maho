@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Mage
  * @package    Mage_Adminhtml
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,7 +17,7 @@ declare(strict_types=1);
 class Mage_Adminhtml_Block_System_Config_Frontend_Log extends Mage_Adminhtml_Block_System_Config_Form_Fieldset
 {
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element): string
+    public function render(\Maho\Data\Form\Element\AbstractElement $element): string
     {
         if (Mage::getModel('core/logger')::isLogConfigManagedByXml()) {
             $html = $this->_getHeaderHtml($element);

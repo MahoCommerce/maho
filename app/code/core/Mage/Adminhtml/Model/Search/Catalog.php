@@ -22,7 +22,7 @@
  * @method bool hasStart()
  * @method int getStart()
  */
-class Mage_Adminhtml_Model_Search_Catalog extends Varien_Object
+class Mage_Adminhtml_Model_Search_Catalog extends \Maho\DataObject
 {
     /**
      * Load search results

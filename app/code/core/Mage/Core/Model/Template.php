@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,14 +26,14 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     /**
      * Configuration of design package for template
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_designConfig;
 
     /**
      * Configuration of emulated design package.
      *
-     * @var Varien_Object|false
+     * @var \Maho\DataObject|false
      */
     protected $_emulatedDesignConfig = false;
 
@@ -41,7 +41,7 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
      * Initial environment information
      * @see self::_applyDesignConfig()
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_initialEnvironmentInfo = null;
 
@@ -81,14 +81,14 @@ abstract class Mage_Core_Model_Template extends Mage_Core_Model_Abstract
     /**
      * Get design configuration data
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function getDesignConfig()
     {
         if (is_null($this->_designConfig)) {
             $store = Mage::getDesign()->getStore();
             $storeId = is_object($store) ? $store->getId() : $store;
-            $this->_designConfig = new Varien_Object([
+            $this->_designConfig = new \Maho\DataObject([
                 'area' => Mage::getDesign()->getArea(),
                 'store' => $storeId,
             ]);

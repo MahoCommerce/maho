@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -252,7 +252,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
     /**
      * @return Mage_Eav_Model_Convert_Adapter_Entity
      * @throws Mage_Core_Model_Store_Exception
-     * @throws Varien_Convert_Exception
+     * @throws \Maho\Convert\Exception
      */
     #[\Override]
     public function load()
@@ -336,7 +336,7 @@ class Mage_Customer_Model_Convert_Adapter_Customer extends Mage_Eav_Model_Conver
 
     /**
      * @throws Mage_Core_Exception
-     * @throws Varien_Exception
+     * @throws \Maho\Exception
      */
     public function setCustomer(Mage_Customer_Model_Customer $customer)
     {

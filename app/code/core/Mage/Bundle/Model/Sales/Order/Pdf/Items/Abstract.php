@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Getting all available children for Invoice, Shipmen or Creditmemo item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return array
      */
     public function getChilds($item): ?array
@@ -48,7 +48,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve is Shipment Separately flag for Item
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function isShipmentSeparately($item = null): bool
     {
@@ -65,9 +65,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
                         && $options['shipment_type'] == Mage_Catalog_Model_Product_Type_Abstract::SHIPMENT_SEPARATELY
                     ) {
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 }
             } else {
                 $options = $item->getProductOptions();
@@ -76,9 +75,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
                         && $options['shipment_type'] == Mage_Catalog_Model_Product_Type_Abstract::SHIPMENT_SEPARATELY
                     ) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    return true;
                 }
             }
         }
@@ -97,7 +95,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve is Child Calculated
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function isChildCalculated($item = null): bool
     {
@@ -114,9 +112,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
                         $options['product_calculations'] == Mage_Catalog_Model_Product_Type_Abstract::CALCULATE_CHILD
                     ) {
                         return true;
-                    } else {
-                        return false;
                     }
+                    return false;
                 }
             } else {
                 $options = $item->getProductOptions();
@@ -125,9 +122,8 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
                         $options['product_calculations'] == Mage_Catalog_Model_Product_Type_Abstract::CALCULATE_CHILD
                     ) {
                         return false;
-                    } else {
-                        return true;
                     }
+                    return true;
                 }
             }
         }
@@ -146,23 +142,22 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve Bundle Options
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function getBundleOptions($item = null): array
     {
         $options = $this->getOrderItem()->getProductOptions();
-        if ($options) {
-            if (isset($options['bundle_options'])) {
-                return $options['bundle_options'];
-            }
+        if (!$options) {
+            return $options['bundle_options'] ?? [];
         }
-        return [];
+
+        return $options['bundle_options'] ?? [];
     }
 
     /**
      * Retrieve Selection attributes
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function getSelectionAttributes($item): mixed
     {
@@ -172,7 +167,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
             $options = $item->getOrderItem()->getProductOptions();
         }
         if (isset($options['bundle_selection_attributes'])) {
-            return unserialize($options['bundle_selection_attributes'], ['allowed_classes' => false]);
+            return Mage::helper('core/string')->unserialize($options['bundle_selection_attributes']);
         }
         return null;
     }
@@ -180,7 +175,7 @@ abstract class Mage_Bundle_Model_Sales_Order_Pdf_Items_Abstract extends Mage_Sal
     /**
      * Retrieve Order options
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      */
     public function getOrderOptions($item = null): array
     {

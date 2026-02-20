@@ -6,7 +6,7 @@
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,16 +33,16 @@ class Mage_Dataflow_Model_Session_Parser_Csv extends Mage_Dataflow_Model_Convert
         $data = [];
         $sessionId = Mage::registry('current_dataflow_session_id');
         $import = Mage::getModel('dataflow/import');
-        $map = new Varien_Convert_Mapper_Column();
+        $map = new \Maho\Convert\Mapper\Column();
+        $fields = [];
         for ($i = 0; $line = fgetcsv($fp, 4096, $fDel, $fEnc, $fEsc); $i++) {
             if ($i == 0) {
                 if ($this->getVar('fieldnames')) {
                     $fields = $line;
                     continue;
-                } else {
-                    foreach (array_keys($line) as $j) {
-                        $fields[$j] = 'column' . ($j + 1);
-                    }
+                }
+                foreach (array_keys($line) as $j) {
+                    $fields[$j] = 'column' . ($j + 1);
                 }
             }
             $row = [];
@@ -55,7 +55,7 @@ class Mage_Dataflow_Model_Session_Parser_Csv extends Mage_Dataflow_Model_Convert
                 $data[] = $row;
             }
             */
-            //$map = new Varien_Convert_Mapper_Column();
+            //$map = new \Maho\Convert\Mapper\Column();
             $map->setData([$row]);
             $map->map();
             $row = $map->getData();

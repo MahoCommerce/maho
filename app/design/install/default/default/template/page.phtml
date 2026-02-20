@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,12 +16,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= Mage::helper('install')->__('Maho Installation Wizard') ?></title>
-    <script type="text/javascript" src="<?= $this->getJsUrl() ?>validation.js"></script>
-    <script type="text/javascript" src="<?= $this->getJsUrl() ?>varien/js.js"></script>
-    <script type="text/javascript" src="<?= $this->getJsUrl() ?>varien/form.js"></script>
-    <?= Mage::helper('page')->getFaviconHtml() ?>
-    <link rel="stylesheet" href="<?= $this->getSkinUrl('css/installer.css') ?>" type="text/css" media="all"/>
+    <title><?= $this->helper('install')->__('Maho Installation Wizard') ?></title>
+    <?= $this->helper('page')->getFaviconHtml() ?>
+    <link rel="stylesheet" href="<?= $this->getSkinUrl('css/installer.css') ?>" type="text/css" media="all">
 </head>
 
 <body>
@@ -67,14 +64,10 @@
     </div>
 </main>
 
-<footer class="footer-container">
-    <div class="footer">
-        <p>
-            <a href="https://mahocommerce.com" target="_blank" rel="noopener">Powered by Maho <?= Mage::getVersion() ?></a>
-        </p>
-    </div>
+<footer>
+    <a href="https://mahocommerce.com" target="_blank" rel="noopener">Powered by Maho <?= Mage::getVersion() ?></a>
 </footer>
 
-<script src="<?= $this->getSkinUrl('js/installer.js') ?>"></script>
+<script type="module" src="<?= $this->getSkinUrl('js/installer.js') ?>"></script>
 </body>
 </html>

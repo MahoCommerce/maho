@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -69,9 +69,6 @@ Adding custom product price block
         <reference name="minicart_head">
             <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/cart/minicart/default.phtml</template></action>
         </reference>
-        <reference name="cart_sidebar">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/cart/sidebar/default.phtml</template></action>
-        </reference>
         <reference name="wishlist_sidebar">
             <action method="addPriceBlockType"><type>bundle</type><block>bundle/catalog_product_price</block><template>bundle/catalog/product/price.phtml</template></action>
         </reference>
@@ -103,16 +100,6 @@ Partof block for simple products
             <action method="setItemLimit"><type>bundle</type><limit>4</limit></action>
         </reference>
     </PRODUCT_TYPE_simple>
-
-<!--
-Shopping cart item renderer (sidebar)
--->
-
-    <customer_account>
-        <reference name="cart_sidebar">
-            <action method="addItemRender"><type>bundle</type><block>bundle/checkout_cart_item_renderer</block><template>checkout/cart/sidebar/default.phtml</template></action>
-        </reference>
-    </customer_account>
 
 <!--
 Shopping cart item renderer

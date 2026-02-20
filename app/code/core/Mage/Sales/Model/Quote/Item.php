@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -626,7 +626,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
     /**
      * Add option to item
      *
-     * @param Mage_Sales_Model_Quote_Item_Option|Varien_Object|array $option
+     * @param Mage_Sales_Model_Quote_Item_Option|\Maho\DataObject|array $option
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -635,7 +635,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
         if (is_array($option)) {
             $option = Mage::getModel('sales/quote_item_option')->setData($option)
                 ->setItem($this);
-        } elseif (($option instanceof Varien_Object) && !($option instanceof Mage_Sales_Model_Quote_Item_Option)) {
+        } elseif (($option instanceof \Maho\DataObject) && !($option instanceof Mage_Sales_Model_Quote_Item_Option)) {
             $option = Mage::getModel('sales/quote_item_option')->setData($option->getData())
                 ->setProduct($option->getProduct())
                 ->setItem($this);
@@ -662,7 +662,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * @param int|float|null $value
      * @return $this
      */
-    public function updateQtyOption(Varien_Object $option, $value)
+    public function updateQtyOption(\Maho\DataObject $option, $value)
     {
         $optionProduct = $option->getProduct();
         $options = $this->getQtyOptions();
@@ -808,7 +808,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
             // Check if this is a file option
             if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
                 try {
-                    $optionValue = @unserialize($option->getValue());
+                    $optionValue = Mage::helper('core/string')->unserialize($option->getValue());
                     if (is_array($optionValue) && isset($optionValue['quote_path'])) {
                         $filePath = Mage::getBaseDir() . $optionValue['quote_path'];
                         if (file_exists($filePath) && is_file($filePath)) {
@@ -845,12 +845,14 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * Returns formatted buy request - object, holding request received from
      * product view page with keys and options for configured product
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getBuyRequest()
     {
         $option = $this->getOptionByCode('info_buyRequest');
-        $buyRequest = new Varien_Object($option ? unserialize($option->getValue()) : null);
+        $buyRequest = new \Maho\DataObject($option
+            ? Mage::helper('core/string')->unserialize($option->getValue())
+            : null);
 
         // Overwrite standard buy request qty, because item qty could have changed since adding to quote
         $buyRequest->setOriginalQty($buyRequest->getQty())
@@ -910,7 +912,7 @@ class Mage_Sales_Model_Quote_Item extends Mage_Sales_Model_Quote_Item_Abstract
      * @param string|null $origin Usually a name of module, that embeds error
      * @param int|null $code Error code, unique for origin, that sets it
      * @param string|null $message Error message
-     * @param Varien_Object|null $additionalData Any additional data, that caller would like to store
+     * @param \Maho\DataObject|null $additionalData Any additional data, that caller would like to store
      * @return $this
      */
     public function addErrorInfo($origin = null, $code = null, $message = null, $additionalData = null)

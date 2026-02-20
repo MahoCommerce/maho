@@ -6,11 +6,11 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
+abstract class Mage_Paypal_Model_Api_Abstract extends \Maho\DataObject
 {
     /**
      * Config instance
@@ -43,7 +43,15 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
      * @var array
      */
     protected $_lineItemExportItemsFormat = [];
+
+    /**
+     * @var array
+     */
     protected $_lineItemExportItemsFilters = [];
+
+    /**
+     * @var array
+     */
     protected $_lineItemTotalExportMap = [];
 
     /**
@@ -154,16 +162,6 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
     }
 
     /**
-     * @deprecated after 1.4.1.0
-     *
-     * @return bool
-     */
-    public function getDebug()
-    {
-        return $this->getDebugFlag();
-    }
-
-    /**
      * PayPal page CSS getter
      *
      * @return string
@@ -234,23 +232,23 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
     /**
      * Import $this public data to specified object or array
      *
-     * @param array|Varien_Object $to
-     * @return array|Varien_Object
+     * @param array|\Maho\DataObject $to
+     * @return array|\Maho\DataObject
      */
     public function &import($to, array $publicMap = [])
     {
-        return Varien_Object_Mapper::accumulateByMap([$this, 'getDataUsingMethod'], $to, $publicMap);
+        return \Maho\DataObject\Mapper::accumulateByMap([$this, 'getDataUsingMethod'], $to, $publicMap);
     }
 
     /**
      * Export $this public data from specified object or array
      *
-     * @param array|Varien_Object $from
+     * @param array|\Maho\DataObject $from
      * @return Mage_Paypal_Model_Api_Abstract
      */
     public function export($from, array $publicMap = [])
     {
-        Varien_Object_Mapper::accumulateByMap($from, [$this, 'setDataUsingMethod'], $publicMap);
+        \Maho\DataObject\Mapper::accumulateByMap($from, [$this, 'setDataUsingMethod'], $publicMap);
         return $this;
     }
 
@@ -319,7 +317,7 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
                 $map[$this->_globalMap[$key]] = $key;
             }
         }
-        $result = Varien_Object_Mapper::accumulateByMap([$this, 'getDataUsingMethod'], $request, $map);
+        $result = \Maho\DataObject\Mapper::accumulateByMap([$this, 'getDataUsingMethod'], $request, $map);
         foreach ($privateRequestMap as $key) {
             if (isset($this->_exportToRequestFilters[$key]) && isset($result[$key])) {
                 $callback   = $this->_exportToRequestFilters[$key];
@@ -346,7 +344,7 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
                 $response[$key] = call_user_func([$this, $callback], $response[$key], $key, $map[$key]);
             }
         }
-        Varien_Object_Mapper::accumulateByMap($response, [$this, 'setDataUsingMethod'], $map);
+        \Maho\DataObject\Mapper::accumulateByMap($response, [$this, 'setDataUsingMethod'], $map);
     }
 
     /**
@@ -478,7 +476,7 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
      *
      * @return string
      */
-    protected function _lookupRegionCodeFromAddress(Varien_Object $address)
+    protected function _lookupRegionCodeFromAddress(\Maho\DataObject $address)
     {
         if ($regionId = $address->getData('region_id')) {
             $region = Mage::getModel('directory/region')->load($regionId);
@@ -493,7 +491,7 @@ abstract class Mage_Paypal_Model_Api_Abstract extends Varien_Object
      * Street address workaround: divides address lines into parts by specified keys
      * (keys should go as 3rd, 4th[...] parameters)
      */
-    protected function _importStreetFromAddress(Varien_Object $address, array &$to)
+    protected function _importStreetFromAddress(\Maho\DataObject $address, array &$to)
     {
         $keys = func_get_args();
         array_shift($keys);

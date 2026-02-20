@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -156,7 +156,7 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
      */
     public function addRequestParam($url, $param)
     {
-        $startDelimiter = (!str_contains($url, '?')) ? '?' : '&';
+        $startDelimiter = (str_contains($url, '?')) ? '&' : '?';
 
         $arrQueryParams = [];
         foreach ($param as $key => $value) {
@@ -258,27 +258,14 @@ class Mage_Core_Helper_Url extends Mage_Core_Helper_Abstract
         }
 
         $mode = Mage::getStoreConfig('web/url/trailing_slash_behavior');
-
         if ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::REMOVE_TRAILING_SLASH) {
             return $this->removeTrailingSlash($url);
-        } elseif ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH) {
-            return $this->addTrailingSlash($url);
-        } else {
-            return $url;
         }
-    }
 
-    /**
-     * Return singleton model instance
-     *
-     * @param string $name
-     * @param array $arguments
-     * @return Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getSingleton()
-     */
-    protected function _getSingletonModel($name, $arguments = [])
-    {
-        return Mage::getSingleton($name, $arguments);
+        if ($mode === Mage_Adminhtml_Model_System_Config_Source_Catalog_Trailingslash::ADD_TRAILING_SLASH) {
+            return $this->addTrailingSlash($url);
+        }
+        return $url;
     }
 
     /**

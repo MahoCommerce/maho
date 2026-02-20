@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -100,7 +100,7 @@ class Mage_Reports_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * @param Varien_Data_Collection $collection
+     * @param \Maho\Data\Collection $collection
      * @param string $from
      * @param string $to
      * @param string $periodType

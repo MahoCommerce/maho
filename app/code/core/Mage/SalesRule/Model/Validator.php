@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,15 +53,6 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
      * @var null|Mage_Sales_Model_Quote_Address
      */
     protected $_address = null;
-
-    /**
-     * Defines if method Mage_SalesRule_Model_Validator::process() was already called
-     * Used for clearing applied rule ids in Quote and in Address
-     *
-     * @deprecated since 1.4.2.0
-     * @var bool
-     */
-    protected $_isFirstTimeProcessRun = false;
 
     /**
      * Defines if method Mage_SalesRule_Model_Validator::reset() wasn't called
@@ -181,7 +172,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     // check per customer usage limit
                     $customerId = $address->getQuote()->getCustomerId();
                     if ($customerId && $coupon->getUsagePerCustomer()) {
-                        $couponUsage = new Varien_Object();
+                        $couponUsage = new \Maho\DataObject();
                         Mage::getResourceModel('salesrule/coupon_usage')->loadByCustomerCoupon(
                             $couponUsage,
                             $customerId,
@@ -441,7 +432,7 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                     break;
             }
 
-            $result = new Varien_Object([
+            $result = new \Maho\DataObject([
                 'discount_amount'      => $discountAmount,
                 'base_discount_amount' => $baseDiscountAmount,
             ]);

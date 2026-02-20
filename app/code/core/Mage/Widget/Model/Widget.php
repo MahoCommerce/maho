@@ -6,24 +6,24 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Widget_Model_Widget extends Varien_Object
+class Mage_Widget_Model_Widget extends \Maho\DataObject
 {
     /**
      * Load Widgets XML config from widget.xml files and cache it
      *
-     * @return Varien_Simplexml_Config
+     * @return \Maho\Simplexml\Config
      */
     public function getXmlConfig()
     {
         $cachedXml = Mage::app()->loadCache('widget_config');
         if ($cachedXml) {
-            $xmlConfig = new Varien_Simplexml_Config($cachedXml);
+            $xmlConfig = new \Maho\Simplexml\Config($cachedXml);
         } else {
-            $config = new Varien_Simplexml_Config();
+            $config = new \Maho\Simplexml\Config();
             $config->loadString('<?xml version="1.0"?><widgets></widgets>');
             Mage::getConfig()->loadModulesConfiguration('widget.xml', $config);
             $xmlConfig = $config;
@@ -42,12 +42,12 @@ class Mage_Widget_Model_Widget extends Varien_Object
      * Return widget XML config element based on its type
      *
      * @param string $type Widget type
-     * @return null|Varien_Simplexml_Element
+     * @return null|\Maho\Simplexml\Element
      */
     public function getXmlElementByType($type)
     {
         $elements = $this->getXmlConfig()->getXpath('*[@type="' . $type . '"]');
-        if (is_array($elements) && isset($elements[0]) && $elements[0] instanceof Varien_Simplexml_Element) {
+        if (is_array($elements) && isset($elements[0]) && $elements[0] instanceof \Maho\Simplexml\Element) {
             return $elements[0];
         }
         return null;
@@ -57,7 +57,7 @@ class Mage_Widget_Model_Widget extends Varien_Object
      * Wrapper for getXmlElementByType method
      *
      * @param string $type Widget type
-     * @return null|Varien_Simplexml_Element
+     * @return null|\Maho\Simplexml\Element
      */
     public function getConfigAsXml($type)
     {
@@ -65,16 +65,16 @@ class Mage_Widget_Model_Widget extends Varien_Object
     }
 
     /**
-     * Return widget XML configuration as Varien_Object and makes some data preparations
+     * Return widget XML configuration as \Maho\DataObject and makes some data preparations
      *
      * @param string $type Widget type
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getConfigAsObject($type)
     {
         $xml = $this->getConfigAsXml($type);
 
-        $object = new Varien_Object();
+        $object = new \Maho\DataObject();
         if ($xml === null) {
             return $object;
         }
@@ -112,7 +112,7 @@ class Mage_Widget_Model_Widget extends Varien_Object
 
                     // prepare helper block object
                     if (isset($data['helper_block'])) {
-                        $helper = new Varien_Object();
+                        $helper = new \Maho\DataObject();
                         if (isset($data['helper_block']['data']) && is_array($data['helper_block']['data'])) {
                             $helper->addData($data['helper_block']['data']);
                         }
@@ -122,7 +122,7 @@ class Mage_Widget_Model_Widget extends Varien_Object
                         $data['helper_block'] = $helper;
                     }
 
-                    $newParams[$key] = new Varien_Object($data);
+                    $newParams[$key] = new \Maho\DataObject($data);
                     $sortOrder++;
                 }
             }
@@ -137,7 +137,7 @@ class Mage_Widget_Model_Widget extends Varien_Object
      * Return filtered list of widgets as SimpleXml object
      *
      * @param array $filters Key-value array of filters for widget node properties
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     public function getWidgetsXml($filters = [])
     {
@@ -174,7 +174,7 @@ class Mage_Widget_Model_Widget extends Varien_Object
     {
         if (!$this->_getData('widgets_array')) {
             $result = [];
-            /** @var Varien_Simplexml_Element $widget */
+            /** @var \Maho\Simplexml\Element $widget */
             foreach ($this->getWidgetsXml($filters) as $widget) {
                 $helper = $widget->getAttribute('module') ?: 'widget';
                 $helper = Mage::helper($helper);
@@ -267,8 +267,8 @@ class Mage_Widget_Model_Widget extends Varien_Object
     /**
      * Widget parameters sort callback
      *
-     * @param Varien_Object $a
-     * @param Varien_Object $b
+     * @param \Maho\DataObject $a
+     * @param \Maho\DataObject $b
      * @return int
      */
     protected function _sortParameters($a, $b)

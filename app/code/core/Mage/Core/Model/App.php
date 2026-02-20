@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -252,13 +252,13 @@ class Mage_Core_Model_App
             $options = ['etc_dir' => $options];
         }
 
-        \Maho\Profiler::start('app.init.config');
+        \Maho\Profiler::start('mage::app::init::config');
         $this->_config = Mage::getConfig();
         $this->_config->setOptions($options);
         $this->_initBaseConfig();
         $this->_initCache();
         $this->_config->init($options);
-        \Maho\Profiler::stop('app.init.config');
+        \Maho\Profiler::stop('mage::app::init::config');
 
         if ($this->_isInstalled === null) {
             $this->_isInstalled = Mage::isInstalled($options);
@@ -375,7 +375,7 @@ class Mage_Core_Model_App
             }
 
             // Finish the request explicitly, no output allowed beyond this point
-            if (php_sapi_name() == 'fpm-fcgi' && function_exists('fastcgi_finish_request')) {
+            if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             } else {
                 flush();
@@ -425,9 +425,9 @@ class Mage_Core_Model_App
      */
     protected function _initBaseConfig()
     {
-        \Maho\Profiler::start('app.init.system_config');
+        \Maho\Profiler::start('mage::app::init::system_config');
         $this->_config->loadBase();
-        \Maho\Profiler::stop('app.init.system_config');
+        \Maho\Profiler::stop('mage::app::init::system_config');
         return $this;
     }
 
@@ -464,9 +464,9 @@ class Mage_Core_Model_App
                 if (!$this->_config->loadModulesCache()) {
                     $this->_config->loadModules();
                     if ($this->_config->isLocalConfigLoaded() && !$this->_shouldSkipProcessModulesUpdates()) {
-                        \Maho\Profiler::start('app.init.apply_db_schema_updates');
+                        \Maho\Profiler::start('mage::app::init::apply_db_schema_updates');
                         Mage_Core_Model_Resource_Setup::applyAllUpdates();
-                        \Maho\Profiler::stop('app.init.apply_db_schema_updates');
+                        \Maho\Profiler::stop('mage::app::init::apply_db_schema_updates');
                     }
                     $this->_config->loadDb();
                     $this->_config->loadEnv();
@@ -518,9 +518,9 @@ class Mage_Core_Model_App
      */
     protected function _initCurrentStore($scopeCode, $scopeType)
     {
-        \Maho\Profiler::start('app.init.stores');
+        \Maho\Profiler::start('mage::app::init::stores');
         $this->_initStores();
-        \Maho\Profiler::stop('app.init.stores');
+        \Maho\Profiler::stop('mage::app::init::stores');
 
         if (empty($scopeCode) && !is_null($this->_website)) {
             $scopeCode = $this->_website->getCode();
@@ -808,9 +808,9 @@ class Mage_Core_Model_App
     {
         $this->_frontController = new Mage_Core_Controller_Varien_Front();
         Mage::register('controller', $this->_frontController);
-        \Maho\Profiler::start('app.init.front_controller');
+        \Maho\Profiler::start('mage::app::init_front_controller');
         $this->_frontController->init();
-        \Maho\Profiler::stop('app.init.front_controller');
+        \Maho\Profiler::stop('mage::app::init_front_controller');
         return $this;
     }
 
@@ -918,7 +918,7 @@ class Mage_Core_Model_App
      * Retrieve application store object without Store_Exception
      *
      * @param string|int|Mage_Core_Model_Store $id
-     * @return Mage_Core_Model_Store|Varien_Object
+     * @return Mage_Core_Model_Store|\Maho\DataObject
      */
     public function getSafeStore($id = null)
     {
@@ -927,10 +927,9 @@ class Mage_Core_Model_App
         } catch (Exception $e) {
             if ($this->_currentStore) {
                 $this->getRequest()->setActionName('noRoute');
-                return new Varien_Object();
-            } else {
-                Mage::throwException(Mage::helper('core')->__('Requested invalid store "%s"', $id));
+                return new \Maho\DataObject();
             }
+            Mage::throwException(Mage::helper('core')->__('Requested invalid store "%s"', $id));
         }
     }
 
@@ -1400,7 +1399,7 @@ class Mage_Core_Model_App
      *
      * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
      * ```php
-     * public function process(Varien_Event_Observer $observer): void
+     * public function process(\Maho\Event\Observer $observer): void
      * {
      *     $isAjax = (bool) $observer->getIsAjax();
      *     // ...
@@ -1443,8 +1442,8 @@ class Mage_Core_Model_App
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
-                $observer = new Varien_Event_Observer([
-                    'event' => new Varien_Event([
+                $observer = new \Maho\Event\Observer([
+                    'event' => new \Maho\Event([
                         ...$obs['args'], // Default config.xml <args>
                         ...$args,        // Mage::dispatchEvent() $args
                         'name' => $eventName,
@@ -1452,7 +1451,7 @@ class Mage_Core_Model_App
                     ...$obs['args'], // Default config.xml <args>
                     ...$args,        // Mage::dispatchEvent() $args
                 ]);
-                \Maho\Profiler::start('observer.execute', ['observer.name' => $obsName]);
+                \Maho\Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
                     case 'disabled':
                         break;
@@ -1468,7 +1467,7 @@ class Mage_Core_Model_App
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                 }
-                \Maho\Profiler::stop('observer.execute');
+                \Maho\Profiler::stop('OBSERVER: ' . $obsName);
             }
         }
         return $this;
@@ -1479,7 +1478,7 @@ class Mage_Core_Model_App
      *
      * @param object $object
      * @param string $method
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @param string $observerName
      * @return $this
      * @throws Mage_Core_Exception

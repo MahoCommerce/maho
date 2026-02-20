@@ -6,7 +6,7 @@
  * @package    Mage_ConfigurableSwatches
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -47,7 +47,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      * @param string $text
      * @param Mage_Catalog_Model_Product $product
      * @param string $type
-     * @return Varien_Object|null
+     * @return \Maho\DataObject|null
      */
     public function getProductImgByLabel($text, $product, $type = null)
     {
@@ -65,7 +65,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         if (!is_null($type) && array_key_exists($type, $resultImages)) {
             $image = $resultImages[$type];
         } else {
-            $image = (!is_null($resultImages['swatch'])) ? $resultImages['swatch'] : $resultImages['standard'];
+            $image = (is_null($resultImages['swatch'])) ? $resultImages['standard'] : $resultImages['swatch'];
         }
 
         return $image;
@@ -285,7 +285,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         ];
         $destPath = implode('/', $destPathArr);
         if (!is_dir(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . dirname($destPath))) {
-            $io = new Varien_Io_File();
+            $io = new \Maho\Io\File();
             $io->mkdir(Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . dirname($destPath), 0777, true);
         }
 
@@ -325,7 +325,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
         $destPath = implode('/', $destPathArr);
         $targetDir = dirname($destPath);
 
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         if (!$io->isWriteable($targetDir)) {
             $io->mkdir($targetDir);
         }
@@ -361,7 +361,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     public function clearSwatchesCache()
     {
         $directory = Mage::getBaseDir(Mage_Core_Model_Store::URL_TYPE_MEDIA) . DS . self::SWATCH_CACHE_DIR;
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->rmdir($directory, true);
     }
 
@@ -369,7 +369,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      * Determine whether to show an image in the product media gallery
      *
      * @param Mage_Catalog_Model_Product $product
-     * @param Varien_Object $image
+     * @param \Maho\DataObject $image
      * @return bool
      */
     public function filterImageInGallery($product, $image)

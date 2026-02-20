@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,7 +42,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
      * @return  string
      */
     #[\Override]
-    public function render(Varien_Object $row)
+    public function render(\Maho\DataObject $row)
     {
         if ($this->getColumn()->getEditable()) {
             $value = $this->_getValue($row);
@@ -58,7 +58,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
      *
      * @return string
      */
-    public function renderExport(Varien_Object $row)
+    public function renderExport(\Maho\DataObject $row)
     {
         return $this->render($row);
     }
@@ -66,12 +66,13 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string|null
      */
-    protected function _getValue(Varien_Object $row)
+    protected function _getValue(\Maho\DataObject $row)
     {
         if ($getter = $this->getColumn()->getGetter()) {
             if (is_string($getter)) {
                 return $row->$getter();
-            } elseif (is_callable($getter)) {
+            }
+            if (is_callable($getter)) {
                 return call_user_func($getter, $row);
             }
             return '';
@@ -85,7 +86,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string
      */
-    public function _getInputValueElement(Varien_Object $row)
+    public function _getInputValueElement(\Maho\DataObject $row)
     {
         return  '<input type="text" class="input-text '
                 . $this->getColumn()->getValidateClass()
@@ -96,7 +97,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string|null
      */
-    protected function _getInputValue(Varien_Object $row)
+    protected function _getInputValue(\Maho\DataObject $row)
     {
         return $this->_getValue($row);
     }
@@ -156,7 +157,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
     /**
      * @return string|null
      */
-    public function getCopyableText(Varien_Object $row)
+    public function getCopyableText(\Maho\DataObject $row)
     {
         return $this->_getValue($row);
     }

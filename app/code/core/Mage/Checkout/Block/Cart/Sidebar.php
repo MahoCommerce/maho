@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -261,7 +261,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
 
         return array_merge(
             parent::getCacheTags(),
-            (!$quoteTags) ? [] : $quoteTags,
+            $quoteTags ?: [],
             $this->getItemsTags($items),
         );
     }
@@ -276,7 +276,7 @@ class Mage_Checkout_Block_Cart_Sidebar extends Mage_Checkout_Block_Cart_Minicart
     protected function _afterToHtml($html)
     {
         $html = parent::_afterToHtml($html);
-        $transport = new Varien_Object();
+        $transport = new \Maho\DataObject();
         $transport->setHtml($html);
         Mage::dispatchEvent(
             'checkout_block_cart_sidebar_aftertohtml',

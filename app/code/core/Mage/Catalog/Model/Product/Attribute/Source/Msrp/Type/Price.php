@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,21 +45,14 @@ class Mage_Catalog_Model_Product_Attribute_Source_Msrp_Type_Price extends Mage_C
     {
         $attributeType = $this->getAttribute()->getBackendType();
         $attributeCode = $this->getAttribute()->getAttributeCode();
+        $helper = Mage::getResourceHelper('eav');
         $column = [
+            'type'      => $helper->getDdlTypeByColumnType($attributeType),
             'unsigned'  => false,
+            'nullable'  => true,
             'default'   => null,
             'extra'     => null,
         ];
-
-        if (Mage::helper('core')->useDbCompatibleMode()) {
-            $column['type']     = $attributeType;
-            $column['is_null']  = true;
-        } else {
-            /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
-            $helper = Mage::getResourceHelper('eav');
-            $column['type']     = $helper->getDdlTypeByColumnType($attributeType);
-            $column['nullable'] = true;
-        }
 
         return [$attributeCode => $column];
     }

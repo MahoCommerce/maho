@@ -1,0 +1,50 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   design
+ * @package    base_default
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/**
+ * Gift Card Total Renderer
+ * @var Maho_Giftcard_Block_Cart_Total $this
+ */
+?>
+<tr>
+    <td colspan="<?= $this->getColspan() ?>" style="<?= $this->getTotal()->getStyle() ?>" class="a-right">
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?><strong><?php endif ?>
+            <?php
+            echo $this->escapeHtml($this->getTotal()->getTitle());
+
+            // Get gift card codes from total data
+            $giftcardCodes = $this->getTotal()->getGiftcardCodes();
+            if ($giftcardCodes):
+                $codes = explode(', ', $giftcardCodes);
+                echo ': ';
+                foreach ($codes as $i => $code):
+                    if ($i > 0) echo ', ';
+                    // Display partial code for security
+                    $displayCode = $code;
+                    if (strlen($code) > 10) {
+                        $displayCode = substr($code, 0, 5) . '...' . substr($code, -4);
+                    }
+                    echo $this->escapeHtml($displayCode);
+                    ?>
+                    <a href="#" onclick="removeGiftCardFromTotal('<?php echo Mage::helper('core')->jsQuoteEscape($code) ?>'); return false;"
+                       class="text-error" title="<?php echo $this->__('Remove') ?>">[x]</a>
+                    <?php
+                endforeach;
+            endif;
+            ?>
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?></strong><?php endif ?>
+    </td>
+    <td style="<?= $this->getTotal()->getStyle() ?>" class="a-right">
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?><strong><?php endif ?>
+            <?php /* DEBUG: Using gift card template */ ?>
+            <?= $this->helper('checkout')->formatPrice(-$this->getTotal()->getValue()) ?>
+        <?php if ($this->getRenderingArea() == $this->getTotal()->getArea()): ?></strong><?php endif ?>
+    </td>
+</tr>

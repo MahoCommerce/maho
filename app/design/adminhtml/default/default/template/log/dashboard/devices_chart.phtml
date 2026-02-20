@@ -1,0 +1,159 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Log_Block_Dashboard_Devices $this */
+$breakdown = $this->getBreakdown();
+$devices = $breakdown['devices'] ?? [];
+$browsers = $breakdown['browsers'] ?? [];
+$chartId = rand(100, 999);
+?>
+
+<div style="margin: 20px;">
+    <p class="switcher a-right" style="padding: 5px 10px;">
+        <?= $this->__('Select Range') ?>:
+        <select name="period" id="order_<?= $this->getHtmlId() ?>_period" onchange="changeDiagramsPeriod(this);">
+            <?php foreach ($this->helper('adminhtml/dashboard_data')->getDatePeriods() as $_value => $_label): ?>
+                <?php if (in_array($_value, ['custom'])) continue; ?>
+                <option value="<?= $_value ?>" <?php if ($this->getRequest()->getParam('period') == $_value): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
+            <?php endforeach ?>
+        </select>
+    </p>
+    <br/>
+
+    <?php if ($this->getCount()): ?>
+        <div class="devices-browsers-charts">
+            <div class="chart-container">
+                <h4><?= $this->__('Devices') ?></h4>
+                <canvas id="devicesChart<?= $chartId ?>"></canvas>
+            </div>
+            <div class="chart-container">
+                <h4><?= $this->__('Browsers') ?></h4>
+                <canvas id="browsersChart<?= $chartId ?>"></canvas>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            window.chartsLoaded = window.chartsLoaded || false;
+            function loadCharts(callback) {
+                if (window.chartsLoaded && window.Chart) {
+                    callback();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+                script.async = true;
+                script.onload = () => {
+                    window.chartsLoaded = true;
+                    callback();
+                };
+                document.head.appendChild(script);
+            }
+
+            function initializeDevicesBrowsersCharts<?= $chartId ?>() {
+                const deviceColors = {
+                    'desktop': '#5C6BC0',
+                    'mobile': '#66BB6A',
+                    'tablet': '#FFA726'
+                };
+
+                const browserColors = [
+                    '#5C6BC0', '#66BB6A', '#FFA726', '#EF5350', '#AB47BC',
+                    '#26C6DA', '#8D6E63', '#78909C', '#FF7043', '#9CCC65'
+                ];
+
+                // Devices pie chart
+                const devicesData = <?= Mage::helper('core')->jsonEncode($devices) ?>;
+                const devicesLabels = Object.keys(devicesData).map(d => d.charAt(0).toUpperCase() + d.slice(1));
+                const devicesValues = Object.values(devicesData);
+                const devicesColors = Object.keys(devicesData).map(d => deviceColors[d] || '#999');
+
+                if (window.devicesChart<?= $chartId ?> instanceof Chart) window.devicesChart<?= $chartId ?>.destroy();
+                window.devicesChart<?= $chartId ?> = new Chart(document.getElementById('devicesChart<?= $chartId ?>'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: devicesLabels,
+                        datasets: [{
+                            data: devicesValues,
+                            backgroundColor: devicesColors,
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 15, usePointStyle: true }
+                            }
+                        }
+                    }
+                });
+
+                // Browsers pie chart
+                const browsersData = <?= Mage::helper('core')->jsonEncode($browsers) ?>;
+                const browsersLabels = Object.keys(browsersData);
+                const browsersValues = Object.values(browsersData);
+
+                if (window.browsersChart<?= $chartId ?> instanceof Chart) window.browsersChart<?= $chartId ?>.destroy();
+                window.browsersChart<?= $chartId ?> = new Chart(document.getElementById('browsersChart<?= $chartId ?>'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: browsersLabels,
+                        datasets: [{
+                            data: browsersValues,
+                            backgroundColor: browserColors.slice(0, browsersLabels.length),
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: { padding: 15, usePointStyle: true }
+                            }
+                        }
+                    }
+                });
+            }
+
+            loadCharts(initializeDevicesBrowsersCharts<?= $chartId ?>);
+        </script>
+
+        <style>
+            .devices-browsers-charts {
+                display: flex;
+                justify-content: center;
+                gap: 40px;
+                padding: 20px;
+            }
+            .devices-browsers-charts .chart-container {
+                flex: 1;
+                max-width: 350px;
+                text-align: center;
+            }
+            .devices-browsers-charts h4 {
+                margin: 0 0 15px 0;
+                font-size: 14px;
+                font-weight: 600;
+                color: #333;
+            }
+        </style>
+    <?php else: ?>
+        <p class="a-center" style="width: 100%; height: 300px; line-height: 300px;">
+            <?= $this->__('No Data Found') ?>
+        </p>
+    <?php endif ?>
+</div>

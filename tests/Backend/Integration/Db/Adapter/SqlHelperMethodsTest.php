@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -305,8 +305,14 @@ describe('SQL Helper Methods - Aggregate Functions', function () {
         );
 
         // Standard deviation should be calculated (MySQL may use population or sample stddev)
-        expect((float) $result)->toBeGreaterThan(10.0);
-        expect((float) $result)->toBeLessThan(20.0);
+        // SQLite doesn't have native STDDEV, so it may return NULL or 0
+        if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite) {
+            // SQLite doesn't support STDDEV natively
+            expect($result === null || (float) $result === 0.0)->toBeTrue();
+        } else {
+            expect((float) $result)->toBeGreaterThan(10.0);
+            expect((float) $result)->toBeLessThan(20.0);
+        }
     });
 });
 
@@ -326,10 +332,258 @@ describe('SQL Helper Methods - Expr Objects', function () {
     });
 
     it('uses Expr in complex queries', function () {
-        $expr = new Expr('UNIX_TIMESTAMP(NOW())');
+        // Use database-agnostic helper method for Unix timestamp
+        $expr = $this->adapter->getUnixTimestampExpr();
 
         $result = $this->adapter->fetchOne("SELECT {$expr} as ts");
 
         expect((int) $result)->toBeGreaterThan(1700000000); // After 2023
+    });
+});
+
+describe('SQL Helper Methods - JSON Functions', function () {
+    beforeEach(function () {
+        $table = $this->adapter->newTable('test_json_helpers');
+        $table->addColumn('id', \Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
+            'identity' => true,
+            'unsigned' => true,
+            'nullable' => false,
+            'primary'  => true,
+        ]);
+        $table->addColumn('data', \Maho\Db\Ddl\Table::TYPE_TEXT, null, [
+            'nullable' => false,
+        ]);
+        $this->adapter->dropTemporaryTable('test_json_helpers');
+        $this->adapter->createTemporaryTable($table);
+
+        $this->adapter->insertMultiple('test_json_helpers', [
+            ['data' => '{"name":"Alice","age":30}'],
+            ['data' => '{"address":{"city":"Paris","zip":"75001"}}'],
+            ['data' => '{"tags":["php","js","sql"]}'],
+            ['data' => '{"attribute":"sku","value":"ABC123"}'],
+            ['data' => '{"type":"combine","conditions":[{"type":"condition","attribute":"sku","value":"ABC"}]}'],
+            ['data' => '{"conditions":[{"conditions":[{"conditions":[{"attribute":"weight"}]}]}]}'],
+            ['data' => '{"status":"active","name":"Test"}'],
+            ['data' => '{"scores":[10,20,30]}'],
+            ['data' => '["apple","banana","cherry"]'],
+            ['data' => '{"conditions":[{"attribute":"8\\" bolt","value":"test"}]}'],
+            ['data' => '{"conditions":[{"attribute":"back\\\\slash","value":"test"}]}'],
+            ['data' => '{"conditions":[{"attribute":"special_price","value":"99"}]}'],
+        ]);
+    });
+
+    afterEach(function () {
+        $this->adapter->dropTemporaryTable('test_json_helpers');
+    });
+
+    // --- getJsonExtractExpr ---
+
+    it('extracts a top-level string value from JSON', function () {
+        $expr = $this->adapter->getJsonExtractExpr('data', '$.name');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT {$expr} AS val FROM test_json_helpers WHERE id = 1",
+        );
+
+        expect($result)->toBe('Alice');
+    });
+
+    it('extracts a numeric value from JSON', function () {
+        $expr = $this->adapter->getJsonExtractExpr('data', '$.age');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT {$expr} AS val FROM test_json_helpers WHERE id = 1",
+        );
+
+        expect((int) $result)->toBe(30);
+    });
+
+    it('extracts a nested value from JSON', function () {
+        $expr = $this->adapter->getJsonExtractExpr('data', '$.address.city');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT {$expr} AS val FROM test_json_helpers WHERE id = 2",
+        );
+
+        expect($result)->toBe('Paris');
+    });
+
+    it('returns null for missing JSON path', function () {
+        $expr = $this->adapter->getJsonExtractExpr('data', '$.missing');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT {$expr} AS val FROM test_json_helpers WHERE id = 1",
+        );
+
+        expect($result)->toBeNull();
+    });
+
+    it('extracts a value by array index from JSON', function () {
+        $expr = $this->adapter->getJsonExtractExpr('data', '$.tags[1]');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT {$expr} AS val FROM test_json_helpers WHERE id = 3",
+        );
+
+        expect($result)->toBe('js');
+    });
+
+    // --- getJsonSearchExpr ---
+
+    it('finds a value at an exact JSON path', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'sku', '$.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 4 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(4);
+    });
+
+    it('does not find a non-matching value at exact path', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'color', '$.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 4 AND {$expr}",
+        );
+
+        expect($result)->toBeFalsy();
+    });
+
+    it('finds a value with recursive wildcard search', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'sku', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 5 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(5);
+    });
+
+    it('does not find a missing value with recursive wildcard', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'color', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 5 AND {$expr}",
+        );
+
+        expect($result)->toBeFalsy();
+    });
+
+    it('finds a deeply nested value with recursive wildcard', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'weight', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 6 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(6);
+    });
+
+    it('filters rows using recursive wildcard in WHERE clause', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'sku', '$**.attribute');
+
+        $results = $this->adapter->fetchCol(
+            "SELECT id FROM test_json_helpers WHERE {$expr} ORDER BY id",
+        );
+
+        expect(array_map('intval', $results))->toBe([4, 5]);
+    });
+
+    it('finds a value containing double quotes with recursive wildcard', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', '8" bolt', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 10 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(10);
+    });
+
+    it('finds a value containing backslashes with recursive wildcard', function () {
+        $expr = $this->adapter->getJsonSearchExpr('data', 'back\\slash', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 11 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(11);
+    });
+
+    // --- getJsonContainsExpr ---
+
+    it('checks if JSON contains a string at a path', function () {
+        $expr = $this->adapter->getJsonContainsExpr('data', '"active"', '$.status');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 7 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(7);
+    });
+
+    it('checks if JSON array contains a value', function () {
+        $expr = $this->adapter->getJsonContainsExpr('data', '"js"', '$.tags');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 3 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(3);
+    });
+
+    it('does not find a missing value in JSON array', function () {
+        $expr = $this->adapter->getJsonContainsExpr('data', '"ruby"', '$.tags');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 3 AND {$expr}",
+        );
+
+        expect($result)->toBeFalsy();
+    });
+
+    it('checks if top-level JSON array contains a value', function () {
+        $expr = $this->adapter->getJsonContainsExpr('data', '"banana"');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 9 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(9);
+    });
+
+    it('checks if JSON contains a numeric value', function () {
+        $expr = $this->adapter->getJsonContainsExpr('data', '20', '$.scores');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 8 AND {$expr}",
+        );
+
+        expect((int) $result)->toBe(8);
+    });
+
+    it('does not false-positive on substring attribute matches with recursive wildcard', function () {
+        // "price" should NOT match row 12 which has "special_price"
+        // This was a bug with the old LIKE '%"attribute":"price"%' approach
+        $expr = $this->adapter->getJsonSearchExpr('data', 'price', '$**.attribute');
+
+        $result = $this->adapter->fetchOne(
+            "SELECT id FROM test_json_helpers WHERE id = 12 AND {$expr}",
+        );
+
+        expect($result)->toBeFalsy();
+    });
+
+    it('throws on wildcard path in getJsonContainsExpr', function () {
+        expect(fn() => $this->adapter->getJsonContainsExpr('data', '"test"', '$**.key'))
+            ->toThrow(\InvalidArgumentException::class);
+    });
+
+    it('throws on wildcard path in getJsonExtractExpr on PostgreSQL', function () {
+        if (!$this->adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql) {
+            $this->markTestSkipped('PostgreSQL-specific test');
+        }
+        expect(fn() => $this->adapter->getJsonExtractExpr('data', '$**.key'))
+            ->toThrow(\InvalidArgumentException::class);
     });
 });

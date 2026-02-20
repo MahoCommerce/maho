@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_SpeculationRules
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,7 +67,6 @@ class Maho_SpeculationRules_Helper_Data extends Mage_Core_Helper_Abstract
             }
 
             // Parse selectors (one per line)
-            /** @var string[] $selectors */
             $selectors = array_filter(array_map('trim', explode("\n", $selectorsConfig)));
 
             if (empty($selectors)) {

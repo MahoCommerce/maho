@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -124,7 +124,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     public function __construct(array $args = [])
     {
         parent::__construct();
-        $this->_taxHelper = !empty($args['helper']) ? $args['helper'] : Mage::helper('tax');
+        $this->_taxHelper = empty($args['helper']) ? Mage::helper('tax') : $args['helper'];
     }
 
     /**
@@ -252,7 +252,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Get calculation tax rate by specific request
      *
-     * @param   Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return  float
      */
     public function getRate($request)
@@ -284,7 +284,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Get cache key value for specific tax rate request
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return string
      */
     protected function _getRequestCacheKey($request)
@@ -300,7 +300,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      * This rate can be used for conversion store price including tax to
      * store price excluding tax
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @param Mage_Core_Model_Store|null $store
      * @return float
      */
@@ -331,11 +331,11 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      * Get request object for getting tax rate based on store shippig original address
      *
      * @param   null|string|bool|int|Mage_Core_Model_Store $store
-     * @return  Varien_Object
+     * @return \Maho\DataObject
      */
     public function getRateOriginRequest($store = null)
     {
-        $request = new Varien_Object();
+        $request = new \Maho\DataObject();
         $request->setCountryId(Mage::getStoreConfig(Mage_Shipping_Model_Config::XML_PATH_ORIGIN_COUNTRY_ID, $store))
             ->setRegionId(Mage::getStoreConfig(Mage_Shipping_Model_Config::XML_PATH_ORIGIN_REGION_ID, $store))
             ->setPostcode(Mage::getStoreConfig(Mage_Shipping_Model_Config::XML_PATH_ORIGIN_POSTCODE, $store))
@@ -348,16 +348,15 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      * Return the default rate request. It can be either based on store address or customer address
      *
      * @param null|string|bool|int|Mage_Core_Model_Store $store
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getDefaultRateRequest($store = null)
     {
         if ($this->_taxHelper->isCrossBorderTradeEnabled($store)) {
             //If cross border trade is enabled, we will use customer tax rate as store tax rate
             return $this->getRateRequest(null, null, null, $store);
-        } else {
-            return $this->getRateOriginRequest($store);
         }
+        return $this->getRateOriginRequest($store);
     }
 
     /**
@@ -373,7 +372,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      * @param   null|false|Mage_Sales_Model_Quote_Address $billingAddress
      * @param   null|int $customerTaxClass
      * @param   null|string|bool|int|Mage_Core_Model_Store $store
-     * @return  Varien_Object
+     * @return \Maho\DataObject
      */
     public function getRateRequest(
         $shippingAddress = null,
@@ -384,7 +383,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
         if ($shippingAddress === false && $billingAddress === false && $customerTaxClass === false) {
             return $this->getRateOriginRequest($store);
         }
-        $address = new Varien_Object();
+        $address = new \Maho\DataObject();
         $customer = $this->getCustomer();
         $basedOn = Mage::getStoreConfig(Mage_Tax_Model_Config::CONFIG_XML_PATH_BASED_ON, $store);
 
@@ -426,7 +425,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
                 $address = $this->getRateOriginRequest($store);
                 break;
             case 'default':
-                /** @var Mage_Sales_Model_Quote_Address|Varien_Object $address */
+                /** @var Mage_Sales_Model_Quote_Address|\Maho\DataObject $address */
                 $address
                     ->setCountryId(Mage::getStoreConfig(
                         Mage_Tax_Model_Config::CONFIG_XML_PATH_DEFAULT_COUNTRY,
@@ -447,7 +446,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
                     ->getTaxClassId(Mage_Customer_Model_Group::NOT_LOGGED_IN_ID);
         }
 
-        $request = new Varien_Object();
+        $request = new \Maho\DataObject();
         $request
             ->setCountryId($address->getCountryId())
             ->setRegionId($address->getRegionId())
@@ -465,8 +464,8 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
      * a) productClassId MUST be identical for both requests, because we intend to check selling SAME products to DIFFERENT locations
      * b) due to optimization productClassId can be array of ids, not only single id
      *
-     * @param   Varien_Object $first
-     * @param   Varien_Object $second
+     * @param \Maho\DataObject $first
+     * @param \Maho\DataObject $second
      * @return  bool
      */
     public function compareRequests($first, $second)
@@ -521,7 +520,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Gets the tax rates by type
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @param string $fieldName
      * @param string $type
      * @return array
@@ -544,7 +543,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Gets rates for all the product tax classes
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getRatesForAllProductTaxClasses($request)
@@ -555,7 +554,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Gets rates for all the customer tax classes
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getRatesForAllCustomerTaxClasses($request)
@@ -566,7 +565,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Get information about tax rates applied to request
      *
-     * @param   Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return  array
      */
     public function getAppliedRates($request)
@@ -585,7 +584,7 @@ class Mage_Tax_Model_Calculation extends Mage_Core_Model_Abstract
     /**
      * Get rate ids applicable for some address
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getApplicableRateIds($request)

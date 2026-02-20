@@ -6,7 +6,7 @@
  * @package    Mage_Contacts
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,7 +56,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
                     Mage::throwException($this->__('Invalid Form Key. Please submit your request again.'));
                 }
 
-                $postObject = new Varien_Object();
+                $postObject = new \Maho\DataObject();
                 $postObject->setData($post);
 
                 // check data

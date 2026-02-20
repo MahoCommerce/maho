@@ -6,7 +6,7 @@
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,8 +62,14 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
         $batchIoAdapter = $this->getBatchModel()->getIoAdapter();
 
         if (Mage::app()->getRequest()->getParam('files')) {
-            $file = Mage::app()->getConfig()->getTempVarDir() . '/import/'
-                . str_replace('../', '', urldecode(Mage::app()->getRequest()->getParam('files')));
+            $baseDir = Mage::app()->getConfig()->getTempVarDir() . '/import';
+            $file = \Maho\Io::validatePath(
+                $baseDir . '/' . urldecode(Mage::app()->getRequest()->getParam('files')),
+                $baseDir,
+            );
+            if ($file === false) {
+                Mage::throwException(Mage::helper('dataflow')->__('Invalid file path.'));
+            }
             $this->_copy($file);
         }
 
@@ -123,10 +129,9 @@ class Mage_Dataflow_Model_Convert_Parser_Csv extends Mage_Dataflow_Model_Convert
             if ($this->getVar('fieldnames')) {
                 $this->_fields = $line;
                 return;
-            } else {
-                foreach ($line as $j => $f) {
-                    $this->_fields[$j] = $this->_mapfields[$j];
-                }
+            }
+            foreach ($line as $j => $f) {
+                $this->_fields[$j] = $this->_mapfields[$j];
             }
         }
 

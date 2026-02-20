@@ -15,7 +15,7 @@
  * @package    Mage_Catalog
  * @todo       Needs to be reimplemented to get rid of the copypasted methods
  */
-class Mage_Catalog_Model_Template_Filter extends Varien_Filter_Template
+class Mage_Catalog_Model_Template_Filter extends \Maho\Filter\Template
 {
     /**
      * Use absolute links flag

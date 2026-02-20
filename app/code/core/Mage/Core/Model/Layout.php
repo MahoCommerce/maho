@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -172,7 +172,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
     /**
      * Create layout blocks hierarchy from layout xml configuration
      *
-     * @param Mage_Core_Model_Layout_Element|Varien_Simplexml_Element|null $parent
+     * @param Mage_Core_Model_Layout_Element|\Maho\Simplexml\Element|null $parent
      */
     public function generateBlocks($parent = null)
     {
@@ -204,8 +204,8 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
     /**
      * Add block object to layout based on xml node data
      *
-     * @param Varien_Simplexml_Element $node
-     * @param Mage_Core_Model_Layout_Element|Varien_Simplexml_Element $parent
+     * @param \Maho\Simplexml\Element $node
+     * @param Mage_Core_Model_Layout_Element|\Maho\Simplexml\Element $parent
      * @return $this
      */
     protected function _generateBlock($node, $parent)
@@ -265,8 +265,8 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
     }
 
     /**
-     * @param Varien_Simplexml_Element $node
-     * @param Mage_Core_Model_Layout_Element|Varien_Simplexml_Element $parent
+     * @param \Maho\Simplexml\Element $node
+     * @param Mage_Core_Model_Layout_Element|\Maho\Simplexml\Element $parent
      * @return $this
      */
     protected function _generateAction($node, $parent)
@@ -329,7 +329,7 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
                 }
             }
 
-            Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($block, $method, $args);
+            Mage::helper('core/security')->ensureBlockMethodAllowed($block, $method, $args);
 
             $this->_translateLayoutNode($node, $args);
             call_user_func_array([$block, $method], array_values($args));
@@ -341,27 +341,9 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
     }
 
     /**
-     * @param string                   $method
-     * @param string[]                 $args
-     * @throws Mage_Core_Exception
-     * @deprecated
-     * @see Mage_Core_Helper_Security::validateAgainstBlockMethodBlacklist()
-     */
-    protected function validateAgainstBlacklist(Mage_Core_Block_Abstract $block, $method, array $args)
-    {
-        foreach ($this->invalidActions as $action) {
-            if ($block instanceof $action['block'] && $action['method'] === strtolower($method)) {
-                Mage::throwException(
-                    sprintf('Action with combination block %s and method %s is forbidden.', $block::class, $method),
-                );
-            }
-        }
-    }
-
-    /**
      * Translate layout node
      *
-     * @param Varien_Simplexml_Element $node
+     * @param \Maho\Simplexml\Element $node
      * @param array $args
      **/
     protected function _translateLayoutNode($node, &$args)
@@ -623,13 +605,13 @@ class Mage_Core_Model_Layout extends Maho\Simplexml\Config
      *
      * @return string
      */
-    public static function findTranslationModuleName(Varien_Simplexml_Element $node)
+    public static function findTranslationModuleName(\Maho\Simplexml\Element $node)
     {
         $result = $node->getAttribute('module');
         if ($result) {
             return (string) $result;
         }
-        /** @var Varien_Simplexml_Element $element */
+        /** @var \Maho\Simplexml\Element $element */
         foreach (array_reverse($node->xpath('ancestor::*[@module]')) as $element) {
             $result = $element->getAttribute('module');
             if ($result) {

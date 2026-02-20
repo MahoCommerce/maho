@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,11 +56,6 @@ describe('Sale Category Integration', function () {
             ->addFieldToFilter('name', 'Sale')
             ->addIsActiveFilter()
             ->getFirstItem();
-
-        // Skip if Sale category doesn't exist
-        if (!$saleCategory->getId()) {
-            $this->markTestSkipped('Sale category not found - sample data may not be installed');
-        }
 
         // Get products in the Sale category
         $productCollection = Mage::getResourceModel('catalog/product_collection')

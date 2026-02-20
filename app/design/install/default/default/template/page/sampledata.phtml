@@ -1,0 +1,269 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Install_Block_SampleData $this */
+?>
+<div class="page-head" id="page-head">
+    <h3><?= $this->__('Sample Data') ?></h3>
+</div>
+
+<div class="messages">
+    <?= $this->getMessagesBlock()->toHtml() ?>
+</div>
+
+<div id="sampledata-form-container">
+    <p class="sampledata-intro"><?= $this->__('Would you like to install sample products and content? This helps you explore Maho features with realistic demo data.') ?></p>
+
+    <div class="sampledata-features">
+        <div class="sampledata-feature">
+            <div class="feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <strong><?= $this->__('Products') ?></strong>
+                <span><?= $this->__('Clothing, accessories & more') ?></span>
+            </div>
+        </div>
+        <div class="sampledata-feature">
+            <div class="feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <strong><?= $this->__('Categories') ?></strong>
+                <span><?= $this->__('Organized catalog structure') ?></span>
+            </div>
+        </div>
+        <div class="sampledata-feature">
+            <div class="feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                    <polyline points="21 15 16 10 5 21"></polyline>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <strong><?= $this->__('Media') ?></strong>
+                <span><?= $this->__('Product images & banners') ?></span>
+            </div>
+        </div>
+        <div class="sampledata-feature">
+            <div class="feature-icon">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+            </div>
+            <div class="feature-text">
+                <strong><?= $this->__('CMS Pages') ?></strong>
+                <span><?= $this->__('About, contact & more') ?></span>
+            </div>
+        </div>
+    </div>
+
+    <p class="sampledata-note"><?= $this->__('Installation takes 2-5 minutes. You can skip this and add products manually later.') ?></p>
+
+    <div class="button-set">
+        <button type="button" id="install-sampledata-btn" class="form-button form-button-primary">
+            <span><?= $this->__('Install Sample Data') ?></span>
+        </button>
+        <a href="<?= $this->getSkipUrl() ?>" class="form-button form-button-secondary" id="skip-btn">
+            <span><?= $this->__('Skip') ?></span>
+        </a>
+    </div>
+</div>
+
+<div id="sampledata-progress-container" style="display: none;">
+    <div class="progress-header">
+        <h4><?= $this->__('Installing Sample Data') ?></h4>
+        <p><?= $this->__('Please wait while we set up your demo content...') ?></p>
+    </div>
+
+    <div class="progress-phases">
+        <div class="progress-phase" data-phase="downloading">
+            <div class="phase-indicator"></div>
+            <span class="phase-label"><?= $this->__('Download') ?></span>
+        </div>
+        <div class="progress-phase" data-phase="extracting">
+            <div class="phase-indicator"></div>
+            <span class="phase-label"><?= $this->__('Extract') ?></span>
+        </div>
+        <div class="progress-phase" data-phase="copying_media">
+            <div class="phase-indicator"></div>
+            <span class="phase-label"><?= $this->__('Media') ?></span>
+        </div>
+        <div class="progress-phase" data-phase="importing_data">
+            <div class="phase-indicator"></div>
+            <span class="phase-label"><?= $this->__('Database') ?></span>
+        </div>
+        <div class="progress-phase" data-phase="reindexing">
+            <div class="phase-indicator"></div>
+            <span class="phase-label"><?= $this->__('Reindex') ?></span>
+        </div>
+        <div class="progress-phase" data-phase="cache_flush">
+            <div class="phase-indicator"></div>
+            <span class="phase-label"><?= $this->__('Cache') ?></span>
+        </div>
+    </div>
+
+    <div class="progress-bar-container">
+        <div class="progress-bar">
+            <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+        <div class="progress-percent" id="progress-percent">0%</div>
+    </div>
+
+    <p class="progress-message" id="progress-message"><?= $this->__('Starting...') ?></p>
+</div>
+
+<div id="sampledata-error-container" style="display: none;">
+    <div class="error-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="48" height="48">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+        </svg>
+    </div>
+    <h4><?= $this->__('Installation Failed') ?></h4>
+    <p class="error-message" id="error-message"></p>
+    <div class="button-set">
+        <button type="button" id="retry-btn" class="form-button form-button-primary">
+            <span><?= $this->__('Retry') ?></span>
+        </button>
+        <a href="<?= $this->getSkipUrl() ?>" class="form-button form-button-secondary">
+            <span><?= $this->__('Skip Sample Data') ?></span>
+        </a>
+    </div>
+</div>
+
+<script type="module">
+    const postUrl = '<?= $this->getPostUrl() ?>';
+    const progressUrl = '<?= $this->getProgressUrl() ?>';
+    const nextUrl = '<?= $this->getNextStepUrl() ?>';
+
+    const pageHead = document.getElementById('page-head');
+    const formContainer = document.getElementById('sampledata-form-container');
+    const progressContainer = document.getElementById('sampledata-progress-container');
+    const errorContainer = document.getElementById('sampledata-error-container');
+    const installBtn = document.getElementById('install-sampledata-btn');
+    const skipBtn = document.getElementById('skip-btn');
+    const retryBtn = document.getElementById('retry-btn');
+    const progressFill = document.getElementById('progress-fill');
+    const progressPercent = document.getElementById('progress-percent');
+    const progressMessage = document.getElementById('progress-message');
+    const errorMessage = document.getElementById('error-message');
+
+    const phaseOrder = ['downloading', 'extracting', 'copying_media', 'importing_data', 'importing_config', 'reindexing', 'cache_flush', 'complete'];
+
+    function showProgress() {
+        pageHead.style.display = 'none';
+        formContainer.style.display = 'none';
+        errorContainer.style.display = 'none';
+        progressContainer.style.display = 'block';
+    }
+
+    function showError(message) {
+        pageHead.style.display = 'none';
+        formContainer.style.display = 'none';
+        progressContainer.style.display = 'none';
+        errorContainer.style.display = 'block';
+        errorMessage.textContent = message;
+    }
+
+    function showForm() {
+        pageHead.style.display = 'block';
+        progressContainer.style.display = 'none';
+        errorContainer.style.display = 'none';
+        formContainer.style.display = 'block';
+    }
+
+    function updateProgress(data) {
+        const { phase, percent, message } = data;
+
+        progressFill.style.width = `${percent}%`;
+        progressPercent.textContent = `${percent}%`;
+        progressMessage.textContent = message;
+
+        const currentPhaseIndex = phaseOrder.indexOf(phase);
+        document.querySelectorAll('.progress-phase').forEach(el => {
+            const elPhase = el.dataset.phase;
+            const elIndex = phaseOrder.indexOf(elPhase);
+
+            el.classList.remove('pending', 'active', 'completed');
+
+            if (elIndex < currentPhaseIndex) {
+                el.classList.add('completed');
+            } else if (elIndex === currentPhaseIndex) {
+                el.classList.add('active');
+            } else {
+                el.classList.add('pending');
+            }
+        });
+    }
+
+    async function startInstallation() {
+        showProgress();
+        installBtn.disabled = true;
+        skipBtn.style.pointerEvents = 'none';
+
+        try {
+            const response = await fetch(postUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            pollProgress();
+        } catch (e) {
+            showError('<?= $this->__('Failed to start installation. Please try again.') ?>');
+        }
+    }
+
+    async function pollProgress() {
+        try {
+            const response = await fetch(progressUrl);
+            const data = await response.json();
+
+            if (data.error) {
+                showError(data.error);
+                return;
+            }
+
+            updateProgress(data);
+
+            if (data.phase === 'complete') {
+                setTimeout(() => {
+                    window.location.href = nextUrl;
+                }, 1000);
+                return;
+            }
+
+            setTimeout(pollProgress, 500);
+        } catch (e) {
+            setTimeout(pollProgress, 1000);
+        }
+    }
+
+    installBtn.addEventListener('click', startInstallation);
+    retryBtn.addEventListener('click', () => showForm());
+</script>

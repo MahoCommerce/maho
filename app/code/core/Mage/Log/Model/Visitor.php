@@ -6,7 +6,7 @@
  * @package    Mage_Log
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -80,11 +80,11 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      */
     public function __construct(array $data = [])
     {
-        $this->_httpHelper = !empty($data['http_helper']) ? $data['http_helper'] : Mage::helper('core/http');
-        $this->_config = !empty($data['config']) ? $data['config'] : Mage::getConfig();
-        $this->_logCondition = !empty($data['log_condition']) ?
-            $data['log_condition'] : Mage::helper('log');
-        $this->_session = !empty($data['session']) ? $data['session'] : Mage::getSingleton('core/session');
+        $this->_httpHelper = empty($data['http_helper']) ? Mage::helper('core/http') : $data['http_helper'];
+        $this->_config = empty($data['config']) ? Mage::getConfig() : $data['config'];
+        $this->_logCondition = empty($data['log_condition']) ?
+            Mage::helper('log') : $data['log_condition'];
+        $this->_session = empty($data['session']) ? Mage::getSingleton('core/session') : $data['session'];
         parent::__construct($data);
     }
 
@@ -162,12 +162,25 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     /**
      * Retrieve url from model data
      *
+     * Uses the original (friendly) URL before rewriting, not the internal rewritten URL
+     *
      * @return string
      */
     public function getUrl()
     {
         $url = 'http' . ($this->getHttpSecure() ? 's' : '') . '://';
-        $url .= $this->getHttpHost() . $this->getRequestUri();
+        $url .= $this->getHttpHost();
+
+        // Use original path info (before URL rewrite) for friendlier URLs in analytics
+        $request = Mage::app()->getRequest();
+        $originalPath = $request->getOriginalPathInfo();
+
+        if (!empty($originalPath)) {
+            $url .= $originalPath;
+        } else {
+            $url .= $this->getRequestUri();
+        }
+
         return $url;
     }
 
@@ -198,7 +211,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      *
      * Used in event "controller_action_predispatch"
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function initByRequest($observer)
@@ -242,7 +255,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      *
      * Used in event "controller_action_postdispatch"
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function saveByRequest($observer)
@@ -267,7 +280,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      *
      * Used in event "customer_login"
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function bindCustomerLogin($observer)
@@ -277,6 +290,14 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         if ($customer) {
             $this->setDoCustomerLogin(true);
             $this->setCustomerId($customer->getId());
+
+            // Update session_id after session regeneration to prevent duplicate visitor creation
+            $newSessionId = $this->_session->getSessionId();
+            if ($this->getId() && $this->getSessionId() !== $newSessionId) {
+                $this->setSessionId($newSessionId);
+                // Update session data with new session_id so next request finds this visitor
+                $this->_session->setVisitorData($this->getData());
+            }
         }
         return $this;
     }
@@ -286,7 +307,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
      *
      * Used in event "customer_logout"
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function bindCustomerLogout($observer)
@@ -298,7 +319,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function bindQuoteCreate($observer)
@@ -315,7 +336,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function bindQuoteDestroy($observer)
@@ -330,7 +351,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
 
     /**
      * Methods for research (depends from customer online admin section)
-     * @param Varien_Object $data
+     * @param \Maho\DataObject $data
      * @return $this
      */
     public function addIpData($data)
@@ -341,7 +362,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Varien_Object $data
+     * @param \Maho\DataObject $data
      * @return $this
      */
     public function addCustomerData($data)
@@ -361,7 +382,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Varien_Object $data
+     * @param \Maho\DataObject $data
      * @return $this
      */
     public function addQuoteData($data)
@@ -375,7 +396,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return bool
      */
     public function isModuleIgnored($observer)

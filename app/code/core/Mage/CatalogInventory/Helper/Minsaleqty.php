@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,7 +22,7 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
      */
     protected function _fixQty($qty)
     {
-        return (!empty($qty) ? (float) $qty : null);
+        return (empty($qty) ? null : (float) $qty);
     }
 
     /**
@@ -36,7 +36,8 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
         if (is_numeric($value)) {
             $data = (float) $value;
             return (string) $data;
-        } elseif (is_array($value)) {
+        }
+        if (is_array($value)) {
             $data = [];
             foreach ($value as $groupId => $qty) {
                 if (!array_key_exists($groupId, $data)) {
@@ -46,10 +47,9 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
             if (count($data) == 1 && array_key_exists(Mage_Customer_Model_Group::CUST_GROUP_ALL, $data)) {
                 return (string) $data[Mage_Customer_Model_Group::CUST_GROUP_ALL];
             }
-            return serialize($data);
-        } else {
-            return '';
+            return Mage::helper('core')->jsonEncode($data);
         }
+        return '';
     }
 
     /**
@@ -64,7 +64,8 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
             return [
                 Mage_Customer_Model_Group::CUST_GROUP_ALL => $this->_fixQty($value),
             ];
-        } elseif (is_string($value) && !empty($value)) {
+        }
+        if (is_string($value) && !empty($value)) {
             try {
                 return Mage::helper('core/unserializeArray')->unserialize($value);
             } catch (Exception $e) {

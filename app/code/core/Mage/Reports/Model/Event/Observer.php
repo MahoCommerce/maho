@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,7 +63,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function customerLogin(Varien_Event_Observer $observer)
+    public function customerLogin(\Maho\Event\Observer $observer)
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn() || !$this->_enabledReports) {
             return $this;
@@ -89,7 +89,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function customerLogout(Varien_Event_Observer $observer)
+    public function customerLogout(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
             Mage::getModel('reports/product_index_compared')
@@ -108,7 +108,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function catalogProductView(Varien_Event_Observer $observer)
+    public function catalogProductView(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports || !Mage::helper('reports')->isRecentlyViewedEnabled()) {
             return $this;
@@ -131,7 +131,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function catalogProductCompareRemoveProduct(Varien_Event_Observer $observer)
+    public function catalogProductCompareRemoveProduct(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
             Mage::getModel('reports/product_index_compared')->calculate();
@@ -147,7 +147,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function catalogProductCompareClear(Varien_Event_Observer $observer)
+    public function catalogProductCompareClear(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
             Mage::getModel('reports/product_index_compared')->calculate();
@@ -163,7 +163,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function catalogProductCompareAddProduct(Varien_Event_Observer $observer)
+    public function catalogProductCompareAddProduct(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports || !Mage::helper('reports')->isProductCompareEnabled()) {
             return $this;
@@ -184,7 +184,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function checkoutCartAddProduct(Varien_Event_Observer $observer)
+    public function checkoutCartAddProduct(\Maho\Event\Observer $observer)
     {
         if ($this->_enabledReports) {
             /** @var Mage_Sales_Model_Quote_Item $quoteItem */
@@ -203,7 +203,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function wishlistAddProduct(Varien_Event_Observer $observer)
+    public function wishlistAddProduct(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports) {
             return $this;
@@ -220,7 +220,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function wishlistShare(Varien_Event_Observer $observer)
+    public function wishlistShare(\Maho\Event\Observer $observer)
     {
         if (!$this->_enabledReports) {
             return $this;
@@ -239,7 +239,7 @@ class Mage_Reports_Model_Event_Observer
      *
      * @return $this
      */
-    public function eventClean(Varien_Event_Observer $observer)
+    public function eventClean(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Reports_Model_Event $event */
         $event = Mage::getModel('reports/event');

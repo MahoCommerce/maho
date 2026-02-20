@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2015-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -206,15 +206,14 @@ class Mage_Core_Block_Template extends Mage_Core_Block_Abstract
     {
         if (!is_null($this->getCacheLifetime())) {
             return 'green';
-        } else {
-            $currentParentBlock = $this;
-            $i = 0;
-            while ($i++ < 20 && $currentParentBlock instanceof Mage_Core_Block_Abstract) {
-                if (!is_null($currentParentBlock->getCacheLifetime())) {
-                    return 'orange'; // not cached, but within cached
-                }
-                $currentParentBlock = $currentParentBlock->getParentBlock();
+        }
+        $currentParentBlock = $this;
+        $i = 0;
+        while ($i++ < 20 && $currentParentBlock instanceof Mage_Core_Block_Abstract) {
+            if (!is_null($currentParentBlock->getCacheLifetime())) {
+                return 'orange'; // not cached, but within cached
             }
+            $currentParentBlock = $currentParentBlock->getParentBlock();
         }
         return 'red';
     }
@@ -356,7 +355,7 @@ HTML;
      * @param string $key
      * @return mixed
      */
-    public function getObjectData(Varien_Object $object, $key)
+    public function getObjectData(\Maho\DataObject $object, $key)
     {
         return $object->getDataUsingMethod((string) $key);
     }
@@ -370,16 +369,5 @@ HTML;
             $this->getTemplateFile(),
             'template' => $this->getTemplate(),
         ];
-    }
-
-    /**
-     * Get is allowed symlinks flag
-     *
-     * @deprecated
-     * @return bool
-     */
-    protected function _getAllowSymlinks()
-    {
-        return false;
     }
 }

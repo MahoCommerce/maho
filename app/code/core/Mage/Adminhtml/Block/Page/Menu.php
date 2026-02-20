@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,7 +91,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return string
      */
-    protected function _getHelperValue(Varien_Simplexml_Element $child)
+    protected function _getHelperValue(\Maho\Simplexml\Element $child)
     {
         $helperName         = 'adminhtml';
         $titleNodeName      = 'title';
@@ -110,7 +110,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      * @param int $level
      * @return array
      */
-    protected function _buildMenuArray(Varien_Simplexml_Element $parent, $path = '', $level = 0)
+    protected function _buildMenuArray(\Maho\Simplexml\Element $parent, $path = '', $level = 0)
     {
         $parentArr = [];
         $sortOrder = 0;
@@ -187,7 +187,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return bool
      */
-    protected function _checkDepends(Varien_Simplexml_Element $depends)
+    protected function _checkDepends(\Maho\Simplexml\Element $depends)
     {
         if ($depends->module) {
             $modulesConfig = Mage::getConfig()->getNode('modules');
@@ -260,21 +260,21 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      */
     public function getMenuLevel($menu, $level = 0)
     {
-        $html = '<ul ' . (!$level ? 'id="nav"' : '') . '>' . PHP_EOL;
+        $html = '<ul ' . ($level ? '' : 'id="nav"') . '>' . PHP_EOL;
         foreach ($menu as $item) {
             if ((empty($item['url']) || ($item['url'] == '#')) && empty($item['children'])) {
                 continue; // for example hide System/Tools when empty
             }
             $html .= '<li class="'
                 . (!$level && !empty($item['active']) ? ' active' : '') . ' '
-                . (!empty($item['children']) ? ' parent' : '')
+                . (empty($item['children']) ? '' : ' parent')
                 . (!empty($level) && !empty($item['last']) ? ' last' : '')
                 . ' level' . $level . '"> <a href="' . $item['url'] . '" '
-                . (!empty($item['id']) ? 'id="nav-' . $item['id'] . '"' : '') . ' '
-                . (!empty($item['title']) ? 'title="' . $item['title'] . '"' : '') . ' '
-                . (!empty($item['target']) ? 'target="' . $item['target'] . '"' : '') . ' '
-                . (!empty($item['click']) ? 'onclick="' . $item['click'] . '"' : '') . ' class="'
-                . (!empty($item['active']) ? 'active' : '') . '"><span>'
+                . (empty($item['id']) ? '' : 'id="nav-' . $item['id'] . '"') . ' '
+                . (empty($item['title']) ? '' : 'title="' . $item['title'] . '"') . ' '
+                . (empty($item['target']) ? '' : 'target="' . $item['target'] . '"') . ' '
+                . (empty($item['click']) ? '' : 'onclick="' . $item['click'] . '"') . ' class="'
+                . (empty($item['active']) ? '' : 'active') . '"><span>'
                 . $this->escapeHtml($item['label']) . '</span></a>' . PHP_EOL;
             if (!empty($item['children'])) {
                 $html .= $this->getMenuLevel($item['children'], $level + 1);
@@ -291,7 +291,7 @@ class Mage_Adminhtml_Block_Page_Menu extends Mage_Adminhtml_Block_Template
      *
      * @return bool
      */
-    protected function _isEnabledModuleOutput(Varien_Simplexml_Element $child)
+    protected function _isEnabledModuleOutput(\Maho\Simplexml\Element $child)
     {
         $helperName      = 'adminhtml';
         $childAttributes = $child->attributes();

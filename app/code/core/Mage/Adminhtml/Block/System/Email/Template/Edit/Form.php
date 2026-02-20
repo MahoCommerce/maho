@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,7 +33,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
     #[\Override]
     protected function _prepareForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
 
         $fieldset = $form->addFieldset('base_fieldset', [
             'legend' => Mage::helper('adminhtml')->__('Template Information'),
@@ -47,8 +47,8 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'container_id' => 'used_currently_for',
                 'after_element_html' =>
                     '<script type="text/javascript">' .
-                    (!$this->getEmailTemplate()->getSystemConfigPathsWhereUsedCurrently()
-                        ? 'document.getElementById(\'' . 'used_currently_for' . '\').style.display = \'none\'; ' : '') .
+                    ($this->getEmailTemplate()->getSystemConfigPathsWhereUsedCurrently()
+                        ? '' : 'document.getElementById(\'' . 'used_currently_for' . '\').style.display = \'none\'; ') .
                     '</script>',
             ]);
         }
@@ -59,8 +59,8 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'container_id' => 'used_default_for',
                 'after_element_html' =>
                     '<script type="text/javascript">' .
-                    (!(bool) $this->getEmailTemplate()->getOrigTemplateCode()
-                        ? 'document.getElementById(\'' . 'used_default_for' . '\').style.display = \'none\'; ' : '') .
+                    ((bool) $this->getEmailTemplate()->getOrigTemplateCode()
+                        ? '' : 'document.getElementById(\'' . 'used_default_for' . '\').style.display = \'none\'; ') .
                     '</script>',
             ]);
         }

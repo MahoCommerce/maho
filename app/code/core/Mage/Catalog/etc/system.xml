@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -214,6 +214,25 @@
                             <show_in_store>1</show_in_store>
                             <validate>required-entry validate-digits validate-greater-than-zero</validate>
                         </max_dimension>
+                        <keep_frame translate="label comment">
+                            <label>Keep Frame</label>
+                            <comment>Pad resized images to exact dimensions with background color</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </keep_frame>
+                        <background_color translate="label comment">
+                            <label>Background Color</label>
+                            <comment>Used to fill the frame when Keep Frame is enabled</comment>
+                            <frontend_type>color</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_color</backend_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </background_color>
                     </fields>
                 </product_image>
                 <placeholder translate="label">

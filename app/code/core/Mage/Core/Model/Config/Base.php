@@ -14,7 +14,7 @@
  *
  * Used to retrieve core configuration values
  */
-class Mage_Core_Model_Config_Base extends Varien_Simplexml_Config
+class Mage_Core_Model_Config_Base extends \Maho\Simplexml\Config
 {
     /**
      * @param string|null $sourceData

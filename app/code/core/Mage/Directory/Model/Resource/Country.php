@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -94,9 +94,9 @@ class Mage_Directory_Model_Resource_Country extends Mage_Core_Model_Resource_Db_
     /**
      * Return collection of translated country names
      */
-    public function getTranslationCollection(?Mage_Directory_Model_Country $country = null): Varien_Data_Collection_Db
+    public function getTranslationCollection(?Mage_Directory_Model_Country $country = null): \Maho\Data\Collection\Db
     {
-        $collection = new Varien_Data_Collection_Db($this->_getReadAdapter());
+        $collection = new \Maho\Data\Collection\Db($this->_getReadAdapter());
 
         $collection->getSelect()
             ->from(
@@ -135,14 +135,14 @@ class Mage_Directory_Model_Resource_Country extends Mage_Core_Model_Resource_Db_
         return (int) $this->_getReadAdapter()->fetchOne($select) > 0;
     }
 
-    public function getTranslation(Mage_Directory_Model_Country $country, string $locale): Varien_Object
+    public function getTranslation(Mage_Directory_Model_Country $country, string $locale): \Maho\DataObject
     {
         $select = $this->_getReadAdapter()->select()
             ->from($this->_countryNameTable)
             ->where('country_id = ?', $country->getId())
             ->where('locale = ?', $locale);
 
-        return new Varien_Object($this->_getReadAdapter()->fetchRow($select));
+        return new \Maho\DataObject($this->_getReadAdapter()->fetchRow($select));
     }
 
     public function insertOrUpdateTranslation(Mage_Directory_Model_Country $country, array $data): bool

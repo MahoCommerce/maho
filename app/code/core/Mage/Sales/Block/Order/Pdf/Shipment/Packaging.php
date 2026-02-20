@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Sales
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -96,7 +96,7 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Sales_Block_Ord
 
     public function getPackageHtml(array $package): string
     {
-        $packageObj = new Varien_Object($package);
+        $packageObj = new \Maho\DataObject($package);
         $html = '<div class="package-details">';
 
         // Package type
@@ -136,7 +136,8 @@ class Mage_Sales_Block_Order_Pdf_Shipment_Packaging extends Mage_Sales_Block_Ord
         return $html;
     }
 
-    public function formatPrice(float $price): string
+    #[\Override]
+    public function formatPrice(float $price, ?string $currency = null): string
     {
         return $this->_order ? $this->_order->formatPriceTxt($price) : Mage::helper('core')->currency($price);
     }

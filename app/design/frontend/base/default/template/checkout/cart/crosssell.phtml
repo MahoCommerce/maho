@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,7 +14,7 @@
 <?php if($this->getItemCount()): ?>
 <?php $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()])); ?>
 <div class="crosssell">
-    <h2><?= $this->__('Based on your selection, you may be interested in the following items:') ?></h2>
+    <h2><?= $this->__('You may be interested in the following items') ?></h2>
     <ul id="crosssell-products-list" class="products-grid products-grid--max-3-col">
     <?php foreach ($this->getItems() as $_item): ?>
         <li class="item">

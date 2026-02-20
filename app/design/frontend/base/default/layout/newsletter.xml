@@ -31,7 +31,7 @@ Customer account pages, rendered for all tabs in dashboard
     <customer_account>
         <!-- Mage_Newsletter -->
         <reference name="customer_account_navigation">
-            <action method="addLink" translate="label" module="newsletter"><name>newsletter</name><path>newsletter/manage/</path><label>Newsletter Subscriptions</label></action>
+            <action method="addLink" translate="label" module="newsletter"><name>newsletter</name><path>newsletter/manage/</path><label>Newsletter</label></action>
         </reference>
         <remove name="left.newsletter"/>
     </customer_account>

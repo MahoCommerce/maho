@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -12,10 +14,11 @@
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option_Swatch _getResource()
  * @method Mage_Eav_Model_Resource_Entity_Attribute_Option_Swatch getResource()
  */
+
 class Mage_Eav_Model_Entity_Attribute_Option_Swatch extends Mage_Core_Model_Abstract
 {
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         $this->_init('eav/entity_attribute_option_swatch');
     }

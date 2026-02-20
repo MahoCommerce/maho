@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -333,7 +333,7 @@ class Mage_Api_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstract
         if ($user->getId() > 0) {
             $role = Mage::getModel('api/role')->load($user->getRoleId());
         } else {
-            $role = new Varien_Object(['tree_level' => 0]);
+            $role = new \Maho\DataObject(['tree_level' => 0]);
         }
         $adapter->insert($this->getTable('api/role'), [
             'parent_id'  => $user->getRoleId(),

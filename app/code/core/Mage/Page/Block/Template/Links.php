@@ -6,7 +6,7 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,7 +75,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
         if (is_null($label) || $label === false) {
             return $this;
         }
-        $link = new Varien_Object([
+        $link = new \Maho\DataObject([
             'label'         => $label,
             'url'           => ($prepare ? $this->getUrl($url, (is_array($urlParams) ? $urlParams : [])) : $url),
             'title'         => $title,
@@ -93,7 +93,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
     /**
      * Add link into collection
      *
-     * @param Varien_Object $link
+     * @param \Maho\DataObject $link
      * @param int $position
      * @return $this
      */
@@ -170,7 +170,7 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
             $links = [];
             if (!empty($this->_links)) {
                 foreach ($this->_links as $position => $link) {
-                    if ($link instanceof Varien_Object) {
+                    if ($link instanceof \Maho\DataObject) {
                         $links[$position] = $link->getData();
                     }
                 }
@@ -194,7 +194,8 @@ class Mage_Page_Block_Template_Links extends Mage_Core_Block_Template
     {
         if (is_string($params)) {
             return $params;
-        } elseif (is_array($params)) {
+        }
+        if (is_array($params)) {
             $result = '';
             foreach ($params as $key => $value) {
                 $result .= ' ' . $key . '="' . addslashes($value) . '"';

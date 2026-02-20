@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -136,13 +136,13 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Configurable extends Mag
             ->joinLeft(
                 ['apd' => $this->getTable('catalog/product_super_attribute_pricing')],
                 'a.product_super_attribute_id = apd.product_super_attribute_id'
-                    . ' AND apd.website_id = 0 AND cp.value = apd.value_index',
+                    . ' AND apd.website_id = 0 AND ' . $write->getCastToTextSql('cp.value') . ' = apd.value_index',
                 [],
             )
             ->joinLeft(
                 ['apw' => $this->getTable('catalog/product_super_attribute_pricing')],
                 'a.product_super_attribute_id = apw.product_super_attribute_id'
-                    . ' AND apw.website_id = i.website_id AND cp.value = apw.value_index',
+                    . ' AND apw.website_id = i.website_id AND ' . $write->getCastToTextSql('cp.value') . ' = apw.value_index',
                 [],
             )
             ->join(
@@ -157,7 +157,7 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Configurable extends Mag
 
         $priceExpression = $write->getCheckSql('apw.value_id IS NOT NULL', 'apw.pricing_value', 'apd.pricing_value');
         $percentExpr = $write->getCheckSql('apw.value_id IS NOT NULL', 'apw.is_percent', 'apd.is_percent');
-        $roundExpr = "ROUND(i.price * ({$priceExpression} / 100), 4)";
+        $roundExpr = $write->getRoundSql("i.price * ({$priceExpression} / 100)", 4);
         $roundPriceExpr = $write->getCheckSql("{$percentExpr} = 1", $roundExpr, $priceExpression);
         $priceColumn = $write->getCheckSql("{$priceExpression} IS NULL", '0', $roundPriceExpr);
         $priceColumn = new Maho\Db\Expr("SUM({$priceColumn})");

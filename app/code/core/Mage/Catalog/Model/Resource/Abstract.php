@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -47,7 +47,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Check whether the attribute is Applicable to the object
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @return bool
      */
@@ -73,7 +73,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             && ($method == 'beforeSave' || $method = 'afterSave')
         ) {
             $attributeCode = $instance->getAttribute()->getAttributeCode();
-            if (isset($args[0]) && $args[0] instanceof Varien_Object && $args[0]->getData($attributeCode) === false) {
+            if (isset($args[0]) && $args[0] instanceof \Maho\DataObject && $args[0]->getData($attributeCode) === false) {
                 return false;
             }
         }
@@ -85,7 +85,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
      * Retrieve select object for loading entity attributes values
      * Join attribute store value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param string $table
      * @return Maho\Db\Select
      */
@@ -138,7 +138,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     #[\Override]
     protected function _addLoadAttributesSelectFields($select, $table, $type)
     {
-        /** @var Mage_Catalog_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('catalog');
         $select->columns(
             $helper->attributeSelectFields('attr_table', $type),
@@ -202,7 +201,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Insert or Update attribute data
      *
-     * @param Mage_Catalog_Model_Abstract|Varien_Object $object
+     * @param Mage_Catalog_Model_Abstract|\Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract|Mage_Catalog_Model_Resource_Eav_Attribute $attribute
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
@@ -227,7 +226,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             ]);
         }
 
-        $data = new Varien_Object([
+        $data = new \Maho\DataObject([
             'entity_type_id'    => $attribute->getEntityTypeId(),
             'attribute_id'      => $attribute->getAttributeId(),
             'store_id'          => $storeId,
@@ -264,7 +263,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Insert entity attribute value
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $value
      * @return Mage_Catalog_Model_Resource_Abstract
@@ -288,7 +287,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
             $row = $this->_getReadAdapter()->fetchOne($select);
 
             if (!$row) {
-                $data  = new Varien_Object([
+                $data  = new \Maho\DataObject([
                     'entity_type_id'    => $attribute->getEntityTypeId(),
                     'attribute_id'      => $attribute->getAttributeId(),
                     'store_id'          => $this->getDefaultStoreId(),
@@ -306,10 +305,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Update entity attribute value
      *
-     * @deprecated after 1.5.1.0
-     * @see Mage_Catalog_Model_Resource_Abstract::_saveAttributeValue()
-     *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param Mage_Eav_Model_Entity_Attribute_Abstract $attribute
      * @param mixed $valueId
      * @param mixed $value
@@ -374,7 +370,7 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Delete entity attribute values
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @param string $table
      * @param array $info
      * @return Mage_Catalog_Model_Resource_Abstract
@@ -445,8 +441,8 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
     /**
      * Retrieve Object instance with original data
      *
-     * @param Varien_Object $object
-     * @return Varien_Object
+     * @param \Maho\DataObject $object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _getOrigObject($object)
@@ -458,56 +454,6 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
         $this->load($origObject, $object->getData($this->getEntityIdField()));
 
         return $origObject;
-    }
-
-    /**
-     * Collect original data
-     *
-     * @deprecated after 1.5.1.0
-     *
-     * @param Varien_Object $object
-     * @return array
-     */
-    protected function _collectOrigData($object)
-    {
-        $this->loadAllAttributes($object);
-
-        if ($this->getUseDataSharing()) {
-            $storeId = $object->getStoreId();
-        } else {
-            $storeId = $this->getStoreId();
-        }
-
-        $data = [];
-        foreach ($this->getAttributesByTable() as $table => $attributes) {
-            $select = $this->_getReadAdapter()->select()
-                ->from($table)
-                ->where($this->getEntityIdField() . '=?', $object->getId());
-
-            $where = $this->_getReadAdapter()->quoteInto('store_id=?', $storeId);
-
-            $globalAttributeIds = [];
-            foreach ($attributes as $attr) {
-                if ($attr->getIsGlobal()) {
-                    $globalAttributeIds[] = $attr->getId();
-                }
-            }
-            if (!empty($globalAttributeIds)) {
-                $where .= ' or ' . $this->_getReadAdapter()->quoteInto('attribute_id in (?)', $globalAttributeIds);
-            }
-            $select->where($where);
-
-            $values = $this->_getReadAdapter()->fetchAll($select);
-
-            if (empty($values)) {
-                continue;
-            }
-
-            foreach ($values as $row) {
-                $data[$this->getAttribute($row['attribute_id'])->getName()][$row['store_id']] = $row;
-            }
-        }
-        return $data;
     }
 
     /**
@@ -639,6 +585,8 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
 
             $store = (int) $store;
 
+            $helper = Mage::getResourceHelper('eav');
+
             foreach ($typedAttributes as $table => $attributes) {
                 // see also Mage_Catalog_Model_Resource_Collection_Abstract::_getLoadAttributesSelect()
                 if ($getPerStore && $store != $this->getDefaultStoreId()) {
@@ -666,17 +614,17 @@ abstract class Mage_Catalog_Model_Resource_Abstract extends Mage_Eav_Model_Entit
                         ]),
                         [],
                     );
-                    // store_value join
-                    $valueExpr = $adapter->getCheckSql(
+                    // store_value join - for PostgreSQL, wrap non-grouped columns in aggregate functions
+                    $valueExpr = $helper->wrapForGroupBy($adapter->getCheckSql(
                         'store_value.attribute_id IS NULL',
                         'default_value.value',
                         'store_value.value',
-                    );
-                    $attributeIdExpr = $adapter->getCheckSql(
+                    ));
+                    $attributeIdExpr = $helper->wrapForGroupBy($adapter->getCheckSql(
                         'store_value.attribute_id IS NULL',
                         'default_value.attribute_id',
                         'store_value.attribute_id',
-                    );
+                    ));
                     $select->joinLeft(
                         ['store_value' => $table],
                         implode(' AND ', [

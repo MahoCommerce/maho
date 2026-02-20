@@ -6,7 +6,7 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
     /**
      * Top menu data tree
      *
-     * @var Varien_Data_Tree_Node
+     * @var \Maho\Data\Tree\Node
      */
     protected $_menu;
 
@@ -30,9 +30,9 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
      * Init top menu tree structure and cache
      */
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
-        $this->_menu = new Varien_Data_Tree_Node([], 'root', new Varien_Data_Tree());
+        $this->_menu = new \Maho\Data\Tree\Node([], 'root', new \Maho\Data\Tree());
         /*
         * setting cache to save the topmenu block
         */
@@ -78,7 +78,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
      * @param string $childrenWrapClass
      * @return string
      */
-    protected function _getHtml(Varien_Data_Tree_Node $menuTree, $childrenWrapClass)
+    protected function _getHtml(\Maho\Data\Tree\Node $menuTree, $childrenWrapClass)
     {
         $html = '';
 
@@ -135,7 +135,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
      *
      * @return string
      */
-    protected function _getRenderedMenuItemAttributes(Varien_Data_Tree_Node $item)
+    protected function _getRenderedMenuItemAttributes(\Maho\Data\Tree\Node $item)
     {
         $html = '';
         $attributes = $this->_getMenuItemAttributes($item);
@@ -152,7 +152,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
      *
      * @return array
      */
-    protected function _getMenuItemAttributes(Varien_Data_Tree_Node $item)
+    protected function _getMenuItemAttributes(\Maho\Data\Tree\Node $item)
     {
         $menuItemClasses = $this->_getMenuItemClasses($item);
         $attributes = [
@@ -172,7 +172,7 @@ class Mage_Page_Block_Html_Topmenu extends Mage_Core_Block_Template
      *
      * @return array
      */
-    protected function _getMenuItemClasses(Varien_Data_Tree_Node $item)
+    protected function _getMenuItemClasses(\Maho\Data\Tree\Node $item)
     {
         $classes = [];
 

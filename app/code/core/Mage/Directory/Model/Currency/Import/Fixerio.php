@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,11 +23,11 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     public const XML_PATH_FIXERIO_API_KEY = 'currency/fixerio/api_key';
 
     /**
-     * URL template for currency rates import
+     * URL template for currency rates import (always uses EUR as base for free tier compatibility)
      *
      * @var string
      */
-    protected $_url = 'https://api.apilayer.com/fixer/latest?apikey={{ACCESS_KEY}}&base={{CURRENCY_FROM}}&symbols={{CURRENCY_TO}}';
+    protected $_url = 'https://data.fixer.io/api/latest?access_key={{ACCESS_KEY}}&symbols={{SYMBOLS}}';
 
     /**
      * Information messages stack
@@ -42,6 +42,13 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
      * @var \Symfony\Contracts\HttpClient\HttpClientInterface
      */
     protected $_httpClient;
+
+    /**
+     * Cached EUR-based rates from API
+     *
+     * @var array|null
+     */
+    protected $_eurRates = null;
 
     /**
      * Create and set HTTP Client
@@ -60,6 +67,9 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     /**
      * Fetching of the currency rates data
      *
+     * Uses EUR as base currency (free tier limitation) and calculates cross-rates mathematically.
+     * This uses only ONE API call regardless of how many base currencies are configured.
+     *
      * @return array
      */
     #[\Override]
@@ -69,12 +79,27 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
         $currencies = $this->_getCurrencyCodes();
         $defaultCurrencies = $this->_getDefaultCurrencyCodes();
 
-        foreach ($defaultCurrencies as $currencyFrom) {
-            if (!isset($data[$currencyFrom])) {
-                $data[$currencyFrom] = [];
+        // Fetch EUR-based rates for all currencies in one API call
+        $eurRates = $this->_fetchEurRates($currencies);
+        if ($eurRates === null) {
+            // Error already logged, return empty data
+            foreach ($defaultCurrencies as $currencyFrom) {
+                $data[$currencyFrom] = $this->_makeEmptyResponse($currencies);
             }
+            return $data;
+        }
 
-            $data = $this->_convertBatch($data, $currencyFrom, $currencies);
+        // Calculate rates for each base currency using EUR rates
+        foreach ($defaultCurrencies as $currencyFrom) {
+            $data[$currencyFrom] = [];
+            foreach ($currencies as $currencyTo) {
+                if ($currencyFrom === $currencyTo) {
+                    $data[$currencyFrom][$currencyTo] = $this->_numberFormat(1);
+                } else {
+                    $rate = $this->_calculateCrossRate($eurRates, $currencyFrom, $currencyTo);
+                    $data[$currencyFrom][$currencyTo] = $rate !== null ? $this->_numberFormat($rate) : null;
+                }
+            }
             ksort($data[$currencyFrom]);
         }
 
@@ -82,25 +107,30 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
     }
 
     /**
-     * Batch import of currency rates
+     * Fetch EUR-based rates for all currencies in one API call
      *
-     * @param string $currencyFrom
-     * @return array
+     * @return array|null Returns rates array or null on error
      */
-    protected function _convertBatch(array $data, $currencyFrom, array $currenciesTo)
+    protected function _fetchEurRates(array $currencies)
     {
+        if ($this->_eurRates !== null) {
+            return $this->_eurRates;
+        }
+
         $accessKey = Mage::getStoreConfig(self::XML_PATH_FIXERIO_API_KEY);
         if (empty($accessKey)) {
             $this->_messages[] = Mage::helper('directory')
                 ->__('No API Key was specified or an invalid API Key was specified.');
-            $data[$currencyFrom] = $this->_makeEmptyResponse($currenciesTo);
-            return $data;
+            return null;
         }
 
-        $currenciesImploded = implode(',', $currenciesTo);
+        // Always include EUR in the symbols list
+        $allCurrencies = array_unique(array_merge(['EUR'], $currencies));
+        $symbols = implode(',', $allCurrencies);
+
         $url = str_replace(
-            ['{{ACCESS_KEY}}', '{{CURRENCY_FROM}}', '{{CURRENCY_TO}}'],
-            [$accessKey, $currencyFrom, $currenciesImploded],
+            ['{{ACCESS_KEY}}', '{{SYMBOLS}}'],
+            [$accessKey, $symbols],
             $this->_url,
         );
 
@@ -111,29 +141,43 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
         try {
             $response = $this->_getServiceResponse($url);
         } catch (Exception $e) {
+            Mage::log('Fixer.io exception: ' . $e->getMessage(), Mage::LOG_ERROR);
             ini_restore('max_execution_time');
+            return null;
         }
 
-        if (isset($response) && !$this->_validateResponse($response, $currencyFrom)) {
-            $data[$currencyFrom] = $this->_makeEmptyResponse($currenciesTo);
-            return $data;
+        if (!$this->_validateResponse($response, 'EUR')) {
+            return null;
         }
 
-        foreach ($currenciesTo as $currencyTo) {
-            if ($currencyFrom == $currencyTo) {
-                $data[$currencyFrom][$currencyTo] = $this->_numberFormat(1);
-            } else {
-                if (empty($response['rates'][$currencyTo])) {
-                    $this->_messages[] = Mage::helper('directory')
-                        ->__('We can\'t retrieve a rate from %s for %s.', $url, $currencyTo);
-                    $data[$currencyFrom][$currencyTo] = null;
-                } else {
-                    $data[$currencyFrom][$currencyTo] = $this->_numberFormat((float) $response['rates'][$currencyTo]);
-                }
-            }
+        // EUR rate is always 1
+        $this->_eurRates = $response['rates'] ?? [];
+        $this->_eurRates['EUR'] = 1.0;
+
+        return $this->_eurRates;
+    }
+
+    /**
+     * Calculate cross-rate from EUR-based rates
+     *
+     * Formula: rate(FROM→TO) = rate(EUR→TO) / rate(EUR→FROM)
+     *
+     * @param string $currencyFrom
+     * @param string $currencyTo
+     * @return float|null
+     */
+    protected function _calculateCrossRate(array $eurRates, $currencyFrom, $currencyTo)
+    {
+        $eurToFrom = $eurRates[$currencyFrom] ?? null;
+        $eurToTo = $eurRates[$currencyTo] ?? null;
+
+        if ($eurToFrom === null || $eurToTo === null || $eurToFrom == 0) {
+            $this->_messages[] = Mage::helper('directory')
+                ->__('Unable to calculate rate for %s to %s.', $currencyFrom, $currencyTo);
+            return null;
         }
 
-        return $data;
+        return (float) $eurToTo / (float) $eurToFrom;
     }
 
     /**
@@ -150,12 +194,15 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
             $httpResponse = $this->_httpClient->request('GET', $url, [
                 'timeout' => Mage::getStoreConfig(self::XML_PATH_FIXERIO_TIMEOUT),
             ]);
-            $jsonResponse = $httpResponse->getContent();
+            // Use false to not throw on HTTP errors, allowing us to read error response body
+            $jsonResponse = $httpResponse->getContent(false);
 
-            $response = json_decode($jsonResponse, true);
+            $response = json_decode($jsonResponse, true) ?? [];
         } catch (Exception $e) {
             if ($retry === 0) {
                 $response = $this->_getServiceResponse($url, 1);
+            } else {
+                Mage::log('Currency import error: ' . $e->getMessage(), Mage::LOG_ERROR);
             }
         }
 
@@ -189,7 +236,9 @@ class Mage_Directory_Model_Currency_Import_Fixerio extends Mage_Directory_Model_
             ];
 
             $errorCode = $response['error']['code'] ?? null;
-            $this->_messages[] = $errorCodes[$errorCode] ?? Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
+            $this->_messages[] = ($errorCode !== null && isset($errorCodes[$errorCode]))
+                ? $errorCodes[$errorCode]
+                : Mage::helper('directory')->__('Currency rates can\'t be retrieved.');
 
             return false;
         }

@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -211,7 +211,7 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
      * @return $this
      * @throws Mage_Core_Exception
      */
-    public function importBuyRequest(Varien_Object $buyRequest)
+    public function importBuyRequest(\Maho\DataObject $buyRequest)
     {
         $startDate = $buyRequest->getData(self::BUY_REQUEST_START_DATETIME);
         if ($startDate) {
@@ -266,19 +266,19 @@ class Mage_Payment_Model_Recurring_Profile extends Mage_Core_Model_Abstract
     /**
      * Render available schedule information
      *
-     * @return Varien_Object[]
+     * @return \Maho\DataObject[]
      */
     public function exportScheduleInfo()
     {
         $result = [
-            new Varien_Object([
+            new \Maho\DataObject([
                 'title'    => Mage::helper('payment')->__('Billing Period'),
                 'schedule' => $this->_renderSchedule('period_unit', 'period_frequency', 'period_max_cycles'),
             ]),
         ];
         $trial = $this->_renderSchedule('trial_period_unit', 'trial_period_frequency', 'trial_period_max_cycles');
         if ($trial) {
-            $result[] = new Varien_Object([
+            $result[] = new \Maho\DataObject([
                 'title'    => Mage::helper('payment')->__('Trial Period'),
                 'schedule' => $trial,
             ]);

@@ -5,22 +5,18 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Checkout_Block_Onepage_Shipping_Method $this */
 ?>
 <form id="co-shipping-method-form" action="">
-    <div id="checkout-shipping-method-load">
-       <!-- Content loaded dynamically -->
-    </div>
+    <div id="checkout-shipping-method-load"></div>
     <script type="text/javascript">
         var shippingMethod = new ShippingMethod('co-shipping-method-form', "<?= $this->getUrl('checkout/onepage/saveShippingMethod') ?>");
     </script>
-    <div id="onepage-checkout-shipping-method-additional-load">
-        <?= $this->getChildHtml('additional') ?>
-    </div>
+    <div id="onepage-checkout-shipping-method-additional-load"><?= $this->getChildHtml('additional') ?></div>
     <div class="buttons-set" id="shipping-method-buttons-container">
         <button type="button" class="button" onclick="shippingMethod.save()"><?= $this->__('Continue') ?></button>
         <span id="shipping-method-please-wait" class="please-wait" style="display:none;">

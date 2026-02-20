@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 ),
             );
 
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
             $helper = Mage::getResourceHelper('core');
             $select = $adapter->select();
 
@@ -190,8 +189,13 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
                 [],
             );
 
-            if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('source_table.created_at >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('source_table.created_at <= ?', $to);
             }
 
             $select->useStraightJoin();  // important!
@@ -232,7 +236,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
         /** @var Mage_Catalog_Model_Resource_Product $product */
         $product    = Mage::getResourceSingleton('catalog/product');
         $attr       = $product->getAttribute('price');
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
         $helper     = Mage::getResourceHelper('core');
 
         $columns = [
@@ -306,7 +309,6 @@ class Mage_Sales_Model_Resource_Report_Bestsellers extends Mage_Sales_Model_Reso
             'yearly'  => self::AGGREGATION_YEARLY,
         ];
 
-        /** @var Mage_Sales_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('sales');
         $helper->getBestsellersReportUpdateRatingPos(
             $aggregation,

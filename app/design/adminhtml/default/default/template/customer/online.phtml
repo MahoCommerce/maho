@@ -5,17 +5,13 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Customer_Online $this */
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td><h3><?= Mage::helper('customer')->__('Online Customers') ?></h3></td>
-        </tr>
-    </table>
+    <h3><?= Mage::helper('customer')->__('Online Customers') ?></h3>
 </div>
 <?= $this->getChildHtml('grid') ?>

@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,7 +35,7 @@ class Mage_Paypal_Model_Cart
 
     /**
      * Rendered cart items
-     * Array of Varien_Objects
+     * Array of \Maho\DataObject
      *
      * @var array
      */
@@ -149,7 +149,6 @@ class Mage_Paypal_Model_Cart
     public function getTotals($mergeDiscount = false)
     {
         $this->_render();
-
         // cut down totals to one total if they are invalid
         if (!$this->_areTotalsValid) {
             $totals = [
@@ -162,7 +161,9 @@ class Mage_Paypal_Model_Cart
                 $totals[self::TOTAL_SUBTOTAL] -= $this->_totals[self::TOTAL_DISCOUNT];
             }
             return $totals;
-        } elseif ($mergeDiscount) {
+        }
+
+        if ($mergeDiscount) {
             $totals = $this->_totals;
             unset($totals[self::TOTAL_DISCOUNT]);
             if (!$this->_isDiscountAsItem) {
@@ -180,12 +181,12 @@ class Mage_Paypal_Model_Cart
      * @param numeric $qty
      * @param float $amount
      * @param string $identifier
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function addItem($name, $qty, $amount, $identifier = null)
     {
         $this->_shouldRender = true;
-        $item = new Varien_Object([
+        $item = new \Maho\DataObject([
             'name'   => $name,
             'qty'    => $qty,
             'amount' => (float) $amount,
@@ -420,9 +421,9 @@ class Mage_Paypal_Model_Cart
     /**
      * Add a usual line item with amount and qty
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    protected function _addRegularItem(Varien_Object $salesItem)
+    protected function _addRegularItem(\Maho\DataObject $salesItem)
     {
         if ($this->_salesEntity instanceof Mage_Sales_Model_Order) {
             // TODO: nominal item for order

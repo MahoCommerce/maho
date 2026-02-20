@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -287,22 +287,19 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
             // Set data for indexer
             $this->setAffectedCategoryIds([$this->getId(), $this->getParentId(), $parentId]);
 
-            $moveComplete = true;
-
             $this->_getResource()->commit();
         } catch (Exception $e) {
             $this->_getResource()->rollBack();
             throw $e;
         }
-        if ($moveComplete) {
-            Mage::dispatchEvent('category_move', $eventParams);
-            Mage::getSingleton('index/indexer')->processEntityAction(
-                $this,
-                self::ENTITY,
-                Mage_Index_Model_Event::TYPE_SAVE,
-            );
-            Mage::app()->cleanCache([self::CACHE_TAG]);
-        }
+
+        Mage::dispatchEvent('category_move', $eventParams);
+        Mage::getSingleton('index/indexer')->processEntityAction(
+            $this,
+            self::ENTITY,
+            Mage_Index_Model_Event::TYPE_SAVE,
+        );
+        Mage::app()->cleanCache([self::CACHE_TAG]);
 
         return $this;
     }
@@ -356,7 +353,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     /**
      * Retrieve array of product id's for category
      *
-     * array($productId => $position)
+     * [$productId => $position]
      *
      * @return array
      */
@@ -657,9 +654,8 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
         $children = $this->getResource()->getAllChildren($this);
         if ($asArray) {
             return $children;
-        } else {
-            return implode(',', $children);
         }
+        return implode(',', $children);
     }
 
     /**
@@ -713,7 +709,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
     {
         $ids = $this->getData('path_ids');
         if (is_null($ids)) {
-            $ids = explode('/', (string) $this->getPath());
+            $ids = array_filter(explode('/', (string) $this->getPath()), fn($id) => $id !== '');
             $this->setData('path_ids', $ids);
         }
         return $ids;
@@ -836,7 +832,7 @@ class Mage_Catalog_Model_Category extends Mage_Catalog_Model_Abstract
      * @param bool $sorted
      * @param bool $asCollection
      * @param bool $toLoad
-     * @return array|Mage_Catalog_Model_Resource_Category_Collection|Varien_Data_Collection|Varien_Data_Tree_Node_Collection
+     * @return array|Mage_Catalog_Model_Resource_Category_Collection|\Maho\Data\Collection|\Maho\Data\Tree\Node\Collection
      */
     public function getCategories($parent, $recursionLevel = 0, $sorted = false, $asCollection = false, $toLoad = true)
     {

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Giftmessage extends Mage_Adminhtml
      * @param string        $entityType
      * @return string
      */
-    public function getFormHtml(Varien_Object $entity, $entityType = 'quote')
+    public function getFormHtml(\Maho\DataObject $entity, $entityType = 'quote')
     {
         return $this->getLayout()->createBlock(
             'adminhtml/sales_order_create_giftmessage_form',

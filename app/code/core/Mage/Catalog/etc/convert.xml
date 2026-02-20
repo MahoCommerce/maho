@@ -51,33 +51,6 @@
         </action>
     </profile>
 
-    <profile name="import_catalog">
-        <action method="load" use="catalog_file"/>
-
-        <action method="parse" type="dataflow/convert_parser_xml_excel"/>
-
-        <action method="save" type="catalog/convert_adapter_catalog"/>
-    </profile>
-
-    <profile name="export_catalog">
-        <action method="load" type="catalog/convert_adapter_catalog"/>
-
-        <action method="unparse" type="dataflow/convert_parser_xml_excel"/>
-
-        <action method="save" use="catalog_file"/>
-    </profile>
-
-    <profile name="export_catalog_to_http">
-        <action method="load" type="catalog/convert_adapter_catalog"/>
-
-        <action method="unparse" type="dataflow/convert_parser_xml_excel"/>
-
-        <action method="save" type="Mage_Dataflow_Model_Convert_Adapter_Http">
-            <var name="Content-Disposition">attachment; filename=catalog.xml</var>
-            <var name="Content-Type">application/octet-stream</var>
-        </action>
-    </profile>
-
     <profile name="import_csv_to_table">
         <action method="load" type="Mage_Dataflow_Model_Convert_Adapter_Io">
             <var name="type">file</var>

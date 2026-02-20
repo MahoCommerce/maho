@@ -8,25 +8,29 @@ declare(strict_types=1);
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+
+use Symfony\Component\Filesystem\Path;
 
 /**
  * Validator for check not protected/available path
  *
+ * @deprecated since 26.1 Use Maho\Io::allowedPath() instead for simpler and more secure path validation.
+ *
  * Mask symbols from path:
  * "?" - something directory with any name
  * "*" - something directory structure, which can not exist
- * Note: For set directory structure which must be exist, need to set mask "/?/{@*}"
+ * Note: For set directory structure which must be exist, need to set mask "/?/{&#64;*}"
  * Mask symbols from filename:
  * "*" - something symbols in file name
  * Example:
  * <code>
  * //set available path
- * $validator->setAvailablePath(array('/path/to/?/*fileMask.xml'));
+ * $validator->setAvailablePath(['/path/to/?/*fileMask.xml']);
  * $validator->isValid('/path/to/MyDir/Some-fileMask.xml'); //return true
- * $validator->setAvailablePath(array('/path/to/{@*}*.xml'));
+ * $validator->setAvailablePath(['/path/to/{&#64;*}*.xml']);
  * $validator->isValid('/path/to/my.xml'); //return true, because directory structure can't exist
  * </code>
  */
@@ -70,6 +74,12 @@ class Mage_Core_Model_File_Validator_AvailablePath
             return false;
         }
 
+        // Block stream wrappers (phar://, http://, etc.) to prevent deserialization attacks
+        if (!Path::isLocal($value)) {
+            $this->messages[] = Mage::helper('core')->__('Path "%s" contains an invalid stream wrapper.', $value);
+            return false;
+        }
+
         if (preg_match('#\\..[\\\\/]#', $value)) {
             $this->messages[] = Mage::helper('core')->__('Path "%s" contains invalid parent directory references.', $value);
             return false;
@@ -110,7 +120,7 @@ class Mage_Core_Model_File_Validator_AvailablePath
 
     public function getMessage(): string
     {
-        return !empty($this->messages) ? $this->messages[0] : '';
+        return empty($this->messages) ? '' : $this->messages[0];
     }
 
     public function setProtectedPaths(array $protectedPaths): self
@@ -195,19 +205,19 @@ class Mage_Core_Model_File_Validator_AvailablePath
                 $reg = $pathsData[$path]['regDir'];
             }
             $resultDir = preg_match($reg, $valuePathInfo['dirname'] . DS);
-
             if ($protected && ($resultDir && $resultFile)) {
                 return false;
-            } elseif (!$protected && ($resultDir && $resultFile)) {
+            }
+
+            if (!$protected && ($resultDir && $resultFile)) {
                 //return true because one match with available path mask
                 return true;
             }
         }
         if ($protected) {
             return true;
-        } else {
-            //return false because no one match with available path mask
-            return false;
         }
+        //return false because no one match with available path mask
+        return false;
     }
 }

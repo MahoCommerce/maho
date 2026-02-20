@@ -6,11 +6,11 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_App_Emulation extends Varien_Object
+class Mage_Core_Model_App_Emulation extends \Maho\DataObject
 {
     /**
      * Factory instance
@@ -28,8 +28,8 @@ class Mage_Core_Model_App_Emulation extends Varien_Object
 
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('core/factory');
-        $this->_app = !empty($args['app']) ? $args['app'] : Mage::app();
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
+        $this->_app = empty($args['app']) ? Mage::app() : $args['app'];
         unset($args['factory'], $args['app']);
         parent::__construct($args);
     }
@@ -43,7 +43,7 @@ class Mage_Core_Model_App_Emulation extends Varien_Object
      * @param string $area
      * @param bool $emulateStoreInlineTranslation emulate inline translation of the specified store or just disable it
      *
-     * @return Varien_Object information about environment of the initial store
+     * @return \Maho\DataObject information about environment of the initial store
      */
     public function startEnvironmentEmulation(
         $storeId,
@@ -63,7 +63,7 @@ class Mage_Core_Model_App_Emulation extends Varien_Object
         $this->_app->setCurrentStore($storeId);
         $initialLocaleCode = $this->_emulateLocale($storeId, $area);
 
-        $initialEnvironmentInfo = new Varien_Object();
+        $initialEnvironmentInfo = new \Maho\DataObject();
         $initialEnvironmentInfo->setInitialTranslateInline($initialTranslateInline)
             ->setInitialDesign($initialDesign)
             ->setInitialLocaleCode($initialLocaleCode);
@@ -78,11 +78,11 @@ class Mage_Core_Model_App_Emulation extends Varien_Object
      *
      * Function restores initial store environment
      *
-     * @param Varien_Object $initialEnvironmentInfo information about environment of the initial store
+     * @param \Maho\DataObject $initialEnvironmentInfo information about environment of the initial store
      *
      * @return $this
      */
-    public function stopEnvironmentEmulation(Varien_Object $initialEnvironmentInfo)
+    public function stopEnvironmentEmulation(\Maho\DataObject $initialEnvironmentInfo)
     {
         $this->_restoreInitialInlineTranslation($initialEnvironmentInfo->getInitialTranslateInline());
         $initialDesign = $initialEnvironmentInfo->getInitialDesign();

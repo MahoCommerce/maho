@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,6 +46,11 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
     #[\Override]
     public function isEnabled($skipAdminCheck = false)
     {
+        // Flat catalog is only supported on MySQL
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!($adapter instanceof Maho\Db\Adapter\Pdo\Mysql)) {
+            return false;
+        }
         return Mage::getStoreConfigFlag(self::XML_PATH_IS_ENABLED_FLAT_CATALOG_CATEGORY);
     }
 
@@ -59,17 +64,5 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
     public function isBuilt($store = null)
     {
         return Mage::getResourceSingleton('catalog/category_flat')->isBuilt($store);
-    }
-
-    /**
-     * Check if Catalog Category Flat Data has been initialized
-     *
-     * @deprecated after 1.7.0.0 use Mage_Catalog_Helper_Category_Flat::isBuilt() instead
-     *
-     * @return bool
-     */
-    public function isRebuilt()
-    {
-        return $this->isBuilt();
     }
 }

@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Edit_Tab_Edit extends Mage_Adm
      */
     public function initForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('_edit');
 
         $model = Mage::registry('current_convert_profile');

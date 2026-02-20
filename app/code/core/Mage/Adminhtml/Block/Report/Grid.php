@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,22 +19,43 @@
  */
 class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
+    /**
+     * @var bool
+     */
     protected $_storeSwitcherVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_dateFilterVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_exportVisibility = true;
 
+    /**
+     * @var bool
+     */
     protected $_subtotalVisibility = false;
 
+    /**
+     * @var array
+     */
     protected $_filters = [];
 
+    /**
+     * @var array
+     */
     protected $_defaultFilters = [
         'report_from' => '',
         'report_to' => '',
         'report_period' => 'day',
     ];
 
+    /**
+     * @var int
+     */
     protected $_subReportSize = 5;
 
     protected $_grandTotals;
@@ -328,12 +349,8 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
 
     public function getFilter($name)
     {
-        if (isset($this->_filters[$name])) {
-            return $this->_filters[$name];
-        } else {
-            return ($this->getRequest()->getParam($name))
-                    ? htmlspecialchars($this->getRequest()->getParam($name)) : '';
-        }
+        return $this->_filters[$name] ?? (($this->getRequest()->getParam($name))
+                ? htmlspecialchars($this->getRequest()->getParam($name)) : '');
     }
 
     public function setSubReportSize($size)
@@ -369,7 +386,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     #[\Override]
     public function addExportType($url, $label)
     {
-        $this->_exportTypes[] = new Varien_Object(
+        $this->_exportTypes[] = new \Maho\DataObject(
             [
                 'url'   => $this->getUrl(
                     $url,
@@ -426,7 +443,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
     public function getGrandTotals()
     {
         if (!$this->_grandTotals) {
-            $this->_grandTotals = new Varien_Object();
+            $this->_grandTotals = new \Maho\DataObject();
         }
         return $this->_grandTotals;
     }
@@ -571,7 +588,7 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
             $data[] = $row;
         }
 
-        $xmlObj = new Varien_Convert_Parser_Xml_Excel();
+        $xmlObj = new \Maho\Convert\Parser\Xml\Excel();
         $xmlObj->setVar('single_sheet', $fileName);
         $xmlObj->setData($data);
         $xmlObj->unparse();
@@ -613,9 +630,8 @@ class Mage_Adminhtml_Block_Report_Grid extends Mage_Adminhtml_Block_Widget_Grid
         $totals = $this->getGrandTotals()->getData();
         if (parent::getCountTotals() && count($totals)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

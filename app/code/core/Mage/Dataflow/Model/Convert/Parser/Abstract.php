@@ -61,9 +61,9 @@ abstract class Mage_Dataflow_Model_Convert_Parser_Abstract extends Mage_Dataflow
     {
         if (is_null($this->_batchExport)) {
             $object = Mage::getModel('dataflow/batch_export');
-            $this->_batchExport = Varien_Object_Cache::singleton()->save($object);
+            $this->_batchExport = \Maho\DataObject\Cache::singleton()->save($object);
         }
-        return Varien_Object_Cache::singleton()->load($this->_batchExport);
+        return \Maho\DataObject\Cache::singleton()->load($this->_batchExport);
     }
 
     /**
@@ -75,14 +75,14 @@ abstract class Mage_Dataflow_Model_Convert_Parser_Abstract extends Mage_Dataflow
     {
         if (is_null($this->_batchImport)) {
             $object = Mage::getModel('dataflow/batch_import');
-            $this->_batchImport = Varien_Object_Cache::singleton()->save($object);
+            $this->_batchImport = \Maho\DataObject\Cache::singleton()->save($object);
         }
-        return Varien_Object_Cache::singleton()->load($this->_batchImport);
+        return \Maho\DataObject\Cache::singleton()->load($this->_batchImport);
     }
 
     protected function _copy($file)
     {
-        $ioAdapter = new Varien_Io_File();
+        $ioAdapter = new \Maho\Io\File();
         if (!$ioAdapter->fileExists($file)) {
             Mage::throwException(Mage::helper('dataflow')->__('File "%s" does not exist.', $file));
         }

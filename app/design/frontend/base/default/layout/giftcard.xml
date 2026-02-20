@@ -1,0 +1,221 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Giftcard
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<layout>
+    <!-- Category listing - Add gift card price block -->
+    <catalog_category_default>
+        <reference name="product_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_category_default>
+
+    <catalog_category_view>
+        <reference name="product_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_category_view>
+
+    <catalog_category_layered>
+        <reference name="product_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_category_layered>
+
+    <!-- Search results - Add gift card price block -->
+    <catalogsearch_result_index>
+        <reference name="search_result_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalogsearch_result_index>
+
+    <catalogsearch_advanced_result>
+        <reference name="search_result_list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalogsearch_advanced_result>
+
+    <!-- Compare list - Add gift card price block -->
+    <catalog_product_compare_index>
+        <reference name="catalog.compare.list">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_product_compare_index>
+
+    <!-- Product view related/upsell - Add gift card price block -->
+    <catalog_product_view>
+        <reference name="catalog.product.related">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+        <reference name="product.info.upsell">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </catalog_product_view>
+
+
+    <!-- Default - Add gift card price block to wishlist sidebar and price template -->
+    <default>
+        <reference name="wishlist_sidebar">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+        <reference name="catalog_product_price_template">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </default>
+
+    <!-- Checkout Payment - Handle payment method visibility based on gift card coverage -->
+    <checkout_onepage_index>
+        <reference name="checkout.onepage.payment.methods">
+            <block type="core/template" name="giftcard.payment.methods" template="maho/giftcard/checkout/payment/methods.phtml" />
+        </reference>
+    </checkout_onepage_index>
+
+    <!-- Checkout Payment Method AJAX Load - Only add JS handler, not the form (form is already in methods_additional) -->
+    <checkout_onepage_paymentmethod>
+        <reference name="root">
+            <block type="core/template" name="giftcard.payment.methods.ajax" template="maho/giftcard/checkout/payment/methods.phtml" />
+        </reference>
+    </checkout_onepage_paymentmethod>
+
+    <!-- Checkout Cart - Custom Renderer and Price Block -->
+    <!-- Note: Gift card input is now integrated into the unified promo code section (checkout/cart/coupon.phtml) -->
+    <checkout_cart_index>
+        <!-- Use custom renderer for gift card items to format dates -->
+        <reference name="checkout.cart">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/checkout_cart_item_renderer</block><template>checkout/cart/item/default.phtml</template></action>
+        </reference>
+        <!-- Add gift card price block for crosssell products -->
+        <reference name="checkout.cart.crosssell">
+            <action method="addPriceBlockType"><type>giftcard</type><block>giftcard/catalog_product_price</block><template>maho/giftcard/catalog/product/price.phtml</template></action>
+        </reference>
+    </checkout_cart_index>
+
+    <!-- Checkout Onepage Review - Add gift card item renderer for date formatting -->
+    <checkout_onepage_review>
+        <reference name="root">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/checkout_cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
+        </reference>
+    </checkout_onepage_review>
+
+    <!-- Sales Order View - Add gift card totals and custom item renderer -->
+    <sales_order_view>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_view>
+
+    <!-- Sales Order Print - Add gift card totals and custom item renderer -->
+    <sales_order_print>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_print>
+
+    <!-- Sales Guest Order View - Add gift card totals and custom item renderer -->
+    <sales_guest_view>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_view>
+
+    <!-- Sales Guest Order Print - Add gift card totals and custom item renderer -->
+    <sales_guest_print>
+        <reference name="order_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_print>
+
+    <!-- Sales Guest Invoice View - Add gift card totals and custom item renderer -->
+    <sales_guest_invoice>
+        <reference name="invoice_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="invoice_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_invoice>
+
+    <!-- Sales Guest Creditmemo View - Add gift card totals and custom item renderer -->
+    <sales_guest_creditmemo>
+        <reference name="creditmemo_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_guest_creditmemo>
+
+    <!-- Sales Order Invoice View - Add gift card totals and custom item renderer -->
+    <sales_order_invoice>
+        <reference name="invoice_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="invoice_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_invoice>
+
+    <!-- Sales Order Creditmemo View - Add gift card totals and custom item renderer -->
+    <sales_order_creditmemo>
+        <reference name="creditmemo_items">
+            <action method="addItemRender"><type>giftcard</type><block>giftcard/sales_order_item_renderer</block><template>sales/order/items/renderer/default.phtml</template></action>
+        </reference>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_order_creditmemo>
+
+    <!-- Sales Order Email - Add gift card totals -->
+    <sales_email_order_items>
+        <reference name="order_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_email_order_items>
+
+    <!-- Sales Invoice Email - Add gift card totals -->
+    <sales_email_order_invoice_items>
+        <reference name="invoice_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_email_order_invoice_items>
+
+    <!-- Sales Creditmemo Email - Add gift card totals -->
+    <sales_email_order_creditmemo_items>
+        <reference name="creditmemo_totals">
+            <block type="giftcard/sales_order_totals" name="giftcard" />
+        </reference>
+    </sales_email_order_creditmemo_items>
+
+    <!-- Gift Card Product View -->
+    <PRODUCT_TYPE_giftcard>
+        <reference name="product.info">
+            <block type="giftcard/catalog_product_view_type_giftcard" name="product.info.giftcard" as="product_type_data" template="catalog/product/view/type/default.phtml">
+                <block type="core/text_list" name="product.info.giftcard.extra" as="product_type_data_extra" translate="label">
+                    <label>Product Extra Info</label>
+                </block>
+            </block>
+        </reference>
+        <reference name="product.info.options.wrapper">
+            <block type="giftcard/catalog_product_view_type_giftcard" name="product.info.options.giftcard" as="options_giftcard" before="-" template="maho/giftcard/catalog/product/view/type/options/giftcard.phtml" />
+        </reference>
+    </PRODUCT_TYPE_giftcard>
+</layout>

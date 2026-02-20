@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -128,7 +128,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
 
     public function validateAction(): void
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setError(false);
 
         $attributeCode  = $this->getRequest()->getParam('attribute_code');
@@ -185,11 +185,11 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     {
         $data = $this->getRequest()->getPost();
         if ($data) {
-            /** @var Mage_Admin_Model_Session $session */
+            /** @var Mage_Adminhtml_Model_Session $session */
             $session = Mage::getSingleton('adminhtml/session');
 
             $redirectBack   = $this->getRequest()->getParam('back', false);
-            /** @var Mage_Catalog_Model_Entity_Attribute $model */
+            /** @var Mage_Catalog_Model_Resource_Eav_Attribute $model */
             $model = Mage::getModel('catalog/resource_eav_attribute');
             /** @var Mage_Catalog_Helper_Product $helper */
             $helper = Mage::helper('catalog/product');
@@ -251,6 +251,7 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
                  */
                 $data['source_model'] = $helper->getAttributeSourceModelByInputType($data['frontend_input']);
                 $data['backend_model'] = $helper->getAttributeBackendModelByInputType($data['frontend_input']);
+                $data['frontend_model'] = $helper->getAttributeFrontendModelByInputType($data['frontend_input']);
             }
 
             if (!isset($data['is_configurable'])) {

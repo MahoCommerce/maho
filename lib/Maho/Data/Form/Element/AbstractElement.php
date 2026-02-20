@@ -3,10 +3,10 @@
 /**
  * Maho
  *
- * @package    Maho_Data
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -215,6 +215,12 @@ abstract class AbstractElement extends AbstractForm
         if ($filter = $this->getValueFilter()) {
             $value = $filter->filter($value);
         }
+
+        // Handle array values (e.g., from delete checkbox)
+        if (is_array($value)) {
+            return '';
+        }
+
         return $this->_escape((string) $value);
     }
 
@@ -345,7 +351,8 @@ abstract class AbstractElement extends AbstractForm
     {
         if ($this->hasData('container_id')) {
             return $this->getData('container_id');
-        } elseif ($idPrefix = $this->getForm()->getFieldContainerIdPrefix()) {
+        }
+        if ($idPrefix = $this->getForm()->getFieldContainerIdPrefix()) {
             return $idPrefix . $this->getId();
         }
         return '';

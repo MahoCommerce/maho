@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,9 +21,9 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
         // set defaults
         $d = explode('/', $this->_getDefaultPath());
         $this->getFront()->setDefault([
-            'module'     => !empty($d[0]) ? $d[0] : '',
-            'controller' => !empty($d[1]) ? $d[1] : 'index',
-            'action'     => !empty($d[2]) ? $d[2] : 'index',
+            'module'     => empty($d[0]) ? '' : $d[0],
+            'controller' => empty($d[1]) ? 'index' : $d[1],
+            'action'     => empty($d[2]) ? 'index' : $d[2],
         ]);
     }
 
@@ -134,9 +134,8 @@ class Mage_Core_Controller_Varien_Router_Admin extends Mage_Core_Controller_Vari
         );
         if ($frontName == $configRouterFrontName) {
             return parent::addModule($frontName, $moduleName, $routeName);
-        } else {
-            return $this;
         }
+        return $this;
     }
 
     /**

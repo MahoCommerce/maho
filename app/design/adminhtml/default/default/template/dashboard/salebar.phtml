@@ -5,19 +5,56 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Adminhtml_Block_Dashboard_Sales $this */
 ?>
 <?php if(count($this->getTotals()) > 0): ?>
+<div class="entry-edit">
+    <div class="entry-edit-head"><h4><?= $this->__('Sales Overview') ?></h4></div>
+    <fieldset class="np">
+        <div class="dashboard-sales-stats">
             <?php foreach( $this->getTotals() as $_total ): ?>
-            <div class="entry-edit">
-                <div class="entry-edit-head"><h4><?= $_total['label'] ?></h4></div>
-                <fieldset class="a-center bold">
-                    <span class="nowrap" style="font-size:18px;"><?= $_total['value'] ?><span style="font-size:14px; color:#686868;"><?= $_total['decimals'] ?>
-                </fieldset>
+            <div class="stat-col">
+                <div class="stat-value"><?= $_total['value'] ?><span class="stat-decimals"><?= $_total['decimals'] ?></span></div>
+                <div class="stat-label"><?= $_total['label'] ?></div>
             </div>
             <?php endforeach ?>
+        </div>
+    </fieldset>
+</div>
+
+<style>
+.dashboard-sales-stats {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+}
+.dashboard-sales-stats .stat-col {
+    flex: 1;
+    text-align: center;
+    padding: 8px;
+    background: #f9f9f9;
+    border-radius: 4px;
+    min-width: 0;
+}
+.dashboard-sales-stats .stat-value {
+    font-size: 18px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 4px;
+}
+.dashboard-sales-stats .stat-decimals {
+    font-size: 16px;
+    color: #686868;
+}
+.dashboard-sales-stats .stat-label {
+    color: #666;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+</style>
 <?php endif ?>

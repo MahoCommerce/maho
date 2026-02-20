@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -31,18 +31,18 @@
     <ul class="note-list">
     <?php foreach ($_entity->getCommentsCollection(true) as $_comment): ?>
         <li>
-            <strong><?= $this->helper('core')->formatDate($_comment->getCreatedAtDate(), 'medium') ?></strong>
-            <?= $this->helper('core')->formatTime($_comment->getCreatedAtDate(), 'medium') ?><span class="separator">|</span><small><?= $this->helper('sales')->__('Customer') ?>
-            <strong class="subdue">
-            <?php if ($_comment->getIsCustomerNotified()): ?>
-            <?= $this->helper('sales')->__('Notified') ?>
-            <img src="<?= $this->getSkinUrl('images/ico_success.gif') ?>" width="16" height="16" alt="" />
-            <?php else: ?>
-            <?= $this->helper('sales')->__('Not Notified') ?>
-            <?php endif ?>
-            </strong></small>
-            <br/>
-            <?= $this->escapeHtml($_comment->getComment(), ['b', 'br', 'strong', 'i', 'u', 'a']) ?>
+            <div class="note-header">
+                <span>
+                    <strong><?= $this->helper('core')->formatDate($_comment->getCreatedAtDate(), 'medium') ?></strong>
+                    <?= $this->helper('core')->formatTime($_comment->getCreatedAtDate(), 'medium') ?>
+                </span>
+                <?php if ($_comment->getIsCustomerNotified()): ?>
+                <span class="icon" title="<?= $this->helper('sales')->__('Customer Notified') ?>"><?= $this->getIconSvg('message') ?></span>
+                <?php else: ?>
+                <span class="icon" title="<?= $this->helper('sales')->__('Customer Not Notified') ?>"><?= $this->getIconSvg('message-off') ?></span>
+                <?php endif ?>
+            </div>
+            <div><?= $this->escapeHtml($_comment->getComment(), ['b', 'br', 'strong', 'i', 'u', 'a']) ?></div>
         </li>
     <?php endforeach ?>
     </ul>

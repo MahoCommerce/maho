@@ -6,7 +6,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2016-2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
@@ -203,6 +203,19 @@
             <block type="adminhtml/catalog_product_edit_tab_crosssell" name="catalog.product.edit.tab.crosssell"/>
         </block>
     </adminhtml_catalog_product_crosssellgrid>
+
+    <adminhtml_catalog_product_parentproducts>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="adminhtml/catalog_product_edit_tab_parentProducts" name="catalog.product.edit.tab.parent_products"/>
+        </block>
+    </adminhtml_catalog_product_parentproducts>
+
+    <adminhtml_catalog_product_parentproductsgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="adminhtml/catalog_product_edit_tab_parentProducts" name="catalog.product.edit.tab.parent_products"/>
+        </block>
+    </adminhtml_catalog_product_parentproductsgrid>
+
 <!--
 Layout handle for simple products
 -->

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -33,7 +33,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return Varien_Data_Collection
+     * @return \Maho\Data\Collection
      */
     public function getGalleryCollection()
     {
@@ -41,7 +41,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return Varien_Object|null
+     * @return \Maho\DataObject|null
      * @throws Exception
      */
     public function getCurrentImage()
@@ -83,13 +83,12 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     {
         $file = $this->getCurrentImage()->getPath();
         if (file_exists($file)) {
-            $size = getimagesize($file);
+            $size = \Maho\Io::getImageSize($file);
             if (isset($size[0])) {
                 if ($size[0] > 600) {
                     return 600;
-                } else {
-                    return $size[0];
                 }
+                return $size[0];
             }
         }
 
@@ -97,7 +96,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return false|Varien_Object
+     * @return false|\Maho\DataObject
      * @throws Exception
      */
     public function getPreviusImage()
@@ -117,7 +116,7 @@ class Mage_Catalog_Block_Product_Gallery extends Mage_Core_Block_Template
     }
 
     /**
-     * @return false|Varien_Object
+     * @return false|\Maho\DataObject
      * @throws Exception
      */
     public function getNextImage()

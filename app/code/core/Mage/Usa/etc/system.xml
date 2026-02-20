@@ -6,7 +6,7 @@
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -631,22 +631,6 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </active>
-                        <gateway_url translate="label">
-                            <label>Gateway URL</label>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><active>1</active></depends>
-                        </gateway_url>
-                        <gateway_secure_url translate="label">
-                            <label>Secure Gateway URL</label>
-                            <sort_order>30</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><active>1</active></depends>
-                        </gateway_secure_url>
                         <title translate="label">
                             <label>Title</label>
                             <sort_order>40</sort_order>
@@ -655,8 +639,9 @@
                             <show_in_store>1</show_in_store>
                             <depends><active>1</active></depends>
                         </title>
-                        <userid translate="label">
-                            <label>User ID</label>
+                        <client_id translate="label comment">
+                            <label>Client ID (Consumer Key)</label>
+                            <comment><![CDATA[Register your application at <a href="https://developers.usps.com" target="_blank">developers.usps.com</a> to obtain OAuth credentials. Copy the Consumer Key as your Client ID and the Consumer Secret as your Client Secret. Use the same credentials for both test and production environments.]]></comment>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>50</sort_order>
@@ -664,9 +649,10 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
-                        </userid>
-                        <password translate="label">
-                            <label>Password</label>
+                            <validate>required-entry</validate>
+                        </client_id>
+                        <client_secret translate="label">
+                            <label>Client Secret (Consumer Secret)</label>
                             <frontend_type>obscure</frontend_type>
                             <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
                             <sort_order>53</sort_order>
@@ -674,17 +660,80 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
-                        </password>
-                        <mode translate="label">
-                            <label>Mode</label>
+                            <validate>required-entry</validate>
+                        </client_secret>
+                        <api_environment translate="label comment">
+                            <label>API Environment</label>
+                            <comment>Use Test (TEM) environment for testing with the same credentials. Test labels will be watermarked and not processed for payment.</comment>
                             <frontend_type>select</frontend_type>
+                            <source_model>usa/shipping_carrier_usps_source_environment</source_model>
                             <sort_order>54</sort_order>
-                            <source_model>usa/shipping_carrier_abstract_source_mode</source_model>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                             <depends><active>1</active></depends>
-                        </mode>
+                        </api_environment>
+                        <commercial_pricing translate="label comment">
+                            <label>Use Commercial Pricing</label>
+                            <comment>Enable to receive discounted commercial rates instead of retail counter pricing. Recommended for online label printing.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>55</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </commercial_pricing>
+                        <payment_account_type translate="label comment">
+                            <label>Payment Account Type</label>
+                            <comment>Required for shipping label generation. EPS (Enterprise Payment System) or PERMIT.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>usa/shipping_carrier_usps_source_accounttype</source_model>
+                            <sort_order>56</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </payment_account_type>
+                        <payment_account_number translate="label comment">
+                            <label>Payment Account Number</label>
+                            <comment>Your EPS or PERMIT account number for paying postage.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>57</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </payment_account_number>
+                        <payment_permit_zip translate="label comment">
+                            <label>Permit ZIP Code</label>
+                            <comment>Required only for PERMIT account type.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>58</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </payment_permit_zip>
+                        <payment_crid translate="label comment">
+                            <label>CRID (Customer Registration ID)</label>
+                            <comment>Your USPS Customer Registration ID for label generation.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>59</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </payment_crid>
+                        <payment_mid translate="label comment">
+                            <label>MID (Mailer ID)</label>
+                            <comment>Your USPS Mailer ID for label generation.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><active>1</active></depends>
+                        </payment_mid>
                         <shipment_requesttype translate="label">
                             <label>Packages Request Type</label>
                             <frontend_type>select</frontend_type>

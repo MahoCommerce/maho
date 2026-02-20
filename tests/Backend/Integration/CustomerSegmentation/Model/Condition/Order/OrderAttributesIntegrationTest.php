@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -546,7 +546,8 @@ describe('Order Attributes Condition Integration Tests', function () {
 
             expect($sql)->toBeString();
             expect($sql)->toContain('MAX(o.created_at)');
-            expect($sql)->toContain('DATEDIFF');
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
             expect($sql)->toContain('HAVING');
         });
     });
@@ -871,14 +872,14 @@ describe('Order Attributes Condition Integration Tests', function () {
 
         test('SQL contains proper subqueries for calculated fields', function () {
             $calculatedFields = [
-                'days_since_last_order' => ['DATEDIFF', 'MAX(o.created_at)'],
-                'average_order_amount' => ['AVG(o.grand_total)', 'HAVING'],
-                'total_ordered_amount' => ['SUM(o.grand_total)', 'HAVING'],
+                'days_since_last_order' => ['pattern' => '/DATEDIFF|::date|DATE\\(|JULIANDAY/', 'contains' => ['MAX(o.created_at)']],
+                'average_order_amount' => ['contains' => ['AVG(o.grand_total)', 'HAVING']],
+                'total_ordered_amount' => ['contains' => ['SUM(o.grand_total)', 'HAVING']],
             ];
 
             $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
 
-            foreach ($calculatedFields as $attribute => $expectedSqlParts) {
+            foreach ($calculatedFields as $attribute => $fieldConfig) {
                 $condition = Mage::getModel('customersegmentation/segment_condition_order_attributes');
                 $condition->setAttribute($attribute);
                 $condition->setOperator('>=');
@@ -887,7 +888,14 @@ describe('Order Attributes Condition Integration Tests', function () {
                 $sql = $condition->getConditionsSql($adapter);
 
                 expect($sql)->toBeString();
-                foreach ($expectedSqlParts as $sqlPart) {
+
+                // Check regex pattern if specified (for MySQL/PostgreSQL compatibility)
+                if (isset($fieldConfig['pattern'])) {
+                    expect($sql)->toMatch($fieldConfig['pattern']);
+                }
+
+                // Check required SQL parts
+                foreach ($fieldConfig['contains'] ?? [] as $sqlPart) {
                     expect($sql)->toContain($sqlPart);
                 }
             }
@@ -1216,7 +1224,7 @@ describe('Order Attributes Condition Integration Tests', function () {
         $segment->setIsActive(1);
         $segment->setWebsiteIds('1');
         $segment->setCustomerGroupIds('0,1,2,3');
-        $segment->setConditionsSerialized(serialize($conditions));
+        $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);

@@ -1,4 +1,14 @@
 <?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CustomerSegmentation
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
 <config>
     <modules>
         <Maho_CustomerSegmentation>
@@ -30,12 +40,12 @@
             </customersegmentation_resource>
         </models>
         <resources>
-            <maho_customersegmentation_setup>
+            <customersegmentation_setup>
                 <setup>
                     <module>Maho_CustomerSegmentation</module>
                     <class>Mage_Core_Model_Resource_Setup</class>
                 </setup>
-            </maho_customersegmentation_setup>
+            </customersegmentation_setup>
             <customersegmentation_resource>
                 <connection>
                     <use>core_setup</use>

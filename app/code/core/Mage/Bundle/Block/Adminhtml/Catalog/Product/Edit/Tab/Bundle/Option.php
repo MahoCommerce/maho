@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,7 +25,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     /**
      * Form element
      *
-     * @var Varien_Data_Form_Element_Abstract|null
+     * @var \Maho\Data\Form\Element\AbstractElement|null
      */
     protected $_element = null;
 
@@ -80,7 +80,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     /**
      * @return string
      */
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->setElement($element);
         return $this->toHtml();
@@ -89,14 +89,14 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option extends
     /**
      * @return $this
      */
-    public function setElement(Varien_Data_Form_Element_Abstract $element)
+    public function setElement(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->_element = $element;
         return $this;
     }
 
     /**
-     * @return Varien_Data_Form_Element_Abstract|null
+     * @return \Maho\Data\Form\Element\AbstractElement|null
      */
     public function getElement()
     {

@@ -6,7 +6,7 @@
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -53,15 +53,13 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
             $select = $this->_getReadAdapter()->select()
                 ->from($this->getTable('newsletter/queue'), new Maho\Db\Expr('COUNT(queue_id)'))
                 ->where('template_id = :template_id');
-
             $countOfQueue = $this->_getReadAdapter()->fetchOne($select, ['template_id' => $template->getId()]);
-
             return $countOfQueue > 0;
-        } elseif ($template->getIsSystem()) {
-            return false;
-        } else {
-            return true;
         }
+        if ($template->getIsSystem()) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -86,9 +84,8 @@ class Mage_Newsletter_Model_Resource_Template extends Mage_Core_Model_Resource_D
             $countOfCodes = $this->_getReadAdapter()->fetchOne($select, $bind);
 
             return $countOfCodes > 0;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

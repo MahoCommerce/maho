@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -22,7 +22,7 @@
             <class>separator-top</class>
             <label>Customer Configuration</label>
             <tab>customer</tab>
-            <sort_order>130</sort_order>
+            <sort_order>100</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
@@ -356,85 +356,6 @@
                         </email_identity>
                     </fields>
                 </password_link>
-                <magic_link translate="label">
-                    <label>Magic Link (Passwordless Login) Options</label>
-                    <sort_order>37</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>1</show_in_store>
-                    <fields>
-                        <enabled translate="label comment">
-                            <label>Enable Magic Link Login</label>
-                            <comment>Allow customers to login via a secure link sent to their email instead of using a password.</comment>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>10</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </enabled>
-                        <token_expiration translate="label comment">
-                            <label>Token Expiration (minutes)</label>
-                            <comment>How long the magic link remains valid. Default: 10 minutes.</comment>
-                            <validate>required-entry validate-digits validate-digits-range digits-range-1-</validate>
-                            <sort_order>20</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </token_expiration>
-                        <rate_limit_email translate="label comment">
-                            <label>Rate Limit - Email (requests per hour)</label>
-                            <comment>Maximum magic link requests per email address per hour. Default: 3.</comment>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                            <sort_order>30</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </rate_limit_email>
-                        <rate_limit_ip translate="label comment">
-                            <label>Rate Limit - IP (requests per hour)</label>
-                            <comment>Maximum magic link requests per IP address per hour. Default: 10.</comment>
-                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
-                            <sort_order>40</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>0</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </rate_limit_ip>
-                        <email_template translate="label">
-                            <label>Magic Link Email Template</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_email_template</source_model>
-                            <sort_order>50</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </email_template>
-                        <email_identity translate="label">
-                            <label>Email Sender</label>
-                            <frontend_type>select</frontend_type>
-                            <source_model>adminhtml/system_config_source_email_identity</source_model>
-                            <sort_order>60</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </email_identity>
-                        <registration_mode translate="label comment">
-                            <label>Registration Password Requirement</label>
-                            <comment>Controls whether password is required during registration.</comment>
-                            <frontend_type>select</frontend_type>
-                            <source_model>customer/config_registrationmode</source_model>
-                            <sort_order>70</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><enabled>1</enabled></depends>
-                        </registration_mode>
-                    </fields>
-                </magic_link>
                 <address translate="label">
                     <label>Name and Address Options</label>
                     <sort_order>40</sort_order>
@@ -531,7 +452,7 @@
                         </gender_show>
                     </fields>
                 </address>
-                <startup translate="label">
+                <login translate="label">
                     <label>Login Options</label>
                     <sort_order>90</sort_order>
                     <show_in_default>1</show_in_default>
@@ -542,13 +463,83 @@
                             <label>Redirect Customer to Account Dashboard after Logging in</label>
                             <frontend_type>boolean</frontend_type>
                             <comment>Customer will stay on the current page if "No" is selected.</comment>
-                            <sort_order>1</sort_order>
+                            <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </redirect_dashboard>
+                        <magic_link_enabled translate="label comment">
+                            <label>Enable Magic Link Login</label>
+                            <comment>Allow customers to login via a secure link sent to their email instead of using a password.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </magic_link_enabled>
+                        <magic_link_token_expiration translate="label comment">
+                            <label>Magic Link Token Expiration (minutes)</label>
+                            <comment>How long the magic link remains valid. Default: 10 minutes.</comment>
+                            <validate>required-entry validate-digits validate-digits-range digits-range-1-</validate>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
+                        </magic_link_token_expiration>
+                        <magic_link_rate_limit_email translate="label comment">
+                            <label>Magic Link Rate Limit - Email (requests per hour)</label>
+                            <comment>Maximum magic link requests per email address per hour. Default: 3.</comment>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
+                        </magic_link_rate_limit_email>
+                        <magic_link_rate_limit_ip translate="label comment">
+                            <label>Magic Link Rate Limit - IP (requests per hour)</label>
+                            <comment>Maximum magic link requests per IP address per hour. Default: 10.</comment>
+                            <validate>required-entry validate-digits validate-zero-or-greater</validate>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
+                        </magic_link_rate_limit_ip>
+                        <magic_link_email_template translate="label">
+                            <label>Magic Link Email Template</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_template</source_model>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
+                        </magic_link_email_template>
+                        <magic_link_email_identity translate="label">
+                            <label>Magic Link Email Sender</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_email_identity</source_model>
+                            <sort_order>70</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
+                        </magic_link_email_identity>
+                        <magic_link_registration_mode translate="label comment">
+                            <label>Magic Link Registration Password Requirement</label>
+                            <comment>Controls whether password is required during registration when Magic Link is enabled.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>customer/config_registrationmode</source_model>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <depends><magic_link_enabled>1</magic_link_enabled></depends>
+                        </magic_link_registration_mode>
                     </fields>
-                </startup>
+                </login>
                 <address_templates translate="label">
                     <label>Address Templates</label>
                     <sort_order>100</sort_order>

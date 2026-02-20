@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -223,7 +223,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
     /**
      * Transactions registry to spare resource calls
-     * array(txn_id => sales/order_payment_transaction)
+     * [txn_id => sales/order_payment_transaction]
      * @var array
      */
     protected $_transactionsLookup = [];
@@ -342,7 +342,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         $methodInstance = $this->getMethodInstance();
         $methodInstance->setStore($order->getStoreId());
         $orderState = Mage_Sales_Model_Order::STATE_NEW;
-        $stateObject = new Varien_Object();
+        $stateObject = new \Maho\DataObject();
 
         /**
          * Do order payment validation on payment method level
@@ -644,7 +644,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * @return bool
      * @throws Mage_Core_Exception
      */
-    public function canVoid(Varien_Object $document)
+    public function canVoid(\Maho\DataObject $document)
     {
         if ($this->_canVoidLookup === null) {
             if (Mage::helper('payment')->getMethodModelClassName($this->getMethod()) === null) {
@@ -666,7 +666,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
      * @see self::_void()
      * @return $this
      */
-    public function void(Varien_Object $document)
+    public function void(\Maho\DataObject $document)
     {
         $this->_void(true);
         Mage::dispatchEvent('sales_order_payment_void', ['payment' => $this, 'invoice' => $document]);
@@ -799,7 +799,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         }
 
         if (Mage::helper('core')->getExactDivision($amount, $baseGrandTotal) != 0) {
-            $transaction = new Varien_Object(['txn_id' => $this->getTransactionId()]);
+            $transaction = new \Maho\DataObject(['txn_id' => $this->getTransactionId()]);
             Mage::dispatchEvent('sales_html_txn_id', ['transaction' => $transaction, 'payment' => $this]);
             $transactionId = $transaction->getHtmlTxnId() ?: $transaction->getTxnId();
             $order->addStatusHistoryComment(Mage::helper('sales')->__(
@@ -1361,7 +1361,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
     /**
      * Totals updater utility method
-     * Updates self totals by keys in data array('key' => $delta)
+     * Updates self totals by keys in data ['key' => $delta]
      *
      * @param array $data
      */
@@ -1372,23 +1372,6 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                 $was = $this->getDataUsingMethod($key);
                 $this->setDataUsingMethod($key, $was + $amount);
             }
-        }
-    }
-
-    /**
-     * Prevent double processing of the same transaction by a payment notification
-     * Uses either specified txn_id or the transaction id that was set before
-     *
-     * @deprecated after 1.4.0.1
-     * @param string $txnId
-     * @throws Mage_Core_Exception
-     */
-    protected function _avoidDoubleTransactionProcessing($txnId = null)
-    {
-        if ($this->_isTransactionExists($txnId)) {
-            Mage::throwException(
-                Mage::helper('sales')->__('Transaction "%s" was already processed.', $txnId),
-            );
         }
     }
 
@@ -1435,9 +1418,9 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         if ($preparedMessage) {
             if (is_string($preparedMessage)) {
                 return $preparedMessage . ' ' . $messagePrependTo;
-            } elseif (is_object($preparedMessage)
-                && ($preparedMessage instanceof Mage_Sales_Model_Order_Status_History)
-            ) {
+            }
+            if (is_object($preparedMessage)
+                && ($preparedMessage instanceof Mage_Sales_Model_Order_Status_History)) {
                 $comment = $preparedMessage->getComment() . ' ' . $messagePrependTo;
                 $preparedMessage->setComment($comment);
                 return $comment;
@@ -1456,7 +1439,7 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
     protected function _formatAmount($amount, $asFloat = false)
     {
         $amount = Mage::app()->getStore()->roundPrice($amount);
-        return !$asFloat ? (string) $amount : $amount;
+        return $asFloat ? $amount : (string) $amount;
     }
 
     /**
@@ -1487,8 +1470,8 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                     ->setOrderFilter($this->getOrder())
                     ->addPaymentIdFilter($this->getId())
                     ->addTxnTypeFilter($txnType)
-                    ->setOrder('created_at', Varien_Data_Collection::SORT_ORDER_DESC)
-                    ->setOrder('transaction_id', Varien_Data_Collection::SORT_ORDER_DESC);
+                    ->setOrder('created_at', \Maho\Data\Collection::SORT_ORDER_DESC)
+                    ->setOrder('transaction_id', \Maho\Data\Collection::SORT_ORDER_DESC);
                 /** @var Mage_Sales_Model_Order_Payment_Transaction $txn */
                 foreach ($collection as $txn) {
                     $txn->setOrderPaymentObject($this);

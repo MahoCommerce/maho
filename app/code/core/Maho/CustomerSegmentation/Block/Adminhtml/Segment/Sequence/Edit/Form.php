@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,7 +19,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Sequence_Edit_Form exten
         $sequence = Mage::registry('current_email_sequence');
         $segment = Mage::registry('current_customer_segment');
 
-        $form = new Varien_Data_Form([
+        $form = new \Maho\Data\Form([
             'id' => 'edit_form',
             'action' => $this->getUrl('*/*/saveSequence', ['id' => $sequence->getId()]),
             'method' => 'post',

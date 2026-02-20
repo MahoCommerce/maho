@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -94,8 +94,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
         switch ($attribute) {
             case 'days_since_last_login':
                 $logTable = $resource->getTableName('log/customer');
+                $dateDiff = $adapter->getDateDiffSql("'{$now}'", 'MAX(l.login_at)');
                 $select = $adapter->select()
-                    ->from(['l' => $logTable], ['customer_id', 'days' => "DATEDIFF('{$now}', MAX(l.login_at))"])
+                    ->from(['l' => $logTable], ['customer_id', 'days' => $dateDiff])
                     ->where('l.customer_id IS NOT NULL')
                     ->group('l.customer_id')
                     ->having("days {$operator} {$value}");
@@ -103,8 +104,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
             case 'days_since_last_order':
                 $orderTable = $resource->getTableName('sales/order');
+                $dateDiff = $adapter->getDateDiffSql("'{$now}'", 'MAX(o.created_at)');
                 $select = $adapter->select()
-                    ->from(['o' => $orderTable], ['customer_id', 'days' => "DATEDIFF('{$now}', MAX(o.created_at))"])
+                    ->from(['o' => $orderTable], ['customer_id', 'days' => $dateDiff])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id')
@@ -121,6 +123,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                 $customerTable = $resource->getTableName('customer/entity');
 
                 // Get the most recent activity (login or order), using registration date as fallback
+                $dateDiff = $adapter->getDateDiffSql("'{$now}'", 'GREATEST(COALESCE(MAX(l.login_at), MAX(c.created_at)), COALESCE(MAX(o.created_at), MAX(c.created_at)))');
                 $select = $adapter->select()
                     ->from(['c' => $customerTable], ['entity_id'])
                     ->where('c.created_at IS NOT NULL') // Exclude customers with invalid registration dates
@@ -131,12 +134,13 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     )
                     ->joinLeft(
                         ['o' => $orderTable],
-                        'c.entity_id = o.customer_id AND o.state NOT IN ("canceled")',
+                        "c.entity_id = o.customer_id AND o.state NOT IN ('canceled')",
                         ['last_order' => 'MAX(o.created_at)'],
                     )
                     ->columns([
                         'customer_id' => 'c.entity_id',
-                        'days' => "DATEDIFF('{$now}', GREATEST(COALESCE(MAX(l.login_at), c.created_at), COALESCE(MAX(o.created_at), c.created_at)))",
+                        // Use MAX(c.created_at) to satisfy ONLY_FULL_GROUP_BY mode - there's only one created_at per customer anyway
+                        'days' => $dateDiff,
                     ])
                     ->group('c.entity_id')
                     ->having("days {$operator} {$value}");
@@ -148,8 +152,9 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
             case 'days_since_first_order':
                 $orderTable = $resource->getTableName('sales/order');
+                $dateDiff = $adapter->getDateDiffSql("'{$now}'", 'MIN(o.created_at)');
                 $select = $adapter->select()
-                    ->from(['o' => $orderTable], ['customer_id', 'days' => "DATEDIFF('{$now}', MIN(o.created_at))"])
+                    ->from(['o' => $orderTable], ['customer_id', 'days' => $dateDiff])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
                     ->group('o.customer_id')
@@ -163,10 +168,11 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
             case 'order_frequency_days':
                 $orderTable = $resource->getTableName('sales/order');
                 // Calculate average days between orders
+                $dateDiff = $adapter->getDateDiffSql('MAX(o.created_at)', 'MIN(o.created_at)');
                 $select = $adapter->select()
                     ->from(['o' => $orderTable], [
                         'customer_id',
-                        'days' => new Maho\Db\Expr('DATEDIFF(MAX(o.created_at), MIN(o.created_at)) / GREATEST(COUNT(*) - 1, 1)'),
+                        'days' => new Maho\Db\Expr("({$dateDiff}) / GREATEST(COUNT(*) - 1, 1)"),
                     ])
                     ->where('o.customer_id IS NOT NULL')
                     ->where('o.state NOT IN (?)', ['canceled'])
@@ -194,9 +200,10 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                     $lastOrderSelect->where('o.store_id IN (?)', Mage::app()->getWebsite($website)->getStoreIds());
                 }
 
+                $dateDiff = $adapter->getDateDiffSql("'{$now}'", 'lo.last_order');
                 $select = $adapter->select()
                     ->from(['lo' => new Maho\Db\Expr("({$lastOrderSelect})")], ['customer_id'])
-                    ->where("DATEDIFF('{$now}', lo.last_order) {$operator} {$value}");
+                    ->where("{$dateDiff} {$operator} {$value}");
 
                 // Also include customers with no orders if operator allows
                 if (in_array($operator, ['>=', '>'])) {
@@ -204,7 +211,7 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
                         ->from(['c' => $customerTable], ['entity_id'])
                         ->joinLeft(
                             ['o' => $orderTable],
-                            'c.entity_id = o.customer_id AND o.state NOT IN ("canceled")',
+                            "c.entity_id = o.customer_id AND o.state NOT IN ('canceled')",
                             [],
                         )
                         ->where('o.entity_id IS NULL');
@@ -225,9 +232,8 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Timebased exten
 
         if ($requireValid) {
             return $adapter->quoteInto("{$fieldName} IN (?)", new Maho\Db\Expr((string) $customerIds));
-        } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $customerIds));
         }
+        return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $customerIds));
     }
 
     #[\Override]

@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,14 +15,14 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
     /**
      * Format type object
      *
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     protected $_type;
 
     /**
      * Retrieve format type object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function getType()
@@ -36,7 +36,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
      * @return $this
      */
     #[\Override]
-    public function setType(Varien_Object $type)
+    public function setType(\Maho\DataObject $type)
     {
         $this->_type = $type;
         return $this;
@@ -77,7 +77,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
             default => Mage_Customer_Model_Attribute_Data::OUTPUT_FORMAT_TEXT,
         };
 
-        $formater   = new Varien_Filter_Template();
+        $formater   = new \Maho\Filter\Template();
         $attributes = Mage::helper('customer/address')->getAttributes();
 
         $data = [];
@@ -112,7 +112,7 @@ class Mage_Customer_Block_Address_Renderer_Default extends Mage_Core_Block_Abstr
         }
 
         $formater->setVariables($data);
-        $format = !is_null($format) ? $format : $this->_prepareAddressTemplateData($this->getFormat($address));
+        $format = is_null($format) ? $this->_prepareAddressTemplateData($this->getFormat($address)) : $format;
 
         return $formater->filter($format);
     }

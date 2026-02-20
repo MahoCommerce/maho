@@ -6,7 +6,7 @@
  * @package    Mage_Oauth
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -85,10 +85,9 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initForm($simple = false)
     {
-        /** @var Mage_Oauth_Model_Server $server */
         $server = Mage::getModel('oauth/server');
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         $isException = false;
         try {
@@ -132,24 +131,23 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initConfirmPage($simple = false)
     {
-        /** @var Mage_Oauth_Helper_Data $helper */
         $helper = Mage::helper('oauth');
 
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         /** @var Mage_Admin_Model_User $user */
         $user = $session->getData('user');
         if (!$user) {
             $session->addError($this->__('Please login to proceed authorization.'));
-            $url = $helper->getAuthorizeUrl(Mage_Oauth_Model_Token::USER_TYPE_ADMIN);
+            $url = $helper->getAuthorizeUrl();
             $this->_redirectUrl($url);
             return $this;
         }
 
         $this->loadLayout();
 
-        /** @var Mage_Oauth_Block_Adminhtml_Oauth_Authorize $block */
+        /** @var Mage_Core_Block_Template $block */
         $block = $this->getLayout()->getBlock('content')->getChild('oauth.authorize.confirm');
         $block->setIsSimple($simple);
 
@@ -162,10 +160,9 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
             if (($callback = $helper->getFullCallbackUrl($token))) { //false in case of OOB
                 $this->getResponse()->setRedirect($callback . ($simple ? '&simple=1' : ''));
                 return $this;
-            } else {
-                $block->setVerifier($token->getVerifier());
-                $session->addSuccess($this->__('Authorization confirmed.'));
             }
+            $block->setVerifier($token->getVerifier());
+            $session->addSuccess($this->__('Authorization confirmed.'));
         } catch (Mage_Core_Exception $e) {
             $block->setHasException(true);
             $session->addError($e->getMessage());
@@ -188,15 +185,14 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
      */
     protected function _initRejectPage($simple = false)
     {
-        /** @var Mage_Oauth_Model_Server $server */
         $server = Mage::getModel('oauth/server');
 
-        /** @var Mage_Admin_Model_Session $session */
         $session = Mage::getSingleton($this->_sessionName);
+        assert($session instanceof \Mage_Admin_Model_Session);
 
         $this->loadLayout();
 
-        /** @var Mage_Oauth_Block_Authorize $block */
+        /** @var Mage_Core_Block_Template $block */
         $block = $this->getLayout()->getBlock('oauth.authorize.reject');
         $block->setIsSimple($simple);
 
@@ -208,9 +204,8 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
             if (($callback = $helper->getFullCallbackUrl($token, true))) {
                 $this->_redirectUrl($callback . ($simple ? '&simple=1' : ''));
                 return $this;
-            } else {
-                $session->addNotice($this->__('The application access request is rejected.'));
             }
+            $session->addNotice($this->__('The application access request is rejected.'));
         } catch (Mage_Core_Exception $e) {
             $session->addError($e->getMessage());
         } catch (Exception $e) {
@@ -278,7 +273,10 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     }
 
     /**
-     * Check admin permissions for this controller
+     * Allow access to all admin users
+     *
+     * OAuth authorization flow requires unrestricted access as it handles
+     * the login and consent screens for third-party application authorization.
      *
      * @return true
      */

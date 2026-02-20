@@ -6,7 +6,7 @@
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -175,11 +175,11 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Search_
     {
         if ($products = $this->getRequest()->getPost('products')) {
             return $products;
-        } elseif ($productss = $this->getRequest()->getParam('productss')) {
-            return explode(',', $productss);
-        } else {
-            return [];
         }
+        if ($productss = $this->getRequest()->getParam('productss')) {
+            return explode(',', $productss);
+        }
+        return [];
     }
 
     /**

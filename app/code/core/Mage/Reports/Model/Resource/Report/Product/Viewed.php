@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,7 +63,6 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             ),
         );
 
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('core');
         $select = $adapter->select();
 
@@ -172,14 +171,15 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
             [],
         );
 
-        $havingPart = [$adapter->prepareSqlCondition($viewsNumExpr, ['gt' => 0])];
-        if (!is_null($subSelect)) {
-            $subSelectHavingPart = $this->_makeConditionFromDateRangeSelect($subSelect, 'period');
-            if ($subSelectHavingPart) {
-                $havingPart[] = '(' . $subSelectHavingPart . ')';
-            }
+        // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+        // so we can't use the 'period' alias here - it doesn't exist yet)
+        if ($from !== null) {
+            $select->where('source_table.logged_at >= ?', $from);
         }
-        $select->having(implode(' AND ', $havingPart));
+        if ($to !== null) {
+            $select->where('source_table.logged_at <= ?', $to);
+        }
+        $select->having($adapter->prepareSqlCondition($viewsNumExpr, ['gt' => 0]));
 
         $select->useStraightJoin();
         $insertQuery = $helper->getInsertFromSelectUsingAnalytic(
@@ -189,7 +189,6 @@ class Mage_Reports_Model_Resource_Report_Product_Viewed extends Mage_Sales_Model
         );
         $adapter->query($insertQuery);
 
-        /** @var Mage_Reports_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('reports');
         $helper
             ->updateReportRatingPos('day', 'views_num', $mainTable, $this->getTable(self::AGGREGATION_DAILY));

@@ -6,7 +6,7 @@
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -56,8 +56,8 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      */
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('core/factory');
-        $this->_app     = !empty($args['app']) ? $args['app'] : Mage::app();
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
+        $this->_app     = empty($args['app']) ? Mage::app() : $args['app'];
 
         parent::__construct();
     }
@@ -137,7 +137,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * @param array $websiteIds
      * @return bool
      */
-    public function validateProduct(Mage_CatalogRule_Model_Rule $rule, Varien_Object $product, $websiteIds = [])
+    public function validateProduct(Mage_CatalogRule_Model_Rule $rule, \Maho\DataObject $product, $websiteIds = [])
     {
         /** @var Mage_Catalog_Helper_Product_Flat $helper */
         $helper = $this->_factory->getHelper('catalog/product_flat');
@@ -153,9 +153,8 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
                 }
             }
             return false;
-        } else {
-            return $rule->getConditions()->validate($product);
         }
+        return $rule->getConditions()->validate($product);
     }
 
     /**
@@ -414,7 +413,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * @param int|null $productId
      * @param int|null $websiteId
      *
-     * @return Maho\Db\Statement\Pdo\Mysql
+     * @return \Maho\Db\Statement\StatementInterface
      */
     protected function _getRuleProductsStmt($fromDate, $toDate, $productId = null, $websiteId = null)
     {
@@ -516,24 +515,6 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     {
         $this->_reindexCatalogRule($product);
         return $this;
-    }
-
-    /**
-     * Generate catalog price rules prices for specified date range
-     * If from date is not defined - will be used previous day by UTC
-     * If to date is not defined - will be used next day by UTC
-     *
-     * @param int|string|null $fromDate
-     * @param int|string|null $toDate
-     * @param int $productId
-     *
-     * @deprecated after 1.7.0.2 use method applyAllRules
-     *
-     * @return $this
-     */
-    public function applyAllRulesForDateRange($fromDate = null, $toDate = null, $productId = null)
-    {
-        return $this->applyAllRules($productId);
     }
 
     /**

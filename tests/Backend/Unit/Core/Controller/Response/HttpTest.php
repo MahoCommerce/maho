@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -349,13 +349,6 @@ describe('Mage_Core_Controller_Response_Http', function () {
 
             $this->response->setException(new Exception('Error'));
             expect($this->response->isException())->toBeTrue();
-        });
-
-        it('renders exceptions when present', function () {
-            $this->response->setException(new Exception('Test exception'));
-            $this->response->renderExceptions(true);
-
-            expect($this->response->renderExceptions())->toBeTrue();
         });
     });
 

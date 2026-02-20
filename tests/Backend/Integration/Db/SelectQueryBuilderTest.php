@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -310,7 +310,13 @@ describe('Select Query Builder - FOR UPDATE', function () {
 
         $sql = $select->assemble();
 
-        expect($sql)->toContain('FOR UPDATE');
+        // SQLite uses transaction-level locking, so FOR UPDATE is silently ignored
+        // MySQL and PostgreSQL support row-level locking with FOR UPDATE
+        if ($this->adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite) {
+            expect($sql)->not->toContain('FOR UPDATE');
+        } else {
+            expect($sql)->toContain('FOR UPDATE');
+        }
     });
 
     it('removes FOR UPDATE when set to false', function () {

@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -40,14 +40,6 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
 {
     public const EXCEPTION_CODE_NOT_SALABLE            = 901;
     public const EXCEPTION_CODE_HAS_REQUIRED_OPTIONS   = 902;
-
-    /**
-     * We can store product store product configuration
-     * and add grouped attributes after 1.4.2.0
-     *
-     * @deprecated after 1.4.2.0
-     */
-    public const EXCEPTION_CODE_IS_GROUPED_PRODUCT     = 903;
     public const EXCEPTION_CODE_NOT_SPECIFIED_PRODUCT  = 904;
 
     /**
@@ -276,24 +268,6 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     }
 
     /**
-     * Retrieve wishlist item data as array
-     *
-     * @deprecated since 1.4.0.0
-     * @return array
-     */
-    public function getDataForSave()
-    {
-        $data = [];
-        $data['product_id']  = $this->getProductId();
-        $data['wishlist_id'] = $this->getWishlistId();
-        $data['added_at']    = $this->getAddedAt() ?: Mage::getSingleton('core/date')->gmtDate();
-        $data['description'] = $this->getDescription();
-        $data['store_id']    = $this->getStoreId() ?: Mage::app()->getStore()->getId();
-
-        return $data;
-    }
-
-    /**
      * Load item by product, wishlist and shared stores
      *
      * @param int $wishlistId
@@ -409,19 +383,21 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      * Returns formatted buy request - object, holding request received from
      * product view page with keys and options for configured product
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getBuyRequest()
     {
         $option = $this->getOptionByCode('info_buyRequest');
-        $initialData = $option ? unserialize($option->getValue(), ['allowed_classes' => false]) : null;
+        $initialData = $option
+            ? Mage::helper('core/string')->unserialize($option->getValue())
+            : null;
 
-        // There can be wrong data due to bug in Grouped products - it formed 'info_buyRequest' as Varien_Object
-        if ($initialData instanceof Varien_Object) {
+        // There can be wrong data due to bug in Grouped products - it formed 'info_buyRequest' as \Maho\DataObject
+        if ($initialData instanceof \Maho\DataObject) {
             $initialData = $initialData->getData();
         }
 
-        $buyRequest = new Varien_Object($initialData);
+        $buyRequest = new \Maho\DataObject($initialData);
         $buyRequest->setOriginalQty($buyRequest->getQty())
             ->setQty($this->getQty() * 1);
         return $buyRequest;
@@ -430,12 +406,12 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     /**
      * Merge data to item info_buyRequest option
      *
-     * @param array|Varien_Object $buyRequest
+     * @param array|\Maho\DataObject $buyRequest
      * @return $this
      */
     public function mergeBuyRequest($buyRequest)
     {
-        if ($buyRequest instanceof Varien_Object) {
+        if ($buyRequest instanceof \Maho\DataObject) {
             $buyRequest = $buyRequest->getData();
         }
 
@@ -445,7 +421,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
 
         $oldBuyRequest = $this->getBuyRequest()
             ->getData();
-        $sBuyRequest = serialize($buyRequest + $oldBuyRequest);
+        $sBuyRequest = Mage::helper('core')->jsonEncode($buyRequest + $oldBuyRequest);
 
         $option = $this->getOptionByCode('info_buyRequest');
         if ($option) {
@@ -463,13 +439,13 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
     /**
      * Set buy request - object, holding request received from
      * product view page with keys and options for configured product
-     * @param Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return $this
      */
     public function setBuyRequest($buyRequest)
     {
         $buyRequest->setId($this->getId());
-        $request = serialize($buyRequest->getData());
+        $request = Mage::helper('core')->jsonEncode($buyRequest->getData());
         $this->setData('buy_request', $request);
         return $this;
     }
@@ -478,7 +454,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      * Check product representation in item
      *
      * @param   Mage_Catalog_Model_Product $product
-     * @param   Varien_Object $buyRequest
+     * @param \Maho\DataObject $buyRequest
      * @return  bool
      */
     public function isRepresent($product, $buyRequest)
@@ -495,9 +471,8 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
         if (empty($selfOptions) && !empty($buyRequest)) {
             if (!$product->isComposite()) {
                 return true;
-            } else {
-                return false;
             }
+            return false;
         }
 
         $requestArray = $buyRequest->getData();
@@ -609,7 +584,7 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
                 ->setItem($this);
         } elseif ($option instanceof Mage_Wishlist_Model_Item_Option) {
             $option->setItem($this);
-        } elseif ($option instanceof Varien_Object) {
+        } elseif ($option instanceof \Maho\DataObject) {
             $option = Mage::getModel('wishlist/item_option')->setData($option->getData())
                ->setProduct($option->getProduct())
                ->setItem($this);
@@ -691,12 +666,12 @@ class Mage_Wishlist_Model_Item extends Mage_Core_Model_Abstract implements Mage_
      *
      * We have to customize only controller url, so return it.
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function getFileDownloadParams()
     {
-        $params = new Varien_Object();
+        $params = new \Maho\DataObject();
         $params->setUrl($this->_customOptionDownloadUrl);
         return $params;
     }

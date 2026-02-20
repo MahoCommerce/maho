@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -47,133 +47,6 @@ class Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default extends Mage_
     public function canDisplayContainer()
     {
         return $this->getRequest()->getParam('reload') != 1;
-    }
-
-    /**
-     * Giftmessage object
-     *
-     * @deprecated after 1.4.2.0
-     * @var Mage_GiftMessage_Model_Message
-     */
-    protected $_giftMessage = [];
-
-    /**
-     * Retrieve default value for giftmessage sender
-     *
-     * @deprecated after 1.4.2.0
-     * @return string
-     */
-    public function getDefaultSender()
-    {
-        if (!$this->getItem()) {
-            return '';
-        }
-
-        if ($this->getItem()->getOrder()) {
-            return $this->getItem()->getOrder()->getBillingAddress()->getName();
-        }
-
-        return $this->getItem()->getBillingAddress()->getName();
-    }
-
-    /**
-     * Retrieve default value for giftmessage recipient
-     *
-     * @deprecated after 1.4.2.0
-     * @return string
-     */
-    public function getDefaultRecipient()
-    {
-        if (!$this->getItem()) {
-            return '';
-        }
-
-        if ($this->getItem()->getOrder()) {
-            if ($this->getItem()->getOrder()->getShippingAddress()) {
-                return $this->getItem()->getOrder()->getShippingAddress()->getName();
-            }
-
-            if ($this->getItem()->getOrder()->getBillingAddress()) {
-                return $this->getItem()->getOrder()->getBillingAddress()->getName();
-            }
-        }
-
-        if ($this->getItem()->getShippingAddress()) {
-            return $this->getItem()->getShippingAddress()->getName();
-        }
-
-        if ($this->getItem()->getBillingAddress()) {
-            return $this->getItem()->getBillingAddress()->getName();
-        }
-
-        return '';
-    }
-
-    /**
-     * Retrieve real name for field
-     *
-     * @deprecated after 1.4.2.0
-     * @param string $name
-     * @return string
-     */
-    public function getFieldName($name)
-    {
-        return 'giftmessage[' . $this->getItem()->getId() . '][' . $name . ']';
-    }
-
-    /**
-     * Initialize gift message for entity
-     *
-     * @deprecated after 1.4.2.0
-     * @return $this
-     */
-    protected function _initMessage()
-    {
-        /** @var Mage_GiftMessage_Helper_Message $helper */
-        $helper = $this->helper('giftmessage/message');
-
-        $this->_giftMessage[$this->getItem()->getGiftMessageId()] =
-            $helper->getGiftMessage($this->getItem()->getGiftMessageId());
-
-        // init default values for giftmessage form
-        if (!$this->getMessage()->getSender()) {
-            $this->getMessage()->setSender($this->getDefaultSender());
-        }
-        if (!$this->getMessage()->getRecipient()) {
-            $this->getMessage()->setRecipient($this->getDefaultRecipient());
-        }
-
-        return $this;
-    }
-
-    /**
-     * Retrieve gift message for entity
-     *
-     * @deprecated after 1.4.2.0
-     * @return Mage_GiftMessage_Model_Message
-     */
-    public function getMessage()
-    {
-        if (!isset($this->_giftMessage[$this->getItem()->getGiftMessageId()])) {
-            $this->_initMessage();
-        }
-
-        return $this->_giftMessage[$this->getItem()->getGiftMessageId()];
-    }
-
-    /**
-     * Retrieve save url
-     *
-     * @return string
-     * @deprecated after 1.4.2.0
-     */
-    public function getSaveUrl()
-    {
-        return $this->getUrl('*/sales_order_view_giftmessage/save', [
-            'entity'    => $this->getItem()->getId(),
-            'type'      => 'order_item',
-            'reload'    => true,
-        ]);
     }
 
     /**
@@ -229,7 +102,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default extends Mage_
      * @return string
      */
     #[\Override]
-    public function displayPriceInclTax(Varien_Object $item)
+    public function displayPriceInclTax(\Maho\DataObject $item)
     {
         /** @var Mage_Checkout_Helper_Data $helper */
         $helper = $this->helper('checkout');

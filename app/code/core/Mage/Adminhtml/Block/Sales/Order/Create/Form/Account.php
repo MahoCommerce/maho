@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -87,7 +87,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Account extends Mage_Adminhtm
      * @return $this
      */
     #[\Override]
-    protected function _addAdditionalFormElementData(Varien_Data_Form_Element_Abstract $element)
+    protected function _addAdditionalFormElementData(\Maho\Data\Form\Element\AbstractElement $element)
     {
         switch ($element->getId()) {
             case 'email':
@@ -96,17 +96,6 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Form_Account extends Mage_Adminhtm
                 break;
         }
         return $this;
-    }
-
-    /**
-     * Return customer data
-     *
-     * @deprecated since 1.4.0.1
-     * @return array
-     */
-    public function getCustomerData()
-    {
-        return $this->getFormValues();
     }
 
     /**

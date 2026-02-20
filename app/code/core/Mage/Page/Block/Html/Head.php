@@ -6,7 +6,7 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -55,36 +55,6 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
     public function addJs($name, $params = '', $referenceName = '*', $before = null)
     {
         $this->addItem('js', $name, $params, null, null, $referenceName, $before);
-        return $this;
-    }
-
-    /**
-     * Add CSS file for Internet Explorer only to HEAD entity
-     *
-     * @param string $name
-     * @param string $params
-     * @param string $referenceName
-     * @param bool $before
-     * @return $this
-     * @deprecated
-     */
-    public function addCssIe($name, $params = '', $referenceName = '*', $before = null)
-    {
-        return $this;
-    }
-
-    /**
-     * Add JavaScript file for Internet Explorer only to HEAD entity
-     *
-     * @param string $name
-     * @param string $params
-     * @param string $referenceName
-     * @param bool $before
-     * @return $this
-     * @deprecated
-     */
-    public function addJsIe($name, $params = '', $referenceName = '*', $before = null)
-    {
         return $this;
     }
 
@@ -187,8 +157,8 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
             if (!is_null($item['cond']) && !$this->getData($item['cond']) || !isset($item['name'])) {
                 continue;
             }
-            $if     = !empty($item['if']) ? $item['if'] : '';
-            $params = !empty($item['params']) ? $item['params'] : '';
+            $if     = empty($item['if']) ? '' : $item['if'];
+            $params = empty($item['params']) ? '' : $item['params'];
             switch ($item['type']) {
                 case 'js':        // js/*.js
                 case 'skin_js':   // skin/*/*.js
@@ -616,17 +586,5 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
         if (isset($newItems[$newKey])) {
             $this->_data['items'] = $newItems;
         }
-    }
-
-    /** @deprecated */
-    public function setCanLoadTinyMce(bool $value): self
-    {
-        return $this->setData('can_load_wysiwyg', $value);
-    }
-
-    /** @deprecated */
-    public function getCanLoadTinyMce(): bool
-    {
-        return (bool) $this->getData('can_load_wysiwyg');
     }
 }

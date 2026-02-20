@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -398,19 +398,6 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Retrieve Default Quantity Increments data wrapper
-     *
-     * @deprecated since 1.7.0.0
-     * @return int|false
-     */
-    public function getDefaultQtyIncrements()
-    {
-        return Mage::getStoreConfigFlag(self::XML_PATH_ENABLE_QTY_INCREMENTS)
-            ? Mage::getStoreConfigAsInt(self::XML_PATH_QTY_INCREMENTS)
-            : false;
-    }
-
-    /**
      * Retrieve backorders status
      *
      * @return int
@@ -518,11 +505,11 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      * @param mixed $qty quantity of this item (item qty x parent item qty)
      * @param mixed $summaryQty quantity of this product
      * @param mixed $origQty original qty of item (not multiplied on parent item qty)
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function checkQuoteItemQty($qty, $summaryQty, $origQty = 0)
     {
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         $result->setHasError(false);
 
         if (!is_numeric($qty)) {
@@ -619,47 +606,46 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
                 ->setQuoteMessage($message)
                 ->setQuoteMessageIndex('qty');
             return $result;
-        } else {
-            if (($this->getQty() - $summaryQty) < 0) {
-                if ($this->getProductName()) {
-                    if ($this->getIsChildItem()) {
-                        $backorderQty = ($this->getQty() > 0) ? ($summaryQty - $this->getQty()) * 1 : $qty * 1;
-                        if ($backorderQty > $qty) {
-                            $backorderQty = $qty;
-                        }
-
-                        $result->setItemBackorders($backorderQty);
-                    } else {
-                        $orderedItems = $this->getOrderedItems();
-                        $itemsLeft = ($this->getQty() > $orderedItems) ? ($this->getQty() - $orderedItems) * 1 : 0;
-                        $backorderQty = ($itemsLeft > 0) ? ($qty - $itemsLeft) * 1 : $qty * 1;
-
-                        if ($backorderQty > 0) {
-                            $result->setItemBackorders($backorderQty);
-                        }
-                        $this->setOrderedItems($orderedItems + $qty);
+        }
+        if (($this->getQty() - $summaryQty) < 0) {
+            if ($this->getProductName()) {
+                if ($this->getIsChildItem()) {
+                    $backorderQty = ($this->getQty() > 0) ? ($summaryQty - $this->getQty()) * 1 : $qty * 1;
+                    if ($backorderQty > $qty) {
+                        $backorderQty = $qty;
                     }
 
-                    if ($this->getBackorders() == Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NOTIFY) {
-                        if (!$this->getIsChildItem()) {
-                            $result->setMessage(
-                                Mage::helper('cataloginventory')->__('This product is not available in the requested quantity. %s of the items will be backordered.', ($backorderQty * 1)),
-                            );
-                        } else {
-                            $result->setMessage(
-                                Mage::helper('cataloginventory')->__('"%s" is not available in the requested quantity. %s of the items will be backordered.', $this->getProductName(), ($backorderQty * 1)),
-                            );
-                        }
-                    } elseif (Mage::app()->getStore()->isAdmin()) {
+                    $result->setItemBackorders($backorderQty);
+                } else {
+                    $orderedItems = $this->getOrderedItems();
+                    $itemsLeft = ($this->getQty() > $orderedItems) ? ($this->getQty() - $orderedItems) * 1 : 0;
+                    $backorderQty = ($itemsLeft > 0) ? ($qty - $itemsLeft) * 1 : $qty * 1;
+
+                    if ($backorderQty > 0) {
+                        $result->setItemBackorders($backorderQty);
+                    }
+                    $this->setOrderedItems($orderedItems + $qty);
+                }
+
+                if ($this->getBackorders() == Mage_CatalogInventory_Model_Stock::BACKORDERS_YES_NOTIFY) {
+                    if (!$this->getIsChildItem()) {
                         $result->setMessage(
-                            Mage::helper('cataloginventory')->__('The requested quantity for "%s" is not available.', $this->getProductName()),
+                            Mage::helper('cataloginventory')->__('This product is not available in the requested quantity. %s of the items will be backordered.', ($backorderQty * 1)),
+                        );
+                    } else {
+                        $result->setMessage(
+                            Mage::helper('cataloginventory')->__('"%s" is not available in the requested quantity. %s of the items will be backordered.', $this->getProductName(), ($backorderQty * 1)),
                         );
                     }
+                } elseif (Mage::app()->getStore()->isAdmin()) {
+                    $result->setMessage(
+                        Mage::helper('cataloginventory')->__('The requested quantity for "%s" is not available.', $this->getProductName()),
+                    );
                 }
-            } else {
-                if (!$this->getIsChildItem()) {
-                    $this->setOrderedItems($qty + (int) $this->getOrderedItems());
-                }
+            }
+        } else {
+            if (!$this->getIsChildItem()) {
+                $this->setOrderedItems($qty + (int) $this->getOrderedItems());
             }
         }
 
@@ -670,11 +656,11 @@ class Mage_CatalogInventory_Model_Stock_Item extends Mage_Core_Model_Abstract
      * Check qty increments
      *
      * @param int|float $qty
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function checkQtyIncrements($qty)
     {
-        $result = new Varien_Object();
+        $result = new \Maho\DataObject();
         if ($this->getSuppressCheckQtyIncrements()) {
             return $result;
         }

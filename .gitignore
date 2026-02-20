@@ -8,6 +8,7 @@
 !.vscode/*.code-snippets
 .history/
 *.vsix
+.planning/
 
 # Maho stuff
 /app/etc/local.xml*
@@ -25,6 +26,9 @@
 
 # Composer
 /vendor
+
+# Local scripts with credentials
+/shell/cf-purge.sh
 
 # PHP-CS-Fixer
 .php-cs-fixer.cache

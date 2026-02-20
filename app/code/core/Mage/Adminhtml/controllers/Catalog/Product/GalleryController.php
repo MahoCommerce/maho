@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -22,7 +22,7 @@ class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Co
     {
         try {
             $uploader = Mage::getModel('core/file_uploader', 'image');
-            $uploader->setAllowedExtensions(Varien_Io_File::ALLOWED_IMAGES_EXTENSIONS);
+            $uploader->setAllowedExtensions(\Maho\Io\File::ALLOWED_IMAGES_EXTENSIONS);
             $uploader->addValidateCallback(
                 'catalog_product_image',
                 Mage::helper('catalog/image'),

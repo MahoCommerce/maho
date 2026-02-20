@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,11 +18,9 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_DEFAULT_COUNTRY              = 'general/country/default';
     public const XML_PATH_PROTECTED_FILE_EXTENSIONS    = 'general/file/protected_extensions';
-    public const XML_PATH_PUBLIC_FILES_VALID_PATHS     = 'general/file/public_files_valid_paths';
     public const XML_PATH_ENCRYPTION_MODEL             = 'global/helpers/core/encryption_model';
     public const XML_PATH_DEV_ALLOW_IPS                = 'dev/restrict/allow_ips';
     public const XML_PATH_CACHE_BETA_TYPES             = 'global/cache/betatypes';
-    public const XML_PATH_CONNECTION_TYPE              = 'global/resources/default_setup/connection/type';
 
     public const CHARS_LOWERS                          = 'abcdefghijklmnopqrstuvwxyz';
     public const CHARS_UPPERS                          = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -300,7 +298,8 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         if (is_null($chars)) {
             $chars = self::CHARS_LOWERS . self::CHARS_UPPERS . self::CHARS_DIGITS;
         }
-        for ($i = 0, $str = '', $lc = strlen($chars) - 1; $i < $len; $i++) {
+        $str = '';
+        for ($i = 0, $lc = strlen($chars) - 1; $i < $len; $i++) {
             $str .= $chars[random_int(0, $lc)];
         }
         return $str;
@@ -491,15 +490,15 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param string $fieldset
      * @param string $aspect
-     * @param array|Varien_Object $source
-     * @param array|Varien_Object $target
+     * @param array|\Maho\DataObject $source
+     * @param array|\Maho\DataObject $target
      * @param string $root
      * @return bool
      */
     public function copyFieldset($fieldset, $aspect, $source, $target, $root = 'global')
     {
-        if (!(is_array($source) || $source instanceof Varien_Object)
-            || !(is_array($target) || $target instanceof Varien_Object)
+        if (!(is_array($source) || $source instanceof \Maho\DataObject)
+            || !(is_array($target) || $target instanceof \Maho\DataObject)
         ) {
             return false;
         }
@@ -711,44 +710,6 @@ XML;
     public function getProtectedFileExtensions($store = null)
     {
         return Mage::getStoreConfig(self::XML_PATH_PROTECTED_FILE_EXTENSIONS, $store);
-    }
-
-    /**
-     * Return list with public files valid paths
-     *
-     * @return array
-     */
-    public function getPublicFilesValidPath()
-    {
-        return Mage::getStoreConfig(self::XML_PATH_PUBLIC_FILES_VALID_PATHS);
-    }
-
-    /**
-     * Check LFI protection
-     *
-     * @throws Mage_Core_Exception
-     * @param string $name
-     * @return bool
-     */
-    public function checkLfiProtection($name)
-    {
-        if (preg_match('#\.\.[\\\/]#', $name)) {
-            throw new Mage_Core_Exception($this->__('Invalid template path: contains parent directory traversal'));
-        }
-        return true;
-    }
-
-    /**
-     * Check whether database compatible mode is used (configs enable it for MySQL by default).
-     *
-     * @return bool
-     */
-    public function useDbCompatibleMode()
-    {
-        $connType = (string) Mage::getConfig()->getNode(self::XML_PATH_CONNECTION_TYPE);
-        $path = 'global/resource/connection/types/' . $connType . '/compatibleMode';
-        $value = (string) Mage::getConfig()->getNode($path);
-        return (bool) $value;
     }
 
     /**
@@ -1201,5 +1162,67 @@ XML;
 
         $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
+    }
+
+    /**
+     * Re-encrypt columns in a table using batched queries to avoid memory exhaustion.
+     *
+     * @param string[] $columns
+     */
+    public function recryptTable(
+        string $table,
+        string $primaryKey,
+        array $columns,
+        callable $encryptCallback,
+        callable $decryptCallback,
+        int $batchSize = 1000,
+    ): void {
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lastId = 0;
+
+        $quotedPk = $readConnection->quoteIdentifier($primaryKey);
+
+        while (true) {
+            $select = $readConnection->select()
+                ->from($table, array_merge([$primaryKey], $columns))
+                ->where("$quotedPk > ?", $lastId)
+                ->order("$quotedPk ASC")
+                ->limit($batchSize);
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $conditions[] = $readConnection->quoteIdentifier($column) . ' IS NOT NULL AND '
+                    . $readConnection->quoteIdentifier($column) . " != ''";
+            }
+            $select->where(implode(' OR ', $conditions));
+
+            $rows = $readConnection->fetchAll($select);
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                $updateData = [];
+                foreach ($columns as $column) {
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $decrypted = $decryptCallback($row[$column]);
+                        if ($decrypted !== '') {
+                            $updateData[$column] = $encryptCallback($decrypted);
+                        }
+                    }
+                }
+                if (!empty($updateData)) {
+                    $writeConnection->update(
+                        $table,
+                        $updateData,
+                        ["$quotedPk = ?" => $row[$primaryKey]],
+                    );
+                }
+                $lastId = $row[$primaryKey];
+            }
+
+            unset($rows);
+        }
     }
 }

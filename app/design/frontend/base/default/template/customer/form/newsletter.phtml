@@ -5,11 +5,12 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Customer_Block_Newsletter $this */
+$isSubscribed = $this->getIsSubscribed();
 ?>
 <div class="page-title">
     <h1><?= $this->__('Newsletter Subscription') ?></h1>
@@ -17,21 +18,24 @@
 <?= $this->getMessagesBlock()->toHtml() ?>
 <?= $this->getChildHtml('form_before') ?>
 <form action="<?= $this->getAction() ?>" method="post" id="form-validate">
-    <div class="fieldset">
-        <?= $this->getBlockHtml('formkey') ?>
-        <h2 class="legend"><?= $this->__('Newsletter Subscription') ?></h2>
-        <ul class="form-list">
-            <li class="control"><input type="checkbox" name="is_subscribed" id="subscription" value="1" title="<?= $this->quoteEscape($this->__('General Subscription')) ?>"<?php if($this->getIsSubscribed()): ?> checked="checked"<?php endif ?> class="checkbox" /><label for="subscription"><?= $this->__('General Subscription') ?></label></li>
-            <?php /* Extensions placeholder */ ?>
-            <?= $this->getChildHtml('customer.form.newsletter.extra') ?>
-        </ul>
-    </div>
-    <div class="buttons-set">
-        <button type="submit" title="<?= $this->quoteEscape($this->__('Save')) ?>" class="button"><?= $this->__('Save') ?></button>
-    </div>
+    <?= $this->getBlockHtml('formkey') ?>
+    <input type="hidden" name="is_subscribed" value="<?= $isSubscribed ? '0' : '1' ?>">
+    <p class="newsletter-description">
+        <?php if ($isSubscribed): ?>
+            <?= $this->__('You are currently subscribed to our newsletter.') ?>
+        <?php else: ?>
+            <?= $this->__('Be the first to know about new arrivals, special offers, and insider news.') ?>
+        <?php endif ?>
+    </p>
+    <?= $this->getChildHtml('customer.form.newsletter.extra') ?>
+    <?php if ($isSubscribed): ?>
+        <button type="submit" title="<?= $this->quoteEscape($this->__('Unsubscribe')) ?>" class="button">
+            <?= $this->__('Unsubscribe') ?>
+        </button>
+    <?php else: ?>
+        <button type="submit" title="<?= $this->quoteEscape($this->__('Subscribe')) ?>" class="button">
+            <?= $this->__('Subscribe') ?>
+        </button>
+    <?php endif ?>
 </form>
-<?php /* Extensions placeholder */ ?>
 <?= $this->getChildHtml('customer.form.newsletter.extra2') ?>
-<script type="text/javascript">
-    var dataForm = new VarienForm('form-validate', true);
-</script>

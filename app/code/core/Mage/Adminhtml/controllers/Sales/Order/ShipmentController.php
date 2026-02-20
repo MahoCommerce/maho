@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -175,7 +175,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
             return;
         }
 
-        $responseAjax = new Varien_Object();
+        $responseAjax = new \Maho\DataObject();
         $isNeedCreateLabel = isset($data['create_shipping_label']) && $data['create_shipping_label'];
 
         try {
@@ -510,7 +510,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      */
     public function createLabelAction(): void
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         try {
             $shipment = $this->_initShipment();
             if (!$this->_createShippingLabel($shipment)) {
@@ -547,25 +547,25 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                         $labelContent,
                         'application/zip',
                     );
-                } elseif (stripos($labelContent, '%PDF-') !== false) {
+                }
+                if (stripos($labelContent, '%PDF-') !== false) {
                     // Single PDF file
                     return $this->_prepareDownloadResponse(
                         'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
                         $labelContent,
                         'application/pdf',
                     );
+                }
+                // Image content - convert to PDF
+                $pdfContent = $this->createPdfFromImageString($labelContent, $shipment->getIncrementId());
+                if (!$pdfContent) {
+                    $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
                 } else {
-                    // Image content - convert to PDF
-                    $pdfContent = $this->createPdfFromImageString($labelContent, $shipment->getIncrementId());
-                    if (!$pdfContent) {
-                        $this->_getSession()->addError(Mage::helper('sales')->__('File extension not known or unsupported type in the following shipment: %s', $shipment->getIncrementId()));
-                    } else {
-                        return $this->_prepareDownloadResponse(
-                            'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
-                            $pdfContent,
-                            'application/pdf',
-                        );
-                    }
+                    return $this->_prepareDownloadResponse(
+                        'ShippingLabel(' . $shipment->getIncrementId() . ').pdf',
+                        $pdfContent,
+                        'application/pdf',
+                    );
                 }
             }
         } catch (Mage_Core_Exception $e) {
@@ -805,10 +805,10 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     <style>
         @page { margin: 0; }
         body { margin: 0; padding: 0; }
-        .shipping-label { 
-            width: 100%; 
-            height: auto; 
-            display: block; 
+        .shipping-label {
+            width: 100%;
+            height: auto;
+            display: block;
             margin: 0 auto;
         }
     </style>

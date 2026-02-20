@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
     /**
      * Get attribute value for save.
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return string|bool
      */
     #[\Override]
@@ -37,7 +37,7 @@ class Mage_Catalog_Model_Product_Attribute_Backend_Startdate_Specialprice extend
      * Before save hook.
      * Prepare attribute value for save
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return Mage_Catalog_Model_Product_Attribute_Backend_Startdate
      */
     #[\Override]

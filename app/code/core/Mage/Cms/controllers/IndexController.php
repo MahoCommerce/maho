@@ -6,7 +6,7 @@
  * @package    Mage_Cms
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -48,7 +48,7 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      * @param string $coreRoute
      */
     #[\Override]
-    public function noRouteAction($coreRoute = null): void
+    public function norouteAction($coreRoute = null): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
         $this->getResponse()->setHeader('Status', '404 File not found');
@@ -68,28 +68,6 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
         $this->getResponse()->setHeader('Status', '404 File not found');
 
-        $this->loadLayout();
-        $this->renderLayout();
-    }
-
-    /**
-     * Render Disable cookies page
-     */
-    #[\Override]
-    public function noCookiesAction(): void
-    {
-        $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_NO_COOKIES_PAGE);
-        if (!Mage::helper('cms/page')->renderPage($this, $pageId)) {
-            $this->_forward('defaultNoCookies');
-        }
-    }
-
-    /**
-     * Default no cookies page action
-     * Used if no cookies page don't configure or available
-     */
-    public function defaultNoCookiesAction(): void
-    {
         $this->loadLayout();
         $this->renderLayout();
     }

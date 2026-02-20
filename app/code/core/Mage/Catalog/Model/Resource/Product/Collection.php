@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -128,7 +128,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Map of price fields
      *
-     * @var array
+     * @var array|null
      */
     protected $_map = ['fields' => [
         'price'         => 'price_index.price',
@@ -203,7 +203,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     public function __construct($resource = null, array $args = [])
     {
         parent::__construct($resource);
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('catalog/factory');
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('catalog/factory') : $args['factory'];
     }
 
     /**
@@ -225,7 +225,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     protected function _preparePriceExpressionParameters($select)
     {
         // prepare response object for event
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setAdditionalCalculations([]);
         $tableAliases = array_keys($select->getPart(Maho\Db\Select::FROM));
         if (in_array(self::INDEX_TABLE_ALIAS, $tableAliases)) {
@@ -366,7 +366,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
      * Retrieve collection empty item
      * Redeclared for specifying id field name without getting resource model inside model
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function getNewEmptyItem()
@@ -504,39 +504,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
         foreach ($this as $product) {
             if ($product->isRecurring() && $profile = $product->getRecurringProfile()) {
                 $product->setRecurringProfile(Mage::helper('core/unserializeArray')->unserialize($profile));
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * Prepare Url Data object
-     *
-     * @return $this
-     * @deprecated after 1.7.0.2
-     */
-    protected function _prepareUrlDataObject()
-    {
-        $objects = [];
-        /** @var Mage_Catalog_Model_Product $item */
-        foreach ($this->_items as $item) {
-            if ($this->getFlag('do_not_use_category_id')) {
-                $item->setDoNotUseCategoryId(true);
-            }
-            if (!$item->isVisibleInSiteVisibility() && $item->getItemStoreId()) {
-                $objects[$item->getEntityId()] = $item->getItemStoreId();
-            }
-        }
-
-        if ($objects && $this->hasFlag('url_data_object')) {
-            $objects = Mage::getResourceSingleton('catalog/url')
-                ->getRewriteByProductStore($objects);
-            foreach ($this->_items as $item) {
-                if (isset($objects[$item->getEntityId()])) {
-                    $object = new Varien_Object($objects[$item->getEntityId()]);
-                    $item->setUrlDataObject($object);
-                }
             }
         }
 
@@ -801,15 +768,15 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
 
     /**
      * Return all attribute values as array in form:
-     * array(
-     *   [entity_id_1] => array(
+     * [
+     *   [entity_id_1] => [
      *          [store_id_1] => store_value_1,
      *          [store_id_2] => store_value_2,
      *          ...
      *          [store_id_n] => store_value_n
-     *   ),
+     *   ],
      *   ...
-     * )
+     * ]
      *
      * @param string $attribute attribute code
      * @return array
@@ -875,12 +842,16 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     {
         $select = clone $this->getSelect();
         $priceExpression = $this->getPriceExpression($select) . ' ' . $this->getAdditionalPriceExpression($select);
-        $sqlEndPart = ') * ' . $this->getCurrencyRate() . ', 2)';
+        $currencyRate = $this->getCurrencyRate();
+        $adapter = $this->getConnection();
+        $roundedMaxExpr = $adapter->getRoundSql("MAX({$priceExpression}) * {$currencyRate}", 2);
+        $roundedMinExpr = $adapter->getRoundSql("MIN({$priceExpression}) * {$currencyRate}", 2);
+        $roundedStdExpr = $adapter->getRoundSql("({$priceExpression}) * {$currencyRate}", 2);
         $select = $this->_getSelectCountSql($select, false);
         $select->columns([
-            'max' => 'ROUND(MAX(' . $priceExpression . $sqlEndPart,
-            'min' => 'ROUND(MIN(' . $priceExpression . $sqlEndPart,
-            'std' => $this->getConnection()->getStandardDeviationSql('ROUND((' . $priceExpression . $sqlEndPart),
+            'max' => $roundedMaxExpr,
+            'min' => $roundedMinExpr,
+            'std' => $adapter->getStandardDeviationSql($roundedStdExpr),
         ]);
         $select->where($this->getPriceExpression($select) . ' IS NOT NULL');
         $result = $this->getConnection()->query($select, $this->_bindParams);
@@ -1055,25 +1026,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     }
 
     /**
-     * Joins url rewrite rules to collection
-     *
-     * @deprecated after 1.7.0.2. Method is not used anywhere in the code.
-     * @return $this
-     */
-    public function joinUrlRewrite()
-    {
-        $this->joinTable(
-            'core/url_rewrite',
-            'entity_id=entity_id',
-            ['request_path'],
-            '{{table}}.type = ' . Mage_Core_Model_Url_Rewrite::TYPE_PRODUCT,
-            'left',
-        );
-
-        return $this;
-    }
-
-    /**
      * Add URL rewrites data to product
      * If collection loadded - run processing else set flag
      *
@@ -1147,32 +1099,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
                 $item->setData('request_path', false);
             }
         }
-    }
-
-    /**
-     * Add minimal price data to result
-     *
-     * @deprecated use addPriceData
-     * @see Mage_Catalog_Model_Resource_Product_Collection::addPriceData
-     *
-     * @return $this
-     */
-    public function addMinimalPrice()
-    {
-        return $this->addPriceData();
-    }
-
-    /**
-     * Add price data for calculate final price
-     *
-     * @deprecated use addPriceData
-     * @see Mage_Catalog_Model_Resource_Product_Collection::addPriceData
-     *
-     * @return $this
-     */
-    public function addFinalPrice()
-    {
-        return $this->addPriceData();
     }
 
     /**
@@ -1362,9 +1288,8 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             }
 
             return $this;
-        } else {
-            return parent::addAttributeToFilter($attribute, $condition, $joinType);
         }
+        return parent::addAttributeToFilter($attribute, $condition, $joinType);
     }
 
     /**
@@ -1386,25 +1311,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     public function requireTaxPercent()
     {
         return $this->_addTaxPercents;
-    }
-
-    /**
-     * @deprecated from 1.3.0
-     */
-    protected function _addTaxPercents()
-    {
-        $classToRate = [];
-        $request = Mage::getSingleton('tax/calculation')->getRateRequest();
-        foreach ($this as &$item) {
-            if ($item->getTaxClassId() === null) {
-                $item->setTaxClassId($item->getMinimalTaxClassId());
-            }
-            if (!isset($classToRate[$item->getTaxClassId()])) {
-                $request->setProductClassId($item->getTaxClassId());
-                $classToRate[$item->getTaxClassId()] = Mage::getSingleton('tax/calculation')->getRate($request);
-            }
-            $item->setTaxPercent($classToRate[$item->getTaxClassId()]);
-        }
     }
 
     /**
@@ -1477,9 +1383,9 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             } else {
                 $this->getSelect()->order('e.entity_id ' . $dir);
             }
-
             return $this;
-        } elseif ($attribute == 'is_saleable') {
+        }
+        if ($attribute == 'is_saleable') {
             $this->getSelect()->order('is_saleable ' . $dir);
             return $this;
         }
@@ -1502,13 +1408,12 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             }
 
             return $this;
-        } else {
-            $attrInstance = $this->getEntity()->getAttribute($attribute);
-            if ($attrInstance && $attrInstance->usesSource()) {
-                $attrInstance->getSource()
-                    ->addValueSortToCollection($this, $dir);
-                return $this;
-            }
+        }
+        $attrInstance = $this->getEntity()->getAttribute($attribute);
+        if ($attrInstance && $attrInstance->usesSource()) {
+            $attrInstance->getSource()
+                ->addValueSortToCollection($this, $dir);
+            return $this;
         }
 
         return parent::addAttributeToSort($attribute, $dir);
@@ -1640,7 +1545,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             );
         }
         // Avoid column duplication problems
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('core');
         $helper->prepareColumnsList($this->getSelect());
 
@@ -1689,7 +1593,6 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
             return $this;
         }
 
-        /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
         $helper     = Mage::getResourceHelper('core');
         $connection = $this->getConnection();
         $select     = $this->getSelect();

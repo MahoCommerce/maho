@@ -6,7 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -217,18 +217,16 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             return false;
         }
 
-        $whereCondition = [];
-        $adapter = $this->_getReadAdapter();
-        foreach ($selectResult as $date) {
-            $date = substr($date, 0, 10); // to fix differences in oracle
-            $whereCondition[] = $adapter->prepareSqlCondition($periodColumn, ['like' => $date]);
-        }
-        $whereCondition = implode(' OR ', $whereCondition);
-        if ($whereCondition == '') {
-            $whereCondition = '1=0';  // FALSE condition!
+        if (empty($selectResult)) {
+            return '1=0';  // FALSE condition!
         }
 
-        return $whereCondition;
+        // Use IN clause instead of multiple LIKE conditions for better performance
+        // and cross-database compatibility (LIKE doesn't work on DATE columns in PostgreSQL)
+        $adapter = $this->_getReadAdapter();
+        $dates = array_map(fn($date) => substr($date, 0, 10), $selectResult);
+
+        return $adapter->quoteInto("$periodColumn IN (?)", $dates);
     }
 
     /**
@@ -405,8 +403,15 @@ abstract class Mage_Reports_Model_Resource_Report_Abstract extends Mage_Core_Mod
             if ($to instanceof DateTime) {
                 $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
+            } elseif (!empty($to)) {
+                $toOriginal = $to;
+                $to = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $to);
+                $to = $to ?: new DateTime($toOriginal);
+                $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+                $to = $to->getTimestamp();
             } else {
-                $to = DateTime::createFromFormat(Mage_Core_Model_Locale::DATETIME_FORMAT, $to) ?: new DateTime($to);
+                // $to is null - use current time as the end period
+                $to = new DateTime();
                 $nextPeriod = $this->_getWriteAdapter()->formatDate($to->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
                 $to = $to->getTimestamp();
             }

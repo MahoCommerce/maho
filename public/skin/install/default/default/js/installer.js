@@ -2,7 +2,7 @@
  * Maho
  *
  * @package     default_default
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -127,7 +127,6 @@
 
             // Add validation state handling
             input.addEventListener('invalid', function(e) {
-                e.preventDefault();
                 this.classList.add('validation-failed');
 
                 // Scroll to first error smoothly
@@ -233,7 +232,7 @@
         }, observerOptions);
 
         // Observe elements that should animate in
-        document.querySelectorAll('.form-list li, .group-select, .button-set').forEach(el => {
+        document.querySelectorAll('.form-list li, .button-set').forEach(el => {
             el.style.opacity = '0';
             el.style.transform = 'translateY(20px)';
             el.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';

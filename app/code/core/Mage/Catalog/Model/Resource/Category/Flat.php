@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -74,15 +74,6 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
     protected $_isBuilt = [];
 
     /**
-     * Store flag which defines if Catalog Category Flat Data has been initialized
-     *
-     * @deprecated after 1.7.0.0 use $this->_isBuilt instead
-     *
-     * @var bool|null
-     */
-    protected $_isRebuilt = null;
-
-    /**
      * array with root category id per store
      *
      * @var array|null
@@ -108,7 +99,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('catalog/factory');
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('catalog/factory') : $args['factory'];
         parent::__construct();
     }
 
@@ -307,7 +298,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      *
      * @param array $children
      * @param string $path
-     * @param Varien_Object $parent
+     * @param \Maho\DataObject $parent
      */
     public function addChildNodes($children, $path, $parent)
     {
@@ -384,7 +375,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      * @param bool|string $sorted
      * @param bool $asCollection
      * @param bool $toLoad
-     * @return array|Varien_Data_Collection
+     * @return array|\Maho\Data\Collection
      */
     public function getCategories($parent, $recursionLevel = 0, $sorted = false, $asCollection = false, $toLoad = true)
     {
@@ -415,7 +406,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      *
      * @param int $nodeId
      * @param array $nodes
-     * @return Varien_Object|array
+     * @return \Maho\DataObject|array
      */
     public function getNodeById($nodeId, $nodes = null)
     {
@@ -637,7 +628,6 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     protected function _getStaticColumns()
     {
-        /** @var Mage_Eav_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('catalog');
         $columns = [];
         $columnsToSkip = ['entity_type_id', 'attribute_set_id'];
@@ -656,6 +646,10 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                 case Maho\Db\Ddl\Table::TYPE_BIGINT:
                     $isUnsigned = (bool) $column['UNSIGNED'];
                     if ($column['DEFAULT'] === '') {
+                        $column['DEFAULT'] = null;
+                    }
+                    // For PostgreSQL: skip sequence-based defaults for flat tables
+                    if (is_string($column['DEFAULT']) && str_starts_with($column['DEFAULT'], 'nextval(')) {
                         $column['DEFAULT'] = null;
                     }
 
@@ -893,7 +887,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
     /**
      * Synchronize flat data with eav model for category
      *
-     * @param Varien_Object $category
+     * @param \Maho\DataObject $category
      * @return $this
      */
     protected function _synchronize($category)
@@ -921,7 +915,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
 
             $storesObjects = [];
             foreach ($stores as $storeId => $rootCategoryId) {
-                $_store = new Varien_Object([
+                $_store = new \Maho\DataObject([
                     'store_id'          => $storeId,
                     'root_category_id'  => $rootCategoryId,
                 ]);
@@ -938,7 +932,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
                 }
 
                 $attributeValues = $this->_getAttributeValues($categoryId, $storeId);
-                $data = new Varien_Object($category->getData());
+                $data = new \Maho\DataObject($category->getData());
                 $data->addData($attributeValues[$categoryId])
                     ->setStoreId($storeId);
                 $this->_synchronize($data);
@@ -958,7 +952,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             foreach ($stores as $storeId => $rootCategoryId) {
                 if (in_array($rootCategoryId, $path)) {
                     $attributeValues = $this->_getAttributeValues($category, $storeId);
-                    $data = new Varien_Object($row);
+                    $data = new \Maho\DataObject($row);
                     $data->addData($attributeValues[$category])
                         ->setStoreId($storeId);
                     $this->_synchronize($data);
@@ -1048,7 +1042,7 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             foreach ($addStores as $storeId => $storeCategoryIds) {
                 $attributeValues = $this->_getAttributeValues(array_keys($storeCategoryIds), $storeId);
                 foreach ($storeCategoryIds as $row) {
-                    $data = new Varien_Object($row);
+                    $data = new \Maho\DataObject($row);
                     $data->addData($attributeValues[$row['entity_id']])
                         ->setStoreId($storeId);
                     $this->_synchronize($data);
@@ -1130,11 +1124,9 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
 
     /**
      * Prepare array of category data to insert or update.
-     * array(
-     *  'field_name' => 'value'
-     * )
+     * ['field_name' => 'value']
      *
-     * @param Varien_Object $category
+     * @param \Maho\DataObject $category
      * @param array $replaceFields
      * @return array
      */
@@ -1199,13 +1191,13 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
      */
     public function getProductCount($category)
     {
-        $select =  $this->_getReadAdapter()->select()
+        $select = $this->_getReadAdapter()->select()
             ->from(
-                $this->getTable('catalog/category_product'),
-                "COUNT({$this->getTable('catalog/category_product')}.product_id)",
+                ['main_table' => $this->getTable('catalog/category_product')],
+                [new Maho\Db\Expr('COUNT(main_table.product_id)')],
             )
-            ->where("{$this->getTable('catalog/category_product')}.category_id = ?", $category->getId())
-            ->group("{$this->getTable('catalog/category_product')}.category_id");
+            ->where('main_table.category_id = ?', (int) $category->getId());
+
         return (int) $this->_getReadAdapter()->fetchOne($select);
     }
 
@@ -1509,17 +1501,5 @@ class Mage_Catalog_Model_Resource_Category_Flat extends Mage_Index_Model_Resourc
             throw $e;
         }
         return $this;
-    }
-
-    /**
-     * Check if Catalog Category Flat Data has been initialized
-     *
-     * @deprecated use Mage_Catalog_Model_Resource_Category_Flat::isBuilt() instead
-     *
-     * @return bool
-     */
-    public function isRebuilt()
-    {
-        return $this->isBuilt();
     }
 }

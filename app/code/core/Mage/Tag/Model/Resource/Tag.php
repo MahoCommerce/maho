@@ -6,7 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,7 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getId() && $object->getStatus() == $object->getApprovedStatus()) {
-            $searchTag = new Varien_Object();
+            $searchTag = new \Maho\DataObject();
             $this->loadByName($searchTag, $object->getName());
             if ($searchTag->getData($this->getIdFieldName())
                 && $searchTag->getStatus() == $object->getPendingStatus()
@@ -100,7 +100,7 @@ class Mage_Tag_Model_Resource_Tag extends Mage_Core_Model_Resource_Db_Abstract
         $writeAdapter->insertOnDuplicate($this->getTable('tag/properties'), [
             'tag_id'            => $tagId,
             'store_id'          => $object->getStore(),
-            'base_popularity'   => (!$object->getBasePopularity()) ? 0 : $object->getBasePopularity(),
+            'base_popularity'   => $object->getBasePopularity() ?: 0,
         ]);
 
         return parent::_afterSave($object);

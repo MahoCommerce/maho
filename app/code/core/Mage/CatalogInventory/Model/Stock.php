@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,10 +25,6 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     public const BACKORDERS_NO             = 0;
     public const BACKORDERS_YES_NONOTIFY   = 1;
     public const BACKORDERS_YES_NOTIFY     = 2;
-
-    /* @deprecated */
-    public const BACKORDERS_BELOW          = 1;
-    public const BACKORDERS_YES            = 2;
 
     public const STOCK_OUT_OF_STOCK        = 0;
     public const STOCK_IN_STOCK            = 1;
@@ -90,7 +86,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Prepare array($productId=>$qty) based on array($productId => array('qty'=>$qty, 'item'=>$stockItem))
+     * Prepare [$productId=>$qty] based on [$productId => ['qty'=>$qty, 'item'=>$stockItem]]
      *
      * @param array $items
      * @return array
@@ -162,7 +158,7 @@ class Mage_CatalogInventory_Model_Stock extends Mage_Core_Model_Abstract
      *
      * @return  Mage_CatalogInventory_Model_Stock
      */
-    public function registerItemSale(Varien_Object $item)
+    public function registerItemSale(\Maho\DataObject $item)
     {
         $productId = $item->getProductId();
         if ($productId) {

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -740,7 +740,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Get is_anchor category attribute information
      *
-     * @return array array('id' => $id, 'table'=>$table)
+     * @return array ['id' => $id, 'table'=>$table]
      */
     protected function _getAnchorAttributeInfo()
     {
@@ -755,7 +755,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Get visibility product attribute information
      *
-     * @return array array('id' => $id, 'table'=>$table)
+     * @return array ['id' => $id, 'table'=>$table]
      */
     protected function _getVisibilityAttributeInfo()
     {
@@ -770,7 +770,7 @@ class Mage_Catalog_Model_Resource_Category_Indexer_Product extends Mage_Index_Mo
     /**
      * Get status product attribute information
      *
-     * @return array array('id' => $id, 'table'=>$table)
+     * @return array ['id' => $id, 'table'=>$table]
      */
     protected function _getStatusAttributeInfo()
     {

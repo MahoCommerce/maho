@@ -6,7 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 /**
@@ -50,7 +50,7 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
     /**
      * Retrieve collection of all attributes
      *
-     * @return Varien_Data_Collection_Db
+     * @return \Maho\Data\Collection\Db
      */
     protected function _getAttributesCollection()
     {
@@ -111,7 +111,6 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
         $tables = [];
         $selects = [];
 
-        /** @var Mage_Core_Model_Resource_Helper_Abstract $resHelper */
         $resHelper = Mage::getResourceHelper('core');
         $likeOptions = ['position' => 'start'];
 
@@ -253,12 +252,10 @@ class Mage_CatalogSearch_Model_Resource_Search_Collection extends Mage_Catalog_M
         foreach ($options as $option) {
             $where[] = sprintf('(attribute_id=%d AND value=%d)', $option['attribute_id'], $option['option_id']);
         }
-        if ($where) {
-            $selects[] = (string) $this->getConnection()->select()
-                ->from($resource->getTableName('catalogindex/eav'), 'entity_id')
-                ->where(implode(' OR ', $where))
-                ->where("store_id={$storeId}");
-        }
+        $selects[] = (string) $this->getConnection()->select()
+            ->from($resource->getTableName('catalogindex/eav'), 'entity_id')
+            ->where(implode(' OR ', $where))
+            ->where("store_id={$storeId}");
         return $this->getConnection()->select()->union($selects, Maho\Db\Select::SQL_UNION_ALL);
     }
 }

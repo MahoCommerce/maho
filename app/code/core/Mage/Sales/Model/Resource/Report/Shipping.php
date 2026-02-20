@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -88,8 +88,13 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                  ])
                 ->where('is_virtual = 0');
 
-            if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('created_at >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('created_at <= ?', $to);
             }
 
             $select->group([
@@ -101,7 +106,6 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
 
             $select->having('orders_count > 0');
 
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
             $helper        = Mage::getResourceHelper('core');
             $insertQuery   = $helper->getInsertFromSelectUsingAnalytic($select, $table, array_keys($columns));
             $adapter->query($insertQuery);
@@ -212,8 +216,13 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 ->from(['filter_source_table' => $sourceTable], 'MIN(filter_source_table.entity_id)')
                 ->where('filter_source_table.order_id = source_table.order_id');
 
-            if ($subSelect !== null) {
-                $select->having($this->_makeConditionFromDateRangeSelect($subSelect, 'period'));
+            // Filter by date range directly on source column (WHERE is evaluated before GROUP BY,
+            // so we can't use the 'period' alias here - it doesn't exist yet)
+            if ($from !== null) {
+                $select->where('source_table.created_at >= ?', $from);
+            }
+            if ($to !== null) {
+                $select->where('source_table.created_at <= ?', $to);
             }
 
             $select->where('source_table.entity_id = (?)', new Maho\Db\Expr($filterSubSelect));
@@ -226,7 +235,6 @@ class Mage_Sales_Model_Resource_Report_Shipping extends Mage_Sales_Model_Resourc
                 'order_table.shipping_description',
             ]);
 
-            /** @var Mage_Core_Model_Resource_Helper_Mysql4 $helper */
             $helper        = Mage::getResourceHelper('core');
             $insertQuery   = $helper->getInsertFromSelectUsingAnalytic($select, $table, array_keys($columns));
             $adapter->query($insertQuery);

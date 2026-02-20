@@ -47,6 +47,11 @@
             <yandexmobilebot>YandexMobileBot</yandexmobilebot>
             <zoominfobot>ZoominfoBot</zoominfobot>
         </ignore_user_agents>
+        <blocks>
+            <log>
+                <class>Mage_Log_Block</class>
+            </log>
+        </blocks>
         <helpers>
             <log>
                 <class>Mage_Log_Helper</class>

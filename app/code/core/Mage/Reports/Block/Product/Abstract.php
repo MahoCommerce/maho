@@ -6,6 +6,7 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -18,7 +19,7 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
     /**
      * Product Index model name
      *
-     * @var string|null
+     * @var string
      */
     protected $_indexName;
 
@@ -168,16 +169,5 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
             return 0;
         }
         return $this->getItemsCollection()->count();
-    }
-
-    /**
-     * Get products collection and apply recent events log to it
-     *
-     * @return Mage_Reports_Model_Resource_Product_Index_Collection_Abstract
-     * @deprecated
-     */
-    protected function _getRecentProductsCollection()
-    {
-        return $this->getItemsCollection();
     }
 }

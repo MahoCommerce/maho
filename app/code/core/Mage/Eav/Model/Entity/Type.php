@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -92,7 +92,8 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
     {
         if ($setId === null && $this->_attributes !== null) {
             return $this->_attributes;
-        } elseif (isset($this->_attributesBySet[$setId])) {
+        }
+        if (isset($this->_attributesBySet[$setId])) {
             return $this->_attributesBySet[$setId];
         }
 
@@ -192,7 +193,6 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
                     ->save();
             }
 
-            /** @var Mage_Eav_Model_Entity_Increment_Abstract $incrementInstance */
             $incrementInstance = Mage::getModel($this->getIncrementModel())
                 ->setPrefix($entityStoreConfig->getIncrementPrefix())
                 ->setPadLength($this->getIncrementPadLength())
@@ -331,8 +331,10 @@ class Mage_Eav_Model_Entity_Type extends Mage_Core_Model_Abstract
      */
     public function getEntity()
     {
-        /** @var Mage_Eav_Model_Entity_Abstract $entity */
         $entity = Mage::getResourceSingleton($this->_data['entity_model']);
+        if (!$entity instanceof Mage_Eav_Model_Entity_Abstract) {
+            throw new Mage_Core_Exception('Invalid entity model');
+        }
         return $entity;
     }
 

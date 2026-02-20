@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Store extends Mage_Adminhtm
             $html .= '<option value="0"' . ($value == 0 ? ' selected="selected"' : '') . '>'
                   . Mage::helper('adminhtml')->__('All Store Views') . '</option>';
         } else {
-            $html .= '<option value=""' . (!$value ? ' selected="selected"' : '') . '></option>';
+            $html .= '<option value=""' . ($value ? '' : ' selected="selected"') . '></option>';
         }
         foreach ($websiteCollection as $website) {
             $websiteShow = false;
@@ -88,8 +88,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Store extends Mage_Adminhtm
         }
         if ($this->getValue() == '_deleted_') {
             return ['null' => true];
-        } else {
-            return ['eq' => $this->getValue()];
         }
+        return ['eq' => $this->getValue()];
     }
 }

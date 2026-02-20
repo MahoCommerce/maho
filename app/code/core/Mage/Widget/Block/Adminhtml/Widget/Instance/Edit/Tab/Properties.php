@@ -6,7 +6,7 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -77,7 +77,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
      * Set widget type and widget parameters if available
      */
     #[\Override]
-    protected function _preparelayout()
+    protected function _prepareLayout()
     {
         $this->setWidgetType($this->getWidgetInstance()->getType())
             ->setWidgetValues($this->getWidgetInstance()->getWidgetParameters());
@@ -87,8 +87,8 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Tab_Properties extends Ma
     /**
      * Add field to Options form based on option configuration
      *
-     * @param Varien_Object $parameter
-     * @return Varien_Data_Form_Element_Abstract|false
+     * @param \Maho\DataObject $parameter
+     * @return \Maho\Data\Form\Element\AbstractElement|false
      */
     #[\Override]
     protected function _addField($parameter)

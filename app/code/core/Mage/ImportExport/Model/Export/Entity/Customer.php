@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -92,29 +92,14 @@ class Mage_ImportExport_Model_Export_Entity_Customer extends Mage_ImportExport_M
     }
 
     /**
-     * Export process and return contents of temporary file
-     *
-     * @deprecated after ver 1.9.2.4 use $this->exportFile() instead
-     *
-     * @return string
-     */
-    #[\Override]
-    public function export()
-    {
-        $this->_prepareExport();
-
-        return $this->getWriter()->getContents();
-    }
-
-    /**
      * Export process and return temporary file through array
      *
      * This method will return following array:
      *
-     * array(
+     * [
      *     'rows'  => count of written rows,
      *     'value' => path to created file
-     * )
+     * ]
      *
      * @return array
      */

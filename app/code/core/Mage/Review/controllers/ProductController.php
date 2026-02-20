@@ -6,19 +6,12 @@
  * @package    Mage_Review
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 {
-    /**
-     * Action list where need check enabled cookie
-     *
-     * @var array
-     */
-    protected $_cookieCheckActions = ['post'];
-
     /**
      * @return $this|Mage_Core_Controller_Front_Action|void
      */
@@ -203,39 +196,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Show list of product's reviews
-     */
-    public function listAction(): void
-    {
-        if ($product = $this->_initProduct()) {
-            Mage::register('productId', $product->getId());
-
-            $design = Mage::getSingleton('catalog/design');
-            $settings = $design->getDesignSettings($product);
-            if ($settings->getCustomDesign()) {
-                $design->applyCustomDesign($settings->getCustomDesign());
-            }
-            $this->_initProductLayout($product);
-
-            // update breadcrumbs
-            /** @var Mage_Page_Block_Html_Breadcrumbs $breadcrumbsBlock */
-            $breadcrumbsBlock = $this->getLayout()->getBlock('breadcrumbs');
-            if ($breadcrumbsBlock) {
-                $breadcrumbsBlock->addCrumb('product', [
-                    'label'    => $product->getName(),
-                    'link'     => $product->getProductUrl(),
-                    'readonly' => true,
-                ]);
-                $breadcrumbsBlock->addCrumb('reviews', ['label' => Mage::helper('review')->__('Product Reviews')]);
-            }
-
-            $this->renderLayout();
-        } elseif (!$this->getResponse()->isRedirect()) {
-            $this->_forward('noRoute');
-        }
-    }
-
-    /**
      * Show details of one review
      */
     public function viewAction(): void
@@ -256,43 +216,6 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
         $this->_initLayoutMessages('review/session');
         $this->_initLayoutMessages('catalog/session');
         $this->renderLayout();
-    }
-
-    /**
-     * Load specific layout handles by product type id
-     * @param Mage_Catalog_Model_Product $product
-     */
-    protected function _initProductLayout($product)
-    {
-        $update = $this->getLayout()->getUpdate();
-
-        $update->addHandle('default');
-        $this->addActionLayoutHandles();
-
-        $update->addHandle('PRODUCT_TYPE_' . $product->getTypeId());
-
-        if ($product->getPageLayout()) {
-            $this->getLayout()->helper('page/layout')
-                ->applyHandle($product->getPageLayout());
-        }
-
-        $this->loadLayoutUpdates();
-        if ($product->getPageLayout()) {
-            $this->getLayout()->helper('page/layout')
-                ->applyTemplate($product->getPageLayout());
-        }
-        $customLayout = $product->getCustomLayoutUpdate();
-        if ($customLayout) {
-            try {
-                if (!Mage::getModel('core/layout_validator')->isValid($customLayout)) {
-                    $customLayout = '';
-                }
-            } catch (Exception $e) {
-                $customLayout = '';
-            }
-        }
-        $update->addUpdate($customLayout);
-        $this->generateLayoutXml()->generateLayoutBlocks();
     }
 
     /**

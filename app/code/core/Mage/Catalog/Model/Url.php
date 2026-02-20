@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,7 +58,7 @@ class Mage_Catalog_Model_Url
     /**
      * Current url rewrite rule
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rewrite;
 
@@ -124,11 +124,11 @@ class Mage_Catalog_Model_Url
      * Sometimes attribute 'url_path' can be empty, because url_path hasn't been generated yet,
      * in this case category is loaded with empty url_path and we should generate it manually.
      *
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject|Mage_Catalog_Model_Category $category
      */
     protected function _addCategoryUrlPath($category)
     {
-        if (!($category instanceof Varien_Object) || $category->getUrlPath()) {
+        if (!($category instanceof \Maho\DataObject) || $category->getUrlPath()) {
             return;
         }
 
@@ -198,7 +198,7 @@ class Mage_Catalog_Model_Url
      * Returns store root category, uses caching for it
      *
      * @param int $storeId
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getStoreRootCategory($storeId)
     {
@@ -272,7 +272,7 @@ class Mage_Catalog_Model_Url
      * @param bool $refreshProducts
      * @return $this
      */
-    protected function _refreshCategoryRewrites(Varien_Object $category, $parentPath = null, $refreshProducts = true)
+    protected function _refreshCategoryRewrites(\Maho\DataObject $category, $parentPath = null, $refreshProducts = true)
     {
         $idCategory = $category->getId();
         if ($idCategory != $this->getStores($category->getStoreId())->getRootCategoryId()) {
@@ -350,7 +350,7 @@ class Mage_Catalog_Model_Url
      * @return $this
      * @throws Mage_Core_Exception
      */
-    protected function _refreshProductRewrite(Varien_Object $product, Varien_Object $category)
+    protected function _refreshProductRewrite(\Maho\DataObject $product, \Maho\DataObject $category)
     {
         if ($category->getId() == $category->getPath()) {
             return $this;
@@ -423,7 +423,7 @@ class Mage_Catalog_Model_Url
      *
      * @return $this
      */
-    protected function _refreshCategoryProductRewrites(Varien_Object $category)
+    protected function _refreshCategoryProductRewrites(\Maho\DataObject $category)
     {
         $originalRewrites = $this->_rewrites;
         $process = true;
@@ -644,22 +644,6 @@ class Mage_Catalog_Model_Url
      *
      * Will try to get unique path by adding -1 -2 etc. between url_key and optional url_suffix
      *
-     * @deprecated use $this->getUnusedPathByUrlKey() instead
-     * @param int $storeId
-     * @param string $requestPath
-     * @param string $idPath
-     * @return string
-     */
-    public function getUnusedPath($storeId, $requestPath, $idPath)
-    {
-        return $this->getUnusedPathByUrlKey($storeId, $requestPath, $idPath, '');
-    }
-
-    /**
-     * Get requestPath that was not used yet.
-     *
-     * Will try to get unique path by adding -1 -2 etc. between url_key and optional url_suffix
-     *
      * @param int $storeId
      * @param string $requestPath
      * @param string $idPath
@@ -717,11 +701,10 @@ class Mage_Catalog_Model_Url
                 $match['increment'] = $lastRequestPath;
             }
             return $match['prefix']
-                . (!empty($match['increment']) ? ((int) $match['increment'] + 1) : '1')
+                . (empty($match['increment']) ? ('1') : (int) $match['increment'] + 1)
                 . $match['suffix'];
-        } else {
-            return $requestPath;
         }
+        return $requestPath;
     }
 
     /**
@@ -749,7 +732,7 @@ class Mage_Catalog_Model_Url
     /**
      * Get unique category request path
      *
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject|Mage_Catalog_Model_Category $category
      * @param string $parentPath
      * @return string
      */
@@ -814,8 +797,8 @@ class Mage_Catalog_Model_Url
     /**
      * Get unique product request path
      *
-     * @param Varien_Object|Mage_Catalog_Model_Product $product
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject|Mage_Catalog_Model_Product $product
+     * @param \Maho\DataObject|Mage_Catalog_Model_Category $category
      * @return string
      */
     public function getProductRequestPath($product, $category)
@@ -909,8 +892,8 @@ class Mage_Catalog_Model_Url
      * $parentPath used only for generating category path
      *
      * @param string $type
-     * @param Varien_Object|Mage_Catalog_Model_Product $product
-     * @param Varien_Object|Mage_Catalog_Model_Category $category
+     * @param \Maho\DataObject|Mage_Catalog_Model_Product $product
+     * @param \Maho\DataObject|Mage_Catalog_Model_Category $category
      * @param string $parentPath
      * @return string
      * @throws Mage_Core_Exception
@@ -1026,12 +1009,12 @@ class Mage_Catalog_Model_Url
      * It will perform permanent redirect from old URL to new URL
      *
      * @param array $rewriteData New rewrite data
-     * @param Varien_Object $rewrite Rewrite model
+     * @param \Maho\DataObject $rewrite Rewrite model
      * @return $this
      */
     protected function _saveRewriteHistory($rewriteData, $rewrite)
     {
-        if ($rewrite instanceof Varien_Object && $rewrite->getId()) {
+        if ($rewrite instanceof \Maho\DataObject && $rewrite->getId()) {
             $rewriteData['target_path'] = $rewriteData['request_path'];
             $rewriteData['request_path'] = $rewrite->getRequestPath();
             $rewriteData['id_path'] = $this->generateUniqueIdPath();

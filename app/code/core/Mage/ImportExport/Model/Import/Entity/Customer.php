@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -64,11 +64,11 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
     /**
      * Customer attributes parameters.
      *
-     *  [attr_code_1] => array(
-     *      'options' => array(),
+     *  [attr_code_1] => [
+     *      'options' => [],
      *      'type' => 'text', 'price', 'textarea', 'select', etc.
      *      'id' => ..
-     *  ),
+     *  ],
      *  ...
      *
      * @var array
@@ -146,12 +146,12 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
     /**
      * Existing customers information. In form of:
      *
-     * [customer e-mail] => array(
+     * [customer e-mail] => [
      *    [website code 1] => customer_id 1,
      *    [website code 2] => customer_id 2,
      *           ...       =>     ...      ,
      *    [website code n] => customer_id n,
-     * )
+     * ]
      *
      * @var array
      */
@@ -224,7 +224,7 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
             if ($idToDelete) {
                 $this->_connection->query(
                     $this->_connection->quoteInto(
-                        "DELETE FROM `{$this->_entityTable}` WHERE `entity_id` IN (?)",
+                        "DELETE FROM {$this->_entityTable} WHERE entity_id IN (?)",
                         $idToDelete,
                     ),
                 );
@@ -349,7 +349,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
         /** @var Mage_Customer_Model_Customer $resource */
         $resource       = Mage::getModel('customer/customer');
         $table = $resource->getResource()->getEntityTable();
-        /** @var Mage_ImportExport_Model_Resource_Helper_Mysql4 $helper */
         $helper         = Mage::getResourceHelper('importexport');
         $nextEntityId   = $helper->getNextAutoincrement($table);
         $passId         = $resource->getAttribute('password_hash')->getId();
@@ -400,7 +399,6 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
                     // attribute values
                     foreach (array_intersect_key($rowData, $this->_attributes) as $attrCode => $value) {
                         if (!$this->_attributes[$attrCode]['is_static'] && strlen($value)) {
-                            /** @var Mage_Customer_Model_Attribute $attribute */
                             $attribute  = $resource->getAttribute($attrCode);
                             $backModel  = $attribute->getBackendModel();
                             $attrParams = $this->_attributes[$attrCode];
@@ -507,15 +505,12 @@ class Mage_ImportExport_Model_Import_Entity_Customer extends Mage_ImportExport_M
      * @param string $websiteCode
      * @return string|null
      */
-    public function getCustomerId(#[\SensitiveParameter] $email, $websiteCode)
-    {
-        if (isset($this->_oldCustomers[$email][$websiteCode])) {
-            return $this->_oldCustomers[$email][$websiteCode];
-        } elseif (isset($this->_newCustomers[$email][$websiteCode])) {
-            return $this->_newCustomers[$email][$websiteCode];
-        } else {
-            return null;
-        }
+    public function getCustomerId(
+        #[\SensitiveParameter]
+        $email,
+        $websiteCode,
+    ) {
+        return $this->_oldCustomers[$email][$websiteCode] ?? $this->_newCustomers[$email][$websiteCode] ?? null;
     }
 
     /**

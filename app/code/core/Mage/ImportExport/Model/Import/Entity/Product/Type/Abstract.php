@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,14 +15,14 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
     /**
      * Product type attribute sets and attributes parameters.
      *
-     * [attr_set_name_1] => array(
-     *     [attr_code_1] => array(
-     *         'options' => array(),
+     * [attr_set_name_1] => [
+     *     [attr_code_1] => [
+     *         'options' => [],
      *         'type' => 'text', 'price', 'textarea', 'select', etc.
      *         'id' => ..
-     *     ),
+     *     ],
      *     ...
-     * ),
+     * ],
      * ...
      *
      * @var array
@@ -124,9 +124,8 @@ abstract class Mage_ImportExport_Model_Import_Entity_Product_Type_Abstract
     {
         if (is_array($attrSetData)) {
             return $this->_attributes[$attrSetData[Mage_ImportExport_Model_Import_Entity_Product::COL_ATTR_SET]];
-        } else {
-            return $this->_attributes[$attrSetData];
         }
+        return $this->_attributes[$attrSetData];
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_CurrencySymbol
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -215,7 +215,7 @@ class Mage_CurrencySymbol_Model_System_Currencysymbol
             }
         }
         if ($symbols) {
-            $value['options']['fields']['customsymbol']['value'] = serialize($symbols);
+            $value['options']['fields']['customsymbol']['value'] = Mage::helper('core')->jsonEncode($symbols);
         } else {
             $value['options']['fields']['customsymbol']['inherit'] = 1;
         }

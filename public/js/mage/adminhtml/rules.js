@@ -4,7 +4,7 @@
  * @package     Mage_Adminhtml
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -23,7 +23,7 @@ class VarienRulesForm {
 
     setReadonly(readonly) {
         this.readOnly = readonly;
-        
+
         // Handle remove buttons
         const removeElems = this.parent.querySelectorAll('.rule-param-remove');
         removeElems.forEach(element => {
@@ -52,7 +52,7 @@ class VarienRulesForm {
 
     initParam(container) {
         container.rulesObject = this;
-        
+
         const label = container.querySelector('.label');
         if (label) {
             label.addEventListener('click', (e) => this.showParamInputField(container, e));
@@ -79,7 +79,7 @@ class VarienRulesForm {
                         }
                     }
                     changeElem.addEventListener('blur', (e) => this.hideParamInputField(container, e));
-                    
+
                     // Allow Enter key to submit the value for text inputs
                     if (changeElem.tagName === 'INPUT') {
                         changeElem.addEventListener('keydown', (e) => {
@@ -106,7 +106,7 @@ class VarienRulesForm {
 
     showChooserElement(chooser) {
         this.chooserSelectedItems.clear();
-        
+
         if (chooser.classList.contains('no-split')) {
             this.chooserSelectedItems.set(this.updateElement.value, 1);
         } else {
@@ -177,7 +177,7 @@ class VarienRulesForm {
         if (!chooser) {
             return;
         }
-        
+
         if (chooser.style.display === 'block') {
             chooser.style.display = 'none';
             this.cleanChooser(container, event);
@@ -272,7 +272,7 @@ class VarienRulesForm {
         const children_ul = document.getElementById(
             elem.id.replace(/__/g, ':').replace(/[^:]*$/, 'children').replace(/:/g, '__')
         );
-        
+
         let max_id = 0;
         const children_inputs = children_ul.querySelectorAll('input.hidden');
         children_inputs.forEach(el => {
@@ -281,7 +281,7 @@ class VarienRulesForm {
                 max_id = i > max_id ? i : max_id;
             }
         });
-        
+
         const new_id = parent_id + '--' + (max_id + 1);
         const new_type = elem.value;
         const new_elem = document.createElement('LI');
@@ -362,7 +362,7 @@ class VarienRulesForm {
     chooserGridRowClick(grid, event) {
         const trElement = event.target.closest('tr');
         const isInput = event.target.tagName === 'INPUT';
-        
+
         if (trElement) {
             const checkbox = trElement.querySelector('input');
             if (checkbox) {
@@ -468,10 +468,10 @@ class VarienRulesForm {
 
                     // Re-initialize rule params in this element
                     if (newElement.nodeType === 1) { // Element node
-                        const elems = newElement.querySelectorAll ? 
+                        const elems = newElement.querySelectorAll ?
                             newElement.querySelectorAll('.rule-param') : [];
                         elems.forEach(elem => this.initParam(elem));
-                        
+
                         // Also check if the element itself is a rule-param
                         if (newElement.classList && newElement.classList.contains('rule-param')) {
                             this.initParam(newElement);
@@ -481,7 +481,7 @@ class VarienRulesForm {
                         if (existingOperator || existingValue) {
                             const newOperatorElem = newElement.querySelector('select[name*="[operator]"]');
                             const newValueElem = newElement.querySelector('input[name*="[value]"], select[name*="[value]"]');
-                            
+
                             if (newOperatorElem && existingOperator) {
                                 // Check if the existing operator is still valid for this attribute
                                 const operatorOption = newOperatorElem.querySelector(`option[value="${existingOperator}"]`);
@@ -489,7 +489,7 @@ class VarienRulesForm {
                                     newOperatorElem.value = existingOperator;
                                 }
                             }
-                            
+
                             if (newValueElem && existingValue) {
                                 // Only restore value if the input type is compatible
                                 if (newValueElem.type === 'text' || newValueElem.tagName === 'SELECT') {

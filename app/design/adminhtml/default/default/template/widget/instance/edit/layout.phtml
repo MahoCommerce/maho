@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -40,7 +40,7 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
             '<col />'+
             '<thead>'+
                 '<tr>'+
-                    '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('%s', $container['label'])) ?></label></th>'+
+                    '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__($container['label'])) ?></label></th>'+
                     '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Block Reference')) ?> <span class="required">*</span></label></th>'+
                     '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Template')) ?></label></th>'+
                     '<th>&nbsp;</th>'+

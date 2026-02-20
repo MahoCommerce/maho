@@ -5,97 +5,77 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Review_Block_Form $this */
 ?>
-<div class="form-add">
-    <h2><?= $this->__('Write Your Own Review') ?></h2>
-    <?php if ($this->getAllowWriteReviewFlag()): ?>
-    <form action="<?= $this->getAction() ?>" method="post" id="review-form">
-        <?= $this->getBlockHtml('formkey') ?>
-        <?= $this->getChildHtml('form_fields_before') ?>
-        <h3><?= $this->__("You're reviewing:") ?>
-            <span><?= $this->escapeHtml($this->getProductInfo()->getName()) ?></span>
-        </h3>
+<dialog id="review-dialog">
+    <div class="d-header">
+        <h2><?= $this->__("You're reviewing:") ?> <?= $this->escapeHtml($this->getProductInfo()->getName()) ?></h2>
+        <button type="button" class="d-close" onclick="this.closest('dialog').close()" aria-label="<?= $this->quoteEscape($this->__('Close')) ?>"><span aria-hidden="true">&times;</span></button>
+    </div>
+    <div class="d-content">
+        <?php if ($this->getAllowWriteReviewFlag()): ?>
+        <form action="<?= $this->getAction() ?>" method="post" id="review-form">
+            <?= $this->getBlockHtml('formkey') ?>
+            <?= $this->getChildHtml('form_fields_before') ?>
 
-        <div class="fieldset">
-            <?php if( $this->getRatings() && $this->getRatings()->getSize()): ?>
-                <h4><?= $this->__('How do you rate this product?') ?> <em class="required">*</em></h4>
-                <span id="input-message-box"></span>
-                <div class="data-table review-summary-table ratings" id="product-review-table">
-                    <?php foreach ($this->getRatings() as $_rating): ?>
-                        <div class="rate">
-                            <strong class="clear"><?php echo $this->escapeHtml($_rating->getRatingCode()) ?></strong>
-                            <div class="star-rating">
-                            <?php foreach (array_reverse($_rating->getOptions()) as $key=>$_option): ?>
-                                <input required class="star-rating__value" type="radio" id="<?php echo $this->escapeHtml($_rating->getRatingCode()) ?>_<?php echo $_option->getValue() ?>" value="<?php echo $_option->getId() ?>" name="ratings[<?php echo $_rating->getId() ?>]" value="<?php echo $_option->getId() ?>" />
-                                <label for="<?php echo $this->escapeHtml($_rating->getRatingCode()) ?>_<?php echo $_option->getValue() ?>" class="star-rating__label" title="<?php echo $_option->getLabel(); ?>"><?php echo $_option->getLabel(); ?></label>
-                            <?php endforeach ?>
+            <div class="fieldset">
+                <?php if ($this->getRatings() && $this->getRatings()->getSize()): ?>
+                    <div class="rd-ratings" id="product-review-table">
+                        <?php foreach ($this->getRatings() as $_rating): ?>
+                            <div class="rd-row">
+                                <span class="rd-label"><?= $this->escapeHtml($_rating->getRatingCode()) ?></span>
+                                <div class="star-rating">
+                                <?php foreach (array_reverse($_rating->getOptions()) as $_option): ?>
+                                    <input class="sr-value" type="radio" id="<?= $this->escapeHtml($_rating->getRatingCode()) ?>_<?= $_option->getValue() ?>" value="<?= $_option->getId() ?>" name="ratings[<?= $_rating->getId() ?>]" />
+                                    <label for="<?= $this->escapeHtml($_rating->getRatingCode()) ?>_<?= $_option->getValue() ?>" class="sr-label" title="<?= $_option->getLabel() ?>"><?= $_option->getLabel() ?></label>
+                                <?php endforeach ?>
+                                </div>
                             </div>
-                        </div>
-                    <?php endforeach ?>
+                        <?php endforeach ?>
+                    </div>
+                    <input type="hidden" name="validate_rating" class="validate-rating" value="" />
+                <?php endif ?>
+
+                <div class="rd-fields">
+                    <div class="rd-field">
+                        <label for="summary_field"><?= $this->__('Summary') ?></label>
+                        <input type="text" name="title" id="summary_field" class="required-entry" value="<?= $this->escapeHtml($data->getTitle()) ?>" />
+                    </div>
+                    <div class="rd-field">
+                        <label for="review_field"><?= $this->__('Review') ?></label>
+                        <textarea name="detail" id="review_field" rows="4" class="required-entry"><?= $this->escapeHtml($data->getDetail()) ?></textarea>
+                    </div>
+                    <div class="rd-field">
+                        <label for="nickname_field"><?= $this->__('Nickname') ?></label>
+                        <input type="text" name="nickname" id="nickname_field" class="required-entry" value="<?= $this->escapeHtml($data->getNickname()) ?>" />
+                    </div>
                 </div>
-                <input type="hidden" name="validate_rating" class="validate-rating" value="" />
-            <?php endif ?>
-
-                <ul class="form-list">
-                    <li>
-                        <label for="review_field" class="required"><?= $this->__('Let us know your thoughts') ?></label>
-                        <div class="input-box">
-                            <textarea name="detail" id="review_field" cols="5" rows="3" class="required-entry"><?= $this->escapeHtml($data->getDetail()) ?></textarea>
-                        </div>
-                    </li>
-
-                   <li class="inline-label">
-                        <label for="summary_field" class="required"><?= $this->__('Summary of Your Review') ?></label>
-                        <div class="input-box">
-                            <input type="text" name="title" id="summary_field" class="input-text required-entry" value="<?= $this->escapeHtml($data->getTitle()) ?>" />
-                        </div>
-                   </li>
-
-                    <li class="inline-label">
-                        <label for="nickname_field" class="required"><?= $this->__("What's your nickname?") ?></label>
-                        <div class="input-box">
-                            <input type="text" name="nickname" id="nickname_field" class="input-text required-entry" value="<?= $this->escapeHtml($data->getNickname()) ?>" />
-                        </div>
-                    </li>
-
-                </ul>
             </div>
-            <div class="buttons-set">
-                <button type="submit" title="<?= $this->quoteEscape($this->__('Submit Review')) ?>" class="button"><?= $this->__('Submit Review') ?></button>
+            <div class="d-actions">
+                <button type="button" class="button" onclick="this.closest('dialog').close()"><?= $this->__('Cancel') ?></button>
+                <button type="submit" class="button"><?= $this->__('Submit Review') ?></button>
             </div>
-    </form>
-    <script type="text/javascript">
-        var dataForm = new VarienForm('review-form');
-        Validation.add('validate-rating',
-            '<?= $this->jsQuoteEscape($this->__('Please select one of each of the ratings above')) ?>',
-            function(v) {
-                const trs = document.getElementById('product-review-table').getElementsByTagName('tr');
-                let error = 1;
-                for (let j = 1; j < trs.length; j++) {
-                    const inputs = trs[j].getElementsByTagName('input');
-                    for (let i = 0; i < inputs.length; i++) {
-                        if (inputs[i].checked === true) {
-                            error = 0;
-                        }
-                    }
-                    if (error === 1) {
+        </form>
+        <script>
+            new VarienForm('review-form');
+            Validation.add('validate-rating', '<?= $this->jsQuoteEscape($this->__('Please select a rating for each category')) ?>', function() {
+                const ratingRows = document.querySelectorAll('#product-review-table .rd-row');
+                for (const row of ratingRows) {
+                    if (!row.querySelector('input[type="radio"]:checked')) {
                         return false;
-                    } else {
-                        error = 1;
                     }
                 }
                 return true;
-            }
-        );
-    </script>
-    <?php else: ?>
-    <p class="review-nologged" id="review-form">
-        <?= $this->__('Only registered users can write reviews. Please, <a href="%s">log in</a> or <a href="%s">register</a>', $this->getLoginLink(), Mage::helper('customer')->getRegisterUrl()) ?>
-    </p>
-    <?php endif ?>
-</div>
+            });
+        </script>
+        <?php else: ?>
+        <p class="rd-login-required">
+            <?= $this->__('Only registered users can write reviews. Please, <a href="%s">log in</a> or <a href="%s">register</a>', $this->getLoginLink(), Mage::helper('customer')->getRegisterUrl()) ?>
+        </p>
+        <?php endif ?>
+    </div>
+</dialog>

@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,13 +16,6 @@
  */
 class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 {
-    /**
-     * Action list where need check enabled cookie
-     *
-     * @var array
-     */
-    protected $_cookieCheckActions = ['add'];
-
     /**
      * If true, authentication in this controller (wishlist) could be skipped
      *
@@ -198,7 +191,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 $requestParams = $session->getBeforeWishlistRequest();
                 $session->unsBeforeWishlistRequest();
             }
-            $buyRequest = new Varien_Object($requestParams);
+            $buyRequest = new \Maho\DataObject($requestParams);
 
             $result = $wishlist->addNewItem($product, $buyRequest);
             if (is_string($result)) {
@@ -265,7 +258,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
 
             Mage::register('wishlist_item', $item);
 
-            $params = new Varien_Object();
+            $params = new \Maho\DataObject();
             $params->setCategoryId(false);
             $params->setConfigureMode(true);
             $buyRequest = $item->getBuyRequest();
@@ -320,7 +313,7 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
                 return;
             }
 
-            $buyRequest = new Varien_Object($this->getRequest()->getPost());
+            $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
 
             $wishlist
@@ -757,6 +750,14 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
         $option = Mage::getModel('wishlist/item_option')->load($this->getRequest()->getParam('id'));
 
         if (!$option->getId()) {
+            $this->_forward('noRoute');
+            return;
+        }
+
+        // Verify the wishlist belongs to the logged-in customer
+        $wishlistItem = Mage::getModel('wishlist/item')->load($option->getWishlistItemId());
+        $wishlist = Mage::getModel('wishlist/wishlist')->load($wishlistItem->getWishlistId());
+        if ($wishlist->getCustomerId() != Mage::getSingleton('customer/session')->getCustomerId()) {
             $this->_forward('noRoute');
             return;
         }

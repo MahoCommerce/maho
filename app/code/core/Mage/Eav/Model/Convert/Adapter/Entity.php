@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -37,7 +37,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                 $this->_store = Mage::app()->getStore($this->getVar('store'));
             } catch (Exception $e) {
                 $message = Mage::helper('eav')->__('Invalid store specified');
-                $this->addException($message, Varien_Convert_Exception::FATAL);
+                $this->addException($message, \Maho\Convert\Exception::FATAL);
                 throw $e;
             }
         }
@@ -221,7 +221,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      *
      * @param array $joinField   Variable should be have view:
      *     Example:
-     *         array(
+     *         [
      *            'alias'     => 'alias_table',
      *            'attribute' => 'table_name', //table name, must be used path of table like 'module/table_name'
      *            'field'     => 'field_name', //selected field name (optional)
@@ -232,7 +232,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
      *            'bind'      => 'self_item_id=other_id',
      *            'cond'      => 'alias_table.entity_id = e.entity_id', //additional condition (optional)
      *            'joinType'  => 'LEFT'
-     *         )
+     *         ]
      *     NOTE: Optional key must be have NULL at least
      */
     public function setJoinField($joinField)
@@ -244,7 +244,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
 
     /**
      * @return $this
-     * @throws Varien_Convert_Exception
+     * @throws \Maho\Convert\Exception
      */
     #[\Override]
     public function load()
@@ -252,7 +252,7 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
         if (!($entityType = $this->getVar('entity_type'))
             || !(Mage::getResourceSingleton($entityType) instanceof Mage_Eav_Model_Entity_Interface)
         ) {
-            $this->addException(Mage::helper('eav')->__('Invalid entity specified'), Varien_Convert_Exception::FATAL);
+            $this->addException(Mage::helper('eav')->__('Invalid entity specified'), \Maho\Convert\Exception::FATAL);
         }
         try {
             $collection = $this->_getCollectionForLoad($entityType);
@@ -298,11 +298,11 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
 
             $message = Mage::helper('eav')->__('Loaded %d records', count($entityIds));
             $this->addException($message);
-        } catch (Varien_Convert_Exception $e) {
+        } catch (\Maho\Convert\Exception $e) {
             throw $e;
         } catch (Exception $e) {
             $message = Mage::helper('eav')->__('Problem loading the collection, aborting. Error: %s', $e->getMessage());
-            $this->addException($message, Varien_Convert_Exception::FATAL);
+            $this->addException($message, \Maho\Convert\Exception::FATAL);
         }
 
         /**
@@ -325,20 +325,20 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
 
     /**
      * @return $this
-     * @throws Varien_Convert_Exception
+     * @throws \Maho\Convert\Exception
      */
     #[\Override]
     public function save()
     {
         $collection = $this->getData();
         if ($collection instanceof Mage_Eav_Model_Entity_Collection_Abstract) {
-            $this->addException(Mage::helper('eav')->__('Entity collections expected.'), Varien_Convert_Exception::FATAL);
+            $this->addException(Mage::helper('eav')->__('Entity collections expected.'), \Maho\Convert\Exception::FATAL);
         }
 
         $this->addException($collection->getSize() . ' records found.');
 
         if (!$collection instanceof Mage_Eav_Model_Entity_Collection_Abstract) {
-            $this->addException(Mage::helper('eav')->__('Entity collection expected.'), Varien_Convert_Exception::FATAL);
+            $this->addException(Mage::helper('eav')->__('Entity collection expected.'), \Maho\Convert\Exception::FATAL);
         }
         try {
             $i = 0;
@@ -347,12 +347,12 @@ class Mage_Eav_Model_Convert_Adapter_Entity extends Mage_Dataflow_Model_Convert_
                 $i++;
             }
             $this->addException(Mage::helper('eav')->__('Saved %d record(s).', $i));
-        } catch (Varien_Convert_Exception $e) {
+        } catch (\Maho\Convert\Exception $e) {
             throw $e;
         } catch (Exception $e) {
             $this->addException(
                 Mage::helper('eav')->__('Problem saving the collection, aborting. Error: %s', $e->getMessage()),
-                Varien_Convert_Exception::FATAL,
+                \Maho\Convert\Exception::FATAL,
             );
         }
         return $this;

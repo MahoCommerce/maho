@@ -6,7 +6,7 @@
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -55,9 +55,9 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
     {
         if (is_null($this->_batchExport)) {
             $object = Mage::getModel('dataflow/batch_export');
-            $this->_batchExport = Varien_Object_Cache::singleton()->save($object);
+            $this->_batchExport = \Maho\DataObject\Cache::singleton()->save($object);
         }
-        return Varien_Object_Cache::singleton()->load($this->_batchExport);
+        return \Maho\DataObject\Cache::singleton()->load($this->_batchExport);
     }
 
     /**
@@ -69,9 +69,9 @@ class Mage_Dataflow_Model_Convert_Mapper_Column extends Mage_Dataflow_Model_Conv
     {
         if (is_null($this->_batchImport)) {
             $object = Mage::getModel('dataflow/batch_import');
-            $this->_batchImport = Varien_Object_Cache::singleton()->save($object);
+            $this->_batchImport = \Maho\DataObject\Cache::singleton()->save($object);
         }
-        return Varien_Object_Cache::singleton()->load($this->_batchImport);
+        return \Maho\DataObject\Cache::singleton()->load($this->_batchImport);
     }
 
     #[\Override]

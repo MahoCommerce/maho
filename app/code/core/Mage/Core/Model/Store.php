@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -131,7 +131,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Cache flag
      *
-     * @var bool
+     * @var string|bool|array
      */
     protected $_cacheTag    = true;
 
@@ -150,7 +150,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Price filter
      *
-     * @var Mage_Directory_Model_Currency_Filter|Varien_Filter_Sprintf
+     * @var Mage_Directory_Model_Currency_Filter|\Maho\Filter\Sprintf
      */
     protected $_priceFilter;
 
@@ -420,7 +420,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
      *
      * @param string $fullPath
      * @param string $path
-     * @param Varien_Simplexml_Element $node
+     * @param \Maho\Simplexml\Element $node
      * @return array|string
      */
     protected function _processConfigValue($fullPath, $path, $node)
@@ -678,9 +678,8 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         $configValue = $this->getConfig(self::XML_PATH_PRICE_SCOPE);
         if ($configValue == self::PRICE_SCOPE_GLOBAL) {
             return Mage::app()->getBaseCurrencyCode();
-        } else {
-            return $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
         }
+        return $this->getConfig(Mage_Directory_Model_Currency::XML_PATH_CURRENCY_BASE);
     }
 
     /**
@@ -890,7 +889,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     /**
      * Get store price filter
      *
-     * @return Mage_Directory_Model_Currency_Filter|Varien_Filter_Sprintf
+     * @return Mage_Directory_Model_Currency_Filter|\Maho\Filter\Sprintf
      */
     public function getPriceFilter()
     {
@@ -902,7 +901,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
         } elseif ($this->getDefaultCurrency()) {
             $this->_priceFilter = $this->getDefaultCurrency()->getFilter();
         } else {
-            $this->_priceFilter = new Varien_Filter_Sprintf('%s', 2);
+            $this->_priceFilter = new \Maho\Filter\Sprintf('%s', 2);
         }
         return $this->_priceFilter;
     }
@@ -1134,7 +1133,7 @@ class Mage_Core_Model_Store extends Mage_Core_Model_Abstract
     {
         if (is_null($this->_frontendName)) {
             $storeGroupName = (string) Mage::getStoreConfig(self::XML_PATH_STORE_STORE_NAME, $this);
-            $this->_frontendName = (!empty($storeGroupName)) ? $storeGroupName : $this->getGroup()->getName();
+            $this->_frontendName = (empty($storeGroupName)) ? $this->getGroup()->getName() : $storeGroupName;
         }
         return $this->_frontendName;
     }

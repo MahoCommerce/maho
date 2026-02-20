@@ -6,7 +6,7 @@
  * @package    Mage_Usa
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,14 +39,14 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Rate request data
      *
-     * @var Mage_Shipping_Model_Rate_Request|Varien_Object|null
+     * @var Mage_Shipping_Model_Rate_Request|\Maho\DataObject|null
      */
     protected $_request = null;
 
     /**
      * Raw rate request data
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_rawRequest = null;
 
@@ -74,7 +74,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Dhl rates result
      *
-     * @var array
+     * @var array|null
      */
     protected $_rates = [];
 
@@ -256,12 +256,12 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @return $this
      */
-    public function setRequest(Varien_Object $request)
+    public function setRequest(\Maho\DataObject $request)
     {
         $this->_request = $request;
         $this->setStore($request->getStoreId());
 
-        $requestObject = new Varien_Object();
+        $requestObject = new \Maho\DataObject();
 
         $requestObject->setIsGenerateLabelReturn($request->getIsGenerateLabelReturn());
 
@@ -436,10 +436,11 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
 
             ],
         ];
-
         if (!isset($codes[$type])) {
             return false;
-        } elseif ($code === '') {
+        }
+
+        if ($code === '') {
             return $codes[$type];
         }
 
@@ -500,10 +501,9 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         if ($doc == self::DHL_CONTENT_TYPE_DOC) {
             // Documents shipping
             return $docType;
-        } else {
-            // Services for shipping non-documents cargo
-            return $nonDocType;
         }
+        // Services for shipping non-documents cargo
+        return $nonDocType;
     }
 
     /**
@@ -898,7 +898,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * Parse response from DHL web service
      *
      * @param string $response
-     * @return Mage_Shipping_Model_Rate_Result|Varien_Object
+     * @return Mage_Shipping_Model_Rate_Result|\Maho\DataObject
      */
     protected function _parseResponse($response)
     {
@@ -935,7 +935,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
                                 $this->_addRate($quotedShipment);
                             }
                         } elseif (isset($xml->AirwayBillNumber)) {
-                            $result = new Varien_Object();
+                            $result = new \Maho\DataObject();
                             $result->setTrackingNumber((string) $xml->AirwayBillNumber);
                             try {
                                 $labelContent = (string) $xml->LabelImage->OutputImage;
@@ -1080,28 +1080,28 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * Get Country Params by Country Code
      *
      * @param string $countryCode ISO 3166 Codes (Countries) A2
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function getCountryParams($countryCode)
     {
         if (empty($this->_countryParams)) {
             $dhlConfigPath = Mage::getModuleDir('etc', 'Mage_Usa') . DS . 'dhl' . DS;
             $countriesXml = file_get_contents($dhlConfigPath . 'international' . DS . 'countries.xml');
-            $this->_countryParams = new Varien_Simplexml_Element($countriesXml);
+            $this->_countryParams = new \Maho\Simplexml\Element($countriesXml);
         }
         if (isset($this->_countryParams->$countryCode)) {
-            $countryParams = new Varien_Object($this->_countryParams->$countryCode->asArray());
+            $countryParams = new \Maho\DataObject($this->_countryParams->$countryCode->asArray());
         }
-        return $countryParams ?? new Varien_Object();
+        return $countryParams ?? new \Maho\DataObject();
     }
 
     /**
      * Do shipment request to carrier web service, obtain Print Shipping Labels and process errors in response
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
-    protected function _doShipmentRequest(Varien_Object $request)
+    protected function _doShipmentRequest(\Maho\DataObject $request)
     {
         $this->_prepareShipmentRequest($request);
         $this->_mapRequestToShipment($request);
@@ -1154,9 +1154,8 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
             $error->setErrorMessage($this->getConfigData('specificerrmsg'));
             $this->_debug($this->_errors);
             return $error;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**
@@ -1165,7 +1164,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * @return array
      */
     #[\Override]
-    public function getContainerTypes(?Varien_Object $params = null)
+    public function getContainerTypes(?\Maho\DataObject $params = null)
     {
         return [
             self::DHL_CONTENT_TYPE_DOC      => Mage::helper('usa')->__('Documents'),
@@ -1176,7 +1175,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Map request to shipment
      */
-    protected function _mapRequestToShipment(Varien_Object $request)
+    protected function _mapRequestToShipment(\Maho\DataObject $request)
     {
         $request->setOrigCountryId($request->getShipperAddressCountryCode());
         $this->_rawRequest = $request;
@@ -1227,7 +1226,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Do rate request and handle errors
      *
-     * @return Mage_Shipping_Model_Rate_Result|Varien_Object
+     * @return Mage_Shipping_Model_Rate_Result|\Maho\DataObject
      */
     protected function _doRequest()
     {
@@ -1410,7 +1409,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      * Generation Shipment Details Node according to origin region
      *
      * @param SimpleXMLElement $xml
-     * @param Mage_Shipping_Model_Rate_Request|Varien_Object $rawRequest
+     * @param Mage_Shipping_Model_Rate_Request|\Maho\DataObject $rawRequest
      * @param string $originRegion
      */
     protected function _shipmentDetails($xml, $rawRequest, $originRegion = '')
@@ -1539,7 +1538,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
      *
      * @param array $trackings
      */
-    protected function _getXMLTracking($trackings)
+    protected function _getXMLTracking($trackings): void
     {
         $xmlStr = '<?xml version="1.0" encoding="UTF-8"?>'
             . '<req:KnownTrackingRequest'
@@ -1683,13 +1682,13 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         }
 
         if (!empty($this->_errors) || empty($resultArr)) {
-            $resultArr = !empty($this->_errors) ? $this->_errors : $trackings;
+            $resultArr = empty($this->_errors) ? $trackings : $this->_errors;
             foreach ($resultArr as $trackNum => $err) {
                 $error = Mage::getModel('shipping/tracking_result_error');
                 $error->setCarrier($this->_code);
                 $error->setCarrierTitle($this->getConfigData('title'));
-                $error->setTracking(!empty($this->_errors) ? $trackNum : $err);
-                $error->setErrorMessage(!empty($this->_errors) ? $err : $errorTitle);
+                $error->setTracking(empty($this->_errors) ? $err : $trackNum);
+                $error->setErrorMessage(empty($this->_errors) ? $errorTitle : $err);
                 $result->append($error);
             }
         }
@@ -1718,7 +1717,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
     /**
      * Do request to shipment
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     public function requestToShipment(Mage_Shipping_Model_Shipment_Request $request)
@@ -1729,7 +1728,7 @@ class Mage_Usa_Model_Shipping_Carrier_Dhl_International extends Mage_Usa_Model_S
         }
         $result = $this->_doShipmentRequest($request);
 
-        $response = new Varien_Object([
+        $response = new \Maho\DataObject([
             'info' => [[
                 'tracking_number' => $result->getTrackingNumber(),
                 'label_content'   => $result->getShippingLabelContent(),

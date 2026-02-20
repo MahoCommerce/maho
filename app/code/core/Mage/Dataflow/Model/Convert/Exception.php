@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -9,7 +11,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Dataflow_Model_Convert_Exception extends Varien_Exception
+class Mage_Dataflow_Model_Convert_Exception extends \Maho\Exception
 {
     public const NOTICE = 'NOTICE';
     public const WARNING = 'WARNING';

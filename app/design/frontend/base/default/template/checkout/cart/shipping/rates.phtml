@@ -1,0 +1,51 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<?php /** @var Mage_Checkout_Block_Cart_Shipping $this */ ?>
+<?php if (($_shippingRateGroups = $this->getEstimateRates())): ?>
+<form id="co-shipping-method-form" action="<?= $this->getUpdateFormActionUrl() ?>" method="post">
+    <dl class="sp-methods">
+        <?php foreach ($_shippingRateGroups as $code => $_rates): ?>
+            <dt><?= $this->escapeHtml($this->getCarrierName($code)) ?></dt>
+            <dd>
+                <ul>
+                <?php foreach ($_rates as $_rate): ?>
+                    <li<?php if ($_rate->getErrorMessage()) echo ' class="error-msg"';?>>
+                       <?php if ($_rate->getErrorMessage()): ?>
+                            <?= $this->escapeHtml($_rate->getErrorMessage()) ?>
+                       <?php else: ?>
+                            <input name="estimate_method" type="radio" value="<?= $this->escapeHtml($_rate->getCode()) ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if ($_rate->getCode() === $this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio" />
+                            <label for="s_method_<?= $_rate->getCode() ?>"><?= $this->escapeHtml($_rate->getMethodTitle()) ?>
+                            <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
+                            -
+                            <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
+                            <?= $_excl ?>
+                            <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
+                                (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
+                            <?php endif ?>
+                            </label>
+                       <?php endif ?>
+                    </li>
+                <?php endforeach ?>
+                </ul>
+            </dd>
+        <?php endforeach ?>
+    </dl>
+    <div class="buttons-set">
+        <button type="submit" title="<?= $this->quoteEscape($this->__('Update Total')) ?>" class="button" id="btn-update-total">
+            <?= $this->__('Update Total') ?>
+        </button>
+    </div>
+    <?= $this->getBlockHtml('formkey') ?>
+</form>
+<?php elseif ($this->getEstimatePostcode() || $this->getEstimateRegionId()): ?>
+<p class="no-rates-message"><?= $this->__('Sorry, no quotes are available for this order at this time.') ?></p>
+<?php endif ?>

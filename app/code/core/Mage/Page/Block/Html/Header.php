@@ -6,7 +6,7 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -19,7 +19,7 @@
 class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
 {
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         $this->setTemplate('page/html/header.phtml');
     }
@@ -55,18 +55,6 @@ class Mage_Page_Block_Html_Header extends Mage_Core_Block_Template
             $this->_data['logo_src'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_src'));
         }
         return $this->getSkinUrl($this->_data['logo_src']);
-    }
-
-    /**
-     * @return string
-     * @deprecated Use SVG or srcset
-     */
-    public function getLogoSrcSmall()
-    {
-        if (empty($this->_data['logo_src_small'])) {
-            $this->_data['logo_src_small'] = $this->escapeHtmlAsObject((string) Mage::getStoreConfig('design/header/logo_src_small'));
-        }
-        return $this->getSkinUrl($this->_data['logo_src_small']);
     }
 
     /**

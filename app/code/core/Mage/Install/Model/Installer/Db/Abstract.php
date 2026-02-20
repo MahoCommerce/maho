@@ -6,7 +6,7 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,61 +14,51 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
 {
     /**
      *  Adapter instance
-     *
-     * @var Maho\Db\Adapter\AdapterInterface
      */
-    protected $_connection;
+    protected ?\Maho\Db\Adapter\AdapterInterface $_connection = null;
 
     /**
      *  Connection configuration
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_connectionData;
+    protected array $_connectionData = [];
 
     /**
-     *  Connection configuration
+     *  Configuration data
      *
-     * @var array
+     * @var array<string, mixed>
      */
-    protected $_configData;
+    protected array $_configData = [];
 
     /**
-     * Return the name of DB model from config
-     *
-     * @return string
+     * Return the database engine from config
      */
-    public function getModel()
+    public function getEngine(): string
     {
-        return $this->_configData['db_model'];
+        return $this->_configData['db_engine'] ?? 'mysql';
     }
 
     /**
-     * Return the DB type from config
-     *
-     * @return string
+     * Return the DB type (pdo_{engine}) derived from engine
      */
-    public function getType()
+    public function getType(): string
     {
-        return $this->_configData['db_type'];
+        return 'pdo_' . $this->getEngine();
     }
 
     /**
      * Set configuration data
-     *
-     * @param array $config the connection configuration
      */
-    public function setConfig($config)
+    public function setConfig(array $config): void
     {
         $this->_configData = $config;
     }
 
     /**
      * Retrieve connection data from config
-     *
-     * @return array
      */
-    public function getConnectionData()
+    public function getConnectionData(): array
     {
         if (!$this->_connectionData) {
             $connectionData = [
@@ -76,7 +66,6 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
                 'username'  => $this->_configData['db_user'],
                 'password'  => $this->_configData['db_pass'],
                 'dbname'    => $this->_configData['db_name'],
-                'pdoType'   => $this->getPdoType(),
             ];
             $this->_connectionData = $connectionData;
         }
@@ -85,20 +74,16 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
 
     /**
      * Check InnoDB support
-     *
-     * @return bool
      */
-    public function supportEngine()
+    public function supportEngine(): bool
     {
         return true;
     }
 
     /**
      * Create new connection with custom config
-     *
-     * @return Maho\Db\Adapter\AdapterInterface
      */
-    protected function _getConnection()
+    protected function _getConnection(): \Maho\Db\Adapter\AdapterInterface
     {
         if (!isset($this->_connection)) {
             $resource   = Mage::getSingleton('core/resource');
@@ -109,22 +94,12 @@ abstract class Mage_Install_Model_Installer_Db_Abstract
     }
 
     /**
-     * Return pdo type
-     */
-    public function getPdoType()
-    {
-        return null;
-    }
-
-    /**
      * Retrieve required PHP extension list for database
-     *
-     * @return array
      */
-    public function getRequiredExtensions()
+    public function getRequiredExtensions(): array
     {
         $extensions = [];
-        $configExt = (array) Mage::getConfig()->getNode(sprintf('install/databases/%s/extensions', $this->getModel()));
+        $configExt = (array) Mage::getConfig()->getNode(sprintf('install/databases/%s/extensions', $this->getEngine()));
         foreach (array_keys($configExt) as $name) {
             $extensions[] = $name;
         }

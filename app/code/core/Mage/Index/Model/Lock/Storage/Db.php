@@ -6,14 +6,14 @@
  * @package    Mage_Index
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_Interface
 {
     /**
-     * @var Mage_Index_Model_Resource_Helper_Mysql4
+     * @var Mage_Index_Model_Resource_Helper_Lock_Interface
      */
     protected $_helper;
 
@@ -27,8 +27,10 @@ class Mage_Index_Model_Lock_Storage_Db implements Mage_Index_Model_Lock_Storage_
         /** @var Mage_Index_Model_Resource_Lock_Resource $resource */
         $resource = Mage::getSingleton('index/resource_lock_resource');
         $this->_connection = $resource->getConnection('index_write', 'default_lock');
-        /** @var Mage_Index_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('index');
+        if (!$helper instanceof Mage_Index_Model_Resource_Helper_Lock_Interface) {
+            throw new Mage_Core_Exception('Index resource helper must implement Lock interface');
+        }
         $this->_helper = $helper;
     }
 

@@ -2,7 +2,7 @@
  * Maho
  *
  * @package     js
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,8 +14,12 @@ class MahoAutocomplete {
         this.options = Object.assign({
             paramName: this.field.name,
             method: 'GET',
-            minChars: 3
+            minChars: 3,
+            debounceDelay: 200
         }, options);
+
+        this.debounceTimer = null;
+        this.abortController = null;
 
         this.setupEventListeners();
     }
@@ -27,8 +31,12 @@ class MahoAutocomplete {
 
     onInput() {
         const value = this.field.value;
+
+        clearTimeout(this.debounceTimer);
+        this.abortController?.abort();
+
         if (value.length >= this.options.minChars) {
-            this.fetchSuggestions(value);
+            this.debounceTimer = setTimeout(() => this.fetchSuggestions(value), this.options.debounceDelay);
         } else {
             this.hideSuggestions();
         }
@@ -41,13 +49,14 @@ class MahoAutocomplete {
     }
 
     fetchSuggestions(query) {
+        this.abortController = new AbortController();
+
         const params = new URLSearchParams({ [this.options.paramName]: query });
         const url = `${this.url}?${params}`;
 
-        fetch(url, { method: this.options.method })
-            .then(response => response.text())
+        mahoFetch(url, { method: this.options.method, signal: this.abortController.signal, loaderArea: false })
             .then(html => this.showSuggestions(html))
-            .catch(error => console.error('Error fetching suggestions:', error));
+            .catch(() => {});
     }
 
     showSuggestions(html) {

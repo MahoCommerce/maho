@@ -6,7 +6,7 @@
  * @package    Mage_Widget
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -24,7 +24,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
     protected $_layoutHandlesXml = null;
 
     /**
-     * @var Varien_Simplexml_Element[]
+     * @var \Maho\Simplexml\Element[]
      */
     protected $_layoutHandleUpdates = [];
 
@@ -190,7 +190,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Instance_Edit_Chooser_Block extends Mag
             $this->_mergeLayoutHandles($handle);
         }
         $updatesStr = '<' . '?xml version="1.0"?' . '><layout>' . implode('', $this->_layoutHandleUpdates) . '</layout>';
-        $this->_layoutHandleUpdatesXml = simplexml_load_string($updatesStr, 'Varien_Simplexml_Element');
+        $this->_layoutHandleUpdatesXml = simplexml_load_string($updatesStr, \Maho\Simplexml\Element::class);
     }
 
     /**

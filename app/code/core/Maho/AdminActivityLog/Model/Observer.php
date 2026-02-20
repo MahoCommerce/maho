@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    Maho_AdminActivityLog
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -45,7 +45,7 @@ class Maho_AdminActivityLog_Model_Observer
         return $this->_currentActionGroupId;
     }
 
-    public function logAdminLogin(Varien_Event_Observer $observer): void
+    public function logAdminLogin(\Maho\Event\Observer $observer): void
     {
         try {
             if (!Mage::helper('adminactivitylog')->shouldLogAuth()) {
@@ -61,7 +61,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    public function logAdminLogout(Varien_Event_Observer $observer): void
+    public function logAdminLogout(\Maho\Event\Observer $observer): void
     {
         try {
             if (!Mage::helper('adminactivitylog')->shouldLogAuth()) {
@@ -77,7 +77,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    public function logAdminLoginFailed(Varien_Event_Observer $observer): void
+    public function logAdminLoginFailed(\Maho\Event\Observer $observer): void
     {
         try {
             if (!Mage::helper('adminactivitylog')->shouldLogFailedAuth()) {
@@ -96,7 +96,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    public function logAdminActivityBefore(Varien_Event_Observer $observer): void
+    public function logAdminActivityBefore(\Maho\Event\Observer $observer): void
     {
         try {
             if (!Mage::helper('adminactivitylog')->shouldLogActivity()) {
@@ -125,7 +125,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    public function logAdminActivityAfter(Varien_Event_Observer $observer): void
+    public function logAdminActivityAfter(\Maho\Event\Observer $observer): void
     {
         try {
             if (!Mage::helper('adminactivitylog')->shouldLogSaveActions()) {
@@ -208,7 +208,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    public function logAdminDelete(Varien_Event_Observer $observer): void
+    public function logAdminDelete(\Maho\Event\Observer $observer): void
     {
         try {
             if (!Mage::helper('adminactivitylog')->shouldLogDeleteActions()) {
@@ -240,7 +240,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    public function logPageVisit(Varien_Event_Observer $observer): void
+    public function logPageVisit(\Maho\Event\Observer $observer): void
     {
         try {
             if (!Mage::helper('adminactivitylog')->shouldLogPageVisit()) {
@@ -321,7 +321,7 @@ class Maho_AdminActivityLog_Model_Observer
         return array_diff_key($data, array_flip($this->ignoreFields));
     }
 
-    public function logMassAction(Varien_Event_Observer $observer): void
+    public function logMassAction(\Maho\Event\Observer $observer): void
     {
         if (!Mage::helper('adminactivitylog')->shouldLogMassActions()) {
             return;
@@ -456,44 +456,21 @@ class Maho_AdminActivityLog_Model_Observer
         Mage::helper('adminactivitylog')->cleanOldLogs();
     }
 
-    public function encryptionKeyRegenerated(Varien_Event_Observer $observer): void
+    public function encryptionKeyRegenerated(\Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */
         $output = $observer->getEvent()->getOutput();
         $encryptCallback = $observer->getEvent()->getEncryptCallback();
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
-        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $output->write('Re-encrypting data on adminactivitylog_activity table... ');
-        $table = Mage::getSingleton('core/resource')->getTableName('adminactivitylog/activity');
-
-        // Re-encrypt old_data
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('old_data IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['old_data' => $encryptCallback($decryptCallback($encryptedDataRow['old_data']))],
-                ['activity_id = ?' => $encryptedDataRow['activity_id']],
-            );
-        }
-
-        // Re-encrypt new_data
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('new_data IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['new_data' => $encryptCallback($decryptCallback($encryptedDataRow['new_data']))],
-                ['activity_id = ?' => $encryptedDataRow['activity_id']],
-            );
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('adminactivitylog/activity'),
+            'activity_id',
+            ['old_data', 'new_data'],
+            $encryptCallback,
+            $decryptCallback,
+        );
         $output->writeln('OK');
     }
 

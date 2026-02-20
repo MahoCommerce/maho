@@ -6,7 +6,7 @@
  * @package    Mage_Weee
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -71,7 +71,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
     public function __construct(array $args = [])
     {
         parent::__construct();
-        $this->_taxHelper = !empty($args['helper']) ? $args['helper'] : Mage::helper('tax');
+        $this->_taxHelper = empty($args['helper']) ? Mage::helper('tax') : $args['helper'];
     }
 
     /**
@@ -245,7 +245,7 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
                         }
                     }
 
-                    $one = new Varien_Object();
+                    $one = new \Maho\DataObject();
                     $one->setName(Mage::helper('catalog')->__($attribute->getFrontend()->getLabel()))
                         ->setAmount($amount)
                         ->setTaxAmount($taxAmount)
@@ -276,9 +276,8 @@ class Mage_Weee_Model_Tax extends Mage_Core_Model_Abstract
         $value = $this->_productDiscounts[$key];
         if ($value) {
             return 100 - min(100, max(0, $value));
-        } else {
-            return 0;
         }
+        return 0;
     }
 
     /**

@@ -1,4 +1,3 @@
-
 <?php
 
 /**
@@ -7,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -97,7 +96,7 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     protected $_customerGroupId = null;
 
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         $this->_init('wishlist/item');
         $this->addFilterToMap('store_id', 'main_table.store_id');
@@ -234,17 +233,6 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     }
 
     /**
-     * Add filter by wishlist object
-     *
-     * @return $this
-     * @deprecated use self::setWishlist($wishlist) instead
-     */
-    public function addWishlistFilter(Mage_Wishlist_Model_Wishlist $wishlist)
-    {
-        return $this->setWishlist($wishlist);
-    }
-
-    /**
      * Add filtration by customer id
      *
      * @param int $customerId
@@ -291,22 +279,6 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
             'store_name' => 'name',
             'item_store_id' => 'store_id',
         ]);
-        return $this;
-    }
-
-    /**
-     * Add wishlist sort order
-     *
-     * @deprecated after 1.6.0.0-rc2
-     * @see Varien_Data_Collection_Db::setOrder() is used instead
-     *
-     * @param string $attribute
-     * @param string $dir
-     * @return $this
-     */
-    public function addWishListSortOrder($attribute = 'added_at', $dir = 'desc')
-    {
-        $this->setOrder($attribute, $dir);
         return $this;
     }
 
@@ -365,18 +337,6 @@ class Mage_Wishlist_Model_Resource_Item_Collection extends Mage_Core_Model_Resou
     public function setDaysInWishlist(bool $flag): self
     {
         $this->_addDaysInWishlist = $flag;
-        return $this;
-    }
-
-    /**
-     * Set add days in wishlist
-     *
-     * @return $this
-     * @deprecated use self::setDaysInWishlist($flag)
-     */
-    public function addDaysInWishlist()
-    {
-        $this->setDaysInWishlist(true);
         return $this;
     }
 

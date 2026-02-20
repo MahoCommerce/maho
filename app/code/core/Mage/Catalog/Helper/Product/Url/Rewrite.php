@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,8 +32,8 @@ class Mage_Catalog_Helper_Product_Url_Rewrite extends Mage_Core_Helper_Abstract 
     public function __construct(array $args = [])
     {
         $this->_resource = Mage::getSingleton('core/resource');
-        $this->_connection = !empty($args['connection']) ? $args['connection'] : $this->_resource
-            ->getConnection(Mage_Core_Model_Resource::DEFAULT_READ_RESOURCE);
+        $this->_connection = empty($args['connection']) ? $this->_resource
+            ->getConnection(Mage_Core_Model_Resource::DEFAULT_READ_RESOURCE) : $args['connection'];
     }
 
     /**
@@ -52,7 +52,7 @@ class Mage_Catalog_Helper_Product_Url_Rewrite extends Mage_Core_Helper_Abstract 
             ->where('is_system = ?', 1)
             ->where('category_id = ? OR category_id IS NULL', (int) $categoryId)
             ->where('product_id IN(?)', $productIds)
-            ->order('category_id ' . Varien_Data_Collection::SORT_ORDER_DESC);
+            ->order('category_id ' . \Maho\Data\Collection::SORT_ORDER_DESC);
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -48,7 +48,7 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
      * Initialize resource model
      */
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         $this->_init('sales/order_shipment_track');
     }
@@ -133,9 +133,8 @@ class Mage_Sales_Model_Order_Shipment_Track extends Mage_Sales_Model_Abstract
             $custom['title'] = $this->getTitle();
             $custom['number'] = $this->getTrackNumber();
             return $custom;
-        } else {
-            $carrierInstance->setStore($this->getStore());
         }
+        $carrierInstance->setStore($this->getStore());
 
         if (!$trackingInfo = $carrierInstance->getTrackingInfo($this->getNumber())) {
             return Mage::helper('sales')->__('No detail for number "%s"', $this->getNumber());

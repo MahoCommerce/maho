@@ -6,7 +6,7 @@
  * @package    Mage_CatalogSearch
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,7 +16,7 @@ class Mage_CatalogSearch_Block_Advanced_Form extends Mage_Core_Block_Template
      * @return Mage_Core_Block_Template
      */
     #[\Override]
-    public function _prepareLayout()
+    protected function _prepareLayout()
     {
         // add Home breadcrumb
         /** @var Mage_Page_Block_Html_Breadcrumbs $breadcrumbs */
@@ -36,7 +36,7 @@ class Mage_CatalogSearch_Block_Advanced_Form extends Mage_Core_Block_Template
     /**
      * Retrieve collection of product searchable attributes
      *
-     * @return Varien_Data_Collection_Db
+     * @return \Maho\Data\Collection\Db
      */
     public function getSearchableAttributes()
     {

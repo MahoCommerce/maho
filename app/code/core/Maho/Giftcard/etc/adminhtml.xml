@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<config>
+    <menu>
+        <sales>
+            <children>
+                <giftcard translate="title" module="giftcard">
+                    <title>Gift Cards</title>
+                    <sort_order>55</sort_order>
+                    <children>
+                        <manage translate="title" module="giftcard">
+                            <title>Manage Gift Cards</title>
+                            <action>adminhtml/giftcard/index</action>
+                            <sort_order>10</sort_order>
+                        </manage>
+                        <history translate="title" module="giftcard">
+                            <title>Gift Card History</title>
+                            <action>adminhtml/giftcard_history/index</action>
+                            <sort_order>20</sort_order>
+                        </history>
+                    </children>
+                </giftcard>
+            </children>
+        </sales>
+    </menu>
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <sales>
+                        <children>
+                            <giftcard translate="title" module="giftcard">
+                                <title>Gift Cards</title>
+                                <sort_order>55</sort_order>
+                                <children>
+                                    <manage translate="title" module="giftcard">
+                                        <title>Manage Gift Cards</title>
+                                    </manage>
+                                    <history translate="title" module="giftcard">
+                                        <title>Gift Card History</title>
+                                    </history>
+                                </children>
+                            </giftcard>
+                        </children>
+                    </sales>
+                    <system>
+                        <children>
+                            <config>
+                                <children>
+                                    <giftcard translate="title" module="giftcard">
+                                        <title>Gift Cards Configuration</title>
+                                    </giftcard>
+                                </children>
+                            </config>
+                        </children>
+                    </system>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

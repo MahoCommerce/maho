@@ -14,7 +14,7 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Store extends Mage_Eav_Model_Entit
     /**
      * Prepare data before save
      *
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return $this
      */
     protected function _beforeSave($object)

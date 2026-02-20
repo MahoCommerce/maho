@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,24 +58,23 @@ abstract class Maho_CustomerSegmentation_Model_Segment_Condition_Abstract extend
 
     public function prepareValueForSql(mixed $value, string $operator): mixed
     {
-        switch ($operator) {
-            case 'LIKE':
-            case 'NOT LIKE':
-                return '%' . $value . '%';
-            case 'IN':
-            case 'NOT IN':
-                if (!is_array($value)) {
-                    $value = explode(',', $value);
-                }
-                return array_map('trim', $value);
-            default:
-                return $value;
-        }
+        return match ($operator) {
+            'LIKE', 'NOT LIKE' => '%' . $value . '%',
+            'IN', 'NOT IN' => is_array($value) ? array_map('trim', $value) : array_map('trim', explode(',', $value)),
+            default => $value,
+        };
+    }
+
+    /**
+     * Prepare numeric value for SQL (cast string to float for SQLite compatibility)
+     */
+    protected function prepareNumericValue(mixed $value): float|int
+    {
+        return str_contains((string) $value, '.') ? (float) $value : (int) $value;
     }
 
     protected function buildSqlCondition(\Maho\Db\Adapter\AdapterInterface $adapter, string $field, string $operator, mixed $value): string
     {
-        // Fallback for empty operator
         if (empty($operator)) {
             $operator = '=';
         }

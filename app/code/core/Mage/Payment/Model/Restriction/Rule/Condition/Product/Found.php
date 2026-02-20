@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Payment
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -72,7 +72,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
     public function loadAttributeOptions()
     {
         $this->setAttributeOption([
-            null => Mage::helper('payment')->__('Please choose a condition to add.'),
+            '' => Mage::helper('payment')->__('Please choose a condition to add.'),
         ]);
         return $this;
     }
@@ -144,7 +144,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
      * @return bool
      */
     #[\Override]
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         // Get quote from object, handling different object types
         if ($object instanceof Mage_Sales_Model_Quote) {
@@ -177,7 +177,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
             return true;
         }
         // not found and we're making sure it doesn't exist
-        elseif (!$found && !$true) {
+        if (!$found && !$true) {
             return true;
         }
         return false;

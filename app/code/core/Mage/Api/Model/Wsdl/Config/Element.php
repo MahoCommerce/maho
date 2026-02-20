@@ -6,21 +6,21 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
+class Mage_Api_Model_Wsdl_Config_Element extends \Maho\Simplexml\Element
 {
     /**
-     * @param Varien_Simplexml_Element $source
+     * @param \Maho\Simplexml\Element $source
      * @param bool $overwrite
-     * @return $this|Varien_Simplexml_Element
+     * @return $this|\Maho\Simplexml\Element
      */
     #[\Override]
     public function extend($source, $overwrite = false)
     {
-        if (!$source instanceof Varien_Simplexml_Element) {
+        if (!$source instanceof \Maho\Simplexml\Element) {
             return $this;
         }
 
@@ -36,10 +36,10 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
     /**
      * Extends one node
      *
-     * @param Varien_Simplexml_Element $source
+     * @param \Maho\Simplexml\Element $source
      * @param bool $overwrite
      * @param string $elmNamespace
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     #[\Override]
     public function extendChild($source, $overwrite = false, $elmNamespace = '')
@@ -121,14 +121,14 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
     /**
      * Return attributes of all namespaces
      *
-     * array(
-     *   namespace => array(
+     * [
+     *   namespace => [
      *     attribute_key => attribute_value,
      *     ...
-     *   )
-     * )
+     *   ]
+     * ]
      *
-     * @param Varien_Simplexml_Element $source
+     * @param \Maho\Simplexml\Element $source
      * @param null|string $namespace
      * @return array
      */
@@ -153,7 +153,7 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
     /**
      * Return children of all namespaces
      *
-     * @param Varien_Simplexml_Element $source
+     * @param \Maho\Simplexml\Element $source
      * @return array
      */
     protected static function _getChildren($source)
@@ -198,9 +198,9 @@ class Mage_Api_Model_Wsdl_Config_Element extends Varien_Simplexml_Element
     /**
      * Return element by tag name, and checking attributes with namespaces
      *
-     * @param Varien_Simplexml_Element $source
+     * @param \Maho\Simplexml\Element $source
      * @param string $elmNamespace
-     * @return SimpleXMLElement|Varien_Simplexml_Element|null
+     * @return SimpleXMLElement|\Maho\Simplexml\Element|null
      */
     public function getElementByName($source, $elmNamespace = '')
     {

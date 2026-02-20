@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -53,11 +53,11 @@
 <div id="checkout-review-submit">
     <?= $this->getChildHtml('agreements') ?>
     <div class="buttons-set" id="review-buttons-container">
+        <a class="continue-shopping" href="<?= $this->getUrl() ?>"><?= $this->__('Continue Shopping') ?></a>
         <?= $this->getChildHtml('button') ?>
         <span class="please-wait" id="review-please-wait" style="display:none;">
             <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
         </span>
-        <p class="f-left"><?= $this->__('Forgot an Item?') ?> <a href="<?= $this->getUrl('checkout/cart') ?>" onclick="return confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you want to leave this page? You will need to go through the checkout steps again.')) ?>')"><?= $this->__('Edit Your Cart') ?></a></p>
     </div>
     <script type="text/javascript">
         review = new Review(

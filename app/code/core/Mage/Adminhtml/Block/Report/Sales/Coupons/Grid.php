@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,9 +26,8 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
     {
         if (($this->getFilterData()->getData('report_type') == 'updated_at_order')) {
             return 'salesrule/report_updatedat_collection';
-        } else {
-            return 'salesrule/report_collection';
         }
+        return 'salesrule/report_collection';
     }
 
     #[\Override]
@@ -142,7 +141,7 @@ class Mage_Adminhtml_Block_Report_Sales_Coupons_Grid extends Mage_Adminhtml_Bloc
      * Add price rule filter
      *
      * @param Mage_SalesRule_Model_Resource_Report_Collection $collection
-     * @param Varien_Object $filterData
+     * @param \Maho\DataObject $filterData
      * @return Mage_Adminhtml_Block_Report_Grid_Abstract
      */
     #[\Override]

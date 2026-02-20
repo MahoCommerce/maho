@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -77,7 +77,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
         try {
             $this->_initData();
 
-            $configureResult = new Varien_Object([
+            $configureResult = new \Maho\DataObject([
                 'ok'                  => true,
                 'product_id'          => $this->_wishlistItem->getProductId(),
                 'buy_request'         => $this->_wishlistItem->getBuyRequest(),
@@ -111,7 +111,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
         try {
             $this->_initData();
 
-            $buyRequest = new Varien_Object($this->getRequest()->getPost());
+            $buyRequest = new \Maho\DataObject($this->getRequest()->getPost());
             $buyRequest->unsFormKey();
 
             $this->_wishlist

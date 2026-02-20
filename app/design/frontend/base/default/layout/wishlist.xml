@@ -24,7 +24,7 @@ Default layout, loads most of the pages
 
         <!-- Mage_Wishlist -->
         <reference name="right">
-            <block type="wishlist/customer_sidebar" name="wishlist_sidebar" as="wishlist" after="cart_sidebar" template="wishlist/sidebar.phtml" />
+            <block type="wishlist/customer_sidebar" name="wishlist_sidebar" as="wishlist" template="wishlist/sidebar.phtml" />
         </reference>
     </default>
 
@@ -123,8 +123,11 @@ Wishlist pages
     <wishlist_shared_index translate="label">
         <label>Customer Shared Wishlist View</label>
         <!-- Mage_Wishlist -->
+        <update handle="page_one_column" />
         <reference name="content">
-            <block type="wishlist/share_wishlist" name="customer.wishlist" template="wishlist/shared.phtml" />
+            <block type="wishlist/share_wishlist" name="customer.wishlist" template="wishlist/shared.phtml">
+                <block type="wishlist/customer_wishlist_item_options" name="customer.wishlist.item.options" />
+            </block>
         </reference>
     </wishlist_shared_index>
 </layout>

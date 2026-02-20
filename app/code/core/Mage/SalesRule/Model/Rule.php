@@ -6,7 +6,7 @@
  * @package    Mage_SalesRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -115,15 +115,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
      * @var string
      */
     protected $_eventObject = 'rule';
-
-    /**
-     * Contain sores labels
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @var array
-     */
-    protected $_labels = [];
 
     /**
      * Rule's primary coupon
@@ -315,10 +306,11 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     {
         $storeId = Mage::app()->getStore($store)->getId();
         $labels = (array) $this->getStoreLabels();
-
         if (isset($labels[$storeId])) {
             return $labels[$storeId];
-        } elseif (isset($labels[0]) && $labels[0]) {
+        }
+
+        if (isset($labels[0]) && $labels[0]) {
             return $labels[0];
         }
 
@@ -367,7 +359,7 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
                 self::COUPON_TYPE_NO_COUPON => Mage::helper('salesrule')->__('No Coupon'),
                 self::COUPON_TYPE_SPECIFIC  => Mage::helper('salesrule')->__('Specific Coupon'),
             ];
-            $transport = new Varien_Object([
+            $transport = new \Maho\DataObject([
                 'coupon_types'                => $this->_couponTypes,
                 'is_coupon_type_auto_visible' => false,
             ]);
@@ -444,7 +436,10 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function hasIsValidForAddress($address)
     {
         $addressId = $this->_getAddressId($address);
-        return isset($this->_validatedAddresses[$addressId]) ? true : false;
+        if ($addressId === null) {
+            return false;
+        }
+        return isset($this->_validatedAddresses[$addressId]);
     }
 
     /**
@@ -457,6 +452,9 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function setIsValidForAddress($address, $validationResult)
     {
         $addressId = $this->_getAddressId($address);
+        if ($addressId === null) {
+            return $this;
+        }
         $this->_validatedAddresses[$addressId] = $validationResult;
         return $this;
     }
@@ -470,6 +468,9 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
     public function getIsValidForAddress($address)
     {
         $addressId = $this->_getAddressId($address);
+        if ($addressId === null) {
+            return false;
+        }
         return $this->_validatedAddresses[$addressId] ?? false;
     }
 
@@ -485,55 +486,6 @@ class Mage_SalesRule_Model_Rule extends Mage_Rule_Model_Abstract
             return $address->getId();
         }
         return $address;
-    }
-
-    /**
-     * Collect all product attributes used in serialized rule's action or condition
-     *
-     * @deprecated after 1.6.2.0 use Mage_SalesRule_Model_Resource_Rule::getProductAttributes() instead
-     *
-     * @param string $serializedString
-     *
-     * @return array
-     */
-    protected function _getUsedAttributes($serializedString)
-    {
-        return $this->_getResource()->getProductAttributes($serializedString);
-    }
-
-    /**
-     * @deprecated after 1.6.2.0
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    #[\Override]
-    public function toString($format = '')
-    {
-        return '';
-    }
-
-    /**
-     * Returns rule as an array for admin interface
-     *
-     * @deprecated after 1.6.2.0
-     *
-     * @param array $arrAttributes
-     *
-     * Output example:
-     * array(
-     *   'name'=>'Example rule',
-     *   'conditions'=>{condition_combine::toArray}
-     *   'actions'=>{action_collection::toArray}
-     * )
-     *
-     * @return array
-     */
-    #[\Override]
-    public function toArray(array $arrAttributes = [])
-    {
-        return parent::toArray($arrAttributes);
     }
 
     /**

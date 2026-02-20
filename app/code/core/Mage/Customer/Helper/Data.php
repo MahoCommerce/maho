@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,7 +25,12 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Config name for Redirect Customer to Account Dashboard after Logging in setting
      */
-    public const XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = 'customer/startup/redirect_dashboard';
+    public const XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD = 'customer/login/redirect_dashboard';
+
+    /**
+     * @deprecated Since 26.1.0. Use XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD instead
+     */
+    public const XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD = self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD;
 
     /**
      * Config paths to VAT related customer groups
@@ -223,7 +228,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
 
         $referer = $this->_getRequest()->getParam(self::REFERER_QUERY_PARAM_NAME);
 
-        if (!$referer && !Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD)
+        if (!$referer && !Mage::getStoreConfigFlag(self::XML_PATH_CUSTOMER_LOGIN_REDIRECT_TO_DASHBOARD)
             && !Mage::getSingleton('customer/session')->getNoReferer()
         ) {
             $referer = Mage::getUrl('*/*/*', ['_current' => true, '_use_rewrite' => true]);
@@ -351,7 +356,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isMagicLinkEnabled(?int $storeId = null): bool
     {
-        return Mage::getStoreConfigFlag('customer/magic_link/enabled', $storeId);
+        return Mage::getStoreConfigFlag('customer/login/magic_link_enabled', $storeId);
     }
 
     /**
@@ -359,7 +364,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkTokenExpiration(): int
     {
-        $expiration = (int) Mage::getStoreConfig('customer/magic_link/token_expiration');
+        $expiration = (int) Mage::getStoreConfig('customer/login/magic_link_token_expiration');
         return $expiration > 0 ? $expiration : 10; // Default: 10 minutes
     }
 
@@ -368,7 +373,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkRateLimitEmail(): int
     {
-        return (int) Mage::getStoreConfig('customer/magic_link/rate_limit_email') ?: 3;
+        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_email') ?: 3;
     }
 
     /**
@@ -376,7 +381,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkRateLimitIp(): int
     {
-        return (int) Mage::getStoreConfig('customer/magic_link/rate_limit_ip') ?: 10;
+        return (int) Mage::getStoreConfig('customer/login/magic_link_rate_limit_ip') ?: 10;
     }
 
     /**
@@ -384,7 +389,13 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getMagicLinkRegistrationMode(): string
     {
-        return Mage::getStoreConfig('customer/magic_link/registration_mode') ?: 'require_password';
+        // If magic link is disabled, always require password regardless of configuration
+        if (!$this->isMagicLinkEnabled()) {
+            return Mage_Customer_Model_Config_Registrationmode::MODE_REQUIRE_PASSWORD;
+        }
+
+        return Mage::getStoreConfig('customer/login/magic_link_registration_mode')
+            ?: Mage_Customer_Model_Config_Registrationmode::MODE_REQUIRE_PASSWORD;
     }
 
     /**
@@ -415,7 +426,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function isRegistrationAllowed()
     {
-        $result = new Varien_Object(['is_allowed' => true]);
+        $result = new \Maho\DataObject(['is_allowed' => true]);
         Mage::dispatchEvent('customer_registration_is_allowed', ['result' => $result]);
         return $result->getIsAllowed();
     }
@@ -553,7 +564,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      * Retrieve customer group ID based on his VAT number
      *
      * @param string $customerCountryCode
-     * @param Varien_Object $vatValidationResult
+     * @param \Maho\DataObject $vatValidationResult
      * @param Mage_Core_Model_Store|string|int $store
      * @return null|int
      */
@@ -585,12 +596,12 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      * @param string $requesterCountryCode
      * @param string $requesterVatNumber
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function checkVatNumber($countryCode, $vatNumber, $requesterCountryCode = '', $requesterVatNumber = '')
     {
         // Default response
-        $gatewayResponse = new Varien_Object([
+        $gatewayResponse = new \Maho\DataObject([
             'is_valid' => false,
             'request_date' => '',
             'request_identifier' => '',
@@ -674,7 +685,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      * Get VAT class
      *
      * @param string $customerCountryCode
-     * @param Varien_Object $vatValidationResult
+     * @param \Maho\DataObject $vatValidationResult
      * @param Mage_Core_Model_Store|string|int|null $store
      * @return null|string
      */
@@ -708,8 +719,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
      *
      * @param Mage_Customer_Model_Address $customerAddress
      * @param bool $customerGroupAutoAssignDisabled
-     * @param Varien_Object $validationResult
-     * @return Varien_Object
+     * @param \Maho\DataObject $validationResult
+     * @return \Maho\DataObject
      */
     public function getVatValidationUserMessage($customerAddress, $customerGroupAutoAssignDisabled, $validationResult)
     {
@@ -750,7 +761,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
                 . $contactUsMessage;
         }
 
-        $validationMessageEnvelope = new Varien_Object();
+        $validationMessageEnvelope = new \Maho\DataObject();
         $validationMessageEnvelope->setMessage($message);
         $validationMessageEnvelope->setIsError($isError);
 

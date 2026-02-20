@@ -5,10 +5,10 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @package    Maho_Db
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,14 +21,16 @@ declare(strict_types=1);
 
 namespace Maho\Db\Statement\Pdo;
 
-class Mysql
+use Maho\Db\Statement\StatementInterface;
+
+class Mysql implements StatementInterface
 {
     // Fetch mode constants for backward compatibility with Zend_Db_Statement
     // These match PDO constants but don't require PDO extension
-    public const FETCH_ASSOC = 2;       // PDO::FETCH_ASSOC
-    public const FETCH_NUM = 3;         // PDO::FETCH_NUM
-    public const FETCH_COLUMN = 7;      // PDO::FETCH_COLUMN
-    public const FETCH_KEY_PAIR = 12;   // PDO::FETCH_KEY_PAIR
+    public const FETCH_ASSOC = StatementInterface::FETCH_ASSOC;
+    public const FETCH_NUM = StatementInterface::FETCH_NUM;
+    public const FETCH_COLUMN = StatementInterface::FETCH_COLUMN;
+    public const FETCH_KEY_PAIR = StatementInterface::FETCH_KEY_PAIR;
 
     /**
      * Doctrine DBAL Result object
@@ -54,6 +56,7 @@ class Mysql
      *
      * @param int $fetchMode One of self::FETCH_* constants
      */
+    #[\Override]
     public function fetch(int $fetchMode = self::FETCH_ASSOC): array|false
     {
         if ($fetchMode === self::FETCH_NUM) {
@@ -69,6 +72,7 @@ class Mysql
      * @param int $fetchMode One of self::FETCH_* constants
      * @param int $col Column index (used for FETCH_COLUMN)
      */
+    #[\Override]
     public function fetchAll(int $fetchMode = self::FETCH_ASSOC, int $col = 0): array
     {
         return match ($fetchMode) {
@@ -82,6 +86,7 @@ class Mysql
     /**
      * Fetch a single column from the next row
      */
+    #[\Override]
     public function fetchColumn(int $col = 0): mixed
     {
         return $this->_result->fetchOne();
@@ -90,6 +95,7 @@ class Mysql
     /**
      * Fetch an object from the result set
      */
+    #[\Override]
     public function fetchObject(string $class = 'stdClass', array $config = []): object|false
     {
         $row = $this->_result->fetchAssociative();
@@ -111,6 +117,7 @@ class Mysql
     /**
      * Return the number of rows affected by the last statement
      */
+    #[\Override]
     public function rowCount(): int
     {
         return $this->_result->rowCount();
@@ -119,6 +126,7 @@ class Mysql
     /**
      * Closes the cursor, allowing the statement to be executed again
      */
+    #[\Override]
     public function closeCursor(): bool
     {
         $this->_result->free();
@@ -128,6 +136,7 @@ class Mysql
     /**
      * Returns the number of columns in the result set
      */
+    #[\Override]
     public function columnCount(): int
     {
         return $this->_result->columnCount();
@@ -136,6 +145,7 @@ class Mysql
     /**
      * Get the Doctrine DBAL Result object
      */
+    #[\Override]
     public function getResult(): \Doctrine\DBAL\Result
     {
         return $this->_result;

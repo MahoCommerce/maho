@@ -6,7 +6,7 @@
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -101,7 +101,7 @@ function updateProgress(sessionId, idx, time, memory) {
 
     public function updateProgress($args)
     {
-        $memory = !empty($args['memory']) ? $args['memory'] : '';
+        $memory = empty($args['memory']) ? '' : $args['memory'];
         echo '<script type="text/javascript">updateProgress("'
             . $args['row']['session_id'] . '", "' . $args['idx'] . '", "' . time() . '", "' . $memory . '");</script>';
         echo '<li>' . $memory . '</li>';

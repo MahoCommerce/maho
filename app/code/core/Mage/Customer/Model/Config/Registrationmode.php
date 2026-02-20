@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Mage_Customer
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,9 +20,6 @@ class Mage_Customer_Model_Config_Registrationmode
     public const MODE_REQUIRE_PASSWORD = 'require_password';
     public const MODE_NO_PASSWORD = 'no_password';
 
-    /**
-     * Options array
-     */
     public function toOptionArray(): array
     {
         return [
@@ -37,9 +34,6 @@ class Mage_Customer_Model_Config_Registrationmode
         ];
     }
 
-    /**
-     * Get options in "key-value" format
-     */
     public function toArray(): array
     {
         return [

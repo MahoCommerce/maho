@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Payment
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -122,7 +122,7 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             $rule = Mage::getModel('payment/restriction_rule');
 
             // Set up the form for the rule
-            $form = new Varien_Data_Form();
+            $form = new \Maho\Data\Form();
             $form->setHtmlIdPrefix('rule_');
             $rule->setForm($form);
 
@@ -141,14 +141,14 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
             // Load the posted data
             $rule->loadPost($data);
 
-            // Serialize the conditions
+            // Encode the conditions as JSON
             $conditionsArray = $rule->getConditions()->asArray();
-            $data['conditions_serialized'] = serialize($conditionsArray);
-
-            // Debug logging
-            Mage::log('Payment Restriction Save - Posted Data: ' . print_r($data, true), null, 'payment_restrictions.log');
-            Mage::log('Payment Restriction Save - Conditions Array: ' . print_r($conditionsArray, true), null, 'payment_restrictions.log');
-            Mage::log('Payment Restriction Save - Serialized Length: ' . strlen($data['conditions_serialized']), null, 'payment_restrictions.log');
+            try {
+                $data['conditions_serialized'] = Mage::helper('core')->jsonEncode($conditionsArray);
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
 
             $model->setData($data);
 
@@ -261,14 +261,13 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
         // Ensure the rule has a form (should auto-create if null)
         $rule->getForm();
 
-        /** @var Mage_Rule_Model_Condition_Abstract $model */
         $model = Mage::getModel($type)
             ->setId($id)
             ->setType($type)
             ->setRule($rule)
             ->setPrefix('conditions');
         if (!empty($typeArr[1])) {
-            $model->setAttribute($typeArr[1]);
+            $model->setData('attribute', $typeArr[1]);
         }
 
         if ($model instanceof Mage_Rule_Model_Condition_Abstract) {

@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Mage
  * @package    Mage_Core
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -100,6 +100,14 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Check if file is already minified based on filename patterns
+     */
+    private function isAlreadyMinified(string $filePath): bool
+    {
+        return (bool) preg_match('/[._-](min|pack)\./i', $filePath);
+    }
+
+    /**
      * Check if the given path is an external URL (different domain)
      */
     private function isExternalUrl(string $filePath): bool
@@ -156,8 +164,13 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
             }
 
             try {
-                $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
-                file_put_contents($cachedFile, $minifiedContent);
+                if ($this->isAlreadyMinified($filePath)) {
+                    // Copy already-minified files to maintain consistent URL/caching
+                    copy($absolutePath, $cachedFile);
+                } else {
+                    $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
+                    file_put_contents($cachedFile, $minifiedContent);
+                }
                 return $cachedUrl;
             } finally {
                 flock($lockHandle, LOCK_UN);
@@ -251,7 +264,9 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
         $dir = Mage::getBaseDir() . '/' . self::CACHE_DIR;
 
         if (!is_dir($dir)) {
-            mkdir($dir, 0755, true);
+            if (!@mkdir($dir, 0755, true) && !is_dir($dir)) {
+                throw new Mage_Core_Exception("Failed to create minify cache directory: {$dir}");
+            }
         }
     }
 
@@ -327,8 +342,11 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                     $fileMtime = (int) $matches[2];
                     // Remove if older than cutoff time
                     if ($fileMtime < $cutoffTime) {
-                        unlink($file);
-                        Mage::log("Cleaned up old minified file: {$filename}", Mage::LOG_INFO);
+                        if (@unlink($file)) {
+                            Mage::log("Cleaned up old minified file: {$filename}", Mage::LOG_INFO);
+                        } else {
+                            Mage::log("Failed to delete old minified file: {$filename}", Mage::LOG_WARNING);
+                        }
                     }
                 }
             }

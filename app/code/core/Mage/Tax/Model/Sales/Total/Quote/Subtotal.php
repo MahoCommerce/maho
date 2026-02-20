@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -72,7 +72,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
     /**
      * Request which can be used for tax rate calculation
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_storeTaxRequest = null;
 
@@ -175,7 +175,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * Calculate item price and row total with configured rounding level
      *
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param Varien_Object $taxRequest
+     * @param \Maho\DataObject $taxRequest
      *
      * @return $this
      */
@@ -201,7 +201,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * Calculate item price and row total including/excluding tax based on unit price rounding level
      *
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      *
      * @return $this
      */
@@ -337,7 +337,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * Calculate item price and row total including/excluding tax based on row total price rounding level
      *
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      *
      * @return $this
      */
@@ -482,7 +482,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * Calculate item price and row total including/excluding tax based on total price rounding level
      *
      * @param Mage_Sales_Model_Quote_Item_Abstract $item
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      *
      * @return $this
      */
@@ -663,7 +663,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      * Used only after collect() started, as far as uses optimized $_areTaxRequestsSimilar property
      * Used only in case of prices including tax
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      *
      * @return bool
      */
@@ -747,7 +747,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      *
      * @param   Mage_Sales_Model_Quote_Address $address
      *
-     * @return  Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getStoreTaxRequest($address)
     {
@@ -762,7 +762,7 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
      *
      * @param   Mage_Sales_Model_Quote_Address $address
      *
-     * @return  Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getAddressTaxRequest($address)
     {
@@ -800,146 +800,5 @@ class Mage_Tax_Model_Sales_Total_Quote_Subtotal extends Mage_Sales_Model_Quote_A
         $address->setSubtotalInclTax($address->getSubtotalInclTax() + $item->getRowTotalInclTax());
         $address->setBaseSubtotalInclTax($address->getBaseSubtotalInclTax() + $item->getBaseRowTotalInclTax());
         return $this;
-    }
-
-    /**
-     * Unset item prices/totals with price include tax.
-     * Operation is necessary for reset item state in case if configuration was changed
-     *
-     * @deprecated after 1.4.1
-     *
-     * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
-     */
-    protected function _resetItemPriceInclTax(Mage_Sales_Model_Quote_Item_Abstract $item)
-    {
-        return $this;
-    }
-
-    /**
-     * @deprecated after 1.4.0.1
-     *
-     * @param   Mage_Sales_Model_Quote_Address $address
-     * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
-     */
-    protected function _processShippingAmount($address)
-    {
-        return $this;
-    }
-
-    /**
-     * Recollect item price and row total using after taxes subtract.
-     * Declare item price including tax attributes
-     *
-     * @deprecated after 1.4.1
-     *
-     * @param   Mage_Sales_Model_Quote_Address $address
-     *
-     * @return  Mage_Tax_Model_Sales_Total_Quote_Subtotal
-     */
-    protected function _recollectItem($address, Mage_Sales_Model_Quote_Item_Abstract $item)
-    {
-        $store = $address->getQuote()->getStore();
-        $request = $this->_getStoreTaxRequest($address);
-        $request->setProductClassId($item->getProduct()->getTaxClassId());
-        $rate = $this->_calculator->getRate($request);
-        $qty = $item->getTotalQty();
-
-        $price = $taxPrice = $item->getCalculationPriceOriginal();
-        $basePrice = $baseTaxPrice = $item->getBaseCalculationPriceOriginal();
-        $subtotal = $taxSubtotal = $item->getRowTotal();
-        $baseSubtotal = $baseTaxSubtotal = $item->getBaseRowTotal();
-
-        if ($this->_config->discountTax($store)) {
-            $item->setDiscountCalculationPrice($price);
-            $item->setBaseDiscountCalculationPrice($basePrice);
-        }
-
-        /**
-         * Use original price for tax calculation
-         */
-        if ($item->hasCustomPrice() && !$this->_helper->applyTaxOnCustomPrice($store)) {
-            $taxPrice = $item->getOriginalPrice();
-            $baseTaxPrice = $item->getBaseOriginalPrice();
-            $taxSubtotal = $taxPrice * $qty;
-            $baseTaxSubtotal = $baseTaxPrice * $qty;
-        }
-
-        if ($this->_areTaxRequestsSimilar) {
-            $item->setRowTotalInclTax($subtotal);
-            $item->setBaseRowTotalInclTax($baseSubtotal);
-            $item->setPriceInclTax($price);
-            $item->setBasePriceInclTax($basePrice);
-
-            $item->setTaxCalcPrice($taxPrice);
-            $item->setBaseTaxCalcPrice($baseTaxPrice);
-            $item->setTaxCalcRowTotal($taxSubtotal);
-            $item->setBaseTaxCalcRowTotal($baseTaxSubtotal);
-        }
-
-        $this->_subtotalInclTax += $subtotal;
-        $this->_baseSubtotalInclTax += $baseSubtotal;
-
-        if ($this->_config->getAlgorithm($store) == Mage_Tax_Model_Calculation::CALC_UNIT_BASE) {
-            $taxAmount = $this->_calculator->calcTaxAmount($taxPrice, $rate, true);
-            $baseTaxAmount = $this->_calculator->calcTaxAmount($baseTaxPrice, $rate, true);
-            $unitPrice = $this->_calculator->round($price - $taxAmount);
-            $baseUnitPrice = $this->_calculator->round($basePrice - $baseTaxAmount);
-            $subtotal = $this->_calculator->round($unitPrice * $qty);
-            $baseSubtotal = $this->_calculator->round($baseUnitPrice * $qty);
-        } else {
-            $taxAmount = $this->_calculator->calcTaxAmount($taxSubtotal, $rate, true, false);
-            $baseTaxAmount = $this->_calculator->calcTaxAmount($baseTaxSubtotal, $rate, true, false);
-            $unitPrice = ($subtotal - $taxAmount) / $qty;
-            $baseUnitPrice = ($baseSubtotal - $baseTaxAmount) / $qty;
-            $subtotal = $this->_calculator->round(($subtotal - $taxAmount));
-            $baseSubtotal = $this->_calculator->round(($baseSubtotal - $baseTaxAmount));
-        }
-
-        if ($item->hasCustomPrice()) {
-            $item->setCustomPrice($unitPrice);
-            $item->setBaseCustomPrice($baseUnitPrice);
-        }
-        $item->setPrice($baseUnitPrice);
-        $item->setOriginalPrice($unitPrice);
-        $item->setBasePrice($baseUnitPrice);
-        $item->setRowTotal($subtotal);
-        $item->setBaseRowTotal($baseSubtotal);
-        return $this;
-    }
-
-    /**
-     * Check if we need subtract store tax amount from item prices
-     *
-     * @deprecated after 1.4.1
-     *
-     * @param Mage_Sales_Model_Quote_Address $address
-     *
-     * @return bool
-     */
-    protected function _needSubtractTax($address)
-    {
-        $store = $address->getQuote()->getStore();
-        if ($this->_config->priceIncludesTax($store) || $this->_config->getNeedUsePriceExcludeTax()) {
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Subtract shipping tax
-     *
-     * @deprecated after 1.4.0.1
-     *
-     * @param Mage_Sales_Model_Quote_Address $address
-     *
-     * @return bool
-     */
-    protected function _needSubtractShippingTax($address)
-    {
-        $store = $address->getQuote()->getStore();
-        if ($this->_config->shippingPriceIncludesTax($store) || $this->_config->getNeedUseShippingExcludeTax()) {
-            return true;
-        }
-        return false;
     }
 }

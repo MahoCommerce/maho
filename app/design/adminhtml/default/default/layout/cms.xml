@@ -6,7 +6,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
@@ -55,6 +55,12 @@
         <update handle="editor"/>
         <reference name="content">
             <block type="adminhtml/cms_block_edit" name="cms_block_edit"></block>
+        </reference>
+        <reference name="left">
+            <block type="adminhtml/cms_block_edit_tabs" name="cms_block_edit_tabs">
+                <block type="adminhtml/cms_block_edit_tab_content" name="cms_block_edit_tab_content" />
+                <action method="addTab"><name>content_section</name><block>cms_block_edit_tab_content</block></action>
+            </block>
         </reference>
     </adminhtml_cms_block_edit>
 

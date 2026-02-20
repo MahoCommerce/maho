@@ -11,8 +11,7 @@
 }
 
 .cart-forms,
-.cart-totals-wrapper,
-.crosssell {
+.cart-totals-wrapper {
     float: right;
     clear: right;
     width: 40%;
@@ -32,7 +31,8 @@
 .cart-totals,
 .cart-forms .discount,
 .cart-forms .giftcard,
-.cart-forms .shipping {
+.cart-forms .shipping,
+.promo-code-section {
     margin-bottom: 20px;
 }
 
@@ -49,18 +49,12 @@
     padding-right: 10px;
     padding-left: 0;
 }
-.display-both-prices .cart-totals-wrapper,
-.display-both-prices .crosssell {
+.display-both-prices .cart-totals-wrapper {
     padding-left: 10px;
 }
 .display-both-prices .cart-forms,
-.display-both-prices .cart-totals-wrapper,
-.display-both-prices .crosssell {
+.display-both-prices .cart-totals-wrapper {
     width: 50%;
-}
-.display-both-prices .crosssell {
-    clear: right;
-    float: right;
 }
 
 td.product-cart-remove a {
@@ -77,18 +71,12 @@ td.product-cart-remove a {
         padding-right: 10px;
         padding-left: 0;
     }
-    .display-single-price .cart-totals-wrapper,
-    .display-single-price .crosssell {
+    .display-single-price .cart-totals-wrapper {
         padding-left: 10px;
     }
     .display-single-price .cart-forms,
-    .display-single-price .cart-totals-wrapper,
-    .display-single-price .crosssell {
+    .display-single-price .cart-totals-wrapper {
         width: 50%;
-    }
-    .display-single-price .crosssell {
-        clear: right;
-        float: right;
     }
 }
 @media only screen and (max-width: 599px) {
@@ -98,10 +86,8 @@ td.product-cart-remove a {
 
     .display-both-prices .cart-forms,
     .display-both-prices .cart-totals-wrapper,
-    .display-both-prices .crosssell,
     .display-single-price .cart-forms,
-    .display-single-price .cart-totals-wrapper,
-    .display-single-price .crosssell {
+    .display-single-price .cart-totals-wrapper {
         padding-top: 0;
         padding-left: 0;
         padding-right: 0;
@@ -239,7 +225,7 @@ td.product-cart-remove a {
 .cart-table .product-cart-sku {
     font-style: italic;
     font-size: 0.75rem;
-    margin: 5px 0 12px;
+    margin-block: 5px;
 }
 .cart-table .product-cart-sku .label {
     font-weight: 600;
@@ -250,6 +236,7 @@ td.product-cart-remove a {
 .cart-table .product-cart-total,
 .cart-table .product-cart-price {
     text-align: center;
+    white-space: nowrap;
 }
 .cart-table .cart-tax-total {
     position: relative;
@@ -685,6 +672,7 @@ td.product-cart-remove a {
 }
 
 #discount-coupon-form h2,
+#giftcard-cart-form h2,
 .cart .giftcard h2 {
     font-size: 0.875rem;
     font-weight: 600;
@@ -706,14 +694,16 @@ td.product-cart-remove a {
     border: 0;
 }
 
-#discount-coupon-form .coupon-input-group {
+#discount-coupon-form .coupon-input-group,
+#giftcard-cart-form .coupon-input-group {
     display: flex;
     align-items: stretch;
     gap: 8px;
     max-width: 600px;
 }
 
-#discount-coupon-form .coupon-input {
+#discount-coupon-form .coupon-input,
+#giftcard-cart-form .coupon-input {
     flex: 1;
     min-width: 0;
     height: 40px;
@@ -724,28 +714,65 @@ td.product-cart-remove a {
     transition: border-color 0.2s ease;
 }
 
-#discount-coupon-form .coupon-input:focus {
+#discount-coupon-form .coupon-input:focus,
+#giftcard-cart-form .coupon-input:focus {
     outline: none;
     border-color: var(--maho-color-primary);
     box-shadow: 0 0 0 2px rgba(var(--maho-color-primary-rgb, 0, 112, 220), 0.1);
 }
 
-#discount-coupon-form .coupon-input::placeholder {
+#discount-coupon-form .coupon-input::placeholder,
+#giftcard-cart-form .coupon-input::placeholder {
     color: #999;
 }
 
 #discount-coupon-form .btn-apply,
-#discount-coupon-form .btn-cancel {
+#discount-coupon-form .btn-cancel,
+#giftcard-cart-form .btn-apply,
+#giftcard-cart-form .btn-cancel {
     height: 40px;
     padding: 8px 20px;
     white-space: nowrap;
     flex-shrink: 0;
 }
 
-#discount-coupon-form .validation-advice {
+#discount-coupon-form .validation-advice,
+#giftcard-cart-form .validation-advice {
     display: block;
     margin-top: 6px;
     font-size: 0.813rem;
+}
+
+/* Checkout payment gift card form */
+#checkout-giftcard-container .coupon-input-group {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    max-width: 600px;
+}
+
+#checkout-giftcard-container .coupon-input {
+    flex: 1;
+    min-width: 0;
+    height: 40px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s ease;
+}
+
+#checkout-giftcard-container .coupon-input:focus {
+    outline: none;
+    border-color: var(--maho-color-primary);
+    box-shadow: 0 0 0 2px rgba(var(--maho-color-primary-rgb, 0, 112, 220), 0.1);
+}
+
+#checkout-giftcard-container .btn-apply {
+    height: 40px;
+    padding: 8px 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* Legacy field-wrapper support for giftcard */
@@ -791,18 +818,178 @@ td.product-cart-remove a {
     text-transform: none;
 }
 
-/* Responsive styles for discount coupon form */
+.applied-giftcards {
+    margin-bottom: 10px;
+
+    .applied-code {
+        margin-bottom: 5px;
+    }
+
+    .btn-remove-giftcard {
+        margin-left: 10px;
+        color: var(--maho-color-primary);
+        background: none;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+
+        &:hover {
+            color: var(--maho-color-primary-hover);
+        }
+    }
+}
+
+/* Unified Promo Code Section (handles both coupons and gift cards) */
+.promo-code-section {
+    padding: 10px;
+    background-color: var(--maho-color-background-alt);
+    border: 1px solid var(--maho-color-border);
+
+    h2 {
+        font-size: 0.875rem;
+        font-weight: 600;
+        margin: 0 0 10px;
+        text-transform: uppercase;
+        color: var(--maho-color-text-secondary);
+    }
+
+    .coupon-input-group {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .coupon-input {
+        flex: 1;
+        min-width: 0;
+        height: 40px;
+        padding: 8px 12px;
+        border: 1px solid var(--maho-color-border);
+        font-size: 0.875rem;
+
+        &:focus {
+            outline: none;
+            border-color: var(--maho-color-primary);
+        }
+
+        &::placeholder {
+            color: var(--maho-color-text-secondary);
+        }
+    }
+
+    .btn-apply {
+        height: 40px;
+        padding: 8px 20px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+}
+
+.applied-codes {
+    margin-top: 1rem;
+    margin-bottom: 12px;
+}
+
+.applied-code {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    background: var(--maho-color-background);
+    border: 1px solid var(--maho-color-border);
+    font-size: 0.8125rem;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    .code-label {
+        color: var(--maho-color-text-secondary);
+    }
+
+    .code-value {
+        font-weight: 600;
+        font-family: monospace;
+    }
+
+    .code-amount {
+        color: var(--maho-color-success);
+        font-weight: 500;
+        margin-left: auto;
+    }
+
+    .btn-remove-code {
+        background: none;
+        border: none;
+        color: var(--maho-color-text-secondary);
+        cursor: pointer;
+        font-size: 1.25rem;
+        line-height: 1;
+        padding: 0 4px;
+        margin-left: auto;
+
+        &:hover {
+            color: var(--maho-color-error);
+        }
+    }
+
+    /* If there's an amount, move remove button after it */
+    &:has(.code-amount) .btn-remove-code {
+        margin-left: 8px;
+    }
+}
+
+.promo-message {
+    margin-top: 8px;
+    font-size: 0.8125rem;
+    line-height: 1.4;
+
+    &:empty {
+        display: none;
+    }
+
+    &.success {
+        color: var(--maho-color-success);
+    }
+
+    &.error {
+        color: var(--maho-color-error);
+    }
+}
+
+/* Responsive styles for promo code section */
 @media only screen and (max-width: 770px) {
-    #discount-coupon-form .coupon-input-group {
+    .promo-code-section .coupon-input-group {
         flex-wrap: wrap;
     }
 
-    #discount-coupon-form .coupon-input {
+    .promo-code-section .coupon-input {
+        flex: 1 1 100%;
+    }
+
+    .promo-code-section .btn-apply {
+        flex: 1 1 auto;
+        height: 44px;
+    }
+}
+
+/* Responsive styles for discount coupon form and gift card form */
+@media only screen and (max-width: 770px) {
+    #discount-coupon-form .coupon-input-group,
+    #giftcard-cart-form .coupon-input-group {
+        flex-wrap: wrap;
+    }
+
+    #discount-coupon-form .coupon-input,
+    #giftcard-cart-form .coupon-input {
         flex: 1 1 100%;
     }
 
     #discount-coupon-form .btn-apply,
-    #discount-coupon-form .btn-cancel {
+    #discount-coupon-form .btn-cancel,
+    #giftcard-cart-form .btn-apply,
+    #giftcard-cart-form .btn-cancel {
         flex: 1 1 auto;
         height: 44px;
     }
@@ -819,49 +1006,57 @@ td.product-cart-remove a {
 /* ============================================ *
  * Checkout - Cart Cross sell
  * ============================================ */
+.crosssell {
+    clear: both;
+    padding: 30px 20px;
+}
+
 .crosssell h2 {
     color: var(--maho-color-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-wrap: balance;
 }
+
+.crosssell #crosssell-products-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
 .crosssell .item a.product-image {
     width: auto;
     float: left;
 }
 
-/* Change the layout to 2 columns at a breakpoint that is higher than a 3 columns layout would normally break */
+/* Responsive crosssell grid */
 @media only screen and (max-width: 979px) {
     .crosssell {
-        /* Undo three-column config */
+        padding: 20px 15px;
     }
-    .crosssell .products-grid > li:nth-child(even),
-    .crosssell .products-grid > li:nth-child(3n),
-    .crosssell .products-grid > li {
-        width: 47.72727%;
-        margin-right: 4.54545%;
-    }
-    .crosssell .products-grid > li:nth-child(odd) {
-        clear: left;
-    }
-    .crosssell .products-grid > li:nth-child(even) {
-        margin-right: 0;
-    }
-    .crosssell .products-grid > li:nth-child(3n+1) {
-        clear: none;
+    .crosssell #crosssell-products-list {
+        gap: 15px;
     }
 }
+
 @media only screen and (max-width: 599px) {
+    .crosssell {
+        padding: 15px 10px;
+        margin: 20px 0;
+    }
+    .crosssell #crosssell-products-list {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
     .cart-table .cart-tax-total:after {
         right: -9px;
     }
     .cart-table .cart-tax-total.cart-tax-total-expanded:after {
         right: -13px;
-    }
-}
-@media only screen and (max-width: 320px) {
-    .crosssell ul .item {
-        padding: 0 0px 40px;
-    }
-    .crosssell ul .product-details .crosssell-actions {
-        padding: 0 5px;
     }
 }
 /* ============================================ *
@@ -892,6 +1087,12 @@ td.product-cart-remove a {
         padding-left: 0;
     }
 }
+/* Constrain width in minimal checkout layout (old onepage checkout only) */
+body.checkout-onepage-index:has(.page-header-minimal):not(:has(.onestep-checkout)) .main-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 .opc select {
     width: 365px;
 }
@@ -959,7 +1160,7 @@ td.product-cart-remove a {
 }
 
 .opc .section .step {
-    padding: 20px;
+    padding-block: 20px;
 }
 .opc .section .step:after {
     content: '';
@@ -1011,45 +1212,8 @@ td.product-cart-remove a {
         margin-left: 0;
     }
 }
-.opc #opc-login .step {
-    padding: 0px;
-}
-.opc #opc-login .buttons-set {
-    border-top: 0;
-    padding-top: 5px;
-}
-
-@media only screen and (max-width: 770px) {
-    .opc #opc-login .description,
-    .opc #opc-login p.required {
-        display: none;
-    }
-}
 #opc-payment .note {
     padding: 10px;
-}
-
-/* -------------------------------------------- *
- * This section hides everything but the "Checkout Method" step of the checkout process and fades in the content
- * once the customer progresses to the next step. The purpose of this is to simplify what the customer has to focus on.
- * It is limited to larger viewports since smaller devices are inherently going to be focused solely on the
- * "Checkout Method" step.
- */
-.opc.opc-firststep-login .section:not(#opc-login) .step-title,
-.opc-block-progress-step-login {
-    transition: opacity 300ms linear 0;
-}
-
-/* When a user progresses from the "Checkout Method" to "Billing Information" for the first time, the              */
-/* "opc-has-progressed-from-login" class gets added to the body. Also, the .opc element will only have the         */
-/* "opc-firststep-login" class if the first step of the checkout is the "Checkout Method" (eg, not when logged in) */
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section:not(#opc-login) .step-title,
-body:not(.opc-has-progressed-from-login) .opc-block-progress-step-login {
-    opacity: 0;
-}
-
-body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-login .step-title h2 {
-    margin-left: 0px;
 }
 
 /* -------------------------------------------- *
@@ -1198,24 +1362,32 @@ body:not(.opc-has-progressed-from-login) .opc.opc-firststep-login .section#opc-l
     display: none;
 }
 
-#checkout-review-table-wrapper {
-    clear: both;
+#checkout-review-table td.a-right {
+    white-space: nowrap;
 }
 
 #review-buttons-container {
-    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
     margin-top: 15px;
     margin-bottom: 15px;
-}
-#review-buttons-container .btn-checkout {
-    min-width: 220px;
-}
-#review-buttons-container .please-wait {
-    float: left;
-    margin-right: 10px;
-}
-#review-buttons-container .f-left {
-    float: right;
+
+    .btn-checkout {
+        order: 1;
+        min-width: 220px;
+    }
+    .please-wait {
+        order: 1;
+        margin-right: 10px;
+    }
+    .continue-shopping {
+        @media (max-width: 599px) {
+            display: none;
+        }
+    }
 }
 
 @media only screen and (max-width: 599px) {

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -531,7 +531,7 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
     /**
      * UnSerialize string
      * @param string|null $str
-     * @return null|void
+     * @return mixed
      */
     public function unserialize($str)
     {
@@ -539,7 +539,11 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
             return null;
         }
 
-        return unserialize($str);
+        if (json_validate($str)) {
+            return Mage::helper('core')->jsonDecode($str);
+        }
+
+        return unserialize($str, ['allowed_classes' => false]);
     }
 
     /**
@@ -550,6 +554,9 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function isSerializedArrayOrObject($data)
     {
+        if (is_string($data) && json_validate($data)) {
+            return $data[0] === '{' || $data[0] === '[';
+        }
         $pattern =
             '/^a:\d+:\{(i:\d+;|s:\d+:\".+\";|N;|O:\d+:\"\w+\":\d+:\{\w:\d+:)+|^O:\d+:\"\w+\":\d+:\{(s:\d+:\"|i:\d+;)/';
         return is_string($data) && preg_match($pattern, $data);
@@ -563,10 +570,12 @@ class Mage_Core_Helper_String extends Mage_Core_Helper_Abstract
      */
     public function validateSerializedObject($str)
     {
-        if ($this->isSerializedArrayOrObject($str)) {
-            if (!unserialize($str)) {
-                return false;
-            }
+        if (!$this->isSerializedArrayOrObject($str)) {
+            return true;
+        }
+
+        if (!unserialize($str, ['allowed_classes' => false])) {
+            return false;
         }
 
         return true;

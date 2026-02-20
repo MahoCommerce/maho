@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -28,7 +28,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle segment refresh completion
      * Triggered after segment customer membership is updated
      */
-    public function onSegmentRefreshAfter(Varien_Event_Observer $observer): void
+    public function onSegmentRefreshAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Maho_CustomerSegmentation_Model_Segment $segment */
         $segment = $observer->getEvent()->getSegment();
@@ -188,7 +188,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle newsletter subscription changes
      * Stop email sequences when customer unsubscribes
      */
-    public function onNewsletterSubscriberSaveAfter(Varien_Event_Observer $observer): void
+    public function onNewsletterSubscriberSaveAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Newsletter_Model_Subscriber $subscriber */
         $subscriber = $observer->getEvent()->getSubscriber();
@@ -229,7 +229,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Handle customer deletion
      * Clean up sequence progress when customer is deleted
      */
-    public function onCustomerDeleteAfter(Varien_Event_Observer $observer): void
+    public function onCustomerDeleteAfter(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Customer_Model_Customer $customer */
         $customer = $observer->getEvent()->getCustomer();
@@ -266,7 +266,7 @@ class Maho_CustomerSegmentation_Model_Observer_EmailAutomation
      * Process ready email sequences (called by cron)
      * This processes scheduled emails that are ready to send
      */
-    public function processScheduledEmails(Varien_Event_Observer $observer): void
+    public function processScheduledEmails(\Maho\Event\Observer $observer): void
     {
         $startTime = microtime(true);
         $processed = 0;

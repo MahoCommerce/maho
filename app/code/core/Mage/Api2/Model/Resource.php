@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -695,7 +695,7 @@ abstract class Mage_Api2_Model_Resource
      *
      * @return $this
      */
-    final protected function _applyCollectionModifiers(Varien_Data_Collection_Db $collection)
+    final protected function _applyCollectionModifiers(\Maho\Data\Collection\Db $collection)
     {
         $pageNumber = $this->getRequest()->getPageNumber();
         if ($pageNumber === null) {
@@ -734,7 +734,7 @@ abstract class Mage_Api2_Model_Resource
      *
      * @return $this
      */
-    protected function _applyFilter(Varien_Data_Collection_Db $collection)
+    protected function _applyFilter(\Maho\Data\Collection\Db $collection)
     {
         $filter = $this->getRequest()->getFilter();
 
@@ -985,11 +985,10 @@ abstract class Mage_Api2_Model_Resource
         $workModel = $this->getConfig()->getResourceWorkingModel($this->getResourceType());
 
         if ($workModel) {
-            /** @var Mage_Core_Model_Resource_Db_Abstract $resource */
             $resource = Mage::getResourceModel($workModel);
 
             if (method_exists($resource, 'getMainTable')) {
-                $available = array_keys($resource->getReadConnection()->describeTable($resource->getMainTable()));
+                $available = array_keys($resource->getConnection()->describeTable($resource->getMainTable()));
             }
         }
         return $available;

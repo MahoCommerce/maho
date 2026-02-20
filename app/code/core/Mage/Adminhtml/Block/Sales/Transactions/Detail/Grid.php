@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -31,9 +31,9 @@ class Mage_Adminhtml_Block_Sales_Transactions_Detail_Grid extends Mage_Adminhtml
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = new Varien_Data_Collection();
+        $collection = new \Maho\Data\Collection();
         foreach ($this->getTransactionAdditionalInfo() as $key => $value) {
-            $data = new Varien_Object(['key' => $key, 'value' => $value]);
+            $data = new \Maho\DataObject(['key' => $key, 'value' => $value]);
             $collection->addItem($data);
         }
 

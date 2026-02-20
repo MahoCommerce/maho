@@ -6,7 +6,7 @@
  * @package    Mage_Log
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,7 +60,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     protected function _saveUrlInfo($visitor)
     {
         $adapter    = $this->_getWriteAdapter();
-        $data       = new Varien_Object([
+        $data       = new \Maho\DataObject([
             'url'    => Mage::helper('core/string')->substr($visitor->getUrl(), 0, 250),
             'referer' => Mage::helper('core/string')->substr($visitor->getHttpReferer(), 0, 250),
         ]);
@@ -109,11 +109,12 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         } else {
             if ($this->_urlLoggingCondition->isAllVisitorLoggingEnabled()) {
                 $this->_saveVisitorUrl($visitor);
+            }
+            if ($this->_urlLoggingCondition->isVisitorLogEnabled()) {
+                // Track customer login/logout for analytics even in "Visitors only" mode
                 if ($visitor->getDoCustomerLogin() || $visitor->getDoCustomerLogout()) {
                     $this->_saveCustomerInfo($visitor);
                 }
-            }
-            if ($this->_urlLoggingCondition->isVisitorLogEnabled()) {
                 if ($visitor->getDoQuoteCreate() || $visitor->getDoQuoteDestroy()) {
                     $this->_saveQuoteInfo($visitor);
                 }
@@ -166,7 +167,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         $language   = $stringHelper->substr($language, 0, 255);
 
         $adapter = $this->_getWriteAdapter();
-        $data = new Varien_Object([
+        $data = new \Maho\DataObject([
             'visitor_id'            => $visitor->getId(),
             'http_referer'          => $referer,
             'http_user_agent'       => $userAgent,
@@ -189,7 +190,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
      */
     protected function _saveVisitorUrl($visitor)
     {
-        $data = new Varien_Object([
+        $data = new \Maho\DataObject([
             'url_id'        => $visitor->getLastUrlId(),
             'visitor_id'    => $visitor->getId(),
             'visit_time'    => Mage::getSingleton('core/date')->gmtDate(),
@@ -211,7 +212,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         $adapter = $this->_getWriteAdapter();
 
         if ($visitor->getDoCustomerLogin()) {
-            $data = new Varien_Object([
+            $data = new \Maho\DataObject([
                 'visitor_id'    => $visitor->getVisitorId(),
                 'customer_id'   => $visitor->getCustomerId(),
                 'login_at'      => Mage::getSingleton('core/date')->gmtDate(),
@@ -225,7 +226,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
         }
 
         if ($visitor->getDoCustomerLogout() && $logId = $visitor->getCustomerLogId()) {
-            $data = new Varien_Object([
+            $data = new \Maho\DataObject([
                 'logout_at' => Mage::getSingleton('core/date')->gmtDate(),
                 'store_id'  => (int) Mage::app()->getStore()->getId(),
             ]);
@@ -256,7 +257,7 @@ class Mage_Log_Model_Resource_Visitor extends Mage_Core_Model_Resource_Db_Abstra
     {
         $adapter = $this->_getWriteAdapter();
         if ($visitor->getDoQuoteCreate()) {
-            $data = new Varien_Object([
+            $data = new \Maho\DataObject([
                 'quote_id'      => (int) $visitor->getQuoteId(),
                 'visitor_id'    => (int) $visitor->getId(),
                 'created_at'    => Mage::getSingleton('core/date')->gmtDate(),

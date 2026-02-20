@@ -1,0 +1,143 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Maho_Giftcard_Block_Adminhtml_Catalog_Product_Edit_Tab_Giftcard $this */
+$product = $this->getProduct();
+$helper = Mage::helper('giftcard');
+
+// Get config defaults for placeholders
+$defaultLifetime = Mage::getStoreConfig('giftcard/general/lifetime');
+$defaultAllowMessage = Mage::getStoreConfigFlag('giftcard/general/allow_message') ? $this->__('Yes') : $this->__('No');
+
+// Current values (null means use default)
+$giftcardType = $product->getData('giftcard_type') ?: 'fixed';
+$giftcardAmounts = $product->getData('giftcard_amounts');
+$giftcardMinAmount = $product->getData('giftcard_min_amount');
+$giftcardMaxAmount = $product->getData('giftcard_max_amount');
+$giftcardAllowMessage = $product->getData('giftcard_allow_message');
+$giftcardLifetime = $product->getData('giftcard_lifetime');
+?>
+
+<div class="entry-edit">
+    <div class="entry-edit-head">
+        <h4 class="icon-head head-edit-form fieldset-legend"><?= $this->__('Gift Card Information') ?></h4>
+    </div>
+    <div class="fieldset">
+        <table class="form-list" cellspacing="0">
+            <tr>
+                <td class="label">
+                    <label for="giftcard_type"><?= $this->__('Card Type') ?> <span class="required">*</span></label>
+                </td>
+                <td class="value">
+                    <select id="giftcard_type" name="product[giftcard_type]" class="required-entry select">
+                        <option value="fixed" <?= $giftcardType === 'fixed' ? 'selected' : '' ?>><?= $this->__('Fixed Amount(s)') ?></option>
+                        <option value="range" <?= $giftcardType === 'range' ? 'selected' : '' ?>><?= $this->__('Amount Range') ?></option>
+                        <option value="combined" <?= $giftcardType === 'combined' ? 'selected' : '' ?>><?= $this->__('Fixed + Range') ?></option>
+                    </select>
+                </td>
+            </tr>
+            <tr id="giftcard_amounts_row">
+                <td class="label">
+                    <label for="giftcard_amounts"><?= $this->__('Fixed Amounts') ?> <span class="required" id="giftcard_amounts_required">*</span></label>
+                </td>
+                <td class="value">
+                    <input type="text" id="giftcard_amounts" name="product[giftcard_amounts]" value="<?= $this->escapeHtml($giftcardAmounts) ?>" class="input-text required-entry" />
+                    <p class="note"><?= $this->__('Comma-separated values (e.g., 25,50,100)') ?></p>
+                </td>
+            </tr>
+            <tr id="giftcard_min_amount_row">
+                <td class="label">
+                    <label for="giftcard_min_amount"><?= $this->__('Minimum Amount') ?> <span class="required" id="giftcard_min_amount_required">*</span></label>
+                </td>
+                <td class="value">
+                    <input type="text" id="giftcard_min_amount" name="product[giftcard_min_amount]" value="<?= $this->escapeHtml($giftcardMinAmount) ?>" class="input-text validate-number" />
+                </td>
+            </tr>
+            <tr id="giftcard_max_amount_row">
+                <td class="label">
+                    <label for="giftcard_max_amount"><?= $this->__('Maximum Amount') ?> <span class="required" id="giftcard_max_amount_required">*</span></label>
+                </td>
+                <td class="value">
+                    <input type="text" id="giftcard_max_amount" name="product[giftcard_max_amount]" value="<?= $this->escapeHtml($giftcardMaxAmount) ?>" class="input-text validate-number" />
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    <label for="giftcard_lifetime"><?= $this->__('Lifetime (days)') ?></label>
+                </td>
+                <td class="value">
+                    <input type="text" id="giftcard_lifetime" name="product[giftcard_lifetime]" value="<?= $this->escapeHtml($giftcardLifetime) ?>" class="input-text validate-digits" placeholder="<?= $this->__('Default: %s', $defaultLifetime) ?>" />
+                    <p class="note"><?= $this->__('Leave empty to use system default. 0 = never expires.') ?></p>
+                </td>
+            </tr>
+            <tr>
+                <td class="label">
+                    <label for="giftcard_allow_message"><?= $this->__('Allow Message') ?></label>
+                </td>
+                <td class="value">
+                    <select id="giftcard_allow_message" name="product[giftcard_allow_message]" class="select">
+                        <option value="" <?= $giftcardAllowMessage === null || $giftcardAllowMessage === '' ? 'selected' : '' ?>><?= $this->__('Use Default (%s)', $defaultAllowMessage) ?></option>
+                        <option value="1" <?= $giftcardAllowMessage === '1' || $giftcardAllowMessage === 1 ? 'selected' : '' ?>><?= $this->__('Yes') ?></option>
+                        <option value="0" <?= $giftcardAllowMessage === '0' || $giftcardAllowMessage === 0 ? 'selected' : '' ?>><?= $this->__('No') ?></option>
+                    </select>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+document.addEventListener('DOMContentLoaded', function() {
+    const select = document.getElementById('giftcard_type');
+    const amountsRow = document.getElementById('giftcard_amounts_row');
+    const minRow = document.getElementById('giftcard_min_amount_row');
+    const maxRow = document.getElementById('giftcard_max_amount_row');
+    const amountsInput = document.getElementById('giftcard_amounts');
+    const minInput = document.getElementById('giftcard_min_amount');
+    const maxInput = document.getElementById('giftcard_max_amount');
+    const amountsRequired = document.getElementById('giftcard_amounts_required');
+    const minRequired = document.getElementById('giftcard_min_amount_required');
+    const maxRequired = document.getElementById('giftcard_max_amount_required');
+
+    function setRequired(input, requiredSpan, isRequired, clearValue = false) {
+        if (isRequired) {
+            input.classList.add('required-entry');
+            requiredSpan.style.display = '';
+        } else {
+            input.classList.remove('required-entry');
+            requiredSpan.style.display = 'none';
+            if (clearValue) {
+                input.value = '';
+            }
+        }
+    }
+
+    function toggleGiftcardAmountFields(isUserChange = false) {
+        const type = select.value || 'fixed';
+
+        // fixed: amounts required
+        // range: min + max required
+        // combined: all required
+        const showAmounts = type === 'fixed' || type === 'combined';
+        const showRange = type === 'range' || type === 'combined';
+
+        amountsRow.style.display = showAmounts ? 'table-row' : 'none';
+        minRow.style.display = showRange ? 'table-row' : 'none';
+        maxRow.style.display = showRange ? 'table-row' : 'none';
+
+        // Clear hidden fields only when user changes the type (not on page load)
+        setRequired(amountsInput, amountsRequired, showAmounts, isUserChange && !showAmounts);
+        setRequired(minInput, minRequired, showRange, isUserChange && !showRange);
+        setRequired(maxInput, maxRequired, showRange, isUserChange && !showRange);
+    }
+
+    select.addEventListener('change', () => toggleGiftcardAmountFields(true));
+    toggleGiftcardAmountFields(false);
+});
+</script>

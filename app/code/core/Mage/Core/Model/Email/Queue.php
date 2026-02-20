@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -123,7 +123,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
             self::EMAIL_TYPE_CC,
             self::EMAIL_TYPE_BCC,
         ];
-        $type = !in_array($type, $_supportedEmailTypes) ? self::EMAIL_TYPE_TO : $type;
+        $type = in_array($type, $_supportedEmailTypes) ? $type : self::EMAIL_TYPE_TO;
         $emails = array_values((array) $emails);
         $names = is_array($names) ? $names : (array) $names;
         $names = array_values($names);
@@ -189,7 +189,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                 }
 
                 try {
-                    $parameters = new Varien_Object($message->getMessageParameters());
+                    $parameters = new \Maho\DataObject($message->getMessageParameters());
                     $mailer = new Mailer(Transport::fromDsn($dsn));
                     $email = new Email();
                     $email->subject($parameters->getSubject());
@@ -220,7 +220,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
                         $email->returnPath($parameters->getReturnTo());
                     }
 
-                    $transport = new Varien_Object();
+                    $transport = new \Maho\DataObject();
                     Mage::dispatchEvent('email_queue_send_before', [
                         'mail'      => $email,
                         'message'   => $message,

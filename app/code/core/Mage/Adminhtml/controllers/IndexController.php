@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -262,9 +262,8 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
                             );
                         $this->_redirect('*/*/login');
                         return;
-                    } else {
-                        $this->_getSession()->addError($this->__('Invalid email address.'));
                     }
+                    $this->_getSession()->addError($this->__('Invalid email address.'));
                 } else {
                     $this->_getSession()->addError($this->__('The email address is empty.'));
                 }
@@ -475,18 +474,5 @@ class Mage_Adminhtml_IndexController extends Mage_Adminhtml_Controller_Action
     protected function _isAllowed()
     {
         return true;
-    }
-
-    /**
-     * Retrieve model object
-     *
-     * @param   string $modelClass
-     * @param   array|object $arguments
-     * @return  Mage_Core_Model_Abstract|false
-     * @deprecated use Mage::getModel()
-     */
-    protected function _getModel($modelClass = '', $arguments = [])
-    {
-        return Mage::getModel($modelClass, $arguments);
     }
 }

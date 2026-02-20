@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,18 +44,6 @@ class Mage_Checkout_Helper_Cart extends Mage_Core_Helper_Url
     public function getAddUrl($product, $additional = [])
     {
         return $this->getAddUrlCustom($product, $additional);
-    }
-
-    /**
-     * Return helper instance
-     *
-     * @param  string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelperInstance($helperName)
-    {
-        return Mage::helper($helperName);
     }
 
     /**

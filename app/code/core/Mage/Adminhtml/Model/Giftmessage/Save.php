@@ -16,7 +16,7 @@
  *
  * @method array getGiftmessages()
  */
-class Mage_Adminhtml_Model_Giftmessage_Save extends Varien_Object
+class Mage_Adminhtml_Model_Giftmessage_Save extends \Maho\DataObject
 {
     protected $_saved = false;
 
@@ -118,7 +118,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends Varien_Object
     /**
      * Delete a single gift message from entity
      *
-     * @param Varien_Object $entityModel
+     * @param \Maho\DataObject $entityModel
      * @param Mage_GiftMessage_Model_Message|null $giftmessageModel
      * @return $this
      * @throws Throwable
@@ -199,7 +199,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends Varien_Object
     /**
      * Checks allowed quote item for gift messages
      *
-     * @param  Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return bool
      */
     public function getIsAllowedQuoteItem($item)
@@ -218,7 +218,7 @@ class Mage_Adminhtml_Model_Giftmessage_Save extends Varien_Object
     /**
      * Retrieve is gift message available for item (product)
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return bool
      */
     public function isGiftMessagesAvailable($item)

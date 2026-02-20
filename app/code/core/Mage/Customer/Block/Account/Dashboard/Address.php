@@ -26,11 +26,10 @@ class Mage_Customer_Block_Account_Dashboard_Address extends Mage_Core_Block_Temp
     {
         $address = $this->getCustomer()->getPrimaryShippingAddress();
 
-        if ($address instanceof Varien_Object) {
+        if ($address instanceof \Maho\DataObject) {
             return $address->format('html');
-        } else {
-            return Mage::helper('customer')->__('You have not set a default shipping address.');
         }
+        return Mage::helper('customer')->__('You have not set a default shipping address.');
     }
 
     /**
@@ -40,11 +39,10 @@ class Mage_Customer_Block_Account_Dashboard_Address extends Mage_Core_Block_Temp
     {
         $address = $this->getCustomer()->getPrimaryBillingAddress();
 
-        if ($address instanceof Varien_Object) {
+        if ($address instanceof \Maho\DataObject) {
             return $address->format('html');
-        } else {
-            return Mage::helper('customer')->__('You have not set a default billing address.');
         }
+        return Mage::helper('customer')->__('You have not set a default billing address.');
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,7 +26,7 @@ class Mage_Core_Model_Observer
      *
      * @return $this
      */
-    public function cleanCacheByTags(Varien_Event_Observer $observer)
+    public function cleanCacheByTags(\Maho\Event\Observer $observer)
     {
         /** @var array $tags */
         $tags = $observer->getEvent()->getTags();
@@ -53,7 +53,7 @@ class Mage_Core_Model_Observer
      * @throws Exception
      * @return Mage_Core_Model_Observer
      */
-    public function secureVarProcessing(Varien_Event_Observer $observer)
+    public function secureVarProcessing(\Maho\Event\Observer $observer)
     {
         if (Mage::registry('varProcessing')) {
             Mage::throwException(Mage::helper('core')->__('Disallowed template variable method.'));

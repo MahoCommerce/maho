@@ -6,19 +6,12 @@
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_Core_Model_Resource_Db_Abstract
 {
-    /**
-     * Fields List for update in forsedSave
-     *
-     * @var array
-     */
-    protected $_fieldsForUpdate    = ['store_id', 'added_at'];
-
     /**
      * Update Customer from visitor (Customer logged in)
      *
@@ -118,7 +111,6 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
 
         $matchFields = ['product_id', 'store_id'];
 
-        /** @var Mage_Reports_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('reports');
         $helper->mergeVisitorProductIndex(
             $this->getMainTable(),
@@ -170,7 +162,7 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
      * @param array $productIds
      * @return Mage_Reports_Model_Resource_Product_Index_Abstract
      */
-    public function registerIds(Varien_Object $object, $productIds)
+    public function registerIds(\Maho\DataObject $object, $productIds)
     {
         $row = [
             'visitor_id'    => $object->getVisitorId(),
@@ -191,7 +183,6 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Abstract extends Mage_C
 
         $matchFields = ['product_id', 'store_id'];
 
-        /** @var Mage_Reports_Model_Resource_Helper_Mysql4 $helper */
         $helper = Mage::getResourceHelper('reports');
         foreach ($data as $row) {
             $helper->mergeVisitorProductIndex(

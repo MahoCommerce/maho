@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -110,7 +110,8 @@ class Mage_Checkout_Model_Type_Onepage
         $customerSession = $this->getCustomerSession();
         if (is_array($checkout->getStepData())) {
             foreach (array_keys($checkout->getStepData()) as $step) {
-                if (!($step === 'login' || $customerSession->isLoggedIn() && $step === 'billing')) {
+                // Only billing is allowed initially, other steps unlock as checkout progresses
+                if ($step !== 'billing') {
                     $checkout->setStepData($step, 'allow', false);
                 }
             }
@@ -414,74 +415,6 @@ class Mage_Checkout_Model_Type_Onepage
 
         // copy customer data to quote
         Mage::helper('core')->copyFieldset('customer_account', 'to_quote', $customer, $quote);
-
-        return true;
-    }
-
-    /**
-     * Validate customer data and set some its data for further usage in quote
-     * Will return either true or array with error messages
-     *
-     * @deprecated since 1.4.0.1
-     * @return true|array
-     */
-    protected function _processValidateCustomer(Mage_Sales_Model_Quote_Address $address)
-    {
-        // set customer date of birth for further usage
-        $dob = '';
-        if ($address->getDob()) {
-            $dob = Mage::app()->getLocale()->dateMutable($address->getDob(), null, null, false)->format(Mage_Core_Model_Locale::DATE_FORMAT);
-            $this->getQuote()->setCustomerDob($dob);
-        }
-
-        // set customer tax/vat number for further usage
-        if ($address->getTaxvat()) {
-            $this->getQuote()->setCustomerTaxvat($address->getTaxvat());
-        }
-
-        // set customer gender for further usage
-        if ($address->getGender()) {
-            $this->getQuote()->setCustomerGender($address->getGender());
-        }
-
-        // invoke customer model, if it is registering
-        if (self::METHOD_REGISTER == $this->getQuote()->getCheckoutMethod()) {
-            // set customer password hash for further usage
-            $customer = Mage::getModel('customer/customer');
-            $this->getQuote()->setPasswordHash($customer->encryptPassword($address->getCustomerPassword()));
-
-            // validate customer
-            foreach ([
-                'firstname'    => 'firstname',
-                'lastname'     => 'lastname',
-                'email'        => 'email',
-                'password'     => 'customer_password',
-                'confirmation' => 'confirm_password',
-                'taxvat'       => 'taxvat',
-                'gender'       => 'gender',
-            ] as $key => $dataKey
-            ) {
-                $customer->setData($key, $address->getData($dataKey));
-            }
-            if ($dob) {
-                $customer->setDob($dob);
-            }
-            $validationResult = $customer->validate();
-            if ($validationResult !== true && is_array($validationResult)) {
-                return [
-                    'error'   => -1,
-                    'message' => implode(', ', $validationResult),
-                ];
-            }
-        } elseif (self::METHOD_GUEST == $this->getQuote()->getCheckoutMethod()) {
-            $email = $address->getData('email');
-            if (!Mage::helper('core')->isValidEmail($email)) {
-                return [
-                    'error'   => -1,
-                    'message' => Mage::helper('checkout')->__('Invalid email address "%s"', $email),
-                ];
-            }
-        }
 
         return true;
     }
@@ -838,41 +771,6 @@ class Mage_Checkout_Model_Type_Onepage
         );
 
         return $this;
-    }
-
-    /**
-     * Validate quote state to be able submitted from one page checkout page
-     *
-     * @throws Mage_Core_Exception
-     * @deprecated after 1.4 - service model doing quote validation
-     */
-    protected function validateOrder()
-    {
-        if ($this->getQuote()->getIsMultiShipping()) {
-            Mage::throwException(Mage::helper('checkout')->__('Invalid checkout type.'));
-        }
-
-        if (!$this->getQuote()->isVirtual()) {
-            $address = $this->getQuote()->getShippingAddress();
-            $addressValidation = $address->validate();
-            if ($addressValidation !== true) {
-                Mage::throwException(Mage::helper('checkout')->__('Please check shipping address information.'));
-            }
-            $method = $address->getShippingMethod();
-            $rate  = $address->getShippingRateByCode($method);
-            if (!$this->getQuote()->isVirtual() && (!$method || !$rate)) {
-                Mage::throwException(Mage::helper('checkout')->__('Please specify shipping method.'));
-            }
-        }
-
-        $addressValidation = $this->getQuote()->getBillingAddress()->validate();
-        if ($addressValidation !== true) {
-            Mage::throwException(Mage::helper('checkout')->__('Please check billing address information.'));
-        }
-
-        if (!($this->getQuote()->getPayment()->getMethod())) {
-            Mage::throwException(Mage::helper('checkout')->__('Please select valid payment method.'));
-        }
     }
 
     /**

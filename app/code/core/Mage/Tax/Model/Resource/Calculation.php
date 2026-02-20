@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -66,7 +66,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Get tax rate information: calculation process data and tax rate
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getRateInfo($request)
@@ -81,7 +81,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Get tax rate for specific tax rate request
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return int
      */
     public function getRate($request)
@@ -92,7 +92,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Retrieve Calculation Process
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @param array $rates
      * @return array
      */
@@ -217,7 +217,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
      * Returns tax rates for request - either pereforms SELECT from DB, or returns already cached result
      * Notice that productClassId due to optimization can be array of ids
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     protected function _getRates($request)
@@ -248,10 +248,12 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
             $select
                 ->from(
                     ['main_table' => $this->getMainTable()],
-                    ['tax_calculation_rate_id',
-                        'tax_calculation_rule_id',
-                        'customer_tax_class_id',
-                        'product_tax_class_id',
+                    [
+                        // Use explicit table.column format for aliases to avoid ambiguous column errors in SQLite UNION ORDER BY
+                        'tax_calculation_rate_id' => 'main_table.tax_calculation_rate_id',
+                        'tax_calculation_rule_id' => 'main_table.tax_calculation_rule_id',
+                        'customer_tax_class_id' => 'main_table.customer_tax_class_id',
+                        'product_tax_class_id' => 'main_table.product_tax_class_id',
                     ],
                 )
                 ->where('customer_tax_class_id = ?', (int) $customerClassId);
@@ -268,18 +270,21 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
                 ->join(
                     ['rule' => $this->getTable('tax/tax_calculation_rule')],
                     $ruleTableAliasName . ' = main_table.tax_calculation_rule_id',
-                    ['rule.priority', 'rule.position', 'rule.calculate_subtotal'],
+                    [
+                        'priority' => 'rule.priority',
+                        'position' => 'rule.position',
+                        'calculate_subtotal' => 'rule.calculate_subtotal',
+                    ],
                 )
                 ->join(
                     ['rate' => $this->getTable('tax/tax_calculation_rate')],
                     'rate.tax_calculation_rate_id = main_table.tax_calculation_rate_id',
                     [
                         'value' => 'rate.rate',
-                        'rate.tax_country_id',
-                        'rate.tax_region_id',
-                        'rate.tax_postcode',
-                        'rate.tax_calculation_rate_id',
-                        'rate.code',
+                        'tax_country_id' => 'rate.tax_country_id',
+                        'tax_region_id' => 'rate.tax_region_id',
+                        'tax_postcode' => 'rate.tax_postcode',
+                        'code' => 'rate.code',
                     ],
                 )
                 ->joinLeft(
@@ -325,12 +330,15 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
 
             /**
              * @see ZF-7592 issue http://framework.zend.com/issues/browse/ZF-7592
+             * Pass Select objects instead of strings to union() for SQLite compatibility.
+             * SQLite requires ORDER BY columns to exactly match result set column names,
+             * and the Select class adds explicit AS aliases when it knows about UNION context.
              */
             if (isset($selectClone) && ($postcodeIsNumeric || $postcodeIsRange)) {
                 $select = $this->_getReadAdapter()->select()->union(
                     [
-                        '(' . $select . ')',
-                        '(' . $selectClone . ')',
+                        $select,
+                        $selectClone,
                     ],
                 );
             }
@@ -351,7 +359,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Get rate ids applicable for some address
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getApplicableRateIds($request)
@@ -417,7 +425,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
     /**
      * Retrieve rate ids
      *
-     * @param Varien_Object $request
+     * @param \Maho\DataObject $request
      * @return array
      */
     public function getRateIds($request)
@@ -480,7 +488,7 @@ class Mage_Tax_Model_Resource_Calculation extends Mage_Core_Model_Resource_Db_Ab
 
         $result = [];
         foreach ($csp as $one) {
-            $request = new Varien_Object();
+            $request = new \Maho\DataObject();
             $request->setCountryId($one['country'])
                 ->setRegionId($one['region_id'])
                 ->setPostcode($one['postcode'])

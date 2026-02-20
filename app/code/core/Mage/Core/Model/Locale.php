@@ -6,11 +6,11 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Core_Model_Locale extends Varien_Object
+class Mage_Core_Model_Locale extends \Maho\DataObject
 {
     /**
      * Default locale name
@@ -52,10 +52,6 @@ class Mage_Core_Model_Locale extends Varien_Object
      */
     public const XML_PATH_DEFAULT_LOCALE   = 'general/locale/code';
     public const XML_PATH_DEFAULT_TIMEZONE = 'general/locale/timezone';
-    /**
-     * @deprecated since 1.4.1.0
-     */
-    public const XML_PATH_DEFAULT_COUNTRY  = 'general/country/default';
     public const XML_PATH_ALLOW_CODES      = 'global/locale/allow/codes';
     public const XML_PATH_ALLOW_CURRENCIES = 'global/locale/allow/currencies';
     public const XML_PATH_ALLOW_CURRENCIES_INSTALLED = 'system/currency/installed';
@@ -454,9 +450,8 @@ class Mage_Core_Model_Locale extends Varien_Object
         if (Mage::isInstalled()) {
             $data = Mage::app()->getStore()->getConfig(self::XML_PATH_ALLOW_CURRENCIES_INSTALLED);
             return explode(',', $data);
-        } else {
-            $data = Mage::getSingleton('core/locale_config')->getAllowedCurrencies();
         }
+        $data = Mage::getSingleton('core/locale_config')->getAllowedCurrencies();
         return $data;
     }
 
@@ -548,13 +543,16 @@ class Mage_Core_Model_Locale extends Varien_Object
      *
      * @param string             $part
      */
-    public function date(string|int|DateTime|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
+    public function date(string|int|DateTime|DateTimeImmutable|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
     {
         if (!is_int($date) && empty($date)) {
             // $date may be false, but DateTime uses strict compare
             $date = null;
         }
-        if ($part === null && is_numeric($date)) {
+        if ($date instanceof DateTimeInterface) {
+            // If already a DateTime/DateTimeImmutable, convert to mutable DateTime
+            $date = $date instanceof DateTime ? clone $date : DateTime::createFromInterface($date);
+        } elseif ($part === null && is_numeric($date)) {
             $date = new DateTime('@' . $date);
             // DateTime created from timestamp always has +00:00 timezone, convert to UTC
             $date->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));
@@ -629,9 +627,8 @@ class Mage_Core_Model_Locale extends Varien_Object
 
                 if ($includeTime) {
                     return $dateObj->format(self::HTML5_DATETIME_FORMAT);
-                } else {
-                    return $dateObj->format(self::DATE_FORMAT);
                 }
+                return $dateObj->format(self::DATE_FORMAT);
             } catch (Exception $e) {
                 return null;
             }
@@ -639,6 +636,9 @@ class Mage_Core_Model_Locale extends Varien_Object
 
         // Native DateTime handling
         $timezone = Mage::app()->getStore($store)->getConfig(self::XML_PATH_DEFAULT_TIMEZONE);
+        if (empty($timezone)) {
+            $timezone = self::DEFAULT_TIMEZONE;
+        }
 
         if ($date instanceof DateTime) {
             // Date is already a DateTime object, use as-is
@@ -756,7 +756,7 @@ class Mage_Core_Model_Locale extends Varien_Object
      */
     public function currency(string $currency): NumberFormatter
     {
-        \Maho\Profiler::start('locale.currency');
+        \Maho\Profiler::start('locale/currency');
         if (!isset(self::$_currencyCache[$this->getLocaleCode()][$currency])) {
             $formatter = new NumberFormatter($this->getLocaleCode(), NumberFormatter::CURRENCY);
 
@@ -773,7 +773,7 @@ class Mage_Core_Model_Locale extends Varien_Object
             }
 
             // Get custom options from event
-            $options = new Varien_Object();
+            $options = new \Maho\DataObject();
             if ($customSymbol) {
                 $options->setData('symbol', $customSymbol);
             }
@@ -796,7 +796,7 @@ class Mage_Core_Model_Locale extends Varien_Object
 
             self::$_currencyCache[$this->getLocaleCode()][$currency] = $formatter;
         }
-        \Maho\Profiler::stop('locale.currency');
+        \Maho\Profiler::stop('locale/currency');
         return self::$_currencyCache[$this->getLocaleCode()][$currency];
     }
 
@@ -1339,10 +1339,9 @@ class Mage_Core_Model_Locale extends Varien_Object
             $countryName = Locale::getDisplayRegion('-' . $countryId, $displayLocale);
             if ($countryName && $countryName !== $countryId) {
                 return $countryName;
-            } else {
-                // Use country code itself as fallback when translation fails
-                return $countryId;
             }
+            // Use country code itself as fallback when translation fails
+            return $countryId;
         } catch (IntlException $e) {
             // Use country code itself as fallback for exceptions
             return $countryId;
@@ -1365,7 +1364,8 @@ class Mage_Core_Model_Locale extends Varien_Object
         $toTimeStamp    = strtotime((string) $dateTo);
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59
-            $endDate = new DateTime((string) $dateTo . ' 23:59:59');
+            $endDate = new DateTime((string) $dateTo);
+            $endDate->setTime(23, 59, 59);
             $toTimeStamp = $endDate->getTimestamp();
         }
 

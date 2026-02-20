@@ -6,14 +6,13 @@
  * @package    Mage_Cms
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
 {
     public const XML_PATH_NO_ROUTE_PAGE        = 'web/default/cms_no_route';
-    public const XML_PATH_NO_COOKIES_PAGE      = 'web/default/cms_no_cookies';
     public const XML_PATH_HOME_PAGE            = 'web/default/cms_home_page';
 
     protected $_moduleName = 'Mage_Cms';
@@ -158,7 +157,6 @@ class Mage_Cms_Helper_Page extends Mage_Core_Helper_Abstract
     {
         $searchPaths = [
             self::XML_PATH_NO_ROUTE_PAGE,
-            self::XML_PATH_NO_COOKIES_PAGE,
             self::XML_PATH_HOME_PAGE,
         ];
 

@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Checkout_Model_Type_Multishipping_State extends Varien_Object
+class Mage_Checkout_Model_Type_Multishipping_State extends \Maho\DataObject
 {
     public const STEP_SELECT_ADDRESSES = 'multishipping_addresses';
     public const STEP_SHIPPING         = 'multishipping_shipping';
@@ -38,19 +38,19 @@ class Mage_Checkout_Model_Type_Multishipping_State extends Varien_Object
     {
         parent::__construct();
         $this->_steps = [
-            self::STEP_SELECT_ADDRESSES => new Varien_Object([
+            self::STEP_SELECT_ADDRESSES => new \Maho\DataObject([
                 'label' => Mage::helper('checkout')->__('Select Addresses'),
             ]),
-            self::STEP_SHIPPING => new Varien_Object([
+            self::STEP_SHIPPING => new \Maho\DataObject([
                 'label' => Mage::helper('checkout')->__('Shipping Information'),
             ]),
-            self::STEP_BILLING => new Varien_Object([
+            self::STEP_BILLING => new \Maho\DataObject([
                 'label' => Mage::helper('checkout')->__('Billing Information'),
             ]),
-            self::STEP_OVERVIEW => new Varien_Object([
+            self::STEP_OVERVIEW => new \Maho\DataObject([
                 'label' => Mage::helper('checkout')->__('Place Order'),
             ]),
-            self::STEP_SUCCESS => new Varien_Object([
+            self::STEP_SUCCESS => new \Maho\DataObject([
                 'label' => Mage::helper('checkout')->__('Order Success'),
             ]),
         ];

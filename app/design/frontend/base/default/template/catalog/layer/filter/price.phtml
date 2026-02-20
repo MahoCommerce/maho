@@ -1,0 +1,68 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     base_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Catalog_Block_Layer_Filter_Price $this */
+$minPrice = floor($this->getMinPrice());
+$maxPrice = ceil($this->getMaxPrice());
+$filterUrl = $this->getFilterUrl();
+$currencySymbol = $this->getCurrencySymbol();
+?>
+<div class="price-filter-input">
+    <div class="price-filter-fields">
+        <div class="price-field">
+            <label for="price-filter-from"><?= $this->__('From') ?></label>
+            <div class="price-input-wrapper">
+                <span class="currency-symbol"><?= $currencySymbol ?></span>
+                <input type="number"
+                       id="price-filter-from"
+                       name="price_from"
+                       min="<?= $minPrice ?>"
+                       max="<?= $maxPrice ?>"
+                       placeholder="<?= $minPrice ?>"
+                       step="1">
+            </div>
+        </div>
+        <span class="price-separator">–</span>
+        <div class="price-field">
+            <label for="price-filter-to"><?= $this->__('To') ?></label>
+            <div class="price-input-wrapper">
+                <span class="currency-symbol"><?= $currencySymbol ?></span>
+                <input type="number"
+                       id="price-filter-to"
+                       name="price_to"
+                       min="<?= $minPrice ?>"
+                       max="<?= $maxPrice ?>"
+                       placeholder="<?= $maxPrice ?>"
+                       step="1">
+            </div>
+        </div>
+        <button type="button" class="price-filter-apply" onclick="applyPriceFilter()" title="<?= $this->quoteEscape($this->__('Apply price filter')) ?>">
+            <?= $this->getIconSvg('arrow-right') ?>
+        </button>
+    </div>
+</div>
+<script>
+function applyPriceFilter() {
+    const from = document.getElementById('price-filter-from').value || '';
+    const to = document.getElementById('price-filter-to').value || '';
+
+    if (!from && !to) return;
+
+    const priceRange = from + '-' + to;
+    const url = <?= Mage::helper('core')->jsonEncode($filterUrl) ?>.replace('__PRICE_RANGE__', encodeURIComponent(priceRange));
+    window.location.href = url;
+}
+
+document.getElementById('price-filter-from').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') applyPriceFilter();
+});
+document.getElementById('price-filter-to').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') applyPriceFilter();
+});
+</script>

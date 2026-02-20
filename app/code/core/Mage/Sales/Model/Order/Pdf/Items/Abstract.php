@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,7 +29,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
     /**
      * Item object
      *
-     * @var Varien_Object|null
+     * @var \Maho\DataObject|null
      */
     protected $_item;
 
@@ -87,7 +87,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
      *
      * @return $this
      */
-    public function setItem(Varien_Object $item)
+    public function setItem(\Maho\DataObject $item)
     {
         $this->_item = $item;
         return $this;
@@ -96,7 +96,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Items_Abstract extends Mage_Core_Block
     /**
      * Get item object
      *
-     * @return Varien_Object|null
+     * @return \Maho\DataObject|null
      */
     public function getItem()
     {

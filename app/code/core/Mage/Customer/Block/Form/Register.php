@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,14 +67,14 @@ class Mage_Customer_Block_Form_Register extends Mage_Directory_Block_Data
     /**
      * Retrieve form data
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getFormData()
     {
         $data = $this->getData('form_data');
         if (is_null($data)) {
             $formData = Mage::getSingleton('customer/session')->getCustomerFormData(true);
-            $data = new Varien_Object();
+            $data = new \Maho\DataObject();
             if ($formData) {
                 $data->addData($formData);
                 $data->setCustomerData(1);

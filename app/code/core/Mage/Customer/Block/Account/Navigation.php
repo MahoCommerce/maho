@@ -6,6 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,7 +31,7 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
      */
     public function addLink($name, $path, $label, $urlParams = [])
     {
-        $this->_links[$name] = new Varien_Object([
+        $this->_links[$name] = new \Maho\DataObject([
             'name' => $name,
             'path' => $path,
             'label' => $label,
@@ -72,7 +73,7 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
     }
 
     /**
-     * @param Varien_Object $link
+     * @param \Maho\DataObject $link
      * @return bool
      */
     public function isActive($link)
@@ -102,5 +103,49 @@ class Mage_Customer_Block_Account_Navigation extends Mage_Core_Block_Template
                 $path .= '/index';
         }
         return $path;
+    }
+
+    /**
+     * Add recurring profiles link only if customer has any profiles
+     */
+    public function addRecurringProfilesLink(): self
+    {
+        if (Mage::helper('sales')->customerHasRecurringProfiles()) {
+            $this->addLink('recurring_profiles', 'sales/recurring_profile/', Mage::helper('sales')->__('Recurring Profiles'));
+        }
+        return $this;
+    }
+
+    /**
+     * Add downloadable products link only if customer has any purchased downloads
+     */
+    public function addDownloadableProductsLink(): self
+    {
+        if (Mage::helper('downloadable')->customerHasDownloadableProducts()) {
+            $this->addLink('downloadable_products', 'downloadable/customer/products', Mage::helper('downloadable')->__('My Downloadable Products'));
+        }
+        return $this;
+    }
+
+    /**
+     * Add billing agreements link only if customer has any agreements
+     */
+    public function addBillingAgreementsLink(): self
+    {
+        if (Mage::helper('sales')->customerHasBillingAgreements()) {
+            $this->addLink('billing_agreements', 'sales/billing_agreement/', Mage::helper('sales')->__('Billing Agreements'));
+        }
+        return $this;
+    }
+
+    /**
+     * Add reviews link only if customer has any product reviews
+     */
+    public function addReviewsLink(): self
+    {
+        if (Mage::helper('review')->customerHasReviews()) {
+            $this->addLink('reviews', 'review/customer', Mage::helper('review')->__('My Product Reviews'));
+        }
+        return $this;
     }
 }

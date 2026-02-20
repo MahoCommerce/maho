@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,19 +46,6 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
     /**
      * Get renderer information by product type code
      *
-     * @deprecated please use getItemRendererInfo() method instead
-     * @see getItemRendererInfo()
-     * @param   string $type
-     * @return  array
-     */
-    public function getItemRender($type)
-    {
-        return $this->getItemRendererInfo($type);
-    }
-
-    /**
-     * Get renderer information by product type code
-     *
      * @param   string $type
      * @return  array
      */
@@ -71,7 +58,7 @@ abstract class Mage_Checkout_Block_Cart_Abstract extends Mage_Core_Block_Templat
      * Get renderer block instance by product type code
      *
      * @param   string $type
-     * @return  array
+     * @return  Mage_Checkout_Block_Cart_Item_Renderer
      */
     public function getItemRenderer($type)
     {

@@ -6,7 +6,7 @@
  * @package    Mage_Newsletter
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Newsletter_Model_Observer
     /**
      * @return $this
      */
-    public function subscribeCustomer(Varien_Event_Observer $observer)
+    public function subscribeCustomer(\Maho\Event\Observer $observer)
     {
         $customer = $observer->getEvent()->getCustomer();
         if (($customer instanceof Mage_Customer_Model_Customer)) {
@@ -29,7 +29,7 @@ class Mage_Newsletter_Model_Observer
      *
      * @return $this
      */
-    public function customerDeleted(Varien_Event_Observer $observer)
+    public function customerDeleted(\Maho\Event\Observer $observer)
     {
         $subscriber = Mage::getModel('newsletter/subscriber')
             ->loadByEmail($observer->getEvent()->getCustomer()->getEmail());
@@ -40,7 +40,7 @@ class Mage_Newsletter_Model_Observer
     }
 
     /**
-     * @param Varien_Event_Observer $schedule
+     * @param \Maho\Event\Observer $schedule
      */
     public function scheduledSend($schedule)
     {

@@ -1,4 +1,14 @@
 <?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Captcha
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
 <config>
     <modules>
         <Maho_Captcha>
@@ -144,8 +154,8 @@
             <captcha>
                 <selectors>.checkout-onepage-index #co-billing-form
 .contacts-index-index #contactForm
-.customer-account-create #form-validate
-.customer-account-forgotpassword #form-validate
+.customer-account-login #form-validate-register
+.customer-account-login #form-validate-forgot
 #newsletter-validate-detail
 .catalog-product-view #review-form
 .review-product-list #review-form

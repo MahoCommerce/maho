@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -398,24 +398,24 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
 
         $optPriceType   = $write->getCheckSql('otps.option_type_price_id > 0', 'otps.price_type', 'otpd.price_type');
         $optPriceValue  = $write->getCheckSql('otps.option_type_price_id > 0', 'otps.price', 'otpd.price');
-        $minPriceRound  = new Maho\Db\Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
+        $minPriceRound  = $write->getRoundSql("i.price * ({$optPriceValue} / 100)", 4);
         $minPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $minPriceRound);
         $minPriceMin    = new Maho\Db\Expr("MIN({$minPriceExpr})");
         $minPrice       = $write->getCheckSql('MIN(o.is_require) = 1', $minPriceMin, '0');
 
-        $tierPriceRound = new Maho\Db\Expr("ROUND(i.base_tier * ({$optPriceValue} / 100), 4)");
+        $tierPriceRound = $write->getRoundSql("i.base_tier * ({$optPriceValue} / 100)", 4);
         $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $tierPriceRound);
         $tierPriceMin   = new Maho\Db\Expr("MIN($tierPriceExpr)");
         $tierPriceValue = $write->getCheckSql('MIN(o.is_require) > 0', $tierPriceMin, '0');
         $tierPrice      = $write->getCheckSql('MIN(i.base_tier) IS NOT NULL', $tierPriceValue, 'NULL');
 
-        $groupPriceRound = new Maho\Db\Expr("ROUND(i.base_group_price * ({$optPriceValue} / 100), 4)");
+        $groupPriceRound = $write->getRoundSql("i.base_group_price * ({$optPriceValue} / 100)", 4);
         $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $groupPriceRound);
         $groupPriceMin   = new Maho\Db\Expr("MIN($groupPriceExpr)");
         $groupPriceValue = $write->getCheckSql('MIN(o.is_require) > 0', $groupPriceMin, '0');
         $groupPrice      = $write->getCheckSql('MIN(i.base_group_price) IS NOT NULL', $groupPriceValue, 'NULL');
 
-        $maxPriceRound  = new Maho\Db\Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
+        $maxPriceRound  = $write->getRoundSql("i.price * ({$optPriceValue} / 100)", 4);
         $maxPriceExpr   = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $maxPriceRound);
         $maxPrice       = $write->getCheckSql(
             "(MIN(o.type)='radio' OR MIN(o.type)='drop_down')",
@@ -467,18 +467,18 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price_Default extends Mage_Cat
         $optPriceType   = $write->getCheckSql('ops.option_price_id > 0', 'ops.price_type', 'opd.price_type');
         $optPriceValue  = $write->getCheckSql('ops.option_price_id > 0', 'ops.price', 'opd.price');
 
-        $minPriceRound  = new Maho\Db\Expr("ROUND(i.price * ({$optPriceValue} / 100), 4)");
+        $minPriceRound  = $write->getRoundSql("i.price * ({$optPriceValue} / 100)", 4);
         $priceExpr      = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $minPriceRound);
         $minPrice       = $write->getCheckSql("{$priceExpr} > 0 AND o.is_require > 1", $priceExpr, '0');
 
         $maxPrice       = $priceExpr;
 
-        $tierPriceRound = new Maho\Db\Expr("ROUND(i.base_tier * ({$optPriceValue} / 100), 4)");
+        $tierPriceRound = $write->getRoundSql("i.base_tier * ({$optPriceValue} / 100)", 4);
         $tierPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $tierPriceRound);
         $tierPriceValue = $write->getCheckSql("{$tierPriceExpr} > 0 AND o.is_require > 0", $tierPriceExpr, '0');
         $tierPrice      = $write->getCheckSql('i.base_tier IS NOT NULL', $tierPriceValue, 'NULL');
 
-        $groupPriceRound = new Maho\Db\Expr("ROUND(i.base_group_price * ({$optPriceValue} / 100), 4)");
+        $groupPriceRound = $write->getRoundSql("i.base_group_price * ({$optPriceValue} / 100)", 4);
         $groupPriceExpr  = $write->getCheckSql("{$optPriceType} = 'fixed'", $optPriceValue, $groupPriceRound);
         $groupPriceValue = $write->getCheckSql("{$groupPriceExpr} > 0 AND o.is_require > 0", $groupPriceExpr, '0');
         $groupPrice      = $write->getCheckSql('i.base_group_price IS NOT NULL', $groupPriceValue, 'NULL');

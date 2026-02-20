@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -41,8 +41,8 @@ class Mage_Checkout_Block_Multishipping_Addresses extends Mage_Sales_Block_Items
     public function getItems()
     {
         $items = $this->getCheckout()->getQuoteShippingAddressesItems();
-        $itemsFilter = new Varien_Filter_Object_Grid();
-        $itemsFilter->addFilter(new Varien_Filter_Sprintf('%d'), 'qty');
+        $itemsFilter = new \Maho\Filter\ObjectFilter\Grid();
+        $itemsFilter->addFilter(new \Maho\Filter\Sprintf('%d'), 'qty');
         return $itemsFilter->filter($items);
     }
 
@@ -95,7 +95,7 @@ class Mage_Checkout_Block_Multishipping_Addresses extends Mage_Sales_Block_Items
     }
 
     /**
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return string
      */
     public function getItemUrl($item)
@@ -104,7 +104,7 @@ class Mage_Checkout_Block_Multishipping_Addresses extends Mage_Sales_Block_Items
     }
 
     /**
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return string
      */
     public function getItemDeleteUrl($item)

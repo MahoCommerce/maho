@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -72,7 +72,7 @@ class Mage_Customer_Model_Observer
     /**
      * Before load layout event handler
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function beforeLoadLayout($observer)
     {
@@ -85,7 +85,7 @@ class Mage_Customer_Model_Observer
     /**
      * Address before save event handler
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function beforeAddressSave($observer)
     {
@@ -114,7 +114,7 @@ class Mage_Customer_Model_Observer
     /**
      * Address after save event handler
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function afterAddressSave($observer)
     {
@@ -184,7 +184,7 @@ class Mage_Customer_Model_Observer
     /**
      * Revert emulated customer group_id
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function quoteSubmitAfter($observer)
     {
@@ -219,7 +219,7 @@ class Mage_Customer_Model_Observer
     /**
      * Upgrade customer password hash when customer has logged in
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function actionUpgradeCustomerPassword($observer)
     {
@@ -248,10 +248,10 @@ class Mage_Customer_Model_Observer
     /**
      * Set the customer's or guest's session time based on config
      */
-    public function setCookieLifetime(Varien_Event_Observer $observer)
+    public function setCookieLifetime(\Maho\Event\Observer $observer)
     {
         if ($observer->getSessionName() === Mage_Core_Controller_Front_Action::SESSION_NAMESPACE) {
-            /** @var Mage_Core_Model_Session $session */
+            /** @var Mage_Customer_Model_Session $session */
             $session = Mage::getSingleton('customer/session');
 
             if ($session->getRememberMe() && Mage::getStoreConfigFlag('web/cookie/remember_enabled')) {

@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -185,9 +185,8 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     {
         if (Mage::registry('attribute_type_hidden_fields')) {
             return Mage::registry('attribute_type_hidden_fields');
-        } else {
-            return [];
         }
+        return [];
     }
 
     /**
@@ -199,9 +198,8 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     {
         if (Mage::registry('attribute_type_disabled_types')) {
             return Mage::registry('attribute_type_disabled_types');
-        } else {
-            return [];
         }
+        return [];
     }
 
     /**
@@ -258,13 +256,13 @@ class Mage_Catalog_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Retrieve template processor for catalog content
      *
-     * @return Varien_Filter_Template
+     * @return \Maho\Filter\Template
      */
     public function getPageTemplateProcessor()
     {
         $model = (string) Mage::getConfig()->getNode(self::XML_PATH_CONTENT_TEMPLATE_FILTER);
-        /** @var Varien_Filter_Template $model */
         $model = Mage::getModel($model);
+        assert($model instanceof \Maho\Filter\Template);
         return $model;
     }
 

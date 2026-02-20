@@ -5,12 +5,12 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 ?>
 <?php /** @var Mage_Checkout_Block_Cart_Shipping $this */ ?>
-<div class="shipping">
+<div class="shipping" id="shipping-container">
     <h2><?= $this->__('Estimate Shipping and Tax') ?></h2>
     <div class="shipping-form">
        <form action="<?= $this->getFormActionUrl() ?>" method="post" id="shipping-zip-form">
@@ -50,93 +50,73 @@
             new RegionUpdater('country', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>);
         </script>
 
-        <?php if (($_shippingRateGroups = $this->getEstimateRates())): ?>
-        <form id="co-shipping-method-form" action="<?= $this->getUpdateFormActionUrl() ?>" method="post">
-            <dl class="sp-methods">
-                <?php foreach ($_shippingRateGroups as $code => $_rates): ?>
-                    <dt><?= $this->escapeHtml($this->getCarrierName($code)) ?></dt>
-                    <dd>
-                        <ul>
-                        <?php foreach ($_rates as $_rate): ?>
-                            <li<?php if ($_rate->getErrorMessage()) echo ' class="error-msg"';?>>
-                               <?php if ($_rate->getErrorMessage()): ?>
-                                    <?= $this->escapeHtml($_rate->getErrorMessage()) ?>
-                               <?php else: ?>
-                                    <input name="estimate_method" type="radio" value="<?= $this->escapeHtml($_rate->getCode()) ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if ($_rate->getCode() === $this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio" />
-                                    <label for="s_method_<?= $_rate->getCode() ?>"><?= $this->escapeHtml($_rate->getMethodTitle()) ?>
-                                    <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
-                                    -
-                                    <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
-                                    <?= $_excl ?>
-                                    <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                                        (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
-                                    <?php endif ?>
-                                    </label>
-                               <?php endif ?>
-                            </li>
-                        <?php endforeach ?>
-                        </ul>
-                    </dd>
-                <?php endforeach ?>
-            </dl>
-            <div class="buttons-set">
-                <button type="submit" title="<?= $this->quoteEscape($this->__('Update Total')) ?>" class="button" name="do" value="<?= $this->__('Update Total') ?>">
-                    <?= $this->__('Update Total') ?>
-                </button>
-            </div>
-            <?= $this->getBlockHtml('formkey') ?>
-        </form>
-        <?php endif ?>
+        <div id="co-shipping-method-form-container">
+            <?= $this->setTemplate('checkout/cart/shipping/rates.phtml')->toHtml() ?>
+        </div>
+
         <script type="text/javascript">
+        (function() {
             const countriesWithOptionalZip = <?= $this->helper('directory')->getCountriesWithOptionalZip(true) ?>;
+            const form = document.getElementById('shipping-zip-form');
+            const container = document.getElementById('co-shipping-method-form-container');
+            const shippingContainer = document.getElementById('shipping-container');
 
-            class ShippingFormValidator {
-                constructor(formId) {
-                    this.form = document.getElementById(formId);
-                    this.setupValidation();
-                }
+            function validate() {
+                const country = document.getElementById('country').value;
+                const postcodeEl = document.getElementById('postcode');
+                postcodeEl.classList.toggle('required-entry', !countriesWithOptionalZip.includes(country));
 
-                setupValidation() {
-                    if (!this.form) return;
-
-                    this.form.addEventListener('submit', (e) => {
-                        e.preventDefault();
-                        this.submit();
-                    });
-                }
-
-                submit() {
-                    const country = document.getElementById('country').value;
-                    const optionalZip = countriesWithOptionalZip.includes(country);
-                    const postcodeElement = document.getElementById('postcode');
-
-                    // Update postcode validation based on country
-                    postcodeElement.classList.toggle('required-entry', !optionalZip);
-
-                    // Validate form
-                    if (this.validate()) {
-                        this.form.submit();
-                    }
-                }
-
-                validate() {
-                    let isValid = true;
-                    const requiredFields = this.form.querySelectorAll('.required-entry');
-
-                    requiredFields.forEach(field => {
-                        if (!field.value.trim()) {
-                            field.classList.add('validation-failed');
-                            isValid = false;
-                        } else {
-                            field.classList.remove('validation-failed');
-                        }
-                    });
-
-                    return isValid;
-                }
+                let valid = true;
+                form.querySelectorAll('.required-entry').forEach(field => {
+                    if (field.offsetParent === null || field.style.display === 'none') return;
+                    field.classList.toggle('validation-failed', !field.value.trim());
+                    if (!field.value.trim()) valid = false;
+                });
+                return valid;
             }
 
-            const coShippingMethodForm = new ShippingFormValidator('shipping-zip-form');
+            function updateTotals(html) {
+                if (!html) return;
+                const totalsTable = document.getElementById('shopping-cart-totals-table');
+                if (!totalsTable) return;
+                const temp = document.createElement('div');
+                temp.innerHTML = html;
+                const newTable = temp.querySelector('#shopping-cart-totals-table');
+                if (newTable) totalsTable.innerHTML = newTable.innerHTML;
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!validate()) return;
+
+                try {
+                    const result = await mahoFetch(form.action, {
+                        method: 'POST',
+                        body: new URLSearchParams(new FormData(form)),
+                        loaderArea: shippingContainer
+                    });
+                    if (result.rates_html) container.innerHTML = result.rates_html;
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+
+            container.addEventListener('submit', async (e) => {
+                if (e.target.id !== 'co-shipping-method-form') return;
+                e.preventDefault();
+
+                try {
+                    const result = await mahoFetch(e.target.action, {
+                        method: 'POST',
+                        body: new URLSearchParams(new FormData(e.target)),
+                        loaderArea: shippingContainer
+                    });
+                    updateTotals(result.totals_html);
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+        })();
         </script>
     </div>
 </div>

@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -48,7 +48,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Store rule form instance
      *
-     * @var Varien_Data_Form
+     * @var \Maho\Data\Form
      */
     protected $_form;
 
@@ -76,9 +76,36 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Getter for rule actions collection instance
      *
-     * @return Mage_Rule_Model_Action_Collection
+     * @return Mage_Rule_Model_Action_Collection|Mage_Rule_Model_Condition_Combine
      */
     abstract public function getActionsInstance();
+
+    /**
+     * Decode a serialized column value, supporting both JSON and legacy PHP serialize format.
+     * If legacy serialized data is detected, it is converted to JSON and persisted back to the database.
+     */
+    protected function _decodeRuleData(string $value, string $column): ?array
+    {
+        if (json_validate($value)) {
+            return Mage::helper('core')->jsonDecode($value);
+        }
+
+        $data = @unserialize($value, ['allowed_classes' => false]);
+        if (!is_array($data)) {
+            throw new RuntimeException(
+                "Could not decode {$column} in {$this->getResource()->getMainTable()} #{$this->getId()}",
+            );
+        }
+
+        $json = Mage::helper('core')->jsonEncode($data);
+        Mage::getSingleton('core/resource')->getConnection('core_write')->update(
+            $this->getResource()->getMainTable(),
+            [$column => $json],
+            [$this->getResource()->getIdFieldName() . ' = ?' => $this->getId()],
+        );
+
+        return $data;
+    }
 
     /**
      * Prepare select for condition
@@ -109,15 +136,25 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             }
         }
 
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($this->getConditions()) {
-            $this->setConditionsSerialized(serialize($this->getConditions()->asArray()));
+            try {
+                $this->setConditionsSerialized(Mage::helper('core')->jsonEncode($this->getConditions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             $this->unsConditions();
         }
 
-        // Serialize actions
+        // Encode actions as JSON
         if ($this->getActions()) {
-            $this->setActionsSerialized(serialize($this->getActions()->asArray()));
+            try {
+                $this->setActionsSerialized(Mage::helper('core')->jsonEncode($this->getActions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
             $this->unsActions();
         }
 
@@ -175,7 +212,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         if ($this->hasConditionsSerialized()) {
             $conditions = $this->getConditionsSerialized();
             if (!empty($conditions)) {
-                $conditions = Mage::helper('core/unserializeArray')->unserialize($conditions);
+                $conditions = $this->_decodeRuleData($conditions, 'conditions_serialized');
                 if (is_array($conditions) && !empty($conditions)) {
                     $this->_conditions->loadArray($conditions);
                 }
@@ -214,7 +251,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
         if ($this->hasActionsSerialized()) {
             $actions = $this->getActionsSerialized();
             if (!empty($actions)) {
-                $actions = Mage::helper('core/unserializeArray')->unserialize($actions);
+                $actions = $this->_decodeRuleData($actions, 'actions_serialized');
                 if (is_array($actions) && !empty($actions)) {
                     $this->_actions->loadArray($actions);
                 }
@@ -264,12 +301,12 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
     /**
      * Rule form getter
      *
-     * @return Varien_Data_Form
+     * @return \Maho\Data\Form
      */
     public function getForm()
     {
         if (!$this->_form) {
-            $this->_form = new Varien_Data_Form();
+            $this->_form = new \Maho\Data\Form();
         }
         return $this->_form;
     }
@@ -338,7 +375,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      *
      * @return bool
      */
-    public function validate(Varien_Object $object)
+    public function validate(\Maho\DataObject $object)
     {
         return $this->getConditions()->validate($object);
     }
@@ -348,7 +385,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
      *
      * @return bool|array - return true if validation passed successfully. Array with errors description otherwise
      */
-    public function validateData(Varien_Object $object)
+    public function validateData(\Maho\DataObject $object)
     {
         $result   = [];
         $fromDate = $toDate = null;
@@ -380,7 +417,7 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             }
         }
 
-        return !empty($result) ? $result : true;
+        return empty($result) ? true : $result;
     }
 
     /**
@@ -441,51 +478,5 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
             $this->setData('website_ids', (array) $websiteIds);
         }
         return $this->_getData('website_ids');
-    }
-
-    /**
-     * @deprecated since 1.7.0.0
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    public function asString($format = '')
-    {
-        return '';
-    }
-
-    /**
-     * @deprecated since 1.7.0.0
-     *
-     * @return string
-     */
-    public function asHtml()
-    {
-        return '';
-    }
-
-    /**
-     * Returns rule as an array for admin interface
-     *
-     * @deprecated since 1.7.0.0
-     *
-     * @return array
-     */
-    public function asArray(array $arrAttributes = [])
-    {
-        return [];
-    }
-
-    /**
-     * Combine website ids to string
-     *
-     * @deprecated since 1.7.0.0
-     *
-     * @return Mage_Rule_Model_Abstract
-     */
-    protected function _prepareWebsiteIds()
-    {
-        return $this;
     }
 }

@@ -6,7 +6,7 @@
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -123,8 +123,8 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const XML_PATH_PASSWORD_LINK_ACCOUNT_NEW_EMAIL_TEMPLATE = 'customer/password_link/account_new_email_template';
     public const XML_PATH_PASSWORD_LINK_EMAIL_TEMPLATE = 'customer/password_link/email_template';
     public const XML_PATH_PASSWORD_LINK_EMAIL_IDENTITY = 'customer/password_link/email_identity';
-    public const XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE = 'customer/magic_link/email_template';
-    public const XML_PATH_MAGIC_LINK_EMAIL_IDENTITY = 'customer/magic_link/email_identity';
+    public const XML_PATH_MAGIC_LINK_EMAIL_TEMPLATE = 'customer/login/magic_link_email_template';
+    public const XML_PATH_MAGIC_LINK_EMAIL_IDENTITY = 'customer/login/magic_link_email_identity';
     /**
      * Codes of exceptions related to customer model
      */
@@ -141,12 +141,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     public const SUBSCRIBED_NO  = 'no';
 
     public const CACHE_TAG = 'customer';
-
-    /**
-     * Minimum Password Length
-     * @deprecated Use getMinPasswordLength() method instead
-     */
-    public const MINIMUM_PASSWORD_LENGTH = Mage_Core_Model_App::ABSOLUTE_MIN_PASSWORD_LENGTH;
 
     /**
      * Configuration path for minimum length of password
@@ -190,7 +184,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Customer addresses array
      *
      * @var Mage_Customer_Model_Address[]|null
-     * @deprecated after 1.4.0.0-rc1
      */
     protected $_addresses = null;
 
@@ -200,6 +193,13 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * @var Mage_Customer_Model_Resource_Address_Collection|null
      */
     protected $_addressesCollection;
+
+    /**
+     * Customer subscription status
+     *
+     * @var bool|null
+     */
+    protected $_isSubscribed;
 
     /**
      * Is model deleteable
@@ -218,7 +218,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
     /**
      * Model cache tag for clear cache in after save and after delete
      *
-     * @var string
+     * @var string|bool|array
      */
     protected $_cacheTag = self::CACHE_TAG;
 
@@ -233,7 +233,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
      * Initialize customer model
      */
     #[\Override]
-    public function _construct()
+    protected function _construct()
     {
         $this->_init('customer/customer');
     }
@@ -273,6 +273,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
                 self::EXCEPTION_INVALID_EMAIL_OR_PASSWORD,
             );
         }
+
         Mage::dispatchEvent('customer_customer_authenticated', [
             'model'    => $this,
             'password' => $password,
@@ -509,18 +510,6 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         /** @var Mage_Core_Helper_Data $helper */
         $helper = Mage::helper('core');
         return $helper->getHash(trim($password), (bool) $salt ? $salt : Mage_Admin_Model_User::HASH_SALT_LENGTH);
-    }
-
-    /**
-     * Get helper instance
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
     }
 
     /**
@@ -975,7 +964,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         }
 
         // Get expiration period from config (in minutes)
-        $tokenExpirationPeriod = (int) Mage::getStoreConfig('customer/magic_link/token_expiration');
+        $tokenExpirationPeriod = (int) Mage::getStoreConfig('customer/login/magic_link_token_expiration');
         if ($tokenExpirationPeriod <= 0) {
             $tokenExpirationPeriod = 10; // Default to 10 minutes
         }

@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CatalogLinkRule
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<layout>
+    <adminhtml_cataloglinkrule_rule_index>
+        <reference name="content">
+            <block type="cataloglinkrule/adminhtml_rule" name="linkrule" />
+        </reference>
+    </adminhtml_cataloglinkrule_rule_index>
+
+    <adminhtml_cataloglinkrule_rule_new>
+        <update handle="adminhtml_cataloglinkrule_rule_edit" />
+    </adminhtml_cataloglinkrule_rule_new>
+
+    <adminhtml_cataloglinkrule_rule_edit>
+        <update handle="editor"/>
+        <reference name="head">
+            <action method="addItem"><type>js</type><name>mage/adminhtml/rules.js</name></action>
+        </reference>
+        <reference name="content">
+            <block type="cataloglinkrule/adminhtml_rule_edit" name="linkrule_edit"></block>
+        </reference>
+        <reference name="left">
+            <block type="cataloglinkrule/adminhtml_rule_edit_tabs" name="linkrule_edit_tabs">
+                <block type="cataloglinkrule/adminhtml_rule_edit_tab_main" name="linkrule_edit_tab_main"/>
+                <block type="cataloglinkrule/adminhtml_rule_edit_tab_conditions" name="linkrule_edit_tab_conditions"/>
+                <block type="cataloglinkrule/adminhtml_rule_edit_tab_targetConditions" name="linkrule_edit_tab_target"/>
+                <action method="addTab"><name>main_section</name><block>linkrule_edit_tab_main</block></action>
+                <action method="addTab"><name>conditions_section</name><block>linkrule_edit_tab_conditions</block></action>
+                <action method="addTab"><name>target_section</name><block>linkrule_edit_tab_target</block></action>
+            </block>
+        </reference>
+    </adminhtml_cataloglinkrule_rule_edit>
+</layout>

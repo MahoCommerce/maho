@@ -6,16 +6,16 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block_Abstract implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * @return string
      */
-    protected function _getElementHtml(Varien_Data_Form_Element_Abstract $element)
+    protected function _getElementHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         return $element->getElementHtml();
     }
@@ -24,7 +24,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $id = $element->getHtmlId();
 
@@ -95,7 +95,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
             $html .= '<td class="use-default">';
             $html .= '<input id="' . $id . '_inherit" name="'
                 . $namePrefix . '[inherit]" type="checkbox" value="1" class="checkbox config-inherit" '
-                . $inherit . ' onclick="toggleValueElements(this, Element.previous(this.parentNode))" /> ';
+                . $inherit . ' onclick="toggleValueElements(this, this.parentNode.previousElementSibling)" /> ';
             $html .= '<label for="' . $id . '_inherit" class="inherit" title="'
                 . htmlspecialchars($defText) . '">' . $checkboxLabel . '</label>';
             $html .= '</td>';
@@ -113,7 +113,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field extends Mage_Adminhtml_Block
     /**
      * Decorate field row html
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @param string $html
      * @return string
      */

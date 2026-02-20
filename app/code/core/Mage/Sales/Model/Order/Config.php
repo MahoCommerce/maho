@@ -39,7 +39,7 @@ class Mage_Sales_Model_Order_Config extends Mage_Core_Model_Config_Base
 
     /**
      * @param string $status
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     protected function _getStatus($status)
     {
@@ -48,7 +48,7 @@ class Mage_Sales_Model_Order_Config extends Mage_Core_Model_Config_Base
 
     /**
      * @param string $state
-     * @return Varien_Simplexml_Element
+     * @return \Maho\Simplexml\Element
      */
     protected function _getState($state)
     {

@@ -6,7 +6,7 @@
  * @package    Mage_Directory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -79,7 +79,7 @@ class Mage_Directory_Model_Country extends Mage_Core_Model_Abstract
      * @param bool $html
      * @return string
      */
-    public function formatAddress(Varien_Object $address, $html = false)
+    public function formatAddress(\Maho\DataObject $address, $html = false)
     {
         //TODO: is it still used?
         $address->getRegion();
@@ -103,7 +103,7 @@ T: {{telephone}}';
             }
         }
 
-        $filter = new Varien_Filter_Template_Simple();
+        $filter = new \Maho\Filter\Template\Simple();
         $addressText = $filter->setData($address->getData())->filter($template);
 
         if ($html) {

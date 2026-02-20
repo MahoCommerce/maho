@@ -6,7 +6,7 @@
  * @package    Mage_Paygate
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -264,7 +264,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @return  bool
      */
     #[\Override]
-    public function canVoid(Varien_Object $payment)
+    public function canVoid(\Maho\DataObject $payment)
     {
         if ($this->_isGatewayActionsLocked($this->getInfoInstance())) {
             return false;
@@ -313,7 +313,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function authorize(Varien_Object $payment, $amount)
+    public function authorize(\Maho\DataObject $payment, $amount)
     {
         if ($amount <= 0) {
             Mage::throwException(Mage::helper('paygate')->__('Invalid amount for authorization.'));
@@ -340,7 +340,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(\Maho\DataObject $payment, $amount)
     {
         if ($amount <= 0) {
             Mage::throwException(Mage::helper('paygate')->__('Invalid amount for capture.'));
@@ -364,7 +364,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function void(Varien_Object $payment)
+    public function void(\Maho\DataObject $payment)
     {
         $cardsStorage = $this->getCardsStorage($payment);
 
@@ -399,7 +399,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @return $this
      */
     #[\Override]
-    public function cancel(Varien_Object $payment)
+    public function cancel(\Maho\DataObject $payment)
     {
         return $this->void($payment);
     }
@@ -413,7 +413,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @throws Mage_Core_Exception
      */
     #[\Override]
-    public function refund(Varien_Object $payment, $requestedAmount)
+    public function refund(\Maho\DataObject $payment, $requestedAmount)
     {
         $cardsStorage = $this->getCardsStorage($payment);
 
@@ -742,7 +742,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      *
      * @param Mage_Sales_Model_Order_Payment $payment
      * @param float $amount
-     * @param Varien_Object $card
+     * @param \Maho\DataObject $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
     protected function _preauthorizeCaptureCardTransaction($payment, $amount, $card)
@@ -808,7 +808,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * Void the card transaction through gateway
      *
      * @param Mage_Sales_Model_Order_Payment $payment
-     * @param Varien_Object $card
+     * @param \Maho\DataObject $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
     protected function _voidCardTransaction($payment, $card)
@@ -909,7 +909,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * Refund the card transaction through gateway
      *
      * @param Mage_Sales_Model_Order_Payment $payment
-     * @param Varien_Object $card
+     * @param \Maho\DataObject $card
      * @return Mage_Sales_Model_Order_Payment_Transaction
      */
     protected function _refundCardTransaction($payment, $amount, $card)
@@ -1187,7 +1187,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param Mage_Payment_Model_Info $payment
      * @return Mage_Paygate_Model_Authorizenet_Request
      */
-    protected function _buildRequest(Varien_Object $payment)
+    protected function _buildRequest(\Maho\DataObject $payment)
     {
         $order = $payment->getOrder();
 
@@ -1278,7 +1278,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
         if ($payment->getCcNumber()) {
             $request->setXCardNum($payment->getCcNumber())
-                ->setXExpDate(sprintf('%02d-%04d', $payment->getCcExpMonth(), $payment->getCcExpYear()))
+                ->setXExpDate(sprintf('%02d-%04d', (int) $payment->getCcExpMonth(), (int) $payment->getCcExpYear()))
                 ->setXCardCode($payment->getCcCid());
         }
 
@@ -1291,7 +1291,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param Mage_Paygate_Model_Authorizenet_Request $request)
      * @return Mage_Paygate_Model_Authorizenet_Result
      */
-    protected function _postRequest(Varien_Object $request)
+    protected function _postRequest(\Maho\DataObject $request)
     {
         $debugData = ['request' => $request->getData()];
 
@@ -1385,18 +1385,17 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     {
         if (Mage::app()->getStore()->isAdmin()) {
             return Mage::getSingleton('adminhtml/session_quote');
-        } else {
-            return Mage::getSingleton('checkout/session');
         }
+        return Mage::getSingleton('checkout/session');
     }
 
     /**
      * It sets card`s data into additional information of payment model
      *
      * @param Mage_Paygate_Model_Authorizenet_Result $response
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
-    protected function _registerCard(Varien_Object $response, Mage_Sales_Model_Order_Payment $payment)
+    protected function _registerCard(\Maho\DataObject $response, Mage_Sales_Model_Order_Payment $payment)
     {
         $cardsStorage = $this->getCardsStorage($payment);
         $card = $cardsStorage->registerCard();
@@ -1536,7 +1535,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @param array $checkSumDataKeys
      * @return string
      */
-    protected function _generateChecksum(Varien_Object $object, $checkSumDataKeys = [])
+    protected function _generateChecksum(\Maho\DataObject $object, $checkSumDataKeys = [])
     {
         $data = [];
         foreach ($checkSumDataKeys as $dataKey) {
@@ -1552,7 +1551,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
      * @link http://www.authorize.net/support/ReportingGuide_XML.pdf
      * @link http://developer.authorize.net/api/transaction_details/
      * @param string $transactionId
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getTransactionDetails($transactionId)
     {
@@ -1588,7 +1587,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
             $responseBody = $response->getContent();
             $debugData['result'] = $responseBody;
             libxml_use_internal_errors(true);
-            $responseXmlDocument = new Varien_Simplexml_Element($responseBody);
+            $responseXmlDocument = new \Maho\Simplexml\Element($responseBody);
             libxml_use_internal_errors(false);
         } catch (Exception $e) {
             $debugData['exception'] = $e->getMessage();
@@ -1602,14 +1601,14 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     }
 
     /**
-     * Parses xml response object with full transaction details to Varien_Object
+     * Parses xml response object with full transaction details to \Maho\DataObject
      *
-     * @param Varien_Simplexml_Element $responseXmlDocument - xml object with full transaction details for a specified transaction ID
-     * @return Varien_Object
+     * @param \Maho\Simplexml\Element $responseXmlDocument - xml object with full transaction details for a specified transaction ID
+     * @return \Maho\DataObject
      */
-    protected function _parseTransactionDetailsXmlResponseToVarienObject(Varien_Simplexml_Element $responseXmlDocument)
+    protected function _parseTransactionDetailsXmlResponseToVarienObject(\Maho\Simplexml\Element $responseXmlDocument)
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $responseTransactionXmlDocument = $responseXmlDocument->transaction;
         //main fields for generating order status:
         $response
@@ -1620,7 +1619,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
         //some additional fields:
         isset($responseTransactionXmlDocument->responseReasonDescription) && $response->setResponseReasonDescription((string) $responseTransactionXmlDocument->responseReasonDescription);
         isset($responseTransactionXmlDocument->FDSFilterAction)           && $response->setFdsFilterAction((string) $responseTransactionXmlDocument->FDSFilterAction);
-        isset($responseTransactionXmlDocument->FDSFilters)                && $response->setFdsFilters(serialize($responseTransactionXmlDocument->FDSFilters->asArray()));
+        isset($responseTransactionXmlDocument->FDSFilters)                && $response->setFdsFilters(Mage::helper('core')->jsonEncode($responseTransactionXmlDocument->FDSFilters->asArray()));
         isset($responseTransactionXmlDocument->transactionType)           && $response->setTransactionType((string) $responseTransactionXmlDocument->transactionType);
         isset($responseTransactionXmlDocument->submitTimeUTC)             && $response->setSubmitTimeUtc((string) $responseTransactionXmlDocument->submitTimeUTC);
         isset($responseTransactionXmlDocument->submitTimeLocal)           && $response->setSubmitTimeLocal((string) $responseTransactionXmlDocument->submitTimeLocal);

@@ -6,7 +6,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -82,12 +82,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public const XML_PATH_NOTIFICATION_EMAILS_TEMPLATE  = 'admin/emails/admin_notification_email_template';
 
     /**
-     * Minimum length of admin password
-     * @deprecated Use getMinAdminPasswordLength() method instead
-     */
-    public const MIN_PASSWORD_LENGTH = 14;
-
-    /**
      * Configuration path for minimum length of admin password
      */
     public const XML_PATH_MIN_ADMIN_PASSWORD_LENGTH = 'admin/security/min_admin_password_length';
@@ -147,7 +141,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             'lastname'  => $this->getLastname(),
             'email'     => $this->getEmail(),
             'modified'  => Mage_Core_Model_Locale::now(),
-            'extra'     => serialize($this->getExtra()),
+            'extra'     => Mage::helper('core')->jsonEncode($this->getExtra()),
         ];
 
         if ($this->getId() > 0) {
@@ -213,7 +207,7 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function saveExtra($data)
     {
         if (is_array($data)) {
-            $data = serialize($data);
+            $data = Mage::helper('core')->jsonEncode($data);
         }
         $this->_getResource()->saveExtra($this, $data);
         return $this;
@@ -311,17 +305,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function getCollection()
     {
         return Mage::getResourceModel('admin/user_collection');
-    }
-
-    /**
-     * Send email with new user password
-     *
-     * @return $this
-     * @deprecated deprecated since version 1.6.1.0
-     */
-    public function sendNewPasswordEmail()
-    {
-        return $this;
     }
 
     /**
@@ -659,21 +642,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Returns helper instance
-     *
-     * @param string $helperName
-     * @return Mage_Core_Helper_Abstract|false
-     * @deprecated use Mage::helper()
-     */
-    protected function _getHelper($helperName)
-    {
-        return Mage::helper($helperName);
-    }
-
-    /**
      * Find first menu item that user is able to access
      *
-     * @param Mage_Core_Model_Config_Element|Varien_Simplexml_Element $parent
+     * @param Mage_Core_Model_Config_Element|\Maho\Simplexml\Element $parent
      * @param string $path
      * @param int $level
      * @return string
@@ -688,10 +659,9 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
             if (Mage::getSingleton('admin/session')->isAllowed($aclResource)) {
                 if (!$child->children) {
                     return (string) $child->action;
-                } elseif ($child->children) {
-                    $action = $this->findFirstAvailableMenu($child->children, $path . $childName . '/', $level + 1);
-                    return $action ?: (string) $child->action;
                 }
+                $action = $this->findFirstAvailableMenu($child->children, $path . $childName . '/', $level + 1);
+                return $action ?: (string) $child->action;
             }
         }
         $this->_hasAvailableResources = false;
@@ -706,18 +676,6 @@ class Mage_Admin_Model_User extends Mage_Core_Model_Abstract
     public function hasAvailableResources()
     {
         return $this->_hasAvailableResources;
-    }
-
-    /**
-     * Find admin start page url
-     *
-     * @deprecated Please use getStartupPageUrl() method instead
-     * @see getStartupPageUrl()
-     * @return string
-     */
-    public function getStatrupPageUrl()
-    {
-        return $this->getStartupPageUrl();
     }
 
     /**

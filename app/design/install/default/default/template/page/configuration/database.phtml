@@ -1,0 +1,69 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * Install database configuration template
+ *
+ * @var Mage_Install_Block_Configuration_Database $this
+ */
+?>
+<h4 class="section-title"><?= $this->__('Database Connection') ?></h4>
+<div class="form-list">
+    <ul>
+        <?php $dbTypeOptions = $this->getDatabaseBlocks(); ?>
+        <?php $selectedEngine = $this->getFormData()->getDbEngine() ?: ($dbTypeOptions[0]->getIdPrefix() ?? ''); ?>
+        <?php if (count($dbTypeOptions) > 0): ?>
+            <li>
+                <label for="db_engine_select"><?= $this->__('Database Type') ?></label>
+                <select name="config[db_engine]" id="db_engine_select" required>
+                    <?php foreach ($dbTypeOptions as $block): ?>
+                        <option value="<?= $block->getIdPrefix()?>"
+                                <?php if ($selectedEngine == $block->getIdPrefix()): ?>selected<?php endif ?>>
+                            <?= $block->getTitle() ?>
+                        </option>
+                    <?php endforeach ?>
+                </select>
+            </li>
+        <?php endif ?>
+
+        <?php foreach ($dbTypeOptions as $block): ?>
+        <?php $block = $this->getDatabaseBlock($block->getIdPrefix()) ?>
+            <div id="<?= $block->getIdPrefix() ?>_conn_form"
+                 class="db-connection-form <?php if ($selectedEngine != $block->getIdPrefix()): ?>hidden<?php endif ?>"
+                 data-db-type="<?= $block->getIdPrefix() ?>">
+                <?= $block->toHtml() ?>
+            </div>
+        <?php endforeach ?>
+    </ul>
+</div>
+
+<script type="module">
+    const dbEngineSelect = document.querySelector('#db_engine_select');
+
+    dbEngineSelect?.addEventListener('change', () => {
+        updateDbForms(dbEngineSelect.value);
+    });
+
+    if (dbEngineSelect) {
+        updateDbForms(dbEngineSelect.value);
+    }
+
+    function updateDbForms(selectedType) {
+        document.querySelectorAll('.db-connection-form').forEach(form => {
+            const isHidden = form.dataset.dbType !== selectedType;
+            form.classList.toggle('hidden', isHidden);
+            // Disable inputs in hidden forms to exclude them from validation
+            form.querySelectorAll('input, select, textarea').forEach(input => {
+                input.disabled = isHidden;
+            });
+        });
+    }
+</script>

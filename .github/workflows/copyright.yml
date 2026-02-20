@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Skip OM commits
         if: github.event_name == 'push'
@@ -51,6 +51,24 @@ jobs:
           .phpstorm.meta.php/resource_models.meta.php
           "
 
+          # Build regex pattern with valid years
+          NEXT_YEAR=$((CURRENT_YEAR + 1))
+          MIN_YEAR=2024
+
+          # Build list of valid start years (2024|2025|...|CURRENT_YEAR)
+          VALID_START_YEARS=""
+          for year in $(seq $MIN_YEAR $CURRENT_YEAR); do
+            if [ -n "$VALID_START_YEARS" ]; then
+              VALID_START_YEARS="${VALID_START_YEARS}|"
+            fi
+            VALID_START_YEARS="${VALID_START_YEARS}${year}"
+          done
+
+          # Build pattern that matches:
+          # - Year ranges: (2024|2025|...)-(CURRENT_YEAR|NEXT_YEAR)
+          # - Single year: CURRENT_YEAR|NEXT_YEAR
+          PATTERN="Copyright \(c\) ((${VALID_START_YEARS})-(${CURRENT_YEAR}|${NEXT_YEAR})|(${CURRENT_YEAR}|${NEXT_YEAR})) Maho \(https://mahocommerce\.com\)"
+
           # Loop through each modified file
           for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
             # Skip if file doesn't exist (was deleted)
@@ -69,12 +87,10 @@ jobs:
                 continue;
             fi
 
-            # Check if file contains the copyright string with current year
-            # Pattern matches either:
-            # @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
-            # @copyright  Copyright (c) (2024-)2024 Maho (https://mahocommerce.com)
-            if ! grep -E -q "Copyright \(c\) (2024-)?${CURRENT_YEAR} Maho \(https://mahocommerce\.com\)" "$file"; then
-              echo "❌ Copyright notice missing in: $file"
+            # Check if file contains valid copyright pattern
+            if ! grep -E -q "$PATTERN" "$file"; then
+              echo "❌ Invalid or missing copyright notice in: $file"
+              echo "   Expected: Copyright (c) [2024-${CURRENT_YEAR}]-(${CURRENT_YEAR}|${NEXT_YEAR}) or (${CURRENT_YEAR}|${NEXT_YEAR}) Maho (https://mahocommerce.com)"
               ERROR=1
             fi
           done

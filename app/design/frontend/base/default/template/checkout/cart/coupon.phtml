@@ -5,48 +5,31 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Mage_Checkout_Block_Cart_Coupon $this */
 ?>
-<form id="discount-coupon-form" action="<?= $this->getFormActionUrl() ?>" method="post">
-    <div class="discount">
-        <h2><?= $this->__('Discount Codes') ?></h2>
-        <div class="discount-form">
-            <input type="hidden" name="remove" id="remove-coupone" value="0" />
-            <div class="coupon-input-group">
-                <label for="coupon_code" class="visually-hidden"><?= $this->__('Enter discount code') ?></label>
-                <input
-                    class="input-text coupon-input"
-                    type="text"
-                    id="coupon_code"
-                    name="coupon_code"
-                    value="<?= $this->escapeHtml($this->getCouponCode()) ?>"
-                    placeholder="<?= $this->__('Enter discount code') ?>" />
-                <button type="button" title="<?= $this->quoteEscape($this->__('Apply')) ?>" class="button2 btn-apply" onclick="discountForm.submit(false)"><?= $this->__('Apply') ?></button>
-                <?php if(strlen($this->getCouponCode())): ?>
-                    <button type="button" title="<?= $this->quoteEscape($this->__('Cancel')) ?>" class="button2 btn-cancel cancel-coupon" onclick="discountForm.submit(true)"><?= $this->__('Cancel') ?></button>
-                <?php endif ?>
-            </div>
-        </div>
-    </div>
-</form>
-<script type="text/javascript">
-    const discountForm = new VarienForm('discount-coupon-form');
-    discountForm.submit = function(isRemove) {
-        const couponCode = document.getElementById('coupon_code');
-        const removeCoupon = document.getElementById('remove-coupone');
+<div class="promo-code-section" id="maho-promo-section">
+    <?= $this->setTemplate('checkout/cart/coupon_content.phtml')->toHtml() ?>
+</div>
 
-        if (isRemove) {
-            couponCode.classList.remove('required-entry');
-            removeCoupon.value = "1";
-        } else {
-            couponCode.classList.add('required-entry');
-            removeCoupon.value = "0";
-        }
-
-        return this.form.submit();
+<script src="<?= $this->getSkinUrl('js/mage/promocode.js') ?>"></script>
+<script>
+new MahoPromoCode({
+    applyUrl: '<?= $this->getUrl('checkout/cart/couponPost') ?>',
+    formKey: '<?= Mage::getSingleton('core/session')->getFormKey() ?>',
+    elements: {
+        input: 'maho-promo-code',
+        applyBtn: 'maho-promo-apply',
+        message: 'maho-promo-message',
+        codesContainer: 'maho-promo-section'
+    },
+    messages: {
+        emptyCode: <?= Mage::helper('core')->jsonEncode($this->__('Please enter a promo code.')) ?>,
+        applying: <?= Mage::helper('core')->jsonEncode($this->__('Applying...')) ?>,
+        error: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred. Please try again.')) ?>
     }
+});
 </script>

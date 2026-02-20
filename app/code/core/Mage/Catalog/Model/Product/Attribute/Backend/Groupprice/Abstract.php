@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -308,7 +308,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
             ));
 
             $useForAllGroups = $data['cust_group'] == Mage_Customer_Model_Group::CUST_GROUP_ALL;
-            $customerGroupId = !$useForAllGroups ? $data['cust_group'] : 0;
+            $customerGroupId = $useForAllGroups ? 0 : $data['cust_group'];
 
             $new[$key] = array_merge([
                 'website_id'        => $data['website_id'],
@@ -335,7 +335,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
 
         if (!empty($insert)) {
             foreach ($insert as $data) {
-                $price = new Varien_Object($data);
+                $price = new \Maho\DataObject($data);
                 $price->setEntityId($productId);
                 $this->_getResource()->savePriceData($price);
 
@@ -346,7 +346,7 @@ abstract class Mage_Catalog_Model_Product_Attribute_Backend_Groupprice_Abstract 
         if (!empty($update)) {
             foreach ($update as $k => $v) {
                 if ($old[$k]['price'] != $v['value'] || $old[$k]['is_percent'] != $v['is_percent']) {
-                    $price = new Varien_Object([
+                    $price = new \Maho\DataObject([
                         'value_id'   => $old[$k]['price_id'],
                         'value'      => $v['value'],
                         'is_percent' => $v['is_percent'],

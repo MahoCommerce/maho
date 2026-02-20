@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -14,15 +14,20 @@
 <?php if($this->canShowBlock()): ?>
 <div class="block block-layered-nav">
     <div class="block-content toggle-content">
-        <?= $this->getStateHtml() ?>
         <?php if ($this->getLayer()->getState()->getFilters()): ?>
-            <div class="actions"><a href="<?= $this->getClearUrl() ?>"><?= $this->__('Clear All') ?></a></div>
+        <div class="active-filters-wrapper">
+            <div class="active-filters-header">
+                <span class="active-filters-title"><?= $this->__('Active Filters') ?></span>
+                <a href="<?= $this->getClearUrl() ?>" class="clear-all-filters"><?= $this->__('Clear All') ?></a>
+            </div>
+            <?= $this->getStateHtml() ?>
+        </div>
         <?php endif ?>
         <?php if($this->canShowOptions()): ?>
             <dl id="narrow-by-list">
                 <?php $_filters = $this->getFilters() ?>
                 <?php foreach ($_filters as $_filter): ?>
-                <?php if($_filter->getItemsCount()): ?>
+                <?php if ($_filter->getItemsCount() || method_exists($_filter, 'isInputMode') && $_filter->isInputMode()): ?>
                     <dt><?= $this->__($_filter->getName()) ?></dt>
                     <dd><?= $_filter->getHtml() ?></dd>
                 <?php endif ?>

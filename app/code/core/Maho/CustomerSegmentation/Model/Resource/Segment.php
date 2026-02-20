@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -148,20 +148,28 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
 
     public function getActiveSegmentIds(int $websiteId): array
     {
-        $select = $this->_getReadAdapter()->select()
+        $adapter = $this->_getReadAdapter();
+        $findInSet = $adapter->getFindInSetExpr($adapter->quote($websiteId), 'website_ids');
+
+        $select = $adapter->select()
             ->from($this->getMainTable(), ['segment_id'])
             ->where('is_active = ?', 1)
-            ->where('FIND_IN_SET(?, website_ids)', $websiteId);
+            ->where((string) $findInSet);
 
-        return $this->_getReadAdapter()->fetchCol($select);
+        return $adapter->fetchCol($select);
     }
 
     #[\Override]
     protected function _beforeSave(Mage_Core_Model_Abstract $object): self
     {
-        // Serialize conditions
+        // Encode conditions as JSON
         if ($object->getConditions()) {
-            $object->setConditionsSerialized(serialize($object->getConditions()->asArray()));
+            try {
+                $object->setConditionsSerialized(Mage::helper('core')->jsonEncode($object->getConditions()->asArray()));
+            } catch (\JsonException $e) {
+                Mage::logException($e);
+                throw $e;
+            }
         }
 
         return parent::_beforeSave($object);

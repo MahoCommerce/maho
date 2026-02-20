@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -70,7 +70,7 @@ class Mage_Api2_Model_Renderer_Xml implements Mage_Api2_Model_Renderer_Interface
     /**
      * Prepare convert data
      *
-     * @param array|Varien_Object $data
+     * @param array|\Maho\DataObject $data
      * @param bool $root
      * @return array
      * @throws Exception
@@ -84,7 +84,7 @@ class Mage_Api2_Model_Renderer_Xml implements Mage_Api2_Model_Renderer_Interface
                 throw new Exception('Prepare data must be an object or an array.');
             }
         }
-        $data = $data instanceof Varien_Object ? $data->toArray() : (array) $data;
+        $data = $data instanceof \Maho\DataObject ? $data->toArray() : (array) $data;
         $isAssoc = !preg_match('/^\d+$/', implode('', array_keys($data)));
 
         $preparedData = [];

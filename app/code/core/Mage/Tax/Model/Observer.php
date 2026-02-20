@@ -6,7 +6,7 @@
  * @package    Mage_Tax
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Tax_Model_Observer
     /**
      * Put quote address tax information into order
      */
-    public function salesEventConvertQuoteAddressToOrder(Varien_Event_Observer $observer)
+    public function salesEventConvertQuoteAddressToOrder(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote_Address $address */
         $address = $observer->getEvent()->getAddress();
@@ -35,7 +35,7 @@ class Mage_Tax_Model_Observer
     /**
      * Save order tax information
      */
-    public function salesEventOrderAfterSave(Varien_Event_Observer $observer)
+    public function salesEventOrderAfterSave(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
         $order = $observer->getEvent()->getOrder();
@@ -147,7 +147,7 @@ class Mage_Tax_Model_Observer
      *
      * @return  Mage_Tax_Model_Observer
      */
-    public function prepareCatalogIndexPriceSelect(Varien_Event_Observer $observer)
+    public function prepareCatalogIndexPriceSelect(\Maho\Event\Observer $observer)
     {
         $table = $observer->getEvent()->getTable();
         $response = $observer->getEvent()->getResponseObject();
@@ -175,7 +175,7 @@ class Mage_Tax_Model_Observer
     /**
      * Add tax percent values to product collection items
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  Mage_Tax_Model_Observer
      */
     public function addTaxPercentToProductCollection($observer)
@@ -225,7 +225,7 @@ class Mage_Tax_Model_Observer
      *
      * @return $this
      */
-    public function quoteCollectTotalsBefore(Varien_Event_Observer $observer)
+    public function quoteCollectTotalsBefore(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();

@@ -165,6 +165,7 @@ class Mage_Shipping_Model_Rate_Result
         if (!is_array($this->_rates) || !count($this->_rates)) {
             return $this;
         }
+        $tmp = [];
         /** @var Mage_Shipping_Model_Rate_Result_Method $rate */
         foreach ($this->_rates as $i => $rate) {
             $tmp[$i] = $rate->getPrice();
@@ -172,6 +173,7 @@ class Mage_Shipping_Model_Rate_Result
 
         natsort($tmp);
 
+        $result = [];
         foreach (array_keys($tmp) as $i) {
             $result[] = $this->_rates[$i];
         }

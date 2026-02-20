@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -417,6 +417,28 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     /**
+     * Get parent products grid (configurable, grouped, bundle products that use this product)
+     * @throws Mage_Core_Exception
+     */
+    public function parentProductsAction(): void
+    {
+        $this->_initProduct();
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
+     * Get parent products grid for AJAX reload
+     * @throws Mage_Core_Exception
+     */
+    public function parentProductsGridAction(): void
+    {
+        $this->_initProduct();
+        $this->loadLayout();
+        $this->renderLayout();
+    }
+
+    /**
      * Get associated grouped products grid and serializer block
      * @throws Mage_Core_Exception
      */
@@ -475,7 +497,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
      */
     public function validateAction(): void
     {
-        $response = new Varien_Object();
+        $response = new \Maho\DataObject();
         $response->setError(false);
 
         try {
@@ -754,7 +776,7 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
 
     /**
      * Duplicates product attributes between stores.
-     * @param array $stores list of store pairs: array(fromStore => toStore, fromStore => toStore,..)
+     * @param array $stores list of store pairs: [fromStore => toStore, fromStore => toStore,..]
      * @param Mage_Catalog_Model_Product $product whose attributes should be copied
      * @return $this
      * @throws Throwable
@@ -1047,26 +1069,5 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
         }
 
         $this->getResponse()->setBodyJson($result);
-    }
-
-    /**
-     * Show item update result from updateAction
-     * in Wishlist and Cart controllers.
-     *
-     * @return false|void
-     * @deprecated use `$this->getResponse()->setBodyJson()`
-     */
-    public function showUpdateResultAction()
-    {
-        $session = Mage::getSingleton('adminhtml/session');
-        if ($session->hasCompositeProductResult() && $session->getCompositeProductResult() instanceof Varien_Object) {
-            /** @var Mage_Adminhtml_Helper_Catalog_Product_Composite $helper */
-            $helper = Mage::helper('adminhtml/catalog_product_composite');
-            $helper->renderUpdateResult($this, $session->getCompositeProductResult());
-            $session->unsCompositeProductResult();
-        } else {
-            $session->unsCompositeProductResult();
-            return false;
-        }
     }
 }

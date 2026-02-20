@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,7 +62,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     public function getResourcesTree()
     {
@@ -70,7 +70,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     public function getResourcesList()
     {
@@ -78,7 +78,7 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     public function getResourcesList2D()
     {
@@ -99,10 +99,10 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
      * @param bool|null $represent2Darray
      * @param bool $rawNodes
      * @param string $module
-     * @return array|false|Varien_Simplexml_Element
+     * @return array|false|\Maho\Simplexml\Element
      */
     protected function _buildResourcesArray(
-        ?Varien_Simplexml_Element $resource = null,
+        ?\Maho\Simplexml\Element $resource = null,
         $parentName = null,
         $level = 0,
         $represent2Darray = null,
@@ -146,18 +146,16 @@ class Mage_Api_Model_Roles extends Mage_Core_Model_Abstract
         if (empty($children)) {
             if ($rawNodes) {
                 return $resource;
-            } else {
-                return $result;
             }
+            return $result;
         }
         foreach ($children as $child) {
             $this->_buildResourcesArray($child, $resourceName, $level + 1, $represent2Darray, $rawNodes, $module);
         }
         if ($rawNodes) {
             return $resource;
-        } else {
-            return $result;
         }
+        return $result;
     }
 
     /**

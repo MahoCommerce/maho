@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -65,7 +65,7 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
 
         $addOptions = $item->getOptionByCode('additional_options');
         if ($addOptions) {
-            $options = array_merge($options, unserialize($addOptions->getValue(), ['allowed_classes' => false]));
+            $options = array_merge($options, Mage::helper('core/string')->unserialize($addOptions->getValue()));
         }
 
         return $options;
@@ -152,9 +152,9 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
      * @param mixed $optionValue
      * Method works well with these $optionValue format:
      *      1. String
-     *      2. Indexed array e.g. array(val1, val2, ...)
+     *      2. Indexed array e.g. [val1, val2, ...]
      *      3. Associative array, containing additional option info, including option value, e.g.
-     *          array
+     *          [
      *          (
      *              [label] => ...,
      *              [value] => ...,
@@ -214,14 +214,13 @@ class Mage_Catalog_Helper_Product_Configuration extends Mage_Core_Helper_Abstrac
             $truncatedValue = implode("\n", $optionValue);
             $truncatedValue = nl2br($truncatedValue);
             return ['value' => $truncatedValue];
-        } else {
-            if ($maxLength) {
-                $truncatedValue = Mage::helper('core/string')->truncate($optionValue, $maxLength, '');
-            } else {
-                $truncatedValue = $optionValue;
-            }
-            $truncatedValue = nl2br($truncatedValue);
         }
+        if ($maxLength) {
+            $truncatedValue = Mage::helper('core/string')->truncate($optionValue, $maxLength, '');
+        } else {
+            $truncatedValue = $optionValue;
+        }
+        $truncatedValue = nl2br($truncatedValue);
 
         $result = ['value' => $truncatedValue];
 

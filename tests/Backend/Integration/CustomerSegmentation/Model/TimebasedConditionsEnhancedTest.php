@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -256,13 +256,14 @@ describe('Enhanced Time-based Customer Conditions', function () {
 
                 if ($orders->getSize() > 0) {
                     $lastOrder = $orders->getFirstItem();
-                    // Use the EXACT same calculation as the segmentation condition: SQL DATEDIFF
+                    // Use the EXACT same calculation as the segmentation condition
                     $currentDate = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                     $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+                    $dateDiff = $adapter->getDateDiffSql("'{$currentDate}'", "'{$lastOrder->getCreatedAt()}'");
                     $select = $adapter->select()
-                        ->from([], ['days' => "DATEDIFF('{$currentDate}', '{$lastOrder->getCreatedAt()}')"]);
+                        ->from([], ['days' => $dateDiff]);
                     $daysDiff = (int) $adapter->fetchOne($select);
-                    expect($daysDiff)->toBe(7); // Should match exactly since both use SQL DATEDIFF
+                    expect($daysDiff)->toBe(7); // Should match exactly since both use same date diff calculation
                 } else {
                     // If no orders, ensure we have at least one assertion
                     expect(true)->toBe(true);
@@ -523,6 +524,7 @@ describe('Enhanced Time-based Customer Conditions', function () {
                     'customer_id' => $customer->getId(),
                     'login_at' => $loginAt,
                     'logout_at' => null,
+                    'store_id' => 1,
                 ]);
             }
 

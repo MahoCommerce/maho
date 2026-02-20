@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -13,11 +13,9 @@
 ?>
 <?php
 $_product = $this->getProduct();
-$_helper = $this->helper('catalog/output');
-$catalogImageHelper = $this->helper('catalog/image');
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 ?>
-    <div class="product-image product-image-zoom" role="region" aria-label="<?= $this->__('Product Images') ?>">
+    <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>">
         <div class="product-image-gallery">
             <img id="image-main"
                 class="gallery-image visible"

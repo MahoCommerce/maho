@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,14 +15,14 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
     /**
      * Files collection object
      *
-     * @var Varien_Data_Collection_Filesystem
+     * @var \Maho\Data\Collection\Filesystem
      */
     protected $_filesCollection;
 
     /**
      * Prepared Files collection for current directory
      *
-     * @return Varien_Data_Collection_Filesystem
+     * @return \Maho\Data\Collection\Filesystem
      */
     public function getFiles()
     {
@@ -48,7 +48,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
      *
      * @return string
      */
-    public function getFileId(Varien_Object $file)
+    public function getFileId(\Maho\DataObject $file)
     {
         return $file->getId();
     }
@@ -58,7 +58,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
      *
      * @return string
      */
-    public function getFileThumbUrl(Varien_Object $file)
+    public function getFileThumbUrl(\Maho\DataObject $file)
     {
         return $file->getThumbUrl();
     }
@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
      *
      * @return string
      */
-    public function getFileName(Varien_Object $file)
+    public function getFileName(\Maho\DataObject $file)
     {
         return $file->getName();
     }
@@ -78,7 +78,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
      *
      * @return string
      */
-    public function getFileWidth(Varien_Object $file)
+    public function getFileWidth(\Maho\DataObject $file)
     {
         return $file->getWidth();
     }
@@ -88,7 +88,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
      *
      * @return string
      */
-    public function getFileHeight(Varien_Object $file)
+    public function getFileHeight(\Maho\DataObject $file)
     {
         return $file->getHeight();
     }
@@ -98,7 +98,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content_Files extends Mage_Adminht
      *
      * @return string
      */
-    public function getFileShortName(Varien_Object $file)
+    public function getFileShortName(\Maho\DataObject $file)
     {
         return $file->getShortName();
     }

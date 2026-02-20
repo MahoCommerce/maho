@@ -6,7 +6,7 @@
  * @package    Mage_ImportExport
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -70,18 +70,17 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
 
             if (isset($validTypes[$this->getEntity()])) {
                 try {
-                    /** @var Mage_ImportExport_Model_Import_Entity_Abstract $_entityAdapter */
                     $_entityAdapter = Mage::getModel($validTypes[$this->getEntity()]['model']);
+                    if (!$_entityAdapter instanceof Mage_ImportExport_Model_Import_Entity_Abstract) {
+                        Mage::throwException(
+                            Mage::helper('importexport')->__('Entity adapter object must be an instance of Mage_ImportExport_Model_Import_Entity_Abstract'),
+                        );
+                    }
                     $this->_entityAdapter = $_entityAdapter;
                 } catch (Exception $e) {
                     Mage::logException($e);
                     Mage::throwException(
                         Mage::helper('importexport')->__('Invalid entity model'),
-                    );
-                }
-                if (!($this->_entityAdapter instanceof Mage_ImportExport_Model_Import_Entity_Abstract)) {
-                    Mage::throwException(
-                        Mage::helper('importexport')->__('Entity adapter object must be an instance of Mage_ImportExport_Model_Import_Entity_Abstract'),
                     );
                 }
             } else {
@@ -180,11 +179,11 @@ class Mage_ImportExport_Model_Import extends Mage_ImportExport_Model_Abstract
         if ($attribute->usesSource()) {
             return $attribute->getFrontendInput() == 'multiselect' ?
                 'multiselect' : 'select';
-        } elseif ($attribute->isStatic()) {
-            return $attribute->getFrontendInput() == 'date' ? 'datetime' : 'varchar';
-        } else {
-            return $attribute->getBackendType();
         }
+        if ($attribute->isStatic()) {
+            return $attribute->getFrontendInput() == 'date' ? 'datetime' : 'varchar';
+        }
+        return $attribute->getBackendType();
     }
 
     /**

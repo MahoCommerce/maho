@@ -3,10 +3,10 @@
 /**
  * Maho
  *
- * @package    Maho_Data
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -40,7 +40,8 @@ class Image extends AbstractElement
     {
         $html = '';
 
-        if ((string) $this->getValue()) {
+        $value = $this->getValue();
+        if ($value && is_string($value)) {
             $url = $this->_getUrl();
 
             if (!preg_match("/^http\:\/\/|https\:\/\//", $url)) {
@@ -49,8 +50,8 @@ class Image extends AbstractElement
 
             $html = '<a href="' . $url . '"'
                 . ' onclick="imagePreview(\'' . $this->getHtmlId() . '_image\'); return false;">'
-                . '<img src="' . $url . '" id="' . $this->getHtmlId() . '_image" title="' . $this->getValue() . '"'
-                . ' alt="' . $this->getValue() . '" height="22" width="22" class="small-image-preview v-middle" />'
+                . '<img src="' . $url . '" id="' . $this->getHtmlId() . '_image" title="' . $value . '"'
+                . ' alt="' . $value . '" height="22" width="22" class="small-image-preview v-middle" />'
                 . '</a> ';
         }
         $this->setClass('input-file');
@@ -91,7 +92,12 @@ class Image extends AbstractElement
      */
     protected function _getHiddenInput()
     {
-        return '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '" />';
+        $value = $this->getValue();
+        // Don't output hidden input for array values (delete checkbox)
+        if (is_array($value)) {
+            return '';
+        }
+        return '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $value . '" />';
     }
 
     /**
@@ -101,7 +107,11 @@ class Image extends AbstractElement
      */
     protected function _getUrl()
     {
-        return $this->getValue();
+        $value = $this->getValue();
+        if ($baseUrl = $this->getData('base_url')) {
+            return $baseUrl . $value;
+        }
+        return $value;
     }
 
     /**

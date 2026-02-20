@@ -6,7 +6,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2022 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -64,7 +64,6 @@ Load this update on every page when customer is logged out
         <reference name="top.links">
             <action method="addLink" translate="label title" module="customer"><label>Log In</label><url helper="customer/getLoginUrl"/><title>Log In</title><prepare/><urlParams/><position>100</position></action>
         </reference>
-        <remove name="reorder"></remove>
     </customer_logged_out>
 
 <!--
@@ -83,6 +82,13 @@ Layout for customer login page
         <reference name="content">
             <block type="customer/form_login" name="customer_form_login" template="customer/form/login.phtml">
                 <block type="customer/form_remember" name="remember.me" template="customer/form/remember.phtml" />
+                <block type="customer/account_forgotpassword" name="customer_forgotpassword_embedded" as="forgotpassword_form" template="customer/form/forgotpassword.phtml" />
+                <block type="customer/form_register" name="customer_form_register_embedded" as="register_form" template="customer/form/register.phtml">
+                    <block type="customer/form_remember" name="remember.me.register" template="customer/form/remember.phtml" />
+                    <block type="page/html_wrapper" name="customer.form.register.fields.before.embedded" as="form_fields_before" translate="label">
+                        <label>Form Fields Before</label>
+                    </block>
+                </block>
             </block>
         </reference>
     </customer_account_login>
@@ -124,6 +130,9 @@ New customer registration
                 <block type="page/html_wrapper" name="customer.form.register.fields.before" as="form_fields_before" translate="label">
                     <label>Form Fields Before</label>
                 </block>
+                <block type="customer/form_login" name="customer_form_login_embedded" as="login_form" template="customer/form/login/embedded.phtml">
+                    <block type="customer/form_remember" name="remember.me.embedded" template="customer/form/remember.phtml" />
+                </block>
             </block>
         </reference>
     </customer_account_create>
@@ -141,7 +150,6 @@ New customer registration
             <action method="setHeaderTitle" translate="title" module="customer"><title>Password forgotten</title></action>
         </reference>
         <reference name="content">
-            <!--<block type="core/template" name="forgotPassword" template="customer/form/forgotpassword.phtml"/>-->
             <block type="customer/account_forgotpassword" name="forgotPassword" template="customer/form/forgotpassword.phtml" />
         </reference>
     </customer_account_forgotpassword>
@@ -226,14 +234,8 @@ Customer account pages, rendered for all tabs in dashboard
             </block>
         </reference>
         <reference name="left">
-            <!--<block type="checkout/cart_sidebar" name="cart_sidebar" template="checkout/cart/sidebar.phtml">-->
-                <!--<action method="addItemRender"><type>simple</type><block>checkout/cart_item_renderer</block><template>checkout/cart/sidebar/default.phtml</template></action>-->
-                <!--<action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>checkout/cart/sidebar/default.phtml</template></action>-->
-                <!--<action method="addItemRender"><type>configurable</type><block>checkout/cart_item_renderer_configurable</block><template>checkout/cart/sidebar/default.phtml</template></action>-->
-            <!--</block>-->
             <block type="catalog/product_compare_sidebar" name="catalog.compare.sidebar" template="catalog/product/compare/sidebar.phtml"/>
             <remove name="tags_popular"/>
-
         </reference>
     </customer_account>
 

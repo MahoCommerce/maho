@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,7 +30,7 @@
  * @method $this setType(string $value)
  * @method bool hasWrapperMustBeVisible()
  */
-abstract class Mage_Core_Block_Abstract extends Varien_Object
+abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
 {
     /**
      * Prefix for cache key
@@ -157,7 +157,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     protected static $_urlModel;
 
     /**
-     * @var Varien_Object
+     * @var \Maho\DataObject
      */
     private static $_transportObject;
 
@@ -256,7 +256,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     /**
      * Retrieve parent block
      *
-     * @return $this
+     * @return self|null
      */
     public function getParentBlock()
     {
@@ -520,7 +520,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
                 $params = $args;
             }
 
-            Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($child, $callback, $params);
+            Mage::helper('core/security')->ensureBlockMethodAllowed($child, $callback, $params);
             if ($result == call_user_func_array([&$child, $callback], $params)) {
                 $this->unsetChild($alias);
             }
@@ -550,10 +550,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         if ($name === '') {
             return $this->_children;
-        } elseif (isset($this->_children[$name])) {
-            return $this->_children[$name];
         }
-        return false;
+        return $this->_children[$name] ?? false;
     }
 
     /**
@@ -580,9 +578,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
                 $out .= $this->_getChildHtml($child->getBlockAlias(), $useCache);
             }
             return $out;
-        } else {
-            return $this->_getChildHtml($name, $useCache);
         }
+        return $this->_getChildHtml($name, $useCache);
     }
 
     /**
@@ -837,7 +834,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $alias = $block->getBlockAlias();
             if (in_array($alias, $this->_childGroups[$groupName])) {
                 if ($callback) {
-                    Mage::helper('core/security')->validateAgainstBlockMethodBlacklist($this, $callback, [$alias]);
+                    Mage::helper('core/security')->ensureBlockMethodAllowed($this, $callback, [$alias]);
                     $row = $this->$callback($alias);
                     if (!$skipEmptyResults || $row) {
                         $result[$alias] = $row;
@@ -863,6 +860,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
         if ($child) {
             return $child->getData($key);
         }
+        return null;
     }
 
     /**
@@ -935,7 +933,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
          * Use single transport object instance for all blocks
          */
         if (self::$_transportObject === null) {
-            self::$_transportObject = new Varien_Object();
+            self::$_transportObject = new \Maho\DataObject();
         }
         self::$_transportObject->setHtml($html);
         Mage::dispatchEvent(
@@ -985,8 +983,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      */
     protected function _getUrlModel()
     {
-        /** @var Mage_Core_Model_Url $model */
         $model = Mage::getModel($this->_getUrlModelClass());
+        assert($model instanceof \Mage_Core_Model_Url);
         return $model;
     }
 
@@ -1382,11 +1380,11 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     {
         if ($this->_getApp()->useCache(self::CACHE_GROUP)) {
             $this->_getApp()->setUseSessionVar(false);
-            \Maho\Profiler::start('cache.url');
-            /** @var Mage_Core_Model_Url $model */
+            \Maho\Profiler::start('CACHE_URL');
             $model = Mage::getSingleton($this->_getUrlModelClass());
+            assert($model instanceof \Mage_Core_Model_Url);
             $html = $model->sessionUrlVar($html);
-            \Maho\Profiler::stop('cache.url');
+            \Maho\Profiler::stop('CACHE_URL');
         }
         return $html;
     }
@@ -1444,7 +1442,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
             $tags = json_decode($tagsCache);
         }
         if (!isset($tags) || !is_array($tags) || empty($tags)) {
-            $tags = !$this->hasData(self::CACHE_TAGS_DATA_KEY) ? [] : $this->getData(self::CACHE_TAGS_DATA_KEY);
+            $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY) ? $this->getData(self::CACHE_TAGS_DATA_KEY) : [];
             if (!in_array(self::CACHE_GROUP, $tags)) {
                 $tags[] = self::CACHE_GROUP;
             }
@@ -1461,8 +1459,8 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
     public function addCacheTag($tag)
     {
         $tag = is_array($tag) ? $tag : [$tag];
-        $tags = !$this->hasData(self::CACHE_TAGS_DATA_KEY) ?
-            $tag : array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag);
+        $tags = $this->hasData(self::CACHE_TAGS_DATA_KEY) ?
+            array_merge($this->getData(self::CACHE_TAGS_DATA_KEY), $tag) : $tag;
         $this->setData(self::CACHE_TAGS_DATA_KEY, $tags);
         return $this;
     }
@@ -1568,7 +1566,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      */
     protected function _getTagsCacheKey($cacheKey = null)
     {
-        $cacheKey = !empty($cacheKey) ? $cacheKey : $this->getCacheKey();
+        $cacheKey = empty($cacheKey) ? $this->getCacheKey() : $cacheKey;
         $cacheKey = md5($cacheKey . '_tags');
         return $cacheKey;
     }
@@ -1592,7 +1590,7 @@ abstract class Mage_Core_Block_Abstract extends Varien_Object
      * Collect and retrieve items tags.
      * Item should implement Mage_Core_Model_Abstract::getCacheIdTags method
      *
-     * @param array|Varien_Data_Collection $items
+     * @param array|\Maho\Data\Collection $items
      * @return array
      */
     public function getItemsTags($items)

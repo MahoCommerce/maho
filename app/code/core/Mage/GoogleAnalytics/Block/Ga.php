@@ -6,7 +6,7 @@
  * @package    Mage_GoogleAnalytics
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -68,34 +68,6 @@ gtag('set', 'user_id', '{$customer->getId()}');
         }
 
         return $trackingCode;
-    }
-
-    /**
-     * Render regular page tracking javascript code
-     * The custom "page name" may be set from layout or somewhere else. It must start from slash.
-     *
-     * @param string $accountId
-     * @return string
-     * @deprecated
-     */
-    protected function _getPageTrackingCodeUniversal($accountId)
-    {
-        return '';
-    }
-
-    /**
-     * Render regular page tracking javascript code
-     * The custom "page name" may be set from layout or somewhere else. It must start from slash.
-     *
-     * @link http://code.google.com/apis/analytics/docs/gaJS/gaJSApiBasicConfiguration.html#_gat.GA_Tracker_._trackPageview
-     * @link http://code.google.com/apis/analytics/docs/gaJS/gaJSApi_gaq.html
-     * @param string $accountId
-     * @return string
-     * @deprecated
-     */
-    protected function _getPageTrackingCodeAnalytics($accountId)
-    {
-        return '';
     }
 
     /**
@@ -337,7 +309,7 @@ gtag('set', 'user_id', '{$customer->getId()}');
             }
         }
 
-        $ga4DataTransport = new Varien_Object();
+        $ga4DataTransport = new \Maho\DataObject();
         $ga4DataTransport->setData($result);
         Mage::dispatchEvent('googleanalytics_ga4_send_data_before', ['ga4_data_transport' => $ga4DataTransport]);
         $result = $ga4DataTransport->getData();

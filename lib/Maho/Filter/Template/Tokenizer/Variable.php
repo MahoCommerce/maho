@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
- * @package    Maho_Filter
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,7 +31,8 @@ class Variable extends AbstractTokenizer
             if ($this->isWhiteSpace()) {
                 // Ignore white spaces
                 continue;
-            } elseif ($this->char() != '.' && $this->char() != '(') {
+            }
+            if ($this->char() != '.' && $this->char() != '(') {
                 // Property or method name
                 $parameterName .= $this->char();
             } elseif ($this->char() == '(') {
@@ -136,7 +139,8 @@ class Variable extends AbstractTokenizer
         while ($this->next() && $this->char() != ')') {
             if ($this->isWhiteSpace() || $this->char() == ',') {
                 continue;
-            } elseif ($this->isNumeric()) {
+            }
+            if ($this->isNumeric()) {
                 $value[] = $this->getNumber();
             } else {
                 $value[] = $this->getString();

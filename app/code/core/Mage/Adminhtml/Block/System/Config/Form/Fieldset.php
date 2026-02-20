@@ -6,11 +6,11 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Block_Abstract implements Varien_Data_Form_Element_Renderer_Interface
+class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Block_Abstract implements \Maho\Data\Form\Element\Renderer\RendererInterface
 {
     /**
      * Render fieldset html
@@ -18,7 +18,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
      * @return string
      */
     #[\Override]
-    public function render(Varien_Data_Form_Element_Abstract $element)
+    public function render(\Maho\Data\Form\Element\AbstractElement $element)
     {
         $this->setElement($element);
         $html = $this->_getHeaderHtml($element);
@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     /**
      * Return header html for fieldset
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     protected function _getHeaderHtml($element)
@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     /**
      * Get frontend class
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     protected function _getFrontendClass($element)
@@ -80,7 +80,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     /**
      * Get group xml data of the element
      *
-     * @param null|Varien_Data_Form_Element_Abstract $element
+     * @param null|\Maho\Data\Form\Element\AbstractElement $element
      * @return Mage_Core_Model_Config_Element
      */
     public function getGroup($element = null)
@@ -98,7 +98,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     /**
      * Return header title part of html for fieldset
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     protected function _getHeaderTitleHtml($element)
@@ -111,7 +111,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     /**
      * Return header comment part of html for fieldset
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     protected function _getHeaderCommentHtml($element)
@@ -124,7 +124,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     /**
      * Return full css class name for form fieldset
      *
-     * @param null|Varien_Data_Form_Element_Abstract $element
+     * @param null|\Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     protected function _getFieldsetCss($element = null)
@@ -137,7 +137,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
      * Return footer html for fieldset
      * Add extra tooltip comments to elements
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     protected function _getFooterHtml($element)
@@ -159,7 +159,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
      * - observe fieldset rows;
      * - apply collapse;
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @param bool $tooltipsExist Init tooltips observer or not
      * @return string
      */
@@ -173,7 +173,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
     /**
      * Collapsed or expanded fieldset when page loaded?
      *
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return int|false
      */
     protected function _getCollapseState($element)

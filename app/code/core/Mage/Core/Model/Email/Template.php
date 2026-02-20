@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,10 +23,10 @@ use Symfony\Component\Mime\Address;
  * // Loading of template
  * $emailTemplate  = Mage::getModel('core/email_template')
  *    ->load(Mage::getStoreConfig('path_to_email_template_id_config'));
- * $variables = array(
+ * $variables = [
  *    'someObject' => Mage::getSingleton('some_model')
  *    'someString' => 'Some string value'
- * );
+ * ];
  * $emailTemplate->send('some@domain.com', 'Name Of User', $variables);
  *
  * @method Mage_Core_Model_Resource_Email_Template _getResource()
@@ -98,7 +98,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
      *
      * @return  $this
      */
-    public function setTemplateFilter(Varien_Filter_Template $filter)
+    public function setTemplateFilter(\Maho\Filter\Template $filter)
     {
         $this->_templateFilter = $filter;
         return $this;
@@ -324,7 +324,8 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     {
         if ($this->isPlain() && $html) {
             return $html;
-        } elseif ($this->isPlain()) {
+        }
+        if ($this->isPlain()) {
             return $this->getTemplateText();
         }
 
@@ -340,7 +341,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     public function getInclude($template, array $variables)
     {
         $thisClass = self::class;
-        /** @var Mage_Core_Model_Email_Template $includeTemplate */
         $includeTemplate = new $thisClass();
         $includeTemplate->loadByCode($template);
 
@@ -386,7 +386,12 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             default => null,
         };
 
-        if ($this->hasQueue() && $this->getQueue() instanceof Mage_Core_Model_Email_Queue) {
+        $useQueue = $this->hasQueue()
+            && $this->getQueue() instanceof Mage_Core_Model_Email_Queue
+            && !Mage::getIsDeveloperMode()
+            && Mage::getStoreConfigFlag('system/smtp/enable_queue');
+
+        if ($useQueue) {
             $emailQueue = $this->getQueue();
             $emailQueue->clearRecipients();
             $emailQueue->setMessageBody($text);
@@ -440,7 +445,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             }
             $mailer = new Mailer(Transport::fromDsn($dsn));
 
-            $transportObj = new Varien_Object();
+            $transportObj = new \Maho\DataObject();
             Mage::dispatchEvent('email_template_send_before', [
                 'mail'      => $email,
                 'template'  => $this,
@@ -612,7 +617,7 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             foreach ($variables as $value => $label) {
                 $optionArray[] = [
                     'value' => '{{' . $value . '}}',
-                    'label' => Mage::helper('core')->__('%s', $label),
+                    'label' => Mage::helper('core')->__($label),
                 ];
             }
             if ($withGroup) {

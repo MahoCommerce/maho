@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Mage_ImportExport
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -164,28 +164,6 @@ class Mage_ImportExport_Model_Export_Entity_Category extends Mage_ImportExport_M
         }
 
         return $this;
-    }
-
-    /**
-     * Export process.
-     *
-     * @return string
-     */
-    #[\Override]
-    public function export()
-    {
-        // Prepare headers
-        $writer = $this->getWriter();
-        $validAttrCodes = $this->_getExportAttrCodes();
-        $writer->setHeaderCols(array_merge(
-            [self::COL_CATEGORY_ID, self::COL_PARENT_ID, self::COL_STORE],
-            $validAttrCodes,
-        ));
-
-        // Export data
-        $this->_exportCategories();
-
-        return $writer->getContents();
     }
 
     /**

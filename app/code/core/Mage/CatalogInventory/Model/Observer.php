@@ -6,21 +6,12 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_CatalogInventory_Model_Observer
 {
-    /**
-     * Product qty's checked
-     * data is valid if you check quote item qty and use singleton instance
-     *
-     * @deprecated after 1.4.2.0-rc1
-     * @var array
-     */
-    protected $_checkedProductsQty = [];
-
     /**
      * Product qty's checked
      * data is valid if you check quote item qty and use singleton instance
@@ -47,7 +38,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Add stock information to product
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function addInventoryData($observer)
@@ -67,7 +58,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Remove stock information from static variable
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function removeInventoryData($observer)
@@ -86,7 +77,7 @@ class Mage_CatalogInventory_Model_Observer
      * Add information about producs stock status to collection
      * Used in for product collection after load
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function addStockStatusToCollection($observer)
@@ -107,7 +98,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Add Stock items to product collection
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function addInventoryDataToCollection($observer)
@@ -120,7 +111,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Saving product inventory data. Product qty calculated dynamically.
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function saveInventoryData($observer)
@@ -148,7 +139,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Copy product inventory data (used for product duplicate functionality)
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function copyInventoryData($observer)
@@ -289,7 +280,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Check product inventory data when quote item quantity declaring
      *
-     * @param  Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -330,10 +321,9 @@ class Mage_CatalogInventory_Model_Observer
                     Mage::helper('cataloginventory')->__('Some of the products are currently out of stock.'),
                 );
                 return $this;
-            } else {
-                // Delete error from item and its quote, if it was set due to item out of stock
-                $this->_removeErrorsFromQuoteAndItem($quoteItem, Mage_CatalogInventory_Helper_Data::ERROR_QTY);
             }
+            // Delete error from item and its quote, if it was set due to item out of stock
+            $this->_removeErrorsFromQuoteAndItem($quoteItem, Mage_CatalogInventory_Helper_Data::ERROR_QTY);
         }
 
         /**
@@ -553,25 +543,6 @@ class Mage_CatalogInventory_Model_Observer
      * Get product qty includes information from all quote items
      * Need be used only in sungleton mode
      *
-     * @param int $productId
-     * @param float $itemQty
-     * @return float|mixed
-     * @deprecated after 1.4.2.0-rc1
-     */
-    protected function _getProductQtyForCheck($productId, $itemQty)
-    {
-        $qty = $itemQty;
-        if (isset($this->_checkedProductsQty[$productId])) {
-            $qty += $this->_checkedProductsQty[$productId];
-        }
-        $this->_checkedProductsQty[$productId] = $qty;
-        return $qty;
-    }
-
-    /**
-     * Get product qty includes information from all quote items
-     * Need be used only in sungleton mode
-     *
      * @param int   $productId
      * @param int   $quoteItemId
      * @param float $itemQty
@@ -597,7 +568,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    public function checkoutAllSubmitAfter(Varien_Event_Observer $observer)
+    public function checkoutAllSubmitAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();
@@ -616,7 +587,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return Mage_CatalogInventory_Model_Observer|void
      */
-    public function subtractQuoteInventory(Varien_Event_Observer $observer)
+    public function subtractQuoteInventory(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = $observer->getEvent()->getQuote();
@@ -639,7 +610,7 @@ class Mage_CatalogInventory_Model_Observer
 
     /**
      * Revert quote items inventory data (cover not success order place case)
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function revertQuoteInventory($observer)
     {
@@ -655,12 +626,12 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Adds stock item qty to $items (creates new entry or increments existing one)
      * $items is array with following structure:
-     * array(
-     *  $productId  => array(
+     * [
+     *  $productId  => [
      *      'qty'   => $qty,
      *      'item'  => $stockItems|null
-     *  )
-     * )
+     *  ]
+     * ]
      *
      * @param Mage_Sales_Model_Quote_Item $quoteItem
      * @param array $items
@@ -688,12 +659,12 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Prepare array with information about used product qty and product stock item
      * result is:
-     * array(
-     *  $productId  => array(
+     * [
+     *  $productId  => [
      *      'qty'   => $qty,
      *      'item'  => $stockItems|null
-     *  )
-     * )
+     *  ]
+     * ]
      * @param array $relatedItems
      * @return array
      */
@@ -720,7 +691,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Refresh stock index for specific stock items after successful order placement
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function reindexQuoteInventory($observer)
@@ -776,7 +747,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Return creditmemo items qty to stock
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      */
     public function refundOrderInventory($observer)
     {
@@ -814,7 +785,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Cancel order item
      *
-     * @param   Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function cancelOrderItem($observer)
@@ -836,7 +807,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Update items stock status and low stock date.
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return  $this
      */
     public function updateItemsStockUponConfigChange($observer)
@@ -852,7 +823,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    public function productStatusUpdate(Varien_Event_Observer $observer)
+    public function productStatusUpdate(\Maho\Event\Observer $observer)
     {
         $productId = $observer->getEvent()->getProductId();
         Mage::getSingleton('cataloginventory/stock_status')
@@ -865,7 +836,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    public function catalogProductWebsiteUpdate(Varien_Event_Observer $observer)
+    public function catalogProductWebsiteUpdate(\Maho\Event\Observer $observer)
     {
         $websiteIds = $observer->getEvent()->getWebsiteIds();
         $productIds = $observer->getEvent()->getProductIds();
@@ -885,7 +856,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    public function addStockStatusToPrepareIndexSelect(Varien_Event_Observer $observer)
+    public function addStockStatusToPrepareIndexSelect(\Maho\Event\Observer $observer)
     {
         $website    = $observer->getEvent()->getWebsite();
         $select     = $observer->getEvent()->getSelect();
@@ -901,7 +872,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    public function prepareCatalogProductIndexSelect(Varien_Event_Observer $observer)
+    public function prepareCatalogProductIndexSelect(\Maho\Event\Observer $observer)
     {
         $select     = $observer->getEvent()->getSelect();
         $entity     = $observer->getEvent()->getEntityField();
@@ -918,7 +889,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    public function addStockStatusFilterToSelect(Varien_Event_Observer $observer)
+    public function addStockStatusFilterToSelect(\Maho\Event\Observer $observer)
     {
         $select         = $observer->getEvent()->getSelect();
         $entityField    = $observer->getEvent()->getEntityField();
@@ -942,87 +913,9 @@ class Mage_CatalogInventory_Model_Observer
     }
 
     /**
-     * Lock DB rows for order products
-     *
-     * We need do it for resolving problems with inventory on placing
-     * some orders in one time
-     * @deprecated after 1.4
-     * @param   Varien_Event_Observer $observer
-     * @return  $this
-     */
-    public function lockOrderInventoryData($observer)
-    {
-        /** @var Mage_Sales_Model_Order $order */
-        $order = $observer->getEvent()->getOrder();
-        $productIds = [];
-
-        /**
-         * Do lock only for new order
-         */
-        if ($order->getId()) {
-            return $this;
-        }
-
-        if ($order) {
-            foreach ($order->getAllItems() as $item) {
-                $productIds[] = $item->getProductId();
-            }
-        }
-
-        if (!empty($productIds)) {
-            Mage::getSingleton('cataloginventory/stock')->lockProductItems($productIds);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Register saving order item
-     *
-     * @deprecated after 1.4
-     * @param   Varien_Event_Observer $observer
-     * @return  $this
-     */
-    public function createOrderItem($observer)
-    {
-        /** @var Mage_Sales_Model_Order_Item $item */
-        $item = $observer->getEvent()->getItem();
-        /**
-         * Before creating order item need subtract ordered qty from product stock
-         */
-
-        $children = $item->getChildrenItems();
-
-        if (!$item->getId() && empty($children)) {
-            Mage::getSingleton('cataloginventory/stock')->registerItemSale($item);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Back refunded item qty to stock
-     *
-     * @deprecated after 1.4
-     * @param   Varien_Event_Observer $observer
-     * @return  $this
-     */
-    public function refundOrderItem($observer)
-    {
-        /** @var Mage_Sales_Model_Order_Creditmemo_Item $item */
-        $item = $observer->getEvent()->getCreditmemoItem();
-        if ($item->getId() && $item->getBackToStock() && ($productId = $item->getProductId())
-            && ($qty = $item->getQty())
-        ) {
-            Mage::getSingleton('cataloginventory/stock')->backItemQty($productId, $qty);
-        }
-        return $this;
-    }
-
-    /**
      * Reindex all events of product-massAction type
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @throws Exception
      */
     public function reindexProductsMassAction($observer): void
@@ -1036,7 +929,7 @@ class Mage_CatalogInventory_Model_Observer
     /**
      * Detects whether product status should be shown
      *
-     * @param Varien_Event_Observer $observer
+     * @param \Maho\Event\Observer $observer
      * @return $this
      */
     public function displayProductStatusInfo($observer)

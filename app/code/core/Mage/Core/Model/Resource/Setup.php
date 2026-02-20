@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -310,14 +310,6 @@ class Mage_Core_Model_Resource_Setup
         $dbVer = $this->_getResource()->getDbVersion($this->_resourceName);
         $configVer = (string) $this->_moduleConfig->version;
 
-        /**
-         * Hook queries in adapter, so that in MySQL compatibility mode extensions and custom modules will avoid
-         * errors due to changes in database structure
-         */
-        if (((string) $this->_moduleConfig->codePool != 'core') && Mage::helper('core')->useDbCompatibleMode()) {
-            $this->_hookQueries();
-        }
-
         // Module is installed
         if ($dbVer !== false) {
             $status = version_compare($configVer, $dbVer);
@@ -494,6 +486,27 @@ class Mage_Core_Model_Resource_Setup
     }
 
     /**
+     * Get the database engine identifier from connection config
+     *
+     * Supports new 'engine' config with backward compatibility for legacy 'model' config.
+     */
+    protected function _getConnectionEngine(): string
+    {
+        // New config: use 'engine'
+        if (!empty($this->_connectionConfig->engine)) {
+            return (string) $this->_connectionConfig->engine;
+        }
+
+        // Backward compatibility: use 'model' (legacy name for engine)
+        if (!empty($this->_connectionConfig->model)) {
+            return (string) $this->_connectionConfig->model;
+        }
+
+        // Default to MySQL for safety
+        return 'mysql';
+    }
+
+    /**
      * Retrieve available Database install/upgrade files for current module
      *
      * @param string $actionType
@@ -503,13 +516,16 @@ class Mage_Core_Model_Resource_Setup
      */
     protected function _getAvailableDbFiles($actionType, $fromVersion, $toVersion)
     {
-        $resModel   = (string) $this->_connectionConfig->model;
+        $resModel   = $this->_getConnectionEngine();
         $modName    = (string) $this->_moduleConfig[0]->getName();
+
+        // Backwards compatibility: also match mysql4- prefix when model is mysql
+        $modelPattern = $resModel === 'mysql' ? 'mysql4?' : preg_quote($resModel, '#');
 
         $dbFiles    = [];
         $typeFiles  = [];
         $regExpDb   = sprintf('#^%s-(.*)\.(php|sql)$#i', $actionType);
-        $regExpType = sprintf('#^%s-%s-(.*)\.(php|sql)$#i', $resModel, $actionType);
+        $regExpType = sprintf('#^%s-%s-(.*)\.(php|sql)$#i', $modelPattern, $actionType);
 
         $filesDir   = Mage::getModuleDir('sql', $modName) . DS . $this->_resourceName;
         foreach (Maho::globPackages("$filesDir/*") as $file) {
@@ -543,10 +559,14 @@ class Mage_Core_Model_Resource_Setup
     protected function _getAvailableDataFiles($actionType, $fromVersion, $toVersion)
     {
         $modName    = (string) $this->_moduleConfig[0]->getName();
+        $resModel   = $this->_getConnectionEngine();
         $files      = [];
 
+        // Backwards compatibility: also match mysql4- prefix when model is mysql
+        $modelPattern = $resModel === 'mysql' ? 'mysql4?' : preg_quote($resModel, '#');
+
         $regExp     = sprintf('#^%s-(.*)\.php$#i', $actionType);
-        $regExpOld  = sprintf('#^%s-%s-(.*)\.php$#i', $this->_connectionConfig->model, $actionType);
+        $regExpOld  = sprintf('#^%s-%s-(.*)\.php$#i', $modelPattern, $actionType);
 
         $filesDir   = Mage::getModuleDir('data', $modName) . DS . $this->_resourceName;
         foreach (Maho::globPackages("$filesDir/*") as $file) {

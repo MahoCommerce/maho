@@ -1,10 +1,10 @@
 /**
  * Maho
  *
- * @package    rwd_default
+ * @package     base_default
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -100,7 +100,7 @@ class Minicart {
                     if (result.success) {
                         this.refreshIfOnCartPage();
                         this.updateCartQty(result.qty);
-                        this.updateContentOnRemove(result, el.closest('li'));
+                        this.updateContentOnRemove(result);
                     } else {
                         this.showMessage(result);
                     }
@@ -182,7 +182,7 @@ class Minicart {
                     if (quantity !== 0) {
                         this.updateContentOnUpdate(result);
                     } else {
-                        this.updateContentOnRemove(result, input.closest('li'));
+                        this.updateContentOnRemove(result);
                     }
                 } else {
                     this.showMessage(result);
@@ -197,20 +197,25 @@ class Minicart {
         return false;
     }
 
-    updateContentOnRemove(result, el) {
-        el.style.display = 'none';
-        document.querySelector(this.selectors.container).innerHTML = result.content;
-        this.showMessage(result);
+    updateContentOnRemove(result) {
+        this.updateContent(result);
     }
 
     updateContentOnUpdate(result) {
-        document.querySelector(this.selectors.container).innerHTML = result.content;
+        this.updateContent(result);
+    }
+
+    updateContent(result) {
+        const container = this.getMessageContainer();
+        container.innerHTML = result.content;
         this.showMessage(result);
     }
 
     updateCartQty(qty) {
         if (typeof qty !== 'undefined') {
-            document.querySelector(this.selectors.qty).textContent = qty;
+            const el = document.querySelector(this.selectors.qty);
+            el.textContent = qty;
+            el.className = el.className.replace(/count-\d+/, 'count-' + qty);
         }
     }
 
@@ -236,26 +241,40 @@ class Minicart {
         }
     }
 
+    getMessageContainer() {
+        return document.querySelector(this.selectors.overlay)?.parentNode || document;
+    }
+
     hideMessage() {
-        document.querySelector(this.selectors.error).style.display = 'none';
-        document.querySelector(this.selectors.success).style.display = 'none';
+        const container = this.getMessageContainer();
+        container.querySelector(this.selectors.error)?.style.setProperty('display', 'none');
+        container.querySelector(this.selectors.success)?.style.setProperty('display', 'none');
     }
 
     showError(message) {
-        const errorElement = document.querySelector(this.selectors.error);
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
+        const el = document.querySelector(this.selectors.error);
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
     }
 
     showSuccess(message) {
-        const successElement = document.querySelector(this.selectors.success);
-        successElement.textContent = message;
-        successElement.style.display = 'block';
+        const el = document.querySelector(this.selectors.success);
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
     }
 
     refreshIfOnCartPage() {
         if (document.body.classList.contains("checkout-cart-index")) {
             window.location.reload(true);
+        }
+    }
+
+    openOffcanvas() {
+        const trigger = document.querySelector('.skip-cart.offcanvas-trigger');
+        if (trigger) {
+            trigger.click();
         }
     }
 };

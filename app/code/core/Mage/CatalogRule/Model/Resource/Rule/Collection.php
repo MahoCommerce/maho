@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -42,8 +44,10 @@ class Mage_CatalogRule_Model_Resource_Rule_Collection extends Mage_Rule_Model_Re
      */
     public function addAttributeInConditionFilter($attributeCode)
     {
-        $match = sprintf('%%%s%%', substr(serialize(['attribute' => $attributeCode]), 5, -1));
-        $this->addFieldToFilter('conditions_serialized', ['like' => $match]);
+        $adapter = $this->getConnection();
+        $field = (string) $this->_getMappedField('conditions_serialized');
+        $expr = $adapter->getJsonSearchExpr($field, $attributeCode, '$**.attribute');
+        $this->getSelect()->where((string) $expr);
 
         return $this;
     }

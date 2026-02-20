@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -129,7 +129,7 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
                 $this->getResponse()->clearBody();
                 $this->getResponse()->sendHeaders();
 
-                $ioAdapter = new Varien_Io_File();
+                $ioAdapter = new \Maho\Io\File();
                 if (!$ioAdapter->fileExists($file)) {
                     Mage::throwException(Mage::helper('core')->__('File not found'));
                 }
@@ -144,9 +144,8 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
                 }
 
                 exit(0);
-            } else {
-                $this->getResponse()->setBody($content);
             }
+            $this->getResponse()->setBody($content);
         }
         return $this;
     }
@@ -158,17 +157,6 @@ class Mage_Core_Controller_Front_Action extends Mage_Core_Controller_Varien_Acti
      * @deprecated since 25.5.0
      */
     protected function _isFormKeyEnabled()
-    {
-        return true;
-    }
-
-    /**
-     * Check if form_key validation enabled on checkout process
-     *
-     * @deprecated
-     * @return bool
-     */
-    protected function isFormkeyValidationOnCheckoutEnabled()
     {
         return true;
     }

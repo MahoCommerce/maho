@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -20,7 +20,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
      */
     public function initForm()
     {
-        $form = new Varien_Data_Form();
+        $form = new \Maho\Data\Form();
         $form->setHtmlIdPrefix('_account');
         $form->setFieldNameSuffix('account');
 
@@ -38,7 +38,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
 
         $attributes = $customerForm->getAttributes();
         foreach ($attributes as $attribute) {
-            /** @var Mage_Eav_Model_Entity_Attribute $attribute */
+            /** @var Mage_Customer_Model_Attribute $attribute */
             $attribute->setFrontendLabel(Mage::helper('customer')->__($attribute->getFrontend()->getLabel()));
             $attribute->setNote(Mage::helper('customer')->__($attribute->getNote()));
             $attribute->unsIsVisible();
@@ -157,7 +157,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
                 );
 
                 $renderer = $this->getLayout()->createBlock('adminhtml/customer_edit_renderer_newpass');
-                if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+                if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
                     $field->setRenderer($renderer);
                 }
 
@@ -198,7 +198,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
                     );
 
                     $renderer = $this->getLayout()->createBlock('adminhtml/customer_edit_renderer_adminpass');
-                    if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+                    if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
                         $field->setRenderer($renderer);
                     }
                 }
@@ -222,7 +222,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
             );
 
             $renderer = $this->getLayout()->createBlock('adminhtml/customer_edit_renderer_newpass');
-            if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
+            if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
                 $field->setRenderer($renderer);
             }
 

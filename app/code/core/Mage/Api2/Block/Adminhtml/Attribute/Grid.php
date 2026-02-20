@@ -6,7 +6,7 @@
  * @package    Mage_Api2
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -30,11 +30,11 @@ class Mage_Api2_Block_Adminhtml_Attribute_Grid extends Mage_Adminhtml_Block_Widg
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = new Varien_Data_Collection();
+        $collection = new \Maho\Data\Collection();
 
         foreach (Mage_Api2_Model_Auth_User::getUserTypes() as $type => $label) {
             $collection->addItem(
-                new Varien_Object(['user_type_name' => $label, 'user_type_code' => $type]),
+                new \Maho\DataObject(['user_type_name' => $label, 'user_type_code' => $type]),
             );
         }
 
@@ -60,7 +60,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Grid extends Mage_Adminhtml_Block_Widg
      * @return $this
      */
     #[\Override]
-    public function _prepareLayout()
+    protected function _prepareLayout()
     {
         $this->setFilterVisibility(false);
         $this->setPagerVisibility(false);
@@ -71,7 +71,7 @@ class Mage_Api2_Block_Adminhtml_Attribute_Grid extends Mage_Adminhtml_Block_Widg
     /**
      * Get row URL
      *
-     * @param Varien_Object $row
+     * @param \Maho\DataObject $row
      * @return string|null
      */
     #[\Override]

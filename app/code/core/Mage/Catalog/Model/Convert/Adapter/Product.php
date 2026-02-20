@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -59,13 +59,6 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
     protected $_requiredFields = [];
 
     protected $_ignoreFields = [];
-
-    /**
-     * @deprecated after 1.5.0.0-alpha2
-     *
-     * @var array
-     */
-    protected $_imageFields = [];
 
     /**
      * Inventory Fields array
@@ -430,7 +423,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
 
     /**
      * @throws Mage_Core_Exception
-     * @throws Varien_Exception
+     * @throws \Maho\Exception
      */
     public function setProduct(Mage_Catalog_Model_Product $object)
     {
@@ -449,7 +442,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
 
     /**
      * @throws Mage_Core_Exception
-     * @throws Varien_Exception
+     * @throws \Maho\Exception
      */
     public function setStockItem(Mage_CatalogInventory_Model_Stock_Item $object)
     {
@@ -883,7 +876,7 @@ class Mage_Catalog_Model_Convert_Adapter_Product extends Mage_Eav_Model_Convert_
          */
         Mage::dispatchEvent($this->_eventPrefix . '_after', []);
 
-        $entity = new Varien_Object();
+        $entity = new \Maho\DataObject();
         Mage::getSingleton('index/indexer')->processEntityAction(
             $entity,
             self::ENTITY,

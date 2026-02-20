@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -220,7 +220,6 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
                 break;
 
             case Mage_Index_Model_Event::TYPE_MASS_ACTION:
-                /** @var Varien_Object $actionObject */
                 $actionObject = $event->getDataObject();
 
                 $reindexData  = [];
@@ -333,6 +332,11 @@ class Mage_Catalog_Model_Product_Indexer_Flat extends Mage_Index_Model_Indexer_A
     #[\Override]
     public function reindexAll()
     {
+        /** @var Mage_Catalog_Helper_Product_Flat $productFlatHelper */
+        $productFlatHelper = Mage::helper('catalog/product_flat');
+        if (!$productFlatHelper->isEnabled()) {
+            return;
+        }
         $this->_getIndexer()->reindexAll();
     }
 

@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2015-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -502,7 +502,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * Init mapping array of short fields to
      * its full names
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _initOldFieldsMap()
@@ -739,7 +739,20 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
          * for this we have additional diapason for 0
          * TotalPaid - contains amount, that were not rounded.
          */
-        if (abs($this->getStore()->roundPrice($this->getTotalPaid()) - $this->getTotalRefunded()) < .0001) {
+        $hasPaymentToRefund = abs($this->getStore()->roundPrice($this->getTotalPaid()) - $this->getTotalRefunded()) >= .0001;
+
+        // Check for gift card amount that can be refunded
+        $hasGiftcardToRefund = false;
+        $giftcardAmount = abs((float) $this->getGiftcardAmount());
+        if ($giftcardAmount > 0 && $this->hasInvoices()) {
+            $giftcardRefunded = 0;
+            foreach ($this->getCreditmemosCollection() as $creditmemo) {
+                $giftcardRefunded += abs((float) $creditmemo->getGiftcardAmount());
+            }
+            $hasGiftcardToRefund = ($giftcardAmount - $giftcardRefunded) >= .0001;
+        }
+
+        if (!$hasPaymentToRefund && !$hasGiftcardToRefund) {
             return false;
         }
 
@@ -1147,22 +1160,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
     }
 
     /**
-     * Add status change information to history
-     * @deprecated after 1.4.0.0-alpha3
-     *
-     * @param  string $status
-     * @param  string $comment
-     * @param  bool $isCustomerNotified
-     * @return $this
-     */
-    public function addStatusToHistory($status, $comment = '', $isCustomerNotified = false)
-    {
-        $history = $this->addStatusHistoryComment($comment, $status)
-            ->setIsCustomerNotified($isCustomerNotified);
-        return $this;
-    }
-
-    /**
      * Add a comment to order
      * Different or default status may be specified
      *
@@ -1331,7 +1328,7 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
              * $method - carrier_method
              */
             $method = $this->getShippingMethod(true);
-            if ($method instanceof Varien_Object) {
+            if ($method instanceof \Maho\DataObject) {
                 $className = Mage::getStoreConfig('carriers/' . $method->getCarrierCode() . '/model');
                 if ($className) {
                     $carrierModel = Mage::getModel($className);
@@ -1346,24 +1343,23 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
      * Retrieve shipping method
      *
      * @param bool $asObject return carrier code and shipping method data as object
-     * @return string|Varien_Object
+     * @return string|\Maho\DataObject
      */
     public function getShippingMethod($asObject = false)
     {
         $shippingMethod = parent::getShippingMethod();
         if (!$asObject) {
             return $shippingMethod;
-        } else {
-            $segments = explode('_', $shippingMethod, 2);
-            if (!isset($segments[1])) {
-                $segments[1] = $segments[0];
-            }
-            [$carrierCode, $method] = $segments;
-            return new Varien_Object([
-                'carrier_code' => $carrierCode,
-                'method'       => $method,
-            ]);
         }
+        $segments = explode('_', $shippingMethod, 2);
+        if (!isset($segments[1])) {
+            $segments[1] = $segments[0];
+        }
+        [$carrierCode, $method] = $segments;
+        return new \Maho\DataObject([
+            'carrier_code' => $carrierCode,
+            'method'       => $method,
+        ]);
     }
 
     /**
@@ -2057,17 +2053,6 @@ class Mage_Sales_Model_Order extends Mage_Sales_Model_Abstract
             $this->_baseCurrency = Mage::getModel('directory/currency')->load($this->getBaseCurrencyCode());
         }
         return $this->_baseCurrency;
-    }
-
-    /**
-     * Retrieve order website currency for working with base prices
-     * @deprecated  please use getBaseCurrency instead.
-     *
-     * @return Mage_Directory_Model_Currency
-     */
-    public function getStoreCurrency()
-    {
-        return $this->getData('store_currency');
     }
 
     /**

@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -131,6 +131,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
                 $result = false;
             }
         } elseif ($entity == Mage_Core_Model_Config_Data::ENTITY) {
+            /** @var Mage_Core_Model_Config_Data $configData */
             $configData = $event->getDataObject();
             if ($configData && in_array($configData->getPath(), $this->_relatedConfigSettings)) {
                 $result = $configData->isValueChanged();
@@ -237,7 +238,7 @@ class Mage_CatalogInventory_Model_Indexer_Stock extends Mage_Index_Model_Indexer
         // Saving stock item without product object
         // Register re-index price process if products out of stock hidden on Front-end
         if (!Mage::helper('cataloginventory')->isShowOutOfStock() && !$object->getProduct()) {
-            $massObject = new Varien_Object();
+            $massObject = new \Maho\DataObject();
             $massObject->setAttributesData(['force_reindex_required' => 1]);
             $massObject->setProductIds([$object->getProductId()]);
             Mage::getSingleton('index/indexer')->logEvent(

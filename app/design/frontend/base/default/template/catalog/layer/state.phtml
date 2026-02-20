@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,9 +16,7 @@ $_filters = $this->getActiveFilters();
 $_renderers = $this->getParentBlock()->getChild('state_renderers')->getSortedChildren();
 ?>
 <?php if(!empty($_filters)): ?>
-<div class="currently">
-    <p class="block-subtitle"><?= $this->__('Currently Shopping by:') ?></p>
-    <ol>
+<ul class="filter-tags">
     <?php foreach ($_filters as $_filter): ?>
         <?php
         $_rendered = false;
@@ -34,15 +32,14 @@ $_renderers = $this->getParentBlock()->getChild('state_renderers')->getSortedChi
 
         if (!$_rendered):
         ?>
-        <li>
-            <span class="label"><?= $this->__($_filter->getName()) ?>:</span>
-            <span class="value"><?= $this->stripTags($_filter->getLabel()) ?></span>
-            <a href="<?= $_filter->getRemoveUrl() ?>" title="<?= $this->quoteEscape($this->__('Remove This Item')) ?>">
+        <li class="filter-tag">
+            <a href="<?= $_filter->getRemoveUrl() ?>" class="filter-tag-link" title="<?= $this->quoteEscape($this->__('Remove filter: %s', $_filter->getLabel())) ?>">
+                <span class="filter-tag-label"><?= $this->__($_filter->getName()) ?></span>
+                <span class="filter-tag-value"><?= $this->stripTags($_filter->getLabel()) ?></span>
                 <?= $this->getIconSvg('x') ?>
             </a>
         </li>
         <?php endif ?>
     <?php endforeach ?>
-    </ol>
-</div>
+</ul>
 <?php endif ?>

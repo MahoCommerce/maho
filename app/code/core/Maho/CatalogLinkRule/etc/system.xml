@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CatalogLinkRule
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <sections>
+        <catalog>
+            <groups>
+                <linkrule translate="label" module="cataloglinkrule">
+                    <label>Product Link Rules</label>
+                    <sort_order>500</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>0</show_in_website>
+                    <show_in_store>0</show_in_store>
+                    <fields>
+                        <schedule translate="label comment">
+                            <label>Cron Schedule</label>
+                            <comment><![CDATA[Cron expression for rule processing. Default: <strong>0 3 * * *</strong> (daily at 3am).]]></comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </schedule>
+                    </fields>
+                </linkrule>
+            </groups>
+        </catalog>
+    </sections>
+</config>

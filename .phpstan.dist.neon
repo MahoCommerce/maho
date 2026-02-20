@@ -3,8 +3,14 @@ includes:
     - vendor/mahocommerce/maho-phpstan-plugin/extension.neon
     - vendor/phpstan/phpstan/conf/bleedingEdge.neon
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
 
 parameters:
+    strictRules:
+        allRules: false
+        matchingInheritedMethodNames: true
+        disallowedBacktick: true
+
     level: 6
     tmpDir: .phpstan.cache
     reportUnmatchedIgnoredErrors: true
@@ -12,11 +18,10 @@ parameters:
     checkInternalClassCaseSensitivity: true
     checkMissingOverrideMethodAttribute: true
     treatPhpDocTypesAsCertain: false
+    reportMaybesInPropertyPhpDocTypes: true
 
-    phpVersion:
-        min: 80300
-        max: 80599
-
+    # Disable strict-rules parameters that aren't controlled by allRules
+    reportMaybesInMethodSignatures: false
     fileExtensions:
         - php
         - phtml

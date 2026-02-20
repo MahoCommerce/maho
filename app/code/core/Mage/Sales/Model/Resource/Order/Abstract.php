@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -134,7 +134,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
             }
 
             if ($this->_eventPrefix && $this->_eventObject) {
-                $proxy = new Varien_Object();
+                $proxy = new \Maho\DataObject();
                 $proxy->setIds($ids)
                     ->setData($this->_eventObject, $this);
 
@@ -310,7 +310,7 @@ abstract class Mage_Sales_Model_Resource_Order_Abstract extends Mage_Sales_Model
             $this->beginTransaction();
             try {
                 $this->_beforeSaveAttribute($object, $attribute);
-                $data = new Varien_Object();
+                $data = new \Maho\DataObject();
                 foreach ($attribute as $code) {
                     $data->setData($code, $object->getData($code));
                 }

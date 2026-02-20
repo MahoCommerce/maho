@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -22,7 +22,7 @@
             <class>separator-top</class>
             <label>Sales</label>
             <tab>sales</tab>
-            <sort_order>300</sort_order>
+            <sort_order>500</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
@@ -249,7 +249,7 @@
         <sales_email translate="label" module="sales">
             <label>Sales Emails</label>
             <tab>sales</tab>
-            <sort_order>301</sort_order>
+            <sort_order>600</sort_order>
             <show_in_default>1</show_in_default>
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>

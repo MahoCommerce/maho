@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,8 +44,7 @@ class Maho_CustomerSegmentation_Block_Adminhtml_Segment_Edit extends Mage_Adminh
         $segment = Mage::registry('current_customer_segment');
         if ($segment && $segment->getId()) {
             return Mage::helper('customersegmentation')->__("Edit Segment '%s'", $this->escapeHtml($segment->getName()));
-        } else {
-            return Mage::helper('customersegmentation')->__('Add Segment');
         }
+        return Mage::helper('customersegmentation')->__('Add Segment');
     }
 }

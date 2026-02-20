@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -43,20 +43,22 @@
     <ul class="note-list">
     <?php foreach ($this->getOrder()->getStatusHistoryCollection(true) as $_item): ?>
         <li>
-            <strong><?= $this->helper('core')->formatDate($_item->getCreatedAtDate(), 'medium') ?></strong>
-            <?= $this->helper('core')->formatTime($_item->getCreatedAtDate(), 'medium') ?><span class="separator">|</span><strong><?= $_item->getStatusLabel() ?></strong><br/><small><?= $this->helper('sales')->__('Customer') ?>
-            <strong class="subdue">
+            <div class="note-header">
+                <span>
+                    <strong><?= $this->helper('core')->formatDate($_item->getCreatedAtDate(), 'medium') ?></strong>
+                    <?= $this->helper('core')->formatTime($_item->getCreatedAtDate(), 'medium') ?>
+                </span>
+                <strong><?= $_item->getStatusLabel() ?></strong>
                 <?php if ($this->isCustomerNotificationNotApplicable($_item)): ?>
-                <?= $this->helper('sales')->__('Notification Not Applicable') ?>
+                <span class="icon" title="<?= $this->helper('sales')->__('Customer Notification Not Applicable') ?>"><?= $this->getIconSvg('message-question') ?></span>
                 <?php elseif ($_item->getIsCustomerNotified()): ?>
-                <?= $this->helper('sales')->__('Notified') ?>
-                <img src="<?= $this->getSkinUrl('images/ico_success.gif') ?>" width="16" height="16" alt="" />
+                <span class="icon" title="<?= $this->helper('sales')->__('Customer Notified') ?>"><?= $this->getIconSvg('message') ?></span>
                 <?php else: ?>
-                <?= $this->helper('sales')->__('Not Notified') ?>
+                <span class="icon" title="<?= $this->helper('sales')->__('Customer Not Notified') ?>"><?= $this->getIconSvg('message-off') ?></span>
                 <?php endif ?>
-            </strong></small>
+            </div>
             <?php if ($_item->getComment()): ?>
-                <br/><?= $this->escapeHtml($_item->getComment(), ['b', 'br', 'strong', 'i', 'u', 'a']) ?>
+                <div><?= $this->escapeHtml($_item->getComment(), ['b', 'br', 'strong', 'i', 'u', 'a']) ?></div>
             <?php endif ?>
         </li>
     <?php endforeach ?>

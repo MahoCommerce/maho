@@ -6,7 +6,7 @@
  * @package    Mage_Sitemap
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -38,7 +38,7 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
      */
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('catalog/factory');
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('catalog/factory') : $args['factory'];
         parent::__construct();
     }
 
@@ -120,11 +120,11 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
     /**
      * Prepare catalog object
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _prepareObject(array $row)
     {
-        $entity = new Varien_Object();
+        $entity = new \Maho\DataObject();
         $entity->setId($row[$this->getIdFieldName()]);
         $entity->setUrl($this->_getEntityUrl($row, $entity));
 
@@ -158,7 +158,7 @@ abstract class Mage_Sitemap_Model_Resource_Catalog_Abstract extends Mage_Core_Mo
      * Retrieve entity url
      *
      * @param array $row
-     * @param Varien_Object $entity
+     * @param \Maho\DataObject $entity
      * @return string
      */
     abstract protected function _getEntityUrl($row, $entity);

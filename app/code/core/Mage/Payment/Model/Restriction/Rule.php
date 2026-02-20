@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Payment
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,15 +62,11 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
             $this->_conditions->setRule($this);
             $this->_conditions->setId('1')->setPrefix('conditions');
 
-            // Try to deserialize conditions from database only when first creating conditions
+            // Decode conditions from database only when first creating conditions
             if ($this->getConditionsSerialized()) {
-                try {
-                    $conditions = unserialize($this->getConditionsSerialized());
-                    if (is_array($conditions) && !empty($conditions)) {
-                        $this->_conditions->loadArray($conditions);
-                    }
-                } catch (Exception $e) {
-                    Mage::logException($e);
+                $conditions = $this->_decodeRuleData($this->getConditionsSerialized(), 'conditions_serialized');
+                if (is_array($conditions) && !empty($conditions)) {
+                    $this->_conditions->loadArray($conditions);
                 }
             }
         }
@@ -113,7 +109,7 @@ class Mage_Payment_Model_Restriction_Rule extends Mage_Rule_Model_Abstract
     }
 
     #[\Override]
-    public function validate(Varien_Object $object): bool
+    public function validate(\Maho\DataObject $object): bool
     {
         return $this->getConditions()->validate($object);
     }

@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_CatalogLinkRule
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <menu>
+        <catalog>
+            <children>
+                <linkrules translate="title" module="cataloglinkrule">
+                    <title>Product Relationship Rules</title>
+                    <sort_order>1</sort_order>
+                    <action>adminhtml/cataloglinkrule_rule</action>
+                </linkrules>
+            </children>
+        </catalog>
+    </menu>
+
+    <acl>
+        <resources>
+            <admin>
+                <children>
+                    <catalog>
+                        <children>
+                            <linkrules translate="title" module="cataloglinkrule">
+                                <title>Product Relationship Rules</title>
+                            </linkrules>
+                        </children>
+                    </catalog>
+                </children>
+            </admin>
+        </resources>
+    </acl>
+</config>

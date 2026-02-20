@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -15,4 +17,5 @@
  *
  * @package    Mage_Customer
  */
+
 class Mage_Customer_Model_Attribute_Data extends Mage_Eav_Model_Attribute_Data {}

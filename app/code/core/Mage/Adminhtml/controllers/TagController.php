@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -155,9 +155,8 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 
                 if (($continue = $this->getRequest()->getParam('continue'))) {
                     return $this->_redirect('*/tag/edit', ['tag_id' => $model->getId(), 'store' => $model->getStoreId(), 'ret' => $continue]);
-                } else {
-                    return $this->_redirect('*/tag/' . $this->getRequest()->getParam('ret', 'index'));
                 }
+                return $this->_redirect('*/tag/' . $this->getRequest()->getParam('ret', 'index'));
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
                 Mage::getSingleton('adminhtml/session')->setTagData($data);

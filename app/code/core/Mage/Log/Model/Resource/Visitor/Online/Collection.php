@@ -6,7 +6,7 @@
  * @package    Mage_Log
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,7 +46,6 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
 
         foreach ($attributes as $alias => $attributeCode) {
             $attribute = $customer->getAttribute($attributeCode);
-            /** @var Mage_Eav_Model_Entity_Attribute_Abstract $attribute */
 
             if ($attribute->getBackendType() == 'static') {
                 $tableAlias = 'customer_' . $attribute->getAttributeCode();
@@ -98,10 +97,10 @@ class Mage_Log_Model_Resource_Visitor_Online_Collection extends Mage_Core_Model_
     /**
      * Add field filter to collection
      * If $attribute is an array will add OR condition with following format:
-     * array(
-     *     array('attribute'=>'firstname', 'like'=>'test%'),
-     *     array('attribute'=>'lastname', 'like'=>'test%'),
-     * )
+     * [
+     *     ['attribute'=>'firstname', 'like'=>'test%'],
+     *     ['attribute'=>'lastname', 'like'=>'test%'],
+     * ]
      *
      * @param string $field
      * @param null|string|array $condition

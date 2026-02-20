@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,7 +91,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/product', 'datetime')
+ * Create table ['catalog/product', 'datetime']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/product', 'datetime']))
@@ -186,7 +186,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/product', 'decimal')
+ * Create table ['catalog/product', 'decimal']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/product', 'decimal']))
@@ -276,7 +276,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/product', 'int')
+ * Create table ['catalog/product', 'int']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/product', 'int']))
@@ -371,7 +371,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/product', 'text')
+ * Create table ['catalog/product', 'text']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/product', 'text']))
@@ -451,7 +451,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/product', 'varchar')
+ * Create table ['catalog/product', 'varchar']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/product', 'varchar']))
@@ -531,7 +531,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/product', 'gallery')
+ * Create table ['catalog/product', 'gallery']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/product', 'gallery']))
@@ -667,7 +667,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/category', 'datetime')
+ * Create table ['catalog/category', 'datetime']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/category', 'datetime']))
@@ -747,7 +747,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/category', 'decimal')
+ * Create table ['catalog/category', 'decimal']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/category', 'decimal']))
@@ -827,7 +827,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/category', 'int')
+ * Create table ['catalog/category', 'int']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/category', 'int']))
@@ -907,7 +907,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/category', 'text')
+ * Create table ['catalog/category', 'text']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/category', 'text']))
@@ -987,7 +987,7 @@ $table = $installer->getConnection()
 $installer->getConnection()->createTable($table);
 
 /**
- * Create table array('catalog/category', 'varchar')
+ * Create table ['catalog/category', 'varchar']
  */
 $table = $installer->getConnection()
     ->newTable($installer->getTable(['catalog/category', 'varchar']))
@@ -1087,8 +1087,6 @@ $table = $installer->getConnection()
         'nullable'  => false,
         'default'   => '0',
     ], 'Position')
-/*    ->addIndex($installer->getIdxName('catalog/category_product', array('category_id')),
-        array('category_id'))*/
     ->addIndex(
         $installer->getIdxName('catalog/category_product', ['product_id']),
         ['product_id'],

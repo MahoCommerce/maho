@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -44,9 +44,8 @@ class Mage_Adminhtml_Block_Sales_Order_View_Giftmessage extends Mage_Adminhtml_B
                 $this->setEntity($order);
             }
             return parent::_beforeToHtml();
-        } else {
-            return parent::_beforeToHtml();
         }
+        return parent::_beforeToHtml();
     }
 
     /**
@@ -87,7 +86,7 @@ class Mage_Adminhtml_Block_Sales_Order_View_Giftmessage extends Mage_Adminhtml_B
      * @param Mage_Sales_Model_Order $entity
      * @return $this
      */
-    public function setEntity(Varien_Object $entity)
+    public function setEntity(\Maho\DataObject $entity)
     {
         $this->_entity  = $entity;
         return $this;

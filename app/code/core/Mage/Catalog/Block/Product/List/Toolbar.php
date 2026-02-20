@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -201,7 +201,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     /**
      * Set collection to pager
      *
-     * @param Varien_Data_Collection $collection
+     * @param \Maho\Data\Collection $collection
      * @return $this
      */
     public function setCollection($collection)
@@ -639,7 +639,8 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
                 return $default;
             }
             return Mage::getStoreConfig('catalog/frontend/list_per_page');
-        } elseif ($this->getCurrentMode() == 'grid') {
+        }
+        if ($this->getCurrentMode() == 'grid') {
             if ($default = $this->getDefaultGridPerPage()) {
                 return $default;
             }
@@ -675,9 +676,8 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         $currentMode = $this->getCurrentMode();
         if (in_array($currentMode, ['list', 'grid'])) {
             return $this->_getAvailableLimit($currentMode);
-        } else {
-            return $this->_defaultAvailableLimit;
         }
+        return $this->_defaultAvailableLimit;
     }
 
     /**
@@ -697,9 +697,8 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
         $perPageValues = array_combine($perPageValues, $perPageValues);
         if (Mage::getStoreConfigFlag('catalog/frontend/list_allow_all')) {
             return ($perPageValues + ['all' => $this->__('All')]);
-        } else {
-            return $perPageValues;
         }
+        return $perPageValues;
     }
 
     /**
@@ -813,7 +812,7 @@ class Mage_Catalog_Block_Product_List_Toolbar extends Mage_Core_Block_Template
     {
         $pagerBlock = $this->getChild('product_list_toolbar_pager');
 
-        if ($pagerBlock instanceof Varien_Object) {
+        if ($pagerBlock instanceof \Maho\DataObject) {
             /** @var Mage_Page_Block_Html_Pager $pagerBlock */
             $pagerBlock->setAvailableLimit($this->getAvailableLimit());
 

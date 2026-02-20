@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,11 +32,12 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     public const XML_PATH_INTERVAL_DIVISION_LIMIT = 'catalog/layered_navigation/interval_division_limit';
 
     /**
-     * Price layered navigation modes: Automatic (equalize price ranges), Automatic (equalize product counts), Manual
+     * Price layered navigation modes: Automatic (equalize price ranges), Automatic (equalize product counts), Manual, Input
      */
     public const RANGE_CALCULATION_AUTO     = 'auto'; // equalize price ranges
     public const RANGE_CALCULATION_IMPROVED = 'improved'; // equalize product counts
     public const RANGE_CALCULATION_MANUAL   = 'manual';
+    public const RANGE_CALCULATION_INPUT    = 'input'; // from-to input fields
 
     /**
      * Minimal size of the range
@@ -159,23 +160,6 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     }
 
     /**
-     * Prepare text of item label
-     *
-     * @deprecated since 1.7.0.0
-     * @param   int $range
-     * @param   float $value
-     * @return  string
-     */
-    protected function _renderItemLabel($range, $value)
-    {
-        $store      = Mage::app()->getStore();
-        $fromPrice  = $store->formatPrice(($value - 1) * $range);
-        $toPrice    = $store->formatPrice($value * $range);
-
-        return Mage::helper('catalog')->__('%s - %s', $fromPrice, $toPrice);
-    }
-
-    /**
      * Prepare text of range label
      *
      * @param float|string $fromPrice
@@ -188,33 +172,14 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
         $formattedFromPrice  = $store->formatPrice($fromPrice);
         if ($toPrice === '') {
             return Mage::helper('catalog')->__('%s and above', $formattedFromPrice);
-        } elseif ($fromPrice == $toPrice && Mage::app()->getStore()->getConfig(self::XML_PATH_ONE_PRICE_INTERVAL)) {
-            return $formattedFromPrice;
-        } else {
-            if ($fromPrice != $toPrice) {
-                $toPrice = (float) $toPrice - .01;
-            }
-            return Mage::helper('catalog')->__('%s - %s', $formattedFromPrice, $store->formatPrice($toPrice));
         }
-    }
-
-    /**
-     * Get price aggreagation data cache key
-     * @deprecated after 1.4
-     * @return string
-     */
-    protected function _getCacheKey()
-    {
-        $key = $this->getLayer()->getStateKey()
-            . '_PRICES_GRP_' . Mage::getSingleton('customer/session')->getCustomerGroupId()
-            . '_CURR_' . Mage::app()->getStore()->getCurrentCurrencyCode()
-            . '_ATTR_' . $this->getAttributeModel()->getAttributeCode()
-            . '_LOC_'
-        ;
-        $taxReq = Mage::getSingleton('tax/calculation')->getDefaultRateRequest();
-        $key .= implode('_', $taxReq->getData());
-
-        return $key;
+        if ($fromPrice == $toPrice && Mage::app()->getStore()->getConfig(self::XML_PATH_ONE_PRICE_INTERVAL)) {
+            return $formattedFromPrice;
+        }
+        if ($fromPrice != $toPrice) {
+            $toPrice = (float) $toPrice - .01;
+        }
+        return sprintf('%s - %s', $formattedFromPrice, $store->formatPrice($toPrice));
     }
 
     /**
@@ -290,7 +255,8 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
     {
         if (Mage::app()->getStore()->getConfig(self::XML_PATH_RANGE_CALCULATION) == self::RANGE_CALCULATION_IMPROVED) {
             return $this->_getCalculatedItemsData();
-        } elseif ($this->getInterval()) {
+        }
+        if ($this->getInterval()) {
             return [];
         }
 
@@ -398,20 +364,6 @@ class Mage_Catalog_Model_Layer_Filter_Price extends Mage_Catalog_Model_Layer_Fil
             $filter,
         ));
 
-        return $this;
-    }
-
-    /**
-     * Apply filter value to product collection based on filter range and selected value
-     *
-     * @deprecated since 1.7.0.0
-     * @param int $range
-     * @param int $index
-     * @return $this
-     */
-    protected function _applyToCollection($range, $index)
-    {
-        $this->_getResource()->applyFilterToCollection($this, $range, $index);
         return $this;
     }
 

@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -201,8 +201,9 @@ describe('Product Viewed Condition Integration Tests', function () {
             expect($sql)->toContain('e.entity_id IN');
             expect($sql)->toContain('report_viewed_product_index');
             expect($sql)->toContain('MAX(rv.added_at)');
-            expect($sql)->toContain('DATEDIFF');
-            expect($sql)->toContain('2025-'); // Verify date is properly formatted
+            // Check for MySQL (DATEDIFF), PostgreSQL (DATE() or ::date), or SQLite (JULIANDAY) syntax
+            expect($sql)->toMatch('/DATEDIFF|::date|DATE\\(|JULIANDAY/');
+            expect($sql)->toMatch('/202[5-9]-/'); // Verify date is properly formatted
             expect($sql)->toContain('GROUP BY');
             expect($sql)->toContain('HAVING');
         });
@@ -452,7 +453,7 @@ function createProductViewedTestSegment(string $name, array $conditions): Maho_C
     $segment->setIsActive(1);
     $segment->setWebsiteIds('1');
     $segment->setCustomerGroupIds('0,1,2,3');
-    $segment->setConditionsSerialized(serialize($conditions));
+    $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
     $segment->setRefreshMode('manual');
     $segment->setRefreshStatus('pending');
     $segment->setPriority(10);

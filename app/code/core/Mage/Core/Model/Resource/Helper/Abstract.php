@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 /**
@@ -160,6 +160,14 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
     abstract public function addLikeEscape($value, $options = []);
 
     /**
+     * Cast a field or expression to text for comparison/concatenation
+     *
+     * @param Maho\Db\Expr|string $field
+     * @return Maho\Db\Expr
+     */
+    abstract public function castField($field);
+
+    /**
      * Returns case insensitive LIKE construction.
      * For options and escaping see escapeLikeValue().
      *
@@ -174,141 +182,5 @@ abstract class Mage_Core_Model_Resource_Helper_Abstract
     {
         $quotedField = $this->_getReadAdapter()->quoteIdentifier($field);
         return new Maho\Db\Expr($quotedField . ' LIKE ' . $this->addLikeEscape($value, $options));
-    }
-
-    /**
-     * Converts old pre-MMDB column definition for MySQL to new cross-db column DDL definition.
-     * Used to convert data from 3rd party extensions that hasn't been updated to MMDB style yet.
-     *
-     * E.g. Converts type 'varchar(255)' to array('type' => Maho\Db\Ddl\Table::TYPE_TEXT, 'length' => 255)
-     *
-     * @param array $column
-     * @return array
-     */
-    public function convertOldColumnDefinition($column)
-    {
-        // Match type and size - e.g. varchar(100) or decimal(12,4) or int
-        $matches    = [];
-        $definition = trim($column['type']);
-        if (!preg_match('/([^(]*)(\\((.*)\\))?/', $definition, $matches)) {
-            throw Mage::exception(
-                'Mage_Core',
-                Mage::helper('core')->__("Wrong old style column type definition: {$definition}."),
-            );
-        }
-
-        $length = null;
-        $proposedLength = (isset($matches[3]) && strlen($matches[3])) ? $matches[3] : null;
-        switch (strtolower($matches[1])) {
-            case 'bool':
-                $length = null;
-                $type = Maho\Db\Ddl\Table::TYPE_BOOLEAN;
-                break;
-            case 'char':
-            case 'varchar':
-            case 'tinytext':
-                $length = $proposedLength;
-                if (!$length) {
-                    $length = 255;
-                }
-                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
-                break;
-            case 'text':
-                $length = $proposedLength;
-                if (!$length) {
-                    $length = '64k';
-                }
-                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
-                break;
-            case 'mediumtext':
-                $length = $proposedLength;
-                if (!$length) {
-                    $length = '16M';
-                }
-                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
-                break;
-            case 'longtext':
-                $length = $proposedLength;
-                if (!$length) {
-                    $length = '4G';
-                }
-                $type = Maho\Db\Ddl\Table::TYPE_TEXT;
-                break;
-            case 'blob':
-                $length = $proposedLength;
-                if (!$length) {
-                    $length = '64k';
-                }
-                $type = Maho\Db\Ddl\Table::TYPE_BLOB;
-                break;
-            case 'mediumblob':
-                $length = $proposedLength;
-                if (!$length) {
-                    $length = '16M';
-                }
-                $type = Maho\Db\Ddl\Table::TYPE_BLOB;
-                break;
-            case 'longblob':
-                $length = $proposedLength;
-                if (!$length) {
-                    $length = '4G';
-                }
-                $type = Maho\Db\Ddl\Table::TYPE_BLOB;
-                break;
-            case 'tinyint':
-            case 'smallint':
-            case 'smallint unsigned':
-                $type = Maho\Db\Ddl\Table::TYPE_SMALLINT;
-                break;
-            case 'mediumint':
-            case 'int':
-                $type = Maho\Db\Ddl\Table::TYPE_INTEGER;
-                break;
-            case 'bigint':
-                $type = Maho\Db\Ddl\Table::TYPE_BIGINT;
-                break;
-            case 'float':
-                $type = Maho\Db\Ddl\Table::TYPE_FLOAT;
-                break;
-            case 'decimal':
-            case 'numeric':
-                $length = $proposedLength;
-                $type = Maho\Db\Ddl\Table::TYPE_DECIMAL;
-                break;
-            case 'datetime':
-                $type = Maho\Db\Ddl\Table::TYPE_DATETIME;
-                break;
-            case 'timestamp':
-            case 'time':
-                $type = Maho\Db\Ddl\Table::TYPE_TIMESTAMP;
-                break;
-            case 'date':
-                $type = Maho\Db\Ddl\Table::TYPE_DATE;
-                break;
-            default:
-                throw Mage::exception(
-                    'Mage_Core',
-                    Mage::helper('core')->__("Unknown old style column type definition: {$definition}."),
-                );
-        }
-
-        $result = [
-            'type'     => $type,
-            'length'   => $length,
-            'unsigned' => $column['unsigned'],
-            'nullable' => $column['is_null'],
-            'default'  => $column['default'],
-            'identity' => !empty($column['extra']) && (stripos($column['extra'], 'auto_increment') !== false),
-        ];
-
-        /**
-         * Process the case when 'is_null' prohibits null value, and 'default' proposed to be null.
-         * It just means that default value not specified, and we must remove it from column definition.
-         */
-        if ($column['is_null'] === false && $column['default'] === null) {
-            unset($result['default']);
-        }
-
-        return $result;
     }
 }

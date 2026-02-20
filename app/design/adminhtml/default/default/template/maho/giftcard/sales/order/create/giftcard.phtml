@@ -1,0 +1,59 @@
+<?php
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_Giftcard
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * @var Maho_Giftcard_Block_Adminhtml_Sales_Order_Create_Giftcard $this
+ */
+
+if (!$this->isEnabled()) {
+    return;
+}
+
+$appliedGiftcards = $this->getAppliedGiftcards();
+$hasGiftcardProducts = $this->hasGiftcardProducts();
+?>
+<div class="entry-edit box-right">
+    <div class="entry-edit-head">
+        <h4 class="icon-head"><?= $this->escapeHtml($this->getHeaderText()) ?></h4>
+    </div>
+    <fieldset class="np">
+        <div class="content">
+            <?php if ($hasGiftcardProducts): ?>
+                <p class="note"><?= Mage::helper('giftcard')->__('Gift cards cannot be used to purchase gift card products.') ?></p>
+            <?php else: ?>
+                <p>
+                    <input type="text" class="input-text" id="giftcard:code" value="" name="giftcard_code" style="width:200px" placeholder="<?= Mage::helper('giftcard')->__('Enter gift card code') ?>" />&nbsp;<?= $this->getButtonHtml(Mage::helper('giftcard')->__('Apply'), 'order.applyGiftcard(document.getElementById(\'giftcard:code\').value)') ?>
+                </p>
+
+                <?php if (!empty($appliedGiftcards)): ?>
+                    <div class="giftcard-applied" style="margin-top: 10px;">
+                        <strong><?= Mage::helper('giftcard')->__('Applied Gift Cards:') ?></strong>
+                        <ul style="list-style: none; padding: 5px 0; margin: 0;">
+                            <?php foreach ($appliedGiftcards as $giftcard): ?>
+                                <li style="padding: 3px 0;">
+                                    <span style="font-family: monospace;"><?= $this->escapeHtml($giftcard['display_code']) ?></span>
+                                    <small style="margin-left: 8px;">
+                                        <?= $giftcard['applied_amount_formatted'] ?> | <?= Mage::helper('giftcard')->__('Balance: %s', $giftcard['balance_formatted']) ?>
+                                    </small>
+                                    <a href="#" onclick="order.removeGiftcard('<?= $this->helper('core')->jsQuoteEscape($giftcard['code']) ?>'); return false;" title="<?= Mage::helper('giftcard')->__('Remove') ?>" style="margin-left: 5px; color: #c00;">[<?= Mage::helper('giftcard')->__('Remove') ?>]</a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <?php if (count($appliedGiftcards) > 1): ?>
+                            <p style="margin-top: 5px;">
+                                <strong><?= Mage::helper('giftcard')->__('Total: %s', $this->getTotalGiftcardAmountFormatted()) ?></strong>
+                            </p>
+                        <?php endif; ?>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
+        </div>
+    </fieldset>
+</div>

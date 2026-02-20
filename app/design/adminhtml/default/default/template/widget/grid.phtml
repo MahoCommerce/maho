@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,11 +16,7 @@ $numColumns = count($this->getColumns());
     <?php if($this->canDisplayContainer()): ?>
         <?php if($this->getGridHeader()): ?>
         <div class="content-header">
-            <table cellspacing="0">
-                <tr>
-                    <td style="width:50%;"><h2><?= $this->getGridHeader() ?></h2></td>
-                </tr>
-            </table>
+            <h2><?= $this->getGridHeader() ?></h2>
         </div>
         <?php endif ?>
 
@@ -38,17 +34,17 @@ $numColumns = count($this->getColumns());
             <?php $_curPage  = $this->getCollection()->getCurPage() ?>
             <?php $_lastPage = $this->getCollection()->getLastPageNumber() ?>
             <?php if($_curPage>1): ?>
-                <a href="#" title="<?= $this->quoteEscape($this->__('Previous page')) ?>" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage-1) ?>');return false;"><img src="<?= $this->getSkinUrl('images/pager_arrow_left.gif') ?>" alt="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>" class="arrow"/></a>
+                <a href="#" title="<?= $this->quoteEscape($this->__('Previous page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage-1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-left') ?></a>
             <?php else: ?>
-                <img src="<?= $this->getSkinUrl('images/pager_arrow_left_off.gif') ?>" alt="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>" class="arrow"/>
+                <span class="pager-arrow disabled" aria-label="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>"><?= $this->getIconSvg('circle-arrow-left') ?></span>
             <?php endif ?>
 
             <input type="text" name="<?= $this->getVarNamePage() ?>" value="<?= $_curPage ?>" class="input-text page" onkeypress="<?= $this->getJsObjectName() ?>.inputPage(event, '<?= $_lastPage ?>')"/>
 
             <?php if($_curPage < $_lastPage): ?>
-                <a href="#" title="<?= $this->quoteEscape($this->__('Next page')) ?>" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage+1) ?>');return false;"><img src="<?= $this->getSkinUrl('images/pager_arrow_right.gif') ?>" alt="<?= $this->quoteEscape($this->__('Go to Next page')) ?>" class="arrow"/></a>
+                <a href="#" title="<?= $this->quoteEscape($this->__('Next page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage+1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-right') ?></a>
             <?php else: ?>
-                <img src="<?= $this->getSkinUrl('images/pager_arrow_right_off.gif') ?>" alt="<?= $this->quoteEscape($this->__('Go to Next page')) ?>" class="arrow"/>
+                <span class="pager-arrow disabled" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>"><?= $this->getIconSvg('circle-arrow-right') ?></span>
             <?php endif ?>
 
             <?= $this->__('of %s pages', $this->getCollection()->getLastPageNumber()) ?>

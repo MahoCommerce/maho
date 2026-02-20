@@ -6,7 +6,7 @@
  * @package    Mage_Wishlist
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -52,41 +52,6 @@ class Mage_Wishlist_Block_Customer_Sidebar extends Mage_Wishlist_Block_Abstract
         }
 
         return '';
-    }
-
-    /**
-     * Can Display wishlist
-     *
-     * @deprecated after 1.6.2.0
-     * @return bool
-     */
-    public function getCanDisplayWishlist()
-    {
-        return $this->_getCustomerSession()->isLoggedIn();
-    }
-
-    /**
-     * Retrieve URL for removing item from wishlist
-     *
-     * @deprecated back compatibility alias for getItemRemoveUrl
-     * @param  Mage_Wishlist_Model_Item $item
-     * @return string
-     */
-    public function getRemoveItemUrl($item)
-    {
-        return $this->getItemRemoveUrl($item);
-    }
-
-    /**
-     * Retrieve URL for adding product to shopping cart and remove item from wishlist
-     *
-     * @deprecated
-     * @param  Mage_Catalog_Model_Product|Mage_Wishlist_Model_Item $product
-     * @return string
-     */
-    public function getAddToCartItemUrl($product)
-    {
-        return $this->getItemAddToCartUrl($product);
     }
 
     /**

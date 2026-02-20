@@ -6,7 +6,7 @@
  * @package    Mage_Admin
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -111,9 +111,8 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
             ];
 
             return $adapter->fetchAll($select, $binds);
-        } else {
-            return null;
         }
+        return null;
     }
 
     /**
@@ -208,10 +207,10 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
                 if ($rid > 0) {
                     $role = Mage::getModel('admin/role')->load($rid);
                 } else {
-                    $role = new Varien_Object(['tree_level' => 0]);
+                    $role = new \Maho\DataObject(['tree_level' => 0]);
                 }
 
-                $data = new Varien_Object([
+                $data = new \Maho\DataObject([
                     'parent_id'  => $rid,
                     'tree_level' => $role->getTreeLevel() + 1,
                     'sort_order' => 0,
@@ -296,10 +295,10 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         if ($user->getId() > 0) {
             $role = Mage::getModel('admin/role')->load($user->getRoleId());
         } else {
-            $role = new Varien_Object(['tree_level' => 0]);
+            $role = new \Maho\DataObject(['tree_level' => 0]);
         }
 
-        $data = new Varien_Object([
+        $data = new \Maho\DataObject([
             'parent_id'  => $user->getRoleId(),
             'tree_level' => $role->getTreeLevel() + 1,
             'sort_order' => 0,
@@ -366,9 +365,8 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
                 ->where('user_id = :user_id');
 
             return $dbh->fetchCol($select, $binds);
-        } else {
-            return [];
         }
+        return [];
     }
 
     /**

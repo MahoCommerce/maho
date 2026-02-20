@@ -9,7 +9,7 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Reports_Model_Config extends Varien_Object
+class Mage_Reports_Model_Config extends \Maho\DataObject
 {
     /**
      * @return string

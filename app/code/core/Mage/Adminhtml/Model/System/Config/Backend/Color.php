@@ -35,10 +35,10 @@ class Mage_Adminhtml_Model_System_Config_Backend_Color extends Mage_Core_Model_C
         }
 
         if ($withHash) {
-            $regex = Varien_Data_Form_Element_Color::VALIDATION_REGEX_WITH_HASH;
+            $regex = \Maho\Data\Form\Element\Color::VALIDATION_REGEX_WITH_HASH;
             $errorMessage = 'Color must be in hexadecimal format with the hash character';
         } else {
-            $regex = Varien_Data_Form_Element_Color::VALIDATION_REGEX_WITHOUT_HASH;
+            $regex = \Maho\Data\Form\Element\Color::VALIDATION_REGEX_WITHOUT_HASH;
             $errorMessage = 'Color must be in hexadecimal format without the hash character';
         }
 

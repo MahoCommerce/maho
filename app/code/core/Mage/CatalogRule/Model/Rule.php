@@ -6,7 +6,7 @@
  * @package    Mage_CatalogRule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -122,9 +122,9 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
      */
     public function __construct(array $args = [])
     {
-        $this->_factory = !empty($args['factory']) ? $args['factory'] : Mage::getSingleton('core/factory');
-        $this->_config  = !empty($args['config']) ? $args['config'] : Mage::getConfig();
-        $this->_app     = !empty($args['app']) ? $args['app'] : Mage::app();
+        $this->_factory = empty($args['factory']) ? Mage::getSingleton('core/factory') : $args['factory'];
+        $this->_config  = empty($args['config']) ? Mage::getConfig() : $args['config'];
+        $this->_app     = empty($args['app']) ? Mage::app() : $args['app'];
 
         parent::__construct();
     }
@@ -332,7 +332,7 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
         $this->_invalidateCache();
 
         Mage::getSingleton('index/indexer')->processEntityAction(
-            new Varien_Object(['id' => $product->getId()]),
+            new \Maho\DataObject(['id' => $product->getId()]),
             Mage_Catalog_Model_Product::ENTITY,
             Mage_Catalog_Model_Product_Indexer_Price::EVENT_TYPE_REINDEX_PRICE,
         );
@@ -389,9 +389,8 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
                     }
                 }
                 return self::$_priceRulesData[$cacheKey] = $priceRules;
-            } else {
-                self::$_priceRulesData[$cacheKey] = null;
             }
+            self::$_priceRulesData[$cacheKey] = null;
         } else {
             return self::$_priceRulesData[$cacheKey];
         }
@@ -431,41 +430,6 @@ class Mage_CatalogRule_Model_Rule extends Mage_Rule_Model_Abstract
             $this->_app->getCache()->invalidateType(array_keys($types));
         }
         return $this;
-    }
-
-    /**
-     * @deprecated after 1.11.2.0
-     *
-     * @param string $format
-     *
-     * @return string
-     */
-    #[\Override]
-    public function toString($format = '')
-    {
-        return '';
-    }
-
-    /**
-     * Returns rule as an array for admin interface
-     *
-     * @deprecated after 1.11.2.0
-     *
-     * @param array $arrAttributes
-     *
-     * Output example:
-     * array(
-     *   'name'=>'Example rule',
-     *   'conditions'=>{condition_combine::toArray}
-     *   'actions'=>{action_collection::toArray}
-     * )
-     *
-     * @return array
-     */
-    #[\Override]
-    public function toArray(array $arrAttributes = [])
-    {
-        return parent::toArray($arrAttributes);
     }
 
     /**

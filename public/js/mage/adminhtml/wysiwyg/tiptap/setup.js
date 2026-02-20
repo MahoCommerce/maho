@@ -2,7 +2,7 @@
  * Maho
  *
  * @package     Mage_Adminhtml
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -204,9 +204,18 @@ class tiptapWysiwygSetup {
         const tableBubbleMenu = this.createTableBubbleMenu();
         this.wrapper.appendChild(tableBubbleMenu);
 
+        // Create columns bubble menu
+        const columnsBubbleMenu = this.createColumnsBubbleMenu();
+        this.wrapper.appendChild(columnsBubbleMenu);
+
+        // Create bento grid bubble menu
+        const bentoBubbleMenu = this.createBentoBubbleMenu();
+        this.wrapper.appendChild(bentoBubbleMenu);
+
         // Create container for Tiptap editor content
         const container = document.createElement('div');
         container.id = `${this.id}_editor`;
+        container.className = 'tiptap-content';
         this.wrapper.appendChild(container);
 
         // Insert wrapper after textarea
@@ -258,13 +267,13 @@ class tiptapWysiwygSetup {
                         variable_target_id: this.id,
                     }),
                 }),
-                TiptapModules.MahoSlideshow.configure({
+                ...(this.config.add_slideshows !== false ? [TiptapModules.MahoSlideshow.configure({
                     directivesUrl: this.config.directives_url,
                     browserUrl: setRouteParams(this.config.files_browser_window_url, {
                         store: this.storeId,
                         filetype: 'image',
                     }),
-                }),
+                })] : []),
                 TiptapModules.Table.configure({
                     resizable: true
                 }),
@@ -272,8 +281,9 @@ class tiptapWysiwygSetup {
                 TiptapModules.TableCell,
                 TiptapModules.TableHeader,
                 TiptapModules.TextAlign.configure({
-                    types: ['heading', 'paragraph'],
+                    types: ['heading', 'paragraph', 'tableCell', 'tableHeader'],
                 }),
+                TiptapModules.VerticalAlign,
                 TiptapModules.BubbleMenu.configure({
                     element: tableBubbleMenu,
                     shouldShow: ({ editor, view, state, oldState }) => {
@@ -285,7 +295,24 @@ class tiptapWysiwygSetup {
                     },
                 }),
                 TiptapModules.MahoDiv,
+                TiptapModules.MahoColumns.configure({
+                    // Store bubble menu reference for NodeView to access
+                    bubbleMenu: columnsBubbleMenu,
+                }),
+                TiptapModules.MahoColumn,
+                TiptapModules.MahoBentoGrid.configure({
+                    bubbleMenu: bentoBubbleMenu,
+                }),
+                TiptapModules.MahoBentoCell,
                 TiptapModules.MahoFullscreen,
+                TiptapModules.DragHandle.configure({
+                    render: () => {
+                        const el = document.createElement('div');
+                        el.classList.add('tiptap-drag-handle');
+                        el.innerHTML = this.getIcon('drag-handle');
+                        return el;
+                    },
+                }),
             ],
             onTransaction: ({ editor }) => {
                 if (editor.isInitialized) {
@@ -370,8 +397,44 @@ class tiptapWysiwygSetup {
             { type: 'separator'},
             { type: 'button', title: 'Link', icon: 'link', onClick: this.linkHandler.bind(this) },
             { type: 'button', title: 'Insert Table', icon: 'table', command: 'insertTable', args: [{rows:3, cols:3, withHeaderRow:true}] },
+            {
+                type: 'dropdown',
+                title: 'Columns',
+                icon: 'columns-2',
+                showTitle: false,
+                showChevron: false,
+                items: [
+                    { title: '2 Columns', icon: 'columns-2', command: 'insertColumns', args: ['2-equal'] },
+                    { title: '3 Columns', icon: 'columns-3', command: 'insertColumns', args: ['3-equal'] },
+                    { title: '4 Columns', icon: 'columns-4', command: 'insertColumns', args: ['4-equal'] },
+                    { title: 'Sidebar Left', icon: 'columns-sidebar-left', command: 'insertColumns', args: ['sidebar-left'] },
+                    { title: 'Sidebar Right', icon: 'columns-sidebar-right', command: 'insertColumns', args: ['sidebar-right'] },
+                    { title: 'Wide Center', icon: 'columns-wide-center', command: 'insertColumns', args: ['wide-center'] },
+                ],
+            },
+            {
+                type: 'dropdown',
+                title: 'Bento Grid',
+                icon: 'bento-grid',
+                showTitle: false,
+                showChevron: false,
+                items: [
+                    { title: 'Hero + 2 Cards', icon: 'bento-hero-2', command: 'insertBentoGrid', args: ['hero-2'] },
+                    { title: 'Feature Left', icon: 'bento-feature-left', command: 'insertBentoGrid', args: ['feature-left'] },
+                    { title: 'Feature Right', icon: 'bento-feature-right', command: 'insertBentoGrid', args: ['feature-right'] },
+                    { title: 'Hero + 3 Cards', icon: 'bento-hero-3', command: 'insertBentoGrid', args: ['hero-3'] },
+                    { title: 'Dashboard', icon: 'bento-dashboard', command: 'insertBentoGrid', args: ['dashboard'] },
+                    { title: 'Magazine', icon: 'bento-magazine', command: 'insertBentoGrid', args: ['magazine'] },
+                    { title: 'Showcase', icon: 'bento-showcase', command: 'insertBentoGrid', args: ['showcase'] },
+                    { title: 'Mosaic', icon: 'bento-mosaic', command: 'insertBentoGrid', args: ['mosaic'] },
+                    { title: 'Hero + 4 Cards', icon: 'bento-hero-4', command: 'insertBentoGrid', args: ['hero-4'] },
+                    { title: 'Gallery', icon: 'bento-gallery', command: 'insertBentoGrid', args: ['gallery'] },
+                    { title: 'Editorial', icon: 'bento-editorial', command: 'insertBentoGrid', args: ['editorial'] },
+                    { title: 'Banner + Cards', icon: 'bento-banner-cards', command: 'insertBentoGrid', args: ['banner-cards'] },
+                ],
+            },
             { type: 'button', title: 'Insert Image', icon: 'image', command: 'insertMahoImage', enabled: this.config.add_images },
-            { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images },
+            { type: 'button', title: 'Insert Slideshow', icon: 'slideshow', command: 'insertMahoSlideshow', enabled: this.config.add_images && this.config.add_slideshows !== false },
             { type: 'button', title: 'Insert Widget', icon: 'widget', command: 'insertMahoWidget', enabled: this.config.add_widgets },
             { type: 'button', title: 'Insert Variable', icon: 'variable', command: 'insertMahoVariable', enabled: this.config.add_variables},
             { type: 'spacer' },
@@ -385,25 +448,98 @@ class tiptapWysiwygSetup {
 
     createTableBubbleMenu() {
         const bubbleMenu = this.createToolbar([
-            { type: 'button', title: 'Add Column Before', command: 'addColumnBefore', icon: 'column-insert-left' },
-            { type: 'button', title: 'Add Column After', command: 'addColumnAfter', icon: 'column-insert-right' },
-            { type: 'button', title: 'Delete Column', command: 'deleteColumn', icon: 'column-remove' },
-            { type: 'separator'},
-            { type: 'button', title: 'Add Row Before', command: 'addRowBefore', icon: 'row-insert-top' },
-            { type: 'button', title: 'Add Row After', command: 'addRowAfter', icon: 'row-insert-bottom' },
-            { type: 'button', title: 'Delete Row', command: 'deleteRow', icon: 'row-remove' },
-            { type: 'separator'},
-            { type: 'button', title: 'Merge Cells', command: 'mergeCells', icon: 'arrows-join' },
-            { type: 'button', title: 'Split Cell', command: 'splitCell', icon: 'arrows-split' },
-            { type: 'separator'},
-            { type: 'button', title: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: 'table-column' },
-            { type: 'button', title: 'Toggle Header Row', command: 'toggleHeaderRow', icon: 'table-row' },
-            { type: 'separator'},
+            {
+                type: 'dropdown',
+                title: 'Columns',
+                icon: 'columns',
+                items: [
+                    { title: 'Add Column Before', command: 'addColumnBefore', icon: 'column-insert-left' },
+                    { title: 'Add Column After', command: 'addColumnAfter', icon: 'column-insert-right' },
+                    { title: 'Delete Column', command: 'deleteColumn', icon: 'column-remove' },
+                ],
+            },
+            {
+                type: 'dropdown',
+                title: 'Rows',
+                icon: 'rows',
+                items: [
+                    { title: 'Add Row Before', command: 'addRowBefore', icon: 'row-insert-top' },
+                    { title: 'Add Row After', command: 'addRowAfter', icon: 'row-insert-bottom' },
+                    { title: 'Delete Row', command: 'deleteRow', icon: 'row-remove' },
+                ],
+            },
+            {
+                type: 'dropdown',
+                title: 'Alignment',
+                icon: 'align-center',
+                items: [
+                    { title: 'Align Left', command: 'setTextAlign', args: ['left'], icon: 'align-left' },
+                    { title: 'Align Center', command: 'setTextAlign', args: ['center'], icon: 'align-center' },
+                    { title: 'Align Right', command: 'setTextAlign', args: ['right'], icon: 'align-right' },
+                    { title: 'Align Top', command: 'setVerticalAlign', args: ['top'], icon: 'valign-top' },
+                    { title: 'Align Middle', command: 'setVerticalAlign', args: ['middle'], icon: 'valign-middle' },
+                    { title: 'Align Bottom', command: 'setVerticalAlign', args: ['bottom'], icon: 'valign-bottom' },
+                ],
+            },
+            {
+                type: 'dropdown',
+                title: 'Cells',
+                icon: 'cells',
+                items: [
+                    { title: 'Merge Cells', command: 'mergeCells', icon: 'arrows-join' },
+                    { title: 'Split Cell', command: 'splitCell', icon: 'arrows-split' },
+                    { title: 'Toggle Header Column', command: 'toggleHeaderColumn', icon: 'table-column' },
+                    { title: 'Toggle Header Row', command: 'toggleHeaderRow', icon: 'table-row' },
+                ],
+            },
             { type: 'button', title: 'Delete Table', command: 'deleteTable', icon: 'trash' },
         ]);
 
         bubbleMenu.id = `${this.id}_table_bubble_menu`;
         bubbleMenu.className = 'tiptap-bubble-menu';
+        return bubbleMenu;
+    }
+
+    createColumnsBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'label', text: 'Gap:' },
+            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setColumnsGap', args: ['none'], dataGap: 'none' },
+            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setColumnsGap', args: ['small'], dataGap: 'small' },
+            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setColumnsGap', args: ['medium'], dataGap: 'medium' },
+            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setColumnsGap', args: ['large'], dataGap: 'large' },
+            { type: 'separator' },
+            { type: 'label', text: 'Style:' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setColumnsStyle', args: ['none'], dataGridStyle: 'none' },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setColumnsStyle', args: ['cards'], dataGridStyle: 'cards' },
+            { type: 'button', title: 'Separated', icon: 'style-separated', command: 'setColumnsStyle', args: ['separated'], dataGridStyle: 'separated' },
+            { type: 'separator' },
+            { type: 'button', title: 'Delete Columns', icon: 'trash', command: 'deleteColumns' },
+        ]);
+
+        bubbleMenu.id = `${this.id}_columns_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
+        return bubbleMenu;
+    }
+
+    createBentoBubbleMenu() {
+        const bubbleMenu = this.createToolbar([
+            { type: 'label', text: 'Gap:' },
+            { type: 'button', title: 'No Gap', icon: 'gap-none', command: 'setBentoGap', args: ['none'], dataGap: 'none' },
+            { type: 'button', title: 'Small', icon: 'gap-small', command: 'setBentoGap', args: ['small'], dataGap: 'small' },
+            { type: 'button', title: 'Medium', icon: 'gap-medium', command: 'setBentoGap', args: ['medium'], dataGap: 'medium' },
+            { type: 'button', title: 'Large', icon: 'gap-large', command: 'setBentoGap', args: ['large'], dataGap: 'large' },
+            { type: 'separator' },
+            { type: 'label', text: 'Style:' },
+            { type: 'button', title: 'None', icon: 'style-none', command: 'setBentoStyle', args: ['none'], dataGridStyle: 'none' },
+            { type: 'button', title: 'Cards', icon: 'style-cards', command: 'setBentoStyle', args: ['cards'], dataGridStyle: 'cards' },
+            { type: 'separator' },
+            { type: 'button', title: 'Delete Bento Grid', icon: 'trash', command: 'deleteBentoGrid' },
+        ]);
+
+        bubbleMenu.id = `${this.id}_bento_bubble_menu`;
+        bubbleMenu.className = 'tiptap-bubble-menu';
+        bubbleMenu.style.display = 'none';
         return bubbleMenu;
     }
 
@@ -431,6 +567,12 @@ class tiptapWysiwygSetup {
                 toolbar.append(spacer);
                 group = addGroup();
             }
+            else if (item.type === 'label') {
+                const label = document.createElement('span');
+                label.className = 'toolbar-label';
+                label.textContent = this.translate(item.text);
+                group.append(label);
+            }
             else if (item.type === 'select') {
                 const select = document.createElement('select');
                 for (const option of item.options) {
@@ -441,6 +583,64 @@ class tiptapWysiwygSetup {
                     select.addEventListener('change', item.onChange);
                 }
                 group.append(select);
+            }
+            else if (item.type === 'dropdown') {
+                const dropdown = document.createElement('div');
+                dropdown.className = 'toolbar-dropdown';
+
+                const toggle = document.createElement('button');
+                toggle.type = 'button';
+                const isIconOnly = item.showTitle === false && item.showChevron === false;
+                toggle.className = 'toolbar-dropdown-toggle' + (isIconOnly ? ' icon-only' : '');
+                toggle.title = this.translate(item.title ?? '');
+                const titleHtml = item.showTitle !== false ? `<span>${this.translate(item.title ?? '')}</span>` : '';
+                const chevronHtml = item.showChevron !== false ? this.getIcon('chevron-down') : '';
+                toggle.innerHTML = this.getIcon(item.icon) + titleHtml + chevronHtml;
+                dropdown.append(toggle);
+
+                const menu = document.createElement('div');
+                menu.className = 'toolbar-dropdown-menu';
+
+                for (const menuItem of item.items) {
+                    const menuButton = document.createElement('button');
+                    menuButton.type = 'button';
+                    menuButton.innerHTML = this.getIcon(menuItem.icon) + `<span>${this.translate(menuItem.title)}</span>`;
+
+                    if (typeof menuItem.onClick === 'function') {
+                        menuButton.addEventListener('click', () => {
+                            menuItem.onClick();
+                            dropdown.classList.remove('is-open');
+                        });
+                    } else if (menuItem.command) {
+                        const args = Array.isArray(menuItem.args) ? menuItem.args : [];
+                        menuButton.addEventListener('click', () => {
+                            this.editor.chain().focus()[menuItem.command](...args).run();
+                            dropdown.classList.remove('is-open');
+                        });
+                    }
+                    menu.append(menuButton);
+                }
+
+                dropdown.append(menu);
+
+                // Toggle dropdown on click
+                toggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // Close other open dropdowns
+                    for (const other of toolbar.querySelectorAll('.toolbar-dropdown.is-open')) {
+                        if (other !== dropdown) {
+                            other.classList.remove('is-open');
+                        }
+                    }
+                    dropdown.classList.toggle('is-open');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', () => {
+                    dropdown.classList.remove('is-open');
+                });
+
+                group.append(dropdown);
             }
             else if (item.type === 'button') {
                 const button = document.createElement('button');
@@ -458,6 +658,12 @@ class tiptapWysiwygSetup {
                     });
                     button.dataset.command = item.command;
                     button.dataset.args = JSON.stringify(item.args);
+                }
+                if (item.dataGap) {
+                    button.dataset.gap = item.dataGap;
+                }
+                if (item.dataGridStyle) {
+                    button.dataset.gridStyle = item.dataGridStyle;
                 }
                 group.append(button);
             }
@@ -549,6 +755,11 @@ class tiptapWysiwygSetup {
         'align-center': '<path d="M4 6l16 0"/><path d="M8 12l8 0"/><path d="M6 18l12 0"/>',
         'align-right': '<path d="M4 6l16 0"/><path d="M10 12l10 0"/><path d="M6 18l14 0"/>',
 
+        // Vertical alignment icons
+        'valign-top': '<path d="M4 4h16"/><path d="M12 8v12"/><path d="M8 12l4 -4l4 4"/>',
+        'valign-middle': '<path d="M12 4v6"/><path d="M12 14v6"/><path d="M8 8l4 4l4 -4"/><path d="M8 16l4 -4l4 4"/>',
+        'valign-bottom': '<path d="M4 20h16"/><path d="M12 4v12"/><path d="M8 12l4 4l4 -4"/>',
+
         // Insert icons
         'link': '<path d="M9 15l6 -6"/><path d="M11 6l.463 -.536a5 5 0 0 1 7.071 7.072l-.534 .464"/><path d="M13 18l-.397 .534a5.068 5.068 0 0 1 -7.127 0a4.972 4.972 0 0 1 0 -7.071l.524 -.463"/>',
         'image': '<path d="M15 8h.01"/><path d="M3 6a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3h-12a3 3 0 0 1 -3 -3v-12z"/><path d="M3 16l5 -5c.928 -.893 2.072 -.893 3 0l5 5"/><path d="M14 14l1 -1c.928 -.893 2.072 -.893 3 0l3 3"/>',
@@ -575,6 +786,54 @@ class tiptapWysiwygSetup {
         'hamburger': '<path d="M4 6l16 0"></path><path d="M4 12l16 0"></path><path d="M4 18l16 0"></path>',
         'fullscreen-maximize': '<path d="M16 4l4 0l0 4"/><path d="M14 10l6 -6"/><path d="M8 20l-4 0l0 -4"/><path d="M4 20l6 -6"/><path d="M16 20l4 0l0 -4"/><path d="M14 14l6 6"/><path d="M8 4l-4 0l0 4"/><path d="M4 4l6 6"/>',
         'fullscreen-minimize': '<path d="M5 9l4 0l0 -4"/><path d="M3 3l6 6"/><path d="M5 15l4 0l0 4"/><path d="M3 21l6 -6"/><path d="M19 9l-4 0l0 -4"/><path d="M15 9l6 -6"/><path d="M19 15l-4 0l0 4"/><path d="M15 15l6 6"/>',
+        'drag-handle': '<path d="M9 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M9 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 5m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 12m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/><path d="M15 19m-1 0a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"/>',
+
+        // Dropdown icons
+        'chevron-down': '<path d="M6 9l6 6l6 -6"/>',
+        'columns': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4v16"/>',
+        'rows': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M4 12h16"/>',
+        'cells': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M4 10h16"/><path d="M10 4v16"/><path d="M4 16h16"/>',
+
+        // Column layout icons
+        'layout-columns': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4v16"/>',
+        'columns-2': '<path d="M4 4m0 2a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2z"/><path d="M12 4v16"/>',
+        'columns-3': '<rect x="1" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="9" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="17" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="none"/>',
+        'columns-4': '<rect x="1" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="6.5" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="12" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="17.5" y="3" width="4" height="18" rx="1" stroke="currentColor" fill="none"/>',
+        'columns-sidebar-left': '<rect x="2" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="10" y="3" width="12" height="18" rx="1" stroke="currentColor" fill="none"/>',
+        'columns-sidebar-right': '<rect x="2" y="3" width="12" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="3" width="6" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'columns-wide-center': '<rect x="1" y="3" width="5" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="8" y="3" width="8" height="18" rx="1" stroke="currentColor" fill="none"/><rect x="18" y="3" width="5" height="18" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+
+        // Gap icons
+        'gap-none': '<rect x="3" y="4" width="8" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="13" y="4" width="8" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+        'gap-small': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+        'gap-medium': '<rect x="3" y="4" width="6" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="15" y="4" width="6" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+        'gap-large': '<rect x="3" y="4" width="5" height="16" rx="1" fill="currentColor" opacity="0.3"/><rect x="16" y="4" width="5" height="16" rx="1" fill="currentColor" opacity="0.3"/>',
+
+        // Style icons
+        'style-none': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-dasharray="2 2"/>',
+        'style-cards': '<rect x="3" y="4" width="18" height="16" rx="2" fill="none" stroke="currentColor"/>',
+        'style-separated': '<rect x="3" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><rect x="14" y="4" width="7" height="16" rx="1" fill="currentColor" opacity="0.15"/><path d="M12 4v16" stroke="currentColor" stroke-width="1"/>',
+
+        // Bento grid icon (toolbar button)
+        'bento-grid': '<rect x="2" y="2" width="20" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.1"/><rect x="2" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="13" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/>',
+
+        // Bento preset icons (2-column)
+        'bento-hero-2': '<rect x="2" y="2" width="20" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="2" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="13" y="14" width="9" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-feature-left': '<rect x="2" y="2" width="12" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16" y="2" width="6" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="13" width="6" height="9" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-feature-right': '<rect x="2" y="2" width="6" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="10" y="2" width="12" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="2" y="13" width="6" height="9" rx="1" stroke="currentColor" fill="none"/>',
+
+        // Bento preset icons (3-column)
+        'bento-hero-3': '<rect x="2" y="2" width="20" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="2" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="9.5" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-dashboard': '<rect x="2" y="2" width="13" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16.5" y="2" width="5.5" height="10" rx="1" stroke="currentColor" fill="none"/><rect x="2" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="9.5" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="16" y="14" width="6" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-magazine': '<rect x="2" y="2" width="13" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16.5" y="2" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="16.5" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-showcase': '<rect x="2" y="2" width="13" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="16.5" y="2" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="2" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="9" y="13" width="13" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'bento-mosaic': '<rect x="2" y="2" width="6" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="9.5" y="2" width="12.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="9.5" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="16.5" y="13" width="5.5" height="9" rx="1" stroke="currentColor" fill="none"/>',
+
+        // Bento preset icons (4-column)
+        'bento-hero-4': '<rect x="1" y="2" width="22" height="10" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="1" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="7" y="14" width="4" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="12.5" y="14" width="5" height="8" rx="1" stroke="currentColor" fill="none"/><rect x="18.5" y="14" width="4.5" height="8" rx="1" stroke="currentColor" fill="none"/>',
+        'bento-gallery': '<rect x="1" y="2" width="10.5" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="13" y="2" width="4.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="19" y="2" width="4" height="20" rx="1" stroke="currentColor" fill="none"/><rect x="1" y="13" width="4.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="7" y="13" width="10.5" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'bento-editorial': '<rect x="1" y="2" width="5" height="20" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="7.5" y="2" width="9.5" height="9" rx="1" stroke="currentColor" fill="none"/><rect x="18.5" y="2" width="4.5" height="20" rx="1" stroke="currentColor" fill="none"/><rect x="7.5" y="13" width="9.5" height="9" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/>',
+        'bento-banner-cards': '<rect x="1" y="1" width="22" height="7" rx="1" stroke="currentColor" fill="currentColor" fill-opacity="0.15"/><rect x="1" y="10" width="10.5" height="6" rx="1" stroke="currentColor" fill="none"/><rect x="12.5" y="10" width="10.5" height="6" rx="1" stroke="currentColor" fill="none"/><rect x="1" y="18" width="5" height="5" rx="1" stroke="currentColor" fill="none"/><rect x="7.5" y="18" width="9.5" height="5" rx="1" stroke="currentColor" fill="none"/><rect x="18.5" y="18" width="4.5" height="5" rx="1" stroke="currentColor" fill="none"/>',
     };
 }
 

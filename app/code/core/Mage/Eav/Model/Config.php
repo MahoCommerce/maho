@@ -6,7 +6,7 @@
  * @package    Mage_Eav
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -142,10 +142,11 @@ class Mage_Eav_Model_Config
             return;
         }
 
-        \Maho\Profiler::start('eav.config.initialize_store');
+        \Maho\Profiler::start('EAV: ' . __METHOD__);
 
         if ($this->_isCacheEnabled() && $this->_loadFromCache($storeId)) {
             $this->_storeInitialized[$storeId] = true;
+            \Maho\Profiler::stop('EAV: ' . __METHOD__);
             return;
         }
 
@@ -168,7 +169,7 @@ class Mage_Eav_Model_Config
 
         $this->_storeInitialized[$storeId] = true;
 
-        \Maho\Profiler::stop('eav.config.initialize_store');
+        \Maho\Profiler::stop('EAV: ' . __METHOD__);
     }
 
     /**
@@ -265,14 +266,14 @@ class Mage_Eav_Model_Config
      */
     protected function _loadFromCache($storeId)
     {
-        \Maho\Profiler::start('eav.config.load_from_cache');
+        \Maho\Profiler::start('EAV: ' . __METHOD__);
 
         $cacheData = Mage::app()->loadCache(self::ENTITIES_CACHE_ID . '_' . $storeId);
         if ($cacheData === false) {
-            \Maho\Profiler::stop('eav.config.load_from_cache');
+            \Maho\Profiler::stop('EAV: ' . __METHOD__);
             return false;
         }
-        $cacheData = unserialize($cacheData);
+        $cacheData = unserialize($cacheData, ['allowed_classes' => false]);
 
         $this->_entityTypes = [];
         $this->_entityTypeByCode = [];
@@ -299,7 +300,7 @@ class Mage_Eav_Model_Config
 
         $this->_attributeSetInfo = $cacheData['_attributeSetInfo'];
 
-        \Maho\Profiler::stop('eav.config.load_from_cache');
+        \Maho\Profiler::stop('EAV: ' . __METHOD__);
         return true;
     }
 
@@ -404,18 +405,16 @@ class Mage_Eav_Model_Config
         if (empty($field) && is_numeric($code)) {
             if (isset($this->_entityTypes[$code])) {
                 return $this->_entityTypes[$code];
-            } else {
-                Mage::throwException('Invalid entity type: ' . $code);
             }
+            Mage::throwException('Invalid entity type: ' . $code);
         }
 
         // lookup by code
         if (empty($field) || $field == 'entity_type_code') {
             if (isset($this->_entityTypeByCode[$code])) {
                 return $this->_entityTypeByCode[$code];
-            } else {
-                Mage::throwException('Invalid entity type: ' . $code);
             }
+            Mage::throwException('Invalid entity type: ' . $code);
         }
 
         // lookup by other field
@@ -477,6 +476,10 @@ class Mage_Eav_Model_Config
             return $code;
         }
 
+        if ($code === null) {
+            return false;
+        }
+
         $storeId ??= $this->_storeId();
         $this->_initializeStore($storeId);
         $entityType = $this->getEntityType($entityType);
@@ -515,7 +518,7 @@ class Mage_Eav_Model_Config
      */
     public function getAttributes($entityType)
     {
-        \Maho\Profiler::start('eav.config.get_attributes');
+        \Maho\Profiler::start('EAV: ' . __METHOD__);
 
         $entityType = $this->getEntityType($entityType);
         $attributes = [];
@@ -525,7 +528,7 @@ class Mage_Eav_Model_Config
             $attributes[] = $this->getAttribute($entityType, $attributeId, $storeId);
         }
 
-        \Maho\Profiler::stop('eav.config.get_attributes');
+        \Maho\Profiler::stop('EAV: ' . __METHOD__);
 
         return $attributes;
     }
@@ -534,7 +537,7 @@ class Mage_Eav_Model_Config
      * Get codes of all entity type attributes
      *
      * @param Mage_Eav_Model_Entity_Type $entityType
-     * @param Varien_Object $object
+     * @param \Maho\DataObject $object
      * @return array
      * @throws Mage_Core_Exception
      * @throws Exception
@@ -543,14 +546,14 @@ class Mage_Eav_Model_Config
     {
         $entityType = $this->getEntityType($entityType);
         $attributeSetId = 0;
-        if (($object instanceof Varien_Object) && $object->getAttributeSetId()) {
+        if (($object instanceof \Maho\DataObject) && $object->getAttributeSetId()) {
             $attributeSetId = $object->getAttributeSetId();
         }
 
         // Technically store id is irrelevant for attribute sets, they are the same in all store scopes.
         // Use current store id when not specified to avoid loading two store-scope attribute data sets from cache
         $storeId = $this->_storeId();
-        if (($object instanceof Varien_Object) && $object->getStoreId()) {
+        if (($object instanceof \Maho\DataObject) && $object->getStoreId()) {
             $storeId = $object->getStoreId();
         }
         $this->_initializeStore($storeId);
@@ -567,11 +570,10 @@ class Mage_Eav_Model_Config
                 }
             }
             return $attributeCodes;
-        } else {
-            return isset($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
-                ? array_keys($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
-                : [];
         }
+        return isset($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
+            ? array_keys($this->_entityTypeAttributeIdByCode[$storeId][$entityType->getId()])
+            : [];
     }
 
     /**
@@ -616,40 +618,5 @@ class Mage_Eav_Model_Config
         }
 
         return false;
-    }
-
-    /**
-     * @param mixed $entityType
-     * @param string $attribute
-     * @return  Mage_Eav_Model_Entity_Attribute_Abstract|null
-     * @throws Mage_Core_Exception
-     * @deprecated Equivalent to getAttribute(...), use getAttribute(...) instead
-     * Get attribute object for collection usage
-     */
-    public function getCollectionAttribute($entityType, $attribute)
-    {
-        return $this->getAttribute($entityType, $attribute);
-    }
-
-    /**
-     * @param mixed $entityType
-     * @param array $attributes
-     * @return  Mage_Eav_Model_Config
-     * @deprecated No longer required to preload only collection attributes explicitly
-     * Prepare attributes for usage in EAV collection
-     */
-    public function loadCollectionAttributes($entityType, $attributes)
-    {
-        return $this;
-    }
-
-    /**
-     * @param string|Mage_Eav_Model_Entity_Type $entityType
-     * @return $this
-     * @deprecated No longer required. All attribute data is cached on-access.
-     */
-    public function importAttributesData($entityType, array $attributes)
-    {
-        return $this;
     }
 }

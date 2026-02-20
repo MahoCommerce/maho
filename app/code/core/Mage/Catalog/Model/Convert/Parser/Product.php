@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -77,21 +77,6 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
                 $this->_imageFields[] = $code;
             }
         }
-    }
-
-    /**
-     * @return Mage_Catalog_Model_Mysql4_Convert
-     */
-    public function getResource()
-    {
-        if (!$this->_resource) {
-            $this->_resource = Mage::getResourceSingleton('catalog_entity/convert');
-            #->loadStores()
-            #->loadProducts()
-            #->loadAttributeSets()
-            #->loadAttributeOptions();
-        }
-        return $this->_resource;
     }
 
     /**
@@ -175,7 +160,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
             } catch (Exception $e) {
                 $this->addException(
                     Mage::helper('catalog')->__('Invalid store specified'),
-                    Varien_Convert_Exception::FATAL,
+                    \Maho\Convert\Exception::FATAL,
                 );
                 throw $e;
             }
@@ -268,7 +253,7 @@ class Mage_Catalog_Model_Convert_Parser_Product extends Mage_Eav_Model_Convert_P
 
                 // try to get entity_id by sku if not set
                 if (empty($row['entity_id'])) {
-                    $row['entity_id'] = $this->getResource()->getProductIdBySku($row['sku']);
+                    $row['entity_id'] = Mage::getModel('catalog/product')->getIdBySku($row['sku']);
                 }
 
                 // if attribute_set not set use default

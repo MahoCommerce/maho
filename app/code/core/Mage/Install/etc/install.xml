@@ -6,38 +6,43 @@
  * @package    Mage_Install
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
 <config>
     <wizard>
         <steps>
-            <begin translate="code">
+            <license translate="code">
                 <code>License</code>
                 <controller>wizard</controller>
-                <action>begin</action>
-            </begin>
+                <action>license</action>
+            </license>
             <locale translate="code">
                 <code>Locale</code>
                 <controller>wizard</controller>
                 <action>locale</action>
             </locale>
-            <config translate="code">
-                <code>Config</code>
+            <configuration translate="code">
+                <code>Configuration</code>
                 <controller>wizard</controller>
-                <action>config</action>
-            </config>
+                <action>configuration</action>
+            </configuration>
+            <sampledata translate="code">
+                <code>Sample Data</code>
+                <controller>wizard</controller>
+                <action>sampledata</action>
+            </sampledata>
             <administrator translate="code">
-                <code>Admin</code>
+                <code>Administrator</code>
                 <controller>wizard</controller>
                 <action>administrator</action>
             </administrator>
-            <end translate="code">
+            <complete translate="code">
                 <code>Complete</code>
                 <controller>wizard</controller>
-                <action>end</action>
-            </end>
+                <action>complete</action>
+            </complete>
         </steps>
     </wizard>
     <check>

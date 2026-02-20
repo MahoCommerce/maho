@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -34,7 +34,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
      */
     public function loadGallery($product, $object)
     {
-        $eventObjectWrapper = new Varien_Object(
+        $eventObjectWrapper = new \Maho\DataObject(
             [
                 'product' => $product,
                 'backend_attribute' => $object,
@@ -91,7 +91,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
     public function insertGallery($data)
     {
         $adapter = $this->_getWriteAdapter();
-        $data    = $this->_prepareDataForTable(new Varien_Object($data), $this->getMainTable());
+        $data    = $this->_prepareDataForTable(new \Maho\DataObject($data), $this->getMainTable());
         $adapter->insert($this->getMainTable(), $data);
 
         return $adapter->lastInsertId($this->getMainTable());
@@ -125,7 +125,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
      */
     public function insertGalleryValueInStore($data)
     {
-        $data = $this->_prepareDataForTable(new Varien_Object($data), $this->getTable(self::GALLERY_VALUE_TABLE));
+        $data = $this->_prepareDataForTable(new \Maho\DataObject($data), $this->getTable(self::GALLERY_VALUE_TABLE));
         $this->_getWriteAdapter()->insert($this->getTable(self::GALLERY_VALUE_TABLE), $data);
 
         return $this;
@@ -233,7 +233,7 @@ class Mage_Catalog_Model_Resource_Product_Attribute_Backend_Media extends Mage_C
             )
             ->where('main.attribute_id = ?', $attributeId)
             ->where('main.entity_id in (?)', $productIds)
-            ->order($positionCheckSql . ' ' . Maho\Db\Select::SQL_ASC);
+            ->order(new Maho\Db\Expr($positionCheckSql . ' ' . Maho\Db\Select::SQL_ASC));
     }
 
     /**

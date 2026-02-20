@@ -6,14 +6,14 @@
  * @package    Mage_Page
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
  * Top menu block item renderer
  *
- * @method Varien_Data_Tree_Node getMenuTree()
+ * @method \Maho\Data\Tree\Node getMenuTree()
  * @method string getChildrenWrapClass()
  */
 class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
@@ -60,7 +60,7 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
      * @param string $childrenWrapClass
      * @return string
      */
-    public function render(Varien_Data_Tree_Node $menuTree, $childrenWrapClass)
+    public function render(\Maho\Data\Tree\Node $menuTree, $childrenWrapClass)
     {
         ob_start();
         $html = include $this->_templateFile;
@@ -68,8 +68,7 @@ class Mage_Page_Block_Html_Topmenu_Renderer extends Mage_Page_Block_Html_Topmenu
 
         if (is_string($html)) {
             return $html;
-        } else {
-            return $directOutput;
         }
+        return $directOutput;
     }
 }

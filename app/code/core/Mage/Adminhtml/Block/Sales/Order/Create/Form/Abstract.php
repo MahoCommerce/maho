@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,13 +15,13 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
     /**
      * Data Form object
      *
-     * @var Varien_Data_Form|null
+     * @var \Maho\Data\Form|null
      */
     protected $_form;
 
     /**
      * Prepare global layout
-     * Add renderers to Varien_Data_Form
+     * Add renderers to \Maho\Data\Form
      *
      * @return Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract
      */
@@ -31,18 +31,18 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
         parent::_prepareLayout();
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_element');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setElementRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setElementRenderer($renderer);
         }
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_fieldset');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setFieldsetRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setFieldsetRenderer($renderer);
         }
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_fieldset_element');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setFieldsetElementRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setFieldsetElementRenderer($renderer);
         }
 
         return $this;
@@ -51,12 +51,12 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
     /**
      * Return Form object
      *
-     * @return Varien_Data_Form
+     * @return \Maho\Data\Form
      */
     public function getForm()
     {
         if (is_null($this->_form)) {
-            $this->_form = new Varien_Data_Form();
+            $this->_form = new \Maho\Data\Form();
             $this->_prepareForm();
         }
 
@@ -101,7 +101,7 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
      *
      * @return Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract
      */
-    protected function _addAdditionalFormElementData(Varien_Data_Form_Element_Abstract $element)
+    protected function _addAdditionalFormElementData(\Maho\Data\Form\Element\AbstractElement $element)
     {
         return $this;
     }
@@ -109,10 +109,10 @@ abstract class Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract extends Mag
     /**
      * Add rendering EAV attributes to Form element
      *
-     * @param array|Varien_Data_Collection $attributes
+     * @param array|\Maho\Data\Collection $attributes
      * @return Mage_Adminhtml_Block_Sales_Order_Create_Form_Abstract
      */
-    protected function _addAttributesToForm($attributes, Varien_Data_Form_Abstract $form)
+    protected function _addAttributesToForm($attributes, \Maho\Data\Form\AbstractForm $form)
     {
         // add additional form types
         $types = $this->_getAdditionalFormElementTypes();

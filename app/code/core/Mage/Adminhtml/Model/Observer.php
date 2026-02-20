@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -54,10 +54,10 @@ class Mage_Adminhtml_Model_Observer
     /**
      * Set the admin's session lifetime based on config
      */
-    public function setCookieLifetime(Varien_Event_Observer $observer): void
+    public function setCookieLifetime(\Maho\Event\Observer $observer): void
     {
         if ($observer->getSessionName() === Mage_Adminhtml_Controller_Action::SESSION_NAMESPACE) {
-            /** @var Mage_Core_Model_Session $session */
+            /** @var Mage_Adminhtml_Model_Session $session */
             $session = Mage::getSingleton('adminhtml/session');
 
             $lifetime = Mage::getStoreConfigAsInt('admin/security/session_cookie_lifetime');

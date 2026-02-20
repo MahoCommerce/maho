@@ -1,0 +1,71 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
+ * @copyright   Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/**
+ * Install mysql database configuration template
+ *
+ * @var Mage_Install_Block_Configuration $this
+ */
+?>
+<li>
+    <label for="mysql_host"><?= $this->__('Host') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_host]"
+           id="mysql_host"
+           value="<?= $this->getFormData()->getDbHost() ?>"
+           title="<?= $this->quoteEscape($this->__('Database host')) ?>"
+           class="input-text"
+           required>
+    <p class="field-note">
+        <?= $this->__('You can specify server port, ex.: localhost:3307<br>If you are not using default UNIX socket, you can specify it here instead of host, ex.: /var/run/mysqld/mysqld.sock') ?>
+    </p>
+</li>
+<li>
+    <label for="mysql_dbname"><?= $this->__('Database Name') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_name]"
+           id="mysql_dbname"
+           value="<?= $this->getFormData()->getDbName() ?>"
+           title="<?= $this->quoteEscape($this->__('Database Name')) ?>"
+           class="input-text"
+           required>
+</li>
+<li>
+    <label for="mysql_user"><?= $this->__('User Name') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_user]"
+           id="mysql_user"
+           value="<?= $this->getFormData()->getDbUser() ?>"
+           title="<?= $this->quoteEscape($this->__('Database user name')) ?>"
+           class="input-text"
+           required>
+</li>
+<li>
+    <label for="mysql_password"><?= $this->__('User Password') ?></label>
+    <input type="password"
+           name="connection[<?= $this->getIdPrefix() ?>][db_pass]"
+           id="mysql_password"
+           value=""
+           title="<?= $this->quoteEscape($this->__('Database user password')) ?>"
+           class="input-text">
+</li>
+<li>
+    <label for="mysql_prefix"><?= $this->__('Tables Prefix') ?></label>
+    <input type="text"
+           name="connection[<?= $this->getIdPrefix() ?>][db_prefix]"
+           id="mysql_prefix"
+           value="<?= $this->getFormData()->getDbPrefix() ?>"
+           title="<?= $this->quoteEscape($this->__('Tables Prefix')) ?>"
+           class="input-text">
+    <p class="field-note">
+        <?= $this->__('(Optional. Leave blank for no prefix)') ?>
+    </p>
+</li>

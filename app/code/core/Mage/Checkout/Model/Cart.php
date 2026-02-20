@@ -6,11 +6,11 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Model_Cart_Interface
+class Mage_Checkout_Model_Cart extends \Maho\DataObject implements Mage_Checkout_Model_Cart_Interface
 {
     /**
      * Shopping cart items summary quantity(s)
@@ -154,7 +154,7 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
             }
 
             $info = $orderItem->getProductOptionByCode('info_buyRequest');
-            $info = new Varien_Object($info);
+            $info = new \Maho\DataObject($info);
             if (is_null($qtyFlag)) {
                 $info->setQty($orderItem->getQtyOrdered());
             } else {
@@ -197,16 +197,16 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
      * Get request for product add to cart procedure
      *
      * @param   mixed $requestInfo
-     * @return  Varien_Object
+     * @return \Maho\DataObject
      */
     protected function _getProductRequest($requestInfo)
     {
-        if ($requestInfo instanceof Varien_Object) {
+        if ($requestInfo instanceof \Maho\DataObject) {
             $request = $requestInfo;
         } elseif (is_numeric($requestInfo)) {
-            $request = new Varien_Object(['qty' => $requestInfo]);
+            $request = new \Maho\DataObject(['qty' => $requestInfo]);
         } else {
-            $request = new Varien_Object($requestInfo);
+            $request = new \Maho\DataObject($requestInfo);
         }
 
         return $request;
@@ -537,12 +537,12 @@ class Mage_Checkout_Model_Cart extends Varien_Object implements Mage_Checkout_Mo
 
     /**
      * Update item in shopping cart (quote)
-     * $requestInfo - either qty (int) or buyRequest in form of array or Varien_Object
+     * $requestInfo - either qty (int) or buyRequest in form of array or \Maho\DataObject
      * $updatingParams - information on how to perform update, passed to Quote->updateItem() method
      *
      * @param int $itemId
-     * @param int|array|Varien_Object $requestInfo
-     * @param null|array|Varien_Object $updatingParams
+     * @param int|array|\Maho\DataObject $requestInfo
+     * @param null|array|\Maho\DataObject $updatingParams
      * @return Mage_Sales_Model_Quote_Item|string
      *
      * @see Mage_Sales_Model_Quote::updateItem()

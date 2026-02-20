@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -9,4 +11,4 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-class Mage_Weee_Block_Element_Weee_Tax extends Varien_Data_Form_Element_Abstract {}
+class Mage_Weee_Block_Element_Weee_Tax extends \Maho\Data\Form\Element\AbstractElement {}

@@ -6,7 +6,7 @@
  * @package    Mage_Api
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -135,7 +135,7 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
                 $mixed = get_object_vars($mixed);
                 /*
                  * Processing an associative arrays.
-                 * $mixed->key = '2'; $mixed->value = '3'; turns to array(2 => '3');
+                 * $mixed->key = '2'; $mixed->value = '3'; turns to [2 => '3'];
                  */
                 $mixed = [$mixed['key'] => $mixed['value']];
             }
@@ -235,7 +235,7 @@ class Mage_Api_Helper_Data extends Mage_Core_Helper_Abstract
      * Parse filters and format them to be applicable for collection filtration
      *
      * @param null|object|array $filters
-     * @param array $fieldsMap Map of field names in format: array('field_name_in_filter' => 'field_name_in_db')
+     * @param array $fieldsMap Map of field names in format: ['field_name_in_filter' => 'field_name_in_db']
      * @return array
      */
     public function parseFilters($filters, $fieldsMap = null)

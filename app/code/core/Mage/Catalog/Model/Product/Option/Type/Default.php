@@ -6,21 +6,22 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 /**
- * @method $this setConfigurationItemOption(Varien_Object $value)
+ * @method $this setConfigurationItemOption(\Maho\DataObject $value)
  * @method bool getIsValid()
  * @method $this setIsValid(bool $value)
  * @method string getProcessMode()
  * @method $this setProcessMode(string $value)
  * @method $this setQuoteItem(Mage_Sales_Model_Quote_Item $value)
  * @method array|int getUserValue()
- * @method $this setRequest(Varien_Object $value)
+ * @method $this setRequest(\Maho\DataObject $value)
  * @method $this setUserValue(array|int $value)
  */
-class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
+class Mage_Catalog_Model_Product_Option_Type_Default extends \Maho\DataObject
 {
     /**
      * Option Instance
@@ -118,18 +119,6 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
     }
 
     /**
-     * Getter for Quote Item Option
-     * Deprecated in favor of getConfigurationItemOption()
-     *
-     * @return Mage_Catalog_Model_Product_Configuration_Item_Option_Interface
-     * @deprecated after 1.4.2.0
-     */
-    public function getQuoteItemOption()
-    {
-        return $this->getConfigurationItemOption();
-    }
-
-    /**
      * Getter for Configuration Item
      *
      * @return Mage_Catalog_Model_Product_Configuration_Item_Interface
@@ -149,25 +138,13 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
     }
 
     /**
-     * Getter for Quote Item
-     * Deprecated in favor of getConfigurationItem()
-     *
-     * @return Mage_Catalog_Model_Product_Configuration_Item_Interface
-     * @deprecated after 1.4.2.0
-     */
-    public function getQuoteItem()
-    {
-        return $this->getConfigurationItem();
-    }
-
-    /**
      * Getter for Buy Request
      *
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function getRequest()
     {
-        if ($this->_getData('request') instanceof Varien_Object) {
+        if ($this->_getData('request') instanceof \Maho\DataObject) {
             return $this->_getData('request');
         }
         Mage::throwException(Mage::helper('catalog')->__('Wrong BuyRequest instance in options group.'));
@@ -376,8 +353,7 @@ class Mage_Catalog_Model_Product_Option_Type_Default extends Varien_Object
     {
         if ($isPercent) {
             return ($basePrice * $price / 100);
-        } else {
-            return $price;
         }
+        return $price;
     }
 }

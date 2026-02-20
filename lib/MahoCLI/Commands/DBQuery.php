@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    MahoCLI
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -25,6 +25,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class DBQuery extends BaseMahoCommand
 {
+    use DatabaseCliTrait;
+
     #[\Override]
     protected function configure(): void
     {
@@ -40,71 +42,112 @@ class DBQuery extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $host = (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/host');
-        $dbname = (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/dbname');
-        $user = (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/username');
-        $password = (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/password');
+        $connConfig = Mage::getConfig()->getNode('global/resources/default_setup/connection');
+
+        $engine = $this->getEngine($connConfig);
+        $query = $input->getArgument('query');
+
+        return match ($engine) {
+            'mysql' => $this->executeMysql($connConfig, $query),
+            'pgsql' => $this->executePgsql($connConfig, $query),
+            'sqlite' => $this->executeSqlite($connConfig, $query),
+            default => $this->handleUnsupportedEngine($engine),
+        };
+    }
+
+    private function executeMysql(mixed $connConfig, string $query): int
+    {
+        $host = (string) $connConfig->host;
+        $dbname = (string) $connConfig->dbname;
+        $user = (string) $connConfig->username;
+        $password = (string) $connConfig->password;
 
         $configFile = $this->createTempMySQLConfig($host, $user, $password);
 
-        $query = $input->getArgument('query');
-        $mysqlCommand = sprintf(
+        $command = sprintf(
             'mysql --defaults-extra-file=%s %s -e %s',
             escapeshellarg($configFile),
             escapeshellarg($dbname),
             escapeshellarg($query),
         );
 
+        return $this->runCommand($command);
+    }
+
+    private function executePgsql(mixed $connConfig, string $query): int
+    {
+        $host = (string) $connConfig->host;
+        $dbname = (string) $connConfig->dbname;
+        $user = (string) $connConfig->username;
+        $password = (string) $connConfig->password;
+        $port = empty($connConfig->port) ? '5432' : (string) $connConfig->port;
+
+        $configFile = $this->createTempPgpassFile($host, $port, $dbname, $user, $password);
+
+        $command = sprintf(
+            'PGPASSFILE=%s psql -h %s -p %s -U %s -d %s -c %s',
+            escapeshellarg($configFile),
+            escapeshellarg($host),
+            escapeshellarg($port),
+            escapeshellarg($user),
+            escapeshellarg($dbname),
+            escapeshellarg($query),
+        );
+
+        return $this->runCommand($command);
+    }
+
+    private function executeSqlite(mixed $connConfig, string $query): int
+    {
+        $dbPath = BP . DS . 'var' . DS . 'db' . DS . (string) $connConfig->dbname;
+
+        $command = sprintf(
+            'sqlite3 -header -column %s %s',
+            escapeshellarg($dbPath),
+            escapeshellarg($query),
+        );
+
+        return $this->runCommand($command);
+    }
+
+    private function handleUnsupportedEngine(string $engine): int
+    {
+        fwrite(STDERR, "Unsupported database engine: {$engine}\n");
+        return Command::FAILURE;
+    }
+
+    private function runCommand(string $command): int
+    {
         $descriptorspec = [
             0 => STDIN,
             1 => STDOUT,
             2 => ['pipe', 'w'],
         ];
 
-        $process = proc_open($mysqlCommand, $descriptorspec, $pipes);
+        $process = proc_open($command, $descriptorspec, $pipes);
         if (is_resource($process)) {
-            // Set error pipe to non-blocking mode
             stream_set_blocking($pipes[2], false);
 
-            // Transfer control to the MySQL client
             while (true) {
                 $status = proc_get_status($process);
                 if (!$status['running']) {
                     break;
                 }
-                usleep(100000); // Sleep for 0.1 seconds
+                usleep(100000);
             }
 
+            $stderr = stream_get_contents($pipes[2]);
             fclose($pipes[2]);
-            proc_close($process);
 
-            return Command::SUCCESS;
+            $exitCode = proc_close($process);
+
+            if ($exitCode !== 0 && $stderr) {
+                fwrite(STDERR, $stderr);
+            }
+
+            return $exitCode === 0 ? Command::SUCCESS : Command::FAILURE;
         }
 
-        unlink($configFile);
         return Command::FAILURE;
-    }
-
-    /**
-     * @return string Path to the temporary file
-     */
-    private function createTempMySQLConfig(#[\SensitiveParameter] string $host, #[\SensitiveParameter] string $user, #[\SensitiveParameter] string $password): string
-    {
-        $configContent = "[client]\nhost=\"$host\"\nuser=\"$user\"\npassword=\"$password\"\n";
-        $configFile = tempnam(sys_get_temp_dir(), '.maho_temp_config_');
-        chmod($configFile, 0600);
-        file_put_contents($configFile, $configContent);
-
-        $this->scheduleFileDeletion($configFile);
-
-        return $configFile;
-    }
-
-    private function scheduleFileDeletion(string $filename): void
-    {
-        exec(sprintf(
-            '(sleep 1 && rm -f %s) > /dev/null 2>&1 &',
-            escapeshellarg($filename),
-        ));
     }
 }

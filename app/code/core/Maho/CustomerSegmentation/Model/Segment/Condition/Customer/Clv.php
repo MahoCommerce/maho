@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -158,13 +158,12 @@ class Maho_CustomerSegmentation_Model_Segment_Condition_Customer_Clv extends Mah
         // Standard condition building
         $clvSelect = $adapter->select()
             ->from(['clv' => new Maho\Db\Expr("({$select})")], ['customer_id'])
-            ->where($this->buildSqlCondition($adapter, 'clv.total', $operator, $value));
+            ->where($this->buildSqlCondition($adapter, 'clv.total', $operator, $this->prepareNumericValue($value)));
 
         if ($requireValid) {
             return $adapter->quoteInto("{$fieldName} IN (?)", new Maho\Db\Expr((string) $clvSelect));
-        } else {
-            return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $clvSelect));
         }
+        return $adapter->quoteInto("{$fieldName} NOT IN (?) OR {$fieldName} IS NULL", new Maho\Db\Expr((string) $clvSelect));
     }
 
     #[\Override]

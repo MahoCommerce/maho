@@ -5,10 +5,10 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @package    Maho_Db
+ * @package    MahoLib
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -62,6 +62,11 @@ interface AdapterInterface
     public function rollBack(): self;
 
     /**
+     * Get the underlying Doctrine DBAL Connection
+     */
+    public function getConnection(): \Doctrine\DBAL\Connection;
+
+    /**
      * Retrieve DDL object for new table
      *
      * @param string|null $tableName the table name
@@ -74,14 +79,14 @@ interface AdapterInterface
      *
      * @throws \Maho\Db\Exception
      */
-    public function createTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql;
+    public function createTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Create temporary table from DDL object
      *
      * @throws \Maho\Db\Exception
      */
-    public function createTemporaryTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\Pdo\Mysql;
+    public function createTemporaryTable(\Maho\Db\Ddl\Table $table): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Drop table from database
@@ -200,12 +205,12 @@ interface AdapterInterface
      *
      * @param string|array $fields  the table column name or array of ones
      */
-    public function addIndex(string $tableName, string $indexName, string|array $fields, string $indexType = self::INDEX_TYPE_INDEX, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql;
+    public function addIndex(string $tableName, string $indexName, string|array $fields, string $indexType = self::INDEX_TYPE_INDEX, ?string $schemaName = null): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Drop the index from table
      */
-    public function dropIndex(string $tableName, string $keyName, ?string $schemaName = null): bool|\Maho\Db\Statement\Pdo\Mysql;
+    public function dropIndex(string $tableName, string $keyName, ?string $schemaName = null): bool|\Maho\Db\Statement\StatementInterface;
 
     /**
      * Returns the table index information
@@ -353,7 +358,7 @@ interface AdapterInterface
      *                      May be a string or \Maho\Db\Select.
      * @param  array|int|string|float  $bind An array of data or data itself to bind to the placeholders.
      */
-    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\Pdo\Mysql;
+    public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Executes a SQL statement(s)
@@ -610,6 +615,18 @@ interface AdapterInterface
     public function getIfNullSql(string $expression, string|int $value = '0'): \Maho\Db\Expr;
 
     /**
+     * Generate fragment of SQL for rounding a numeric value to specified precision.
+     * Handles database-specific ROUND function requirements.
+     */
+    public function getRoundSql(string $expression, int $precision = 0): \Maho\Db\Expr;
+
+    /**
+     * Generate fragment of SQL to cast a value to text/varchar for comparison.
+     * This is useful for comparing integer columns with varchar columns.
+     */
+    public function getCastToTextSql(string $expression): \Maho\Db\Expr;
+
+    /**
      * Generate fragment of SQL, that combine together (concatenate) the results from data array
      * All arguments in data must be quoted
      *
@@ -705,6 +722,30 @@ interface AdapterInterface
      * @param \Maho\Db\Expr|string $date   quoted field name or SQL statement
      */
     public function getDateExtractSql(\Maho\Db\Expr|string $date, string $unit): \Maho\Db\Expr;
+
+    /**
+     * Get difference between two dates in days
+     *
+     * @param \Maho\Db\Expr|string $date1 First date (quoted field name or SQL statement)
+     * @param \Maho\Db\Expr|string $date2 Second date (quoted field name or SQL statement)
+     * @return \Maho\Db\Expr SQL expression that returns (date1 - date2) in days
+     */
+    public function getDateDiffSql(\Maho\Db\Expr|string $date1, \Maho\Db\Expr|string $date2): \Maho\Db\Expr;
+
+    /**
+     * Get SQL expression for days until next annual occurrence of a date
+     *
+     * This calculates the number of days from a reference date until the next
+     * occurrence of an anniversary (e.g., birthday). Handles:
+     * - Dates where the year is in the future (returns days to that date in current year)
+     * - Dates where the anniversary has passed this year (returns days to next year)
+     * - Leap year birthdays (Feb 29) in non-leap years (uses Feb 28)
+     *
+     * @param \Maho\Db\Expr|string $dateField The date field containing the anniversary (e.g., birth date)
+     * @param string $referenceDate The reference date in 'Y-m-d' or 'Y-m-d H:i:s' format (usually today)
+     * @return \Maho\Db\Expr SQL expression that returns days until next anniversary
+     */
+    public function getDaysUntilAnniversarySql(\Maho\Db\Expr|string $dateField, string $referenceDate): \Maho\Db\Expr;
 
     /**
      * Retrieve valid table name
@@ -822,7 +863,7 @@ interface AdapterInterface
     /**
      * Change table auto increment value
      */
-    public function changeTableAutoIncrement(string $tableName, string $increment, ?string $schemaName = null): \Maho\Db\Statement\Pdo\Mysql;
+    public function changeTableAutoIncrement(string $tableName, int $increment, ?string $schemaName = null): \Maho\Db\Statement\StatementInterface;
 
     /**
      * Create new table from provided select statement
@@ -831,6 +872,8 @@ interface AdapterInterface
 
     /**
      * Retrieve the list of all tables in the database
+     *
+     * @return string[] List of table names
      */
     public function listTables(?string $schemaName = null): array;
 
@@ -843,4 +886,112 @@ interface AdapterInterface
      * Retrieve last inserted ID
      */
     public function lastInsertId(?string $tableName = null, ?string $primaryKey = null): string|int;
+
+    /**
+     * Acquire a named lock
+     *
+     * @param string $lockName The name of the lock
+     * @param int $timeout Timeout in seconds to wait for the lock
+     * @return bool True if lock was acquired, false otherwise
+     */
+    public function getLock(string $lockName, int $timeout = 0): bool;
+
+    /**
+     * Release a named lock
+     *
+     * @param string $lockName The name of the lock
+     * @return bool True if lock was released, false otherwise
+     */
+    public function releaseLock(string $lockName): bool;
+
+    /**
+     * Check if a named lock is currently held
+     *
+     * @param string $lockName The name of the lock
+     * @return bool True if lock is held, false otherwise
+     */
+    public function isLocked(string $lockName): bool;
+
+    /**
+     * Get SQL expression for timestamp difference in seconds
+     *
+     * Returns the difference between two timestamps in seconds (end - start).
+     * This is database-agnostic and handles the syntax differences between MySQL and PostgreSQL.
+     *
+     * @param string $startTimestamp The start timestamp column or expression
+     * @param string $endTimestamp The end timestamp column or expression
+     */
+    public function getTimestampDiffExpr(string $startTimestamp, string $endTimestamp): \Maho\Db\Expr;
+
+    /**
+     * Get SQL expression for concatenating grouped values
+     *
+     * Returns a SQL expression that concatenates values from grouped rows.
+     * This is database-agnostic and handles the syntax differences between MySQL (GROUP_CONCAT)
+     * and PostgreSQL (STRING_AGG).
+     *
+     * @param string $expression The column or expression to concatenate
+     * @param string $separator The separator to use between values (default: ',')
+     */
+    public function getGroupConcatExpr(string $expression, string $separator = ','): \Maho\Db\Expr;
+
+    /**
+     * Get SQL expression for FIND_IN_SET functionality
+     *
+     * Returns a SQL expression that checks if a value exists in a comma-separated list.
+     * This is database-agnostic and handles the syntax differences between MySQL (FIND_IN_SET)
+     * and PostgreSQL (ANY with string_to_array).
+     *
+     * @param string $needle The value to search for (can be a ? placeholder)
+     * @param string $haystack The column containing comma-separated values
+     */
+    public function getFindInSetExpr(string $needle, string $haystack): \Maho\Db\Expr;
+
+    /**
+     * Generate a database-agnostic Unix timestamp expression
+     *
+     * MySQL: UNIX_TIMESTAMP($timestamp) or UNIX_TIMESTAMP() for current time
+     * PostgreSQL: EXTRACT(EPOCH FROM $timestamp)::bigint
+     *
+     * @param string|null $timestamp Optional timestamp expression (defaults to current time)
+     */
+    public function getUnixTimestampExpr(?string $timestamp = null): \Maho\Db\Expr;
+
+    /**
+     * Extract a scalar value from a JSON column at a given path
+     *
+     * Returns a SQL expression that extracts and unquotes a value from JSON data.
+     * The path uses MySQL/SQLite dot notation (e.g., '$.name', '$.address.city').
+     * Platform adapters translate this internally for their native syntax.
+     *
+     * @param string $column The column name containing JSON data
+     * @param string $path The JSON path (e.g., '$.name', '$.address.city')
+     */
+    public function getJsonExtractExpr(string $column, string $path): \Maho\Db\Expr;
+
+    /**
+     * Search for a string value within a JSON column
+     *
+     * Returns a boolean SQL expression that checks if a value exists at the given path.
+     * Supports '$**' recursive wildcard for deep search (e.g., '$**.attribute').
+     * The value parameter is a plain PHP string — quoting is handled internally.
+     *
+     * @param string $column The column name containing JSON data
+     * @param string $value The string value to search for
+     * @param string $path The JSON path, supports '$**' recursive wildcard
+     */
+    public function getJsonSearchExpr(string $column, string $value, string $path): \Maho\Db\Expr;
+
+    /**
+     * Check if a JSON column contains a specific JSON value
+     *
+     * Returns a boolean SQL expression. The value parameter must be a JSON-encoded
+     * string (e.g., '"hello"', '42', 'true'). Optional path scopes the check.
+     * Wildcard paths ('$**') are not supported — use getJsonSearchExpr() instead.
+     *
+     * @param string $column The column name containing JSON data
+     * @param string $value A JSON-encoded value (e.g., '"hello"', '42')
+     * @param string|null $path Optional JSON path to scope the check
+     */
+    public function getJsonContainsExpr(string $column, string $value, ?string $path = null): \Maho\Db\Expr;
 }

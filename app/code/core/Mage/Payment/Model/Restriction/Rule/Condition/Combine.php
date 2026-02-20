@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    Mage_Payment
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -13,7 +13,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
     /**
      * Fallback form instance
      */
-    protected ?Varien_Data_Form $_form = null;
+    protected ?\Maho\Data\Form $_form = null;
 
     public function __construct()
     {
@@ -79,7 +79,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
             ],
         ]);
 
-        $additional = new Varien_Object();
+        $additional = new \Maho\DataObject();
         Mage::dispatchEvent('payment_restriction_rule_condition_combine', ['additional' => $additional]);
         if ($additionalConditions = $additional->getConditions()) {
             $conditions = array_merge_recursive($conditions, $additionalConditions);
@@ -116,7 +116,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Combine extends Mage_Rule_Mo
 
         // Fallback: create a basic form if rule is not available
         if (!$this->_form) {
-            $this->_form = new Varien_Data_Form();
+            $this->_form = new \Maho\Data\Form();
         }
         return $this->_form;
     }

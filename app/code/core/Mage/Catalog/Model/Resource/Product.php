@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -98,7 +98,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
     /**
      * Retrieve product category identifiers
      *
-     * @param Mage_Catalog_Model_Product|Varien_Object $product
+     * @param Mage_Catalog_Model_Product|\Maho\DataObject $product
      * @return array
      */
     public function getCategoryIds($product)
@@ -135,7 +135,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      * @param Mage_Catalog_Model_Product $object
      */
     #[\Override]
-    protected function _beforeSave(Varien_Object $object)
+    protected function _beforeSave(\Maho\DataObject $object)
     {
         /**
          * Try to detect product id by sku if id is not declared
@@ -163,7 +163,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      * @param Mage_Catalog_Model_Product $product
      */
     #[\Override]
-    protected function _afterSave(Varien_Object $product)
+    protected function _afterSave(\Maho\DataObject $product)
     {
         $this->_saveWebsiteIds($product)
             ->_saveCategories($product);
@@ -225,7 +225,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
      *
      * @return $this
      */
-    protected function _saveCategories(Varien_Object $object)
+    protected function _saveCategories(\Maho\DataObject $object)
     {
         /**
          * If category ids data is not declared we haven't do manipulations
@@ -608,16 +608,6 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             ->from($this->getTable('catalog/product'), ['entity_id', 'sku'])
             ->where('entity_id IN (?)', $productIds);
         return $this->_getReadAdapter()->fetchAll($select);
-    }
-
-    /**
-     * @param Mage_Catalog_Model_Product $object
-     * @return array
-     * @deprecated after 1.4.2.0
-     */
-    public function getParentProductIds($object)
-    {
-        return [];
     }
 
     /**

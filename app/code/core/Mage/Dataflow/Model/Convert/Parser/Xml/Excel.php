@@ -6,7 +6,7 @@
  * @package    Mage_Dataflow
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -58,8 +58,14 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         $batchIoAdapter = $this->getBatchModel()->getIoAdapter();
 
         if (Mage::app()->getRequest()->getParam('files')) {
-            $file = Mage::app()->getConfig()->getTempVarDir() . '/import/'
-                . str_replace('../', '', urldecode(Mage::app()->getRequest()->getParam('files')));
+            $baseDir = Mage::app()->getConfig()->getTempVarDir() . '/import';
+            $file = \Maho\Io::validatePath(
+                $baseDir . '/' . urldecode(Mage::app()->getRequest()->getParam('files')),
+                $baseDir,
+            );
+            if ($file === false) {
+                Mage::throwException(Mage::helper('dataflow')->__('Invalid file path.'));
+            }
             $this->_copy($file);
         }
 
@@ -102,32 +108,28 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
                     $xmlString = substr($xmlTmpString, $strposF);
                     $isWorksheet = true;
                     continue;
-                } else {
-                    if (preg_match('/ss:Name=\"' . preg_quote($worksheet, '/') . '\"/siU', substr($xmlTmpString, 0, $strposF))) {
-                        $xmlString = substr($xmlTmpString, $strposF);
-                        $isWorksheet = true;
-                        continue;
-                    } else {
-                        $xmlString = '';
-                        continue;
-                    }
                 }
-            } else {
-                $xmlString = $this->_parseXmlRow($xmlString);
-
-                $strposS = strpos($xmlString, '</Worksheet>');
-                $substrL = 12;
-                //fix for OpenOffice
-                if ($strposS === false) {
-                    $strposS = strpos($xmlString, '</ss:Worksheet>');
-                    $substrL = 15;
-                }
-                if ($strposS !== false) {
-                    $xmlString = substr($xmlString, $strposS + $substrL);
-                    $isWorksheet = false;
-
+                if (preg_match('/ss:Name=\"' . preg_quote($worksheet, '/') . '\"/siU', substr($xmlTmpString, 0, $strposF))) {
+                    $xmlString = substr($xmlTmpString, $strposF);
+                    $isWorksheet = true;
                     continue;
                 }
+                $xmlString = '';
+                continue;
+            }
+            $xmlString = $this->_parseXmlRow($xmlString);
+            $strposS = strpos($xmlString, '</Worksheet>');
+            $substrL = 12;
+            //fix for OpenOffice
+            if ($strposS === false) {
+                $strposS = strpos($xmlString, '</ss:Worksheet>');
+                $substrL = 15;
+            }
+            if ($strposS !== false) {
+                $xmlString = substr($xmlString, $strposS + $substrL);
+                $isWorksheet = false;
+
+                continue;
             }
         }
 
@@ -270,7 +272,7 @@ class Mage_Dataflow_Model_Convert_Parser_Xml_Excel extends Mage_Dataflow_Model_C
         $io->write($xml);
 
         $wsName = htmlspecialchars($this->getVar('single_sheet'));
-        $wsName = !empty($wsName) ? $wsName : Mage::helper('dataflow')->__('Sheet 1');
+        $wsName = empty($wsName) ? Mage::helper('dataflow')->__('Sheet 1') : $wsName;
 
         $xml = '<Worksheet ss:Name="' . $wsName . '"><Table>';
         $io->write($xml);

@@ -6,7 +6,7 @@
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -181,9 +181,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
 
         /**
          * Get information about product types
-         * array (
-         *      $productType => array()
-         * )
+         * [$productType => []]
          */
         $products = Mage::getSingleton('catalogindex/retreiver')->assignProductTypes($products);
         if (is_null($forcedId)) {
@@ -556,7 +554,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
      *
      * @return $this
      */
-    public function prepareCatalogProductFlatColumns(Varien_Object $object)
+    public function prepareCatalogProductFlatColumns(\Maho\DataObject $object)
     {
         $columns = $object->getColumns();
 
@@ -582,7 +580,7 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
      *
      * @return $this
      */
-    public function prepareCatalogProductFlatIndexes(Varien_Object $object)
+    public function prepareCatalogProductFlatIndexes(\Maho\DataObject $object)
     {
         $indexes = $object->getIndexes();
 
@@ -628,10 +626,10 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
             $select = $this->_getWriteAdapter()->select()
                 ->join(
                     ['p' => $this->getTable('catalogindex/price')],
-                    '`e`.`entity_id`=`p`.`entity_id`'
-                        . " AND `p`.`attribute_id`={$priceAttribute}"
-                        . " AND `p`.`customer_group_id`={$group->getId()}"
-                        . " AND `p`.`website_id`={$websiteId}",
+                    'e.entity_id = p.entity_id'
+                        . " AND p.attribute_id = {$priceAttribute}"
+                        . " AND p.customer_group_id = {$group->getId()}"
+                        . " AND p.website_id = {$websiteId}",
                     [$columnName => 'value'],
                 );
             if ($addChildData) {
@@ -654,10 +652,10 @@ class Mage_CatalogIndex_Model_Resource_Indexer extends Mage_Core_Model_Resource_
                 $select = $this->_getWriteAdapter()->select()
                     ->join(
                         ['p' => $this->getTable('catalogindex/price')],
-                        '`e`.`child_id`=`p`.`entity_id`'
-                            . " AND `p`.`attribute_id`={$priceAttribute}"
-                            . " AND `p`.`customer_group_id`={$group->getId()}"
-                            . " AND `p`.`website_id`={$websiteId}",
+                        'e.child_id = p.entity_id'
+                            . " AND p.attribute_id = {$priceAttribute}"
+                            . " AND p.customer_group_id = {$group->getId()}"
+                            . " AND p.website_id = {$websiteId}",
                         [$columnName => 'value'],
                     )
                     ->where('e.is_child=?', 1);

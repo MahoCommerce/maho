@@ -6,7 +6,7 @@
  * @package    Mage_Paygate
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -52,7 +52,7 @@ class Mage_Paygate_Model_Authorizenet_Cards
      * Add based on $cardInfo card to payment and return Id of new item
      *
      * @param mixed $cardInfo
-     * @return Varien_Object
+     * @return \Maho\DataObject
      */
     public function registerCard($cardInfo = [])
     {
@@ -67,7 +67,7 @@ class Mage_Paygate_Model_Authorizenet_Cards
     /**
      * Save data from card object in cards storage
      *
-     * @param Varien_Object $card
+     * @param \Maho\DataObject $card
      * @return $this
      */
     public function updateCard($card)
@@ -84,12 +84,12 @@ class Mage_Paygate_Model_Authorizenet_Cards
      * Retrieve card by ID
      *
      * @param string $cardId
-     * @return Varien_Object|false
+     * @return \Maho\DataObject|false
      */
     public function getCard($cardId)
     {
         if (isset($this->_cards[$cardId])) {
-            return new Varien_Object($this->_cards[$cardId]);
+            return new \Maho\DataObject($this->_cards[$cardId]);
         }
         return false;
     }

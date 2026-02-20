@@ -6,7 +6,7 @@
  * @package    Mage_Rule
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -16,19 +16,19 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      * Store associated with rule entities information map
      *
      * Example:
-     * array(
-     *    'entity_type1' => array(
+     * [
+     *    'entity_type1' => [
      *        'associations_table' => 'table_name',
      *        'rule_id_field'      => 'rule_id',
      *        'entity_id_field'    => 'entity_id'
-     *    ),
-     *    'entity_type2' => array(
+     *    ],
+     *    'entity_type2' => [
      *        'associations_table' => 'table_name',
      *        'rule_id_field'      => 'rule_id',
      *        'entity_id_field'    => 'entity_id'
-     *    )
+     *    ]
      *    ....
-     * )
+     * ]
      *
      * @var array
      */
@@ -40,7 +40,7 @@ abstract class Mage_Rule_Model_Resource_Abstract extends Mage_Core_Model_Resourc
      * @return Mage_Rule_Model_Resource_Abstract
      */
     #[\Override]
-    public function _beforeSave(Mage_Core_Model_Abstract $object)
+    protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         $fromDate = $object->getFromDate();
         if ($fromDate instanceof DateTime) {

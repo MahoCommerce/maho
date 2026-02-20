@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -14,8 +14,8 @@
  * Recurring profiles listing
  *
  * @method $this setBackUrl(string $value)
- * @method $this setGridColumns(Varien_Object[] $profiles)
- * @method $this setGridElements(Varien_Object[] $profiles)
+ * @method $this setGridColumns(\Maho\DataObject[] $profiles)
+ * @method $this setGridElements(\Maho\DataObject[] $profiles)
  */
 class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
 {
@@ -41,30 +41,30 @@ class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
         $profile = Mage::getModel('sales/recurring_profile');
 
         $this->setGridColumns([
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'reference_id',
                 'title' => $profile->getFieldLabel('reference_id'),
                 'is_nobr' => true,
                 'width' => 1,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'state',
                 'title' => $profile->getFieldLabel('state'),
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'created_at',
                 'title' => $profile->getFieldLabel('created_at'),
                 'is_nobr' => true,
                 'width' => 1,
                 'is_amount' => true,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'updated_at',
                 'title' => $profile->getFieldLabel('updated_at'),
                 'is_nobr' => true,
                 'width' => 1,
             ]),
-            new Varien_Object([
+            new \Maho\DataObject([
                 'index' => 'method_code',
                 'title' => $profile->getFieldLabel('method_code'),
                 'is_nobr' => true,
@@ -77,7 +77,7 @@ class Mage_Sales_Block_Recurring_Profiles extends Mage_Core_Block_Template
         $locale = Mage::app()->getLocale();
         foreach ($this->_profiles as $profile) {
             $profile->setStore($store)->setLocale($locale);
-            $profiles[] = new Varien_Object([
+            $profiles[] = new \Maho\DataObject([
                 'reference_id' => $profile->getReferenceId(),
                 'reference_id_link_url' => $this->getUrl('sales/recurring_profile/view/', ['profile' => $profile->getId()]),
                 'state'       => $profile->renderData('state'),

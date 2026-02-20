@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,7 +23,7 @@
  * @method $this updateBillingAgreementStatus(Mage_Sales_Model_Billing_Agreement $value)
  * @method $this validateRecurringProfile(Mage_Payment_Model_Recurring_Profile $value)
  */
-abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
+abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 {
     public const ACTION_ORDER             = 'order';
     public const ACTION_AUTHORIZE         = 'authorize';
@@ -49,8 +49,19 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     public const CHECK_RECURRING_PROFILES    = 64;
     public const CHECK_ZERO_TOTAL            = 128;
 
+    /**
+     * @var string
+     */
     protected $_code;
+
+    /**
+     * @var string
+     */
     protected $_formBlockType = 'payment/form';
+
+    /**
+     * @var string
+     */
     protected $_infoBlockType = 'payment/info';
 
     /**
@@ -58,21 +69,53 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @var bool
      */
     protected $_isGateway                   = false;
+
+    /** @var bool */
     protected $_canOrder                    = false;
+
+    /** @var bool */
     protected $_canAuthorize                = false;
+
+    /** @var bool */
     protected $_canCapture                  = false;
+
+    /** @var bool */
     protected $_canCapturePartial           = false;
+
+    /** @var bool */
     protected $_canCaptureOnce              = false;
+
+    /** @var bool */
     protected $_canRefund                   = false;
+
+    /** @var bool */
     protected $_canRefundInvoicePartial     = false;
+
+    /** @var bool */
     protected $_canVoid                     = false;
+
+    /** @var bool */
     protected $_canUseInternal              = true;
+
+    /** @var bool */
     protected $_canUseCheckout              = true;
+
+    /** @var bool */
     protected $_canUseForMultishipping      = true;
+
+    /** @var bool */
     protected $_isInitializeNeeded          = false;
+
+    /** @var bool */
     protected $_canFetchTransactionInfo     = false;
+
+    /** @var bool */
     protected $_canReviewPayment            = false;
+
+    /** @var bool */
     protected $_canCreateBillingAgreement   = false;
+
+    /** @var bool */
     protected $_canManageRecurringProfiles  = true;
     /**
      * TODO: whether a captured transaction may be voided by this gateway
@@ -165,7 +208,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      *
      * @return  bool
      */
-    public function canVoid(Varien_Object $payment)
+    public function canVoid(\Maho\DataObject $payment)
     {
         return $this->_canVoid;
     }
@@ -398,7 +441,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function order(Varien_Object $payment, $amount)
+    public function order(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canOrder()) {
             Mage::throwException(Mage::helper('payment')->__('Order action is not available.'));
@@ -412,7 +455,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function authorize(Varien_Object $payment, $amount)
+    public function authorize(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canAuthorize()) {
             Mage::throwException(Mage::helper('payment')->__('Authorize action is not available.'));
@@ -426,7 +469,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canCapture()) {
             Mage::throwException(Mage::helper('payment')->__('Capture action is not available.'));
@@ -468,7 +511,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      * @param float $amount
      * @return $this
      */
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         if (!$this->canRefund()) {
             Mage::throwException(Mage::helper('payment')->__('Refund action is not available.'));
@@ -494,22 +537,8 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      *
      * @return $this
      */
-    public function cancel(Varien_Object $payment)
+    public function cancel(\Maho\DataObject $payment)
     {
-        return $this;
-    }
-
-    /**
-     * @deprecated after 1.4.0.0-alpha3
-     * this method doesn't make sense, because invoice must not void entire authorization
-     * there should be method for invoice cancellation
-     * @param Mage_Sales_Model_Order_Invoice $invoice
-     * @param Mage_Sales_Model_Order_Payment $payment
-     * @return Mage_Payment_Model_Method_Abstract
-     */
-    public function processBeforeVoid($invoice, $payment)
-    {
-        $payment->setVoidTransactionId($invoice->getTransactionId());
         return $this;
     }
 
@@ -518,7 +547,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
      *
      * @return $this
      */
-    public function void(Varien_Object $payment)
+    public function void(\Maho\DataObject $payment)
     {
         if (!$this->canVoid($payment)) {
             Mage::throwException(Mage::helper('payment')->__('Void action is not available.'));
@@ -601,7 +630,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends Varien_Object
     {
         if (is_array($data)) {
             $this->getInfoInstance()->addData($data);
-        } elseif ($data instanceof Varien_Object) {
+        } elseif ($data instanceof \Maho\DataObject) {
             $this->getInfoInstance()->addData($data->getData());
         }
         return $this;

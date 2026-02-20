@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
     /**
      * @return $this
      */
-    public function setItem(Varien_Object $item)
+    public function setItem(\Maho\DataObject $item)
     {
         $this->setData('item', $item);
         return $this;
@@ -46,9 +46,8 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
     {
         if ($this->getItem() instanceof Mage_Sales_Model_Order_Item) {
             return $this->getItem();
-        } else {
-            return $this->getItem()->getOrderItem();
         }
+        return $this->getItem()->getOrderItem();
     }
 
     /**
@@ -77,9 +76,9 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
      * @param mixed $optionValue
      * Method works well with these $optionValue format:
      *      1. String
-     *      2. Indexed array e.g. array(val1, val2, ...)
+     *      2. Indexed array e.g. [val1, val2, ...]
      *      3. Associative array, containing additional option info, including option value, e.g.
-     *          array
+     *          [
      *          (
      *              [label] => ...,
      *              [value] => ...,
@@ -127,10 +126,9 @@ class Mage_Sales_Block_Order_Item_Renderer_Default extends Mage_Core_Block_Templ
             $truncatedValue = implode("\n", $optionValue);
             $truncatedValue = nl2br($truncatedValue);
             return ['value' => $truncatedValue];
-        } else {
-            $truncatedValue = Mage::helper('core/string')->truncate($optionValue, 55, '');
-            $truncatedValue = nl2br($truncatedValue);
         }
+        $truncatedValue = Mage::helper('core/string')->truncate($optionValue, 55, '');
+        $truncatedValue = nl2br($truncatedValue);
 
         $result = ['value' => $truncatedValue];
 

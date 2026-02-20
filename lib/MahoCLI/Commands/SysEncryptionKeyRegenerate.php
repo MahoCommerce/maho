@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    MahoCLI
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -119,16 +119,21 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
-        $this->recryptAdminUserTable($output, $readConnection, $writeConnection);
-        $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
-        Mage::app()->getCache()->clean('config');
+        if ($this->isOldEncryptionKeyM1 && !function_exists('mcrypt_module_open')) {
+            $output->writeln('<comment>Skipping re-encryption of existing data (M1 key without mcrypt support).</comment>');
+            $output->writeln('<comment>Old encrypted data will no longer be decryptable. New data will use the new key.</comment>');
+        } else {
+            $this->recryptAdminUserTable($output);
+            $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
+            Mage::app()->getCache()->clean('config');
 
-        Mage::dispatchEvent('encryption_key_regenerated', [
-            'output' => $output,
-            'encrypt_callback' => [$this, 'encrypt'],
-            'decrypt_callback' => [$this, 'decrypt'],
-        ]);
-        Mage::app()->getCache()->clean('config');
+            Mage::dispatchEvent('encryption_key_regenerated', [
+                'output' => $output,
+                'encrypt_callback' => [$this, 'encrypt'],
+                'decrypt_callback' => [$this, 'decrypt'],
+            ]);
+            Mage::app()->getCache()->clean('config');
+        }
 
         if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
             $output->writeln('');
@@ -146,24 +151,16 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         return Command::SUCCESS;
     }
 
-    protected function recryptAdminUserTable(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection, \Maho\Db\Adapter\AdapterInterface $writeConnection): void
+    protected function recryptAdminUserTable(OutputInterface $output): void
     {
         $output->write('Re-encrypting data on admin_user table... ');
-
-        $table = Mage::getSingleton('core/resource')->getTableName('admin_user');
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('twofa_secret IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['twofa_secret' => $this->encrypt($this->decrypt($encryptedDataRow['twofa_secret']))],
-                ['user_id = ?' => $encryptedDataRow['user_id']],
-            );
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('admin_user'),
+            'user_id',
+            ['twofa_secret'],
+            [$this, 'encrypt'],
+            [$this, 'decrypt'],
+        );
         $output->writeln('OK');
     }
 
@@ -231,7 +228,11 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
     public function decrypt(#[\SensitiveParameter] string $data): string
     {
-        if ($this->isOldEncryptionKeyM1 && function_exists('mcrypt_module_open')) {
+        if ($this->isOldEncryptionKeyM1) {
+            if (!function_exists('mcrypt_module_open')) {
+                return '';
+            }
+
             $key = $this->oldEncryptionKey;
             $handler = mcrypt_module_open(MCRYPT_BLOWFISH, '', MCRYPT_MODE_ECB, ''); // @phpstan-ignore constant.notFound,constant.notFound
             $initVector = mcrypt_create_iv(mcrypt_enc_get_iv_size($handler), MCRYPT_RAND); // @phpstan-ignore function.notFound,function.notFound,constant.notFound

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -140,7 +140,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      *
      * @return string
      */
-    public function getItemHtml(Varien_Object $item)
+    public function getItemHtml(\Maho\DataObject $item)
     {
         if ($item->getOrderItem()) {
             $type = $item->getOrderItem()->getProductType();
@@ -159,7 +159,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      *
      * @return string
      */
-    public function getItemExtraInfoHtml(Varien_Object $item)
+    public function getItemExtraInfoHtml(\Maho\DataObject $item)
     {
         $extraInfoBlock = $this->getChild('order_item_extra_info');
         if ($extraInfoBlock) {
@@ -177,7 +177,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      * @param string $field the custom item field
      * @return string
      */
-    public function getColumnHtml(Varien_Object $item, $column, $field = null)
+    public function getColumnHtml(\Maho\DataObject $item, $column, $field = null)
     {
         if ($item->getOrderItem()) {
             $block = $this->getColumnRenderer($column, $item->getOrderItem()->getProductType());
@@ -261,14 +261,13 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
                 $strong,
                 $separator,
             );
-        } else {
-            return $this->displayPrices(
-                $this->getPriceDataObject()->getData('base_' . $code),
-                $this->getPriceDataObject()->getData($code),
-                $strong,
-                $separator,
-            );
         }
+        return $this->displayPrices(
+            $this->getPriceDataObject()->getData('base_' . $code),
+            $this->getPriceDataObject()->getData($code),
+            $strong,
+            $separator,
+        );
     }
 
     /**
@@ -316,7 +315,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      *
      * @return string
      */
-    public function displayPriceInclTax(Varien_Object $item)
+    public function displayPriceInclTax(\Maho\DataObject $item)
     {
         $qty = ($item->getQtyOrdered() ?: (($item->getQty() ?: 1)));
         $baseTax = ($item->getTaxBeforeDiscount() ?: (($item->getTaxAmount() ?: 0)));
@@ -339,7 +338,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
     /**
      * Retrieve subtotal price include tax html formatted content
      *
-     * @param Varien_Object $item
+     * @param \Maho\DataObject $item
      * @return string
      */
     public function displaySubtotalInclTax($item)
@@ -358,7 +357,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      *
      * @return string
      */
-    public function displayTaxCalculation(Varien_Object $item)
+    public function displayTaxCalculation(\Maho\DataObject $item)
     {
         if ($item->getTaxPercent() && $item->getTaxString() == '') {
             $percents = [$item->getTaxPercent()];
@@ -379,13 +378,12 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      *
      * @return string
      */
-    public function displayTaxPercent(Varien_Object $item)
+    public function displayTaxPercent(\Maho\DataObject $item)
     {
         if ($item->getTaxPercent()) {
             return sprintf('%s%%', $item->getTaxPercent() + 0);
-        } else {
-            return '0%';
         }
+        return '0%';
     }
 
     /**
@@ -495,9 +493,8 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
         $canReturnToStock = Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT);
         if (Mage::getStoreConfig(Mage_CatalogInventory_Model_Stock_Item::XML_PATH_CAN_SUBTRACT)) {
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     /**

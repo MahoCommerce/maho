@@ -6,7 +6,7 @@
  * @package    Mage_CatalogIndex
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -79,8 +79,8 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
             $fields = [
                 'entity_id',
                 'type_id',
-                'attribute_id'  => 'IF(c.value_id > 0, c.attribute_id, d.attribute_id)',
-                'value'         => 'IF(c.value_id > 0, c.value, d.value)',
+                'attribute_id'  => 'CASE WHEN c.value_id > 0 THEN c.attribute_id ELSE d.attribute_id END',
+                'value'         => 'CASE WHEN c.value_id > 0 THEN c.value ELSE d.value END',
             ];
 
             $select = $this->_getReadAdapter()->select()
@@ -236,7 +236,7 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
         if ($attribute->getBackendType() == 'static') {
             $tableAlias = sprintf('t_%s', $attribute->getAttributeCode());
             $joinCond = implode(' AND ', [
-                sprintf('`%s`.`%s`=`%s`.`entity_id`', $table, $field, $tableAlias),
+                sprintf('%s.%s = %s.entity_id', $table, $field, $tableAlias),
             ]);
             $select
                 ->join(
@@ -248,9 +248,9 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
         } elseif ($attribute->isScopeGlobal()) {
             $tableAlias = sprintf('t_%s', $attribute->getAttributeCode());
             $joinCond = implode(' AND ', [
-                sprintf('`%s`.`%s`=`%s`.`entity_id`', $table, $field, $tableAlias),
-                $adapter->quoteInto(sprintf('`%s`.`attribute_id`=?', $tableAlias), $attribute->getAttributeId()),
-                $adapter->quoteInto(sprintf('`%s`.`store_id`=?', $tableAlias), 0),
+                sprintf('%s.%s = %s.entity_id', $table, $field, $tableAlias),
+                $adapter->quoteInto(sprintf('%s.attribute_id = ?', $tableAlias), $attribute->getAttributeId()),
+                $adapter->quoteInto(sprintf('%s.store_id = ?', $tableAlias), 0),
             ]);
             $select
                 ->join(
@@ -263,17 +263,17 @@ class Mage_CatalogIndex_Model_Resource_Data_Abstract extends Mage_Core_Model_Res
             $tableGlobal    = sprintf('t_global_%s', $attribute->getAttributeCode());
             $tableStore     = sprintf('t_store_%s', $attribute->getAttributeCode());
             $joinCondGlobal = implode(' AND ', [
-                sprintf('`%s`.`%s`=`%s`.`entity_id`', $table, $field, $tableGlobal),
-                $adapter->quoteInto(sprintf('`%s`.`attribute_id`=?', $tableGlobal), $attribute->getAttributeId()),
-                $adapter->quoteInto(sprintf('`%s`.`store_id`=?', $tableGlobal), 0),
+                sprintf('%s.%s = %s.entity_id', $table, $field, $tableGlobal),
+                $adapter->quoteInto(sprintf('%s.attribute_id = ?', $tableGlobal), $attribute->getAttributeId()),
+                $adapter->quoteInto(sprintf('%s.store_id = ?', $tableGlobal), 0),
             ]);
             $joinCondStore = implode(' AND ', [
-                sprintf('`%s`.`entity_id`=`%s`.`entity_id`', $tableGlobal, $tableStore),
-                sprintf('`%s`.`attribute_id`=`%s`.`attribute_id`', $tableGlobal, $tableStore),
-                $adapter->quoteInto(sprintf('`%s`.`store_id`=?', $tableStore), $store),
+                sprintf('%s.entity_id = %s.entity_id', $tableGlobal, $tableStore),
+                sprintf('%s.attribute_id = %s.attribute_id', $tableGlobal, $tableStore),
+                $adapter->quoteInto(sprintf('%s.store_id = ?', $tableStore), $store),
             ]);
             $whereCond      = sprintf(
-                'IF(`%s`.`value_id`>0, `%s`.`value`, `%s`.`value`) IN(?)',
+                'CASE WHEN %s.value_id > 0 THEN %s.value ELSE %s.value END IN(?)',
                 $tableStore,
                 $tableStore,
                 $tableGlobal,

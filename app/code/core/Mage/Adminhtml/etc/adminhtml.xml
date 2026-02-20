@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
@@ -22,11 +22,6 @@
             <sort_order>90</sort_order>
             <!-- action>adminhtml/system</action -->
             <children>
-                <myaccount translate="title">
-                    <title>My Account</title>
-                    <action>adminhtml/system_account</action>
-                    <sort_order>10</sort_order>
-                </myaccount>
                 <tools translate="title">
                     <title>Tools</title>
                     <sort_order>20</sort_order>

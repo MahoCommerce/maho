@@ -6,7 +6,7 @@
  * @package    Mage_Downloadable
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -83,7 +83,7 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
      */
     protected function _moveFileFromTmp($baseTmpPath, $basePath, $file)
     {
-        $ioObject = new Varien_Io_File();
+        $ioObject = new \Maho\Io\File();
         $destDirectory = dirname($this->getFilePath($basePath, $file));
         try {
             $ioObject->open(['path' => $destDirectory]);
@@ -163,18 +163,6 @@ class Mage_Downloadable_Helper_File extends Mage_Core_Helper_Abstract
     public function getFileType($filePath)
     {
         $ext = substr($filePath, strrpos($filePath, '.') + 1);
-        return $this->_getFileHelper()->getMimeTypeByExtension($ext);
-    }
-
-    /**
-     * Get MIME type by file extension
-     *
-     * @param string $ext
-     * @return string
-     * @deprecated
-     */
-    protected function _getFileTypeByExt($ext)
-    {
         return $this->_getFileHelper()->getMimeTypeByExtension($ext);
     }
 

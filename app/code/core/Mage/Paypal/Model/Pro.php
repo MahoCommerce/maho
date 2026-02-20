@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -74,8 +74,8 @@ class Mage_Paypal_Model_Pro
                 $params[] = $storeId;
             }
 
-            /** @var Mage_Paypal_Model_Config $model */
             $model = Mage::getModel($this->_configType, $params);
+            assert($model instanceof \Mage_Paypal_Model_Config);
             $this->_config = $model;
         } else {
             $this->_config->setMethod($code);
@@ -157,7 +157,7 @@ class Mage_Paypal_Model_Pro
      * @param Mage_Paypal_Model_Api_Abstract $from
      * @return $this
      */
-    public function importPaymentInfo(Varien_Object $from, Mage_Payment_Model_Info $to)
+    public function importPaymentInfo(\Maho\DataObject $from, Mage_Payment_Model_Info $to)
     {
         // update PayPal-specific payment information in the payment object
         $this->getInfo()->importToPayment($from, $to);
@@ -186,7 +186,7 @@ class Mage_Paypal_Model_Pro
     /**
      * Void transaction
      */
-    public function void(Varien_Object $payment)
+    public function void(\Maho\DataObject $payment)
     {
         if ($authTransactionId = $this->_getParentTransactionId($payment)) {
             $api = $this->getApi();
@@ -204,7 +204,7 @@ class Mage_Paypal_Model_Pro
      * @param float $amount
      * @return false|null
      */
-    public function capture(Varien_Object $payment, $amount)
+    public function capture(\Maho\DataObject $payment, $amount)
     {
         $authTransactionId = $this->_getParentTransactionId($payment);
         if (!$authTransactionId) {
@@ -228,7 +228,7 @@ class Mage_Paypal_Model_Pro
      *
      * @param float $amount
      */
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         $captureTxnId = $this->_getParentTransactionId($payment);
         if ($captureTxnId) {
@@ -254,7 +254,7 @@ class Mage_Paypal_Model_Pro
     /**
      * Cancel payment
      */
-    public function cancel(Varien_Object $payment)
+    public function cancel(\Maho\DataObject $payment)
     {
         if (!$payment->getOrder()->getInvoiceCollection()->count()) {
             $this->void($payment);
@@ -345,7 +345,7 @@ class Mage_Paypal_Model_Pro
         Mage_Payment_Model_Info $paymentInfo,
     ) {
         $api = $this->getApi();
-        Varien_Object_Mapper::accumulateByMap($profile, $api, [
+        \Maho\DataObject\Mapper::accumulateByMap($profile, $api, [
             'token', // EC fields
             // TODO: DP fields
             // profile fields
@@ -368,7 +368,7 @@ class Mage_Paypal_Model_Pro
      *
      * @param string $referenceId
      */
-    public function getRecurringProfileDetails($referenceId, Varien_Object $result)
+    public function getRecurringProfileDetails($referenceId, \Maho\DataObject $result)
     {
         $api = $this->getApi();
         $api->setRecurringProfileId($referenceId)
@@ -442,7 +442,7 @@ class Mage_Paypal_Model_Pro
      *
      * @return string
      */
-    protected function _getParentTransactionId(Varien_Object $payment)
+    protected function _getParentTransactionId(\Maho\DataObject $payment)
     {
         return $payment->getParentTransactionId() ?: $payment->getLastTransId();
     }

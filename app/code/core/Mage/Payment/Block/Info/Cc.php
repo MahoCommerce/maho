@@ -6,7 +6,7 @@
  * @package    Mage_Payment
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -67,8 +67,8 @@ class Mage_Payment_Block_Info_Cc extends Mage_Payment_Block_Info
     /**
      * Prepare credit card related payment info
      *
-     * @param Varien_Object|array $transport
-     * @return Varien_Object
+     * @param \Maho\DataObject|array $transport
+     * @return \Maho\DataObject
      */
     #[\Override]
     protected function _prepareSpecificInformation($transport = null)
@@ -106,6 +106,6 @@ class Mage_Payment_Block_Info_Cc extends Mage_Payment_Block_Info
      */
     protected function _formatCardDate($year, $month)
     {
-        return sprintf('%s/%s', sprintf('%02d', $month), $year);
+        return sprintf('%s/%s', sprintf('%02d', (int) $month), $year);
     }
 }

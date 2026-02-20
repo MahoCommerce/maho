@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2018-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -147,6 +147,19 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
         $watermarkSize = Mage::getStoreConfig("design/watermark/{$this->_getModel()->getDestinationSubdir()}_size");
         if ($watermarkSize) {
             $this->setWatermarkSize($watermarkSize);
+        }
+
+        $keepFrame = Mage::getStoreConfig('catalog/product_image/keep_frame');
+        if ($keepFrame !== null) {
+            $this->keepFrame((bool) (int) $keepFrame);
+        }
+
+        $bgColor = Mage::getStoreConfig('catalog/product_image/background_color');
+        if ($bgColor) {
+            $rgb = sscanf(ltrim($bgColor, '#'), '%02x%02x%02x');
+            if (count(array_filter($rgb, fn($v) => $v !== null)) === 3) {
+                $this->backgroundColor($rgb);
+            }
         }
 
         if ($imageFile) {
@@ -354,21 +367,17 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
 
             if ($model->isCached()) {
                 return $model->getUrl();
-            } else {
-                if ($this->_scheduleRotate) {
-                    $model->rotate($this->getAngle());
-                }
-
-                if ($this->_scheduleResize) {
-                    $model->resize();
-                }
-
-                if ($this->getWatermark()) {
-                    $model->setWatermark($this->getWatermark());
-                }
-
-                $url = $model->saveFile()->getUrl();
             }
+            if ($this->_scheduleRotate) {
+                $model->rotate($this->getAngle());
+            }
+            if ($this->_scheduleResize) {
+                $model->resize();
+            }
+            if ($this->getWatermark()) {
+                $model->setWatermark($this->getWatermark());
+            }
+            $url = $model->saveFile()->getUrl();
         } catch (Exception $e) {
             Mage::logException($e);
             $url = Mage::getDesign()->getSkinUrl($this->getPlaceholder());
@@ -628,7 +637,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
     public function validateUploadFile($filePath)
     {
         $maxDimension = Mage::getStoreConfig(self::XML_NODE_PRODUCT_MAX_DIMENSION);
-        $imageInfo = getimagesize($filePath);
+        $imageInfo = \Maho\Io::getImageSize($filePath);
         if (!$imageInfo) {
             Mage::throwException($this->__('Disallowed file type.'));
         }

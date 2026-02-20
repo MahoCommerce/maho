@@ -6,7 +6,7 @@
  * @package    Mage_Paypal
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -91,9 +91,8 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
     {
         if ($this->getConfigData('mobile_optimized')) {
             return self::MOBILE_LAYOUT_TEMPLATE;
-        } else {
-            return self::LAYOUT_TEMPLATE;
         }
+        return self::LAYOUT_TEMPLATE;
     }
 
     /**
@@ -111,7 +110,7 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
      * Instantiate state and set it to state object
      *
      * @param string $paymentAction
-     * @param Varien_Object $stateObject
+     * @param \Maho\DataObject $stateObject
      */
     #[\Override]
     public function initialize($paymentAction, $stateObject)

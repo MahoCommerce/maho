@@ -6,7 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,47 +23,6 @@
  */
 class Mage_Checkout_Block_Cart extends Mage_Checkout_Block_Cart_Abstract
 {
-    /**
-     * Prepare cart items URLs
-     *
-     * @deprecated after 1.7.0.2
-     */
-    public function prepareItemUrls()
-    {
-        $products = [];
-        foreach ($this->getItems() as $item) {
-            $product    = $item->getProduct();
-            $option     = $item->getOptionByCode('product_type');
-            if ($option) {
-                $product = $option->getProduct();
-            }
-
-            if ($item->getStoreId() != Mage::app()->getStore()->getId()
-                && !$item->getRedirectUrl()
-                && !$product->isVisibleInSiteVisibility()
-            ) {
-                $products[$product->getId()] = $item->getStoreId();
-            }
-        }
-
-        if ($products) {
-            $products = Mage::getResourceSingleton('catalog/url')
-                ->getRewriteByProductStore($products);
-            foreach ($this->getItems() as $item) {
-                $product    = $item->getProduct();
-                $option     = $item->getOptionByCode('product_type');
-                if ($option) {
-                    $product = $option->getProduct();
-                }
-
-                if (isset($products[$product->getId()])) {
-                    $object = new Varien_Object($products[$product->getId()]);
-                    $item->getProduct()->setUrlDataObject($object);
-                }
-            }
-        }
-    }
-
     public function chooseTemplate()
     {
         $itemsCount = $this->getItemsCount() ?: $this->getQuote()->getItemsCount();

@@ -3,7 +3,7 @@
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -776,6 +776,7 @@ describe('Time-based Customer Conditions', function () {
                     'customer_id' => $customer->getId(),
                     'login_at' => $loginAt,
                     'logout_at' => null,
+                    'store_id' => 1,
                 ]);
             }
 
@@ -825,7 +826,7 @@ describe('Time-based Customer Conditions', function () {
         $segment->setIsActive(1);
         $segment->setWebsiteIds('1');
         $segment->setCustomerGroupIds('0,1,2,3');
-        $segment->setConditionsSerialized(serialize($conditions));
+        $segment->setConditionsSerialized(Mage::helper('core')->jsonEncode($conditions));
         $segment->setRefreshMode('manual');
         $segment->setRefreshStatus('pending');
         $segment->setPriority(10);

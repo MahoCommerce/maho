@@ -4,21 +4,17 @@
  *
  * @category    design
  * @package     default_default
- * @copyright   Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
 /** @var Maho_Blog_Block_Adminhtml_Post $this */
 ?>
 <div class="content-header">
-    <table cellspacing="0">
-        <tr>
-            <td style="width:50%;"><h3><?= Mage::helper('blog')->__('Blog Posts') ?></h3></td>
-            <td class="a-right">
-                <?= $this->getButtonsHtml() ?>
-            </td>
-        </tr>
-    </table>
+    <h3><?= Mage::helper('blog')->__('Blog Posts') ?></h3>
+    <p class="content-buttons a-right">
+        <?= $this->getButtonsHtml() ?>
+    </p>
 </div>
 <div>
     <?= $this->getChildHtml('grid') ?>

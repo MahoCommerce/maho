@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,7 +17,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return  Mage_Catalog_Model_Observer
      */
-    public function storeEdit(Varien_Event_Observer $observer)
+    public function storeEdit(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Core_Model_Store $store */
         $store = $observer->getEvent()->getStore();
@@ -38,7 +38,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return  Mage_Catalog_Model_Observer
      */
-    public function storeAdd(Varien_Event_Observer $observer)
+    public function storeAdd(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Core_Model_Store $store */
         $store = $observer->getEvent()->getStore();
@@ -58,7 +58,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return  Mage_Catalog_Model_Observer
      */
-    public function storeGroupSave(Varien_Event_Observer $observer)
+    public function storeGroupSave(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Core_Model_Store_Group $group */
         $group = $observer->getEvent()->getGroup();
@@ -80,7 +80,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
-    public function storeDelete(Varien_Event_Observer $observer)
+    public function storeDelete(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
         $categoryFlatHelper = Mage::helper('catalog/category_flat');
@@ -96,7 +96,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return  Mage_Catalog_Model_Observer
      */
-    public function categoryMove(Varien_Event_Observer $observer)
+    public function categoryMove(\Maho\Event\Observer $observer)
     {
         $categoryId = $observer->getEvent()->getCategoryId();
         $prevParentId = $observer->getEvent()->getPrevParentId();
@@ -114,7 +114,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return  Mage_Catalog_Model_Observer
      */
-    public function catalogProductImportAfter(Varien_Event_Observer $observer)
+    public function catalogProductImportAfter(\Maho\Event\Observer $observer)
     {
         Mage::getModel('catalog/url')->refreshRewrites();
         Mage::getResourceSingleton('catalog/category')->refreshProductIndex();
@@ -126,7 +126,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
-    public function catalogProductCompareClean(Varien_Event_Observer $observer)
+    public function catalogProductCompareClean(\Maho\Event\Observer $observer)
     {
         Mage::getModel('catalog/product_compare_item')->clean();
         return $this;
@@ -137,7 +137,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
-    public function categorySaveAfter(Varien_Event_Observer $observer)
+    public function categorySaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Helper_Category_Flat $categoryFlatHelper */
         $categoryFlatHelper = Mage::helper('catalog/category_flat');
@@ -152,7 +152,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Checking whether the using static urls in WYSIWYG allowed event
      */
-    public function catalogCheckIsUsingStaticUrlsAllowed(Varien_Event_Observer $observer)
+    public function catalogCheckIsUsingStaticUrlsAllowed(\Maho\Event\Observer $observer)
     {
         $storeId = $observer->getEvent()->getData('store_id');
         $result  = $observer->getEvent()->getData('result');
@@ -174,7 +174,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Adds catalog categories to top menu
      */
-    public function addCatalogToTopmenuItems(Varien_Event_Observer $observer)
+    public function addCatalogToTopmenuItems(\Maho\Event\Observer $observer)
     {
         $block = $observer->getEvent()->getBlock();
         $block->addCacheTag(Mage_Catalog_Model_Category::CACHE_TAG);
@@ -188,8 +188,8 @@ class Mage_Catalog_Model_Observer
     /**
      * Recursively adds categories to top menu
      *
-     * @param Varien_Data_Tree_Node_Collection|array $categories
-     * @param Varien_Data_Tree_Node $parentCategoryNode
+     * @param \Maho\Data\Tree\Node\Collection|array $categories
+     * @param \Maho\Data\Tree\Node $parentCategoryNode
      * @param Mage_Page_Block_Html_Topmenu $menuBlock
      * @param bool $addTags
      */
@@ -215,7 +215,7 @@ class Mage_Catalog_Model_Observer
                 'url' => Mage::helper('catalog/category')->getCategoryUrl($category),
                 'is_active' => $this->_isActiveMenuCategory($category),
             ];
-            $categoryNode = new Varien_Data_Tree_Node($categoryData, 'id', $tree, $parentCategoryNode);
+            $categoryNode = new \Maho\Data\Tree\Node($categoryData, 'id', $tree, $parentCategoryNode);
             $parentCategoryNode->addChild($categoryNode);
 
             $flatHelper = Mage::helper('catalog/category_flat');
@@ -232,7 +232,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Checks whether category belongs to active category's path
      *
-     * @param Varien_Data_Tree_Node $category
+     * @param \Maho\Data\Tree\Node $category
      * @return bool
      */
     protected function _isActiveMenuCategory($category)
@@ -256,7 +256,7 @@ class Mage_Catalog_Model_Observer
      *
      * @throws Mage_Core_Exception
      */
-    public function checkReservedAttributeCodes(Varien_Event_Observer $observer)
+    public function checkReservedAttributeCodes(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
         $attribute = $observer->getEvent()->getAttribute();
@@ -270,5 +270,50 @@ class Mage_Catalog_Model_Observer
                 Mage::helper('catalog')->__('The attribute code \'%s\' is reserved by system. Please try another attribute code', $attribute->getAttributeCode()),
             );
         }
+    }
+
+    /**
+     * Add file attribute type to product attributes
+     *
+     * @return $this
+     */
+    public function addFileAttributeType(\Maho\Event\Observer $observer)
+    {
+        $response = $observer->getEvent()->getResponse();
+        $types = $response->getTypes();
+        $types[] = [
+            'value' => 'file',
+            'label' => Mage::helper('catalog')->__('File'),
+            'hide_fields' => [
+                'is_searchable',
+                'is_visible_in_advanced_search',
+                'is_filterable',
+                'is_filterable_in_search',
+                'is_comparable',
+                'is_used_for_promo_rules',
+                'used_for_sort_by',
+                'is_wysiwyg_enabled',
+                'is_html_allowed_on_front',
+            ],
+        ];
+
+        $response->setTypes($types);
+
+        return $this;
+    }
+
+    /**
+     * Add file element type for product edit form
+     *
+     * @return $this
+     */
+    public function addFileElementType(\Maho\Event\Observer $observer)
+    {
+        $response = $observer->getEvent()->getResponse();
+        $types = $response->getTypes();
+        $types['file'] = Mage::getConfig()->getBlockClassName('adminhtml/catalog_product_helper_form_file');
+        $response->setTypes($types);
+
+        return $this;
     }
 }

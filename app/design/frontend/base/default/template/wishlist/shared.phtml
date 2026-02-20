@@ -5,7 +5,7 @@
  * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2021-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -20,9 +20,9 @@
     <form action="<?= $this->getUrl('*/*/update') ?>" method="post">
         <div class="fieldset">
             <table class="data-table" id="wishlist-table">
-            <col width="1" />
             <col />
-            <col width="1" />
+            <col />
+            <col width="160"/>
             <thead>
                 <tr>
                     <th><?= $this->__('Product') ?></th>
@@ -42,7 +42,9 @@
                         <a class="product-image" href="<?= $this->getProductUrl($item) ?>" title="<?= $this->escapeHtml($product->getName()) ?>"><img src="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(113, 113) ?>" srcset="<?= $this->helper('catalog/image')->init($product, 'small_image')->resize(226, 226) ?> 2x" width="113" height="113" alt="<?= $this->escapeHtml($product->getName()) ?>" /></a>
                         <h2 class="product-name"><a href="<?= $this->getProductUrl($item) ?>"><?= $this->escapeHtml($product->getName()) ?></a></h2>
                         <?= $this->getPriceHtml($product) ?>
-                        <?= $this->getDetailsHtml($item) ?>
+                        <?php if ($optionsBlock = $this->getChild('customer.wishlist.item.options')): ?>
+                            <?= $optionsBlock->setItem($item)->toHtml() ?>
+                        <?php endif ?>
                     </td>
                     <td><?= $this->getEscapedDescription($item) ?></td>
                     <td class="a-center">

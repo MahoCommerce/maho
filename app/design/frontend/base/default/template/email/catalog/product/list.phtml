@@ -2,10 +2,10 @@
 /**
  * Maho
  *
- * @package     rwd_default
+ * @package     base_default
  * @copyright   Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -38,8 +38,8 @@ $_params = $this->escapeHtml(json_encode(['form_key' => $this->getFormKey()]));
                         (one column, two column, three column) and number of product columns. */ ?>
                             <?php $_imgSize = 300; ?>
                             <img id="product-collection-image-<?= $_product->getId() ?>"
-                                 src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->keepFrame(false)->resize($_imgSize) ?>"
-                                 srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->keepFrame(false)->resize($_imgSize * 2) ?> 2x"
+                                 src="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize) ?>"
+                                 srcset="<?= $this->helper('catalog/image')->init($_product, 'small_image')->resize($_imgSize * 2) ?> 2x"
                                  alt="<?= $this->stripTags($this->getImageLabel($_product, 'small_image'), null, true) ?>" />
                         </a>
                         <?php // Product description ?>

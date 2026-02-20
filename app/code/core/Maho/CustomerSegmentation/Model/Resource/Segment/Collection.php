@@ -7,7 +7,7 @@ declare(strict_types=1);
  *
  * @category   Maho
  * @package    Maho_CustomerSegmentation
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -32,14 +32,16 @@ class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_C
 
     public function addWebsiteFilter(int|array $websiteId): self
     {
+        $adapter = $this->getConnection();
         if (is_array($websiteId)) {
             $condition = [];
             foreach ($websiteId as $id) {
-                $condition[] = $this->getConnection()->quoteInto('FIND_IN_SET(?, website_ids)', $id);
+                $condition[] = (string) $adapter->getFindInSetExpr($adapter->quote($id), 'website_ids');
             }
             $this->getSelect()->where(implode(' OR ', $condition));
         } else {
-            $this->getSelect()->where('FIND_IN_SET(?, website_ids)', $websiteId);
+            $findInSet = $adapter->getFindInSetExpr($adapter->quote($websiteId), 'website_ids');
+            $this->getSelect()->where((string) $findInSet);
         }
 
         return $this;

@@ -6,7 +6,7 @@
  * @package    Mage_Sales
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -153,5 +153,35 @@ class Mage_Sales_Helper_Data extends Mage_Core_Helper_Data
             return [];
         }
         return (array) $node;
+    }
+
+    /**
+     * Check if current customer has any recurring profiles
+     */
+    public function customerHasRecurringProfiles(): bool
+    {
+        $customer = Mage::getSingleton('customer/session')->getCustomer();
+        if (!$customer || !$customer->getId()) {
+            return false;
+        }
+
+        return Mage::getResourceModel('sales/recurring_profile_collection')
+            ->addFieldToFilter('customer_id', $customer->getId())
+            ->getSize() > 0;
+    }
+
+    /**
+     * Check if current customer has any billing agreements
+     */
+    public function customerHasBillingAgreements(): bool
+    {
+        $customerId = Mage::getSingleton('customer/session')->getCustomerId();
+        if (!$customerId) {
+            return false;
+        }
+
+        return Mage::getResourceModel('sales/billing_agreement_collection')
+            ->addFieldToFilter('customer_id', $customerId)
+            ->getSize() > 0;
     }
 }

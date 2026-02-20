@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     /**
      * Form Object
      *
-     * @var Varien_Data_Form
+     * @var \Maho\Data\Form
      */
     protected $_form;
 
@@ -42,18 +42,18 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     protected function _prepareLayout()
     {
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_element');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setElementRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setElementRenderer($renderer);
         }
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_fieldset');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setFieldsetRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setFieldsetRenderer($renderer);
         }
 
         $renderer = $this->getLayout()->createBlock('adminhtml/widget_form_renderer_fieldset_element');
-        if ($renderer instanceof Varien_Data_Form_Element_Renderer_Interface) {
-            Varien_Data_Form::setFieldsetElementRenderer($renderer);
+        if ($renderer instanceof \Maho\Data\Form\Element\Renderer\RendererInterface) {
+            \Maho\Data\Form::setFieldsetElementRenderer($renderer);
         }
 
         return parent::_prepareLayout();
@@ -62,23 +62,11 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     /**
      * Get form object
      *
-     * @return Varien_Data_Form
+     * @return \Maho\Data\Form
      */
     public function getForm()
     {
         return $this->_form;
-    }
-
-    /**
-     * Get form object
-     *
-     * @deprecated deprecated since version 1.2
-     * @see getForm()
-     * @return Varien_Data_Form
-     */
-    public function getFormObject()
-    {
-        return $this->getForm();
     }
 
     /**
@@ -99,7 +87,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
      *
      * @return $this
      */
-    public function setForm(Varien_Data_Form $form)
+    public function setForm(\Maho\Data\Form $form)
     {
         $this->_form = $form;
         $this->_form->setParent($this);
@@ -152,7 +140,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
      * Set Fieldset to Form
      *
      * @param array $attributes attributes that are to be added
-     * @param Varien_Data_Form_Element_Fieldset $fieldset
+     * @param \Maho\Data\Form\Element\Fieldset $fieldset
      * @param array $exclude attributes that should be skipped
      */
     protected function _setFieldset($attributes, $fieldset, $exclude = [])
@@ -212,7 +200,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     /**
      * Add new element type
      */
-    protected function _addElementTypes(Varien_Data_Form_Abstract $baseElement)
+    protected function _addElementTypes(\Maho\Data\Form\AbstractForm $baseElement)
     {
         $types = $this->_getAdditionalElementTypes();
         foreach ($types as $code => $className) {
@@ -231,7 +219,7 @@ class Mage_Adminhtml_Block_Widget_Form extends Mage_Adminhtml_Block_Widget
     }
 
     /**
-     * @param Varien_Data_Form_Element_Abstract $element
+     * @param \Maho\Data\Form\Element\AbstractElement $element
      * @return string
      */
     protected function _getAdditionalElementHtml($element)

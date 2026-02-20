@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -21,7 +21,7 @@ class Mage_Adminhtml_Helper_Catalog_Product_Composite extends Mage_Core_Helper_A
      * @param Mage_Adminhtml_Controller_Action $controller
      * @return $this
      */
-    public function renderUpdateResult($controller, Varien_Object $updateResult)
+    public function renderUpdateResult($controller, \Maho\DataObject $updateResult)
     {
         $controller->getResponse()->setBodyJson($updateResult);
         return $this;
@@ -37,7 +37,7 @@ class Mage_Adminhtml_Helper_Catalog_Product_Composite extends Mage_Core_Helper_A
      * @param Mage_Adminhtml_Controller_Action $controller
      * @return $this
      */
-    public function renderConfigureResult($controller, Varien_Object $configureResult)
+    public function renderConfigureResult($controller, \Maho\DataObject $configureResult)
     {
         try {
             if (!$configureResult->getOk()) {

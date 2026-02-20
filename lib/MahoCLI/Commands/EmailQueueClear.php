@@ -4,7 +4,7 @@
  * Maho
  *
  * @package    MahoCLI
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -39,13 +39,13 @@ class EmailQueueClear extends BaseMahoCommand
 <info>Usage examples:</info>
   Clear all emails (default):
     <comment>./maho email:queue:clear</comment>
-    
+
   Clear all emails without confirmation:
     <comment>./maho email:queue:clear --force</comment>
-    
+
   Clear only pending emails:
     <comment>./maho email:queue:clear --status=pending</comment>
-    
+
   Clear processed emails older than 7 days:
     <comment>./maho email:queue:clear --status=processed --older-than=7</comment>
 
@@ -54,9 +54,9 @@ class EmailQueueClear extends BaseMahoCommand
                     - all: Both pending and processed emails (default)
                     - pending: Emails not yet sent
                     - processed: Emails already sent
-                    
+
   <comment>--force (-f)</comment>      Skip the confirmation prompt
-  
+
   <comment>--older-than</comment>     Only clear emails older than X days
                     Can be combined with any status filter',
         );

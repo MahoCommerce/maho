@@ -8,7 +8,7 @@ declare(strict_types=1);
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -386,7 +386,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $uploadedFile = $_FILES['edited_image']['tmp_name'];
 
             // Validate uploaded file is an image
-            if (!getimagesize($uploadedFile)) {
+            if (!\Maho\Io::getImageSize($uploadedFile)) {
                 throw new Exception('Uploaded file is not a valid image.');
             }
 

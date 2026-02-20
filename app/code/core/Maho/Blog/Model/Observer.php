@@ -5,7 +5,7 @@
  *
  * @category   Maho
  * @package    Maho_Blog
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 class Maho_Blog_Model_Observer
 {
-    public function setBlogEntityKey(Varien_Event_Observer $observer): void
+    public function setBlogEntityKey(\Maho\Event\Observer $observer): void
     {
         $entityKey = 'blog_index';
         if ($post = Mage::registry('current_blog_post')) {
@@ -23,17 +23,17 @@ class Maho_Blog_Model_Observer
         Mage::register('current_entity_key', $entityKey, true);
     }
 
-    public function addBlogToTopmenuItems(Varien_Event_Observer $observer): void
+    public function addBlogToTopmenuItems(\Maho\Event\Observer $observer): void
     {
         if (!Mage::helper('blog')->shouldShowInNavigation()) {
             return;
         }
 
-        /** @var Varien_Data_Tree_Node $menu */
+        /** @var \Maho\Data\Tree\Node $menu */
         $menu = $observer->getMenu();
         $tree = $menu->getTree();
 
-        $blogNode = new Varien_Data_Tree_Node([
+        $blogNode = new \Maho\Data\Tree\Node([
             'name' => Mage::helper('blog')->__('Blog'),
             'id' => 'blog-node',
             'url' => Mage::helper('blog')->getBlogUrl(),
@@ -47,7 +47,7 @@ class Maho_Blog_Model_Observer
     /**
      * Add blog content to sitemap generation
      */
-    public function addBlogToSitemap(Varien_Event_Observer $observer): void
+    public function addBlogToSitemap(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sitemap_Model_Sitemap $sitemap */
         $sitemap = $observer->getEvent()->getSitemap();
@@ -65,7 +65,7 @@ class Maho_Blog_Model_Observer
 
         // Get blog sitemap configuration
         $changefreq = (string) Mage::getStoreConfig('blog/sitemap/changefreq', $storeId);
-        $priority = (string) Mage::getStoreConfig('blog/sitemap/priority', $storeId);
+        $priority = (float) Mage::getStoreConfig('blog/sitemap/priority', $storeId);
         $lastmod = Mage::getStoreConfigFlag('blog/sitemap/lastmod', $storeId) ? $date : '';
         $includeBlogImages = Mage::getStoreConfigFlag('blog/sitemap/include_images', $storeId);
 
@@ -73,13 +73,13 @@ class Maho_Blog_Model_Observer
         $blogItems = [];
 
         // Add blog index as first item
-        $blogIndex = new Varien_Object();
+        $blogIndex = new \Maho\DataObject();
         $blogIndex->setUrl(str_replace($baseUrl, '', Mage::helper('blog')->getBlogUrl($storeId)));
         $blogItems[] = $blogIndex;
 
         // Add all blog posts
         foreach ($posts as $post) {
-            $blogPost = new Varien_Object();
+            $blogPost = new \Maho\DataObject();
             $blogPost->setUrl(str_replace($baseUrl, '', $post->getUrl()));
 
             // Only set image data if the post has an image AND images are enabled in configuration
@@ -111,7 +111,7 @@ class Maho_Blog_Model_Observer
         string $baseUrl,
         string $lastmod,
         string $changefreq,
-        string $priority,
+        float $priority,
         int $maxUrlsPerFile,
     ): void {
         if (empty($items)) {
@@ -175,13 +175,13 @@ class Maho_Blog_Model_Observer
     /**
      * Open and initialize a blog sitemap file
      */
-    protected function openBlogSitemapFile(Mage_Sitemap_Model_Sitemap $sitemap, string $filename): Varien_Io_File
+    protected function openBlogSitemapFile(Mage_Sitemap_Model_Sitemap $sitemap, string $filename): \Maho\Io\File
     {
-        $io = new Varien_Io_File();
+        $io = new \Maho\Io\File();
         $io->setAllowCreateFolders(true);
 
-        // Files should be saved in public directory for web accessibility
-        $resolvedPath = Mage::getBaseDir('public');
+        // Files should be saved in public/{sitemap_path} for web accessibility
+        $resolvedPath = rtrim(Mage::getBaseDir('public') . '/' . $sitemap->getSitemapPath(), '/');
 
         $io->open(['path' => $resolvedPath]);
 
@@ -199,7 +199,7 @@ class Maho_Blog_Model_Observer
     /**
      * Generate sitemap row XML for a URL
      */
-    protected function getSitemapRow(string $url, ?string $lastmod = null, ?string $changefreq = null, ?string $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
+    protected function getSitemapRow(string $url, ?string $lastmod = null, ?string $changefreq = null, ?float $priority = null, ?string $imageUrl = null, ?string $imageTitle = null): string
     {
         $row = '<loc>' . htmlspecialchars($url) . '</loc>';
         if ($lastmod) {
@@ -245,7 +245,7 @@ class Maho_Blog_Model_Observer
         return $posts;
     }
 
-    public function addBlogAutocompleteContent(Varien_Event_Observer $observer): void
+    public function addBlogAutocompleteContent(\Maho\Event\Observer $observer): void
     {
         $autocompleteData = $observer->getEvent()->getAutocompleteData();
         $layout = $autocompleteData->getLayout();

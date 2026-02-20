@@ -6,7 +6,7 @@
  * @package    Mage_PaypalUk
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2023 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -46,7 +46,7 @@ class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro
      * @param float $amount
      */
     #[\Override]
-    public function refund(Varien_Object $payment, $amount)
+    public function refund(\Maho\DataObject $payment, $amount)
     {
         if ($captureTxnId = $this->_getParentTransactionId($payment)) {
             $api = $this->getApi();
@@ -71,7 +71,7 @@ class Mage_PaypalUk_Model_Pro extends Mage_Paypal_Model_Pro
      * @return string
      */
     #[\Override]
-    protected function _getParentTransactionId(Varien_Object $payment)
+    protected function _getParentTransactionId(\Maho\DataObject $payment)
     {
         if ($payment->getParentTransactionId()) {
             return $payment->getTransaction($payment->getParentTransactionId())

@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -15,7 +15,7 @@
  * @method $this setAction(Mage_Core_Controller_Varien_Action $value)
  * @method bool getNoRender()
  */
-class Mage_Core_Controller_Varien_Front extends Varien_Object
+class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 {
     protected $_defaults = [];
 
@@ -53,10 +53,8 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     {
         if (is_null($key)) {
             return $this->_defaults;
-        } elseif (isset($this->_defaults[$key])) {
-            return $this->_defaults[$key];
         }
-        return false;
+        return $this->_defaults[$key] ?? false;
     }
 
     /**
@@ -124,7 +122,7 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
 
         $routersInfo = Mage::app()->getStore()->getConfig(self::XML_STORE_ROUTERS_PATH);
 
-        \Maho\Profiler::start('app.init.front_controller.collect_routers');
+        \Maho\Profiler::start('mage::app::init_front_controller::collect_routers');
         foreach ($routersInfo as $routerCode => $routerInfo) {
             if (isset($routerInfo['disabled']) && $routerInfo['disabled']) {
                 continue;
@@ -138,7 +136,7 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
                 $this->addRouter($routerCode, $router);
             }
         }
-        \Maho\Profiler::stop('app.init.front_controller.collect_routers');
+        \Maho\Profiler::stop('mage::app::init_front_controller::collect_routers');
 
         Mage::dispatchEvent('controller_front_init_routers', ['front' => $this]);
 
@@ -168,7 +166,7 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
             $this->_getRequestRewriteController()->rewrite();
         }
 
-        \Maho\Profiler::start('dispatch.routers_match');
+        \Maho\Profiler::start('mage::dispatch::routers_match');
         $i = 0;
         while (!$request->isDispatched() && $i++ < 100) {
             foreach ($this->_routers as $router) {
@@ -178,15 +176,15 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
                 }
             }
         }
-        \Maho\Profiler::stop('dispatch.routers_match');
+        \Maho\Profiler::stop('mage::dispatch::routers_match');
         if ($i > 100) {
             Mage::throwException('Front controller reached 100 router match iterations');
         }
         // This event gives possibility to launch something before sending output (allow cookie setting)
         Mage::dispatchEvent('controller_front_send_response_before', ['front' => $this]);
-        \Maho\Profiler::start('app.dispatch.send_response');
+        \Maho\Profiler::start('mage::app::dispatch::send_response');
         $this->getResponse()->sendResponse();
-        \Maho\Profiler::stop('app.dispatch.send_response');
+        \Maho\Profiler::stop('mage::app::dispatch::send_response');
         Mage::dispatchEvent('controller_front_send_response_after', ['front' => $this]);
         return $this;
     }
@@ -200,10 +198,10 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     protected function _getRequestRewriteController()
     {
         $className = (string) Mage::getConfig()->getNode('global/request_rewrite/model');
-        /** @var Mage_Core_Model_Url_Rewrite_Request $model */
         $model = Mage::getSingleton('core/factory')->getModel($className, [
             'routers' => $this->getRouters(),
         ]);
+        assert($model instanceof \Mage_Core_Model_Url_Rewrite_Request);
         return $model;
     }
 
@@ -260,59 +258,6 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     }
 
     /**
-     * Apply configuration rewrites to current url
-     *
-     * @deprecated since 1.7.0.2. Refactored and moved to Mage_Core_Controller_Request_Rewrite
-     */
-    public function rewrite()
-    {
-        $request = $this->getRequest();
-        $config = Mage::getConfig()->getNode('global/rewrite');
-        if (!$config) {
-            return;
-        }
-        foreach ($config->children() as $rewrite) {
-            $from = (string) $rewrite->from;
-            $to = (string) $rewrite->to;
-            if (empty($from) || empty($to)) {
-                continue;
-            }
-            $from = $this->_processRewriteUrl($from);
-            $to   = $this->_processRewriteUrl($to);
-
-            $pathInfo = preg_replace($from, $to, $request->getPathInfo());
-
-            if (isset($rewrite->complete)) {
-                $request->setPathInfo($pathInfo);
-            } else {
-                $request->rewritePathInfo($pathInfo);
-            }
-        }
-    }
-
-    /**
-     * Replace route name placeholders in url to front name
-     *
-     * @param   string $url
-     * @return  string
-     * @deprecated since 1.7.0.2. Refactored and moved to Mage_Core_Controller_Request_Rewrite
-     */
-    protected function _processRewriteUrl($url)
-    {
-        $startPos = strpos($url, '{');
-        if ($startPos !== false) {
-            $endPos = strpos($url, '}');
-            $routeName = substr($url, $startPos + 1, $endPos - $startPos - 1);
-            $router = $this->getRouterByRoute($routeName);
-            if ($router) {
-                $fronName = $router->getFrontNameByRoute($routeName);
-                $url = str_replace('{' . $routeName . '}', $fronName, $url);
-            }
-        }
-        return $url;
-    }
-
-    /**
      * Auto-redirect to base url (without SID) if the requested url doesn't match it.
      * By default this feature is enabled in configuration.
      *
@@ -327,7 +272,8 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
         $redirectCode = Mage::getStoreConfigAsInt('web/url/redirect_to_base');
         if (!$redirectCode) {
             return;
-        } elseif ($redirectCode != 301) {
+        }
+        if ($redirectCode != 301) {
             $redirectCode = 302;
         }
 
@@ -357,7 +303,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
     }
 
     /**
-     * Redirect to canonical URL if trailing slash doesn't match configured behavior
+     * Normalize request path and redirect to canonical URL if needed
+     *
+     * Handles:
+     * - Consecutive slashes (e.g., //men -> /men)
+     * - Trailing slash based on store configuration
      */
     protected function checkTrailingSlash(Mage_Core_Controller_Request_Http $request): void
     {
@@ -370,7 +320,11 @@ class Mage_Core_Controller_Varien_Front extends Varien_Object
 
         $requestUri = $request->getRequestUri();
 
-        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($requestUri);
+        // Normalize consecutive slashes to single slash
+        $canonicalUri = preg_replace('#/{2,}#', '/', $requestUri);
+
+        // Apply trailing slash configuration
+        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
 
         if ($canonicalUri !== $requestUri) {
             Mage::app()->getFrontController()->getResponse()

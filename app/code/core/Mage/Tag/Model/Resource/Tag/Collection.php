@@ -6,7 +6,7 @@
  * @package    Mage_Tag
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -29,7 +29,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     /**
      * Mapping for fields
      *
-     * @var array
+     * @var array|null
      */
     public $_map               = [
         'fields' => [
@@ -96,7 +96,7 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
             ->joinLeft(
                 ['summary' => $this->getTable('tag/summary')],
                 'relation.tag_id = summary.tag_id AND relation.store_id = summary.store_id',
-                ['popularity'],
+                ['popularity' => 'MAX(summary.popularity)'],
             )
             ->group('main_table.tag_id');
 
@@ -127,11 +127,16 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
             $joinCondition = $this->getConnection()
                     ->quoteInto(' AND ' . $tableAlias . '.store_id IN(?)', $storeId);
 
+            // Use MAX aggregates for PostgreSQL GROUP BY compatibility
             $this->getSelect()
                 ->joinLeft(
                     [$tableAlias => $this->getTable('tag/summary')],
                     'main_table.tag_id = ' . $tableAlias . '.tag_id' . $joinCondition,
-                    ['store_id','popularity', 'customers', 'products',
+                    [
+                        'store_id' => 'MAX(' . $tableAlias . '.store_id)',
+                        'popularity' => 'MAX(' . $tableAlias . '.popularity)',
+                        'customers' => 'MAX(' . $tableAlias . '.customers)',
+                        'products' => 'MAX(' . $tableAlias . '.products)',
                     ],
                 );
 
@@ -244,9 +249,11 @@ class Mage_Tag_Model_Resource_Tag_Collection extends Mage_Core_Model_Resource_Db
     public function addStoreFilter($storeId, $allFilter = true)
     {
         if (!$this->getFlag('store_filter')) {
+            // Join without selecting columns to avoid GROUP BY issues
             $this->getSelect()->joinLeft(
                 ['summary_store' => $this->getTable('tag/summary')],
                 'main_table.tag_id = summary_store.tag_id',
+                [],
             );
 
             $this->getSelect()->where('summary_store.store_id IN (?)', $storeId);

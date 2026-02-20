@@ -6,7 +6,7 @@
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -821,106 +821,5 @@ class Mage_Catalog_Model_Resource_Setup extends Mage_Eav_Model_Entity_Setup
                 ],
             ],
         ];
-    }
-
-    /**
-     * Converts old tree to new
-     *
-     * @deprecated since 1.5.0.0
-     * @return $this
-     */
-    public function convertOldTreeToNew()
-    {
-        if (!Mage::getModel('catalog/category')->load(1)->getId()) {
-            Mage::getModel('catalog/category')->setId(1)->setPath(1)->save();
-        }
-
-        $categories = [];
-
-        $select = $this->getConnection()->select();
-        $select->from($this->getTable('catalog/category'));
-        $categories = $this->getConnection()->fetchAll($select);
-
-        if (is_array($categories)) {
-            foreach ($categories as $category) {
-                $path = $this->_getCategoryPath($category);
-                $path = array_reverse($path);
-                $path = implode('/', $path);
-                if ($category['entity_id'] != 1 && !str_starts_with($path, '1/')) {
-                    $path = "1/{$path}";
-                }
-
-                $this
-                    ->getConnection()
-                    ->update(
-                        $this->getTable('catalog/category'),
-                        ['path' => $path],
-                        ['entity_id = ?' => $category['entity_id']],
-                    );
-            }
-        }
-        return $this;
-    }
-
-    /**
-     * Returns category entity row by category id
-     *
-     * @param int $entityId
-     * @return array
-     */
-    protected function _getCategoryEntityRow($entityId)
-    {
-        $select = $this->getConnection()->select();
-
-        $select->from($this->getTable('catalog/category'));
-        $select->where('entity_id = :entity_id');
-
-        return $this->getConnection()->fetchRow($select, ['entity_id' => $entityId]);
-    }
-
-    /**
-     * Returns category path as array
-     *
-     * @param array $category
-     * @param array $path
-     * @return array
-     */
-    protected function _getCategoryPath($category, $path = [])
-    {
-        $path[] = $category['entity_id'];
-
-        if ($category['parent_id'] != 0) {
-            $parentCategory = $this->_getCategoryEntityRow($category['parent_id']);
-            if ($parentCategory) {
-                $path = $this->_getCategoryPath($parentCategory, $path);
-            }
-        }
-
-        return $path;
-    }
-
-    /**
-     * Creates level values for categories and saves them
-     *
-     * @deprecated since 1.5.0.0
-     * @return $this
-     */
-    public function rebuildCategoryLevels()
-    {
-        $adapter = $this->getConnection();
-        $select = $adapter->select()
-            ->from($this->getTable('catalog/category'));
-
-        $categories = $adapter->fetchAll($select);
-
-        foreach ($categories as $category) {
-            $level = count(explode('/', $category['path'])) - 1;
-            $adapter->update(
-                $this->getTable('catalog/category'),
-                ['level' => $level],
-                ['entity_id = ?' => $category['entity_id']],
-            );
-        }
-        return $this;
     }
 }

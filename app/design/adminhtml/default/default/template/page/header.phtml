@@ -5,7 +5,7 @@
  * @package     default_default
  * @copyright   Copyright (c) 2006-2018 Magento, Inc. (https://magento.com)
  * @copyright   Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright   Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
@@ -16,25 +16,11 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 242 237" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"><g transform="matrix(.710571 0 0 .710571 -564.814 315.583)"><clipPath id="A"><path d="M844.242-396.422h241.346v236.975H844.242z"/></clipPath><g clip-path="url(#A)"><path d="M1075.34-395.845c5.8 0 10.49 4.654 10.49 10.392v109.133c0 64.867-53.09 117.45-118.569 117.45h-112.28c-5.796 0-10.496-4.654-10.496-10.396v-115.717c0-61.225 50.113-110.863 111.929-110.863h118.926v.001zm-111.229 40.954c-42.454 0-76.871 34.088-76.871 76.142s34.417 76.138 76.871 76.138c42.459 0 76.869-34.088 76.869-76.138s-34.41-76.142-76.869-76.142z" fill="#d7df22"/></g></g></svg>
 	</a>
     <div class="header-right">
-        <ul id="usermenu">
-        	<li onmouseover="this.classList.add('over')" onmouseout="this.classList.remove('over')" class="parent level0 usermenulabel">
-        		<a href="#" onclick="return false" title="<?= $this->__('User Menu') ?>">
-                    <svg version="1.1" id="burger" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="40px" height="40px" viewBox="0 0 40 40" enable-background="new 0 0 40 40" xml:space="preserve">
-                        <rect opacity="0.25" fill="#FFFFFF" width="40" height="40"></rect>
-                        <path fill="#FFFFFF" d="M31,21H9v-2h22V21z M31,17H9v-2h22V17z M31,25H9v-2h22V25z"></path>
-                    </svg>
-                </a>
-			    <ul>
-                    <li><a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>"><span><?= $this->__("Logged in as %s", $this->escapeHtml($this->getUser()->getUsername())) ?></span></a></li>
-			    	<li class="last"><a href="<?= $this->getLogoutLink() ?>"><span><?= $this->__('Log Out') ?></span></a></li>
-		        </ul>
-		    </li>
-		</ul>
         <?php if (Mage::getStoreConfigFlag('admin/global_search/enable') && Mage::getSingleton('admin/session')->isAllowed('admin/global_search')): ?>
         <fieldset>
             <legend>Search</legend>
             <span id="global_search_indicator" class="autocomplete-indicator" style="display: none">
-                <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>" class="v-middle"/>
+                <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading...')) ?>" />
             </span>
             <?php $defSearch = $this->__('Global Record Search') ?>
             <input id="global_search" name="query" type="text" class="input-text" value="<?php if(!empty($query)): ?><?= $query ?><?php else: ?><?= $this->quoteEscape($defSearch) ?><?php endif ?>" onfocus="if(this.value=='<?= $this->quoteEscape($defSearch, true) ?>')this.value=''; " onblur="if(this.value=='')this.value='<?= $defSearch ?>';" autocomplete="off" />
@@ -79,5 +65,13 @@
             </script>
         </fieldset>
         <?php endif ?>
+        <div class="user-menu-icons">
+            <a href="<?= Mage::helper("adminhtml")->getUrl("adminhtml/system_account") ?>" class="user-icon" title="<?= $this->__("My Account") ?>">
+                <?= $this->getIconSvg('user') ?>
+            </a>
+            <a href="<?= $this->getLogoutLink() ?>" class="logout-icon" title="<?= $this->__('Log Out') ?>">
+                <?= $this->getIconSvg('logout') ?>
+            </a>
+        </div>
     </div>
 </div>

@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -75,8 +75,9 @@ describe('Parameter Binding and SQL Injection Protection', function () {
             $malicious,
         );
 
-        // Should contain escaped value - Doctrine escapes properly
-        expect($sql)->toContain("\\'");
+        // Should contain escaped value - MySQL uses \', PostgreSQL uses ''
+        // Both should properly escape the malicious input
+        expect($sql)->toMatch("/\\\\'|''/"); // Either \' (MySQL) or '' (PostgreSQL)
         expect($sql)->not->toContain("' OR '1'='1");
     });
 
@@ -242,7 +243,9 @@ describe('Quote Methods', function () {
         $tableName = 'users';
         $quoted = $this->adapter->quoteIdentifier($tableName);
 
-        expect($quoted)->toBe('`users`');
+        // MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
+        expect($quoted)->toBe("{$q}users{$q}");
     });
 
     it('quotes column names with aliases', function () {
@@ -251,9 +254,11 @@ describe('Quote Methods', function () {
 
         $quoted = $this->adapter->quoteColumnAs($column, $alias);
 
-        expect($quoted)->toContain('`user_id`');
+        // MySQL uses backticks, PostgreSQL and SQLite use double quotes
+        $q = $this->adapter instanceof \Maho\Db\Adapter\Pdo\Mysql ? '`' : '"';
+        expect($quoted)->toContain("{$q}user_id{$q}");
         expect($quoted)->toContain('AS');
-        expect($quoted)->toContain('`id`');
+        expect($quoted)->toContain("{$q}id{$q}");
     });
 
     it('quotes expressions correctly', function () {

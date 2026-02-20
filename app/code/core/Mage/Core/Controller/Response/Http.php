@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -27,7 +27,7 @@ class Mage_Core_Controller_Response_Http
     /**
      * Transport object for observers to perform
      */
-    protected static ?Varien_Object $_transportObject = null;
+    protected static ?\Maho\DataObject $_transportObject = null;
 
     /**
      * Array of headers
@@ -48,11 +48,6 @@ class Mage_Core_Controller_Response_Http
      * Flag; is this response a redirect?
      */
     protected bool $_isRedirect = false;
-
-    /**
-     * Whether or not to render exceptions
-     */
-    protected bool $_renderExceptions = false;
 
     /**
      * Array of exceptions
@@ -145,7 +140,7 @@ class Mage_Core_Controller_Response_Http
          * Use single transport object instance
          */
         if (self::$_transportObject === null) {
-            self::$_transportObject = new Varien_Object();
+            self::$_transportObject = new \Maho\DataObject();
         }
         self::$_transportObject->setUrl($url);
         self::$_transportObject->setCode($code);
@@ -437,13 +432,11 @@ class Mage_Core_Controller_Response_Http
     {
         if (false === $spec) {
             return $this->outputBody();
-        } elseif (true === $spec) {
-            return $this->_body;
-        } elseif (isset($this->_body[$spec])) {
-            return $this->_body[$spec];
         }
-
-        return '';
+        if (true === $spec) {
+            return $this->_body;
+        }
+        return $this->_body[$spec] ?? '';
     }
 
     /**
@@ -691,18 +684,6 @@ class Mage_Core_Controller_Response_Http
     }
 
     /**
-     * Flag; are exceptions being rendered?
-     */
-    public function renderExceptions(bool|null $flag = null): bool
-    {
-        if (null !== $flag) {
-            $this->_renderExceptions = (bool) $flag;
-        }
-
-        return $this->_renderExceptions;
-    }
-
-    /**
      * Send the response, including all headers
      */
     public function sendResponse(): void
@@ -718,15 +699,6 @@ class Mage_Core_Controller_Response_Http
         }
 
         $this->sendHeaders();
-
-        if ($this->isException() && $this->renderExceptions()) {
-            $exceptions = '';
-            foreach ($this->getException() as $e) {
-                $exceptions .= $e->__toString() . "\n";
-            }
-            echo $exceptions;
-            return;
-        }
 
         echo $this->outputBody();
     }
@@ -945,7 +917,7 @@ class Mage_Core_Controller_Response_Http
                 return '';
             },
             $html,
-        );
+        ) ?? $html;
 
         // Prepare scripts for bottom insertion
         $scriptsHtml = '';

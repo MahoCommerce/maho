@@ -6,7 +6,7 @@
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2015-2025 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -63,7 +63,7 @@ class Mage_Core_Model_Layout_Update
     protected $_handles = [];
 
     /**
-     * Substitution values in structure array('from'=>array(), 'to'=>array())
+     * Substitution values in structure ['from'=>[], 'to'=>[]]
      *
      * @var array
      */
@@ -334,12 +334,12 @@ class Mage_Core_Model_Layout_Update
      */
     public function fetchPackageLayoutUpdates($handle)
     {
-        $profilerKey = 'layout.package_update.' . $handle;
+        $profilerKey = 'layout/package_update: ' . $handle;
         \Maho\Profiler::start($profilerKey);
         if (empty($this->_packageLayout)) {
             $this->fetchFileLayoutUpdates();
         }
-        /** @var Varien_Simplexml_Element $updateXml */
+        /** @var \Maho\Simplexml\Element $updateXml */
         foreach ($this->_packageLayout->$handle as $updateXml) {
             $this->fetchRecursiveUpdates($updateXml);
             $this->addUpdate($updateXml->innerXml());
@@ -355,7 +355,7 @@ class Mage_Core_Model_Layout_Update
      */
     public function fetchDbLayoutUpdates($handle)
     {
-        $profilerKey = 'layout.db_update.' . $handle;
+        $profilerKey = 'layout/db_update: ' . $handle;
         \Maho\Profiler::start($profilerKey);
         $updateStr = $this->_getUpdateString($handle);
         if (!$updateStr) {
@@ -364,7 +364,7 @@ class Mage_Core_Model_Layout_Update
         }
         $updateStr = '<update_xml>' . $updateStr . '</update_xml>';
         $updateStr = str_replace($this->_subst['from'], $this->_subst['to'], $updateStr);
-        /** @var Varien_Simplexml_Element $updateXml */
+        /** @var \Maho\Simplexml\Element $updateXml */
         $updateXml = simplexml_load_string($updateStr, $this->getElementClass());
         $this->fetchRecursiveUpdates($updateXml);
         $this->addUpdate($updateXml->innerXml());
@@ -456,7 +456,7 @@ class Mage_Core_Model_Layout_Update
             }
             $fileStr = file_get_contents($filename);
             $fileStr = str_replace($this->_subst['from'], $this->_subst['to'], $fileStr);
-            /** @var Varien_Simplexml_Element $fileXml */
+            /** @var \Maho\Simplexml\Element $fileXml */
             $fileXml = simplexml_load_string($fileStr, $elementClass);
             if (!$fileXml instanceof SimpleXMLElement) {
                 continue;

@@ -37,13 +37,13 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
      * @param bool|string $sorted
      * @param bool $asCollection
      * @param bool $toLoad
-     * @return array|Mage_Catalog_Model_Resource_Category_Collection|Varien_Data_Collection|Varien_Data_Tree_Node_Collection
+     * @return array|Mage_Catalog_Model_Resource_Category_Collection|\Maho\Data\Collection|\Maho\Data\Tree\Node\Collection
      * @throws Mage_Core_Model_Store_Exception
      */
     public function getStoreCategories($sorted = false, $asCollection = false, $toLoad = true)
     {
         $parent     = Mage::app()->getStore()->getRootCategoryId();
-        $cacheKey   = sprintf('%d-%d-%d-%d', $parent, $sorted, $asCollection, $toLoad);
+        $cacheKey   = sprintf('%d-%d-%d-%d', $parent, (int) $sorted, (int) $asCollection, (int) $toLoad);
         if (isset($this->_storeCategories[$cacheKey])) {
             return $this->_storeCategories[$cacheKey];
         }
@@ -55,7 +55,7 @@ class Mage_Catalog_Helper_Category extends Mage_Core_Helper_Abstract
         /** @var Mage_Catalog_Model_Category $category */
         if (!$category->checkId($parent)) {
             if ($asCollection) {
-                return new Varien_Data_Collection();
+                return new \Maho\Data\Collection();
             }
             return [];
         }

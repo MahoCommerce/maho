@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -15,14 +17,14 @@ abstract class Mage_Core_Model_Resource_Entity_Abstract
     /**
      * Configuration object
      *
-     * @var Varien_Simplexml_Config
+     * @var \Maho\Simplexml\Config
      */
     protected $_config = [];
 
     /**
      * Set config
      *
-     * @param Varien_Simplexml_Config $config
+     * @param \Maho\Simplexml\Config $config
      */
     public function __construct($config)
     {
@@ -39,10 +41,7 @@ abstract class Mage_Core_Model_Resource_Entity_Abstract
     {
         if ($key === '') {
             return $this->_config;
-        } elseif (isset($this->_config->$key)) {
-            return $this->_config->$key;
-        } else {
-            return false;
         }
+        return $this->_config->$key ?? false;
     }
 }

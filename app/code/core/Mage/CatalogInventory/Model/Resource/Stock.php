@@ -6,7 +6,7 @@
  * @package    Mage_CatalogInventory
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2016-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -244,9 +244,9 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
             . ' AND ((use_config_min_qty = 1 AND qty <= %5$d) OR (use_config_min_qty = 0 AND qty <= min_qty))'
             . ' AND product_id IN (%6$s)',
             $this->_stock->getId(),
-            $this->_isConfigManageStock,
+            (int) $this->_isConfigManageStock,
             Mage_CatalogInventory_Model_Stock::BACKORDERS_NO,
-            $this->_isConfigBackorders,
+            (int) $this->_isConfigBackorders,
             $this->_configMinQty,
             $select->assemble(),
         );
@@ -277,7 +277,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
             . ' AND ((use_config_min_qty = 1 AND qty > %3$d) OR (use_config_min_qty = 0 AND qty > min_qty))'
             . ' AND product_id IN (%4$s)',
             $this->_stock->getId(),
-            $this->_isConfigManageStock,
+            (int) $this->_isConfigManageStock,
             $this->_configMinQty,
             $select->assemble(),
         );
@@ -313,7 +313,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
             . ' AND ((use_config_manage_stock = 1 AND 1 = %2$d) OR (use_config_manage_stock = 0 AND manage_stock = 1))'
             . ' AND product_id IN (%3$s)',
             $this->_stock->getId(),
-            $this->_isConfigManageStock,
+            (int) $this->_isConfigManageStock,
             $select->assemble(),
         );
 

@@ -6,7 +6,7 @@
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
- * @copyright  Copyright (c) 2024-2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -60,9 +60,8 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
             return $this->getCategory()->getId()
                 ? (int) $this->getCategory()->getId()
                 : null;
-        } else {
-            return Mage_Catalog_Model_Category::TREE_ROOT_ID;
         }
+        return Mage_Catalog_Model_Category::TREE_ROOT_ID;
     }
 
     /**
@@ -145,7 +144,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
      *
      * @param Mage_Catalog_Model_Category|int|string $parentNodeCategory
      * @param int $recursionLevel how many levels to load
-     * @return Varien_Data_Tree_Node|null
+     * @return \Maho\Data\Tree\Node|null
      */
     public function getRoot($parentNodeCategory = null, $recursionLevel = null)
     {
@@ -204,7 +203,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
      *
      * @param array $ids list of category ids
      * @param int $recursionLevel how many levels to load
-     * @return Varien_Data_Tree_Node|null
+     * @return \Maho\Data\Tree\Node|null
      */
     public function getRootByIds($ids, $recursionLevel = null)
     {
@@ -250,7 +249,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
      *
      * @param Mage_Catalog_Model_Category $parentNodeCategory
      * @param int $recursionLevel how many levels to load
-     * @return Varien_Data_Tree_Node|null
+     * @return \Maho\Data\Tree\Node|null
      */
     public function getNode($parentNodeCategory, $recursionLevel = null)
     {
@@ -329,7 +328,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     /**
      * Get JSON of a tree node or an associative array
      */
-    public function getNodeJson(Varien_Data_Tree_Node|array $node, int $level = 0): array
+    public function getNodeJson(\Maho\Data\Tree\Node|array $node, int $level = 0): array
     {
         return $this->_getNodeJson($node, $level);
     }
@@ -337,7 +336,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     /**
      * Get JSON of a tree node or an associative array
      *
-     * @param Varien_Data_Tree_Node|array $node
+     * @param \Maho\Data\Tree\Node|array $node
      * @param int $level
      * @return array
      */
@@ -345,7 +344,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     {
         // create a node from data array
         if (is_array($node)) {
-            $node = new Varien_Data_Tree_Node($node, 'entity_id', new Varien_Data_Tree());
+            $node = new \Maho\Data\Tree\Node($node, 'entity_id', new \Maho\Data\Tree());
         }
 
         $item = [
@@ -384,7 +383,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     /**
      * Get category name
      *
-     * @param Varien_Object $node
+     * @param \Maho\DataObject $node
      * @return string
      */
     public function buildNodeName($node)
@@ -399,7 +398,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Abstract extends Mage_Adminhtml_Bloc
     /**
      * Check if the node contains children categories that are selected
      *
-     * @param Varien_Object $node
+     * @param \Maho\DataObject $node
      * @return bool
      */
     protected function _isParentSelectedCategory($node)
