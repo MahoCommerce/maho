@@ -83,10 +83,11 @@ class Maho_OpenTelemetry_Model_Http_TracedClient extends Mage_Core_Model_Abstrac
             $response = $this->_client->request($method, $url, $options);
 
             // Add response data
+            $statusCode = $response->getStatusCode();
             $span->setAttributes([
-                'http.status_code' => $response->getStatusCode(),
+                'http.status_code' => $statusCode,
             ]);
-            $span->setStatus('ok');
+            $span->setStatus($statusCode >= 500 ? 'error' : 'ok');
 
             return $response;
         } catch (\Throwable $e) {

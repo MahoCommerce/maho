@@ -22,9 +22,16 @@ class Profiler
 
     /**
      * Stack of active OpenTelemetry spans indexed by timer name
-     * @var array<string, mixed>
+     * @var array<string, \Maho_OpenTelemetry_Model_Span>
      */
     private static array $_spans = [];
+
+    /**
+     * Whether OpenTelemetry tracing is available (cached after first check)
+     * - null = not checked yet
+     * - true/false = checked
+     */
+    private static ?bool $_tracingAvailable = null;
 
     public static function enable(): void
     {
@@ -81,9 +88,15 @@ class Profiler
     {
         self::resume($timerName);
 
-        // OpenTelemetry: Create span if not already exists for this timer
-        if (!isset(self::$_spans[$timerName])) {
-            self::$_spans[$timerName] = \Mage::startSpan($timerName, $attributes);
+        // OpenTelemetry: Create span if tracing available and not already exists for this timer
+        if (self::$_tracingAvailable !== false && !isset(self::$_spans[$timerName])) {
+            $span = \Mage::startSpan($timerName, $attributes);
+            if ($span !== null) {
+                self::$_spans[$timerName] = $span;
+                self::$_tracingAvailable = true;
+            } else {
+                self::$_tracingAvailable = false;
+            }
         }
     }
 
