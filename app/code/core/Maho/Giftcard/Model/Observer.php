@@ -495,63 +495,6 @@ class Maho_Giftcard_Model_Observer
     }
 
     /**
-     * Add gift card total to admin order view
-     *
-     * @return void
-     */
-    public function addGiftcardTotalToAdminOrder(Maho\Event\Observer $observer)
-    {
-        $block = $observer->getEvent()->getBlock();
-
-        // Check if this is an order totals block
-        if ($block->getNameInLayout() != 'order_totals') {
-            return;
-        }
-
-        $order = $block->getOrder();
-        if (!$order || !$order->getId()) {
-            return;
-        }
-
-        $giftcardAmount = $order->getGiftcardAmount();
-
-        if ($giftcardAmount != 0) {
-            // Get gift card codes for display
-            $codes = [];
-            $giftcardCodes = $order->getGiftcardCodes();
-            if ($giftcardCodes) {
-                $codesArray = json_decode($giftcardCodes, true);
-                if (is_array($codesArray)) {
-                    // Show partial codes for security
-                    foreach (array_keys($codesArray) as $code) {
-                        if (strlen($code) > 10) {
-                            $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                        } else {
-                            $codes[] = $code;
-                        }
-                    }
-                }
-            }
-
-            $label = Mage::helper('giftcard')->__('Gift Cards');
-            if ($codes !== []) {
-                $label .= ' (' . implode(', ', $codes) . ')';
-            }
-
-            $total = new Maho\DataObject([
-                'code'       => 'giftcard',
-                'value'      => -abs((float) $giftcardAmount),
-                'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
-                'label'      => $label,
-                'strong'     => false,
-            ]);
-
-            // Add after tax, before grand_total
-            $block->addTotal($total, 'tax');
-        }
-    }
-
-    /**
      * Refund gift card balance when credit memo is created
      *
      * @return void
