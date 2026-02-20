@@ -369,7 +369,7 @@ class Mage_Core_Model_App
 
             // OpenTelemetry: Add response data to span
             if ($rootSpan) {
-                $statusCode = http_response_code();
+                $statusCode = http_response_code() ?: 200;
                 $rootSpan->setAttributes([
                     'http.status_code' => $statusCode,
                     'http.response_size' => (int) (ob_get_length() ?: 0),
