@@ -308,6 +308,7 @@ class Mysql extends AbstractPdoAdapter
 
             // OpenTelemetry: Add SQL operation type after _prepareQuery() converts to string
             if ($span) {
+                /** @var string $sql _prepareQuery() converts Select to string via (string) cast */
                 $span->setAttribute('db.operation', $this->_getOperationType($sql));
             }
 
@@ -336,6 +337,7 @@ class Mysql extends AbstractPdoAdapter
 
             // OpenTelemetry: Record exception in span
             $span?->recordException($e);
+            $span?->setStatus('error', $e->getMessage());
 
             // Detect implicit rollback - MySQL SQLSTATE: ER_LOCK_WAIT_TIMEOUT or ER_LOCK_DEADLOCK
             $previous = $e->getPrevious();

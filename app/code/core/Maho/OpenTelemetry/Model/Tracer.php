@@ -274,13 +274,22 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             return;
         }
 
+        // End any remaining spans in reverse order (child spans first)
+        $remainingSpans = array_reverse($this->_spanStack);
+        $this->_spanStack = [];
+        foreach ($remainingSpans as $span) {
+            try {
+                $span->end();
+            } catch (\Throwable $e) {
+                // Ignore errors ending orphaned spans
+            }
+        }
+
         try {
             $this->_tracerProvider->forceFlush();
         } catch (\Throwable $e) {
             Mage::log('Failed to flush telemetry: ' . $e->getMessage(), Mage::LOG_ERROR);
         }
-
-        $this->_spanStack = [];
     }
 
     /**
