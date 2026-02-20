@@ -44,7 +44,7 @@ class Client
         if ($tracer && $tracer->isEnabled()) {
             // Check if TracedHttpClient class exists (from OpenTelemetry module)
             if (class_exists('Maho_OpenTelemetry_Model_Http_TracedClient')) {
-                $tracedClient = \Mage::getModel('opentelemetry/http_tracedClient');
+                $tracedClient = \Mage::getModel('opentelemetry/http_tracedclient');
                 if ($tracedClient) {
                     $tracedClient->setClient($client);
                     $tracedClient->setTracer($tracer);

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 use OpenTelemetry\API\Trace\SpanInterface;
 use OpenTelemetry\API\Trace\StatusCode;
+use OpenTelemetry\Context\ScopeInterface;
 
 /**
  * OpenTelemetry Span Implementation
@@ -26,18 +27,35 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
     private ?SpanInterface $_sdkSpan = null;
 
     /**
+     * The scope from activating this span in the OTel Context
+     */
+    private ?ScopeInterface $_scope = null;
+
+    /**
      * Reference to the tracer that created this span
      */
     private ?Maho_OpenTelemetry_Model_Tracer $_tracer = null;
 
     /**
-     * Set the underlying SDK span
+     * Set the underlying SDK span and activate it in the OpenTelemetry Context
+     *
+     * Activation is required so that child spans created later will automatically
+     * be nested under this span. Without activation, all spans appear as root spans.
      *
      * @return $this
      */
     public function setSdkSpan(SpanInterface $span): self
     {
         $this->_sdkSpan = $span;
+
+        // Activate the span so child spans are nested correctly
+        try {
+            $this->_scope = $span->activate();
+        } catch (\Throwable $e) {
+            // Activation failure should not break the application
+            error_log('OpenTelemetry: Failed to activate span: ' . $e->getMessage());
+        }
+
         return $this;
     }
 
@@ -149,10 +167,20 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
     }
 
     /**
-     * End the span
+     * End the span and detach its scope from the OpenTelemetry Context
      */
     public function end(): void
     {
+        // Detach the scope first to restore the parent context
+        if ($this->_scope) {
+            try {
+                $this->_scope->detach();
+            } catch (\Throwable $e) {
+                error_log('OpenTelemetry: Failed to detach span scope: ' . $e->getMessage());
+            }
+            $this->_scope = null;
+        }
+
         if ($this->_sdkSpan) {
             try {
                 $this->_sdkSpan->end();

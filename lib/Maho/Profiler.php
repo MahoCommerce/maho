@@ -26,13 +26,6 @@ class Profiler
      */
     private static array $_spans = [];
 
-    /**
-     * Whether OpenTelemetry tracing is available (cached after first check)
-     * - null = not checked yet
-     * - true/false = checked
-     */
-    private static ?bool $_tracingAvailable = null;
-
     public static function enable(): void
     {
         self::$_enabled = true;
@@ -88,14 +81,12 @@ class Profiler
     {
         self::resume($timerName);
 
-        // OpenTelemetry: Create span if tracing available and not already exists for this timer
-        if (self::$_tracingAvailable !== false && !isset(self::$_spans[$timerName])) {
+        // OpenTelemetry: Create span if not already exists for this timer
+        // Mage::startSpan() has its own fast-path caching (~0.01μs when tracer is disabled)
+        if (!isset(self::$_spans[$timerName])) {
             $span = \Mage::startSpan($timerName, $attributes);
             if ($span !== null) {
                 self::$_spans[$timerName] = $span;
-                self::$_tracingAvailable = true;
-            } else {
-                self::$_tracingAvailable = false;
             }
         }
     }

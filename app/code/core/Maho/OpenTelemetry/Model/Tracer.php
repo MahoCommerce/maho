@@ -143,17 +143,6 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Initialize tracer with configuration
-     *
-     * @return $this
-     */
-    public function init(array $config): self
-    {
-        // Legacy init method - not used in current implementation
-        return $this;
-    }
-
-    /**
      * Start a root span (top-level span for a trace)
      */
     public function startRootSpan(string $name, array $attributes = []): Maho_OpenTelemetry_Model_Span
