@@ -309,7 +309,12 @@ class Mage_Cron_Model_Observer
                 ->setExecutedAt(Mage::getSingleton('core/date')->gmtDate())
                 ->save();
 
+            \Maho\Profiler::start('cron.job.execute', [
+                'cron.job_code' => $schedule->getJobCode(),
+                'cron.model' => (string) $runConfig->model,
+            ]);
             call_user_func_array($callback, $arguments);
+            \Maho\Profiler::stop('cron.job.execute');
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)

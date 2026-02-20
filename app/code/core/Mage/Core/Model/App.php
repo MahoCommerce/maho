@@ -327,14 +327,7 @@ class Mage_Core_Model_App
      */
     public function run($params)
     {
-        // OpenTelemetry: Start root span immediately for entire request
-        $rootSpan = Mage::getTracer()?->startRootSpan('http.request', [
-            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'CLI',
-            'http.url' => $_SERVER['REQUEST_URI'] ?? '',
-            'http.host' => $_SERVER['HTTP_HOST'] ?? '',
-            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
-            'http.user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-        ]);
+        $rootSpan = null;
 
         try {
             $options = $params['options'] ?? [];
@@ -343,6 +336,15 @@ class Mage_Core_Model_App
 
             $this->_initModules();
             $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
+
+            // OpenTelemetry: Start root span after modules are loaded so tracer can initialize
+            $rootSpan = Mage::getTracer()?->startRootSpan('http.request', [
+                'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'CLI',
+                'http.url' => $_SERVER['REQUEST_URI'] ?? '',
+                'http.host' => $_SERVER['HTTP_HOST'] ?? '',
+                'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+                'http.user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
+            ]);
 
             if ($this->_config->isLocalConfigLoaded()) {
                 $scopeCode = $params['scope_code'] ?? '';

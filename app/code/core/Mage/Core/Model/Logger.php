@@ -135,7 +135,8 @@ class Mage_Core_Model_Logger
                 $logger->pushHandler($traceContextHandler);
             } catch (\Throwable $e) {
                 // Silently fail - telemetry should never break logging
-                Mage::log('Failed to add trace context handler: ' . $e->getMessage(), Mage::LOG_WARNING);
+                // Use error_log() to avoid re-entrant createLogger() → stack overflow
+                error_log('Failed to add trace context handler: ' . $e->getMessage());
             }
         }
 

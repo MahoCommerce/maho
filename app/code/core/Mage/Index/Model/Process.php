@@ -180,7 +180,12 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
             } else {
                 //Update existing events since we'll do reindexAll
                 $eventResource->updateProcessEvents($this);
+                \Maho\Profiler::start('index.reindex', [
+                    'index.code' => (string) $this->getIndexerCode(),
+                    'index.name' => (string) $this->getIndexer()->getName(),
+                ]);
                 $this->getIndexer()->reindexAll();
+                \Maho\Profiler::stop('index.reindex');
             }
             $this->unlock();
 

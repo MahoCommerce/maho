@@ -39,6 +39,12 @@ class Profiler
 
     public static function reset(string $timerName): void
     {
+        // End and clean up any existing OpenTelemetry span for this timer
+        if (isset(self::$_spans[$timerName])) {
+            self::$_spans[$timerName]->end();
+            unset(self::$_spans[$timerName]);
+        }
+
         self::$_timers[$timerName] = [
             'start' => false,
             'count' => 0,

@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Maho_OpenTelemetry
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -26,6 +26,11 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
     private ?SpanInterface $_sdkSpan = null;
 
     /**
+     * Reference to the tracer that created this span
+     */
+    private ?Maho_OpenTelemetry_Model_Tracer $_tracer = null;
+
+    /**
      * Set the underlying SDK span
      *
      * @return $this
@@ -42,6 +47,17 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
     public function getSdkSpan(): ?SpanInterface
     {
         return $this->_sdkSpan;
+    }
+
+    /**
+     * Set the tracer that created this span
+     *
+     * @return $this
+     */
+    public function setTracer(Maho_OpenTelemetry_Model_Tracer $tracer): self
+    {
+        $this->_tracer = $tracer;
+        return $this;
     }
 
     /**
@@ -144,6 +160,9 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
                 Mage::log('Failed to end span: ' . $e->getMessage(), Mage::LOG_ERROR);
             }
         }
+
+        // Pop this span from the tracer's stack
+        $this->_tracer?->popSpan($this);
     }
 
     /**

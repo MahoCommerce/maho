@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @package    Maho_OpenTelemetry
- * @copyright  Copyright (c) 2025 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -101,7 +101,7 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             $transport = (new OtlpHttpTransportFactory())->create(
                 $endpoint,
                 'application/json',
-                $this->_getHeaders($helper),
+                $helper->getHeaders(),
             );
 
             $exporter = new SpanExporter($transport);
@@ -141,21 +141,6 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             Mage::logException($e);
             return false;
         }
-    }
-
-    /**
-     * Get headers for OTLP exporter
-     */
-    private function _getHeaders(Maho_OpenTelemetry_Helper_Data $helper): array
-    {
-        $headers = $helper->getHeaders();
-        $formatted = [];
-
-        foreach ($headers as $key => $value) {
-            $formatted[$key] = $value;
-        }
-
-        return $formatted;
     }
 
     /**
@@ -319,12 +304,27 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Pop a span from the stack when it ends
+     */
+    public function popSpan(Maho_OpenTelemetry_Model_Span $span): void
+    {
+        // Remove the span from the stack (search from end for efficiency)
+        for ($i = count($this->_spanStack) - 1; $i >= 0; $i--) {
+            if ($this->_spanStack[$i] === $span) {
+                array_splice($this->_spanStack, $i, 1);
+                break;
+            }
+        }
+    }
+
+    /**
      * Create a span wrapping an SDK span
      */
     private function _createSpan(SpanInterface $sdkSpan): Maho_OpenTelemetry_Model_Span
     {
         $span = Mage::getModel('opentelemetry/span');
         $span->setSdkSpan($sdkSpan);
+        $span->setTracer($this);
         return $span;
     }
 

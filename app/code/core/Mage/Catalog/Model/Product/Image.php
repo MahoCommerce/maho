@@ -509,6 +509,12 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function saveFile(): self
     {
+        \Maho\Profiler::start('image.process', [
+            'image.width' => (string) $this->getWidth(),
+            'image.height' => (string) $this->getHeight(),
+            'image.destination' => (string) $this->getNewFile(),
+        ]);
+
         match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
             IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
             IMAGETYPE_GIF => $this->getImage()->toGif(),
@@ -520,6 +526,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $filename = $this->getNewFile();
         @mkdir(dirname($filename), recursive: true);
         $this->getImage()->save($filename);
+
+        \Maho\Profiler::stop('image.process');
         return $this;
     }
 

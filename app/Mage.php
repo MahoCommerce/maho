@@ -659,15 +659,6 @@ final class Mage
      */
     public static function run($code = '', $type = 'store', $options = [])
     {
-        $attributes = [
-            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'GET',
-            'http.url' => $_SERVER['REQUEST_URI'] ?? '/',
-            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
-            'http.user_agent' => $_SERVER['HTTP_USER_AGENT'] ?? '',
-        ];
-
-        \Maho\Profiler::start('http.request', $attributes);
-
         try {
             \Maho\Profiler::start('mage');
             self::setRoot();
@@ -688,15 +679,12 @@ final class Mage
             ]);
             \Maho\Profiler::stop('mage');
         } catch (Mage_Core_Model_Session_Exception $e) {
-            \Maho\Profiler::stop('http.request');
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
-            \Maho\Profiler::stop('http.request');
             Maho::errorReport([], 404);
             die();
         } catch (Exception $e) {
-            \Maho\Profiler::stop('http.request');
             if (self::isInstalled()) {
                 self::dispatchEvent('mage_run_installed_exception', ['exception' => $e]);
                 self::printException($e);
