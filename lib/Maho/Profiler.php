@@ -26,6 +26,21 @@ class Profiler
      */
     private static array $_spans = [];
 
+    /**
+     * Profiler timer prefixes that should create OpenTelemetry spans.
+     * Only meaningful high-level operations are included to avoid noise.
+     */
+    private static array $_spanPrefixes = [
+        'mage::app::init',
+        'mage::app::dispatch',
+        'mage::dispatch',
+        'mage::app::init_front_controller',
+        'dispatch.controller.action',
+        'OBSERVER:',
+        'cron.job',
+        'email.send',
+    ];
+
     public static function enable(): void
     {
         self::$_enabled = true;
@@ -39,12 +54,6 @@ class Profiler
 
     public static function reset(string $timerName): void
     {
-        // End and clean up any existing OpenTelemetry span for this timer
-        if (isset(self::$_spans[$timerName])) {
-            self::$_spans[$timerName]->end();
-            unset(self::$_spans[$timerName]);
-        }
-
         self::$_timers[$timerName] = [
             'start' => false,
             'count' => 0,
@@ -81,12 +90,14 @@ class Profiler
     {
         self::resume($timerName);
 
-        // OpenTelemetry: Create span if not already exists for this timer
-        // Mage::startSpan() has its own fast-path caching (~0.01μs when tracer is disabled)
-        if (!isset(self::$_spans[$timerName])) {
-            $span = \Mage::startSpan($timerName, $attributes);
-            if ($span !== null) {
-                self::$_spans[$timerName] = $span;
+        // Create OTel span for meaningful profiler timers
+        $tracer = \Mage::getTracer();
+        if ($tracer) {
+            foreach (self::$_spanPrefixes as $prefix) {
+                if (str_starts_with($timerName, $prefix)) {
+                    self::$_spans[$timerName] = $tracer->startSpan($timerName, $attributes);
+                    break;
+                }
             }
         }
     }
@@ -112,19 +123,17 @@ class Profiler
         }
     }
 
-    /**
-     * Stop profiling timer and end OpenTelemetry span
-     *
-     * @param string $timerName The name of the profiler timer
-     */
     public static function stop(string $timerName): void
     {
         self::pause($timerName);
 
-        // OpenTelemetry: End span if exists
+        // End corresponding OTel span if one was created
         if (isset(self::$_spans[$timerName])) {
-            self::$_spans[$timerName]->setStatus('ok');
-            self::$_spans[$timerName]->end();
+            try {
+                self::$_spans[$timerName]->end();
+            } catch (\Throwable $e) {
+                // Don't let span errors affect profiler
+            }
             unset(self::$_spans[$timerName]);
         }
     }

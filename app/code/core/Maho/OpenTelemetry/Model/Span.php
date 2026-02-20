@@ -194,7 +194,15 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
 
         if ($this->_sdkSpan) {
             try {
-                $this->_sdkSpan->end();
+                // Suppress E_DEPRECATED during span export because google/protobuf
+                // triggers PHP 8.5 deprecation notices that Maho's developer mode
+                // error handler would convert to exceptions, breaking the export.
+                $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
+                try {
+                    $this->_sdkSpan->end();
+                } finally {
+                    error_reporting($prevReporting);
+                }
             } catch (\Throwable $e) {
                 Mage::log('Failed to end span: ' . $e->getMessage(), Mage::LOG_ERROR);
             }

@@ -327,82 +327,96 @@ class Mage_Core_Model_App
      */
     public function run($params)
     {
-        $rootSpan = null;
+        $options = $params['options'] ?? [];
+        $this->baseInit($options);
+        Mage::register('application_params', $params);
+
+        $this->_initModules();
+        $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
+
+        if ($this->_config->isLocalConfigLoaded()) {
+            $scopeCode = $params['scope_code'] ?? '';
+            $scopeType = $params['scope_type'] ?? 'store';
+            $this->_initCurrentStore($scopeCode, $scopeType);
+            $this->_initRequest();
+            Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
+            Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
+        }
+
+        // OpenTelemetry: start root span for request
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        $rootSpan = Mage::getTracer()?->startRootSpan('http.request', [
+            'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'CLI',
+            'http.target' => strtok($requestUri, '?') ?: $requestUri,
+            'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
+            'http.host' => $_SERVER['HTTP_HOST'] ?? '',
+            'server.address' => $_SERVER['SERVER_NAME'] ?? '',
+        ]);
+
+        // Add store context to root span
+        if ($rootSpan) {
+            try {
+                $rootSpan->setAttributes([
+                    'maho.store_id' => $this->getStore()->getId(),
+                    'maho.store_code' => $this->getStore()->getCode(),
+                    'maho.website_id' => $this->getWebsite()->getId(),
+                ]);
+            } catch (\Throwable $e) {
+                // Store may not be fully initialized yet
+            }
+        }
 
         try {
-            $options = $params['options'] ?? [];
-            $this->baseInit($options);
-            Mage::register('application_params', $params);
-
-            $this->_initModules();
-            $this->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
-
-            // OpenTelemetry: Start root span after modules are loaded so tracer can initialize
-            $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-            $rootSpan = Mage::getTracer()?->startRootSpan('http.request', [
-                'http.method' => $_SERVER['REQUEST_METHOD'] ?? 'CLI',
-                'http.target' => strtok($requestUri, '?') ?: $requestUri,
-                'http.host' => $_SERVER['HTTP_HOST'] ?? '',
-                'http.scheme' => (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http',
-            ]);
-
-            if ($this->_config->isLocalConfigLoaded()) {
-                $scopeCode = $params['scope_code'] ?? '';
-                $scopeType = $params['scope_type'] ?? 'store';
-                $this->_initCurrentStore($scopeCode, $scopeType);
-
-                // OpenTelemetry: Add store context to span
-                if ($rootSpan) {
-                    $rootSpan->setAttributes([
-                        'maho.store_id' => $this->getStore()->getId(),
-                        'maho.store_code' => $this->getStore()->getCode(),
-                        'maho.website_id' => $this->getWebsite()->getId(),
-                    ]);
-                }
-
-                $this->_initRequest();
-                Mage_Core_Model_Resource_Setup::applyAllDataUpdates();
-                Mage_Core_Model_Resource_Setup::applyAllMahoUpdates();
-            }
-
             $this->getFrontController()->dispatch();
 
-            // OpenTelemetry: Add response data to span
+            // Add response attributes to root span
             if ($rootSpan) {
                 $statusCode = http_response_code() ?: 200;
-                $rootSpan->setAttributes([
-                    'http.status_code' => $statusCode,
-                    'http.response_size' => (int) (ob_get_length() ?: 0),
-                ]);
+                $rootSpan->setAttribute('http.status_code', $statusCode);
                 $rootSpan->setStatus($statusCode >= 500 ? 'error' : 'ok');
 
                 // Route context
                 $request = $this->getRequest();
                 if ($request) {
-                    $rootSpan->setAttributes([
-                        'http.route' => $request->getRequestedRouteName()
-                            . '/' . $request->getRequestedControllerName()
-                            . '/' . $request->getRequestedActionName(),
-                    ]);
+                    $rootSpan->setAttribute('http.route', $request->getModuleName()
+                        . '/' . $request->getControllerName()
+                        . '/' . $request->getActionName());
+
+                    // Detect area: admin, api, or frontend
+                    $area = 'frontend';
+                    try {
+                        if ($this->getStore()->isAdmin()) {
+                            $area = 'admin';
+                        }
+                    } catch (\Throwable $e) {
+                        // Store may not be initialized
+                    }
+                    if (str_starts_with($request->getModuleName() ?? '', 'api')
+                        || str_starts_with($requestUri, '/api/')
+                    ) {
+                        $area = 'api';
+                    }
+                    $rootSpan->setAttribute('maho.area', $area);
                 }
 
-                // Admin user context (safe try/catch - session may not be initialized)
+                // Admin user context (session may not be initialized on frontend)
                 try {
                     $adminSession = Mage::getSingleton('admin/session');
                     if ($adminSession->isLoggedIn()) {
                         $user = $adminSession->getUser();
                         if ($user) {
-                            $rootSpan->setAttributes([
-                                'enduser.id' => (string) $user->getUserId(),
-                            ]);
+                            $rootSpan->setAttribute('enduser.id', (string) $user->getUserId());
                         }
                     }
                 } catch (\Throwable) {
-                    // Admin session not available (frontend, CLI, etc.) — skip
+                    // Admin session not available — skip
                 }
             }
 
-            // Finish the request explicitly, no output allowed beyond this point
+            // End root span
+            $rootSpan?->end();
+
+            // Finish the request — no output allowed beyond this point
             if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
                 fastcgi_finish_request();
             } else {
@@ -418,14 +432,11 @@ class Mage_Core_Model_App
                 Mage::logException($e);
             }
         } catch (Throwable $e) {
-            // OpenTelemetry: Record exception in span
-            if ($rootSpan) {
-                $rootSpan->recordException($e);
-                $rootSpan->setStatus('error', $e::class);
-            }
+            $rootSpan?->recordException($e);
+            $rootSpan?->setStatus('error', $e->getMessage());
             throw $e;
         } finally {
-            // OpenTelemetry: End span and flush after response is sent to client
+            // End span and flush telemetry after response is sent to client
             $rootSpan?->end();
 
             // On the error path, ensure response is sent before flushing telemetry

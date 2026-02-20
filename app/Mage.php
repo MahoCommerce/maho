@@ -842,7 +842,7 @@ final class Mage
         // Slow path: Initialize tracer (happens once per request)
         // Check if config is loaded and OpenTelemetry module exists
         if (!self::getConfig()) {
-            self::$_tracer = false;
+            // Don't cache false — config isn't loaded yet, retry on next call
             return null;
         }
 
@@ -852,12 +852,13 @@ final class Mage
             // Check if module is installed and active
             $modules = self::getConfig()->getNode('modules');
             if (!$modules) {
-                self::$_tracer = false;
+                // Don't cache false — modules not loaded yet
                 return null;
             }
 
             $moduleConfig = $modules->Maho_OpenTelemetry;
             if (!$moduleConfig || !isset($moduleConfig->active) || (string) $moduleConfig->active !== 'true') {
+                // Module genuinely not active — cache permanently
                 self::$_tracer = false;
                 return null;
             }
@@ -874,13 +875,12 @@ final class Mage
                 self::$_tracer = $initialized;
                 return self::$_tracer;
             }
-
-            self::$_tracer = false;
+            // Don't cache false here — initialize() may fail because the store
+            // config isn't loaded yet. Allow retry on subsequent calls.
             return null;
         } catch (\Throwable $e) {
-            // Log for debugging, but don't break the application
-            error_log('OpenTelemetry initialization error: ' . $e->getMessage());
-            self::$_tracer = false;
+            // Use error_log() because Mage::log() may not be available during early bootstrap
+            error_log('Maho OpenTelemetry initialization error: ' . $e->getMessage());
             return null;
         } finally {
             self::$_tracerInitializing = false;

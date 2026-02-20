@@ -64,7 +64,8 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
         try {
             $helper = Mage::helper('opentelemetry');
         } catch (\Throwable $e) {
-            error_log('OpenTelemetry: Failed to get helper: ' . $e->getMessage());
+            // Use error_log() because Mage::log() may not be available during early bootstrap
+            error_log('Maho OpenTelemetry: Failed to get helper: ' . $e->getMessage());
             return false;
         }
 
@@ -99,17 +100,14 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
             // Create OTLP exporter
             $transport = (new OtlpHttpTransportFactory())->create(
                 $endpoint,
-                'application/json',
+                'application/x-protobuf',
                 $helper->getHeaders(),
             );
 
             $exporter = new SpanExporter($transport);
 
-            // Create span processor with batching
-            $spanProcessor = new BatchSpanProcessor(
-                $exporter,
-                Clock::getDefault(),
-            );
+            // Batch processor: queue spans in memory, export all at once on forceFlush()
+            $spanProcessor = new BatchSpanProcessor($exporter, Clock::getDefault());
 
             // Create sampler based on sampling rate
             $samplingRate = $helper->getSamplingRate();
@@ -286,7 +284,15 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
         }
 
         try {
-            $this->_tracerProvider->forceFlush();
+            // Suppress E_DEPRECATED during flush because google/protobuf
+            // triggers PHP 8.5 deprecation notices that Maho's developer mode
+            // error handler would convert to exceptions, breaking the export.
+            $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
+            try {
+                $this->_tracerProvider->forceFlush();
+            } finally {
+                error_reporting($prevReporting);
+            }
         } catch (\Throwable $e) {
             Mage::log('Failed to flush telemetry: ' . $e->getMessage(), Mage::LOG_ERROR);
         }
@@ -319,7 +325,8 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      */
     private function _createSpan(SpanInterface $sdkSpan): Maho_OpenTelemetry_Model_Span
     {
-        $span = Mage::getModel('opentelemetry/span');
+        // Instantiate directly to avoid Profiler::start() → startSpan() recursion
+        $span = new Maho_OpenTelemetry_Model_Span();
         $span->setSdkSpan($sdkSpan);
         $span->setTracer($this);
         return $span;
@@ -330,7 +337,7 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
      */
     private function _createNullSpan(): Maho_OpenTelemetry_Model_Span
     {
-        return Mage::getModel('opentelemetry/span');
+        return new Maho_OpenTelemetry_Model_Span();
     }
 
     /**
@@ -340,7 +347,12 @@ class Maho_OpenTelemetry_Model_Tracer extends Mage_Core_Model_Abstract
     {
         if ($this->_tracerProvider) {
             try {
-                $this->_tracerProvider->shutdown();
+                $prevReporting = error_reporting(error_reporting() & ~E_DEPRECATED);
+                try {
+                    $this->_tracerProvider->shutdown();
+                } finally {
+                    error_reporting($prevReporting);
+                }
             } catch (\Throwable $e) {
                 // Ignore errors during shutdown
             }
