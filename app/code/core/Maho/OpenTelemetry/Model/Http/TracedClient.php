@@ -66,7 +66,7 @@ class Maho_OpenTelemetry_Model_Http_TracedClient extends Mage_Core_Model_Abstrac
 
         $span = $this->_tracer->startSpan('http.client.request', [
             'http.method' => $method,
-            'http.url' => $url,
+            'http.url' => strtok($url, '?') ?: $url,
             'http.request.method' => $method,
         ]);
 

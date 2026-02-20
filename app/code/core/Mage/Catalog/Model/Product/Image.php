@@ -515,19 +515,21 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             'image.destination' => (string) $this->getNewFile(),
         ]);
 
-        match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
-            IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
-            IMAGETYPE_GIF => $this->getImage()->toGif(),
-            IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
-            IMAGETYPE_PNG  => $this->getImage()->toPng(),
-            default => $this->getImage()->toWebp($this->getQuality()),
-        };
+        try {
+            match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
+                IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
+                IMAGETYPE_GIF => $this->getImage()->toGif(),
+                IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
+                IMAGETYPE_PNG  => $this->getImage()->toPng(),
+                default => $this->getImage()->toWebp($this->getQuality()),
+            };
 
-        $filename = $this->getNewFile();
-        @mkdir(dirname($filename), recursive: true);
-        $this->getImage()->save($filename);
-
-        \Maho\Profiler::stop('image.process');
+            $filename = $this->getNewFile();
+            @mkdir(dirname($filename), recursive: true);
+            $this->getImage()->save($filename);
+        } finally {
+            \Maho\Profiler::stop('image.process');
+        }
         return $this;
     }
 

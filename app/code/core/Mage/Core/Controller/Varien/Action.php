@@ -383,9 +383,12 @@ abstract class Mage_Core_Controller_Varien_Action
                 $actionMethodName = 'norouteAction';
             }
 
-            \Maho\Profiler::start(self::PROFILER_KEY . '::predispatch');
-            $this->preDispatch();
-            \Maho\Profiler::stop(self::PROFILER_KEY . '::predispatch');
+            \Maho\Profiler::start(self::PROFILER_KEY . '.predispatch');
+            try {
+                $this->preDispatch();
+            } finally {
+                \Maho\Profiler::stop(self::PROFILER_KEY . '.predispatch');
+            }
 
             if ($this->getRequest()->isDispatched()) {
                 /**
@@ -395,12 +398,18 @@ abstract class Mage_Core_Controller_Varien_Action
                     $profilerKey = self::PROFILER_KEY . '.' . $this->getFullActionName();
 
                     \Maho\Profiler::start($profilerKey);
-                    $this->$actionMethodName();
-                    \Maho\Profiler::stop($profilerKey);
+                    try {
+                        $this->$actionMethodName();
+                    } finally {
+                        \Maho\Profiler::stop($profilerKey);
+                    }
 
-                    \Maho\Profiler::start(self::PROFILER_KEY . '::postdispatch');
-                    $this->postDispatch();
-                    \Maho\Profiler::stop(self::PROFILER_KEY . '::postdispatch');
+                    \Maho\Profiler::start(self::PROFILER_KEY . '.postdispatch');
+                    try {
+                        $this->postDispatch();
+                    } finally {
+                        \Maho\Profiler::stop(self::PROFILER_KEY . '.postdispatch');
+                    }
                 }
             }
         } catch (Mage_Core_Controller_Varien_Exception $e) {

@@ -184,8 +184,11 @@ class Mage_Index_Model_Process extends Mage_Core_Model_Abstract
                     'index.code' => (string) $this->getIndexerCode(),
                     'index.name' => (string) $this->getIndexer()->getName(),
                 ]);
-                $this->getIndexer()->reindexAll();
-                \Maho\Profiler::stop('index.reindex');
+                try {
+                    $this->getIndexer()->reindexAll();
+                } finally {
+                    \Maho\Profiler::stop('index.reindex');
+                }
             }
             $this->unlock();
 

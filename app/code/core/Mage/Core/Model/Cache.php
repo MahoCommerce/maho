@@ -132,26 +132,30 @@ class Mage_Core_Model_Cache
     public function load(string $id): mixed
     {
         \Maho\Profiler::start('cache.load', ['cache.key' => $id]);
-        $item = $this->getCacheAdapter()->getItem($this->_id($id)); // @phpstan-ignore method.internalClass
-        $result = $item->isHit() ? $item->get() : false;
-        \Maho\Profiler::stop('cache.load');
-        return $result;
+        try {
+            $item = $this->getCacheAdapter()->getItem($this->_id($id)); // @phpstan-ignore method.internalClass
+            return $item->isHit() ? $item->get() : false;
+        } finally {
+            \Maho\Profiler::stop('cache.load');
+        }
     }
 
     public function save(mixed $data, string $id, array $tags = [], ?int $lifeTime = null): bool
     {
         \Maho\Profiler::start('cache.save', ['cache.key' => $id, 'cache.tags' => implode(',', $tags)]);
-        $cacheItem = $this->cacheAdapter->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
-            ->set($data)
-            ->tag($this->_tags($tags));
+        try {
+            $cacheItem = $this->cacheAdapter->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
+                ->set($data)
+                ->tag($this->_tags($tags));
 
-        if ($lifeTime) {
-            $cacheItem->expiresAfter($lifeTime);
+            if ($lifeTime) {
+                $cacheItem->expiresAfter($lifeTime);
+            }
+
+            return $this->cacheAdapter->save($cacheItem); // @phpstan-ignore method.internalClass
+        } finally {
+            \Maho\Profiler::stop('cache.save');
         }
-
-        $result = $this->cacheAdapter->save($cacheItem); // @phpstan-ignore method.internalClass
-        \Maho\Profiler::stop('cache.save');
-        return $result;
     }
 
     /**
@@ -168,9 +172,11 @@ class Mage_Core_Model_Cache
     public function remove(string $id): bool
     {
         \Maho\Profiler::start('cache.remove', ['cache.key' => $id]);
-        $result = $this->cacheAdapter->deleteItem($this->_id($id)); // @phpstan-ignore method.internalClass
-        \Maho\Profiler::stop('cache.remove');
-        return $result;
+        try {
+            return $this->cacheAdapter->deleteItem($this->_id($id)); // @phpstan-ignore method.internalClass
+        } finally {
+            \Maho\Profiler::stop('cache.remove');
+        }
     }
 
     /**
@@ -179,22 +185,23 @@ class Mage_Core_Model_Cache
     public function clean(array|string $tags = []): bool
     {
         \Maho\Profiler::start('cache.clean');
-        $args = func_get_args();
-        if (count($args) > 1 && is_array($args[1])) {
-            $tags = $args[1];
-        }
+        try {
+            $args = func_get_args();
+            if (count($args) > 1 && is_array($args[1])) {
+                $tags = $args[1];
+            }
 
-        if (!empty($tags) && !is_array($tags)) {
-            $tags = [$tags];
-        }
+            if (!empty($tags) && !is_array($tags)) {
+                $tags = [$tags];
+            }
 
-        if (is_array($tags) && count($tags) > 0) {
-            $result = $this->cacheAdapter->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
-        } else {
-            $result = $this->flush();
+            if (is_array($tags) && count($tags) > 0) {
+                return $this->cacheAdapter->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
+            }
+            return $this->flush();
+        } finally {
+            \Maho\Profiler::stop('cache.clean');
         }
-        \Maho\Profiler::stop('cache.clean');
-        return $result;
     }
 
     public function prune(): bool
@@ -208,9 +215,11 @@ class Mage_Core_Model_Cache
     public function flush(): bool
     {
         \Maho\Profiler::start('cache.flush');
-        $result = $this->cacheAdapter->clear(); // @phpstan-ignore method.internalClass
-        \Maho\Profiler::stop('cache.flush');
-        return $result;
+        try {
+            return $this->cacheAdapter->clear(); // @phpstan-ignore method.internalClass
+        } finally {
+            \Maho\Profiler::stop('cache.flush');
+        }
     }
 
     /**
