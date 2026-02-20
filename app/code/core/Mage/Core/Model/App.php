@@ -372,6 +372,32 @@ class Mage_Core_Model_App
                     'http.response_size' => ob_get_length() ?: 0,
                 ]);
                 $rootSpan->setStatus('ok');
+
+                // Route context
+                $request = $this->getRequest();
+                if ($request) {
+                    $rootSpan->setAttributes([
+                        'http.route' => $request->getRequestedRouteName()
+                            . '/' . $request->getRequestedControllerName()
+                            . '/' . $request->getRequestedActionName(),
+                    ]);
+                }
+
+                // Admin user context (safe try/catch - session may not be initialized)
+                try {
+                    $adminSession = Mage::getSingleton('admin/session');
+                    if ($adminSession->isLoggedIn()) {
+                        $user = $adminSession->getUser();
+                        if ($user) {
+                            $rootSpan->setAttributes([
+                                'enduser.id' => (string) $user->getUserId(),
+                                'maho.admin_user' => $user->getUsername(),
+                            ]);
+                        }
+                    }
+                } catch (\Throwable) {
+                    // Admin session not available (frontend, CLI, etc.) — skip
+                }
             }
 
             // Finish the request explicitly, no output allowed beyond this point
@@ -397,8 +423,16 @@ class Mage_Core_Model_App
             }
             throw $e;
         } finally {
-            // OpenTelemetry: End span and flush (after response sent - non-blocking)
+            // OpenTelemetry: End span and flush after response is sent to client
             $rootSpan?->end();
+
+            // On the error path, ensure response is sent before flushing telemetry
+            if (!headers_sent()) {
+                if (in_array(php_sapi_name(), ['fpm-fcgi', 'frankenphp'], true) && function_exists('fastcgi_finish_request')) {
+                    fastcgi_finish_request();
+                }
+            }
+
             Mage::getTracer()?->flush();
         }
 
