@@ -96,7 +96,6 @@
         "laminas/laminas-soap": "Install this package if you need SOAP web services functionality",
         "laminas/laminas-xmlrpc": "Install this package if you need XML-RPC web services functionality",
         "mahocommerce/module-braintree": "Braintree payment gateway integration",
-        "open-telemetry/sdk": "OpenTelemetry SDK for distributed tracing and observability",
         "open-telemetry/exporter-otlp": "OTLP exporter for OpenTelemetry (required for sending traces to collectors)",
         "picqer/php-barcode-generator": "Required for gift card barcode generation"
     },
