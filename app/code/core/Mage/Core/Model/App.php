@@ -394,7 +394,6 @@ class Mage_Core_Model_App
                         if ($user) {
                             $rootSpan->setAttributes([
                                 'enduser.id' => (string) $user->getUserId(),
-                                'maho.admin_user' => $user->getUsername(),
                             ]);
                         }
                     }

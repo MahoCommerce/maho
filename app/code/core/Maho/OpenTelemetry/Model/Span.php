@@ -32,6 +32,11 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
     private ?ScopeInterface $_scope = null;
 
     /**
+     * Whether this span has already been ended
+     */
+    private bool $_ended = false;
+
+    /**
      * Reference to the tracer that created this span
      */
     private ?Maho_OpenTelemetry_Model_Tracer $_tracer = null;
@@ -171,6 +176,12 @@ class Maho_OpenTelemetry_Model_Span extends Mage_Core_Model_Abstract
      */
     public function end(): void
     {
+        // Guard against double-end calls (e.g. from flush() + normal end)
+        if ($this->_ended) {
+            return;
+        }
+        $this->_ended = true;
+
         // Detach the scope first to restore the parent context
         if ($this->_scope) {
             try {
