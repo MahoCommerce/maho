@@ -509,17 +509,27 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function saveFile(): self
     {
-        match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
-            IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
-            IMAGETYPE_GIF => $this->getImage()->toGif(),
-            IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
-            IMAGETYPE_PNG  => $this->getImage()->toPng(),
-            default => $this->getImage()->toWebp($this->getQuality()),
-        };
+        \Maho\Profiler::start('image.process', [
+            'image.width' => (string) $this->getWidth(),
+            'image.height' => (string) $this->getHeight(),
+            'image.destination' => (string) $this->getNewFile(),
+        ]);
 
-        $filename = $this->getNewFile();
-        @mkdir(dirname($filename), recursive: true);
-        $this->getImage()->save($filename);
+        try {
+            match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
+                IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
+                IMAGETYPE_GIF => $this->getImage()->toGif(),
+                IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
+                IMAGETYPE_PNG  => $this->getImage()->toPng(),
+                default => $this->getImage()->toWebp($this->getQuality()),
+            };
+
+            $filename = $this->getNewFile();
+            @mkdir(dirname($filename), recursive: true);
+            $this->getImage()->save($filename);
+        } finally {
+            \Maho\Profiler::stop('image.process');
+        }
         return $this;
     }
 

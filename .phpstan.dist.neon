@@ -34,3 +34,8 @@ parameters:
 
     ignoreErrors:
         - identifier: missingType.iterableValue
+        # OpenTelemetry SDK is an optional dependency (in suggest, not require)
+        -
+            identifier: class.notFound
+            paths:
+                - app/code/core/Maho/OpenTelemetry/

@@ -335,7 +335,7 @@ class Maho_FeedManager_Model_Uploader
         $headers = $formData->getPreparedHeaders()->toArray();
         $headers['Authorization'] = 'Bearer ' . $accessToken;
 
-        $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 300]);
+        $client = \Maho\Http\Client::create(['timeout' => 300]);
 
         $response = $client->request('POST', $url, [
             'headers' => $headers,
@@ -563,7 +563,7 @@ class Maho_FeedManager_Model_Uploader
 
         try {
             $url = "https://graph.facebook.com/v18.0/{$catalogId}";
-            $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 30]);
+            $client = \Maho\Http\Client::create(['timeout' => 30]);
             $response = $client->request('GET', $url, [
                 'headers' => [
                     'Authorization' => 'Bearer ' . $accessToken,

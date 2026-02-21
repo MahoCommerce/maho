@@ -465,7 +465,15 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         $status = true;
         if (!$invoice->getIsPaid() && !$this->getIsTransactionPending()) {
             // attempt to capture: this can trigger "is_transaction_pending"
-            $this->getMethodInstance()->setStore($order->getStoreId())->capture($this, $amountToCapture);
+            \Maho\Profiler::start('payment.capture', [
+                'payment.method' => $this->getMethodInstance()->getCode(),
+                'payment.amount' => (string) $amountToCapture,
+            ]);
+            try {
+                $this->getMethodInstance()->setStore($order->getStoreId())->capture($this, $amountToCapture);
+            } finally {
+                \Maho\Profiler::stop('payment.capture');
+            }
 
             $transaction = $this->_addTransaction(
                 Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE,
@@ -718,11 +726,19 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
                 }
                 $this->setShouldCloseParentTransaction(true); // TODO: implement multiple refunds per capture
                 try {
-                    $gateway->setStore($this->getOrder()->getStoreId())
-                        ->processBeforeRefund($invoice, $this)
-                        ->refund($this, $baseAmountToRefund)
-                        ->processCreditmemo($creditmemo, $this)
-                    ;
+                    \Maho\Profiler::start('payment.refund', [
+                        'payment.method' => $gateway->getCode(),
+                        'payment.amount' => (string) $baseAmountToRefund,
+                    ]);
+                    try {
+                        $gateway->setStore($this->getOrder()->getStoreId())
+                            ->processBeforeRefund($invoice, $this)
+                            ->refund($this, $baseAmountToRefund)
+                            ->processCreditmemo($creditmemo, $this)
+                        ;
+                    } finally {
+                        \Maho\Profiler::stop('payment.refund');
+                    }
                 } catch (Mage_Core_Exception $e) {
                     if (!$captureTxn) {
                         $e->setMessage(' ' . Mage::helper('sales')->__('If the invoice was created offline, try creating an offline creditmemo.'), true);
@@ -1122,7 +1138,15 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
         $status = true;
         if ($isOnline) {
             // invoke authorization on gateway
-            $this->getMethodInstance()->setStore($order->getStoreId())->authorize($this, $amount);
+            \Maho\Profiler::start('payment.authorize', [
+                'payment.method' => $this->getMethodInstance()->getCode(),
+                'payment.amount' => (string) $amount,
+            ]);
+            try {
+                $this->getMethodInstance()->setStore($order->getStoreId())->authorize($this, $amount);
+            } finally {
+                \Maho\Profiler::stop('payment.authorize');
+            }
         }
 
         // similar logic of "payment review" order as in capturing
@@ -1186,7 +1210,15 @@ class Mage_Sales_Model_Order_Payment extends Mage_Payment_Model_Info
 
         // attempt to void
         if ($isOnline) {
-            $this->getMethodInstance()->setStore($order->getStoreId())->$gatewayCallback($this);
+            \Maho\Profiler::start('payment.void', [
+                'payment.method' => $this->getMethodInstance()->getCode(),
+                'payment.callback' => $gatewayCallback,
+            ]);
+            try {
+                $this->getMethodInstance()->setStore($order->getStoreId())->$gatewayCallback($this);
+            } finally {
+                \Maho\Profiler::stop('payment.void');
+            }
         }
         if ($this->_isTransactionExists()) {
             return $this;

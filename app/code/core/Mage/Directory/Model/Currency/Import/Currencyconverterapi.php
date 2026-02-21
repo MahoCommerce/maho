@@ -55,7 +55,7 @@ class Mage_Directory_Model_Currency_Import_Currencyconverterapi extends Mage_Dir
      */
     public function __construct()
     {
-        $this->_httpClient = \Symfony\Component\HttpClient\HttpClient::create();
+        $this->_httpClient = \Maho\Http\Client::create();
     }
 
     #[\Override]

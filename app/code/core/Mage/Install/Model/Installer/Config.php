@@ -146,7 +146,7 @@ class Mage_Install_Model_Installer_Config extends Mage_Install_Model_Installer_A
     {
         $prefix = $secure ? 'install/wizard/checkSecureHost/' : 'install/wizard/checkHost/';
         try {
-            $client = \Symfony\Component\HttpClient\HttpClient::create();
+            $client = \Maho\Http\Client::create();
             $response = $client->request('GET', $url . 'index.php/' . $prefix);
             $body = $response->getContent();
         } catch (Exception $e) {

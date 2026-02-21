@@ -453,7 +453,15 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 'variables' => $variables,
             ]);
 
-            $mailer->send($email);
+            \Maho\Profiler::start('email.send', [
+                'email.template_id' => (string) $this->getTemplateId(),
+                'email.recipient_count' => (string) count($emails),
+            ]);
+            try {
+                $mailer->send($email);
+            } finally {
+                \Maho\Profiler::stop('email.send');
+            }
 
             foreach ($emails as $recipientEmail) {
                 Mage::dispatchEvent('email_template_send_after', [

@@ -116,6 +116,13 @@ class Mage_Adminhtml_Block_System_Config_Form_Fieldset extends Mage_Adminhtml_Bl
      */
     protected function _getHeaderCommentHtml($element)
     {
+        $package = (string) ($this->getGroup($element)->mandatory_package ?? '');
+        if ($package && !\Composer\InstalledVersions::isInstalled($package)) {
+            $warning = "⚠️ Install <code>$package</code>";
+            $comment = $element->getComment();
+            $element->setComment($comment ? "$warning<br>$comment" : $warning);
+        }
+
         return $element->getComment()
             ? '<div class="comment">' . $element->getComment() . '</div>'
             : '';

@@ -157,7 +157,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps_RestClient
     {
         $accessToken = $this->oauthClient->getAccessToken();
 
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
+        $client = \Maho\Http\Client::create([
             'timeout' => 30,
         ]);
 

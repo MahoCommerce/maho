@@ -1297,7 +1297,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
 
         $result = Mage::getModel('paygate/authorizenet_result');
 
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
+        $client = \Maho\Http\Client::create([
             'max_redirects' => 0,
             'timeout' => 30,
             'verify_host' => true,
@@ -1566,7 +1566,7 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
             $transactionId,
         );
 
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
+        $client = \Maho\Http\Client::create([
             'timeout' => 45,
             'verify_host' => true,
             'verify_peer' => true,

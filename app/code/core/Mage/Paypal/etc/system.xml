@@ -706,7 +706,6 @@
                                                 <fields>
                                                     <heading_sftp translate="label">
                                                         <label>SFTP Credentials</label>
-                                                        <frontend_model>adminhtml/system_config_form_field_heading_packagecheck</frontend_model>
                                                         <mandatory_package>phpseclib/phpseclib</mandatory_package>
                                                         <sort_order>10</sort_order>
                                                         <show_in_default>1</show_in_default>
