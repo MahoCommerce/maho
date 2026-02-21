@@ -243,7 +243,7 @@ final class ProductProvider implements ProviderInterface
         // Merge REST filters and GraphQL args (GraphQL args take precedence)
         $requestFilters = array_merge($context['filters'] ?? [], $context['args'] ?? []);
         $page = (int) ($requestFilters['page'] ?? 1);
-        $pageSize = min((int) ($requestFilters['itemsPerPage'] ?? $requestFilters['pageSize'] ?? 20), 100);
+        $pageSize = max(1, min((int) ($requestFilters['itemsPerPage'] ?? $requestFilters['pageSize'] ?? 20), 100));
         // Support both 'search' and 'q' parameters for compatibility
         $search = $requestFilters['search'] ?? $requestFilters['q'] ?? '';
 

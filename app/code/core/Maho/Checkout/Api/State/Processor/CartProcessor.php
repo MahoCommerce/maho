@@ -19,6 +19,9 @@ use Maho\Checkout\Api\Resource\Cart;
 use Maho\Checkout\Api\Resource\CartItem;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Cart State Processor - Handles cart mutations for API Platform
@@ -27,11 +30,14 @@ use Maho\ApiPlatform\Service\CartService;
  */
 final class CartProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     private AddressMapper $addressMapper;
     private CartService $cartService;
 
-    public function __construct()
+    public function __construct(Security $security)
     {
+        $this->security = $security;
         $this->addressMapper = new AddressMapper();
         $this->cartService = new CartService();
     }
@@ -132,6 +138,8 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
+        $this->verifyCartAccess($quote, $context);
+
         $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);
 
         // Set fulfillment type on the newly added item
@@ -172,6 +180,8 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
+        $this->verifyCartAccess($quote, $context);
+
         if (!$itemId) {
             throw new \RuntimeException('Item ID is required');
         }
@@ -199,6 +209,8 @@ final class CartProcessor implements ProcessorInterface
         if (!$quote) {
             throw new \RuntimeException('Cart not found');
         }
+
+        $this->verifyCartAccess($quote, $context);
 
         if (!$itemId) {
             throw new \RuntimeException('Item ID is required');
@@ -234,6 +246,8 @@ final class CartProcessor implements ProcessorInterface
         if (!$quote) {
             throw new \RuntimeException('Cart not found');
         }
+
+        $this->verifyCartAccess($quote, $context);
 
         if (!$itemId) {
             throw new \RuntimeException('Item ID is required');
@@ -311,6 +325,8 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
+        $this->verifyCartAccess($quote, $context);
+
         if (!$couponCode) {
             throw new \RuntimeException('Coupon code is required');
         }
@@ -338,6 +354,8 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
+        $this->verifyCartAccess($quote, $context);
+
         $quote = $this->cartService->removeCoupon($quote);
 
         return $this->mapQuoteToCart($quote);
@@ -360,6 +378,8 @@ final class CartProcessor implements ProcessorInterface
         if (!$quote) {
             throw new \RuntimeException('Cart not found');
         }
+
+        $this->verifyCartAccess($quote, $context);
 
         $addressData = $this->mapInputToAddressData($args);
         $quote = $this->cartService->setShippingAddress($quote, $addressData);
@@ -386,6 +406,8 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
+        $this->verifyCartAccess($quote, $context);
+
         $addressData = $sameAsShipping ? [] : $this->mapInputToAddressData($args);
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
@@ -411,6 +433,8 @@ final class CartProcessor implements ProcessorInterface
         if (!$quote) {
             throw new \RuntimeException('Cart not found');
         }
+
+        $this->verifyCartAccess($quote, $context);
 
         if (!$carrierCode || !$methodCode) {
             throw new \RuntimeException('Carrier code and method code are required');
@@ -440,6 +464,8 @@ final class CartProcessor implements ProcessorInterface
         if (!$quote) {
             throw new \RuntimeException('Cart not found');
         }
+
+        $this->verifyCartAccess($quote, $context);
 
         if (!$methodCode) {
             throw new \RuntimeException('Payment method code is required');
@@ -504,6 +530,8 @@ final class CartProcessor implements ProcessorInterface
         if (!$quote) {
             throw new \RuntimeException('Cart not found');
         }
+
+        $this->verifyCartAccess($quote, $context);
 
         // Check if cart has gift card products
         foreach ($quote->getAllItems() as $item) {
@@ -578,6 +606,8 @@ final class CartProcessor implements ProcessorInterface
             throw new \RuntimeException('Cart not found');
         }
 
+        $this->verifyCartAccess($quote, $context);
+
         // Get currently applied codes
         $appliedCodes = $quote->getGiftcardCodes();
         if ($appliedCodes) {
@@ -605,6 +635,35 @@ final class CartProcessor implements ProcessorInterface
         $quote->collectTotals()->save();
 
         return $this->mapQuoteToCart($quote);
+    }
+
+    /**
+     * Verify cart ownership for authenticated customers.
+     * Guest carts accessed via maskedId are already secure (cryptographic 32-char hex).
+     * Customer carts accessed via cartId must belong to the authenticated customer.
+     */
+    private function verifyCartAccess(\Mage_Sales_Model_Quote $quote, array $context): void
+    {
+        $customerId = $this->getAuthenticatedCustomerId();
+        $quoteCustomerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
+
+        // If cart belongs to a customer, verify the authenticated user matches
+        if ($quoteCustomerId !== null && $customerId !== null && $quoteCustomerId !== $customerId) {
+            // Allow admin/POS to access any cart
+            if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
+                throw new AccessDeniedHttpException('You do not have access to this cart');
+            }
+        }
+
+        // If accessing by cartId (not maskedId) and not admin/POS, require ownership
+        $args = $context['args']['input'] ?? [];
+        if (!empty($args['cartId']) && empty($args['maskedId'])) {
+            if ($customerId !== null && $quoteCustomerId !== $customerId) {
+                if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
+                    throw new AccessDeniedHttpException('You do not have access to this cart');
+                }
+            }
+        }
     }
 
     /**

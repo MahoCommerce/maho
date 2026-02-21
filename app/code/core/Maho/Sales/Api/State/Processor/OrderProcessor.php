@@ -25,6 +25,9 @@ use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Service\OrderService;
 use Maho\ApiPlatform\Service\PaymentService;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
+use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -35,13 +38,16 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class OrderProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     private AddressMapper $addressMapper;
     private CartService $cartService;
     private OrderService $orderService;
     private PaymentService $paymentService;
 
-    public function __construct()
+    public function __construct(Security $security)
     {
+        $this->security = $security;
         $this->addressMapper = new AddressMapper();
         $this->cartService = new CartService();
         $this->orderService = new OrderService();
@@ -304,6 +310,11 @@ final class OrderProcessor implements ProcessorInterface
      */
     private function placeOrderWithSplitPayments(array $context): PlaceOrderWithSplitPaymentsResult
     {
+        // POS operation — require admin, POS, or API user role
+        if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
+            throw new AccessDeniedHttpException('Admin, POS, or API user access required for split payments');
+        }
+
         $args = $context['args']['input'] ?? [];
         $cartId = $args['cartId'] ?? null;
         $maskedId = $args['maskedId'] ?? null;
@@ -517,6 +528,11 @@ final class OrderProcessor implements ProcessorInterface
      */
     private function recordPayment(array $context): PosPayment
     {
+        // recordPayment is a POS operation — require admin, POS, or API user role
+        if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
+            throw new AccessDeniedHttpException('Admin, POS, or API user access required to record payments');
+        }
+
         $args = $context['args']['input'] ?? [];
         $orderId = (int) ($args['orderId'] ?? 0);
         $method = $args['method'] ?? $args['methodCode'] ?? 'cash';

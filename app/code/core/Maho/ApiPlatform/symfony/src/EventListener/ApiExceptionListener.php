@@ -86,7 +86,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         if ($exception instanceof ApiException) {
             $data = $exception->toArray();
 
-            if ($this->debug && $exception->getPrevious()) {
+            if ($this->showDebug() && $exception->getPrevious()) {
                 $data['debug'] = [
                     'previous' => $exception->getPrevious()->getMessage(),
                     'trace' => $exception->getTraceAsString(),
@@ -105,7 +105,7 @@ class ApiExceptionListener implements EventSubscriberInterface
                 'code' => $statusCode,
             ];
 
-            if ($this->debug) {
+            if ($this->showDebug()) {
                 $data['debug'] = [
                     'class' => get_class($exception),
                     'trace' => $exception->getTraceAsString(),
@@ -130,7 +130,7 @@ class ApiExceptionListener implements EventSubscriberInterface
                 'code' => $statusCode,
             ];
 
-            if ($this->debug) {
+            if ($this->showDebug()) {
                 $data['debug'] = [
                     'class' => get_class($exception),
                     'trace' => $exception->getTraceAsString(),
@@ -150,7 +150,7 @@ class ApiExceptionListener implements EventSubscriberInterface
                 'code' => $statusCode,
             ];
 
-            if ($this->debug) {
+            if ($this->showDebug()) {
                 $data['debug'] = [
                     'class' => get_class($exception),
                     'trace' => $exception->getTraceAsString(),
@@ -164,11 +164,11 @@ class ApiExceptionListener implements EventSubscriberInterface
         $statusCode = 500;
         $data = [
             'error' => 'internal_server_error',
-            'message' => $this->debug ? $exception->getMessage() : 'An internal error occurred',
+            'message' => $this->showDebug() ? $exception->getMessage() : 'An internal error occurred',
             'code' => $statusCode,
         ];
 
-        if ($this->debug) {
+        if ($this->showDebug()) {
             $data['debug'] = [
                 'class' => get_class($exception),
                 'file' => $exception->getFile(),
@@ -181,6 +181,14 @@ class ApiExceptionListener implements EventSubscriberInterface
         \Mage::logException($exception);
 
         return new JsonResponse($data, $statusCode);
+    }
+
+    /**
+     * Only show debug info when both Symfony debug mode AND Maho developer mode are active
+     */
+    private function showDebug(): bool
+    {
+        return $this->debug && \Mage::getIsDeveloperMode();
     }
 
     private function getErrorCodeFromStatusCode(int $statusCode): string

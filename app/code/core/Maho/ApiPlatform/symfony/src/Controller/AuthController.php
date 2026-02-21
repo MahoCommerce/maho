@@ -14,7 +14,9 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Controller;
 
 use Maho\ApiPlatform\Service\JwtService;
+use Maho\ApiPlatform\Service\RateLimiter;
 use Maho\ApiPlatform\Service\StoreContext;
+use Maho\ApiPlatform\Service\TokenBlacklist;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -28,10 +30,14 @@ use Symfony\Component\Routing\Attribute\Route;
 class AuthController extends AbstractController
 {
     private JwtService $jwtService;
+    private RateLimiter $rateLimiter;
+    private TokenBlacklist $tokenBlacklist;
 
     public function __construct()
     {
         $this->jwtService = new JwtService();
+        $this->rateLimiter = new RateLimiter();
+        $this->tokenBlacklist = new TokenBlacklist();
     }
     /**
      * Token endpoint - supports customer, client_credentials, and api_user grant types
@@ -40,6 +46,9 @@ class AuthController extends AbstractController
     public function getToken(Request $request): JsonResponse
     {
         StoreContext::ensureStore();
+
+        $ip = $request->getClientIp() ?? 'unknown';
+        $this->rateLimiter->check("auth_token:ip:{$ip}", 20, 60);
 
         $data = json_decode($request->getContent(), true) ?? [];
         $grantType = $data['grant_type'] ?? 'customer';
@@ -79,6 +88,8 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        $this->rateLimiter->check('auth_token:email:' . strtolower($email), 5, 60);
+
         try {
             $websiteId = \Mage::app()->getStore()->getWebsiteId();
 
@@ -87,6 +98,8 @@ class AuthController extends AbstractController
                 ->loadByEmail($email);
 
             if (!$customer->getId()) {
+                // Dummy hash comparison to equalize timing with real password check
+                password_verify($password, '$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012');
                 return new JsonResponse([
                     'error' => 'invalid_credentials',
                     'message' => 'Invalid email or password',
@@ -638,6 +651,10 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        $ip = $request->getClientIp() ?? 'unknown';
+        $this->rateLimiter->check('auth_forgot:email:' . strtolower($email), 3, 3600);
+        $this->rateLimiter->check("auth_forgot:ip:{$ip}", 10, 3600);
+
         try {
             $customer = \Mage::getModel('customer/customer')
                 ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
@@ -697,6 +714,10 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        $ip = $request->getClientIp() ?? 'unknown';
+        $this->rateLimiter->check("auth_reset:ip:{$ip}", 5, 3600);
+        $this->rateLimiter->check('auth_reset:token:' . substr($token, 0, 16), 5, 3600);
+
         try {
             $customer = \Mage::getModel('customer/customer')
                 ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
@@ -748,6 +769,43 @@ class AuthController extends AbstractController
                 'error' => 'server_error',
                 'message' => 'Failed to reset password',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Logout endpoint - revokes the current token
+     */
+    #[Route('/api/auth/logout', name: 'api_auth_logout', methods: ['POST'])]
+    public function logout(Request $request): JsonResponse
+    {
+        $authHeader = $request->headers->get('Authorization', '');
+
+        if (!str_starts_with($authHeader, 'Bearer ')) {
+            return new JsonResponse([
+                'error' => 'invalid_request',
+                'message' => 'Bearer token required',
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $token = substr($authHeader, 7);
+
+        try {
+            $payload = $this->jwtService->decodeToken($token);
+
+            if (isset($payload->jti)) {
+                $this->tokenBlacklist->revoke($payload->jti, (int) ($payload->exp ?? time() + 86400));
+            }
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Successfully logged out',
+            ]);
+        } catch (\Exception $e) {
+            // Token is already invalid/expired, consider it logged out
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Successfully logged out',
+            ]);
         }
     }
 

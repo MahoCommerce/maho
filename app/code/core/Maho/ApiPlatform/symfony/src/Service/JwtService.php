@@ -28,6 +28,7 @@ class JwtService
     private const CONFIG_PATH_LEGACY = 'maho_api/settings/jwt_secret';
     private const TOKEN_EXPIRY_SECONDS = 86400; // 24 hours
     private const ALGORITHM = 'HS256';
+    private const AUDIENCE = 'maho-api';
 
     private ?string $cachedSecret = null;
 
@@ -45,6 +46,8 @@ class JwtService
 
         $payload = [
             'iss' => $this->getIssuer(),
+            'aud' => self::AUDIENCE,
+            'jti' => bin2hex(random_bytes(16)),
             'sub' => 'customer_' . $customer->getId(),
             'iat' => $now,
             'exp' => $now + self::TOKEN_EXPIRY_SECONDS,
@@ -71,6 +74,8 @@ class JwtService
 
         $payload = [
             'iss' => $this->getIssuer(),
+            'aud' => self::AUDIENCE,
+            'jti' => bin2hex(random_bytes(16)),
             'sub' => 'admin_' . $admin->getId(),
             'iat' => $now,
             'exp' => $now + self::TOKEN_EXPIRY_SECONDS,
@@ -98,6 +103,8 @@ class JwtService
 
         $payload = [
             'iss' => $this->getIssuer(),
+            'aud' => self::AUDIENCE,
+            'jti' => bin2hex(random_bytes(16)),
             'sub' => 'api_user_' . $apiUser->getId(),
             'iat' => $now,
             'exp' => $now + $this->getTokenExpiry(),
@@ -163,7 +170,19 @@ class JwtService
     public function decodeToken(string $token): object
     {
         $secret = $this->getSecret();
-        return JWT::decode($token, new Key($secret, self::ALGORITHM));
+        $payload = JWT::decode($token, new Key($secret, self::ALGORITHM));
+
+        // Validate audience
+        if (($payload->aud ?? null) !== self::AUDIENCE) {
+            throw new \UnexpectedValueException('Invalid token audience');
+        }
+
+        // Validate issuer
+        if (($payload->iss ?? null) !== $this->getIssuer()) {
+            throw new \UnexpectedValueException('Invalid token issuer');
+        }
+
+        return $payload;
     }
 
     /**
@@ -219,7 +238,7 @@ class JwtService
      * Get JWT secret from Maho configuration
      *
      * @return string The JWT secret
-     * @throws \RuntimeException If secret is not configured
+     * @throws \RuntimeException If secret is not configured or too short
      */
     public function getSecret(): string
     {
@@ -239,6 +258,10 @@ class JwtService
             throw new \RuntimeException('JWT secret not configured. Please set maho_apiplatform/oauth2/secret in configuration.');
         }
 
+        if (strlen($secret) < 32) {
+            throw new \RuntimeException('JWT secret must be at least 32 characters. Configure in System > Configuration > API > JWT.');
+        }
+
         $this->cachedSecret = $secret;
         return $secret;
     }
@@ -254,7 +277,7 @@ class JwtService
     /**
      * Get the issuer URL for tokens
      */
-    private function getIssuer(): string
+    public function getIssuer(): string
     {
         return \Mage::getBaseUrl();
     }

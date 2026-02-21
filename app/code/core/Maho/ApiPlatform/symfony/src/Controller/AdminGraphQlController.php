@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Controller;
 
+use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Service\CustomerService;
 use Maho\ApiPlatform\Service\GraphQL\CartMutationHandler;
@@ -65,6 +66,15 @@ class AdminGraphQlController
             $input = json_decode($content, true) ?? [];
             $storeId = (int) ($_SERVER['MAHO_STORE_ID'] ?? $input['variables']['storeId'] ?? 1);
             $adminUserId = $_SERVER['MAHO_ADMIN_USER_ID'] ?? null;
+            // Verify bridge token if admin context was set via $_SERVER
+            if ($adminUserId !== null) {
+                if (!AdminSessionAuthenticator::verifyBridgeToken(
+                    (string) $adminUserId,
+                    $_SERVER['MAHO_API_BRIDGE_TOKEN'] ?? '',
+                )) {
+                    $adminUserId = null; // Reject unverified context
+                }
+            }
             $customerId = $_SERVER['MAHO_POS_CUSTOMER_ID'] ?? null;
 
             // For POS - validate form_key using Maho's standard method

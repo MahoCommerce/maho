@@ -109,7 +109,7 @@ final class BlogPostProvider implements ProviderInterface
 
         // Apply pagination
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10), 50);
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10), 50));
         $collection->setPageSize($pageSize);
         $collection->setCurPage($page);
 

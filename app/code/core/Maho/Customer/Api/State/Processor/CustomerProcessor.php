@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\ProcessorInterface;
 use Maho\Customer\Api\Resource\Customer;
+use Maho\ApiPlatform\Service\RateLimiter;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -35,9 +36,12 @@ final class CustomerProcessor implements ProcessorInterface
 {
     use AuthenticationTrait;
 
+    private RateLimiter $rateLimiter;
+
     public function __construct(Security $security)
     {
         $this->security = $security;
+        $this->rateLimiter = new RateLimiter();
     }
 
     /**
@@ -173,6 +177,7 @@ final class CustomerProcessor implements ProcessorInterface
     private function createCustomer(Customer $data, array $context): Customer
     {
         StoreContext::ensureStore();
+        $this->rateLimiter->check('create_customer:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600);
         $storeId = StoreContext::getStoreId();
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
 
@@ -238,6 +243,7 @@ final class CustomerProcessor implements ProcessorInterface
         $args = $context['args']['input'] ?? [];
 
         StoreContext::ensureStore();
+        $this->rateLimiter->check('create_customer:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600);
         $storeId = StoreContext::getStoreId();
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
 
@@ -311,6 +317,8 @@ final class CustomerProcessor implements ProcessorInterface
             throw new BadRequestHttpException('Email and password are required');
         }
 
+        $this->rateLimiter->check('graphql_login:email:' . strtolower($email), 5, 60);
+
         StoreContext::ensureStore();
         $storeId = StoreContext::getStoreId();
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
@@ -320,6 +328,8 @@ final class CustomerProcessor implements ProcessorInterface
             ->loadByEmail($email);
 
         if (!$customer->getId()) {
+            // Dummy hash comparison to equalize timing with real password check
+            password_verify($password, '$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012');
             throw new BadRequestHttpException('Invalid email or password');
         }
 
@@ -529,7 +539,10 @@ final class CustomerProcessor implements ProcessorInterface
             throw new BadRequestHttpException('Failed to reset password');
         }
 
-        return $this->mapToDto($customer);
+        // Return minimal DTO — don't expose full customer data after password reset
+        $dto = new Customer();
+        $dto->email = $email;
+        return $dto;
     }
 
     // TODO: Extract customer mapping to a shared CustomerMapper service to eliminate duplication with CustomerProcessor/CustomerProvider

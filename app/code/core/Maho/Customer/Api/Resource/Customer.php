@@ -35,10 +35,12 @@ use Maho\Customer\Api\State\Processor\CustomerProcessor;
         new Get(
             uriTemplate: '/customers/{id}',
             description: 'Get a customer by ID',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
         new GetCollection(
             uriTemplate: '/customers',
             description: 'Get customer collection',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
         new Post(
             uriTemplate: '/customers',
@@ -48,11 +50,13 @@ use Maho\Customer\Api\State\Processor\CustomerProcessor;
             uriTemplate: '/customers/me',
             name: 'update_profile',
             description: 'Update current customer profile',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Post(
             uriTemplate: '/customers/me/password',
             name: 'change_password',
             description: 'Change current customer password',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
     ],
     graphQlOperations: [

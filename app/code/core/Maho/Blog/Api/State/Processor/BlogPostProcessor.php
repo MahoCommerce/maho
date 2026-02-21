@@ -112,7 +112,8 @@ final class BlogPostProcessor implements ProcessorInterface
                 $this->saveImageAttribute($post, $this->processImage($data->image));
             }
         } catch (\Exception $e) {
-            throw new UnprocessableEntityHttpException('Failed to create blog post: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new UnprocessableEntityHttpException('Failed to create blog post');
         }
 
         $this->logActivity('create', null, $post, $user);
@@ -169,7 +170,8 @@ final class BlogPostProcessor implements ProcessorInterface
                 $this->saveImageAttribute($post, $this->processImage($data->image));
             }
         } catch (\Exception $e) {
-            throw new UnprocessableEntityHttpException('Failed to update blog post: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new UnprocessableEntityHttpException('Failed to update blog post');
         }
 
         $this->logActivity('update', $oldData, $post, $user);
@@ -197,7 +199,8 @@ final class BlogPostProcessor implements ProcessorInterface
         try {
             $post->delete();
         } catch (\Exception $e) {
-            throw new UnprocessableEntityHttpException('Failed to delete blog post: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new UnprocessableEntityHttpException('Failed to delete blog post');
         }
 
         $this->logActivity('delete', $oldData, null, $user);
@@ -289,6 +292,14 @@ final class BlogPostProcessor implements ProcessorInterface
         if (str_contains($image, '/media/wysiwyg/')) {
             if (preg_match('#/media/wysiwyg/(.+)$#', $image, $matches)) {
                 $sourceFile = Mage::getBaseDir('media') . '/wysiwyg/' . $matches[1];
+                $mediaDir = realpath(Mage::getBaseDir('media') . '/wysiwyg');
+                $realSource = realpath($sourceFile);
+
+                // Validate path doesn't escape media directory (path traversal protection)
+                if ($realSource === false || $mediaDir === false || !str_starts_with($realSource, $mediaDir)) {
+                    return basename($urlPath);
+                }
+
                 $destDir = Mage::getBaseDir('media') . '/blog/';
                 $destFile = $destDir . $filename;
 

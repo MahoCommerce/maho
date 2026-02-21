@@ -84,10 +84,17 @@ final class ProductMediaProcessor implements ProcessorInterface
             rename($tmpPath, $newPath);
             $tmpPath = $newPath;
         } elseif ($imageUrl !== null) {
-            // Validate URL to prevent SSRF
-            $this->validateImageUrl($imageUrl);
-            // Download from URL
-            $imageData = @file_get_contents($imageUrl);
+            // Validate URL and get resolved IP to prevent DNS rebinding SSRF
+            $validatedIp = $this->validateImageUrl($imageUrl);
+            // Replace hostname with validated IP for the actual request
+            $parsedUrl = parse_url($imageUrl);
+            $originalHost = $parsedUrl['host'] ?? '';
+            $ipUrl = str_replace($originalHost, $validatedIp, $imageUrl);
+            $context = stream_context_create(['http' => [
+                'header' => "Host: {$originalHost}\r\n",
+                'timeout' => 10,
+            ]]);
+            $imageData = @file_get_contents($ipUrl, false, $context);
             if ($imageData === false) {
                 throw new BadRequestHttpException('Failed to download image from URL');
             }
@@ -121,7 +128,8 @@ final class ProductMediaProcessor implements ProcessorInterface
 
             $product->save();
         } catch (\Throwable $e) {
-            throw new UnprocessableEntityHttpException('Failed to upload image: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new UnprocessableEntityHttpException('Failed to upload image');
         } finally {
             if ($tmpPath && file_exists($tmpPath)) {
                 @unlink($tmpPath);
@@ -198,7 +206,8 @@ final class ProductMediaProcessor implements ProcessorInterface
             $product->unsetData('stock_data');
             $product->save();
         } catch (\Throwable $e) {
-            throw new UnprocessableEntityHttpException('Failed to update image: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new UnprocessableEntityHttpException('Failed to update image');
         }
 
         return $this->provider->getMediaGallery($this->loadProduct($productId));
@@ -236,7 +245,8 @@ final class ProductMediaProcessor implements ProcessorInterface
             $product->unsetData('stock_data');
             $product->save();
         } catch (\Throwable $e) {
-            throw new UnprocessableEntityHttpException('Failed to delete image: ' . $e->getMessage());
+            \Mage::logException($e);
+            throw new UnprocessableEntityHttpException('Failed to delete image');
         }
 
         return null;
@@ -245,8 +255,9 @@ final class ProductMediaProcessor implements ProcessorInterface
 
     /**
      * Validate image URL to prevent SSRF attacks.
+     * Returns the validated IP to use for the actual request (prevents DNS rebinding).
      */
-    private function validateImageUrl(string $url): void
+    private function validateImageUrl(string $url): string
     {
         $parsed = parse_url($url);
         $scheme = $parsed['scheme'] ?? '';
@@ -267,6 +278,8 @@ final class ProductMediaProcessor implements ProcessorInterface
         if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
             throw new BadRequestHttpException('imageUrl cannot point to private or reserved IP addresses');
         }
+
+        return $ip;
     }
     private function loadProduct(int $id): Mage_Catalog_Model_Product
     {
