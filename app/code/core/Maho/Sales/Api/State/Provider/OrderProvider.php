@@ -235,8 +235,9 @@ final class OrderProvider implements ProviderInterface
         $email = $filters['email'] ?? null;
         $emailLike = $filters['emailLike'] ?? null;
         $incrementId = $filters['incrementId'] ?? null;
+        $since = $filters['since'] ?? null;
 
-        $result = $this->orderService->getAllOrders($page, $pageSize, $status, $email, $incrementId, $emailLike);
+        $result = $this->orderService->getAllOrders($page, $pageSize, $status, $email, $incrementId, $emailLike, $since);
 
         $orders = [];
         foreach ($result['orders'] as $order) {
@@ -278,25 +279,52 @@ final class OrderProvider implements ProviderInterface
             $dto->accessToken = $accessToken;
         }
 
-        // Map items
+        // Map items — use preloaded items if available (batch-loaded), otherwise load.
         $dto->items = [];
-        foreach ($order->getAllVisibleItems() as $item) {
-            $dto->items[] = $this->mapItemToDto($item);
+        $preloadedItems = $order->getData('_preloaded_items');
+        if ($preloadedItems) {
+            foreach ($preloadedItems as $item) {
+                $dto->items[] = $this->mapItemToDto($item);
+            }
+        } else {
+            foreach ($order->getAllVisibleItems() as $item) {
+                $dto->items[] = $this->mapItemToDto($item);
+            }
         }
 
         // Map prices
         $dto->prices = $this->mapPricesToArray($order);
 
-        // Map billing address
-        $billingAddress = $order->getBillingAddress();
-        if ($billingAddress && $billingAddress->getId()) {
-            $dto->billingAddress = $this->addressMapper->fromOrderAddress($billingAddress);
+        // Map billing address — use joined data if available, otherwise load.
+        if ($order->getData('billing_telephone') !== null) {
+            $dto->billingAddress = new Address();
+            $dto->billingAddress->id = (int) ($order->getData('billing_addr_id') ?: 0);
+            $dto->billingAddress->firstName = $order->getData('billing_firstname') ?? '';
+            $dto->billingAddress->lastName = $order->getData('billing_lastname') ?? '';
+            $dto->billingAddress->company = $order->getData('billing_company');
+            $street = $order->getData('billing_street') ?? '';
+            $dto->billingAddress->street = $street ? explode("\n", $street) : [];
+            $dto->billingAddress->city = $order->getData('billing_city') ?? '';
+            $dto->billingAddress->region = $order->getData('billing_region');
+            $dto->billingAddress->postcode = $order->getData('billing_postcode') ?? '';
+            $dto->billingAddress->countryId = $order->getData('billing_country_id') ?? '';
+            $dto->billingAddress->telephone = (string) $order->getData('billing_telephone');
+        } else {
+            $billingAddress = $order->getBillingAddress();
+            if ($billingAddress && $billingAddress->getId()) {
+                $dto->billingAddress = $this->addressMapper->fromOrderAddress($billingAddress);
+            }
         }
 
-        // Map shipping address
-        $shippingAddress = $order->getShippingAddress();
-        if ($shippingAddress && $shippingAddress->getId()) {
-            $dto->shippingAddress = $this->addressMapper->fromOrderAddress($shippingAddress);
+        // For collection (batch) orders with joined data, skip expensive lazy-loads.
+        $isCollectionOrder = $order->getData('billing_telephone') !== null;
+
+        if (!$isCollectionOrder) {
+            // Map shipping address (only for single-order detail views)
+            $shippingAddress = $order->getShippingAddress();
+            if ($shippingAddress && $shippingAddress->getId()) {
+                $dto->shippingAddress = $this->addressMapper->fromOrderAddress($shippingAddress);
+            }
         }
 
         // Map shipping method
@@ -307,9 +335,13 @@ final class OrderProvider implements ProviderInterface
         $payment = $order->getPayment();
         if ($payment) {
             $dto->paymentMethod = $payment->getMethod();
-            try {
-                $dto->paymentMethodTitle = $payment->getMethodInstance()->getTitle();
-            } catch (\Exception $e) {
+            if (!$isCollectionOrder) {
+                try {
+                    $dto->paymentMethodTitle = $payment->getMethodInstance()->getTitle();
+                } catch (\Exception $e) {
+                    $dto->paymentMethodTitle = $payment->getMethod();
+                }
+            } else {
                 $dto->paymentMethodTitle = $payment->getMethod();
             }
 
@@ -320,11 +352,13 @@ final class OrderProvider implements ProviderInterface
             }
         }
 
-        // Map status history
-        $dto->statusHistory = $this->orderService->getOrderNotes($order);
+        if (!$isCollectionOrder) {
+            // Map status history (only for single-order detail views)
+            $dto->statusHistory = $this->orderService->getOrderNotes($order);
 
-        // Map shipments with tracking
-        $dto->shipments = $this->mapShipmentsToDto($order);
+            // Map shipments with tracking
+            $dto->shipments = $this->mapShipmentsToDto($order);
+        }
 
         return $dto;
     }
