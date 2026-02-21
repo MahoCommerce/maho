@@ -98,7 +98,9 @@ class Maho_Giftcard_Model_Observer
 
         // Convert amount to base currency using order's conversion rate
         // Gift card amount is in order currency, need to convert to base currency
-        $baseAmount = $amount * $order->getBaseToOrderRate();
+        // base_to_order_rate converts base→order, so to go order→base we divide
+        $baseToOrderRate = (float) $order->getBaseToOrderRate();
+        $baseAmount = $baseToOrderRate > 0 ? $amount / $baseToOrderRate : $amount;
 
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setData([

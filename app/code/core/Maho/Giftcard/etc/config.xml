@@ -15,15 +15,6 @@
                     </giftcard>
                 </totals>
             </quote>
-            <order>
-                <totals>
-                    <giftcard>
-                        <class>giftcard/total_order</class>
-                        <after>subtotal,shipping,discount,tax</after>
-                        <before>grand_total</before>
-                    </giftcard>
-                </totals>
-            </order>
         </sales>
 
         <models>

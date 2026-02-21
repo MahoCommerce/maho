@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -33,7 +35,7 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Totals_Giftcard extends Mage_Cor
 
         $giftcardAmount = $order->getGiftcardAmount();
 
-        if ($giftcardAmount != 0) {
+        if ((float) $giftcardAmount !== 0.0) {
             // Get gift card codes for display
             $codes = [];
             $giftcardCodes = $order->getGiftcardCodes();
