@@ -16,18 +16,14 @@ class Maho_Giftcard_Model_Total_Order extends Mage_Sales_Model_Order_Total_Abstr
     /**
      * Collect gift card totals
      *
+     * Gift card amounts are already deducted from grand_total during quote
+     * total collection (via _addAmount in Total_Quote::collect) and carried
+     * over during quote-to-order conversion. No further adjustment needed.
+     *
      * @return $this
      */
     public function collect(Mage_Sales_Model_Order $order)
     {
-        $giftcardAmount = $order->getGiftcardAmount();
-        $baseGiftcardAmount = $order->getBaseGiftcardAmount();
-
-        if ($baseGiftcardAmount) {
-            $order->setGrandTotal($order->getGrandTotal() - $giftcardAmount);
-            $order->setBaseGrandTotal($order->getBaseGrandTotal() - $baseGiftcardAmount);
-        }
-
         return $this;
     }
 

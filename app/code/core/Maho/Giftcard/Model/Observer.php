@@ -304,15 +304,12 @@ class Maho_Giftcard_Model_Observer
 
         if ($baseGiftcardAmount > 0) {
             // Set gift card amounts on order
+            // Grand total is already reduced during quote total collection
             $order->setBaseGiftcardAmount($baseGiftcardAmount);
             $order->setGiftcardAmount($giftcardAmount);
             if ($giftcardCodes) {
                 $order->setGiftcardCodes($giftcardCodes);
             }
-
-            // Reduce grand total by gift card amount
-            $order->setGrandTotal(max(0, $order->getGrandTotal() - $giftcardAmount));
-            $order->setBaseGrandTotal(max(0, $order->getBaseGrandTotal() - $baseGiftcardAmount));
         }
     }
 
@@ -375,17 +372,15 @@ class Maho_Giftcard_Model_Observer
             }
         }
 
-        // Set gift card amounts on order
+        // Set gift card amounts on order (codes/amounts may already be set
+        // by fieldset conversion + applyGiftcardToOrder, but ensure they're present)
         $order->setGiftcardCodes($giftcardCodes);
         $order->setBaseGiftcardAmount($baseGiftcardAmount);
         $order->setGiftcardAmount($giftcardAmount);
 
-        // Reduce grand total by gift card amount (if not already reduced)
-        $currentGrandTotal = (float) $order->getGrandTotal();
-        if ($giftcardAmount > 0 && $currentGrandTotal > 0) {
-            $order->setGrandTotal(max(0, $currentGrandTotal - $giftcardAmount));
-            $order->setBaseGrandTotal(max(0, (float) $order->getBaseGrandTotal() - $baseGiftcardAmount));
-        }
+        // Grand total is NOT modified here — it was already reduced during
+        // quote total collection via Total_Quote::collect() → _addAmount(-$amount)
+        // and carried over to the order during quote-to-order conversion.
 
         // Add gift card info to payment additional information for display in grid
         $payment = $order->getPayment();
