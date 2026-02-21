@@ -38,51 +38,61 @@ use Maho\Customer\Api\State\Processor\AddressProcessor;
         new Get(
             uriTemplate: '/addresses/{id}',
             description: 'Get a specific address by ID',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Put(
             uriTemplate: '/addresses/{id}',
             description: 'Update an address',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Delete(
             uriTemplate: '/addresses/{id}',
             description: 'Delete an address',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         // Simple route for authenticated customers to create/list their own addresses
         new GetCollection(
             name: 'get_my_addresses',
             uriTemplate: '/addresses',
             description: 'List all addresses for the authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Post(
             name: 'create_my_address',
             uriTemplate: '/addresses',
             description: 'Create a new address for the authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         // Routes using /customers/me/* pattern (frontend compatibility)
         new GetCollection(
             name: 'get_me_addresses',
             uriTemplate: '/customers/me/addresses',
             description: 'List all addresses for the authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Post(
             name: 'create_me_address',
             uriTemplate: '/customers/me/addresses',
             description: 'Create a new address for the authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Get(
             name: 'get_me_address',
             uriTemplate: '/customers/me/addresses/{id}',
             description: 'Get an address for the authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Put(
             name: 'update_me_address',
             uriTemplate: '/customers/me/addresses/{id}',
             description: 'Update an address for the authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Delete(
             name: 'delete_me_address',
             uriTemplate: '/customers/me/addresses/{id}',
             description: 'Delete an address for the authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         // Customer-scoped routes for listing/creating (admin or explicit customer ID)
         new GetCollection(
@@ -92,6 +102,7 @@ use Maho\Customer\Api\State\Processor\AddressProcessor;
                 'customerId' => new Link(toProperty: 'customerId'),
             ],
             description: 'List all addresses for a customer',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
         new Post(
             name: 'create_customer_address',
@@ -100,6 +111,7 @@ use Maho\Customer\Api\State\Processor\AddressProcessor;
                 'customerId' => new Link(toProperty: 'customerId'),
             ],
             description: 'Create a new address for a customer',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
     graphQlOperations: [

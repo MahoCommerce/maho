@@ -254,17 +254,41 @@ class Maho_ApiPlatform_Adminhtml_Apiplatform_RoleController extends Mage_Adminht
                 return [];
             }
             // Filter out intermediate group/resource node IDs
-            return array_values(array_filter(
+            $leafPermissions = array_values(array_filter(
                 explode(',', $treeValue),
                 fn(string $id) => !str_starts_with($id, 'group_') && !str_starts_with($id, 'section_') && !str_starts_with($id, 'resource_'),
             ));
+            // Validate against the permission registry
+            $registry = new \Maho\ApiPlatform\Security\ApiPermissionRegistry();
+            $validPermissions = $this->buildValidPermissionIds($registry);
+            return array_values(array_intersect($leafPermissions, $validPermissions));
         }
 
         // Legacy checkbox format
         if (isset($data['permissions']) && is_array($data['permissions'])) {
-            return $data['permissions'];
+            $registry = new \Maho\ApiPlatform\Security\ApiPermissionRegistry();
+            $validPermissions = $this->buildValidPermissionIds($registry);
+            $validPermissions[] = 'all';
+            return array_values(array_intersect($data['permissions'], $validPermissions));
         }
 
         return [];
+    }
+
+    /**
+     * Build list of valid permission IDs from the registry.
+     * Format: "resource/operation" e.g. "products/read", "orders/write"
+     *
+     * @return string[]
+     */
+    private function buildValidPermissionIds(\Maho\ApiPlatform\Security\ApiPermissionRegistry $registry): array
+    {
+        $valid = [];
+        foreach ($registry->getResources() as $resourceId => $config) {
+            foreach (array_keys($config['operations']) as $operation) {
+                $valid[] = $resourceId . '/' . $operation;
+            }
+        }
+        return $valid;
     }
 }

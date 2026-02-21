@@ -107,7 +107,36 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
      */
     private function hasAdminContext(): bool
     {
-        return isset($_SERVER['MAHO_ADMIN_USER_ID']) && $_SERVER['MAHO_IS_ADMIN'] === '1';
+        if (!isset($_SERVER['MAHO_ADMIN_USER_ID']) || ($_SERVER['MAHO_IS_ADMIN'] ?? '') !== '1') {
+            return false;
+        }
+        // Verify HMAC bridge token to prevent $_SERVER injection
+        return self::verifyBridgeToken(
+            (string) $_SERVER['MAHO_ADMIN_USER_ID'],
+            $_SERVER['MAHO_API_BRIDGE_TOKEN'] ?? '',
+        );
+    }
+
+    /**
+     * Generate HMAC bridge token for admin context verification.
+     * Ensures $_SERVER vars were set by our authenticator, not injected externally.
+     */
+    public static function generateBridgeToken(string $adminId): string
+    {
+        $key = (string) \Mage::getConfig()->getNode('global/crypt/key');
+        return hash_hmac('sha256', $adminId, $key);
+    }
+
+    /**
+     * Verify HMAC bridge token
+     */
+    public static function verifyBridgeToken(string $adminId, string $token): bool
+    {
+        if ($token === '') {
+            return false;
+        }
+        $expected = self::generateBridgeToken($adminId);
+        return hash_equals($expected, $token);
     }
 
     /**
@@ -162,11 +191,12 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
             \Mage::logException($e);
         }
 
-        // Set context for services
+        // Set context for services with HMAC bridge token for verification
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminId;
         $_SERVER['MAHO_ADMIN_USERNAME'] = $admin->getUsername();
         $_SERVER['MAHO_ADMIN_ROLE_ID'] = $admin->getRole()->getId();
         $_SERVER['MAHO_IS_ADMIN'] = '1';
+        $_SERVER['MAHO_API_BRIDGE_TOKEN'] = self::generateBridgeToken((string) $adminId);
 
         return new ApiUser(
             identifier: 'admin_' . $adminId,

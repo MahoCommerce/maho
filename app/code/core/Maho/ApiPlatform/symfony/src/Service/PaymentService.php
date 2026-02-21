@@ -66,47 +66,65 @@ class PaymentService
         /** @phpstan-ignore-next-line */
         string $status = \Maho_Pos_Model_Payment::STATUS_CAPTURED,
     ) {
-        // Load order
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw new \Mage_Core_Exception('Order not found');
-        }
+        // Use transaction with row locking to prevent race conditions
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $orderTable = $resource->getTableName('sales/order');
 
-        // Validate cumulative payments don't exceed order total
-        $existingPaid = $this->getTotalPaidAmount($orderId);
-        $orderTotal = (float) $order->getGrandTotal();
-        $tolerance = 0.01;
-        if (($existingPaid + $amount) > ($orderTotal + $tolerance)) {
-            throw new \Mage_Core_Exception(
-                "Payment would exceed order total. Order total: {$orderTotal}, already paid: {$existingPaid}, attempted: {$amount}",
+        $write->beginTransaction();
+        try {
+            // Lock the order row to prevent concurrent payment recording
+            $orderRow = $write->fetchRow(
+                $write->select()
+                    ->from($orderTable, ['entity_id', 'grand_total', 'order_currency_code'])
+                    ->where('entity_id = ?', $orderId)
+                    ->forUpdate(),
             );
+
+            if (!$orderRow) {
+                throw new \Mage_Core_Exception('Order not found');
+            }
+
+            $orderTotal = (float) $orderRow['grand_total'];
+            $currencyCode = $orderRow['order_currency_code'];
+
+            // Validate cumulative payments don't exceed order total (within lock)
+            $existingPaid = $this->getTotalPaidAmount($orderId);
+            $tolerance = 0.01;
+            if (($existingPaid + $amount) > ($orderTotal + $tolerance)) {
+                throw new \Mage_Core_Exception(
+                    "Payment would exceed order total. Order total: {$orderTotal}, already paid: {$existingPaid}, attempted: {$amount}",
+                );
+            }
+
+            // Create payment record
+            /** @phpstan-ignore-next-line */
+            $payment = \Mage::getModel('maho_pos/payment');
+            /** @phpstan-ignore-next-line */
+            $payment->setData([
+                'order_id' => $orderId,
+                'register_id' => $registerId,
+                'method_code' => $methodCode,
+                'amount' => $amount,
+                'base_amount' => $amount, // TODO: Convert to base currency if needed
+                'currency_code' => $currencyCode,
+                'terminal_id' => $terminalId,
+                'transaction_id' => $transactionId,
+                'card_type' => $cardType,
+                'card_last4' => $cardLast4,
+                'auth_code' => $authCode,
+                'receipt_data' => $receiptData,
+                'status' => $status,
+            ]);
+
+            /** @phpstan-ignore-next-line */
+            $payment->save();
+
+            $write->commit();
+        } catch (\Exception $e) {
+            $write->rollBack();
+            throw $e;
         }
-
-        // Get currency
-        $currencyCode = $order->getOrderCurrencyCode();
-
-        // Create payment record
-        /** @phpstan-ignore-next-line */
-        $payment = \Mage::getModel('maho_pos/payment');
-        /** @phpstan-ignore-next-line */
-        $payment->setData([
-            'order_id' => $orderId,
-            'register_id' => $registerId,
-            'method_code' => $methodCode,
-            'amount' => $amount,
-            'base_amount' => $amount, // TODO: Convert to base currency if needed
-            'currency_code' => $currencyCode,
-            'terminal_id' => $terminalId,
-            'transaction_id' => $transactionId,
-            'card_type' => $cardType,
-            'card_last4' => $cardLast4,
-            'auth_code' => $authCode,
-            'receipt_data' => $receiptData,
-            'status' => $status,
-        ]);
-
-        /** @phpstan-ignore-next-line */
-        $payment->save();
 
         return $payment;
     }

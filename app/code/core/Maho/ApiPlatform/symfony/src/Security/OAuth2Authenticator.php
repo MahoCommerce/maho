@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Security;
 
 use Maho\ApiPlatform\Service\JwtService;
+use Maho\ApiPlatform\Service\TokenBlacklist;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,10 +36,12 @@ class OAuth2Authenticator extends AbstractAuthenticator
     private const BEARER_PREFIX = 'Bearer ';
 
     private JwtService $jwtService;
+    private TokenBlacklist $tokenBlacklist;
 
     public function __construct()
     {
         $this->jwtService = new JwtService();
+        $this->tokenBlacklist = new TokenBlacklist();
     }
 
     /**
@@ -82,6 +85,11 @@ class OAuth2Authenticator extends AbstractAuthenticator
         // Validate required payload fields
         if (!isset($payload->sub)) {
             throw new CustomUserMessageAuthenticationException('Invalid token: missing subject');
+        }
+
+        // Check token blacklist
+        if (isset($payload->jti) && $this->tokenBlacklist->isRevoked($payload->jti)) {
+            throw new CustomUserMessageAuthenticationException('Token has been revoked');
         }
 
         // Build user badge with loader callback
@@ -141,9 +149,10 @@ class OAuth2Authenticator extends AbstractAuthenticator
 
         if (isset($payload->api_user_id)) {
             $apiUserId = (int) $payload->api_user_id;
-        }
 
-        if (isset($payload->permissions) && is_array($payload->permissions)) {
+            // Re-validate API user permissions from database instead of trusting JWT
+            $permissions = $this->loadFreshApiUserPermissions($apiUserId);
+        } elseif (isset($payload->permissions) && is_array($payload->permissions)) {
             $permissions = $payload->permissions;
         }
 
@@ -160,6 +169,48 @@ class OAuth2Authenticator extends AbstractAuthenticator
             permissions: $permissions,
             allowedStoreIds: $allowedStoreIds,
         );
+    }
+
+    /**
+     * Load fresh permissions from the database for an API user
+     *
+     * @return array<string>
+     */
+    private function loadFreshApiUserPermissions(int $apiUserId): array
+    {
+        $apiUser = \Mage::getModel('api/user')->load($apiUserId);
+        if (!$apiUser->getId() || !(int) $apiUser->getIsActive()) {
+            throw new CustomUserMessageAuthenticationException('API user account is inactive or not found');
+        }
+
+        $roleIds = $apiUser->getRoles();
+        if (empty($roleIds)) {
+            return [];
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $ruleTable = $resource->getTableName('api/rule');
+
+        $permissions = [];
+        foreach ($roleIds as $roleId) {
+            $rules = $read->fetchCol(
+                $read->select()
+                    ->from($ruleTable, 'resource_id')
+                    ->where('role_id = ?', $roleId)
+                    ->where('role_type = ?', 'G')
+                    ->where('api_permission = ?', 'allow'),
+            );
+
+            foreach ($rules as $resourceId) {
+                if ($resourceId === 'all') {
+                    return ['all'];
+                }
+                $permissions[] = $resourceId;
+            }
+        }
+
+        return array_values(array_unique($permissions));
     }
 
     /**

@@ -95,7 +95,7 @@ final class GiftCardProvider implements ProviderInterface
     {
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100);
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100));
 
         $collection = \Mage::getResourceModel('giftcard/giftcard_collection');
         $collection->setOrder('created_at', 'DESC');

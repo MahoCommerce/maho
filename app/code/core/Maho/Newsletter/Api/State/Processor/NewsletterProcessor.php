@@ -18,6 +18,7 @@ use ApiPlatform\State\ProcessorInterface;
 use Maho\Newsletter\Api\Resource\NewsletterSubscription;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
@@ -151,38 +152,26 @@ final class NewsletterProcessor implements ProcessorInterface
     /**
      * Unsubscribe from newsletter
      *
-     * - Authenticated users: unsubscribes their account
-     * - Guests: requires email in request body
+     * Requires authentication — guests should use the unsubscribe link in their email.
      */
     private function unsubscribe(NewsletterSubscription $data): NewsletterSubscription
     {
         $customerId = $this->getAuthenticatedCustomerId();
-        $email = $data->email;
 
-        // For authenticated users, use their email if not provided
-        if ($customerId !== null) {
-            $customer = \Mage::getModel('customer/customer')->load($customerId);
-            if (!$customer->getId()) {
-                throw new BadRequestHttpException('Customer not found');
-            }
-
-            if (empty($email)) {
-                $email = $customer->getEmail();
-            }
-
-            $data->customerId = $customerId;
+        if ($customerId === null) {
+            throw new AccessDeniedHttpException(
+                'Authentication required to unsubscribe. Use the unsubscribe link in your email.',
+            );
         }
 
-        // Validate email
-        if (empty($email)) {
-            throw new BadRequestHttpException('Email address is required');
+        $customer = \Mage::getModel('customer/customer')->load($customerId);
+        if (!$customer->getId()) {
+            throw new BadRequestHttpException('Customer not found');
         }
 
-        $coreHelper = \Mage::helper('core');
-        if (!$coreHelper->isValidEmail($email)) {
-            throw new BadRequestHttpException('Invalid email address');
-        }
-
+        // Always use authenticated customer's email — prevent unsubscribing others
+        $email = $customer->getEmail();
+        $data->customerId = $customerId;
         $data->email = $email;
 
         try {
@@ -197,11 +186,8 @@ final class NewsletterProcessor implements ProcessorInterface
                 return $data;
             }
 
-            // For authenticated users unsubscribing their own email, skip code check
-            if ($customerId !== null) {
-                $subscriber->setCheckCode($subscriber->getCode());
-            }
-
+            // Skip code check for authenticated users unsubscribing their own email
+            $subscriber->setCheckCode($subscriber->getCode());
             $subscriber->unsubscribe();
 
             $data->status = 'unsubscribed';
