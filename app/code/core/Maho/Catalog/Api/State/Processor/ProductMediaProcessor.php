@@ -129,7 +129,7 @@ final class ProductMediaProcessor implements ProcessorInterface
             $product->save();
         } catch (\Throwable $e) {
             \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to upload image');
+            throw new UnprocessableEntityHttpException('Failed to upload image: ' . $e->getMessage());
         } finally {
             if ($tmpPath && file_exists($tmpPath)) {
                 @unlink($tmpPath);
@@ -207,7 +207,7 @@ final class ProductMediaProcessor implements ProcessorInterface
             $product->save();
         } catch (\Throwable $e) {
             \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to update image');
+            throw new UnprocessableEntityHttpException('Failed to update image: ' . $e->getMessage());
         }
 
         return $this->provider->getMediaGallery($this->loadProduct($productId));
@@ -246,7 +246,7 @@ final class ProductMediaProcessor implements ProcessorInterface
             $product->save();
         } catch (\Throwable $e) {
             \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to delete image');
+            throw new UnprocessableEntityHttpException('Failed to delete image: ' . $e->getMessage());
         }
 
         return null;

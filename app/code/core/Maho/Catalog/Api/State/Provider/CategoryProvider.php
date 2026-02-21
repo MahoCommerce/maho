@@ -127,17 +127,24 @@ final class CategoryProvider implements ProviderInterface
             $collection->addAttributeToFilter('include_in_menu', (int) $includeInMenu);
         }
 
+        // Pagination
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 100), 500));
+
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+
+        $total = (int) $collection->getSize();
+
         $categories = [];
         foreach ($collection as $mahoCategory) {
             $categories[] = $this->mapToDto($mahoCategory, false);
         }
 
-        $total = count($categories);
-
         return new ArrayPaginator(
             items: $categories,
-            currentPage: 1,
-            itemsPerPage: max($total, 100),
+            currentPage: $page,
+            itemsPerPage: $pageSize,
             totalItems: $total,
         );
     }
