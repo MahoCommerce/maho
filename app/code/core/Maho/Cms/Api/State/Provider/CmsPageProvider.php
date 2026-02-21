@@ -121,17 +121,24 @@ final class CmsPageProvider implements ProviderInterface
 
         $collection->setOrder('title', 'ASC');
 
-        $pages = [];
-        foreach ($collection as $page) {
-            $pages[] = $this->mapToDto($page);
-        }
+        // Pagination
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 100), 100));
 
-        $total = count($pages);
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+
+        $total = (int) $collection->getSize();
+
+        $pages = [];
+        foreach ($collection as $cmsPage) {
+            $pages[] = $this->mapToDto($cmsPage);
+        }
 
         return new ArrayPaginator(
             items: $pages,
-            currentPage: 1,
-            itemsPerPage: max($total, 100),
+            currentPage: $page,
+            itemsPerPage: $pageSize,
             totalItems: $total,
         );
     }

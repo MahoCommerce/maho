@@ -113,7 +113,7 @@ final class OrderProvider implements ProviderInterface
             }
 
             $page = $context['args']['page'] ?? 1;
-            $pageSize = $context['args']['pageSize'] ?? 20;
+            $pageSize = max(1, min((int) ($context['args']['pageSize'] ?? 20), 100));
             $status = $context['args']['status'] ?? null;
 
             $result = $this->orderService->getCustomerOrders((int) $customerId, $page, $pageSize, $status);
@@ -201,7 +201,7 @@ final class OrderProvider implements ProviderInterface
 
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10), 50);
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10), 100));
         $status = $filters['status'] ?? null;
 
         $result = $this->orderService->getCustomerOrders($customerId, $page, $pageSize, $status);
@@ -230,7 +230,7 @@ final class OrderProvider implements ProviderInterface
 
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100);
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100));
         $status = $filters['status'] ?? null;
         $email = $filters['email'] ?? null;
         $emailLike = $filters['emailLike'] ?? null;

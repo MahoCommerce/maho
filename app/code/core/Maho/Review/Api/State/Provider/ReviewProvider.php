@@ -60,7 +60,7 @@ final class ReviewProvider implements ProviderInterface
             return $this->getProductReviews(
                 (int) $args['productId'],
                 (int) ($args['page'] ?? 1),
-                (int) ($args['pageSize'] ?? 10),
+                max(1, min((int) ($args['pageSize'] ?? 10), 100)),
             );
         }
 
@@ -82,7 +82,7 @@ final class ReviewProvider implements ProviderInterface
                 return $this->getProductReviews(
                     $productId,
                     (int) ($filters['page'] ?? 1),
-                    (int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10),
+                    max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 10), 100)),
                 );
             }
             return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 10, totalItems: 0);

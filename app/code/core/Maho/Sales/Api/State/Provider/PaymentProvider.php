@@ -80,7 +80,7 @@ final class PaymentProvider implements ProviderInterface
     {
         $filters = $context['filters'] ?? [];
         $page = (int) ($filters['page'] ?? 1);
-        $pageSize = min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100);
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 20), 100));
         $orderId = $filters['orderId'] ?? null;
 
         // If orderId filter provided, get payments for that order

@@ -113,7 +113,7 @@ final class BlogPostProcessor implements ProcessorInterface
             }
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to create blog post');
+            throw new UnprocessableEntityHttpException('Failed to create blog post: ' . $e->getMessage());
         }
 
         $this->logActivity('create', null, $post, $user);
@@ -171,7 +171,7 @@ final class BlogPostProcessor implements ProcessorInterface
             }
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to update blog post');
+            throw new UnprocessableEntityHttpException('Failed to update blog post: ' . $e->getMessage());
         }
 
         $this->logActivity('update', $oldData, $post, $user);
@@ -200,7 +200,7 @@ final class BlogPostProcessor implements ProcessorInterface
             $post->delete();
         } catch (\Exception $e) {
             \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to delete blog post');
+            throw new UnprocessableEntityHttpException('Failed to delete blog post: ' . $e->getMessage());
         }
 
         $this->logActivity('delete', $oldData, null, $user);

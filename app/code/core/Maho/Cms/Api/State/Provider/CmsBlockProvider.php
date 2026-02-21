@@ -121,17 +121,24 @@ final class CmsBlockProvider implements ProviderInterface
 
         $collection->setOrder('title', 'ASC');
 
+        // Pagination
+        $page = max(1, (int) ($filters['page'] ?? 1));
+        $pageSize = max(1, min((int) ($filters['itemsPerPage'] ?? $filters['pageSize'] ?? 100), 100));
+
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+
+        $total = (int) $collection->getSize();
+
         $blocks = [];
         foreach ($collection as $block) {
             $blocks[] = $this->mapToDto($block);
         }
 
-        $total = count($blocks);
-
         return new ArrayPaginator(
             items: $blocks,
-            currentPage: 1,
-            itemsPerPage: max($total, 100),
+            currentPage: $page,
+            itemsPerPage: $pageSize,
             totalItems: $total,
         );
     }
