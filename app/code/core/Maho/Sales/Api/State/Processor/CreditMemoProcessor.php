@@ -190,9 +190,9 @@ final class CreditMemoProcessor implements ProcessorInterface
         $dto->createdAt = $creditmemo->getCreatedAt();
 
         $stateMap = [
-            1 => 'open',
-            2 => 'refunded',
-            3 => 'canceled',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_OPEN => 'open',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED => 'refunded',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED => 'canceled',
         ];
         $dto->state = $stateMap[(int) $creditmemo->getState()] ?? 'unknown';
 

@@ -115,11 +115,10 @@ final class CreditMemoProvider implements ProviderInterface
         $dto->incrementId = $creditmemo->getIncrementId();
         $dto->createdAt = $creditmemo->getCreatedAt();
 
-        // Map state: 1=open, 2=refunded, 3=canceled
         $stateMap = [
-            1 => 'open',
-            2 => 'refunded',
-            3 => 'canceled',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_OPEN => 'open',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED => 'refunded',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED => 'canceled',
         ];
         $dto->state = $stateMap[(int) $creditmemo->getState()] ?? 'unknown';
 

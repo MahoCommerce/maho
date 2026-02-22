@@ -318,8 +318,8 @@ final class CartProvider implements ProviderInterface
 
             // Use the appropriate configuration helper per product type
             $rawOptions = match ($typeId) {
-                'bundle' => \Mage::helper('bundle/catalog_product_configuration')->getOptions($item),
-                'downloadable' => \Mage::helper('downloadable/catalog_product_configuration')->getOptions($item),
+                \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE => \Mage::helper('bundle/catalog_product_configuration')->getOptions($item),
+                \Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE => \Mage::helper('downloadable/catalog_product_configuration')->getOptions($item),
                 default => \Mage::helper('catalog/product_configuration')->getOptions($item),
             };
 
