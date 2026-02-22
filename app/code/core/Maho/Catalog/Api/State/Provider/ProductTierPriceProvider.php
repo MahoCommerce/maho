@@ -32,7 +32,7 @@ final class ProductTierPriceProvider implements ProviderInterface
         foreach ($tierPrices as $i => $tp) {
             $dto = new ProductTierPrice();
             $dto->id = $productId . '_' . $i;
-            $dto->customerGroupId = (int) ($tp['cust_group'] ?? 32000) === 32000
+            $dto->customerGroupId = (int) ($tp['cust_group'] ?? \Mage_Customer_Model_Group::CUST_GROUP_ALL) === \Mage_Customer_Model_Group::CUST_GROUP_ALL
                 ? 'all'
                 : (int) $tp['cust_group'];
             $dto->websiteId = (int) ($tp['website_id'] ?? 0);

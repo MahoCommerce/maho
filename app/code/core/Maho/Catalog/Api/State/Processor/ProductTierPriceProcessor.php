@@ -63,7 +63,7 @@ final class ProductTierPriceProcessor implements ProcessorInterface
 
             $groupId = $tp['customerGroupId'] ?? $tp['customer_group_id'] ?? 'all';
             if ($groupId === 'all') {
-                $groupId = 32000;
+                $groupId = \Mage_Customer_Model_Group::CUST_GROUP_ALL;
             }
 
             $price = (float) ($tp['price'] ?? 0);

@@ -363,7 +363,7 @@ class ProductQueryHandler
             \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE => 'BundleProduct',
             \Mage_Catalog_Model_Product_Type::TYPE_GROUPED => 'GroupedProduct',
             \Mage_Catalog_Model_Product_Type::TYPE_VIRTUAL => 'VirtualProduct',
-            'downloadable' => 'DownloadableProduct',
+            \Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE => 'DownloadableProduct',
             'giftcard' => 'GiftCardProduct',
             default => 'SimpleProduct',
         };

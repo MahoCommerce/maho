@@ -212,7 +212,7 @@ final class ProductProvider implements ProviderInterface
 
         // Sort configurables first so they take priority over simples with shared url_keys
         $collection->getSelect()->order(
-            new \Maho\Db\Expr("FIELD(e.type_id, 'configurable', 'grouped', 'bundle') DESC"),
+            new \Maho\Db\Expr("FIELD(e.type_id, '" . \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE . "', '" . \Mage_Catalog_Model_Product_Type::TYPE_GROUPED . "', '" . \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE . "') DESC"),
         );
 
         $storeId = StoreContext::getStoreId();
@@ -528,7 +528,7 @@ final class ProductProvider implements ProviderInterface
         $dto->description = $product->getDescription();
         $dto->shortDescription = $product->getShortDescription();
         $dto->type = $product->getTypeId();
-        $dto->status = $product->getStatus() == 1 ? 'enabled' : 'disabled';
+        $dto->status = (int) $product->getStatus() === \Mage_Catalog_Model_Product_Status::STATUS_ENABLED ? 'enabled' : 'disabled';
         $dto->visibility = match ((int) $product->getVisibility()) {
             \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE => 'not_visible',
             \Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG => 'catalog',
@@ -550,7 +550,7 @@ final class ProductProvider implements ProviderInterface
         // or calculate from associated products
         if ($dto->price === null || $dto->price === 0.0) {
             $minPrice = $product->getMinimalPrice() ?: $product->getData('min_price');
-            if (!$minPrice && in_array($dto->type, ['grouped', 'bundle'])) {
+            if (!$minPrice && in_array($dto->type, [\Mage_Catalog_Model_Product_Type::TYPE_GROUPED, \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE])) {
                 $minPrice = $this->getGroupedMinPrice($product);
             }
             if ($minPrice) {
@@ -640,17 +640,17 @@ final class ProductProvider implements ProviderInterface
             $dto->upsellProducts = $this->getLinkedProducts($product->getUpSellProductCollection());
 
             // Grouped product children
-            if ($product->getTypeId() === 'grouped') {
+            if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_GROUPED) {
                 $dto->groupedProducts = $this->getGroupedProducts($product);
             }
 
             // Bundle product options with selections
-            if ($product->getTypeId() === 'bundle') {
+            if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
                 $dto->bundleOptions = $this->getBundleOptions($product);
             }
 
             // Downloadable links
-            if ($product->getTypeId() === 'downloadable') {
+            if ($product->getTypeId() === \Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
                 $dto->downloadableLinks = $this->getDownloadableLinks($product);
                 $dto->linksTitle = $product->getData('links_title')
                     ?: \Mage::getStoreConfig('catalog/downloadable/links_title')

@@ -261,7 +261,7 @@ class CartService
 
         // If price is still 0 after addProduct, manually set it on the quote item
         // For grouped/bundle products, child items have their own SKUs — look up each child's price individually
-        $isGroupedOrBundle = in_array($product->getTypeId(), ['grouped', 'bundle'], true);
+        $isGroupedOrBundle = in_array($product->getTypeId(), [\Mage_Catalog_Model_Product_Type::TYPE_GROUPED, \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE], true);
         $items = $quote->getAllItems();
         foreach ($items as $item) {
             if ($item->getPrice() != 0 && $item->getPrice()) {
