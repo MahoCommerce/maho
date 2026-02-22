@@ -301,6 +301,7 @@ final class CouponProcessor implements ProcessorInterface
         }
 
         $dto = new Coupon();
+        $dto->id = 0; // Required by API Platform for IRI generation
         $dto->code = $code;
 
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
