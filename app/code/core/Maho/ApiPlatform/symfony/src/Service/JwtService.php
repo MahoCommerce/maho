@@ -279,6 +279,6 @@ class JwtService
      */
     public function getIssuer(): string
     {
-        return \Mage::getBaseUrl();
+        return rtrim((string) \Mage::getStoreConfig('web/unsecure/base_url'), '/') . '/';
     }
 }
