@@ -22,31 +22,14 @@ class Maho_FeedManager_Model_Observer
         $encryptCallback = $observer->getEvent()->getEncryptCallback();
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
 
-        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
-
         $output->write('Re-encrypting data on feedmanager_destination table... ');
-
-        $table = Mage::getSingleton('core/resource')->getTableName('feedmanager/destination');
-
-        $select = $readConnection->select()
-            ->from($table, ['destination_id', 'config'])
-            ->where('config IS NOT NULL')
-            ->where('config != ?', '');
-
-        $destinations = $readConnection->fetchAll($select);
-
-        foreach ($destinations as $row) {
-            $decrypted = $decryptCallback($row['config']);
-            if ($decrypted !== '') {
-                $writeConnection->update(
-                    $table,
-                    ['config' => $encryptCallback($decrypted)],
-                    ['destination_id = ?' => $row['destination_id']],
-                );
-            }
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('feedmanager/destination'),
+            'destination_id',
+            ['config'],
+            $encryptCallback,
+            $decryptCallback,
+        );
         $output->writeln('OK');
     }
 }

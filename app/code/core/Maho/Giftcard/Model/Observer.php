@@ -98,7 +98,9 @@ class Maho_Giftcard_Model_Observer
 
         // Convert amount to base currency using order's conversion rate
         // Gift card amount is in order currency, need to convert to base currency
-        $baseAmount = $amount * $order->getBaseToOrderRate();
+        // base_to_order_rate converts base→order, so to go order→base we divide
+        $baseToOrderRate = (float) $order->getBaseToOrderRate();
+        $baseAmount = $baseToOrderRate > 0 ? $amount / $baseToOrderRate : $amount;
 
         $giftcard = Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
@@ -304,15 +306,12 @@ class Maho_Giftcard_Model_Observer
 
         if ($baseGiftcardAmount > 0) {
             // Set gift card amounts on order
+            // Grand total is already reduced during quote total collection
             $order->setBaseGiftcardAmount($baseGiftcardAmount);
             $order->setGiftcardAmount($giftcardAmount);
             if ($giftcardCodes) {
                 $order->setGiftcardCodes($giftcardCodes);
             }
-
-            // Reduce grand total by gift card amount
-            $order->setGrandTotal(max(0, $order->getGrandTotal() - $giftcardAmount));
-            $order->setBaseGrandTotal(max(0, $order->getBaseGrandTotal() - $baseGiftcardAmount));
         }
     }
 
@@ -375,17 +374,15 @@ class Maho_Giftcard_Model_Observer
             }
         }
 
-        // Set gift card amounts on order
+        // Set gift card amounts on order (codes/amounts may already be set
+        // by fieldset conversion + applyGiftcardToOrder, but ensure they're present)
         $order->setGiftcardCodes($giftcardCodes);
         $order->setBaseGiftcardAmount($baseGiftcardAmount);
         $order->setGiftcardAmount($giftcardAmount);
 
-        // Reduce grand total by gift card amount (if not already reduced)
-        $currentGrandTotal = (float) $order->getGrandTotal();
-        if ($giftcardAmount > 0 && $currentGrandTotal > 0) {
-            $order->setGrandTotal(max(0, $currentGrandTotal - $giftcardAmount));
-            $order->setBaseGrandTotal(max(0, (float) $order->getBaseGrandTotal() - $baseGiftcardAmount));
-        }
+        // Grand total is NOT modified here — it was already reduced during
+        // quote total collection via Total_Quote::collect() → _addAmount(-$amount)
+        // and carried over to the order during quote-to-order conversion.
 
         // Add gift card info to payment additional information for display in grid
         $payment = $order->getPayment();
@@ -491,63 +488,6 @@ class Maho_Giftcard_Model_Observer
                 'comment' => "Used in order #{$order->getIncrementId()}",
                 'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
             ]);
-        }
-    }
-
-    /**
-     * Add gift card total to admin order view
-     *
-     * @return void
-     */
-    public function addGiftcardTotalToAdminOrder(Maho\Event\Observer $observer)
-    {
-        $block = $observer->getEvent()->getBlock();
-
-        // Check if this is an order totals block
-        if ($block->getNameInLayout() != 'order_totals') {
-            return;
-        }
-
-        $order = $block->getOrder();
-        if (!$order || !$order->getId()) {
-            return;
-        }
-
-        $giftcardAmount = $order->getGiftcardAmount();
-
-        if ($giftcardAmount != 0) {
-            // Get gift card codes for display
-            $codes = [];
-            $giftcardCodes = $order->getGiftcardCodes();
-            if ($giftcardCodes) {
-                $codesArray = json_decode($giftcardCodes, true);
-                if (is_array($codesArray)) {
-                    // Show partial codes for security
-                    foreach (array_keys($codesArray) as $code) {
-                        if (strlen($code) > 10) {
-                            $codes[] = substr($code, 0, 5) . '...' . substr($code, -4);
-                        } else {
-                            $codes[] = $code;
-                        }
-                    }
-                }
-            }
-
-            $label = Mage::helper('giftcard')->__('Gift Cards');
-            if ($codes !== []) {
-                $label .= ' (' . implode(', ', $codes) . ')';
-            }
-
-            $total = new Maho\DataObject([
-                'code'       => 'giftcard',
-                'value'      => -abs((float) $giftcardAmount),
-                'base_value' => -abs((float) $order->getBaseGiftcardAmount()),
-                'label'      => $label,
-                'strong'     => false,
-            ]);
-
-            // Add after tax, before grand_total
-            $block->addTotal($total, 'tax');
         }
     }
 

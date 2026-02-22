@@ -71,13 +71,20 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Invoice_Totals_Giftcard extends 
             $baseGiftcardAmount = $order->getBaseGiftcardAmount();
         }
 
-        // Add total after tax
-        $parent->addTotal(new Maho\DataObject([
+        // Add before grand_total
+        $parent->addTotalBefore(new Maho\DataObject([
             'code'       => 'giftcard',
             'value'      => -abs((float) $giftcardAmount),
             'base_value' => -abs((float) $baseGiftcardAmount),
             'label'      => $label,
-        ]), 'tax');
+        ]), ['grand_total', 'base_grandtotal']);
+
+        // Ensure tax appears before giftcard
+        $taxTotal = $parent->getTotal('tax');
+        if ($taxTotal) {
+            $parent->removeTotal('tax');
+            $parent->addTotalBefore($taxTotal, 'giftcard');
+        }
 
         return $this;
     }
