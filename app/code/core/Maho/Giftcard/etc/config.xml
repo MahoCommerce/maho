@@ -15,15 +15,6 @@
                     </giftcard>
                 </totals>
             </quote>
-            <order>
-                <totals>
-                    <giftcard>
-                        <class>giftcard/total_order</class>
-                        <after>subtotal,shipping,discount,tax</after>
-                        <before>grand_total</before>
-                    </giftcard>
-                </totals>
-            </order>
         </sales>
 
         <models>
@@ -160,14 +151,6 @@
                     </giftcard_create_on_payment>
                 </observers>
             </sales_order_invoice_pay>
-            <core_block_abstract_to_html_after>
-                <observers>
-                    <giftcard_add_total_to_admin>
-                        <class>giftcard/observer</class>
-                        <method>addGiftcardTotalToAdminOrder</method>
-                    </giftcard_add_total_to_admin>
-                </observers>
-            </core_block_abstract_to_html_after>
             <sales_convert_quote_address_to_order>
                 <observers>
                     <giftcard_apply_to_order>

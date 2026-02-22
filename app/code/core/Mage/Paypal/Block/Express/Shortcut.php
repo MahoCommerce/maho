@@ -101,6 +101,10 @@ class Mage_Paypal_Block_Express_Shortcut extends Mage_Core_Block_Template
         }
 
         // check payment method availability
+        if (!$config->isMethodActive($this->_paymentMethodCode)) {
+            $this->_shouldRender = false;
+            return $result;
+        }
         $methodInstance = Mage::helper('payment')->getMethodInstance($this->_paymentMethodCode);
         if (!$methodInstance || !$methodInstance->isAvailable($quote)) {
             $this->_shouldRender = false;
