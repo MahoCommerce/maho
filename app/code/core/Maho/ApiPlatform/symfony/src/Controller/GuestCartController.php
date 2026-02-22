@@ -96,13 +96,14 @@ class GuestCartController extends AbstractController
     public function addItem(string $cartId, Request $request): JsonResponse
     {
         try {
+            $cartRecreated = false;
             $quote = $this->loadCart($cartId);
 
             if (!$quote) {
-                return new JsonResponse([
-                    'error' => 'cart_not_found',
-                    'message' => 'Cart not found',
-                ], Response::HTTP_NOT_FOUND);
+                // Cart expired, converted to order, or doesn't exist — auto-create a new one
+                $result = $this->cartService->createEmptyCart();
+                $quote = $result['quote'];
+                $cartRecreated = true;
             }
 
             $data = json_decode($request->getContent(), true);
@@ -140,7 +141,12 @@ class GuestCartController extends AbstractController
 
             $quote = $this->cartService->addItem($quote, $sku, $qty, $options);
 
-            return new JsonResponse($this->mapCartToArray($quote));
+            $response = $this->mapCartToArray($quote);
+            if ($cartRecreated) {
+                $response['cartRecreated'] = true;
+            }
+
+            return new JsonResponse($response);
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
