@@ -744,9 +744,13 @@ mutation {
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | `/newsletter/subscribe` | None | Subscribe to newsletter |
-| POST | `/newsletter/unsubscribe` | None | Unsubscribe |
+| POST | `/newsletter/subscribe` | None or Customer | Subscribe to newsletter |
+| POST | `/newsletter/unsubscribe` | Customer | Unsubscribe (guests use email link) |
 | GET | `/newsletter/status` | Customer | Get subscription status |
+
+**Guest subscription control:** Guest (unauthenticated) subscribe is controlled by the Maho config flag `newsletter/subscription/allow_guest_subscribe` (**System > Config > Newsletter > Subscription Options > Allow Guest Subscription**). When disabled, only authenticated customers can subscribe. Recommended: set to **No** for API use to prevent abuse.
+
+**Confirmation emails:** When `newsletter/subscription/confirm` is enabled, new subscriptions receive a confirmation email and remain inactive until confirmed (double opt-in).
 
 ---
 
