@@ -163,13 +163,16 @@ describe('POST /api/guest-carts/{id}/items (Add Item)', function (): void {
         expect($response['json']['message'])->toContain('SKU');
     });
 
-    it('returns 404 for non-existent cart', function (): void {
+    it('auto-recreates expired or non-existent cart', function (): void {
         $response = apiPost('/api/guest-carts/999999999/items', [
             'sku' => fixtures('write_test_sku'),
             'qty' => 1,
         ]);
 
-        expect($response['status'])->toBeNotFound();
+        // Non-existent masked IDs trigger cart auto-recreation
+        expect($response['status'])->toBe(200);
+        expect($response['json']['cartRecreated'])->toBeTrue();
+        expect($response['json']['itemsCount'])->toBeGreaterThan(0);
     });
 
 });

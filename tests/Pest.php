@@ -92,7 +92,7 @@ function serviceToken(array $permissions = ['all'], ?array $storeIds = null): st
     return ApiV2Helper::generateToken([
         'sub' => 'api_user_test',
         'type' => 'api_user',
-        'api_user_id' => 999,
+        // No api_user_id - use JWT-embedded permissions for testing
         'permissions' => $permissions,
         'allowed_store_ids' => $storeIds,
     ]);

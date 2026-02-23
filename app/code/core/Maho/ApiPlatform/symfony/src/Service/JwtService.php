@@ -251,6 +251,14 @@ class JwtService
             $secret = \Mage::getStoreConfig(self::CONFIG_PATH_LEGACY);
         }
 
+        // Fall back to deriving a secret from the Maho crypt key
+        if (empty($secret)) {
+            $cryptKey = (string) \Mage::getConfig()->getNode('global/crypt/key');
+            if (!empty($cryptKey)) {
+                $secret = hash('sha256', $cryptKey . ':maho_api_jwt');
+            }
+        }
+
         if (empty($secret)) {
             throw new \RuntimeException('JWT secret not configured. Please set maho_apiplatform/oauth2/secret in configuration.');
         }

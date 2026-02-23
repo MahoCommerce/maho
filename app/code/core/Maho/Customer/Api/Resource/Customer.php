@@ -35,7 +35,7 @@ use Maho\Customer\Api\State\Processor\CustomerProcessor;
         new Get(
             uriTemplate: '/customers/{id}',
             description: 'Get a customer by ID',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
         new GetCollection(
             uriTemplate: '/customers',

@@ -41,7 +41,7 @@ final class ConfigurableSetupProcessor implements ProcessorInterface
     ) {}
 
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): array|null
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ConfigurableSetup|null
     {
         $user = $this->getAuthorizedUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
@@ -83,7 +83,7 @@ final class ConfigurableSetupProcessor implements ProcessorInterface
         return 0;
     }
 
-    private function handleSetup(int $productId, array $body): array
+    private function handleSetup(int $productId, array $body): ConfigurableSetup
     {
         $product = $this->loadConfigurableProduct($productId);
         $typeInstance = $product->getTypeInstance(true);
@@ -124,10 +124,10 @@ final class ConfigurableSetupProcessor implements ProcessorInterface
             $this->replaceChildLinks($productId, array_map('intval', $childProductIds));
         }
 
-        return [$this->provider->getSetup($this->loadConfigurableProduct($productId))];
+        return $this->provider->getSetup($this->loadConfigurableProduct($productId));
     }
 
-    private function handleAddChild(int $productId, array $body): array
+    private function handleAddChild(int $productId, array $body): ConfigurableSetup
     {
         $this->loadConfigurableProduct($productId);
 
@@ -145,7 +145,7 @@ final class ConfigurableSetupProcessor implements ProcessorInterface
             'parent_id' => $productId,
         ], ['product_id']);
 
-        return [$this->provider->getSetup($this->loadConfigurableProduct($productId))];
+        return $this->provider->getSetup($this->loadConfigurableProduct($productId));
     }
 
     private function handleRemoveChild(int $productId, int $childId): null

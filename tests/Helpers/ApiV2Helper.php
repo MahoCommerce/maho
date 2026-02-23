@@ -254,7 +254,8 @@ class ApiV2Helper
         $now = time();
 
         $payload = [
-            'iss' => self::getBaseUrl(),
+            'iss' => self::getBaseUrl() . '/',
+            'aud' => 'maho-api',
             'sub' => 'customer_' . $customerId,
             'iat' => $now,
             'exp' => $now + 86400,
@@ -276,7 +277,8 @@ class ApiV2Helper
         $now = time();
 
         $payload = [
-            'iss' => self::getBaseUrl(),
+            'iss' => self::getBaseUrl() . '/',
+            'aud' => 'maho-api',
             'sub' => 'admin_1',
             'iat' => $now,
             'exp' => $now + 86400,
@@ -298,7 +300,8 @@ class ApiV2Helper
         $now = time();
 
         $payload = [
-            'iss' => self::getBaseUrl(),
+            'iss' => self::getBaseUrl() . '/',
+            'aud' => 'maho-api',
             'sub' => 'customer_1',
             'iat' => $now - 172800, // 2 days ago
             'exp' => $now - 86400,  // expired 1 day ago
@@ -318,7 +321,8 @@ class ApiV2Helper
         $now = time();
 
         $payload = [
-            'iss' => self::getBaseUrl(),
+            'iss' => self::getBaseUrl() . '/',
+            'aud' => 'maho-api',
             'sub' => 'customer_1',
             'iat' => $now,
             'exp' => $now + 86400,
@@ -339,7 +343,8 @@ class ApiV2Helper
         $now = time();
 
         $defaults = [
-            'iss' => self::getBaseUrl(),
+            'iss' => self::getBaseUrl() . '/',
+            'aud' => 'maho-api',
             'iat' => $now,
             'exp' => $now + 86400,
         ];
@@ -468,19 +473,23 @@ class ApiV2Helper
         if ($fixtures === null) {
             self::ensureMahoBootstrapped();
 
+            $productData = self::lookupProduct();
+            $configurableSku = self::lookupConfigurableSku();
+            $categoryId = self::lookupCategoryId();
+
             $fixtures = [
-                'customer_id' => 1,
-                'customer_email' => self::lookupCustomerEmail(1),
+                'customer_id' => self::lookupCustomerId(),
+                'customer_email' => self::lookupCustomerEmail(self::lookupCustomerId()),
                 'invalid_customer_id' => 999999,
-                'product_id' => 421,
-                'product_sku' => 'wsd015',
-                'configurable_sku' => 'mtk002',
-                'category_id' => 4,
+                'product_id' => $productData['id'],
+                'product_sku' => $productData['sku'],
+                'configurable_sku' => $configurableSku,
+                'category_id' => $categoryId,
                 'invalid_product_id' => 999999,
                 'existing_cart_id' => null,
                 'order_id' => self::lookupOrderId(),
                 'invalid_order_id' => 999999,
-                'write_test_sku' => 'wsd015',
+                'write_test_sku' => $productData['sku'],
                 'write_test_qty' => 1,
                 'blog_post_url_key' => null,
             ];
@@ -628,6 +637,77 @@ class ApiV2Helper
         }
 
         return self::$jwtSecret;
+    }
+
+    /**
+     * Look up the first active customer ID from DB
+     */
+    private static function lookupCustomerId(): ?int
+    {
+        try {
+            $customer = \Mage::getModel('customer/customer')->getCollection()
+                ->addFieldToFilter('is_active', 1)
+                ->setPageSize(1)
+                ->getFirstItem();
+            return $customer->getId() ? (int) $customer->getId() : 1;
+        } catch (\Throwable $e) {
+            return 1;
+        }
+    }
+
+    /**
+     * Look up a simple product from DB (for testing)
+     *
+     * @return array{id: int|null, sku: string|null}
+     */
+    private static function lookupProduct(): array
+    {
+        try {
+            $product = \Mage::getModel('catalog/product')->getCollection()
+                ->addFieldToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE)
+                ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->setPageSize(1)
+                ->getFirstItem();
+            if ($product->getId()) {
+                return ['id' => (int) $product->getId(), 'sku' => $product->getSku()];
+            }
+        } catch (\Throwable $e) {
+        }
+        return ['id' => null, 'sku' => null];
+    }
+
+    /**
+     * Look up a configurable product SKU from DB
+     */
+    private static function lookupConfigurableSku(): ?string
+    {
+        try {
+            $product = \Mage::getModel('catalog/product')->getCollection()
+                ->addFieldToFilter('type_id', \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE)
+                ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
+                ->setPageSize(1)
+                ->getFirstItem();
+            return $product->getId() ? $product->getSku() : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * Look up a category ID from DB
+     */
+    private static function lookupCategoryId(): ?int
+    {
+        try {
+            $category = \Mage::getModel('catalog/category')->getCollection()
+                ->addFieldToFilter('level', ['gt' => 1])
+                ->addFieldToFilter('is_active', 1)
+                ->setPageSize(1)
+                ->getFirstItem();
+            return $category->getId() ? (int) $category->getId() : null;
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /**
