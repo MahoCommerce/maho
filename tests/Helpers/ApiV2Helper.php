@@ -574,6 +574,14 @@ class ApiV2Helper
     /**
      * Get API base URL
      */
+    /**
+     * Public accessor for getBaseUrl (used by Pest.php availability check)
+     */
+    public static function getBaseUrlPublic(): string
+    {
+        return self::getBaseUrl();
+    }
+
     private static function getBaseUrl(): string
     {
         if (self::$baseUrl !== null) {

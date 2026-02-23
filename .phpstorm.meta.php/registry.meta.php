@@ -1,6 +1,9 @@
 <?php
 namespace PHPSTORM_META {
     expectedArguments(\Mage::registry(), 0, 
+        api_resources,
+        api_role_data,
+        api_role_permissions,
         api_user,
         application_params,
         attribute_type_disabled_types,
