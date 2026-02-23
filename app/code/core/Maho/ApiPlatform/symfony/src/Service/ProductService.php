@@ -211,21 +211,26 @@ class ProductService
 
         // Use Meilisearch for all product queries when available (much faster than MySQL)
         if ($this->useMeilisearch) {
-            $results = $this->searchWithMeilisearch($query, $page, $pageSize, $filters, $sort, $usePosIndex, $storeId, $attributeFilters);
+            try {
+                $results = $this->searchWithMeilisearch($query, $page, $pageSize, $filters, $sort, $usePosIndex, $storeId, $attributeFilters);
 
-            // Fallback to MySQL if no results - handles cases where:
-            // 1. POS needs to find products by GTIN (even if disabled/out of stock)
-            // 2. Category filtering when category_ids isn't fully indexed in Meilisearch
-            $shouldFallback = empty($results['products']) && (
-                ($usePosIndex && !empty($query)) ||
-                isset($filters['categoryId'])
-            );
+                // Fallback to MySQL if no results - handles cases where:
+                // 1. POS needs to find products by GTIN (even if disabled/out of stock)
+                // 2. Category filtering when category_ids isn't fully indexed in Meilisearch
+                $shouldFallback = empty($results['products']) && (
+                    ($usePosIndex && !empty($query)) ||
+                    isset($filters['categoryId'])
+                );
 
-            if ($shouldFallback) {
-                $results = $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex, $attributeFilters);
+                if ($shouldFallback) {
+                    $results = $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex, $attributeFilters);
+                }
+
+                return $results;
+            } catch (\Exception $e) {
+                // Meilisearch error (e.g. missing filterable attributes) — fall back to MySQL
+                \Mage::logException($e);
             }
-
-            return $results;
         }
 
         return $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex, $attributeFilters);
