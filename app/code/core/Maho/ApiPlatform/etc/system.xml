@@ -1,0 +1,165 @@
+<?xml version="1.0"?>
+<config>
+    <sections>
+        <maho_apiplatform translate="label" module="maho_apiplatform">
+            <label>API Platform</label>
+            <tab>service</tab>
+            <sort_order>100</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label">
+                    <label>General Settings</label>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <enabled translate="label">
+                            <label>Enable API Platform</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </enabled>
+                        <legacy_sunset_date translate="label comment">
+                            <label>Legacy API Sunset Date</label>
+                            <comment>Date when legacy SOAP/REST APIs will be disabled</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </legacy_sunset_date>
+                    </fields>
+                </general>
+                <graphql translate="label">
+                    <label>GraphQL Settings</label>
+                    <sort_order>15</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <naming_convention translate="label comment">
+                            <label>Naming Convention</label>
+                            <comment>GraphQL Standard uses camelCase (recommended). Magento 2 uses snake_case for compatibility with M2 themes.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>maho_apiplatform/system_config_source_namingconvention</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </naming_convention>
+                    </fields>
+                </graphql>
+                <cache translate="label">
+                    <label>API Cache</label>
+                    <sort_order>18</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <ttl translate="label comment">
+                            <label>Cache TTL (seconds)</label>
+                            <comment>How long API responses are cached. Default: 300 (5 minutes). Set to 0 to disable caching.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </ttl>
+                        <auto_clean translate="label comment">
+                            <label>Auto-Clean on Changes</label>
+                            <comment>Automatically purge API cache when data changes in admin.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>maho_apiplatform/system_config_source_autoclean</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </auto_clean>
+                    </fields>
+                </cache>
+                <oauth2 translate="label">
+                    <label>OAuth2 Settings</label>
+                    <sort_order>20</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <fields>
+                        <token_lifetime translate="label comment">
+                            <label>Access Token Lifetime</label>
+                            <comment>In seconds (default: 3600 = 1 hour)</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </token_lifetime>
+                        <refresh_token_lifetime translate="label comment">
+                            <label>Refresh Token Lifetime</label>
+                            <comment>In seconds (default: 86400 = 24 hours)</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </refresh_token_lifetime>
+                    </fields>
+                </oauth2>
+                <contact translate="label">
+                    <label>Contact Form</label>
+                    <sort_order>25</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Contact API</label>
+                            <comment>Allow headless frontends to submit contact forms via the API</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <captcha_provider translate="label comment">
+                            <label>CAPTCHA Provider</label>
+                            <comment>Verify a CAPTCHA token on each submission to prevent spam. Turnstile is free and works on any website.</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>maho_apiplatform/system_config_source_captchaprovider</source_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </captcha_provider>
+                        <captcha_site_key translate="label comment">
+                            <label>CAPTCHA Site Key</label>
+                            <comment>Public key embedded in the frontend widget</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </captcha_site_key>
+                        <captcha_secret_key translate="label comment">
+                            <label>CAPTCHA Secret Key</label>
+                            <comment>Private key used for server-side token verification</comment>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </captcha_secret_key>
+                        <honeypot_enabled translate="label comment">
+                            <label>Enable Honeypot Field</label>
+                            <comment>Adds a hidden field that bots fill in — zero dependency, works everywhere</comment>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </honeypot_enabled>
+                        <rate_limit translate="label comment">
+                            <label>Rate Limit (per email per hour)</label>
+                            <comment>Maximum submissions allowed from the same email address per hour. 0 to disable.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>60</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </rate_limit>
+                    </fields>
+                </contact>
+            </groups>
+        </maho_apiplatform>
+    </sections>
+</config>

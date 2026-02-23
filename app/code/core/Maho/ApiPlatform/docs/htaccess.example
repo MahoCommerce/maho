@@ -1,0 +1,44 @@
+# Maho API Platform - Apache .htaccess Configuration Example
+#
+# REQUIRED: Route /api/* requests to rest.php (Symfony API Platform entry point).
+# Add these rules to your public/.htaccess BEFORE the main "RewriteRule .* index.php" catch-all.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+
+    # ---- API Platform routing ----
+
+    # Pass Authorization header through (required for JWT in CGI/FastCGI mode)
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle CORS preflight requests for /api/
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteRule ^(.*)$ $1 [R=204,L]
+
+    # Route /api/* to rest.php (Symfony API Platform)
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^api/(.*)$ rest.php [QSA,L]
+
+    # ---- End API Platform routing ----
+</IfModule>
+
+# CORS headers for API endpoints
+<IfModule mod_headers.c>
+    <LocationMatch "^/api/">
+        Header always set Access-Control-Allow-Origin "*"
+        Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Header always set Access-Control-Allow-Headers "Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match"
+        Header always set Access-Control-Expose-Headers "ETag, X-Idempotency-Replayed, Link"
+    </LocationMatch>
+</IfModule>
+
+# If using basic auth site-wide, exclude /api/ and rest.php:
+#
+# <LocationMatch "^/(api/|rest\.php)">
+#     Satisfy Any
+#     Allow from all
+#     AuthType None
+#     Require all granted
+# </LocationMatch>

@@ -20950,6 +20950,54 @@ parameters:
 			path: app/code/core/Mage/Wishlist/controllers/SharedController.php
 
 		-
+			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Type_Abstract::getConfigurableAttributeCollection().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Processor/ConfigurableSetupProcessor.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Type_Abstract::getAssociatedProducts().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Processor/GroupedProductLinkProcessor.php
+
+		-
+			rawMessage: 'Cannot unset offset ''option_type_id'' on array{title: mixed, price: float, price_type: mixed, sku: mixed, sort_order: int}.'
+			identifier: unset.offset
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Processor/ProductCustomOptionProcessor.php
+
+		-
+			rawMessage: 'Method Maho\Catalog\Api\State\Processor\ProductCustomOptionProcessor::process() never returns array so it can be removed from the return type.'
+			identifier: return.unusedType
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Processor/ProductCustomOptionProcessor.php
+
+		-
+			rawMessage: 'Parameter #1 $value of method Mage_Catalog_Model_Product_Option::setProductId() expects string|null, int given.'
+			identifier: argument.type
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Processor/ProductCustomOptionProcessor.php
+
+		-
+			rawMessage: 'Call to function is_array() with array will always evaluate to true.'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Processor/ProductLinkProcessor.php
+
+		-
+			rawMessage: 'Method Maho\Catalog\Api\State\Provider\ConfigurableSetupProvider::provide() never returns Maho\Catalog\Api\Resource\ConfigurableSetup so it can be removed from the return type.'
+			identifier: return.unusedType
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Provider/ConfigurableSetupProvider.php
+
+		-
+			rawMessage: 'Call to an undefined method Mage_Catalog_Model_Product_Type_Abstract::getAssociatedProducts().'
+			identifier: method.notFound
+			count: 1
+			path: app/code/core/Maho/Catalog/Api/State/Provider/GroupedProductLinkProvider.php
+
+		-
 			rawMessage: 'Call to an undefined method Mage_Core_Block_Abstract::_getUsers().'
 			identifier: method.notFound
 			count: 1
@@ -23654,3 +23702,4 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Maho/Simplexml/Element.php
+

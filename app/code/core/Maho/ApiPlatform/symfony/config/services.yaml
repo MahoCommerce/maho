@@ -1,0 +1,27 @@
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+
+    Maho\ApiPlatform\:
+        resource: '../src/'
+        exclude:
+            - '../src/Kernel.php'
+
+    # API Exception Listener - converts exceptions to standardized JSON responses
+    Maho\ApiPlatform\EventListener\ApiExceptionListener:
+        arguments:
+            $debug: '%kernel.debug%'
+        tags:
+            - { name: kernel.event_subscriber }
+
+    # Custom GraphQL query resolver for operations without `id` arg (me, customerCart, etc.)
+    # ReadProvider short-circuits these, so this resolver calls the state provider directly.
+    Maho\ApiPlatform\GraphQl\CustomQueryResolver:
+        arguments:
+            $providerLocator: !tagged_locator { tag: 'maho.api.state_provider', default_index_method: null, index_by: 'key' }
+        tags:
+            - { name: 'api_platform.graphql.query_resolver' }
+
+    # Tag all our state providers so CustomQueryResolver can locate them

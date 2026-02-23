@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_ApiPlatform>
+            <version>1.1.0</version>
+        </Maho_ApiPlatform>
+    </modules>
+    <global>
+        <helpers>
+            <maho_apiplatform>
+                <class>Maho_ApiPlatform_Helper</class>
+            </maho_apiplatform>
+        </helpers>
+        <models>
+            <maho_apiplatform>
+                <class>Maho_ApiPlatform_Model</class>
+            </maho_apiplatform>
+        </models>
+        <blocks>
+            <maho_apiplatform>
+                <class>Maho_ApiPlatform_Block</class>
+            </maho_apiplatform>
+        </blocks>
+        <resources>
+            <maho_apiplatform_setup>
+                <setup>
+                    <module>Maho_ApiPlatform</module>
+                </setup>
+            </maho_apiplatform_setup>
+        </resources>
+        <cache>
+            <types>
+                <api_data translate="label,description" module="maho_apiplatform">
+                    <label>API Data</label>
+                    <description>REST and GraphQL API response cache (products, reviews, wishlists, etc.)</description>
+                    <tags>API_PRODUCTS,API_REVIEWS,API_WISHLIST,API_STORE_CONFIG,API_COUNTRIES</tags>
+                </api_data>
+            </types>
+        </cache>
+        <events>
+            <!-- Add deprecation headers to legacy API responses -->
+            <controller_front_send_response_before>
+                <observers>
+                    <maho_apiplatform_deprecation>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>addDeprecationHeaders</method>
+                    </maho_apiplatform_deprecation>
+                </observers>
+            </controller_front_send_response_before>
+
+            <!-- Invalidate API products cache when products change -->
+            <catalog_product_save_after>
+                <observers>
+                    <maho_apiplatform_product_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateProductCache</method>
+                    </maho_apiplatform_product_cache>
+                </observers>
+            </catalog_product_save_after>
+            <catalog_product_delete_after>
+                <observers>
+                    <maho_apiplatform_product_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateProductCache</method>
+                    </maho_apiplatform_product_cache>
+                </observers>
+            </catalog_product_delete_after>
+
+            <!-- Invalidate API products cache when categories change -->
+            <catalog_category_save_after>
+                <observers>
+                    <maho_apiplatform_category_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateCategoryCache</method>
+                    </maho_apiplatform_category_cache>
+                </observers>
+            </catalog_category_save_after>
+
+            <!-- Invalidate API products cache when stock changes -->
+            <cataloginventory_stock_item_save_after>
+                <observers>
+                    <maho_apiplatform_stock_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateStockCache</method>
+                    </maho_apiplatform_stock_cache>
+                </observers>
+            </cataloginventory_stock_item_save_after>
+
+            <!-- Invalidate API products cache when catalog price rules are applied -->
+            <catalogrule_after_apply>
+                <observers>
+                    <maho_apiplatform_price_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidatePriceCache</method>
+                    </maho_apiplatform_price_cache>
+                </observers>
+            </catalogrule_after_apply>
+
+            <!-- Invalidate API reviews cache when a review is saved -->
+            <review_save_after>
+                <observers>
+                    <maho_apiplatform_review_cache>
+                        <class>Maho_ApiPlatform_Model_Observer</class>
+                        <method>invalidateReviewCache</method>
+                    </maho_apiplatform_review_cache>
+                </observers>
+            </review_save_after>
+        </events>
+    </global>
+    <frontend>
+        <translate>
+            <modules>
+                <Maho_ApiPlatform>
+                    <files>
+                        <default>Maho_ApiPlatform.csv</default>
+                    </files>
+                </Maho_ApiPlatform>
+            </modules>
+        </translate>
+        <routers>
+            <maho_apiplatform>
+                <use>standard</use>
+                <args>
+                    <module>Maho_ApiPlatform</module>
+                    <frontName>api</frontName>
+                </args>
+            </maho_apiplatform>
+        </routers>
+    </frontend>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <maho_apiplatform before="Mage_Adminhtml">Maho_ApiPlatform_Adminhtml</maho_apiplatform>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    </admin>
+    <adminhtml>
+        <translate>
+            <modules>
+                <Maho_ApiPlatform>
+                    <files>
+                        <default>Maho_ApiPlatform.csv</default>
+                    </files>
+                </Maho_ApiPlatform>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <maho_apiplatform>
+                    <file>maho_apiplatform.xml</file>
+                </maho_apiplatform>
+            </updates>
+        </layout>
+    </adminhtml>
+    <default>
+        <maho_apiplatform>
+            <general>
+                <enabled>1</enabled>
+                <legacy_sunset_date>2028-01-01</legacy_sunset_date>
+            </general>
+            <cache>
+                <ttl>3600</ttl>
+                <auto_clean>all</auto_clean>
+            </cache>
+            <graphql>
+                <naming_convention>graphql</naming_convention>
+            </graphql>
+            <oauth2>
+                <token_lifetime>3600</token_lifetime>
+                <refresh_token_lifetime>86400</refresh_token_lifetime>
+            </oauth2>
+            <contact>
+                <enabled>1</enabled>
+                <captcha_provider>none</captcha_provider>
+                <honeypot_enabled>1</honeypot_enabled>
+                <rate_limit>3</rate_limit>
+            </contact>
+        </maho_apiplatform>
+    </default>
+</config>

@@ -1,0 +1,58 @@
+# Maho API Platform - FrankenPHP / Caddy Configuration Example
+#
+# REQUIRED: Route /api/* requests to rest.php (Symfony API Platform entry point).
+# Add this to your Caddyfile or FrankenPHP configuration.
+
+maho.example.com {
+    root * /var/www/maho/public
+
+    # ---- API Platform routing ----
+
+    # CORS headers for API endpoints
+    @api path /api/*
+    header @api Access-Control-Allow-Origin "*"
+    header @api Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    header @api Access-Control-Allow-Headers "Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match"
+    header @api Access-Control-Expose-Headers "ETag, X-Idempotency-Replayed, Link"
+
+    # Handle CORS preflight
+    @preflight {
+        method OPTIONS
+        path /api/*
+    }
+    respond @preflight 204
+
+    # Route /api/* to rest.php
+    @apiRoute {
+        path /api/*
+        not file
+    }
+    rewrite @apiRoute /rest.php
+
+    # ---- End API Platform routing ----
+
+    # Static files
+    @static file
+    handle @static {
+        file_server
+    }
+
+    # Everything else to index.php (Maho front controller)
+    php_server {
+        index index.php
+    }
+}
+
+# Worker mode (optional — persistent PHP workers for better performance)
+# Uncomment to use FrankenPHP worker mode with rest.php:
+#
+# {
+#     frankenphp {
+#         worker /var/www/maho/public/rest.php 4
+#     }
+# }
+#
+# Note: Worker mode keeps the PHP process alive between requests.
+# Maho's Mage::init() runs once, subsequent requests reuse the bootstrap.
+# This can significantly reduce response times but requires testing to
+# ensure no state leaks between requests.

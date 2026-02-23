@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -24,15 +26,9 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
 
         $this->_addButton('saveandcontinue', [
             'label'     => Mage::helper('adminhtml')->__('Save and Continue Edit'),
-            'onclick'   => 'saveAndContinueEdit()',
+            'onclick'   => Mage::helper('core/js')->getSaveAndContinueEditJs($this->_getSaveAndContinueUrl()),
             'class'     => 'save',
         ], -100);
-
-        $this->_formScripts[] = "
-            function saveAndContinueEdit(){
-                editForm.submit(document.getElementById('edit_form').action+'back/edit/');
-            }
-        ";
     }
 
     #[\Override]
@@ -42,5 +38,46 @@ class Maho_Blog_Block_Adminhtml_Post_Edit extends Mage_Adminhtml_Block_Widget_Fo
             return Mage::helper('blog')->__("Edit Post '%s'", $this->escapeHtml(Mage::registry('blog_post')->getTitle()));
         }
         return Mage::helper('blog')->__('New Post');
+    }
+
+    /**
+     * Getter of url for "Save and Continue" button
+     * tab_id will be replaced by desired by JS later
+     */
+    protected function _getSaveAndContinueUrl(): string
+    {
+        return $this->getUrl('*/*/save', [
+            '_current'   => true,
+            'back'       => 'edit',
+            'active_tab' => '{{tab_id}}',
+        ]);
+    }
+
+    #[\Override]
+    protected function _prepareLayout()
+    {
+        $tabsBlock = $this->getLayout()->getBlock('blog_post_edit_tabs');
+        if ($tabsBlock) {
+            $tabsBlockJsObject = $tabsBlock->getJsObjectName();
+            $tabsBlockPrefix   = $tabsBlock->getId() . '_';
+        } else {
+            $tabsBlockJsObject = 'blog_post_tabsJsTabs';
+            $tabsBlockPrefix   = 'blog_post_tabs_';
+        }
+
+        $this->_formScripts[] = '
+            function saveAndContinueEdit(urlTemplate) {
+                var tabsIdValue = ' . $tabsBlockJsObject . ".activeTab.id;
+                var tabsBlockPrefix = '" . $tabsBlockPrefix . "';
+                if (tabsIdValue.startsWith(tabsBlockPrefix)) {
+                    tabsIdValue = tabsIdValue.substr(tabsBlockPrefix.length)
+                }
+                var url = urlTemplate.replace(/{{(\\w+)}}/g, function(match, key) {
+                    return key === 'tab_id' ? tabsIdValue : match;
+                });
+                editForm.submit(url);
+            }
+        ";
+        return parent::_prepareLayout();
     }
 }
