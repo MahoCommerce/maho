@@ -39,7 +39,7 @@ class ConflictException extends ApiException
      * Create exception for duplicate email
      */
     public static function duplicateEmail(#[\SensitiveParameter]
-    string $email): self
+        string $email): self
     {
         return new self(
             message: 'An account with this email already exists',

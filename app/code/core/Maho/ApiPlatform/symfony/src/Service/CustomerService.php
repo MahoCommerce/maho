@@ -22,8 +22,8 @@ class CustomerService
      * Authenticate customer with email and password
      */
     public function authenticate(#[\SensitiveParameter]
-    string $email, #[\SensitiveParameter]
-    string $password): ?\Mage_Customer_Model_Customer
+        string $email, #[\SensitiveParameter]
+        string $password): ?\Mage_Customer_Model_Customer
     {
         try {
             $customer = \Mage::getModel('customer/customer')
@@ -60,7 +60,7 @@ class CustomerService
      * Get customer by email
      */
     public function getCustomerByEmail(#[\SensitiveParameter]
-    string $email): ?\Mage_Customer_Model_Customer
+        string $email): ?\Mage_Customer_Model_Customer
     {
         $customer = \Mage::getModel('customer/customer')
             ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
@@ -453,7 +453,7 @@ class CustomerService
      * Request password reset token
      */
     public function requestPasswordReset(#[\SensitiveParameter]
-    string $email): bool
+        string $email): bool
     {
         $customer = $this->getCustomerByEmail($email);
 
@@ -475,7 +475,7 @@ class CustomerService
      * Reset password using token
      */
     public function resetPassword(#[\SensitiveParameter]
-    string $email, string $token, string $newPassword): bool
+        string $email, string $token, string $newPassword): bool
     {
         $customer = $this->getCustomerByEmail($email);
 
