@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8464ef3e0970c14e99f56bcf72c20545",
+    "content-hash": "9e3573e8623e250c0f1349b851c15b68",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -980,16 +980,16 @@
         },
         {
             "name": "mahocommerce/icons",
-            "version": "1.0.2",
+            "version": "3.37.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/icons.git",
-                "reference": "f6631c78e6d705364c193cb803dc7acc605d718b"
+                "reference": "2033b8955e7fb974721ec9fef045b4be1ecebf70"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/f6631c78e6d705364c193cb803dc7acc605d718b",
-                "reference": "f6631c78e6d705364c193cb803dc7acc605d718b",
+                "url": "https://api.github.com/repos/MahoCommerce/icons/zipball/2033b8955e7fb974721ec9fef045b4be1ecebf70",
+                "reference": "2033b8955e7fb974721ec9fef045b4be1ecebf70",
                 "shasum": ""
             },
             "type": "library",
@@ -1000,9 +1000,9 @@
             "description": "A huge package of optimized SVG icons",
             "support": {
                 "issues": "https://github.com/MahoCommerce/icons/issues",
-                "source": "https://github.com/MahoCommerce/icons/tree/1.0.2"
+                "source": "https://github.com/MahoCommerce/icons/tree/3.37.1"
             },
-            "time": "2025-09-16T07:06:08+00:00"
+            "time": "2026-02-20T09:35:09+00:00"
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
@@ -8410,5 +8410,5 @@
     "platform-overrides": {
         "php": "8.3"
     },
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }
