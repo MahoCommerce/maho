@@ -153,8 +153,6 @@ class Mage_Oauth_Block_Adminhtml_Oauth_Consumer_Edit_Form extends Mage_Adminhtml
 
     /**
      * Get store IDs value for the multiselect field
-     *
-     * @return array
      */
     protected function _getStoreIdsValue(Mage_Oauth_Model_Consumer $model): array
     {

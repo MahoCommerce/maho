@@ -45,7 +45,7 @@ if ($storeCode) {
 
 // Check for admin endpoint access - validate admin session
 $requestUri = $_SERVER['REQUEST_URI'] ?? '';
-if (strpos($requestUri, '/api/admin/') !== false) {
+if (str_contains($requestUri, '/api/admin/')) {
     // Load adminhtml area for session handling
     Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMINHTML, Mage_Core_Model_App_Area::PART_EVENTS);
 
@@ -55,8 +55,8 @@ if (strpos($requestUri, '/api/admin/') !== false) {
 
     // Find admin session cookie (might have different name prefix)
     $adminCookieName = null;
-    foreach ($_COOKIE as $name => $value) {
-        if (strpos($name, 'admin') !== false || $name === 'adminhtml' || $name === 'backend') {
+    foreach (array_keys($_COOKIE) as $name) {
+        if (str_contains($name, 'admin') || $name === 'adminhtml' || $name === 'backend') {
             $adminCookieName = $name;
             break;
         }

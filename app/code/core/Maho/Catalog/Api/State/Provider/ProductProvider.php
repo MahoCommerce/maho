@@ -503,7 +503,6 @@ final class ProductProvider implements ProviderInterface
     /**
      * Map Maho product model to Product DTO
      *
-     * @param \Mage_Catalog_Model_Product $product
      * @param bool $forListing Skip expensive operations for listings (custom options, variants)
      * @param array|null $reviewSummary Pre-loaded review summary data (for batch loading)
      * @param int[]|null $categoryIds Pre-loaded category IDs (for batch loading)
@@ -1134,7 +1133,7 @@ final class ProductProvider implements ProviderInterface
                     $prices[] = $price;
                 }
             }
-            return !empty($prices) ? min($prices) : null;
+            return empty($prices) ? null : min($prices);
         } catch (\Throwable $e) {
             return null;
         }

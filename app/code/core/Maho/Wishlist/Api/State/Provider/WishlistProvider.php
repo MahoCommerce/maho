@@ -46,9 +46,6 @@ final class WishlistProvider implements ProviderInterface
         $this->security = $security;
     }
 
-    /**
-     * @return ArrayPaginator|WishlistItem|null
-     */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|WishlistItem|null
     {

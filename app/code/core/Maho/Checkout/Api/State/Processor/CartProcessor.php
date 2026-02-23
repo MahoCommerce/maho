@@ -551,13 +551,14 @@ final class CartProcessor implements ProcessorInterface
             $status = $giftcard->getStatus();
             if ($status === 'pending') {
                 throw new \RuntimeException('Gift card "' . $giftcardCode . '" is pending activation');
-            } elseif ($status === 'expired') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has expired');
-            } elseif ($status === 'used') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has been fully used');
-            } else {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not active');
             }
+            if ($status === 'expired') {
+                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has expired');
+            }
+            if ($status === 'used') {
+                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has been fully used');
+            }
+            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not active');
         }
 
         // Get currently applied codes

@@ -137,7 +137,6 @@ class OrderService
      *
      * @param int|null $orderId Order ID
      * @param string|null $incrementId Increment ID
-     * @return \Mage_Sales_Model_Order|null
      */
     public function getOrder(?int $orderId = null, ?string $incrementId = null): ?\Mage_Sales_Model_Order
     {
@@ -163,7 +162,6 @@ class OrderService
      *
      * @param string $incrementId Order increment ID
      * @param string $accessToken Guest access token
-     * @return \Mage_Sales_Model_Order|null
      */
     public function getGuestOrder(string $incrementId, string $accessToken): ?\Mage_Sales_Model_Order
     {
@@ -198,6 +196,7 @@ class OrderService
         int $page = 1,
         int $pageSize = 20,
         ?string $status = null,
+        #[\SensitiveParameter]
         ?string $email = null,
         ?string $incrementId = null,
         ?string $emailLike = null,
@@ -370,7 +369,6 @@ class OrderService
      *
      * @param \Mage_Sales_Model_Order $order Order
      * @param string|null $reason Cancellation reason
-     * @return \Mage_Sales_Model_Order
      */
     public function cancelOrder(\Mage_Sales_Model_Order $order, ?string $reason = null): \Mage_Sales_Model_Order
     {
@@ -402,7 +400,6 @@ class OrderService
      * @param string $note Note text
      * @param bool $notifyCustomer Notify customer
      * @param bool $visibleOnFront Visible on frontend
-     * @return \Mage_Sales_Model_Order
      */
     public function addOrderNote(
         \Mage_Sales_Model_Order $order,

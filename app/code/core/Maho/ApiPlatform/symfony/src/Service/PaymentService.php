@@ -38,17 +38,6 @@ class PaymentService
     /**
      * Record a payment for an order
      *
-     * @param int $orderId
-     * @param int $registerId
-     * @param string $methodCode
-     * @param float $amount
-     * @param string|null $terminalId
-     * @param string|null $transactionId
-     * @param string|null $cardType
-     * @param string|null $cardLast4
-     * @param string|null $authCode
-     * @param array|null $receiptData
-     * @param string $status
      * @throws \Mage_Core_Exception
      * @phpstan-ignore-next-line
      */
@@ -132,8 +121,6 @@ class PaymentService
     /**
      * Record multiple payments for an order (split payment)
      *
-     * @param int $orderId
-     * @param int $registerId
      * @param array $payments Array of payment data
      * @return array Array of created payment models
      * @throws \Mage_Core_Exception
@@ -188,9 +175,6 @@ class PaymentService
 
     /**
      * Get total paid amount for an order
-     *
-     * @param int $orderId
-     * @return float
      */
     public function getTotalPaidAmount(int $orderId): float
     {
@@ -202,9 +186,6 @@ class PaymentService
 
     /**
      * Validate if order is fully paid
-     *
-     * @param int $orderId
-     * @return bool
      */
     public function isOrderFullyPaid(int $orderId): bool
     {
@@ -221,8 +202,6 @@ class PaymentService
 
     /**
      * Get payment methods available for POS
-     *
-     * @return array
      */
     public function getAvailablePaymentMethods(): array
     {

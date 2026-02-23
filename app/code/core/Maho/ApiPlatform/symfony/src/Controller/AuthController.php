@@ -811,7 +811,6 @@ class AuthController extends AbstractController
 
     /**
      * Get authenticated customer from request
-     * @return \Mage_Customer_Model_Customer|JsonResponse
      */
     private function getAuthenticatedCustomer(Request $request): \Mage_Customer_Model_Customer|JsonResponse
     {

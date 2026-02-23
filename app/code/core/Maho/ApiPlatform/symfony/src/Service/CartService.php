@@ -63,7 +63,6 @@ class CartService
      *
      * @param int|null $cartId Cart ID
      * @param string|null $maskedId Masked ID
-     * @return \Mage_Sales_Model_Quote|null
      */
     public function getCart(?int $cartId = null, ?string $maskedId = null): ?\Mage_Sales_Model_Quote
     {
@@ -98,7 +97,6 @@ class CartService
      * Get customer's active cart
      *
      * @param int $customerId Customer ID
-     * @return \Mage_Sales_Model_Quote
      */
     public function getCustomerCart(int $customerId): \Mage_Sales_Model_Quote
     {
@@ -121,7 +119,6 @@ class CartService
      * @param string $sku Product SKU
      * @param float $qty Quantity
      * @param array $options Custom options (option_id => value)
-     * @return \Mage_Sales_Model_Quote
      */
     public function addItem(\Mage_Sales_Model_Quote $quote, string $sku, float $qty, array $options = []): \Mage_Sales_Model_Quote
     {
@@ -315,7 +312,6 @@ class CartService
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param int $itemId Item ID
      * @param float $qty New quantity
-     * @return \Mage_Sales_Model_Quote
      */
     public function updateItem(\Mage_Sales_Model_Quote $quote, int $itemId, float $qty): \Mage_Sales_Model_Quote
     {
@@ -358,7 +354,6 @@ class CartService
      *
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param int $itemId Item ID
-     * @return \Mage_Sales_Model_Quote
      */
     public function removeItem(\Mage_Sales_Model_Quote $quote, int $itemId): \Mage_Sales_Model_Quote
     {
@@ -375,7 +370,6 @@ class CartService
      *
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param string $couponCode Coupon code
-     * @return \Mage_Sales_Model_Quote
      */
     public function applyCoupon(\Mage_Sales_Model_Quote $quote, string $couponCode): \Mage_Sales_Model_Quote
     {
@@ -402,7 +396,6 @@ class CartService
      * Remove coupon code
      *
      * @param \Mage_Sales_Model_Quote $quote Quote
-     * @return \Mage_Sales_Model_Quote
      */
     public function removeCoupon(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
@@ -418,7 +411,6 @@ class CartService
      *
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param array $addressData Address data
-     * @return \Mage_Sales_Model_Quote
      */
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
     {
@@ -440,7 +432,6 @@ class CartService
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param array $addressData Address data
      * @param bool $sameAsShipping Same as shipping
-     * @return \Mage_Sales_Model_Quote
      */
     public function setBillingAddress(\Mage_Sales_Model_Quote $quote, array $addressData, bool $sameAsShipping = false): \Mage_Sales_Model_Quote
     {
@@ -465,7 +456,6 @@ class CartService
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param string $carrierCode Carrier code
      * @param string $methodCode Method code
-     * @return \Mage_Sales_Model_Quote
      */
     public function setShippingMethod(\Mage_Sales_Model_Quote $quote, string $carrierCode, string $methodCode, bool $skipValidation = false): \Mage_Sales_Model_Quote
     {
@@ -501,7 +491,6 @@ class CartService
      * @param \Mage_Sales_Model_Quote $quote Quote
      * @param string $methodCode Method code
      * @param array|null $additionalData Additional payment data
-     * @return \Mage_Sales_Model_Quote
      */
     public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null, bool $skipValidation = false): \Mage_Sales_Model_Quote
     {
@@ -867,9 +856,7 @@ class CartService
      * Create invoice for order (MDN PointOfSales approach)
      * Uses pay() instead of capture() for offline POS payments
      *
-     * @param \Mage_Sales_Model_Order $order
      * @param string $comments Optional invoice comments
-     * @return \Mage_Sales_Model_Order_Invoice
      */
     protected function createInvoice(\Mage_Sales_Model_Order $order, string $comments = ''): \Mage_Sales_Model_Order_Invoice
     {
@@ -916,9 +903,6 @@ class CartService
 
     /**
      * Create shipment for order (MDN PointOfSales approach)
-     *
-     * @param \Mage_Sales_Model_Order $order
-     * @return \Mage_Sales_Model_Order_Shipment
      */
     protected function createShipment(\Mage_Sales_Model_Order $order): \Mage_Sales_Model_Order_Shipment
     {
@@ -1048,7 +1032,6 @@ class CartService
      * Called when customer is assigned to cart to recalculate with customer group pricing
      *
      * @param \Mage_Sales_Model_Quote $quote Quote to update
-     * @return void
      */
     public function reapplyCatalogRulePrices(\Mage_Sales_Model_Quote $quote): void
     {

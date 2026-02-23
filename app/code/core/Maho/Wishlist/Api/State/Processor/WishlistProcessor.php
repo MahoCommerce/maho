@@ -248,7 +248,7 @@ final class WishlistProcessor implements ProcessorInterface
         if ($cartId) {
             // Use CartService to load the cart properly (handles numeric or masked IDs)
             if (is_numeric($cartId)) {
-                $quote = $this->cartService->getCart((int) $cartId, null);
+                $quote = $this->cartService->getCart((int) $cartId);
             } else {
                 $quote = $this->cartService->getCart(null, $cartId);
             }

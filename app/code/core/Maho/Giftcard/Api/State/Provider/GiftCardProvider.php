@@ -28,8 +28,6 @@ final class GiftCardProvider implements ProviderInterface
 {
     /**
      * Provide gift card data based on operation type
-     *
-     * @return GiftCard|ArrayPaginator|null
      */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): GiftCard|ArrayPaginator|null

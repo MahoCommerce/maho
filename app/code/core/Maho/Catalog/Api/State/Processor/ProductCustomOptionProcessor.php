@@ -81,7 +81,7 @@ final class ProductCustomOptionProcessor implements ProcessorInterface
         $option->setStoreId(0);
         $option->setTitle($body['title']);
         $option->setType($body['type']);
-        $option->setIsRequire(!empty($body['required']) ? 1 : 0);
+        $option->setIsRequire(empty($body['required']) ? 0 : 1);
         $option->setSortOrder((int) ($body['sortOrder'] ?? $body['sort_order'] ?? 0));
 
         if (in_array($body['type'], self::SELECT_TYPES)) {

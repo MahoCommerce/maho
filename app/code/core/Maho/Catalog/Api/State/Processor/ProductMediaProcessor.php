@@ -119,7 +119,7 @@ final class ProductMediaProcessor implements ProcessorInterface
             $product->unsetData('stock_data');
             $product->addImageToMediaGallery(
                 $tmpPath,
-                !empty($types) ? $types : null,
+                empty($types) ? null : $types,
                 false,
                 false,
             );
