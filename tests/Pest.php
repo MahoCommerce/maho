@@ -134,6 +134,40 @@ function getItems(array $response): array
 
 /*
 |--------------------------------------------------------------------------
+| API v2 Test Availability Check
+|--------------------------------------------------------------------------
+|
+| Skip Feature/Api/V2 tests when no API server is reachable.
+| CI environments install Maho but do not start a web server,
+| so these integration tests can only run locally or in environments
+| where the API is served.
+|
+*/
+
+uses()
+    ->beforeAll(function (): void {
+        try {
+            $baseUrl = ApiV2Helper::getBaseUrlPublic();
+            $ch = curl_init($baseUrl . '/api/store-config');
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+            if ($code === 0) {
+                throw new \RuntimeException('API server not reachable');
+            }
+        } catch (\Throwable $e) {
+            // Using PHPUnit TestCase::markTestSkipped via Pest
+            test()->markTestSkipped('API server not reachable at ' . ($baseUrl ?? 'unknown') . ' - skipping API integration tests');
+        }
+    })
+    ->in('Feature/Api/V2');
+
+/*
+|--------------------------------------------------------------------------
 | Custom Expectations
 |--------------------------------------------------------------------------
 */
