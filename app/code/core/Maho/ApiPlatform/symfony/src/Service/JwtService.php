@@ -35,7 +35,6 @@ class JwtService
     /**
      * Generate JWT token for a customer
      *
-     * @param \Mage_Customer_Model_Customer $customer
      * @return string The JWT token
      * @throws \RuntimeException If JWT secret is not configured
      */
@@ -63,7 +62,6 @@ class JwtService
     /**
      * Generate JWT token for an admin user
      *
-     * @param \Mage_Admin_Model_User $admin
      * @return string The JWT token
      * @throws \RuntimeException If JWT secret is not configured
      */
@@ -91,7 +89,6 @@ class JwtService
     /**
      * Generate JWT token for a dedicated API user
      *
-     * @param \Mage_Api_Model_User $apiUser
      * @param array<string> $permissions Resource permissions from api_rule
      * @return string The JWT token
      * @throws \RuntimeException If JWT secret is not configured

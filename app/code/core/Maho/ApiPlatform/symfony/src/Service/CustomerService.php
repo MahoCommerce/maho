@@ -21,7 +21,9 @@ class CustomerService
     /**
      * Authenticate customer with email and password
      */
-    public function authenticate(string $email, string $password): ?\Mage_Customer_Model_Customer
+    public function authenticate(#[\SensitiveParameter]
+    string $email, #[\SensitiveParameter]
+    string $password): ?\Mage_Customer_Model_Customer
     {
         try {
             $customer = \Mage::getModel('customer/customer')
@@ -57,7 +59,8 @@ class CustomerService
     /**
      * Get customer by email
      */
-    public function getCustomerByEmail(string $email): ?\Mage_Customer_Model_Customer
+    public function getCustomerByEmail(#[\SensitiveParameter]
+    string $email): ?\Mage_Customer_Model_Customer
     {
         $customer = \Mage::getModel('customer/customer')
             ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
@@ -72,6 +75,7 @@ class CustomerService
      */
     public function searchCustomers(
         string $search = '',
+        #[\SensitiveParameter]
         ?string $email = null,
         ?string $telephone = null,
         int $page = 1,
@@ -144,6 +148,7 @@ class CustomerService
      */
     private function searchCustomerIdsFast(
         string $search,
+        #[\SensitiveParameter]
         ?string $email,
         ?string $telephone,
         int $page,
@@ -314,6 +319,7 @@ class CustomerService
     public function createCustomerQuick(
         string $firstName,
         string $lastName,
+        #[\SensitiveParameter]
         ?string $email = null,
         ?string $telephone = null,
         ?int $groupId = null,
@@ -322,7 +328,7 @@ class CustomerService
 
         // If no email provided, generate a temporary one
         if (empty($email)) {
-            $email = 'guest_' . time() . '_' . rand(1000, 9999) . '@pos.local';
+            $email = 'guest_' . time() . '_' . random_int(1000, 9999) . '@pos.local';
         }
 
         $customer->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
@@ -365,7 +371,9 @@ class CustomerService
     public function registerCustomer(
         string $firstName,
         string $lastName,
+        #[\SensitiveParameter]
         string $email,
+        #[\SensitiveParameter]
         string $password,
         bool $isSubscribed = false,
     ): \Mage_Customer_Model_Customer {
@@ -444,7 +452,8 @@ class CustomerService
     /**
      * Request password reset token
      */
-    public function requestPasswordReset(string $email): bool
+    public function requestPasswordReset(#[\SensitiveParameter]
+    string $email): bool
     {
         $customer = $this->getCustomerByEmail($email);
 
@@ -465,7 +474,8 @@ class CustomerService
     /**
      * Reset password using token
      */
-    public function resetPassword(string $email, string $token, string $newPassword): bool
+    public function resetPassword(#[\SensitiveParameter]
+    string $email, string $token, string $newPassword): bool
     {
         $customer = $this->getCustomerByEmail($email);
 

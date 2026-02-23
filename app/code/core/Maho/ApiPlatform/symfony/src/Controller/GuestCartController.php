@@ -657,7 +657,7 @@ class GuestCartController extends AbstractController
                     $quote->setCustomerIsGuest(0);
                     // Use form email if provided, fall back to customer record
                     $quote->setCustomerEmail(
-                        !empty($data['email']) ? $data['email'] : $customer->getEmail(),
+                        empty($data['email']) ? $customer->getEmail() : $data['email'],
                     );
                 }
             }

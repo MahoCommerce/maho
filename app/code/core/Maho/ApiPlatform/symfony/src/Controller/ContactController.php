@@ -264,7 +264,8 @@ class ContactController extends AbstractController
         return null;
     }
 
-    private function checkRateLimit(string $email, int $storeId): ?JsonResponse
+    private function checkRateLimit(#[\SensitiveParameter]
+    string $email, int $storeId): ?JsonResponse
     {
         $limit = (int) \Mage::getStoreConfig(self::CONFIG_RATE_LIMIT, $storeId);
         if ($limit <= 0) {
@@ -285,7 +286,8 @@ class ContactController extends AbstractController
         return null;
     }
 
-    private function recordSubmission(string $email, int $storeId): void
+    private function recordSubmission(#[\SensitiveParameter]
+    string $email, int $storeId): void
     {
         $limit = (int) \Mage::getStoreConfig(self::CONFIG_RATE_LIMIT, $storeId);
         if ($limit <= 0) {

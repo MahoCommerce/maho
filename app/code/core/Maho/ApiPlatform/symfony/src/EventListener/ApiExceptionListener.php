@@ -107,7 +107,7 @@ class ApiExceptionListener implements EventSubscriberInterface
 
             if ($this->showDebug()) {
                 $data['debug'] = [
-                    'class' => get_class($exception),
+                    'class' => $exception::class,
                     'trace' => $exception->getTraceAsString(),
                 ];
             }
@@ -132,7 +132,7 @@ class ApiExceptionListener implements EventSubscriberInterface
 
             if ($this->showDebug()) {
                 $data['debug'] = [
-                    'class' => get_class($exception),
+                    'class' => $exception::class,
                     'trace' => $exception->getTraceAsString(),
                 ];
             }
@@ -152,7 +152,7 @@ class ApiExceptionListener implements EventSubscriberInterface
 
             if ($this->showDebug()) {
                 $data['debug'] = [
-                    'class' => get_class($exception),
+                    'class' => $exception::class,
                     'trace' => $exception->getTraceAsString(),
                 ];
             }
@@ -170,7 +170,7 @@ class ApiExceptionListener implements EventSubscriberInterface
 
         if ($this->showDebug()) {
             $data['debug'] = [
-                'class' => get_class($exception),
+                'class' => $exception::class,
                 'file' => $exception->getFile(),
                 'line' => $exception->getLine(),
                 'trace' => $exception->getTraceAsString(),

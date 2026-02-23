@@ -1135,7 +1135,7 @@ abstract class Mage_Eav_Model_Entity_Abstract extends Mage_Core_Model_Resource_A
              * drop attributes that are unknown in new data
              * not needed after introduction of partial entity loading
              */
-            foreach ($origData as $k => $v) {
+            foreach (array_keys($origData) as $k) {
                 if (!array_key_exists($k, $newData)) {
                     unset($origData[$k]);
                 }

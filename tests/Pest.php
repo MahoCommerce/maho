@@ -144,27 +144,31 @@ function getItems(array $response): array
 |
 */
 
+
 uses()
-    ->beforeAll(function (): void {
-        try {
-            $baseUrl = ApiV2Helper::getBaseUrlPublic();
-            $ch = curl_init($baseUrl . '/api/store-config');
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 3);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_exec($ch);
-            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            curl_close($ch);
-            if ($code === 0) {
-                throw new \RuntimeException('API server not reachable');
+    ->beforeEach(function (): void {
+        static $apiAvailable = null;
+        if ($apiAvailable === null) {
+            try {
+                $baseUrl = ApiV2Helper::getBaseUrlPublic();
+                $ch = curl_init($baseUrl . '/api/store-config');
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt($ch, CURLOPT_TIMEOUT, 3);
+                curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 2);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_exec($ch);
+                $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                curl_close($ch);
+                $apiAvailable = ($code !== 0);
+            } catch (\Throwable) {
+                $apiAvailable = false;
             }
-        } catch (\Throwable $e) {
-            // Using PHPUnit TestCase::markTestSkipped via Pest
-            test()->markTestSkipped('API server not reachable at ' . ($baseUrl ?? 'unknown') . ' - skipping API integration tests');
+        }
+        if (!$apiAvailable) {
+            $this->markTestSkipped('API server not reachable - skipping API integration tests');
         }
     })
-    ->in('Feature/Api/V2');
+    ->in('Feature/Api');
 
 /*
 |--------------------------------------------------------------------------

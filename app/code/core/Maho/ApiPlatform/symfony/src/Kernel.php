@@ -147,7 +147,7 @@ class Kernel extends BaseKernel
         }
 
         // Phase 3: Register all loaded classes as services
-        foreach ($files as $class => $filePath) {
+        foreach (array_keys($files) as $class) {
             if (!class_exists($class, false)) {
                 continue;
             }
