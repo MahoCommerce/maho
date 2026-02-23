@@ -18,9 +18,9 @@ declare(strict_types=1);
 const TEST_CLIENT_ID = 'maho_5293a399b1369914b84a9958466e026e';
 const TEST_CLIENT_SECRET = 'pest_test_secret_12345';
 
-describe('OAuth2 Client Credentials Flow', function () {
+describe('OAuth2 Client Credentials Flow', function (): void {
 
-    it('rejects invalid client_id', function () {
+    it('rejects invalid client_id', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'client_credentials',
             'client_id' => 'nonexistent_key_12345',
@@ -31,7 +31,7 @@ describe('OAuth2 Client Credentials Flow', function () {
         expect($response['json']['error'] ?? '')->toBe('invalid_client');
     });
 
-    it('rejects invalid client_secret', function () {
+    it('rejects invalid client_secret', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'client_credentials',
             'client_id' => TEST_CLIENT_ID,
@@ -42,7 +42,7 @@ describe('OAuth2 Client Credentials Flow', function () {
         expect($response['json']['error'] ?? '')->toBe('invalid_client');
     });
 
-    it('rejects missing client_id', function () {
+    it('rejects missing client_id', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'client_credentials',
             'client_secret' => TEST_CLIENT_SECRET,
@@ -51,7 +51,7 @@ describe('OAuth2 Client Credentials Flow', function () {
         expect($response['status'])->toBe(400);
     });
 
-    it('returns token for valid credentials', function () {
+    it('returns token for valid credentials', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'client_credentials',
             'client_id' => TEST_CLIENT_ID,
@@ -67,7 +67,7 @@ describe('OAuth2 Client Credentials Flow', function () {
         expect($response['json']['permissions'])->toContain('all');
     });
 
-    it('returned token works for authorized endpoints', function () {
+    it('returned token works for authorized endpoints', function (): void {
         // Get a real token
         $authResponse = apiPost('/api/auth/token', [
             'grant_type' => 'client_credentials',
@@ -97,9 +97,9 @@ describe('OAuth2 Client Credentials Flow', function () {
 
 });
 
-describe('Customer Auth Grant', function () {
+describe('Customer Auth Grant', function (): void {
 
-    it('rejects missing email', function () {
+    it('rejects missing email', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'customer',
             'password' => 'test123',
@@ -109,7 +109,7 @@ describe('Customer Auth Grant', function () {
         expect($response['json']['error'] ?? '')->toBe('invalid_request');
     });
 
-    it('rejects invalid email format', function () {
+    it('rejects invalid email format', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'customer',
             'email' => 'not-an-email',
@@ -120,7 +120,7 @@ describe('Customer Auth Grant', function () {
         expect($response['json']['error'] ?? '')->toBe('invalid_request');
     });
 
-    it('rejects non-existent customer', function () {
+    it('rejects non-existent customer', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'customer',
             'email' => 'nonexistent@example.com',
@@ -131,7 +131,7 @@ describe('Customer Auth Grant', function () {
         expect($response['json']['error'] ?? '')->toBe('invalid_credentials');
     });
 
-    it('defaults to customer grant without grant_type', function () {
+    it('defaults to customer grant without grant_type', function (): void {
         // Without grant_type, defaults to 'customer' which requires email
         $response = apiPost('/api/auth/token', [
             'email' => 'nonexistent@example.com',
@@ -144,9 +144,9 @@ describe('Customer Auth Grant', function () {
 
 });
 
-describe('Unsupported Grant Types', function () {
+describe('Unsupported Grant Types', function (): void {
 
-    it('rejects unsupported grant_type', function () {
+    it('rejects unsupported grant_type', function (): void {
         $response = apiPost('/api/auth/token', [
             'grant_type' => 'authorization_code',
             'client_id' => TEST_CLIENT_ID,

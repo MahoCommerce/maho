@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Customer DTO', function () {
-    it('has correct default values for all properties', function () {
+describe('Customer DTO', function (): void {
+    it('has correct default values for all properties', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Customer();
 
         expect($dto->id)->toBeNull();
@@ -34,8 +34,8 @@ describe('Customer DTO', function () {
     });
 });
 
-describe('Customer DTO - property assignment', function () {
-    it('accepts and returns all scalar property values', function () {
+describe('Customer DTO - property assignment', function (): void {
+    it('accepts and returns all scalar property values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Customer();
         $dto->id = 123;
         $dto->email = 'customer@example.com';
@@ -64,7 +64,7 @@ describe('Customer DTO - property assignment', function () {
         expect($dto->newPassword)->toBe('newpassword');
     });
 
-    it('accepts and returns nested Address objects', function () {
+    it('accepts and returns nested Address objects', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Customer();
 
         $billingAddress = new \Maho\ApiPlatform\ApiResource\Address();
@@ -103,8 +103,8 @@ describe('Customer DTO - property assignment', function () {
     });
 });
 
-describe('Customer - password never exposed', function () {
-    it('marks password field as write-only via ApiProperty attribute', function () {
+describe('Customer - password never exposed', function (): void {
+    it('marks password field as write-only via ApiProperty attribute', function (): void {
         $reflection = new ReflectionClass(\Maho\ApiPlatform\ApiResource\Customer::class);
         $passwordProperty = $reflection->getProperty('password');
         $attributes = $passwordProperty->getAttributes(\ApiPlatform\Metadata\ApiProperty::class);
@@ -116,7 +116,7 @@ describe('Customer - password never exposed', function () {
         expect($apiPropertyAttribute->isReadable())->toBeFalse();
     });
 
-    it('marks currentPassword field as write-only via ApiProperty attribute', function () {
+    it('marks currentPassword field as write-only via ApiProperty attribute', function (): void {
         $reflection = new ReflectionClass(\Maho\ApiPlatform\ApiResource\Customer::class);
         $property = $reflection->getProperty('currentPassword');
         $attributes = $property->getAttributes(\ApiPlatform\Metadata\ApiProperty::class);
@@ -128,7 +128,7 @@ describe('Customer - password never exposed', function () {
         expect($apiPropertyAttribute->isReadable())->toBeFalse();
     });
 
-    it('marks newPassword field as write-only via ApiProperty attribute', function () {
+    it('marks newPassword field as write-only via ApiProperty attribute', function (): void {
         $reflection = new ReflectionClass(\Maho\ApiPlatform\ApiResource\Customer::class);
         $property = $reflection->getProperty('newPassword');
         $attributes = $property->getAttributes(\ApiPlatform\Metadata\ApiProperty::class);
@@ -141,8 +141,8 @@ describe('Customer - password never exposed', function () {
     });
 });
 
-describe('CustomerProvider - mapToDto', function () {
-    it('correctly maps a real customer to DTO', function () {
+describe('CustomerProvider - mapToDto', function (): void {
+    it('correctly maps a real customer to DTO', function (): void {
         // Load any existing customer from the database
         $mahoCustomer = \Mage::getModel('customer/customer')
             ->getCollection()
@@ -199,8 +199,8 @@ describe('CustomerProvider - mapToDto', function () {
     });
 });
 
-describe('CustomerProcessor - mapToDto', function () {
-    it('correctly maps a real customer to DTO', function () {
+describe('CustomerProcessor - mapToDto', function (): void {
+    it('correctly maps a real customer to DTO', function (): void {
         // Load any existing customer from the database
         $mahoCustomer = \Mage::getModel('customer/customer')
             ->getCollection()
@@ -241,7 +241,7 @@ describe('CustomerProcessor - mapToDto', function () {
         expect($dto->password)->toBeNull();
     });
 
-    it('maps customer with minimal data correctly', function () {
+    it('maps customer with minimal data correctly', function (): void {
         // Create a test customer with minimal required data
         $mahoCustomer = \Mage::getModel('customer/customer');
         $mahoCustomer->setId(999);
@@ -267,8 +267,8 @@ describe('CustomerProcessor - mapToDto', function () {
     });
 });
 
-describe('CustomerProvider - mapToDtoForSearch', function () {
-    it('correctly maps customer for search results with pre-loaded address', function () {
+describe('CustomerProvider - mapToDtoForSearch', function (): void {
+    it('correctly maps customer for search results with pre-loaded address', function (): void {
         // Load any existing customer from the database with a billing address
         $mahoCustomer = \Mage::getModel('customer/customer')
             ->getCollection()
@@ -319,8 +319,8 @@ describe('CustomerProvider - mapToDtoForSearch', function () {
     });
 });
 
-describe('AddressMapper - fromCustomerAddress', function () {
-    it('correctly maps a Maho address to Address DTO', function () {
+describe('AddressMapper - fromCustomerAddress', function (): void {
+    it('correctly maps a Maho address to Address DTO', function (): void {
         // Load any existing address from the database
         $mahoAddress = \Mage::getModel('customer/address')
             ->getCollection()

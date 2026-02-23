@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Permission Enforcement (REST)', function () {
+describe('Product Permission Enforcement (REST)', function (): void {
 
-    it('denies create without authentication', function () {
+    it('denies create without authentication', function (): void {
         $response = apiPost('/api/products', [
             'sku' => 'TEST-NOAUTH',
             'name' => 'Test Product No Auth',
@@ -27,7 +27,7 @@ describe('Product Permission Enforcement (REST)', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies create with customer token (wrong role)', function () {
+    it('denies create with customer token (wrong role)', function (): void {
         $response = apiPost('/api/products', [
             'sku' => 'TEST-CUSTOMER',
             'name' => 'Test Product Customer',
@@ -37,7 +37,7 @@ describe('Product Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies create without correct permission', function () {
+    it('denies create without correct permission', function (): void {
         $token = serviceToken(['cms-pages/write']);
         $response = apiPost('/api/products', [
             'sku' => 'TEST-NOPERM',
@@ -48,7 +48,7 @@ describe('Product Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies update without correct permission', function () {
+    it('denies update without correct permission', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['cms-pages/write']);
         $response = apiPut("/api/products/{$productId}", [
@@ -58,7 +58,7 @@ describe('Product Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies delete without correct permission', function () {
+    it('denies delete without correct permission', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write']);
         $response = apiDelete("/api/products/{$productId}", $token);
@@ -68,9 +68,9 @@ describe('Product Permission Enforcement (REST)', function () {
 
 });
 
-describe('Product Create Lifecycle (REST)', function () {
+describe('Product Create Lifecycle (REST)', function (): void {
 
-    it('creates a simple product and reads it back', function () {
+    it('creates a simple product and reads it back', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -98,7 +98,7 @@ describe('Product Create Lifecycle (REST)', function () {
         expect($read['json']['price'])->toBe(29.95);
     });
 
-    it('creates a simple product with all basic fields', function () {
+    it('creates a simple product with all basic fields', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -130,7 +130,7 @@ describe('Product Create Lifecycle (REST)', function () {
         expect($read['json']['price'])->toBe(49.95);
     });
 
-    it('creates a virtual product', function () {
+    it('creates a virtual product', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -151,7 +151,7 @@ describe('Product Create Lifecycle (REST)', function () {
         expect($read['json']['type'])->toBe('virtual');
     });
 
-    it('creates a disabled product', function () {
+    it('creates a disabled product', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -168,7 +168,7 @@ describe('Product Create Lifecycle (REST)', function () {
         trackCreated('product', $create['json']['id']);
     });
 
-    it('requires sku and name for product creation', function () {
+    it('requires sku and name for product creation', function (): void {
         $token = serviceToken(['products/write']);
 
         // Missing SKU
@@ -188,9 +188,9 @@ describe('Product Create Lifecycle (REST)', function () {
 
 });
 
-describe('Product Update (REST)', function () {
+describe('Product Update (REST)', function (): void {
 
-    it('updates a product name and restores it', function () {
+    it('updates a product name and restores it', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write']);
 
@@ -219,9 +219,9 @@ describe('Product Update (REST)', function () {
 
 });
 
-describe('Product Delete (REST)', function () {
+describe('Product Delete (REST)', function (): void {
 
-    it('deletes a product successfully', function () {
+    it('deletes a product successfully', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -246,9 +246,9 @@ describe('Product Delete (REST)', function () {
 
 });
 
-describe('Product Type Fields - Read Verification', function () {
+describe('Product Type Fields - Read Verification', function (): void {
 
-    it('reads simple product with expected fields', function () {
+    it('reads simple product with expected fields', function (): void {
         $productId = fixtures('product_id');
         $response = apiGet("/api/products/{$productId}");
         expect($response['status'])->toBe(200);
@@ -265,7 +265,7 @@ describe('Product Type Fields - Read Verification', function () {
         expect($product['mediaGallery'])->toBeArray();
     });
 
-    it('reads configurable product with options and variants', function () {
+    it('reads configurable product with options and variants', function (): void {
         // Look up configurable by SKU via collection search
         $sku = fixtures('configurable_sku');
         $response = apiGet("/api/products?search={$sku}");
@@ -294,7 +294,7 @@ describe('Product Type Fields - Read Verification', function () {
         expect($detail['json']['variants'])->toBeArray();
     });
 
-    it('reads product via GraphQL by SKU', function () {
+    it('reads product via GraphQL by SKU', function (): void {
         $sku = fixtures('product_sku');
         $query = <<<GRAPHQL
         {

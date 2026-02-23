@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Category DTO', function () {
-    it('has correct default values', function () {
+describe('Category DTO', function (): void {
+    it('has correct default values', function (): void {
         $category = new \Maho\ApiPlatform\ApiResource\Category();
 
         expect($category->id)->toBeNull()
@@ -38,8 +38,8 @@ describe('Category DTO', function () {
     });
 });
 
-describe('Category DTO - property assignment', function () {
-    it('can set all properties', function () {
+describe('Category DTO - property assignment', function (): void {
+    it('can set all properties', function (): void {
         $category = new \Maho\ApiPlatform\ApiResource\Category();
 
         $category->id = 123;
@@ -86,8 +86,8 @@ describe('Category DTO - property assignment', function () {
     });
 });
 
-describe('Category - tree building', function () {
-    it('can build nested category tree structure', function () {
+describe('Category - tree building', function (): void {
+    it('can build nested category tree structure', function (): void {
         $parent = new \Maho\ApiPlatform\ApiResource\Category();
         $parent->id = 10;
         $parent->name = 'Parent Category';
@@ -131,7 +131,7 @@ describe('Category - tree building', function () {
             ->and($parent->children[0]->childrenIds)->toBe([30]);
     });
 
-    it('can handle empty children array', function () {
+    it('can handle empty children array', function (): void {
         $category = new \Maho\ApiPlatform\ApiResource\Category();
         $category->id = 50;
         $category->name = 'Leaf Category';
@@ -145,8 +145,8 @@ describe('Category - tree building', function () {
     });
 });
 
-describe('Category - database integration', function () {
-    it('can load root category from database', function () {
+describe('Category - database integration', function (): void {
+    it('can load root category from database', function (): void {
         $category = \Mage::getModel('catalog/category')->load(2);
 
         expect($category->getId())->toBe(2)
@@ -155,7 +155,7 @@ describe('Category - database integration', function () {
             ->and($category->getLevel())->toBeGreaterThanOrEqual(1);
     });
 
-    it('root category has expected properties', function () {
+    it('root category has expected properties', function (): void {
         $category = \Mage::getModel('catalog/category')->load(2);
 
         expect((int) $category->getId())->toBe(2)
@@ -164,7 +164,7 @@ describe('Category - database integration', function () {
             ->and($category->getIsActive())->toBeIn([0, 1, '0', '1', true, false]);
     });
 
-    it('can verify root category path structure', function () {
+    it('can verify root category path structure', function (): void {
         $category = \Mage::getModel('catalog/category')->load(2);
         $pathIds = explode('/', $category->getPath());
 

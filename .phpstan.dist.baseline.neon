@@ -23703,14 +23703,3 @@ parameters:
 			count: 1
 			path: lib/Maho/Simplexml/Element.php
 
-		-
-			rawMessage: 'Call to Mage::getModel(''datasync/adapter_openmage'') resulted in invalid type Maho_DataSync_Model_Adapter_Openmage.'
-			identifier: mage.invalidType
-			count: 2
-			path: lib/MahoCLI/Commands/DatasyncIncremental.php
-
-		-
-			rawMessage: PHPDoc tag @var with type Maho_DataSync_Model_Adapter_OpenMage is not subtype of type false.
-			identifier: varTag.type
-			count: 2
-			path: lib/MahoCLI/Commands/DatasyncIncremental.php

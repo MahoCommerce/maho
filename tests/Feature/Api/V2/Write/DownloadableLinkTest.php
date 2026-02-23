@@ -8,13 +8,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Downloadable Links — CRUD Lifecycle', function () {
+describe('Downloadable Links — CRUD Lifecycle', function (): void {
 
-    it('reads existing downloadable links', function () {
+    it('reads existing downloadable links', function (): void {
         // Product 448 is a known downloadable product
         $read = apiGet('/api/products/448/downloadable-links');
         expect($read['status'])->toBe(200);
@@ -25,7 +25,7 @@ describe('Downloadable Links — CRUD Lifecycle', function () {
         expect($link)->toHaveKey('linkType');
     });
 
-    it('creates a downloadable product, adds link, reads back, deletes', function () {
+    it('creates a downloadable product, adds link, reads back, deletes', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
         $suffix = substr(uniqid(), -6);
 
@@ -80,7 +80,7 @@ describe('Downloadable Links — CRUD Lifecycle', function () {
         expect(count($emptyLinks))->toBe(0);
     });
 
-    it('rejects downloadable operations on a simple product', function () {
+    it('rejects downloadable operations on a simple product', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -6);
         $simple = apiPost('/api/products', [

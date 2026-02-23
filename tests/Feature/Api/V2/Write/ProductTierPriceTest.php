@@ -10,13 +10,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Tier Prices — Permission Enforcement', function () {
+describe('Product Tier Prices — Permission Enforcement', function (): void {
 
-    it('denies tier price update without authentication', function () {
+    it('denies tier price update without authentication', function (): void {
         $productId = fixtures('product_id');
         $response = apiPut("/api/products/{$productId}/tier-prices", [
             ['customerGroupId' => 'all', 'qty' => 5, 'price' => 19.95],
@@ -24,7 +24,7 @@ describe('Product Tier Prices — Permission Enforcement', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies tier price update without correct permission', function () {
+    it('denies tier price update without correct permission', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['cms-pages/write']);
         $response = apiPut("/api/products/{$productId}/tier-prices", [
@@ -33,7 +33,7 @@ describe('Product Tier Prices — Permission Enforcement', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies tier price delete without correct permission', function () {
+    it('denies tier price delete without correct permission', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write']); // needs products/delete
         $response = apiDelete("/api/products/{$productId}/tier-prices", $token);
@@ -42,9 +42,9 @@ describe('Product Tier Prices — Permission Enforcement', function () {
 
 });
 
-describe('Product Tier Prices — CRUD Lifecycle', function () {
+describe('Product Tier Prices — CRUD Lifecycle', function (): void {
 
-    it('sets tier prices, reads them back, then removes them', function () {
+    it('sets tier prices, reads them back, then removes them', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
 
@@ -77,7 +77,7 @@ describe('Product Tier Prices — CRUD Lifecycle', function () {
         expect(count($emptyItems))->toBe(0);
     });
 
-    it('replaces existing tier prices with new ones', function () {
+    it('replaces existing tier prices with new ones', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write', 'products/delete']);
 
@@ -108,12 +108,12 @@ describe('Product Tier Prices — CRUD Lifecycle', function () {
         apiDelete("/api/products/{$productId}/tier-prices", $token);
     });
 
-    it('returns 404 for non-existent product', function () {
+    it('returns 404 for non-existent product', function (): void {
         $response = apiGet('/api/products/999999/tier-prices');
         expect($response['status'])->toBeNotFound();
     });
 
-    it('validates tier price data', function () {
+    it('validates tier price data', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write']);
 

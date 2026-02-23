@@ -10,13 +10,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Custom Options — Permission Enforcement', function () {
+describe('Product Custom Options — Permission Enforcement', function (): void {
 
-    it('denies custom option create without authentication', function () {
+    it('denies custom option create without authentication', function (): void {
         $productId = fixtures('product_id');
         $response = apiPost("/api/products/{$productId}/custom-options", [
             'title' => 'Test Option',
@@ -25,7 +25,7 @@ describe('Product Custom Options — Permission Enforcement', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies custom option create without correct permission', function () {
+    it('denies custom option create without correct permission', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['cms-pages/write']);
         $response = apiPost("/api/products/{$productId}/custom-options", [
@@ -37,9 +37,9 @@ describe('Product Custom Options — Permission Enforcement', function () {
 
 });
 
-describe('Product Custom Options — CRUD Lifecycle', function () {
+describe('Product Custom Options — CRUD Lifecycle', function (): void {
 
-    it('creates a text field option, reads back, updates title, then deletes', function () {
+    it('creates a text field option, reads back, updates title, then deletes', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write', 'products/delete']);
 
@@ -89,7 +89,7 @@ describe('Product Custom Options — CRUD Lifecycle', function () {
         expect(count($stillExists))->toBe(0);
     });
 
-    it('creates a drop_down option with values', function () {
+    it('creates a drop_down option with values', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write', 'products/delete']);
 
@@ -121,7 +121,7 @@ describe('Product Custom Options — CRUD Lifecycle', function () {
         apiDelete("/api/products/{$productId}/custom-options/{$optionId}", $token);
     });
 
-    it('rejects select-type option without values', function () {
+    it('rejects select-type option without values', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write']);
 
@@ -132,7 +132,7 @@ describe('Product Custom Options — CRUD Lifecycle', function () {
         expect($response['status'])->toBeIn([400, 422]);
     });
 
-    it('rejects option without title', function () {
+    it('rejects option without title', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['products/write']);
 

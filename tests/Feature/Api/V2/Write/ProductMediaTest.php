@@ -8,13 +8,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Media Gallery — Read', function () {
+describe('Product Media Gallery — Read', function (): void {
 
-    it('lists gallery images for existing product', function () {
+    it('lists gallery images for existing product', function (): void {
         // Product 421 should have images
         $read = apiGet('/api/products/421/media');
         expect($read['status'])->toBe(200);
@@ -31,9 +31,9 @@ describe('Product Media Gallery — Read', function () {
 
 });
 
-describe('Product Media Gallery — Upload & Manage', function () {
+describe('Product Media Gallery — Upload & Manage', function (): void {
 
-    it('uploads a base64 image, updates label, then deletes it', function () {
+    it('uploads a base64 image, updates label, then deletes it', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
         $suffix = substr(uniqid(), -6);
 

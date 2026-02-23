@@ -12,11 +12,11 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Product Reviews', function () {
+describe('API v2 Product Reviews', function (): void {
 
-    describe('public access - product reviews', function () {
+    describe('public access - product reviews', function (): void {
 
-        it('allows listing reviews for a product without authentication', function () {
+        it('allows listing reviews for a product without authentication', function (): void {
             // First get a product
             $products = apiGet('/api/products');
 
@@ -33,16 +33,16 @@ describe('API v2 Product Reviews', function () {
 
     });
 
-    describe('customer reviews - protected', function () {
+    describe('customer reviews - protected', function (): void {
 
-        it('rejects listing customer reviews without token', function () {
+        it('rejects listing customer reviews without token', function (): void {
             $response = apiGet('/api/customers/me/reviews');
 
             // Either 401 (protected) or 404 (not implemented)
             expect($response['status'])->toBeIn([401, 404]);
         });
 
-        it('returns proper error for unauthenticated customer reviews request', function () {
+        it('returns proper error for unauthenticated customer reviews request', function (): void {
             $response = apiGet('/api/customers/me/reviews');
 
             // Either 401 unauthorized or 404 not found
@@ -54,7 +54,7 @@ describe('API v2 Product Reviews', function () {
             }
         });
 
-        it('allows listing customer reviews with valid token', function () {
+        it('allows listing customer reviews with valid token', function (): void {
             $response = apiGet('/api/customers/me/reviews', customerToken());
 
             // Should succeed (200) or 404 if endpoint doesn't exist
@@ -63,16 +63,16 @@ describe('API v2 Product Reviews', function () {
 
     });
 
-    describe('with invalid token', function () {
+    describe('with invalid token', function (): void {
 
-        it('rejects customer reviews with malformed token', function () {
+        it('rejects customer reviews with malformed token', function (): void {
             $response = apiGet('/api/customers/me/reviews', 'invalid-token');
 
             // 401 if protected, or 404 if endpoint doesn't exist
             expect($response['status'])->toBeIn([401, 404]);
         });
 
-        it('rejects customer reviews with expired token', function () {
+        it('rejects customer reviews with expired token', function (): void {
             $response = apiGet('/api/customers/me/reviews', expiredToken());
 
             // 401 if protected, or 404 if endpoint doesn't exist

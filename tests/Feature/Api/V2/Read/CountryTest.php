@@ -11,24 +11,24 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Countries', function () {
+describe('API v2 Countries', function (): void {
 
-    describe('public access (no auth)', function () {
+    describe('public access (no auth)', function (): void {
 
-        it('allows listing countries without authentication', function () {
+        it('allows listing countries without authentication', function (): void {
             $response = apiGet('/api/countries');
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('returns countries collection', function () {
+        it('returns countries collection', function (): void {
             $response = apiGet('/api/countries');
 
             expect($response['status'])->toBe(200);
             expect($response['json'])->toBeArray();
         });
 
-        it('allows getting single country without authentication', function () {
+        it('allows getting single country without authentication', function (): void {
             $list = apiGet('/api/countries');
             $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
 
@@ -44,7 +44,7 @@ describe('API v2 Countries', function () {
             }
         });
 
-        it('returns 404 for non-existent country', function () {
+        it('returns 404 for non-existent country', function (): void {
             $response = apiGet('/api/countries/XX');
 
             expect($response['status'])->toBe(404);
@@ -52,9 +52,9 @@ describe('API v2 Countries', function () {
 
     });
 
-    describe('with authentication', function () {
+    describe('with authentication', function (): void {
 
-        it('allows listing countries with valid token', function () {
+        it('allows listing countries with valid token', function (): void {
             $response = apiGet('/api/countries', customerToken());
 
             expect($response['status'])->toBeSuccessful();
@@ -62,9 +62,9 @@ describe('API v2 Countries', function () {
 
     });
 
-    describe('response format', function () {
+    describe('response format', function (): void {
 
-        it('includes expected country fields', function () {
+        it('includes expected country fields', function (): void {
             $response = apiGet('/api/countries');
             $countries = $response['json']['member'] ?? $response['json']['hydra:member'] ?? $response['json'] ?? [];
 

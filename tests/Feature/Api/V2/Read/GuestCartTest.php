@@ -12,9 +12,9 @@ declare(strict_types=1);
  * These tests verify the API contract and response structure.
  */
 
-describe('GET /api/guest-carts/{id}', function () {
+describe('GET /api/guest-carts/{id}', function (): void {
 
-    it('returns 404 for non-existent cart', function () {
+    it('returns 404 for non-existent cart', function (): void {
         $response = apiGet('/api/guest-carts/999999999');
 
         expect($response['status'])->toBeNotFound();
@@ -22,13 +22,13 @@ describe('GET /api/guest-carts/{id}', function () {
         expect($response['json']['error'])->toBe('cart_not_found');
     });
 
-    it('returns 404 for invalid cart ID format', function () {
+    it('returns 404 for invalid cart ID format', function (): void {
         $response = apiGet('/api/guest-carts/invalid-id');
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('does not require authentication for guest cart access', function () {
+    it('does not require authentication for guest cart access', function (): void {
         // Guest carts should be accessible without auth (by cart ID)
         // This tests that guest carts work without JWT token
         $response = apiGet('/api/guest-carts/1');
@@ -39,15 +39,15 @@ describe('GET /api/guest-carts/{id}', function () {
 
 });
 
-describe('Guest Cart Response Structure', function () {
+describe('Guest Cart Response Structure', function (): void {
 
-    beforeEach(function () {
+    beforeEach(function (): void {
         // Try to find an existing cart for testing
         // This is read-only so we check if any cart exists
         $this->existingCartId = fixtures('existing_cart_id');
     });
 
-    it('returns expected fields when cart exists', function () {
+    it('returns expected fields when cart exists', function (): void {
         if (!$this->existingCartId) {
             $this->markTestSkipped('No existing_cart_id configured in fixtures');
         }
@@ -67,7 +67,7 @@ describe('Guest Cart Response Structure', function () {
         expect($response['json']['items'])->toBeArray();
     });
 
-    it('returns prices with expected structure', function () {
+    it('returns prices with expected structure', function (): void {
         if (!$this->existingCartId) {
             $this->markTestSkipped('No existing_cart_id configured in fixtures');
         }
@@ -87,7 +87,7 @@ describe('Guest Cart Response Structure', function () {
         expect($prices['grandTotal'])->toBeNumeric();
     });
 
-    it('returns consistent item count and items array length', function () {
+    it('returns consistent item count and items array length', function (): void {
         if (!$this->existingCartId) {
             $this->markTestSkipped('No existing_cart_id configured in fixtures');
         }
@@ -115,15 +115,15 @@ describe('Guest Cart Response Structure', function () {
 
 });
 
-describe('GET /api/guest-carts/{id}/totals', function () {
+describe('GET /api/guest-carts/{id}/totals', function (): void {
 
-    it('returns 404 for non-existent cart', function () {
+    it('returns 404 for non-existent cart', function (): void {
         $response = apiGet('/api/guest-carts/999999999/totals');
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('returns totals structure', function () {
+    it('returns totals structure', function (): void {
         $cartId = fixtures('existing_cart_id');
 
         if (!$cartId) {
@@ -143,9 +143,9 @@ describe('GET /api/guest-carts/{id}/totals', function () {
 
 });
 
-describe('POST /api/guest-carts/{id}/shipping-methods', function () {
+describe('POST /api/guest-carts/{id}/shipping-methods', function (): void {
 
-    it('returns 404 for non-existent cart', function () {
+    it('returns 404 for non-existent cart', function (): void {
         $response = apiPost('/api/guest-carts/999999999/shipping-methods', [
             'address' => [
                 'countryId' => 'AU',
@@ -157,7 +157,7 @@ describe('POST /api/guest-carts/{id}/shipping-methods', function () {
         expect($response['status'])->toBeNotFound();
     });
 
-    it('returns shipping methods array for valid address', function () {
+    it('returns shipping methods array for valid address', function (): void {
         $cartId = fixtures('existing_cart_id');
 
         if (!$cartId) {
@@ -193,15 +193,15 @@ describe('POST /api/guest-carts/{id}/shipping-methods', function () {
 
 });
 
-describe('GET /api/guest-carts/{id}/payment-methods', function () {
+describe('GET /api/guest-carts/{id}/payment-methods', function (): void {
 
-    it('returns 404 for non-existent cart', function () {
+    it('returns 404 for non-existent cart', function (): void {
         $response = apiGet('/api/guest-carts/999999999/payment-methods');
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('returns payment methods array for valid cart', function () {
+    it('returns payment methods array for valid cart', function (): void {
         $cartId = fixtures('existing_cart_id');
 
         if (!$cartId) {
@@ -218,7 +218,7 @@ describe('GET /api/guest-carts/{id}/payment-methods', function () {
         expect($response['json'])->toBeArray();
     });
 
-    it('returns payment methods with expected structure', function () {
+    it('returns payment methods with expected structure', function (): void {
         $cartId = fixtures('existing_cart_id');
 
         if (!$cartId) {
@@ -251,7 +251,7 @@ describe('GET /api/guest-carts/{id}/payment-methods', function () {
         }
     });
 
-    it('returns methods sorted by sortOrder', function () {
+    it('returns methods sorted by sortOrder', function (): void {
         $cartId = fixtures('existing_cart_id');
 
         if (!$cartId) {
@@ -277,7 +277,7 @@ describe('GET /api/guest-carts/{id}/payment-methods', function () {
         }
     });
 
-    it('does not require authentication', function () {
+    it('does not require authentication', function (): void {
         // Payment methods should be accessible without auth (cart ID based)
         $response = apiGet('/api/guest-carts/1/payment-methods');
 
@@ -287,15 +287,15 @@ describe('GET /api/guest-carts/{id}/payment-methods', function () {
 
 });
 
-describe('GET /api/products/{sku}/options', function () {
+describe('GET /api/products/{sku}/options', function (): void {
 
-    it('returns 404 for non-existent product', function () {
+    it('returns 404 for non-existent product', function (): void {
         $response = apiGet('/api/products/NONEXISTENT-SKU-12345/options');
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('returns options for valid SKU', function () {
+    it('returns options for valid SKU', function (): void {
         $sku = fixtures('product_sku');
 
         if (!$sku) {

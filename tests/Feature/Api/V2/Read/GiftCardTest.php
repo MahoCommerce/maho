@@ -9,9 +9,9 @@ declare(strict_types=1);
  * All tests are READ-ONLY (safe for synced database).
  */
 
-describe('GET /api/giftcards/{code}', function () {
+describe('GET /api/giftcards/{code}', function (): void {
 
-    it('returns gift card balance for valid code', function () {
+    it('returns gift card balance for valid code', function (): void {
         $code = fixtures('giftcard_code');
 
         if (!$code) {
@@ -25,7 +25,7 @@ describe('GET /api/giftcards/{code}', function () {
         expect($response['json'])->toHaveKey('balance');
     });
 
-    it('returns expected gift card fields', function () {
+    it('returns expected gift card fields', function (): void {
         $code = fixtures('giftcard_code');
 
         if (!$code) {
@@ -41,7 +41,7 @@ describe('GET /api/giftcards/{code}', function () {
         expect($giftcard)->toHaveKey('balance');
     });
 
-    it('returns 404 for non-existent gift card code', function () {
+    it('returns 404 for non-existent gift card code', function (): void {
         $invalidCode = fixtures('invalid_giftcard_code');
 
         $response = apiGet("/api/giftcards/{$invalidCode}", customerToken());
@@ -49,7 +49,7 @@ describe('GET /api/giftcards/{code}', function () {
         expect($response['status'])->toBeNotFound();
     });
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $code = fixtures('giftcard_code') ?? 'TEST123';
 
         $response = apiGet("/api/giftcards/{$code}");

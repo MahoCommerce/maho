@@ -10,15 +10,15 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Wishlist - Authentication', function () {
+describe('API v2 Wishlist - Authentication', function (): void {
 
-    it('rejects listing wishlist without token', function () {
+    it('rejects listing wishlist without token', function (): void {
         $response = apiGet('/api/customers/me/wishlist');
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('returns 401 error body for unauthenticated request', function () {
+    it('returns 401 error body for unauthenticated request', function (): void {
         $response = apiGet('/api/customers/me/wishlist');
 
         expect($response['status'])->toBe(401);
@@ -26,19 +26,19 @@ describe('API v2 Wishlist - Authentication', function () {
         expect($response['json']['error'])->toBe('unauthorized');
     });
 
-    it('rejects requests with malformed token', function () {
+    it('rejects requests with malformed token', function (): void {
         $response = apiGet('/api/customers/me/wishlist', 'invalid-token');
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('rejects requests with expired token', function () {
+    it('rejects requests with expired token', function (): void {
         $response = apiGet('/api/customers/me/wishlist', expiredToken());
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('rejects requests with invalid signature', function () {
+    it('rejects requests with invalid signature', function (): void {
         $response = apiGet('/api/customers/me/wishlist', invalidToken());
 
         expect($response['status'])->toBeUnauthorized();
@@ -46,15 +46,15 @@ describe('API v2 Wishlist - Authentication', function () {
 
 });
 
-describe('API v2 Wishlist - Listing', function () {
+describe('API v2 Wishlist - Listing', function (): void {
 
-    it('returns 200 with valid customer token', function () {
+    it('returns 200 with valid customer token', function (): void {
         $response = apiGet('/api/customers/me/wishlist', customerToken());
 
         expect($response['status'])->toBe(200);
     });
 
-    it('returns a valid collection response', function () {
+    it('returns a valid collection response', function (): void {
         $response = apiGet('/api/customers/me/wishlist', customerToken());
 
         expect($response['status'])->toBe(200);
@@ -70,7 +70,7 @@ describe('API v2 Wishlist - Listing', function () {
      * causing the REST listing to always return an empty collection
      * even when wishlist items existed in the database.
      */
-    it('returns totalItems matching actual member count (regression: hardcoded totalItems=0)', function () {
+    it('returns totalItems matching actual member count (regression: hardcoded totalItems=0)', function (): void {
         $response = apiGet('/api/customers/me/wishlist', customerToken());
 
         expect($response['status'])->toBe(200);

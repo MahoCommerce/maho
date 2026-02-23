@@ -13,7 +13,7 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
@@ -31,9 +31,9 @@ function createGuestCart(): array
     return $response;
 }
 
-describe('POST /api/guest-carts (Create Cart)', function () {
+describe('POST /api/guest-carts (Create Cart)', function (): void {
 
-    it('creates an empty guest cart', function () {
+    it('creates an empty guest cart', function (): void {
         $response = createGuestCart();
 
         expect($response['status'])->toBe(201);
@@ -43,7 +43,7 @@ describe('POST /api/guest-carts (Create Cart)', function () {
         expect($response['json']['itemsQty'])->toBe(0);
     });
 
-    it('does not require authentication for guest cart creation', function () {
+    it('does not require authentication for guest cart creation', function (): void {
         $response = createGuestCart();
 
         expect($response['status'])->toBe(201);
@@ -51,9 +51,9 @@ describe('POST /api/guest-carts (Create Cart)', function () {
 
 });
 
-describe('GET /api/guest-carts/{id} (Get Cart)', function () {
+describe('GET /api/guest-carts/{id} (Get Cart)', function (): void {
 
-    it('returns cart with items array', function () {
+    it('returns cart with items array', function (): void {
         $createResponse = createGuestCart();
         expect($createResponse['status'])->toBe(201);
 
@@ -68,7 +68,7 @@ describe('GET /api/guest-carts/{id} (Get Cart)', function () {
         expect($response['json']['items'])->toBeArray();
     });
 
-    it('returns items in cart after adding product', function () {
+    it('returns items in cart after adding product', function (): void {
         $createResponse = createGuestCart();
         expect($createResponse['status'])->toBe(201);
         $cartId = $createResponse['json']['maskedId'];
@@ -107,9 +107,9 @@ describe('GET /api/guest-carts/{id} (Get Cart)', function () {
 
 });
 
-describe('POST /api/guest-carts/{id}/items (Add Item)', function () {
+describe('POST /api/guest-carts/{id}/items (Add Item)', function (): void {
 
-    it('adds item to cart', function () {
+    it('adds item to cart', function (): void {
         $createResponse = createGuestCart();
         expect($createResponse['status'])->toBe(201);
         $cartId = $createResponse['json']['maskedId'];
@@ -129,7 +129,7 @@ describe('POST /api/guest-carts/{id}/items (Add Item)', function () {
         expect($items)->not->toBeEmpty();
     });
 
-    it('returns 400 for invalid SKU', function () {
+    it('returns 400 for invalid SKU', function (): void {
         $createResponse = createGuestCart();
         expect($createResponse['status'])->toBe(201);
         $cartId = $createResponse['json']['maskedId'];
@@ -143,7 +143,7 @@ describe('POST /api/guest-carts/{id}/items (Add Item)', function () {
         expect($response['json'])->toHaveKey('error');
     });
 
-    it('returns 400 when SKU is missing', function () {
+    it('returns 400 when SKU is missing', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
@@ -155,7 +155,7 @@ describe('POST /api/guest-carts/{id}/items (Add Item)', function () {
         expect($response['json']['message'])->toContain('SKU');
     });
 
-    it('returns 404 for non-existent cart', function () {
+    it('returns 404 for non-existent cart', function (): void {
         $response = apiPost('/api/guest-carts/999999999/items', [
             'sku' => fixtures('write_test_sku'),
             'qty' => 1,
@@ -166,9 +166,9 @@ describe('POST /api/guest-carts/{id}/items (Add Item)', function () {
 
 });
 
-describe('PUT /api/guest-carts/{id}/items/{itemId} (Update Item)', function () {
+describe('PUT /api/guest-carts/{id}/items/{itemId} (Update Item)', function (): void {
 
-    it('updates item quantity', function () {
+    it('updates item quantity', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
@@ -194,7 +194,7 @@ describe('PUT /api/guest-carts/{id}/items/{itemId} (Update Item)', function () {
         expect((float) $updatedItem['qty'])->toBe(3.0);
     });
 
-    it('returns 404 for non-existent item', function () {
+    it('returns 404 for non-existent item', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
@@ -208,9 +208,9 @@ describe('PUT /api/guest-carts/{id}/items/{itemId} (Update Item)', function () {
 
 });
 
-describe('DELETE /api/guest-carts/{id}/items/{itemId} (Remove Item)', function () {
+describe('DELETE /api/guest-carts/{id}/items/{itemId} (Remove Item)', function (): void {
 
-    it('removes item from cart', function () {
+    it('removes item from cart', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
@@ -231,9 +231,9 @@ describe('DELETE /api/guest-carts/{id}/items/{itemId} (Remove Item)', function (
 
 });
 
-describe('PUT /api/guest-carts/{id}/coupon (Apply Coupon)', function () {
+describe('PUT /api/guest-carts/{id}/coupon (Apply Coupon)', function (): void {
 
-    it('returns 400 for invalid coupon', function () {
+    it('returns 400 for invalid coupon', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
@@ -245,7 +245,7 @@ describe('PUT /api/guest-carts/{id}/coupon (Apply Coupon)', function () {
         expect($response['json']['error'])->toBe('invalid_coupon');
     });
 
-    it('returns 400 when coupon code is missing', function () {
+    it('returns 400 when coupon code is missing', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
@@ -256,9 +256,9 @@ describe('PUT /api/guest-carts/{id}/coupon (Apply Coupon)', function () {
 
 });
 
-describe('Cart Totals Consistency', function () {
+describe('Cart Totals Consistency', function (): void {
 
-    it('returns prices structure and item row totals after adding items', function () {
+    it('returns prices structure and item row totals after adding items', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 
@@ -291,9 +291,9 @@ describe('Cart Totals Consistency', function () {
 
 });
 
-describe('Cart Item Response Structure', function () {
+describe('Cart Item Response Structure', function (): void {
 
-    it('returns all required item fields', function () {
+    it('returns all required item fields', function (): void {
         $createResponse = createGuestCart();
         $cartId = $createResponse['json']['maskedId'];
 

@@ -11,9 +11,9 @@ declare(strict_types=1);
  * Tests POST /api/orders endpoints.
  */
 
-describe('POST /api/orders', function () {
+describe('POST /api/orders', function (): void {
 
-    it('places an order from a cart', function () {
+    it('places an order from a cart', function (): void {
         $sku = fixtures('write_test_sku');
         $qty = fixtures('write_test_qty') ?? 1;
 
@@ -42,7 +42,7 @@ describe('POST /api/orders', function () {
         expect($orderResponse['status'])->toBeLessThan(500);
     })->skip('Depends on cart creation');
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiPost('/api/orders', [
             'cartId' => 1,
         ]);
@@ -50,7 +50,7 @@ describe('POST /api/orders', function () {
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('validates required fields', function () {
+    it('validates required fields', function (): void {
         $response = apiPost('/api/orders', [], customerToken());
 
         // Should return validation error, not 500

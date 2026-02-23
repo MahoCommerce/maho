@@ -11,16 +11,16 @@ declare(strict_types=1);
  * Tests /api/pos-payments endpoints.
  */
 
-describe('GET /api/pos-payments', function () {
+describe('GET /api/pos-payments', function (): void {
 
-    it('allows admin to list POS payments', function () {
+    it('allows admin to list POS payments', function (): void {
         $response = apiGet('/api/pos-payments', adminToken());
 
         expect($response['status'])->toBeSuccessful();
         expect($response['json'])->toBeArray();
     });
 
-    it('returns POS payments in expected format', function () {
+    it('returns POS payments in expected format', function (): void {
         $response = apiGet('/api/pos-payments', adminToken());
 
         expect($response['status'])->toBe(200);
@@ -31,13 +31,13 @@ describe('GET /api/pos-payments', function () {
         expect($items)->toBeArray();
     });
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiGet('/api/pos-payments');
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('requires admin role', function () {
+    it('requires admin role', function (): void {
         $response = apiGet('/api/pos-payments', customerToken());
 
         // Regular customer should not access POS payments
@@ -46,9 +46,9 @@ describe('GET /api/pos-payments', function () {
 
 });
 
-describe('GET /api/pos-payments/{id}', function () {
+describe('GET /api/pos-payments/{id}', function (): void {
 
-    it('returns POS payment details with admin token', function () {
+    it('returns POS payment details with admin token', function (): void {
         // First list payments to get an ID
         $listResponse = apiGet('/api/pos-payments', adminToken());
 
@@ -75,13 +75,13 @@ describe('GET /api/pos-payments/{id}', function () {
         expect($response['status'])->toBe(200);
     });
 
-    it('returns 404 for non-existent POS payment', function () {
+    it('returns 404 for non-existent POS payment', function (): void {
         $response = apiGet('/api/pos-payments/999999999', adminToken());
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiGet('/api/pos-payments/1');
 
         expect($response['status'])->toBeUnauthorized();

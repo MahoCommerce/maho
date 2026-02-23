@@ -12,18 +12,18 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Invoices', function () {
+describe('API v2 Invoices', function (): void {
 
-    describe('GET /api/orders/{orderId}/invoices - without authentication', function () {
+    describe('GET /api/orders/{orderId}/invoices - without authentication', function (): void {
 
-        it('rejects listing invoices without token', function () {
+        it('rejects listing invoices without token', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $response = apiGet("/api/orders/{$orderId}/invoices");
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('returns 401 error for unauthenticated request', function () {
+        it('returns 401 error for unauthenticated request', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $response = apiGet("/api/orders/{$orderId}/invoices");
 
@@ -34,16 +34,16 @@ describe('API v2 Invoices', function () {
 
     });
 
-    describe('GET /api/orders/{orderId}/invoices - with invalid token', function () {
+    describe('GET /api/orders/{orderId}/invoices - with invalid token', function (): void {
 
-        it('rejects invoice list with malformed token', function () {
+        it('rejects invoice list with malformed token', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $response = apiGet("/api/orders/{$orderId}/invoices", 'invalid-token');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('rejects invoice list with expired token', function () {
+        it('rejects invoice list with expired token', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $response = apiGet("/api/orders/{$orderId}/invoices", expiredToken());
 
@@ -52,9 +52,9 @@ describe('API v2 Invoices', function () {
 
     });
 
-    describe('GET /api/orders/{orderId}/invoices - with valid token', function () {
+    describe('GET /api/orders/{orderId}/invoices - with valid token', function (): void {
 
-        it('allows listing invoices with valid customer token', function () {
+        it('allows listing invoices with valid customer token', function (): void {
             $orderId = fixtures('order_id');
 
             if (!$orderId) {
@@ -67,7 +67,7 @@ describe('API v2 Invoices', function () {
             expect($response['status'])->toBeIn([200, 403, 404]);
         });
 
-        it('allows listing invoices with admin token', function () {
+        it('allows listing invoices with admin token', function (): void {
             $orderId = fixtures('order_id');
 
             if (!$orderId) {
@@ -80,7 +80,7 @@ describe('API v2 Invoices', function () {
             expect($response['status'])->toBeIn([200, 404]);
         });
 
-        it('returns invoices array when order exists', function () {
+        it('returns invoices array when order exists', function (): void {
             $orderId = fixtures('order_id');
 
             if (!$orderId) {
@@ -96,7 +96,7 @@ describe('API v2 Invoices', function () {
             }
         });
 
-        it('returns 404 for non-existent order', function () {
+        it('returns 404 for non-existent order', function (): void {
             $invalidId = fixtures('invalid_order_id') ?? 999999;
             $response = apiGet("/api/orders/{$invalidId}/invoices", adminToken());
 
@@ -105,16 +105,16 @@ describe('API v2 Invoices', function () {
 
     });
 
-    describe('GET /api/customers/me/orders/{orderId}/invoices - customer access', function () {
+    describe('GET /api/customers/me/orders/{orderId}/invoices - customer access', function (): void {
 
-        it('rejects without authentication', function () {
+        it('rejects without authentication', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $response = apiGet("/api/customers/me/orders/{$orderId}/invoices");
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('allows authenticated customer to list their order invoices', function () {
+        it('allows authenticated customer to list their order invoices', function (): void {
             $orderId = fixtures('customer_order_id');
 
             if (!$orderId) {
@@ -126,7 +126,7 @@ describe('API v2 Invoices', function () {
             expect($response['status'])->toBeIn([200, 404]);
         });
 
-        it('returns 404 for orders not belonging to customer', function () {
+        it('returns 404 for orders not belonging to customer', function (): void {
             // Try to access another customer's order
             $orderId = fixtures('other_customer_order_id');
 
@@ -142,9 +142,9 @@ describe('API v2 Invoices', function () {
 
     });
 
-    describe('GET /api/orders/{orderId}/invoices/{invoiceId}/pdf - PDF download', function () {
+    describe('GET /api/orders/{orderId}/invoices/{invoiceId}/pdf - PDF download', function (): void {
 
-        it('rejects PDF download without authentication', function () {
+        it('rejects PDF download without authentication', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $invoiceId = fixtures('invoice_id') ?? 1;
 
@@ -153,7 +153,7 @@ describe('API v2 Invoices', function () {
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('rejects PDF download with invalid token', function () {
+        it('rejects PDF download with invalid token', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $invoiceId = fixtures('invoice_id') ?? 1;
 
@@ -162,7 +162,7 @@ describe('API v2 Invoices', function () {
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('returns PDF with valid admin token', function () {
+        it('returns PDF with valid admin token', function (): void {
             $orderId = fixtures('order_id');
             $invoiceId = fixtures('invoice_id');
 
@@ -180,7 +180,7 @@ describe('API v2 Invoices', function () {
             }
         });
 
-        it('returns 404 for non-existent invoice', function () {
+        it('returns 404 for non-existent invoice', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $invalidInvoiceId = 999999;
 
@@ -191,9 +191,9 @@ describe('API v2 Invoices', function () {
 
     });
 
-    describe('GET /api/customers/me/orders/{orderId}/invoices/{invoiceId}/pdf - customer PDF download', function () {
+    describe('GET /api/customers/me/orders/{orderId}/invoices/{invoiceId}/pdf - customer PDF download', function (): void {
 
-        it('rejects without authentication', function () {
+        it('rejects without authentication', function (): void {
             $orderId = fixtures('order_id') ?? 1;
             $invoiceId = fixtures('invoice_id') ?? 1;
 
@@ -202,7 +202,7 @@ describe('API v2 Invoices', function () {
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('allows customer to download their invoice PDF', function () {
+        it('allows customer to download their invoice PDF', function (): void {
             $orderId = fixtures('customer_order_id');
             $invoiceId = fixtures('customer_invoice_id');
 
@@ -219,7 +219,7 @@ describe('API v2 Invoices', function () {
             }
         });
 
-        it('returns 404 for invoice not belonging to customer', function () {
+        it('returns 404 for invoice not belonging to customer', function (): void {
             $orderId = fixtures('other_customer_order_id');
             $invoiceId = fixtures('other_customer_invoice_id');
 

@@ -9,9 +9,9 @@ declare(strict_types=1);
  * All tests are READ-ONLY (safe for synced database).
  */
 
-describe('GET /api/customers/{id}', function () {
+describe('GET /api/customers/{id}', function (): void {
 
-    it('returns customer data with valid token', function () {
+    it('returns customer data with valid token', function (): void {
         $customerId = fixtures('customer_id');
 
         if (!$customerId) {
@@ -24,7 +24,7 @@ describe('GET /api/customers/{id}', function () {
         expect($response['json'])->toBeArray();
     });
 
-    it('returns expected customer fields', function () {
+    it('returns expected customer fields', function (): void {
         $customerId = fixtures('customer_id');
 
         if (!$customerId) {
@@ -39,7 +39,7 @@ describe('GET /api/customers/{id}', function () {
         expect($customer)->toHaveKey('email');
     });
 
-    it('returns 404 for non-existent customer', function () {
+    it('returns 404 for non-existent customer', function (): void {
         $invalidId = fixtures('invalid_customer_id');
 
         $response = apiGet("/api/customers/{$invalidId}", adminToken());
@@ -47,7 +47,7 @@ describe('GET /api/customers/{id}', function () {
         expect($response['status'])->toBeNotFound();
     });
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $customerId = fixtures('customer_id') ?? 1;
 
         $response = apiGet("/api/customers/{$customerId}");
@@ -55,7 +55,7 @@ describe('GET /api/customers/{id}', function () {
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('prevents accessing other customers data without admin role', function () {
+    it('prevents accessing other customers data without admin role', function (): void {
         $customerId = fixtures('customer_id') ?? 1;
 
         // Use a different customer's token
@@ -68,23 +68,23 @@ describe('GET /api/customers/{id}', function () {
 
 });
 
-describe('GET /api/customers', function () {
+describe('GET /api/customers', function (): void {
 
-    it('allows admin to list customers', function () {
+    it('allows admin to list customers', function (): void {
         $response = apiGet('/api/customers', adminToken());
 
         // Admin should be able to list customers
         expect($response['status'])->toBeSuccessful();
     });
 
-    it('prevents non-admin from listing all customers', function () {
+    it('prevents non-admin from listing all customers', function (): void {
         $response = apiGet('/api/customers', customerToken());
 
         // Regular customer should not list all customers
         expect($response['status'])->toBeGreaterThanOrEqual(400);
     })->skip('Customer access control not yet enforced in provider');
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiGet('/api/customers');
 
         expect($response['status'])->toBeUnauthorized();

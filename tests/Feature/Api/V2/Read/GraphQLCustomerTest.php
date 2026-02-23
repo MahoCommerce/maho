@@ -12,9 +12,9 @@ declare(strict_types=1);
  * @group graphql
  */
 
-describe('GraphQL Me Query', function () {
+describe('GraphQL Me Query', function (): void {
 
-    it('returns current customer profile when authenticated', function () {
+    it('returns current customer profile when authenticated', function (): void {
         $customerId = fixtures('customer_id');
 
         $query = <<<'GRAPHQL'
@@ -46,7 +46,7 @@ describe('GraphQL Me Query', function () {
         }
     });
 
-    it('returns null for me query with admin token', function () {
+    it('returns null for me query with admin token', function (): void {
         $query = <<<'GRAPHQL'
         {
             meCustomer {
@@ -67,9 +67,9 @@ describe('GraphQL Me Query', function () {
 
 });
 
-describe('GraphQL Customer By ID Query', function () {
+describe('GraphQL Customer By ID Query', function (): void {
 
-    it('returns customer by IRI for admin', function () {
+    it('returns customer by IRI for admin', function (): void {
         $customerId = fixtures('customer_id');
         $iri = "/api/customers/{$customerId}";
 
@@ -95,7 +95,7 @@ describe('GraphQL Customer By ID Query', function () {
         expect($customer['firstName'])->toBeString();
     });
 
-    it('denies customer by ID for regular customer', function () {
+    it('denies customer by ID for regular customer', function (): void {
         $customerId = fixtures('customer_id');
         $iri = "/api/customers/{$customerId}";
 
@@ -117,9 +117,9 @@ describe('GraphQL Customer By ID Query', function () {
 
 });
 
-describe('GraphQL Customer Orders Query', function () {
+describe('GraphQL Customer Orders Query', function (): void {
 
-    it('returns customer orders when authenticated', function () {
+    it('returns customer orders when authenticated', function (): void {
         $query = <<<'GRAPHQL'
         {
             customerOrdersOrders(pageSize: 5) {
@@ -146,9 +146,9 @@ describe('GraphQL Customer Orders Query', function () {
 
 });
 
-describe('GraphQL Customer Addresses Query', function () {
+describe('GraphQL Customer Addresses Query', function (): void {
 
-    it('returns customer addresses when authenticated', function () {
+    it('returns customer addresses when authenticated', function (): void {
         $query = <<<'GRAPHQL'
         {
             myAddressesAddresses {
@@ -176,7 +176,7 @@ describe('GraphQL Customer Addresses Query', function () {
         expect($response['json']['data'])->toHaveKey('myAddressesAddresses');
     });
 
-    it('returns addresses with expected field types', function () {
+    it('returns addresses with expected field types', function (): void {
         $query = <<<'GRAPHQL'
         {
             myAddressesAddresses {

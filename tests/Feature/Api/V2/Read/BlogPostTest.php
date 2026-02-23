@@ -11,24 +11,24 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Blog Posts', function () {
+describe('API v2 Blog Posts', function (): void {
 
-    describe('public access (no auth)', function () {
+    describe('public access (no auth)', function (): void {
 
-        it('allows listing blog posts without authentication', function () {
+        it('allows listing blog posts without authentication', function (): void {
             $response = apiGet('/api/blog-posts');
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('returns blog posts collection', function () {
+        it('returns blog posts collection', function (): void {
             $response = apiGet('/api/blog-posts');
 
             expect($response['status'])->toBe(200);
             expect($response['json'])->toBeArray();
         });
 
-        it('allows getting single blog post without authentication', function () {
+        it('allows getting single blog post without authentication', function (): void {
             $list = apiGet('/api/blog-posts');
             $members = $list['json']['member'] ?? $list['json']['hydra:member'] ?? [];
 
@@ -42,7 +42,7 @@ describe('API v2 Blog Posts', function () {
             }
         });
 
-        it('returns 404 for non-existent blog post', function () {
+        it('returns 404 for non-existent blog post', function (): void {
             $response = apiGet('/api/blog-posts/999999');
 
             expect($response['status'])->toBe(404);
@@ -50,15 +50,15 @@ describe('API v2 Blog Posts', function () {
 
     });
 
-    describe('with authentication', function () {
+    describe('with authentication', function (): void {
 
-        it('allows listing blog posts with valid token', function () {
+        it('allows listing blog posts with valid token', function (): void {
             $response = apiGet('/api/blog-posts', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('allows listing blog posts with admin token', function () {
+        it('allows listing blog posts with admin token', function (): void {
             $response = apiGet('/api/blog-posts', adminToken());
 
             expect($response['status'])->toBeSuccessful();
@@ -66,9 +66,9 @@ describe('API v2 Blog Posts', function () {
 
     });
 
-    describe('response format', function () {
+    describe('response format', function (): void {
 
-        it('includes expected blog post fields', function () {
+        it('includes expected blog post fields', function (): void {
             $response = apiGet('/api/blog-posts');
             $members = $response['json']['member'] ?? $response['json']['hydra:member'] ?? [];
 

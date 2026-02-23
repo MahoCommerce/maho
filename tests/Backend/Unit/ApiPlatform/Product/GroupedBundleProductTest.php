@@ -12,14 +12,14 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Product DTO - grouped products property', function () {
-    it('has empty groupedProducts by default', function () {
+describe('Product DTO - grouped products property', function (): void {
+    it('has empty groupedProducts by default', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         expect($product->groupedProducts)->toBe([]);
     });
 
-    it('can set groupedProducts array', function () {
+    it('can set groupedProducts array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->groupedProducts = [
@@ -71,7 +71,7 @@ describe('Product DTO - grouped products property', function () {
             ->and($product->groupedProducts[2]['imageUrl'])->toBeNull();
     });
 
-    it('handles empty groupedProducts array', function () {
+    it('handles empty groupedProducts array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
         $product->groupedProducts = [];
 
@@ -79,7 +79,7 @@ describe('Product DTO - grouped products property', function () {
             ->and($product->groupedProducts)->toHaveCount(0);
     });
 
-    it('validates grouped product child structure has required keys', function () {
+    it('validates grouped product child structure has required keys', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
         $product->groupedProducts = [
             [
@@ -110,14 +110,14 @@ describe('Product DTO - grouped products property', function () {
     });
 });
 
-describe('Product DTO - bundle options property', function () {
-    it('has empty bundleOptions by default', function () {
+describe('Product DTO - bundle options property', function (): void {
+    it('has empty bundleOptions by default', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         expect($product->bundleOptions)->toBe([]);
     });
 
-    it('can set bundleOptions with selections', function () {
+    it('can set bundleOptions with selections', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->bundleOptions = [
@@ -193,7 +193,7 @@ describe('Product DTO - bundle options property', function () {
             ->and($product->bundleOptions[1]['required'])->toBeFalse();
     });
 
-    it('handles empty bundleOptions array', function () {
+    it('handles empty bundleOptions array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
         $product->bundleOptions = [];
 
@@ -201,7 +201,7 @@ describe('Product DTO - bundle options property', function () {
             ->and($product->bundleOptions)->toHaveCount(0);
     });
 
-    it('validates bundle option structure has required keys', function () {
+    it('validates bundle option structure has required keys', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
         $product->bundleOptions = [
             [
@@ -223,7 +223,7 @@ describe('Product DTO - bundle options property', function () {
             ->and($option)->toHaveKey('selections');
     });
 
-    it('validates bundle selection structure has required keys', function () {
+    it('validates bundle selection structure has required keys', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
         $product->bundleOptions = [
             [
@@ -265,7 +265,7 @@ describe('Product DTO - bundle options property', function () {
             ->and($selection['priceType'])->toBe('percent');
     });
 
-    it('supports all bundle option types', function () {
+    it('supports all bundle option types', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $types = ['select', 'radio', 'checkbox', 'multi'];
@@ -290,8 +290,8 @@ describe('Product DTO - bundle options property', function () {
     });
 });
 
-describe('Product - grouped product loading from database', function () {
-    it('can load a grouped product from database', function () {
+describe('Product - grouped product loading from database', function (): void {
+    it('can load a grouped product from database', function (): void {
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToFilter('type_id', 'grouped')
@@ -323,8 +323,8 @@ describe('Product - grouped product loading from database', function () {
     });
 });
 
-describe('Product - bundle product loading from database', function () {
-    it('can load a bundle product from database', function () {
+describe('Product - bundle product loading from database', function (): void {
+    it('can load a bundle product from database', function (): void {
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToFilter('type_id', 'bundle')

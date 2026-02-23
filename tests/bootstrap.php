@@ -12,7 +12,7 @@ declare(strict_types=1);
 require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 // Register test case classes
-spl_autoload_register(function ($class) {
+spl_autoload_register(function ($class): void {
     // Only handle Tests\ namespace
     if (strpos($class, 'Tests\\') !== 0) {
         return;

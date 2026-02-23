@@ -11,8 +11,8 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Product DTO', function () {
-    it('has correct default values for all properties', function () {
+describe('Product DTO', function (): void {
+    it('has correct default values for all properties', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         expect($product->id)->toBeNull()
@@ -45,8 +45,8 @@ describe('Product DTO', function () {
     });
 });
 
-describe('Product DTO - property assignment', function () {
-    it('can set all scalar properties', function () {
+describe('Product DTO - property assignment', function (): void {
+    it('can set all scalar properties', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->id = 123;
@@ -98,7 +98,7 @@ describe('Product DTO - property assignment', function () {
             ->and($product->averageRating)->toBe(4.5);
     });
 
-    it('can set categoryIds array', function () {
+    it('can set categoryIds array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->categoryIds = [1, 2, 3, 5, 8];
@@ -108,7 +108,7 @@ describe('Product DTO - property assignment', function () {
             ->and($product->categoryIds)->toHaveCount(5);
     });
 
-    it('can set configurableOptions array', function () {
+    it('can set configurableOptions array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->configurableOptions = [
@@ -141,7 +141,7 @@ describe('Product DTO - property assignment', function () {
             ->and($product->configurableOptions[1]['values'])->toHaveCount(3);
     });
 
-    it('can set variants array', function () {
+    it('can set variants array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->variants = [
@@ -156,7 +156,7 @@ describe('Product DTO - property assignment', function () {
             ->and($product->variants[1]['id'])->toBe(11);
     });
 
-    it('can set customOptions array', function () {
+    it('can set customOptions array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->customOptions = [
@@ -187,8 +187,8 @@ describe('Product DTO - property assignment', function () {
     });
 });
 
-describe('Product - simple product mapping', function () {
-    it('can load a simple product from database', function () {
+describe('Product - simple product mapping', function (): void {
+    it('can load a simple product from database', function (): void {
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToFilter('type_id', 'simple')
@@ -206,7 +206,7 @@ describe('Product - simple product mapping', function () {
             ->and($product->getName())->not->toBeEmpty();
     });
 
-    it('has valid product type for simple products', function () {
+    it('has valid product type for simple products', function (): void {
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToFilter('type_id', 'simple')
@@ -218,8 +218,8 @@ describe('Product - simple product mapping', function () {
     });
 });
 
-describe('Product - stock data', function () {
-    it('can retrieve stock information', function () {
+describe('Product - stock data', function (): void {
+    it('can retrieve stock information', function (): void {
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToSelect('*')
@@ -240,7 +240,7 @@ describe('Product - stock data', function () {
         }
     });
 
-    it('has numeric stock quantity', function () {
+    it('has numeric stock quantity', function (): void {
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToSelect('*')
@@ -258,7 +258,7 @@ describe('Product - stock data', function () {
         }
     });
 
-    it('has valid in-stock status', function () {
+    it('has valid in-stock status', function (): void {
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToSelect('*')
@@ -272,8 +272,8 @@ describe('Product - stock data', function () {
     });
 });
 
-describe('Product - configurable options structure', function () {
-    it('accepts configurable options with expected structure', function () {
+describe('Product - configurable options structure', function (): void {
+    it('accepts configurable options with expected structure', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $configurableOptions = [
@@ -301,7 +301,7 @@ describe('Product - configurable options structure', function () {
             ->and($product->configurableOptions[0]['values'])->toHaveCount(3);
     });
 
-    it('supports multiple configurable options', function () {
+    it('supports multiple configurable options', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $configurableOptions = [
@@ -345,7 +345,7 @@ describe('Product - configurable options structure', function () {
             ->and($product->configurableOptions[1]['values'])->toHaveCount(4);
     });
 
-    it('handles empty configurable options array', function () {
+    it('handles empty configurable options array', function (): void {
         $product = new \Maho\ApiPlatform\ApiResource\Product();
 
         $product->configurableOptions = [];

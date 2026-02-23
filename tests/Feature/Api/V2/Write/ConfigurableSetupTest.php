@@ -8,13 +8,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Configurable Setup — Read', function () {
+describe('Configurable Setup — Read', function (): void {
 
-    it('reads configurable setup from existing configurable product', function () {
+    it('reads configurable setup from existing configurable product', function (): void {
         // Use the existing configurable SKU from fixtures
         $sku = fixtures('configurable_sku');
         // First get the product ID
@@ -42,7 +42,7 @@ describe('Configurable Setup — Read', function () {
         expect($setup)->toHaveKey('childProductIds');
     });
 
-    it('rejects configurable setup on a simple product', function () {
+    it('rejects configurable setup on a simple product', function (): void {
         // fixtures('product_id') (421) is actually configurable, so create a simple product
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -6);
@@ -61,9 +61,9 @@ describe('Configurable Setup — Read', function () {
 
 });
 
-describe('Configurable Setup — Child Management', function () {
+describe('Configurable Setup — Child Management', function (): void {
 
-    it('adds and removes a child from existing configurable', function () {
+    it('adds and removes a child from existing configurable', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
         $suffix = substr(uniqid(), -6);
 

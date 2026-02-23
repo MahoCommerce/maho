@@ -8,13 +8,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Product Links — Permission Enforcement', function () {
+describe('Product Links — Permission Enforcement', function (): void {
 
-    it('denies link update without authentication', function () {
+    it('denies link update without authentication', function (): void {
         $productId = fixtures('product_id');
         $response = apiPut("/api/products/{$productId}/links/related", [
             ['linkedProductId' => 1, 'position' => 0],
@@ -22,7 +22,7 @@ describe('Product Links — Permission Enforcement', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies link update without correct permission', function () {
+    it('denies link update without correct permission', function (): void {
         $productId = fixtures('product_id');
         $token = serviceToken(['cms-pages/write']);
         $response = apiPut("/api/products/{$productId}/links/related", [
@@ -33,9 +33,9 @@ describe('Product Links — Permission Enforcement', function () {
 
 });
 
-describe('Product Links — CRUD Lifecycle', function () {
+describe('Product Links — CRUD Lifecycle', function (): void {
 
-    it('adds related links, reads back, replaces, removes', function () {
+    it('adds related links, reads back, replaces, removes', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
 
         // Create two test products to link
@@ -98,13 +98,13 @@ describe('Product Links — CRUD Lifecycle', function () {
         expect($emptyIds)->not->toContain($p2Id);
     });
 
-    it('rejects invalid link type', function () {
+    it('rejects invalid link type', function (): void {
         $productId = fixtures('product_id');
         $response = apiGet("/api/products/{$productId}/links/invalid_type");
         expect($response['status'])->toBeIn([400, 404]);
     });
 
-    it('supports cross_sell and up_sell types', function () {
+    it('supports cross_sell and up_sell types', function (): void {
         $productId = fixtures('product_id');
 
         $crossSell = apiGet("/api/products/{$productId}/links/cross_sell");

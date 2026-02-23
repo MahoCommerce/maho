@@ -11,17 +11,17 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Customer Addresses', function () {
+describe('API v2 Customer Addresses', function (): void {
 
-    describe('without authentication', function () {
+    describe('without authentication', function (): void {
 
-        it('rejects listing addresses without token', function () {
+        it('rejects listing addresses without token', function (): void {
             $response = apiGet('/api/customers/me/addresses');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('returns 401 error for unauthenticated request', function () {
+        it('returns 401 error for unauthenticated request', function (): void {
             $response = apiGet('/api/customers/me/addresses');
 
             expect($response['status'])->toBe(401);
@@ -31,15 +31,15 @@ describe('API v2 Customer Addresses', function () {
 
     });
 
-    describe('with invalid token', function () {
+    describe('with invalid token', function (): void {
 
-        it('rejects requests with malformed token', function () {
+        it('rejects requests with malformed token', function (): void {
             $response = apiGet('/api/customers/me/addresses', 'invalid-token');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('rejects requests with expired token', function () {
+        it('rejects requests with expired token', function (): void {
             $response = apiGet('/api/customers/me/addresses', expiredToken());
 
             expect($response['status'])->toBeUnauthorized();
@@ -47,16 +47,16 @@ describe('API v2 Customer Addresses', function () {
 
     });
 
-    describe('with valid customer token', function () {
+    describe('with valid customer token', function (): void {
 
-        it('allows listing addresses with valid customer token', function () {
+        it('allows listing addresses with valid customer token', function (): void {
             $response = apiGet('/api/customers/me/addresses', customerToken());
 
             // Should succeed (200) or 404 if endpoint not implemented yet
             expect($response['status'])->toBeIn([200, 404]);
         });
 
-        it('returns addresses collection when endpoint exists', function () {
+        it('returns addresses collection when endpoint exists', function (): void {
             $response = apiGet('/api/customers/me/addresses', customerToken());
 
             // Skip if endpoint not implemented
@@ -71,9 +71,9 @@ describe('API v2 Customer Addresses', function () {
 
     });
 
-    describe('with admin token', function () {
+    describe('with admin token', function (): void {
 
-        it('allows listing addresses with admin token', function () {
+        it('allows listing addresses with admin token', function (): void {
             $response = apiGet('/api/customers/me/addresses', adminToken());
 
             // Admin accessing "me" endpoint should work if admin is also a customer

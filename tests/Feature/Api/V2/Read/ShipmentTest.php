@@ -12,17 +12,17 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Shipments', function () {
+describe('API v2 Shipments', function (): void {
 
-    describe('customer order shipments - without authentication', function () {
+    describe('customer order shipments - without authentication', function (): void {
 
-        it('rejects listing order shipments without token', function () {
+        it('rejects listing order shipments without token', function (): void {
             $response = apiGet('/api/customers/me/orders');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('returns 401 error for unauthenticated shipment request', function () {
+        it('returns 401 error for unauthenticated shipment request', function (): void {
             $response = apiGet('/api/customers/me/orders');
 
             expect($response['status'])->toBe(401);
@@ -32,15 +32,15 @@ describe('API v2 Shipments', function () {
 
     });
 
-    describe('with invalid token', function () {
+    describe('with invalid token', function (): void {
 
-        it('rejects shipment request with malformed token', function () {
+        it('rejects shipment request with malformed token', function (): void {
             $response = apiGet('/api/customers/me/orders', 'invalid-token');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('rejects shipment request with expired token', function () {
+        it('rejects shipment request with expired token', function (): void {
             $response = apiGet('/api/customers/me/orders', expiredToken());
 
             expect($response['status'])->toBeUnauthorized();
@@ -48,15 +48,15 @@ describe('API v2 Shipments', function () {
 
     });
 
-    describe('with valid customer token', function () {
+    describe('with valid customer token', function (): void {
 
-        it('allows listing orders with valid token', function () {
+        it('allows listing orders with valid token', function (): void {
             $response = apiGet('/api/customers/me/orders', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('orders include shipment information when available', function () {
+        it('orders include shipment information when available', function (): void {
             $response = apiGet('/api/customers/me/orders', customerToken());
 
             if ($response['status'] === 200) {

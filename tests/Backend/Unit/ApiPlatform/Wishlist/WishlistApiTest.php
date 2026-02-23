@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('WishlistItem DTO', function () {
-    it('has correct default values for all properties', function () {
+describe('WishlistItem DTO', function (): void {
+    it('has correct default values for all properties', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\WishlistItem();
 
         expect($dto->id)->toBeNull();
@@ -31,8 +31,8 @@ describe('WishlistItem DTO', function () {
     });
 });
 
-describe('WishlistItem DTO - property assignment', function () {
-    it('accepts all property values', function () {
+describe('WishlistItem DTO - property assignment', function (): void {
+    it('accepts all property values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\WishlistItem();
 
         $dto->id = 42;
@@ -62,7 +62,7 @@ describe('WishlistItem DTO - property assignment', function () {
         expect($dto->inStock)->toBeFalse();
     });
 
-    it('can set null values for nullable properties', function () {
+    it('can set null values for nullable properties', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\WishlistItem();
 
         // Set some values first
@@ -81,8 +81,8 @@ describe('WishlistItem DTO - property assignment', function () {
     });
 });
 
-describe('WishlistProvider - getProductImageUrl', function () {
-    it('returns a string URL or empty string', function () {
+describe('WishlistProvider - getProductImageUrl', function (): void {
+    it('returns a string URL or empty string', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\WishlistProvider(
             $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
         );
@@ -108,7 +108,7 @@ describe('WishlistProvider - getProductImageUrl', function () {
         expect($result)->toBeString();
     });
 
-    it('returns URL containing http or empty string', function () {
+    it('returns URL containing http or empty string', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\WishlistProvider(
             $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
         );
@@ -136,7 +136,7 @@ describe('WishlistProvider - getProductImageUrl', function () {
         }
     });
 
-    it('handles products without images gracefully', function () {
+    it('handles products without images gracefully', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\WishlistProvider(
             $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
         );
@@ -155,8 +155,8 @@ describe('WishlistProvider - getProductImageUrl', function () {
     });
 });
 
-describe('WishlistItem - buildWishlistItem mapping', function () {
-    it('verifies DTO structure matches expected API output shape', function () {
+describe('WishlistItem - buildWishlistItem mapping', function (): void {
+    it('verifies DTO structure matches expected API output shape', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\WishlistItem();
 
         // Set all properties with realistic values
@@ -202,7 +202,7 @@ describe('WishlistItem - buildWishlistItem mapping', function () {
         expect($dto->inStock)->toBeBool();
     });
 
-    it('maintains correct types when values are null', function () {
+    it('maintains correct types when values are null', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\WishlistItem();
 
         // Only set required/default values
@@ -220,7 +220,7 @@ describe('WishlistItem - buildWishlistItem mapping', function () {
         expect($dto->inStock)->toBeBool();  // Has default value of true
     });
 
-    it('represents a complete wishlist item as returned by API', function () {
+    it('represents a complete wishlist item as returned by API', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\WishlistItem();
         $dto->id = 5;
         $dto->productId = 200;

@@ -10,13 +10,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Category Permission Enforcement (REST)', function () {
+describe('Category Permission Enforcement (REST)', function (): void {
 
-    it('denies create without authentication', function () {
+    it('denies create without authentication', function (): void {
         $response = apiPost('/api/categories', [
             'name' => 'Test Category No Auth',
         ]);
@@ -24,7 +24,7 @@ describe('Category Permission Enforcement (REST)', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies create with customer token (wrong role)', function () {
+    it('denies create with customer token (wrong role)', function (): void {
         $response = apiPost('/api/categories', [
             'name' => 'Test Category Customer',
         ], customerToken());
@@ -32,7 +32,7 @@ describe('Category Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies create without correct permission', function () {
+    it('denies create without correct permission', function (): void {
         $token = serviceToken(['cms-pages/write']);
         $response = apiPost('/api/categories', [
             'name' => 'Test Category No Permission',
@@ -43,9 +43,9 @@ describe('Category Permission Enforcement (REST)', function () {
 
 });
 
-describe('Category CRUD Lifecycle (REST)', function () {
+describe('Category CRUD Lifecycle (REST)', function (): void {
 
-    it('creates a category, updates it, and deletes it', function () {
+    it('creates a category, updates it, and deletes it', function (): void {
         $token = serviceToken(['categories/write', 'categories/delete']);
         $suffix = substr(uniqid(), -8);
 
@@ -88,7 +88,7 @@ describe('Category CRUD Lifecycle (REST)', function () {
         expect($gone['status'])->toBe(404);
     });
 
-    it('denies delete with only write permission', function () {
+    it('denies delete with only write permission', function (): void {
         $writeToken = serviceToken(['categories/write']);
 
         // Create
@@ -107,9 +107,9 @@ describe('Category CRUD Lifecycle (REST)', function () {
 
 });
 
-describe('Category via GraphQL (read)', function () {
+describe('Category via GraphQL (read)', function (): void {
 
-    it('reads categories via GraphQL', function () {
+    it('reads categories via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
             categoriesCategories {
@@ -131,7 +131,7 @@ describe('Category via GraphQL (read)', function () {
         expect($response['json']['data'])->toHaveKey('categoriesCategories');
     });
 
-    it('reads single category by URL key via GraphQL', function () {
+    it('reads single category by URL key via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
             categoryByUrlKeyCategory(urlKey: "audio") {

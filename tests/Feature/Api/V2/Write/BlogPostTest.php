@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Blog Post Permission Enforcement (REST)', function () {
+describe('Blog Post Permission Enforcement (REST)', function (): void {
 
-    it('denies create without authentication', function () {
+    it('denies create without authentication', function (): void {
         $response = apiPost('/api/blog-posts', [
             'title' => 'Test Post No Auth',
             'urlKey' => 'test-post-noauth',
@@ -27,7 +27,7 @@ describe('Blog Post Permission Enforcement (REST)', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies create with customer token (wrong role)', function () {
+    it('denies create with customer token (wrong role)', function (): void {
         $response = apiPost('/api/blog-posts', [
             'title' => 'Test Post Customer',
             'urlKey' => 'test-post-customer',
@@ -37,7 +37,7 @@ describe('Blog Post Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies create without correct permission', function () {
+    it('denies create without correct permission', function (): void {
         $token = serviceToken(['cms-pages/write']);
         $response = apiPost('/api/blog-posts', [
             'title' => 'Test Post No Permission',
@@ -50,9 +50,9 @@ describe('Blog Post Permission Enforcement (REST)', function () {
 
 });
 
-describe('Blog Post CRUD Lifecycle (REST)', function () {
+describe('Blog Post CRUD Lifecycle (REST)', function (): void {
 
-    it('creates → reads → updates → verifies → delete-denied → deletes → confirms gone', function () {
+    it('creates → reads → updates → verifies → delete-denied → deletes → confirms gone', function (): void {
         $writeToken = serviceToken(['blog-posts/write']);
         $deleteToken = serviceToken(['blog-posts/delete']);
 
@@ -111,9 +111,9 @@ describe('Blog Post CRUD Lifecycle (REST)', function () {
 
 });
 
-describe('Blog Post CRUD with "all" permission', function () {
+describe('Blog Post CRUD with "all" permission', function (): void {
 
-    it('full lifecycle with "all" permission', function () {
+    it('full lifecycle with "all" permission', function (): void {
         $token = serviceToken(['all']);
 
         // Create
@@ -150,9 +150,9 @@ describe('Blog Post CRUD with "all" permission', function () {
 
 });
 
-describe('Blog Post via GraphQL (read)', function () {
+describe('Blog Post via GraphQL (read)', function (): void {
 
-    it('reads blog posts collection via GraphQL', function () {
+    it('reads blog posts collection via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
             blogPostsBlogPosts {
@@ -176,7 +176,7 @@ describe('Blog Post via GraphQL (read)', function () {
         expect($response['json']['data'])->toHaveKey('blogPostsBlogPosts');
     });
 
-    it('creates post via REST then reads via GraphQL', function () {
+    it('creates post via REST then reads via GraphQL', function (): void {
         $token = serviceToken(['blog-posts/write', 'blog-posts/delete']);
 
         // Create via REST

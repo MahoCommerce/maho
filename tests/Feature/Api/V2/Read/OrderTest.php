@@ -11,16 +11,16 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('GET /api/orders', function () {
+describe('GET /api/orders', function (): void {
 
-    it('allows admin to list all orders', function () {
+    it('allows admin to list all orders', function (): void {
         $response = apiGet('/api/orders', adminToken());
 
         expect($response['status'])->toBeSuccessful();
         expect($response['json'])->toBeArray();
     });
 
-    it('returns orders in expected format', function () {
+    it('returns orders in expected format', function (): void {
         $response = apiGet('/api/orders', adminToken());
 
         expect($response['status'])->toBe(200);
@@ -31,37 +31,37 @@ describe('GET /api/orders', function () {
         expect($items)->toBeArray();
     });
 
-    it('supports pagination', function () {
+    it('supports pagination', function (): void {
         $response = apiGet('/api/orders?page=1', adminToken());
 
         expect($response['status'])->toBeSuccessful();
     });
 
-    it('supports itemsPerPage parameter', function () {
+    it('supports itemsPerPage parameter', function (): void {
         $response = apiGet('/api/orders?itemsPerPage=5', adminToken());
 
         expect($response['status'])->toBeSuccessful();
     });
 
-    it('supports email exact match filter', function () {
+    it('supports email exact match filter', function (): void {
         $response = apiGet('/api/orders?email=test@example.com', adminToken());
 
         expect($response['status'])->toBeSuccessful();
     });
 
-    it('supports emailLike partial match filter', function () {
+    it('supports emailLike partial match filter', function (): void {
         $response = apiGet('/api/orders?emailLike=example.com', adminToken());
 
         expect($response['status'])->toBeSuccessful();
     });
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiGet('/api/orders');
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('prevents non-admin from listing all orders', function () {
+    it('prevents non-admin from listing all orders', function (): void {
         $response = apiGet('/api/orders', customerToken());
 
         // Regular customer should only see their own orders or be forbidden
@@ -71,17 +71,17 @@ describe('GET /api/orders', function () {
 
 });
 
-describe('GET /api/customers/me/orders', function () {
+describe('GET /api/customers/me/orders', function (): void {
 
-    describe('without authentication', function () {
+    describe('without authentication', function (): void {
 
-        it('rejects listing customer orders without token', function () {
+        it('rejects listing customer orders without token', function (): void {
             $response = apiGet('/api/customers/me/orders');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('returns 401 with proper error message', function () {
+        it('returns 401 with proper error message', function (): void {
             $response = apiGet('/api/customers/me/orders');
 
             expect($response['status'])->toBe(401);
@@ -91,15 +91,15 @@ describe('GET /api/customers/me/orders', function () {
 
     });
 
-    describe('with invalid token', function () {
+    describe('with invalid token', function (): void {
 
-        it('rejects customer orders with malformed token', function () {
+        it('rejects customer orders with malformed token', function (): void {
             $response = apiGet('/api/customers/me/orders', 'invalid-token');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('rejects customer orders with expired token', function () {
+        it('rejects customer orders with expired token', function (): void {
             $response = apiGet('/api/customers/me/orders', expiredToken());
 
             expect($response['status'])->toBeUnauthorized();
@@ -107,40 +107,40 @@ describe('GET /api/customers/me/orders', function () {
 
     });
 
-    describe('with valid customer token', function () {
+    describe('with valid customer token', function (): void {
 
-        it('allows listing customer orders with valid token', function () {
+        it('allows listing customer orders with valid token', function (): void {
             $response = apiGet('/api/customers/me/orders', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('returns array of orders', function () {
+        it('returns array of orders', function (): void {
             $response = apiGet('/api/customers/me/orders', customerToken());
 
             expect($response['status'])->toBe(200);
             expect($response['json'])->toBeArray();
         });
 
-        it('supports pagination with pageSize', function () {
+        it('supports pagination with pageSize', function (): void {
             $response = apiGet('/api/customers/me/orders?page=1&pageSize=5', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('supports pagination with itemsPerPage', function () {
+        it('supports pagination with itemsPerPage', function (): void {
             $response = apiGet('/api/customers/me/orders?page=1&itemsPerPage=5', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('supports status filter', function () {
+        it('supports status filter', function (): void {
             $response = apiGet('/api/customers/me/orders?status=complete', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('returns orders with expected fields', function () {
+        it('returns orders with expected fields', function (): void {
             $response = apiGet('/api/customers/me/orders', customerToken());
 
             if ($response['status'] === 200) {
@@ -157,7 +157,7 @@ describe('GET /api/customers/me/orders', function () {
             expect(true)->toBeTrue();
         });
 
-        it('only returns orders belonging to authenticated customer', function () {
+        it('only returns orders belonging to authenticated customer', function (): void {
             $response = apiGet('/api/customers/me/orders', customerToken());
 
             // Each order should belong to the authenticated customer
@@ -169,9 +169,9 @@ describe('GET /api/customers/me/orders', function () {
 
 });
 
-describe('GET /api/orders/{id}', function () {
+describe('GET /api/orders/{id}', function (): void {
 
-    it('returns order details with admin token', function () {
+    it('returns order details with admin token', function (): void {
         $orderId = fixtures('order_id');
 
         if (!$orderId) {
@@ -184,7 +184,7 @@ describe('GET /api/orders/{id}', function () {
         expect($response['json'])->toBeArray();
     });
 
-    it('returns expected order fields', function () {
+    it('returns expected order fields', function (): void {
         $orderId = fixtures('order_id');
 
         if (!$orderId) {
@@ -199,7 +199,7 @@ describe('GET /api/orders/{id}', function () {
         expect($order)->toHaveKey('incrementId');
     });
 
-    it('returns 404 for non-existent order', function () {
+    it('returns 404 for non-existent order', function (): void {
         $invalidId = fixtures('invalid_order_id');
 
         $response = apiGet("/api/orders/{$invalidId}", adminToken());
@@ -207,7 +207,7 @@ describe('GET /api/orders/{id}', function () {
         expect($response['status'])->toBeNotFound();
     });
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $orderId = fixtures('order_id') ?? 1;
 
         $response = apiGet("/api/orders/{$orderId}");

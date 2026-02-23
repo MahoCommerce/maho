@@ -17,8 +17,8 @@ use Maho\ApiPlatform\ApiResource\Shipment;
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Order DTO', function () {
-    it('has correct default values', function () {
+describe('Order DTO', function (): void {
+    it('has correct default values', function (): void {
         $order = new Order();
 
         expect($order->id)->toBeNull()
@@ -50,7 +50,7 @@ describe('Order DTO', function () {
             ->and($order->shipments)->toBeArray()->toBeEmpty();
     });
 
-    it('can set all properties', function () {
+    it('can set all properties', function (): void {
         $order = new Order();
         $order->id = 123;
         $order->incrementId = '100000001';
@@ -98,8 +98,8 @@ describe('Order DTO', function () {
     });
 });
 
-describe('OrderPrices DTO', function () {
-    it('has correct default values', function () {
+describe('OrderPrices DTO', function (): void {
+    it('has correct default values', function (): void {
         $prices = new OrderPrices();
 
         expect($prices->subtotal)->toBe(0.0)
@@ -115,7 +115,7 @@ describe('OrderPrices DTO', function () {
             ->and($prices->giftcardAmount)->toBeNull();
     });
 
-    it('can set all properties', function () {
+    it('can set all properties', function (): void {
         $prices = new OrderPrices();
         $prices->subtotal = 100.00;
         $prices->subtotalInclTax = 110.00;
@@ -142,7 +142,7 @@ describe('OrderPrices DTO', function () {
             ->and($prices->giftcardAmount)->toBe(20.00);
     });
 
-    it('calculates totals correctly', function () {
+    it('calculates totals correctly', function (): void {
         $prices = new OrderPrices();
         $prices->subtotal = 100.00;
         $prices->shippingAmount = 10.00;
@@ -160,8 +160,8 @@ describe('OrderPrices DTO', function () {
     });
 });
 
-describe('OrderItem DTO', function () {
-    it('has correct default values', function () {
+describe('OrderItem DTO', function (): void {
+    it('has correct default values', function (): void {
         $item = new OrderItem();
 
         expect($item->id)->toBeNull()
@@ -185,7 +185,7 @@ describe('OrderItem DTO', function () {
             ->and($item->parentItemId)->toBeNull();
     });
 
-    it('can set all properties', function () {
+    it('can set all properties', function (): void {
         $item = new OrderItem();
         $item->id = 1;
         $item->sku = 'TEST-SKU-001';
@@ -228,7 +228,7 @@ describe('OrderItem DTO', function () {
             ->and($item->parentItemId)->toBeNull();
     });
 
-    it('calculates row totals correctly', function () {
+    it('calculates row totals correctly', function (): void {
         $item = new OrderItem();
         $item->qty = 3.0;
         $item->price = 25.00;
@@ -238,8 +238,8 @@ describe('OrderItem DTO', function () {
     });
 });
 
-describe('Order - items management', function () {
-    it('can add order items to order', function () {
+describe('Order - items management', function (): void {
+    it('can add order items to order', function (): void {
         $order = new Order();
 
         $item1 = new OrderItem();
@@ -269,7 +269,7 @@ describe('Order - items management', function () {
             ->and($order->totalQtyOrdered)->toBe(3.0);
     });
 
-    it('maintains correct order structure with items', function () {
+    it('maintains correct order structure with items', function (): void {
         $order = new Order();
         $order->id = 100;
         $order->incrementId = '100000100';
@@ -295,7 +295,7 @@ describe('Order - items management', function () {
             ->and($order->prices->grandTotal)->toBe(200.00);
     });
 
-    it('can handle configurable product with child items', function () {
+    it('can handle configurable product with child items', function (): void {
         $order = new Order();
 
         $parentItem = new OrderItem();
@@ -324,8 +324,8 @@ describe('Order - items management', function () {
     });
 });
 
-describe('Order - address mapping', function () {
-    it('can assign billing and shipping addresses', function () {
+describe('Order - address mapping', function (): void {
+    it('can assign billing and shipping addresses', function (): void {
         $order = new Order();
 
         $billingAddress = new Address();
@@ -359,7 +359,7 @@ describe('Order - address mapping', function () {
             ->and($order->shippingAddress->region)->toBe('VIC');
     });
 
-    it('handles same billing and shipping address', function () {
+    it('handles same billing and shipping address', function (): void {
         $order = new Order();
 
         $address = new Address();
@@ -379,8 +379,8 @@ describe('Order - address mapping', function () {
     });
 });
 
-describe('Order - shipments', function () {
-    it('can add shipments to order', function () {
+describe('Order - shipments', function (): void {
+    it('can add shipments to order', function (): void {
         $order = new Order();
 
         $shipment = new Shipment();
@@ -396,8 +396,8 @@ describe('Order - shipments', function () {
     });
 });
 
-describe('Order - database integration', function () {
-    it('can load a real order from database', function () {
+describe('Order - database integration', function (): void {
+    it('can load a real order from database', function (): void {
         $mahoOrder = \Mage::getModel('sales/order')->getCollection()
             ->setPageSize(1)
             ->getFirstItem();
@@ -413,7 +413,7 @@ describe('Order - database integration', function () {
             ->and($mahoOrder->getStatus())->toBeString()->not->toBeEmpty();
     });
 
-    it('verifies order has required data structure', function () {
+    it('verifies order has required data structure', function (): void {
         $mahoOrder = \Mage::getModel('sales/order')->getCollection()
             ->setPageSize(1)
             ->getFirstItem();
@@ -447,7 +447,7 @@ describe('Order - database integration', function () {
         }
     });
 
-    it('can map database order to Order DTO', function () {
+    it('can map database order to Order DTO', function (): void {
         $mahoOrder = \Mage::getModel('sales/order')->getCollection()
             ->setPageSize(1)
             ->getFirstItem();

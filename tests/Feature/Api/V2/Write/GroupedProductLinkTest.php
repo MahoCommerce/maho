@@ -8,13 +8,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Grouped Product Links — CRUD Lifecycle', function () {
+describe('Grouped Product Links — CRUD Lifecycle', function (): void {
 
-    it('creates a grouped product, links children, reads back, removes', function () {
+    it('creates a grouped product, links children, reads back, removes', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
         $suffix = substr(uniqid(), -6);
 
@@ -75,7 +75,7 @@ describe('Grouped Product Links — CRUD Lifecycle', function () {
         expect($afterIds)->toContain($child2Id);
     });
 
-    it('rejects grouped operations on a non-grouped product', function () {
+    it('rejects grouped operations on a non-grouped product', function (): void {
         $simpleId = fixtures('product_id');
         $response = apiGet("/api/products/{$simpleId}/grouped");
         expect($response['status'])->toBeIn([400, 422]);

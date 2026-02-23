@@ -12,17 +12,17 @@ declare(strict_types=1);
  * @group read
  */
 
-describe('API v2 Customer Cart', function () {
+describe('API v2 Customer Cart', function (): void {
 
-    describe('without authentication', function () {
+    describe('without authentication', function (): void {
 
-        it('rejects getting customer cart without token', function () {
+        it('rejects getting customer cart without token', function (): void {
             $response = apiGet('/api/carts/mine');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('returns 401 error for unauthenticated cart request', function () {
+        it('returns 401 error for unauthenticated cart request', function (): void {
             $response = apiGet('/api/carts/mine');
 
             expect($response['status'])->toBe(401);
@@ -32,15 +32,15 @@ describe('API v2 Customer Cart', function () {
 
     });
 
-    describe('with invalid token', function () {
+    describe('with invalid token', function (): void {
 
-        it('rejects cart request with malformed token', function () {
+        it('rejects cart request with malformed token', function (): void {
             $response = apiGet('/api/carts/mine', 'invalid-token');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('rejects cart request with expired token', function () {
+        it('rejects cart request with expired token', function (): void {
             $response = apiGet('/api/carts/mine', expiredToken());
 
             expect($response['status'])->toBeUnauthorized();
@@ -48,9 +48,9 @@ describe('API v2 Customer Cart', function () {
 
     });
 
-    describe('with valid customer token', function () {
+    describe('with valid customer token', function (): void {
 
-        it('allows getting customer cart with valid token', function () {
+        it('allows getting customer cart with valid token', function (): void {
             $response = apiGet('/api/carts/mine', customerToken());
 
             // Should succeed (200) or 404 if no cart exists

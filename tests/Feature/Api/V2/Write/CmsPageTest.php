@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('CMS Page Permission Enforcement (REST)', function () {
+describe('CMS Page Permission Enforcement (REST)', function (): void {
 
-    it('denies create without authentication', function () {
+    it('denies create without authentication', function (): void {
         $response = apiPost('/api/cms-pages', [
             'identifier' => 'test-page-noauth',
             'title' => 'Test Page No Auth',
@@ -28,7 +28,7 @@ describe('CMS Page Permission Enforcement (REST)', function () {
         expect($response['json']['error'])->toBe('unauthorized');
     });
 
-    it('denies create with customer token (wrong role)', function () {
+    it('denies create with customer token (wrong role)', function (): void {
         $response = apiPost('/api/cms-pages', [
             'identifier' => 'test-page-customer',
             'title' => 'Test Page Customer',
@@ -38,7 +38,7 @@ describe('CMS Page Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies create without correct permission', function () {
+    it('denies create without correct permission', function (): void {
         $token = serviceToken(['blog-posts/write']);
         $response = apiPost('/api/cms-pages', [
             'identifier' => 'test-page-noperm',
@@ -51,9 +51,9 @@ describe('CMS Page Permission Enforcement (REST)', function () {
 
 });
 
-describe('CMS Page CRUD Lifecycle (REST)', function () {
+describe('CMS Page CRUD Lifecycle (REST)', function (): void {
 
-    it('creates → reads → updates → verifies → delete-denied → deletes → confirms gone', function () {
+    it('creates → reads → updates → verifies → delete-denied → deletes → confirms gone', function (): void {
         $writeToken = serviceToken(['cms-pages/write']);
         $deleteToken = serviceToken(['cms-pages/delete']);
 
@@ -108,9 +108,9 @@ describe('CMS Page CRUD Lifecycle (REST)', function () {
 
 });
 
-describe('CMS Page CRUD with "all" permission', function () {
+describe('CMS Page CRUD with "all" permission', function (): void {
 
-    it('full lifecycle with "all" permission', function () {
+    it('full lifecycle with "all" permission', function (): void {
         $token = serviceToken(['all']);
 
         // Create
@@ -147,9 +147,9 @@ describe('CMS Page CRUD with "all" permission', function () {
 
 });
 
-describe('CMS Page via GraphQL (read)', function () {
+describe('CMS Page via GraphQL (read)', function (): void {
 
-    it('reads pages collection via GraphQL', function () {
+    it('reads pages collection via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
             cmsPagesCmsPages {
@@ -176,7 +176,7 @@ describe('CMS Page via GraphQL (read)', function () {
         expect($edges)->not->toBeEmpty();
     });
 
-    it('creates page via REST then reads via GraphQL', function () {
+    it('creates page via REST then reads via GraphQL', function (): void {
         $token = serviceToken(['cms-pages/write', 'cms-pages/delete']);
 
         // Create via REST
