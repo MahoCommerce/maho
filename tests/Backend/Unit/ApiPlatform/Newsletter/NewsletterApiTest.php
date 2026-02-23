@@ -19,8 +19,8 @@ function createPostOperation(string $name): \ApiPlatform\Metadata\Post
     return new \ApiPlatform\Metadata\Post(name: $name);
 }
 
-describe('Newsletter API - Subscription', function () {
-    beforeEach(function () {
+describe('Newsletter API - Subscription', function (): void {
+    beforeEach(function (): void {
         // Clean up test subscribers
         $testEmails = [
             'newsletter-test@example.com',
@@ -36,8 +36,8 @@ describe('Newsletter API - Subscription', function () {
         }
     });
 
-    describe('Subscribe Operation', function () {
-        it('subscribes a new email address', function () {
+    describe('Subscribe Operation', function (): void {
+        it('subscribes a new email address', function (): void {
             $processor = new \Maho\ApiPlatform\State\Processor\NewsletterProcessor(
                 $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
             );
@@ -55,7 +55,7 @@ describe('Newsletter API - Subscription', function () {
             expect($result->message)->not->toBeNull();
         });
 
-        it('handles already subscribed email', function () {
+        it('handles already subscribed email', function (): void {
             // First subscribe
             $subscriber = Mage::getModel('newsletter/subscriber');
             $subscriber->subscribe('newsletter-test@example.com');
@@ -76,7 +76,7 @@ describe('Newsletter API - Subscription', function () {
             expect($result->message)->toContain('already subscribed');
         });
 
-        it('rejects invalid email address', function () {
+        it('rejects invalid email address', function (): void {
             $processor = new \Maho\ApiPlatform\State\Processor\NewsletterProcessor(
                 $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
             );
@@ -90,7 +90,7 @@ describe('Newsletter API - Subscription', function () {
                 ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
         });
 
-        it('rejects empty email address', function () {
+        it('rejects empty email address', function (): void {
             $processor = new \Maho\ApiPlatform\State\Processor\NewsletterProcessor(
                 $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
             );
@@ -105,8 +105,8 @@ describe('Newsletter API - Subscription', function () {
         });
     });
 
-    describe('Unsubscribe Operation', function () {
-        it('unsubscribes an existing subscriber', function () {
+    describe('Unsubscribe Operation', function (): void {
+        it('unsubscribes an existing subscriber', function (): void {
             // First subscribe
             $subscriber = Mage::getModel('newsletter/subscriber');
             $subscriber->subscribe('newsletter-test@example.com');
@@ -128,7 +128,7 @@ describe('Newsletter API - Subscription', function () {
             expect($result->message)->toContain('unsubscribed');
         });
 
-        it('handles unsubscribe for non-existent email', function () {
+        it('handles unsubscribe for non-existent email', function (): void {
             $processor = new \Maho\ApiPlatform\State\Processor\NewsletterProcessor(
                 $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
             );
@@ -147,8 +147,8 @@ describe('Newsletter API - Subscription', function () {
     });
 });
 
-describe('Newsletter API - Status Provider', function () {
-    it('maps subscriber status correctly', function () {
+describe('Newsletter API - Status Provider', function (): void {
+    it('maps subscriber status correctly', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\NewsletterProvider(
             $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
         );
@@ -171,8 +171,8 @@ describe('Newsletter API - Status Provider', function () {
     });
 });
 
-describe('NewsletterSubscription DTO', function () {
-    it('has correct default values', function () {
+describe('NewsletterSubscription DTO', function (): void {
+    it('has correct default values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\NewsletterSubscription();
 
         expect($dto->email)->toBeNull();
@@ -183,7 +183,7 @@ describe('NewsletterSubscription DTO', function () {
         expect($dto->confirmationRequired)->toBeFalse();
     });
 
-    it('accepts all property values', function () {
+    it('accepts all property values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\NewsletterSubscription();
         $dto->email = 'test@example.com';
         $dto->customerId = 123;
@@ -201,22 +201,22 @@ describe('NewsletterSubscription DTO', function () {
     });
 });
 
-describe('Newsletter Subscriber Model Integration', function () {
-    beforeEach(function () {
+describe('Newsletter Subscriber Model Integration', function (): void {
+    beforeEach(function (): void {
         $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail('integration-test@example.com');
         if ($subscriber->getId()) {
             $subscriber->delete();
         }
     });
 
-    afterEach(function () {
+    afterEach(function (): void {
         $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail('integration-test@example.com');
         if ($subscriber->getId()) {
             $subscriber->delete();
         }
     });
 
-    it('can subscribe and unsubscribe using Mage model', function () {
+    it('can subscribe and unsubscribe using Mage model', function (): void {
         // Subscribe
         $subscriber = Mage::getModel('newsletter/subscriber');
         $status = $subscriber->subscribe('integration-test@example.com');
@@ -241,7 +241,7 @@ describe('Newsletter Subscriber Model Integration', function () {
             ->toBe(Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED);
     });
 
-    it('loadByEmail returns empty model for non-existent email', function () {
+    it('loadByEmail returns empty model for non-existent email', function (): void {
         $subscriber = Mage::getModel('newsletter/subscriber')->loadByEmail('does-not-exist@example.com');
 
         expect($subscriber->getId())->toBeNull();

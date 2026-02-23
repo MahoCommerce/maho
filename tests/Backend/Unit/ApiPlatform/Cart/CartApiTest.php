@@ -17,8 +17,8 @@ use Maho\ApiPlatform\ApiResource\CartPrices;
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Cart DTO', function () {
-    it('has correct default values', function () {
+describe('Cart DTO', function (): void {
+    it('has correct default values', function (): void {
         $cart = new Cart();
 
         expect($cart->id)->toBeNull()
@@ -43,7 +43,7 @@ describe('Cart DTO', function () {
             ->and($cart->updatedAt)->toBeNull();
     });
 
-    it('can be instantiated with custom values', function () {
+    it('can be instantiated with custom values', function (): void {
         $prices = new CartPrices();
         $prices->grandTotal = 150.00;
 
@@ -74,8 +74,8 @@ describe('Cart DTO', function () {
     });
 });
 
-describe('CartPrices DTO', function () {
-    it('has correct default values', function () {
+describe('CartPrices DTO', function (): void {
+    it('has correct default values', function (): void {
         $prices = new CartPrices();
 
         expect($prices->subtotal)->toBe(0.0)
@@ -89,7 +89,7 @@ describe('CartPrices DTO', function () {
             ->and($prices->giftcardAmount)->toBeNull();
     });
 
-    it('can be instantiated with custom values', function () {
+    it('can be instantiated with custom values', function (): void {
         $prices = new CartPrices();
         $prices->subtotal = 100.00;
         $prices->subtotalInclTax = 110.00;
@@ -113,8 +113,8 @@ describe('CartPrices DTO', function () {
     });
 });
 
-describe('CartItem DTO', function () {
-    it('has correct default values', function () {
+describe('CartItem DTO', function (): void {
+    it('has correct default values', function (): void {
         $item = new CartItem();
 
         expect($item->id)->toBeNull()
@@ -136,7 +136,7 @@ describe('CartItem DTO', function () {
             ->and($item->fulfillmentType)->toBe('SHIP');
     });
 
-    it('can be instantiated with custom values', function () {
+    it('can be instantiated with custom values', function (): void {
         $item = new CartItem();
         $item->id = 789;
         $item->sku = 'TEST-SKU-001';
@@ -176,8 +176,8 @@ describe('CartItem DTO', function () {
     });
 });
 
-describe('Cart - items management', function () {
-    it('can add cart items to cart', function () {
+describe('Cart - items management', function (): void {
+    it('can add cart items to cart', function (): void {
         $cart = new Cart();
 
         $item1 = new CartItem();
@@ -209,7 +209,7 @@ describe('Cart - items management', function () {
             ->and($cart->itemsQty)->toBe(3.0);
     });
 
-    it('maintains cart items structure integrity', function () {
+    it('maintains cart items structure integrity', function (): void {
         $cart = new Cart();
 
         $item = new CartItem();
@@ -243,8 +243,8 @@ describe('Cart - items management', function () {
     });
 });
 
-describe('Cart - address assignment', function () {
-    it('can assign billing and shipping addresses', function () {
+describe('Cart - address assignment', function (): void {
+    it('can assign billing and shipping addresses', function (): void {
         $cart = new Cart();
 
         $billingAddress = new Address();
@@ -276,7 +276,7 @@ describe('Cart - address assignment', function () {
             ->and($cart->shippingAddress->city)->toBe('Melbourne');
     });
 
-    it('can have same address for billing and shipping', function () {
+    it('can have same address for billing and shipping', function (): void {
         $cart = new Cart();
 
         $address = new Address();
@@ -297,8 +297,8 @@ describe('Cart - address assignment', function () {
     });
 });
 
-describe('Cart - shipping methods structure', function () {
-    it('can store available shipping methods', function () {
+describe('Cart - shipping methods structure', function (): void {
+    it('can store available shipping methods', function (): void {
         $cart = new Cart();
 
         $shippingMethods = [
@@ -329,7 +329,7 @@ describe('Cart - shipping methods structure', function () {
             ->and($cart->availableShippingMethods[1]['amount'])->toBe(0.00);
     });
 
-    it('can store selected shipping method', function () {
+    it('can store selected shipping method', function (): void {
         $cart = new Cart();
 
         $selectedMethod = [
@@ -350,7 +350,7 @@ describe('Cart - shipping methods structure', function () {
             ->and($cart->prices->shippingAmount)->toBe(10.00);
     });
 
-    it('can store available payment methods', function () {
+    it('can store available payment methods', function (): void {
         $cart = new Cart();
 
         $paymentMethods = [
@@ -371,7 +371,7 @@ describe('Cart - shipping methods structure', function () {
             ->and($cart->availablePaymentMethods[1]['code'])->toBe('cashondelivery');
     });
 
-    it('can store selected payment method', function () {
+    it('can store selected payment method', function (): void {
         $cart = new Cart();
 
         $selectedPayment = [
@@ -387,8 +387,8 @@ describe('Cart - shipping methods structure', function () {
     });
 });
 
-describe('Cart - coupon and giftcard management', function () {
-    it('can apply a coupon code', function () {
+describe('Cart - coupon and giftcard management', function (): void {
+    it('can apply a coupon code', function (): void {
         $cart = new Cart();
 
         $coupon = [
@@ -405,7 +405,7 @@ describe('Cart - coupon and giftcard management', function () {
             ->and($cart->prices->discountAmount)->toBe(10.00);
     });
 
-    it('can apply multiple giftcards', function () {
+    it('can apply multiple giftcards', function (): void {
         $cart = new Cart();
 
         $giftcards = [
@@ -431,8 +431,8 @@ describe('Cart - coupon and giftcard management', function () {
     });
 });
 
-describe('Cart - complete scenario', function () {
-    it('can build a complete cart with all components', function () {
+describe('Cart - complete scenario', function (): void {
+    it('can build a complete cart with all components', function (): void {
         $cart = new Cart();
         $cart->id = 1;
         $cart->customerId = 123;

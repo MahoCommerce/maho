@@ -38,3 +38,4 @@
 .phpstan*.neon
 phpstan*.neon
 !.phpstan.dist*.neon
+public/api-test/

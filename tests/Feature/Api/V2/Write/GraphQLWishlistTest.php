@@ -15,13 +15,13 @@ declare(strict_types=1);
  * @group graphql
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('GraphQL Wishlist - My Wishlist Query', function () {
+describe('GraphQL Wishlist - My Wishlist Query', function (): void {
 
-    it('returns wishlist collection for authenticated customer', function () {
+    it('returns wishlist collection for authenticated customer', function (): void {
         $query = <<<'GRAPHQL'
         {
             myWishlistWishlistItems {
@@ -47,7 +47,7 @@ describe('GraphQL Wishlist - My Wishlist Query', function () {
         expect($response['json']['data'])->toHaveKey('myWishlistWishlistItems');
     });
 
-    it('rejects query without authentication', function () {
+    it('rejects query without authentication', function (): void {
         $query = <<<'GRAPHQL'
         {
             myWishlistWishlistItems {
@@ -64,12 +64,12 @@ describe('GraphQL Wishlist - My Wishlist Query', function () {
 
 });
 
-describe('GraphQL Wishlist - Add To Wishlist Mutation', function () {
+describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
 
     /**
      * Regression: addToWishlist was reading $context['args'] instead of $context['args']['input']
      */
-    it('adds product to wishlist (regression: args vs args.input)', function () {
+    it('adds product to wishlist (regression: args vs args.input)', function (): void {
         $productId = fixtures('product_id');
 
         $query = <<<GRAPHQL
@@ -118,9 +118,9 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function () {
  * - getItemCollection() vs getItemsCollection() typo
  * - totalItems hardcoded to 0
  */
-describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function () {
+describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function (): void {
 
-    it('item added via mutation appears in myWishlist query', function () {
+    it('item added via mutation appears in myWishlist query', function (): void {
         $productId = fixtures('product_id');
         $token = customerToken();
 
@@ -172,9 +172,9 @@ describe('GraphQL Wishlist - Add Then Query Round-Trip (Regression)', function (
 
 });
 
-describe('GraphQL Wishlist - Remove From Wishlist Mutation', function () {
+describe('GraphQL Wishlist - Remove From Wishlist Mutation', function (): void {
 
-    it('removes item from wishlist', function () {
+    it('removes item from wishlist', function (): void {
         $productId = fixtures('product_id');
         $token = customerToken();
 
@@ -208,7 +208,7 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function () {
         expect($removeResponse['json'])->not->toHaveKey('errors');
     });
 
-    it('removed item no longer appears in listing', function () {
+    it('removed item no longer appears in listing', function (): void {
         $productId = fixtures('product_id');
         $token = customerToken();
 
@@ -256,13 +256,13 @@ describe('GraphQL Wishlist - Remove From Wishlist Mutation', function () {
 
 });
 
-describe('GraphQL Wishlist - Sync Wishlist Mutation', function () {
+describe('GraphQL Wishlist - Sync Wishlist Mutation', function (): void {
 
     /**
      * Regression: syncWishlist crashed on empty wishlists because
      * getItemCollection() returned null instead of empty collection.
      */
-    it('does not crash on empty product list (regression: null getItemCollection)', function () {
+    it('does not crash on empty product list (regression: null getItemCollection)', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             syncWishlistWishlistItem(input: {productIds: []}) {
@@ -277,7 +277,7 @@ describe('GraphQL Wishlist - Sync Wishlist Mutation', function () {
         expect($response['json'])->not->toHaveKey('errors');
     });
 
-    it('syncs product IDs into wishlist', function () {
+    it('syncs product IDs into wishlist', function (): void {
         $productId = fixtures('product_id');
 
         $query = <<<GRAPHQL

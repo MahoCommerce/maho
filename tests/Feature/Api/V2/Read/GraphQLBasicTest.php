@@ -12,15 +12,15 @@ declare(strict_types=1);
  * @group graphql
  */
 
-describe('GraphQL Endpoint - Authentication', function () {
+describe('GraphQL Endpoint - Authentication', function (): void {
 
-    it('allows unauthenticated access to public queries', function () {
+    it('allows unauthenticated access to public queries', function (): void {
         $response = gqlQuery('{ __typename }');
 
         expect($response['status'])->toBeSuccessful();
     });
 
-    it('denies unauthenticated access to protected operations', function () {
+    it('denies unauthenticated access to protected operations', function (): void {
         $query = '{ myWishlistWishlistItems(first: 1) { edges { node { _id } } } }';
         $response = gqlQuery($query);
 
@@ -30,25 +30,25 @@ describe('GraphQL Endpoint - Authentication', function () {
         expect($response['json']['errors'][0]['extensions']['status'] ?? null)->toBeIn([401, 403]);
     });
 
-    it('rejects GraphQL requests with invalid token', function () {
+    it('rejects GraphQL requests with invalid token', function (): void {
         $response = gqlQuery('{ __typename }', [], invalidToken());
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('rejects GraphQL requests with expired token', function () {
+    it('rejects GraphQL requests with expired token', function (): void {
         $response = gqlQuery('{ __typename }', [], expiredToken());
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('accepts GraphQL requests with valid customer token', function () {
+    it('accepts GraphQL requests with valid customer token', function (): void {
         $response = gqlQuery('{ __typename }', [], customerToken());
 
         expect($response['status'])->toBeSuccessful();
     });
 
-    it('accepts GraphQL requests with valid admin token', function () {
+    it('accepts GraphQL requests with valid admin token', function (): void {
         $response = gqlQuery('{ __typename }', [], adminToken());
 
         expect($response['status'])->toBeSuccessful();
@@ -56,9 +56,9 @@ describe('GraphQL Endpoint - Authentication', function () {
 
 });
 
-describe('GraphQL Endpoint - Introspection', function () {
+describe('GraphQL Endpoint - Introspection', function (): void {
 
-    it('supports introspection queries', function () {
+    it('supports introspection queries', function (): void {
         $query = <<<'GRAPHQL'
         {
             __schema {
@@ -77,7 +77,7 @@ describe('GraphQL Endpoint - Introspection', function () {
         expect($response['json']['data']['__schema'])->toHaveKey('mutationType');
     });
 
-    it('returns product type in schema', function () {
+    it('returns product type in schema', function (): void {
         $query = <<<'GRAPHQL'
         {
             __type(name: "Product") {
@@ -99,7 +99,7 @@ describe('GraphQL Endpoint - Introspection', function () {
         expect($fieldNames)->toContain('price');
     });
 
-    it('returns cart type with prices field in schema', function () {
+    it('returns cart type with prices field in schema', function (): void {
         $query = <<<'GRAPHQL'
         {
             __type(name: "Cart") {
@@ -122,16 +122,16 @@ describe('GraphQL Endpoint - Introspection', function () {
 
 });
 
-describe('GraphQL Endpoint - Error Handling', function () {
+describe('GraphQL Endpoint - Error Handling', function (): void {
 
-    it('returns errors for invalid query syntax', function () {
+    it('returns errors for invalid query syntax', function (): void {
         $response = gqlQuery('{ invalid query syntax !!!', [], customerToken());
 
         expect($response['status'])->toBe(200);
         expect($response['json'])->toHaveKey('errors');
     });
 
-    it('returns errors for non-existent field', function () {
+    it('returns errors for non-existent field', function (): void {
         $response = gqlQuery('{ nonExistentField }', [], customerToken());
 
         expect($response['status'])->toBe(200);

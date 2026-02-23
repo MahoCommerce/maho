@@ -16,13 +16,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('REST Wishlist - Add Item', function () {
+describe('REST Wishlist - Add Item', function (): void {
 
-    it('adds product to wishlist via POST', function () {
+    it('adds product to wishlist via POST', function (): void {
         $productId = fixtures('product_id');
 
         $response = apiPost('/api/customers/me/wishlist', [
@@ -40,7 +40,7 @@ describe('REST Wishlist - Add Item', function () {
         trackCreated('wishlist_item', (int) $response['json']['id']);
     });
 
-    it('returns wishlist item with all expected fields', function () {
+    it('returns wishlist item with all expected fields', function (): void {
         $productId = fixtures('product_id');
 
         $response = apiPost('/api/customers/me/wishlist', [
@@ -61,7 +61,7 @@ describe('REST Wishlist - Add Item', function () {
         trackCreated('wishlist_item', (int) $item['id']);
     });
 
-    it('rejects adding to wishlist without authentication', function () {
+    it('rejects adding to wishlist without authentication', function (): void {
         $response = apiPost('/api/customers/me/wishlist', [
             'productId' => fixtures('product_id'),
             'qty' => 1,
@@ -80,9 +80,9 @@ describe('REST Wishlist - Add Item', function () {
  * 2. ArrayPaginator had totalItems hardcoded to 0
  * Both caused GET /customers/me/wishlist to always return empty.
  */
-describe('REST Wishlist - Add Then List Round-Trip (Regression)', function () {
+describe('REST Wishlist - Add Then List Round-Trip (Regression)', function (): void {
 
-    it('item added via POST appears in GET listing', function () {
+    it('item added via POST appears in GET listing', function (): void {
         $productId = fixtures('product_id');
         $token = customerToken();
 
@@ -110,7 +110,7 @@ describe('REST Wishlist - Add Then List Round-Trip (Regression)', function () {
         expect($foundIds)->toContain($addedItemId);
     });
 
-    it('listed items have correct product data', function () {
+    it('listed items have correct product data', function (): void {
         $token = customerToken();
 
         $listResponse = apiGet('/api/customers/me/wishlist', $token);
@@ -129,9 +129,9 @@ describe('REST Wishlist - Add Then List Round-Trip (Regression)', function () {
 
 });
 
-describe('REST Wishlist - Remove Item', function () {
+describe('REST Wishlist - Remove Item', function (): void {
 
-    it('removes item via DELETE and returns 204', function () {
+    it('removes item via DELETE and returns 204', function (): void {
         $token = customerToken();
 
         // Add an item first
@@ -149,7 +149,7 @@ describe('REST Wishlist - Remove Item', function () {
         expect($deleteResponse['status'])->toBeSuccessful();
     });
 
-    it('deleted item no longer appears in listing', function () {
+    it('deleted item no longer appears in listing', function (): void {
         $token = customerToken();
 
         // Add
@@ -172,13 +172,13 @@ describe('REST Wishlist - Remove Item', function () {
         expect($foundIds)->not->toContain($itemId);
     });
 
-    it('returns 404 when deleting non-existent item', function () {
+    it('returns 404 when deleting non-existent item', function (): void {
         $response = apiDelete('/api/customers/me/wishlist/999999', customerToken());
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('rejects delete without authentication', function () {
+    it('rejects delete without authentication', function (): void {
         $response = apiDelete('/api/customers/me/wishlist/1');
 
         expect($response['status'])->toBeUnauthorized();
@@ -186,9 +186,9 @@ describe('REST Wishlist - Remove Item', function () {
 
 });
 
-describe('REST Wishlist - Sync', function () {
+describe('REST Wishlist - Sync', function (): void {
 
-    it('syncs wishlist with product IDs', function () {
+    it('syncs wishlist with product IDs', function (): void {
         $response = apiPost('/api/customers/me/wishlist/sync', [
             'productIds' => [fixtures('product_id')],
         ], customerToken());
@@ -199,7 +199,7 @@ describe('REST Wishlist - Sync', function () {
     /**
      * Regression: sync with empty array crashed on null getItemCollection()
      */
-    it('syncs empty array without error (regression: null collection)', function () {
+    it('syncs empty array without error (regression: null collection)', function (): void {
         $response = apiPost('/api/customers/me/wishlist/sync', [
             'productIds' => [],
         ], customerToken());

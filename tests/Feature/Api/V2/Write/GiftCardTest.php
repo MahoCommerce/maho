@@ -10,7 +10,7 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     // Clean up any gift cards created during tests
     $codes = giftCardTestCodes();
     if (!empty($codes)) {
@@ -25,9 +25,9 @@ afterAll(function () {
     }
 });
 
-describe('POST /api/giftcards', function () {
+describe('POST /api/giftcards', function (): void {
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiPost('/api/giftcards', [
             'initialBalance' => 50.0,
         ]);
@@ -35,7 +35,7 @@ describe('POST /api/giftcards', function () {
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('creates a gift card with auto-generated code', function () {
+    it('creates a gift card with auto-generated code', function (): void {
         $response = apiPost('/api/giftcards', [
             'initialBalance' => 25.0,
         ], adminToken());
@@ -56,7 +56,7 @@ describe('POST /api/giftcards', function () {
         registerGiftCardCode($response['json']['code']);
     });
 
-    it('creates a gift card with custom code', function () {
+    it('creates a gift card with custom code', function (): void {
         $code = 'TEST-API-' . time();
 
         $response = apiPost('/api/giftcards', [
@@ -77,7 +77,7 @@ describe('POST /api/giftcards', function () {
         registerGiftCardCode($code);
     });
 
-    it('rejects zero balance', function () {
+    it('rejects zero balance', function (): void {
         $response = apiPost('/api/giftcards', [
             'initialBalance' => 0,
         ], adminToken());
@@ -85,7 +85,7 @@ describe('POST /api/giftcards', function () {
         expect($response['status'])->toBeGreaterThanOrEqual(400);
     });
 
-    it('rejects negative balance', function () {
+    it('rejects negative balance', function (): void {
         $response = apiPost('/api/giftcards', [
             'initialBalance' => -50.0,
         ], adminToken());
@@ -93,7 +93,7 @@ describe('POST /api/giftcards', function () {
         expect($response['status'])->toBeGreaterThanOrEqual(400);
     });
 
-    it('rejects balance over 10000', function () {
+    it('rejects balance over 10000', function (): void {
         $response = apiPost('/api/giftcards', [
             'initialBalance' => 10001.0,
         ], adminToken());
@@ -101,7 +101,7 @@ describe('POST /api/giftcards', function () {
         expect($response['status'])->toBeGreaterThanOrEqual(400);
     });
 
-    it('rejects duplicate custom code', function () {
+    it('rejects duplicate custom code', function (): void {
         $code = 'TEST-DUP-' . time();
 
         // Create first
@@ -124,9 +124,9 @@ describe('POST /api/giftcards', function () {
 
 });
 
-describe('GraphQL Gift Card mutations', function () {
+describe('GraphQL Gift Card mutations', function (): void {
 
-    it('creates a gift card via GraphQL', function () {
+    it('creates a gift card via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             createGiftcardGiftCard(input: {
@@ -159,7 +159,7 @@ describe('GraphQL Gift Card mutations', function () {
         registerGiftCardCode($gc['code']);
     });
 
-    it('creates a gift card with recipient info via GraphQL', function () {
+    it('creates a gift card with recipient info via GraphQL', function (): void {
         $code = 'GQL-' . time();
 
         $query = <<<GRAPHQL
@@ -198,7 +198,7 @@ describe('GraphQL Gift Card mutations', function () {
         registerGiftCardCode($code);
     });
 
-    it('adjusts gift card balance via GraphQL', function () {
+    it('adjusts gift card balance via GraphQL', function (): void {
         // First create a gift card
         $code = 'ADJ-' . time();
 
@@ -248,7 +248,7 @@ describe('GraphQL Gift Card mutations', function () {
         expect((float) $gc['initialBalance'])->toBe(100.0);
     });
 
-    it('rejects adjusting non-existent gift card', function () {
+    it('rejects adjusting non-existent gift card', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             adjustGiftcardBalanceGiftCard(input: {
@@ -267,7 +267,7 @@ describe('GraphQL Gift Card mutations', function () {
         expect($response['json'])->toHaveKey('errors');
     });
 
-    it('rejects unauthenticated gift card creation', function () {
+    it('rejects unauthenticated gift card creation', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             createGiftcardGiftCard(input: {
@@ -285,7 +285,7 @@ describe('GraphQL Gift Card mutations', function () {
         expect($response['json'])->toHaveKey('errors');
     });
 
-    it('rejects customer-only token for gift card creation', function () {
+    it('rejects customer-only token for gift card creation', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             createGiftcardGiftCard(input: {

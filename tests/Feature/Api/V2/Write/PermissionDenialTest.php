@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Permission Boundaries - Token Types', function () {
+describe('Permission Boundaries - Token Types', function (): void {
 
-    it('allows all operations with "all" permission', function () {
+    it('allows all operations with "all" permission', function (): void {
         $token = serviceToken(['all']);
 
         // Create a CMS page
@@ -41,7 +41,7 @@ describe('Permission Boundaries - Token Types', function () {
         expect($delete['status'])->toBeIn([200, 204]);
     });
 
-    it('denies with expired token', function () {
+    it('denies with expired token', function (): void {
         $response = apiPost('/api/cms-pages', [
             'identifier' => 'test-expired',
             'title' => 'Expired Token',
@@ -52,7 +52,7 @@ describe('Permission Boundaries - Token Types', function () {
         expect($response['json']['message'] ?? '')->toContain('expired');
     });
 
-    it('denies with invalid token (wrong secret)', function () {
+    it('denies with invalid token (wrong secret)', function (): void {
         $response = apiPost('/api/cms-pages', [
             'identifier' => 'test-invalid',
             'title' => 'Invalid Token',
@@ -62,12 +62,12 @@ describe('Permission Boundaries - Token Types', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('allows public GET without any token', function () {
+    it('allows public GET without any token', function (): void {
         $response = apiGet('/api/products');
         expect($response['status'])->toBe(200);
     });
 
-    it('denies POST without any token', function () {
+    it('denies POST without any token', function (): void {
         $response = apiPost('/api/cms-pages', [
             'identifier' => 'test-notoken',
             'title' => 'No Token',
@@ -78,9 +78,9 @@ describe('Permission Boundaries - Token Types', function () {
 
 });
 
-describe('Permission Boundaries - Cross-Resource Denial', function () {
+describe('Permission Boundaries - Cross-Resource Denial', function (): void {
 
-    it('denies CMS page write with only blog permissions', function () {
+    it('denies CMS page write with only blog permissions', function (): void {
         $token = serviceToken(['blog-posts/write']);
         $response = apiPost('/api/cms-pages', [
             'identifier' => 'test-cross-resource',
@@ -91,7 +91,7 @@ describe('Permission Boundaries - Cross-Resource Denial', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies CMS block write with only CMS page permissions', function () {
+    it('denies CMS block write with only CMS page permissions', function (): void {
         $token = serviceToken(['cms-pages/write']);
         $response = apiPost('/api/cms-blocks', [
             'identifier' => 'test-cross-block',
@@ -102,7 +102,7 @@ describe('Permission Boundaries - Cross-Resource Denial', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies blog post write with only CMS block permissions', function () {
+    it('denies blog post write with only CMS block permissions', function (): void {
         $token = serviceToken(['cms-blocks/write']);
         $response = apiPost('/api/blog-posts', [
             'title' => 'Cross Resource Post',
@@ -113,7 +113,7 @@ describe('Permission Boundaries - Cross-Resource Denial', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies media upload with only CMS permissions', function () {
+    it('denies media upload with only CMS permissions', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
@@ -128,9 +128,9 @@ describe('Permission Boundaries - Cross-Resource Denial', function () {
 
 });
 
-describe('Permission Boundaries - Operation-Level Denial', function () {
+describe('Permission Boundaries - Operation-Level Denial', function (): void {
 
-    it('denies delete with only write permission (CMS pages)', function () {
+    it('denies delete with only write permission (CMS pages)', function (): void {
         $writeToken = serviceToken(['cms-pages/write']);
         $allToken = serviceToken(['all']);
 
@@ -158,7 +158,7 @@ describe('Permission Boundaries - Operation-Level Denial', function () {
         apiDelete("/api/cms-pages/{$pageId}", $allToken);
     });
 
-    it('denies delete with only write permission (blog posts)', function () {
+    it('denies delete with only write permission (blog posts)', function (): void {
         $writeToken = serviceToken(['blog-posts/write']);
         $allToken = serviceToken(['all']);
 
@@ -181,7 +181,7 @@ describe('Permission Boundaries - Operation-Level Denial', function () {
         apiDelete("/api/blog-posts/{$postId}", $allToken);
     });
 
-    it('allows delete with specific delete permission', function () {
+    it('allows delete with specific delete permission', function (): void {
         $writeToken = serviceToken(['cms-pages/write']);
         $deleteToken = serviceToken(['cms-pages/delete']);
 
@@ -204,9 +204,9 @@ describe('Permission Boundaries - Operation-Level Denial', function () {
 
 });
 
-describe('Permission Boundaries - Empty Permissions', function () {
+describe('Permission Boundaries - Empty Permissions', function (): void {
 
-    it('denies everything with empty permissions array', function () {
+    it('denies everything with empty permissions array', function (): void {
         $token = serviceToken([]);
 
         // GET public endpoint still works (no auth required)

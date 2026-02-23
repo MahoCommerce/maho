@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('POST /api/carts', function () {
+describe('POST /api/carts', function (): void {
 
-    it('creates an empty cart', function () {
+    it('creates an empty cart', function (): void {
         $response = apiPost('/api/carts', [], customerToken());
 
         expect($response['status'])->toBeSuccessful();
@@ -25,7 +25,7 @@ describe('POST /api/carts', function () {
         expect($response['json'])->toHaveKey('id');
     })->skip('Cart POST processor not yet implemented');
 
-    it('returns cart with expected fields', function () {
+    it('returns cart with expected fields', function (): void {
         $response = apiPost('/api/carts', [], customerToken());
 
         expect($response['status'])->toBeSuccessful();
@@ -34,7 +34,7 @@ describe('POST /api/carts', function () {
         expect($cart)->toHaveKey('id');
     })->skip('Cart POST processor not yet implemented');
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiPost('/api/carts', []);
 
         expect($response['status'])->toBeUnauthorized();
@@ -42,9 +42,9 @@ describe('POST /api/carts', function () {
 
 });
 
-describe('GET /api/carts/{id}', function () {
+describe('GET /api/carts/{id}', function (): void {
 
-    it('returns cart details', function () {
+    it('returns cart details', function (): void {
         $createResponse = apiPost('/api/carts', [], customerToken());
         expect($createResponse['status'])->toBeSuccessful();
 
@@ -57,13 +57,13 @@ describe('GET /api/carts/{id}', function () {
         expect($response['json'])->toHaveKey('id');
     })->skip('Depends on cart creation');
 
-    it('returns 404 for non-existent cart', function () {
+    it('returns 404 for non-existent cart', function (): void {
         $response = apiGet('/api/carts/999999999', customerToken());
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiGet('/api/carts/1');
 
         expect($response['status'])->toBeUnauthorized();
@@ -74,9 +74,9 @@ describe('GET /api/carts/{id}', function () {
 /**
  * Regression tests for cart prices field
  */
-describe('Cart Prices Field (Regression)', function () {
+describe('Cart Prices Field (Regression)', function (): void {
 
-    it('returns prices object in guest cart response', function () {
+    it('returns prices object in guest cart response', function (): void {
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
 
@@ -99,7 +99,7 @@ describe('Cart Prices Field (Regression)', function () {
         expect($prices)->toHaveKey('grandTotal');
     });
 
-    it('includes thumbnailUrl in cart items', function () {
+    it('includes thumbnailUrl in cart items', function (): void {
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
 

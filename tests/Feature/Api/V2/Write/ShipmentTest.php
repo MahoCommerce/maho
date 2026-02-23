@@ -10,21 +10,21 @@ declare(strict_types=1);
  * @group write
  */
 
-describe('POST /api/orders/{orderId}/shipments', function () {
+describe('POST /api/orders/{orderId}/shipments', function (): void {
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiPost('/api/orders/1/shipments', []);
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('returns 404 for non-existent order', function () {
+    it('returns 404 for non-existent order', function (): void {
         $response = apiPost('/api/orders/999999999/shipments', [], adminToken());
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('creates a full shipment for a shippable order', function () {
+    it('creates a full shipment for a shippable order', function (): void {
         // Find an order that can be shipped
         $orderId = findShippableOrderId();
 
@@ -48,7 +48,7 @@ describe('POST /api/orders/{orderId}/shipments', function () {
         expect($response['json']['items'])->toBeArray();
     });
 
-    it('creates a shipment with tracking info', function () {
+    it('creates a shipment with tracking info', function (): void {
         $orderId = findShippableOrderId();
 
         if (!$orderId) {
@@ -76,15 +76,15 @@ describe('POST /api/orders/{orderId}/shipments', function () {
 
 });
 
-describe('GET /api/orders/{orderId}/shipments', function () {
+describe('GET /api/orders/{orderId}/shipments', function (): void {
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiGet('/api/orders/1/shipments');
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('returns shipments for an order', function () {
+    it('returns shipments for an order', function (): void {
         $orderId = findOrderWithShipments();
 
         if (!$orderId) {
@@ -100,21 +100,21 @@ describe('GET /api/orders/{orderId}/shipments', function () {
 
 });
 
-describe('GET /api/shipments/{id}', function () {
+describe('GET /api/shipments/{id}', function (): void {
 
-    it('requires authentication', function () {
+    it('requires authentication', function (): void {
         $response = apiGet('/api/shipments/1');
 
         expect($response['status'])->toBeUnauthorized();
     });
 
-    it('returns 404 for non-existent shipment', function () {
+    it('returns 404 for non-existent shipment', function (): void {
         $response = apiGet('/api/shipments/999999999', adminToken());
 
         expect($response['status'])->toBeNotFound();
     });
 
-    it('returns shipment details', function () {
+    it('returns shipment details', function (): void {
         $shipmentId = findAnyShipmentId();
 
         if (!$shipmentId) {
@@ -133,9 +133,9 @@ describe('GET /api/shipments/{id}', function () {
 
 });
 
-describe('GraphQL Shipment mutations', function () {
+describe('GraphQL Shipment mutations', function (): void {
 
-    it('creates a shipment via GraphQL', function () {
+    it('creates a shipment via GraphQL', function (): void {
         $orderId = findShippableOrderId();
 
         if (!$orderId) {
@@ -173,7 +173,7 @@ describe('GraphQL Shipment mutations', function () {
         expect($shipment['items'])->toBeArray();
     });
 
-    it('rejects unauthenticated shipment creation', function () {
+    it('rejects unauthenticated shipment creation', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             createShipmentShipment(input: {
@@ -194,9 +194,9 @@ describe('GraphQL Shipment mutations', function () {
 
 });
 
-describe('GraphQL Shipment queries', function () {
+describe('GraphQL Shipment queries', function (): void {
 
-    it('returns shipment by ID', function () {
+    it('returns shipment by ID', function (): void {
         $shipmentId = findAnyShipmentId();
 
         if (!$shipmentId) {

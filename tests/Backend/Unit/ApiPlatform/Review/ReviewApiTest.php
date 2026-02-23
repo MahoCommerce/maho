@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Review DTO', function () {
-    it('has correct default values', function () {
+describe('Review DTO', function (): void {
+    it('has correct default values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Review();
 
         expect($dto->id)->toBeNull();
@@ -29,8 +29,8 @@ describe('Review DTO', function () {
     });
 });
 
-describe('Review DTO - property assignment', function () {
-    it('accepts all property values', function () {
+describe('Review DTO - property assignment', function (): void {
+    it('accepts all property values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Review();
         $dto->id = 123;
         $dto->productId = 456;
@@ -56,8 +56,8 @@ describe('Review DTO - property assignment', function () {
     });
 });
 
-describe('ReviewProcessor - validation', function () {
-    it('validates rating bounds - minimum value', function () {
+describe('ReviewProcessor - validation', function (): void {
+    it('validates rating bounds - minimum value', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Review();
         $dto->rating = 0;
 
@@ -65,7 +65,7 @@ describe('ReviewProcessor - validation', function () {
             ->and($dto->rating)->not->toBeGreaterThanOrEqual(1);
     });
 
-    it('validates rating bounds - maximum value', function () {
+    it('validates rating bounds - maximum value', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Review();
         $dto->rating = 6;
 
@@ -73,7 +73,7 @@ describe('ReviewProcessor - validation', function () {
             ->and($dto->rating)->not->toBeLessThanOrEqual(5);
     });
 
-    it('validates rating bounds - valid ratings in range', function () {
+    it('validates rating bounds - valid ratings in range', function (): void {
         $validRatings = [1, 2, 3, 4, 5];
 
         foreach ($validRatings as $rating) {
@@ -85,7 +85,7 @@ describe('ReviewProcessor - validation', function () {
         }
     });
 
-    it('verifies rating is within valid bounds', function () {
+    it('verifies rating is within valid bounds', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Review();
 
         // Test each valid rating
@@ -103,15 +103,15 @@ describe('ReviewProcessor - validation', function () {
     });
 });
 
-describe('Review - status mapping', function () {
-    it('maps status constants to string values', function () {
+describe('Review - status mapping', function (): void {
+    it('maps status constants to string values', function (): void {
         // Test that the Review model constants exist and have expected values
         expect(\Mage_Review_Model_Review::STATUS_APPROVED)->toBe(1);
         expect(\Mage_Review_Model_Review::STATUS_PENDING)->toBe(2);
         expect(\Mage_Review_Model_Review::STATUS_NOT_APPROVED)->toBe(3);
     });
 
-    it('uses correct status string values in DTO', function () {
+    it('uses correct status string values in DTO', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Review();
 
         // Test pending status (default)
@@ -126,7 +126,7 @@ describe('Review - status mapping', function () {
         expect($dto->status)->toBe('not_approved');
     });
 
-    it('verifies status values match expected constants', function () {
+    it('verifies status values match expected constants', function (): void {
         // Map of status IDs to expected string values
         $statusMap = [
             \Mage_Review_Model_Review::STATUS_PENDING => 'pending',
@@ -134,7 +134,7 @@ describe('Review - status mapping', function () {
             \Mage_Review_Model_Review::STATUS_NOT_APPROVED => 'not_approved',
         ];
 
-        foreach ($statusMap as $statusId => $expectedString) {
+        foreach ($statusMap as $expectedString) {
             $dto = new \Maho\ApiPlatform\ApiResource\Review();
             $dto->status = $expectedString;
 

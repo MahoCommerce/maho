@@ -9,18 +9,18 @@ declare(strict_types=1);
  * All tests are READ-ONLY (safe for synced database).
  */
 
-describe('API v2 Authentication', function () {
+describe('API v2 Authentication', function (): void {
 
-    describe('without token', function () {
+    describe('without token', function (): void {
 
-        it('rejects requests to protected endpoints without token', function () {
+        it('rejects requests to protected endpoints without token', function (): void {
             // Use /api/customers/me which requires authentication (not public like /api/products)
             $response = apiGet('/api/customers/me');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('returns proper error message for missing token', function () {
+        it('returns proper error message for missing token', function (): void {
             $response = apiGet('/api/customers/me');
 
             expect($response['status'])->toBe(401);
@@ -31,15 +31,15 @@ describe('API v2 Authentication', function () {
 
     });
 
-    describe('with invalid token', function () {
+    describe('with invalid token', function (): void {
 
-        it('rejects requests with malformed token', function () {
+        it('rejects requests with malformed token', function (): void {
             $response = apiGet('/api/customers/me', 'not-a-valid-jwt-token');
 
             expect($response['status'])->toBeUnauthorized();
         });
 
-        it('rejects requests with token signed by wrong secret', function () {
+        it('rejects requests with token signed by wrong secret', function (): void {
             $response = apiGet('/api/customers/me', invalidToken());
 
             expect($response['status'])->toBeUnauthorized();
@@ -47,9 +47,9 @@ describe('API v2 Authentication', function () {
 
     });
 
-    describe('with expired token', function () {
+    describe('with expired token', function (): void {
 
-        it('rejects requests with expired token', function () {
+        it('rejects requests with expired token', function (): void {
             $response = apiGet('/api/customers/me', expiredToken());
 
             expect($response['status'])->toBeUnauthorized();
@@ -58,15 +58,15 @@ describe('API v2 Authentication', function () {
 
     });
 
-    describe('with valid customer token', function () {
+    describe('with valid customer token', function (): void {
 
-        it('accepts requests with valid customer token', function () {
+        it('accepts requests with valid customer token', function (): void {
             $response = apiGet('/api/products', customerToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('can access product list', function () {
+        it('can access product list', function (): void {
             $response = apiGet('/api/products', customerToken());
 
             expect($response['status'])->toBe(200);
@@ -76,15 +76,15 @@ describe('API v2 Authentication', function () {
 
     });
 
-    describe('with valid admin token', function () {
+    describe('with valid admin token', function (): void {
 
-        it('accepts requests with valid admin token', function () {
+        it('accepts requests with valid admin token', function (): void {
             $response = apiGet('/api/products', adminToken());
 
             expect($response['status'])->toBeSuccessful();
         });
 
-        it('can access admin-level endpoints', function () {
+        it('can access admin-level endpoints', function (): void {
             // Test with a single order endpoint instead of collection
             // Collection endpoints require additional provider implementation
             $response = apiGet('/api/products', adminToken());
@@ -95,9 +95,9 @@ describe('API v2 Authentication', function () {
 
     });
 
-    describe('token payload validation', function () {
+    describe('token payload validation', function (): void {
 
-        it('rejects token without subject claim', function () {
+        it('rejects token without subject claim', function (): void {
             // Generate token without 'sub' claim
             $token = \Tests\Helpers\ApiV2Helper::generateToken([
                 'sub' => null,
@@ -114,9 +114,9 @@ describe('API v2 Authentication', function () {
 
 });
 
-describe('API v2 Public Endpoints', function () {
+describe('API v2 Public Endpoints', function (): void {
 
-    it('allows access to API documentation without auth', function () {
+    it('allows access to API documentation without auth', function (): void {
         $response = apiGet('/api/docs');
 
         // Docs should be publicly accessible

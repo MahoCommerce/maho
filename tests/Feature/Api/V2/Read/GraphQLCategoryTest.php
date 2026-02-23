@@ -12,9 +12,9 @@ declare(strict_types=1);
  * @group graphql
  */
 
-describe('GraphQL Categories Collection Query', function () {
+describe('GraphQL Categories Collection Query', function (): void {
 
-    it('returns a list of categories', function () {
+    it('returns a list of categories', function (): void {
         $query = <<<'GRAPHQL'
         {
             categoriesCategories {
@@ -48,7 +48,7 @@ describe('GraphQL Categories Collection Query', function () {
         expect($category)->toHaveKey('level');
     });
 
-    it('supports parentId filter', function () {
+    it('supports parentId filter', function (): void {
         $query = <<<'GRAPHQL'
         {
             categoriesCategories(parentId: 2) {
@@ -76,9 +76,9 @@ describe('GraphQL Categories Collection Query', function () {
 
 });
 
-describe('GraphQL Single Category Query', function () {
+describe('GraphQL Single Category Query', function (): void {
 
-    it('returns a single category by IRI', function () {
+    it('returns a single category by IRI', function (): void {
         $categoryId = fixtures('category_id');
         $iri = "/api/categories/{$categoryId}";
 
@@ -108,7 +108,7 @@ describe('GraphQL Single Category Query', function () {
         expect($category['name'])->toBeString();
     });
 
-    it('returns null for non-existent category', function () {
+    it('returns null for non-existent category', function (): void {
         $iri = '/api/categories/999999';
 
         $query = <<<GRAPHQL
@@ -131,9 +131,9 @@ describe('GraphQL Single Category Query', function () {
 
 });
 
-describe('GraphQL Category By URL Key Query', function () {
+describe('GraphQL Category By URL Key Query', function (): void {
 
-    it('returns category by URL key', function () {
+    it('returns category by URL key', function (): void {
         // First get a category to know a valid URL key
         $query = <<<'GRAPHQL'
         {

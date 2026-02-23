@@ -12,8 +12,8 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Address DTO', function () {
-    it('has correct default values', function () {
+describe('Address DTO', function (): void {
+    it('has correct default values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
 
         expect($dto->id)->toBeNull();
@@ -33,8 +33,8 @@ describe('Address DTO', function () {
     });
 });
 
-describe('Address DTO - property assignment', function () {
-    it('accepts all property values', function () {
+describe('Address DTO - property assignment', function (): void {
+    it('accepts all property values', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->id = 123;
         $dto->customerId = 456;
@@ -68,8 +68,8 @@ describe('Address DTO - property assignment', function () {
     });
 });
 
-describe('AddressProvider - mapToDto', function () {
-    it('maps address model to DTO correctly', function () {
+describe('AddressProvider - mapToDto', function (): void {
+    it('maps address model to DTO correctly', function (): void {
         // Load a real customer with addresses from the database
         $customerCollection = Mage::getModel('customer/customer')->getCollection()
             ->addAttributeToSelect('*')
@@ -137,8 +137,8 @@ describe('AddressProvider - mapToDto', function () {
     });
 });
 
-describe('AddressProcessor - validation', function () {
-    beforeEach(function () {
+describe('AddressProcessor - validation', function (): void {
+    beforeEach(function (): void {
         $this->processor = new \Maho\ApiPlatform\State\Processor\AddressProcessor(
             $this->createMock(\Symfony\Bundle\SecurityBundle\Security::class),
         );
@@ -148,7 +148,7 @@ describe('AddressProcessor - validation', function () {
         $this->validateMethod->setAccessible(true);
     });
 
-    it('throws exception when firstName is empty', function () {
+    it('throws exception when firstName is empty', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = '';
         $dto->lastName = 'Doe';
@@ -162,7 +162,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('throws exception when lastName is empty', function () {
+    it('throws exception when lastName is empty', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = '';
@@ -176,7 +176,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('throws exception when street is empty', function () {
+    it('throws exception when street is empty', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -190,7 +190,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('throws exception when street contains only empty strings', function () {
+    it('throws exception when street contains only empty strings', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -204,7 +204,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('throws exception when city is empty', function () {
+    it('throws exception when city is empty', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -218,7 +218,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('throws exception when postcode is empty', function () {
+    it('throws exception when postcode is empty', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -232,7 +232,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('throws exception when countryId is empty', function () {
+    it('throws exception when countryId is empty', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -246,7 +246,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('throws exception when telephone is empty', function () {
+    it('throws exception when telephone is empty', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -260,7 +260,7 @@ describe('AddressProcessor - validation', function () {
             ->toThrow(\Symfony\Component\HttpKernel\Exception\BadRequestHttpException::class);
     });
 
-    it('passes validation with all required fields', function () {
+    it('passes validation with all required fields', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -276,7 +276,7 @@ describe('AddressProcessor - validation', function () {
         expect(true)->toBeTrue(); // Test passes if no exception is thrown
     });
 
-    it('passes validation with optional fields populated', function () {
+    it('passes validation with optional fields populated', function (): void {
         $dto = new \Maho\ApiPlatform\ApiResource\Address();
         $dto->firstName = 'John';
         $dto->lastName = 'Doe';
@@ -296,8 +296,8 @@ describe('AddressProcessor - validation', function () {
     });
 });
 
-describe('AddressProcessor - mapToDto', function () {
-    it('produces same output as AddressProvider mapToDto', function () {
+describe('AddressProcessor - mapToDto', function (): void {
+    it('produces same output as AddressProvider mapToDto', function (): void {
         // Load a real customer with addresses
         $customerCollection = Mage::getModel('customer/customer')->getCollection()
             ->addAttributeToSelect('*')
@@ -370,8 +370,8 @@ describe('AddressProcessor - mapToDto', function () {
     });
 });
 
-describe('Address - default billing/shipping detection', function () {
-    it('correctly detects default billing and shipping addresses', function () {
+describe('Address - default billing/shipping detection', function (): void {
+    it('correctly detects default billing and shipping addresses', function (): void {
         // Load a customer
         $customerCollection = Mage::getModel('customer/customer')->getCollection()
             ->addAttributeToSelect('*')
@@ -459,7 +459,7 @@ describe('Address - default billing/shipping detection', function () {
         $customer->save();
     });
 
-    it('handles customer with no default addresses', function () {
+    it('handles customer with no default addresses', function (): void {
         // Load a customer
         $customerCollection = Mage::getModel('customer/customer')->getCollection()
             ->addAttributeToSelect('*')

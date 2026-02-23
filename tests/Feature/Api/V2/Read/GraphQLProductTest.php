@@ -12,9 +12,9 @@ declare(strict_types=1);
  * @group graphql
  */
 
-describe('GraphQL Products Collection Query', function () {
+describe('GraphQL Products Collection Query', function (): void {
 
-    it('returns a list of products', function () {
+    it('returns a list of products', function (): void {
         $query = <<<'GRAPHQL'
         {
             productsProducts(pageSize: 5) {
@@ -50,7 +50,7 @@ describe('GraphQL Products Collection Query', function () {
         expect($product)->toHaveKey('stockStatus');
     });
 
-    it('returns product IDs as IRI strings', function () {
+    it('returns product IDs as IRI strings', function (): void {
         $query = <<<'GRAPHQL'
         {
             productsProducts(pageSize: 1) {
@@ -79,7 +79,7 @@ describe('GraphQL Products Collection Query', function () {
         expect($product['_id'])->toBeInt();
     });
 
-    it('supports search filter', function () {
+    it('supports search filter', function (): void {
         $query = <<<'GRAPHQL'
         {
             productsProducts(search: "dress", pageSize: 5) {
@@ -99,7 +99,7 @@ describe('GraphQL Products Collection Query', function () {
         expect($response['json']['data'])->toHaveKey('productsProducts');
     });
 
-    it('supports category filter', function () {
+    it('supports category filter', function (): void {
         $categoryId = fixtures('category_id');
 
         $query = <<<GRAPHQL
@@ -124,7 +124,7 @@ describe('GraphQL Products Collection Query', function () {
         expect($edges)->not->toBeEmpty();
     });
 
-    it('supports price range filter', function () {
+    it('supports price range filter', function (): void {
         $query = <<<'GRAPHQL'
         {
             productsProducts(priceMin: 50, priceMax: 200, pageSize: 5) {
@@ -153,9 +153,9 @@ describe('GraphQL Products Collection Query', function () {
 
 });
 
-describe('GraphQL Single Product Query', function () {
+describe('GraphQL Single Product Query', function (): void {
 
-    it('returns a single product by IRI', function () {
+    it('returns a single product by IRI', function (): void {
         $productId = fixtures('product_id');
         $iri = "/api/products/{$productId}";
 
@@ -186,7 +186,7 @@ describe('GraphQL Single Product Query', function () {
         expect($product['name'])->toBeString();
     });
 
-    it('returns null for non-existent product', function () {
+    it('returns null for non-existent product', function (): void {
         $invalidId = fixtures('invalid_product_id');
         $iri = "/api/products/{$invalidId}";
 
@@ -210,9 +210,9 @@ describe('GraphQL Single Product Query', function () {
 
 });
 
-describe('GraphQL Product By SKU Query', function () {
+describe('GraphQL Product By SKU Query', function (): void {
 
-    it('returns product by SKU', function () {
+    it('returns product by SKU', function (): void {
         $sku = fixtures('product_sku');
 
         $query = <<<GRAPHQL
@@ -245,9 +245,9 @@ describe('GraphQL Product By SKU Query', function () {
 
 });
 
-describe('GraphQL Category Products Query', function () {
+describe('GraphQL Category Products Query', function (): void {
 
-    it('returns products for a category', function () {
+    it('returns products for a category', function (): void {
         $categoryId = fixtures('category_id');
 
         $query = <<<GRAPHQL

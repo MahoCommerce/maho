@@ -12,13 +12,13 @@ declare(strict_types=1);
  * @group graphql
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('GraphQL Review - Product Reviews Query', function () {
+describe('GraphQL Review - Product Reviews Query', function (): void {
 
-    it('returns reviews for a product', function () {
+    it('returns reviews for a product', function (): void {
         $productId = fixtures('product_id');
 
         $query = <<<GRAPHQL
@@ -48,12 +48,12 @@ describe('GraphQL Review - Product Reviews Query', function () {
 
 });
 
-describe('GraphQL Review - Submit Review Mutation', function () {
+describe('GraphQL Review - Submit Review Mutation', function (): void {
 
     /**
      * Regression: submitReview was reading args instead of args.input
      */
-    it('submits a review successfully (regression: args vs args.input)', function () {
+    it('submits a review successfully (regression: args vs args.input)', function (): void {
         $productId = fixtures('product_id');
         $timestamp = time();
 
@@ -100,7 +100,7 @@ describe('GraphQL Review - Submit Review Mutation', function () {
         }
     });
 
-    it('returns error when required fields are missing', function () {
+    it('returns error when required fields are missing', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             submitReviewReview(input: {
@@ -125,9 +125,9 @@ describe('GraphQL Review - Submit Review Mutation', function () {
 
 });
 
-describe('GraphQL Review - My Reviews Query', function () {
+describe('GraphQL Review - My Reviews Query', function (): void {
 
-    it('returns customer reviews when authenticated', function () {
+    it('returns customer reviews when authenticated', function (): void {
         $query = <<<'GRAPHQL'
         {
             myReviewsReviews {

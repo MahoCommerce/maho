@@ -17,7 +17,7 @@ declare(strict_types=1);
  * @group graphql
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
@@ -53,9 +53,9 @@ function createGqlCart(?string $token = null): array
     return $response;
 }
 
-describe('GraphQL Cart - Create Cart Mutation', function () {
+describe('GraphQL Cart - Create Cart Mutation', function (): void {
 
-    it('creates a cart with maskedId', function () {
+    it('creates a cart with maskedId', function (): void {
         $response = createGqlCart();
 
         expect($response['status'])->toBe(200);
@@ -72,9 +72,9 @@ describe('GraphQL Cart - Create Cart Mutation', function () {
 
 });
 
-describe('GraphQL Cart - Query Cart', function () {
+describe('GraphQL Cart - Query Cart', function (): void {
 
-    it('returns cart by maskedId with prices field', function () {
+    it('returns cart by maskedId with prices field', function (): void {
         $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
@@ -110,9 +110,9 @@ describe('GraphQL Cart - Query Cart', function () {
 
 });
 
-describe('GraphQL Cart - Add To Cart Mutation', function () {
+describe('GraphQL Cart - Add To Cart Mutation', function (): void {
 
-    it('adds item to cart and returns updated cart with prices', function () {
+    it('adds item to cart and returns updated cart with prices', function (): void {
         $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
@@ -156,7 +156,7 @@ describe('GraphQL Cart - Add To Cart Mutation', function () {
         }
     });
 
-    it('returns error for invalid SKU', function () {
+    it('returns error for invalid SKU', function (): void {
         $createResponse = createGqlCart();
         expect($createResponse['status'])->toBe(200);
 
@@ -180,9 +180,9 @@ describe('GraphQL Cart - Add To Cart Mutation', function () {
 
 });
 
-describe('GraphQL Cart - Update Item Quantity', function () {
+describe('GraphQL Cart - Update Item Quantity', function (): void {
 
-    it('updates item quantity in cart', function () {
+    it('updates item quantity in cart', function (): void {
         // Create cart and add item via REST (more reliable for getting item ID)
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
@@ -221,9 +221,9 @@ describe('GraphQL Cart - Update Item Quantity', function () {
 
 });
 
-describe('GraphQL Cart - Remove Item', function () {
+describe('GraphQL Cart - Remove Item', function (): void {
 
-    it('removes item from cart', function () {
+    it('removes item from cart', function (): void {
         $createResponse = apiPost('/api/guest-carts', []);
         expect($createResponse['status'])->toBe(201);
         trackCreated('quote', (int) $createResponse['json']['id']);
@@ -261,9 +261,9 @@ describe('GraphQL Cart - Remove Item', function () {
 
 });
 
-describe('GraphQL Cart - Apply Coupon', function () {
+describe('GraphQL Cart - Apply Coupon', function (): void {
 
-    it('returns error for invalid coupon', function () {
+    it('returns error for invalid coupon', function (): void {
         $createResponse = createGqlCart();
         $maskedId = $createResponse['json']['data']['createCartCart']['cart']['maskedId'];
 

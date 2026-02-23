@@ -1,5 +1,14 @@
 <?php
 
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
 // This file is auto-generated and is for apps only. Bundles SHOULD NOT rely on its content.
 
 namespace Symfony\Component\DependencyInjection\Loader\Configurator;

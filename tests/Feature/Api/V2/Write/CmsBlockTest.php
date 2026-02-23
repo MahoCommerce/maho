@@ -11,13 +11,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('CMS Block Permission Enforcement (REST)', function () {
+describe('CMS Block Permission Enforcement (REST)', function (): void {
 
-    it('denies create without authentication', function () {
+    it('denies create without authentication', function (): void {
         $response = apiPost('/api/cms-blocks', [
             'identifier' => 'test-block-noauth',
             'title' => 'Test Block No Auth',
@@ -27,7 +27,7 @@ describe('CMS Block Permission Enforcement (REST)', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies create with customer token (wrong role)', function () {
+    it('denies create with customer token (wrong role)', function (): void {
         $response = apiPost('/api/cms-blocks', [
             'identifier' => 'test-block-customer',
             'title' => 'Test Block Customer',
@@ -37,7 +37,7 @@ describe('CMS Block Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies create without correct permission', function () {
+    it('denies create without correct permission', function (): void {
         $token = serviceToken(['cms-pages/write']);
         $response = apiPost('/api/cms-blocks', [
             'identifier' => 'test-block-noperm',
@@ -50,9 +50,9 @@ describe('CMS Block Permission Enforcement (REST)', function () {
 
 });
 
-describe('CMS Block CRUD Lifecycle (REST)', function () {
+describe('CMS Block CRUD Lifecycle (REST)', function (): void {
 
-    it('creates → reads → updates → verifies → delete-denied → deletes → confirms gone', function () {
+    it('creates → reads → updates → verifies → delete-denied → deletes → confirms gone', function (): void {
         $writeToken = serviceToken(['cms-blocks/write']);
         $deleteToken = serviceToken(['cms-blocks/delete']);
 
@@ -107,9 +107,9 @@ describe('CMS Block CRUD Lifecycle (REST)', function () {
 
 });
 
-describe('CMS Block CRUD with "all" permission', function () {
+describe('CMS Block CRUD with "all" permission', function (): void {
 
-    it('full lifecycle with "all" permission', function () {
+    it('full lifecycle with "all" permission', function (): void {
         $token = serviceToken(['all']);
 
         // Create
@@ -146,9 +146,9 @@ describe('CMS Block CRUD with "all" permission', function () {
 
 });
 
-describe('CMS Block via GraphQL (read)', function () {
+describe('CMS Block via GraphQL (read)', function (): void {
 
-    it('reads blocks collection via GraphQL', function () {
+    it('reads blocks collection via GraphQL', function (): void {
         $query = <<<'GRAPHQL'
         {
             cmsBlocksCmsBlocks {
@@ -172,7 +172,7 @@ describe('CMS Block via GraphQL (read)', function () {
         expect($response['json']['data'])->toHaveKey('cmsBlocksCmsBlocks');
     });
 
-    it('creates block via REST then reads by identifier via GraphQL', function () {
+    it('creates block via REST then reads by identifier via GraphQL', function (): void {
         $token = serviceToken(['cms-blocks/write', 'cms-blocks/delete']);
 
         // Create via REST

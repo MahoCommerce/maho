@@ -13,9 +13,9 @@ declare(strict_types=1);
  * @group graphql
  */
 
-describe('GraphQL CMS Pages', function () {
+describe('GraphQL CMS Pages', function (): void {
 
-    it('returns CMS pages collection', function () {
+    it('returns CMS pages collection', function (): void {
         $query = <<<'GRAPHQL'
         {
             cmsPagesCmsPages {
@@ -50,7 +50,7 @@ describe('GraphQL CMS Pages', function () {
      * Regression: Custom QueryCollection with identifier filter
      * Previously, custom query operations without `id` returned null
      */
-    it('supports identifier filter on custom query (regression)', function () {
+    it('supports identifier filter on custom query (regression)', function (): void {
         $query = <<<'GRAPHQL'
         {
             cmsPagesCmsPages(identifier: "home") {
@@ -78,7 +78,7 @@ describe('GraphQL CMS Pages', function () {
         }
     });
 
-    it('returns single CMS page by IRI', function () {
+    it('returns single CMS page by IRI', function (): void {
         // First get a page ID
         $listQuery = <<<'GRAPHQL'
         {
@@ -125,9 +125,9 @@ describe('GraphQL CMS Pages', function () {
 
 });
 
-describe('GraphQL Blog Posts', function () {
+describe('GraphQL Blog Posts', function (): void {
 
-    it('returns blog posts collection', function () {
+    it('returns blog posts collection', function (): void {
         $query = <<<'GRAPHQL'
         {
             blogPostsBlogPosts {
@@ -155,7 +155,7 @@ describe('GraphQL Blog Posts', function () {
      * Regression: Custom QueryCollection with urlKey filter
      * Previously, custom query operations without `id` returned null
      */
-    it('supports urlKey filter on custom query (regression)', function () {
+    it('supports urlKey filter on custom query (regression)', function (): void {
         // First get an existing blog post URL key
         $listQuery = <<<'GRAPHQL'
         {
@@ -205,7 +205,7 @@ describe('GraphQL Blog Posts', function () {
         expect($filteredEdges[0]['node']['urlKey'])->toBe($urlKey);
     });
 
-    it('returns single blog post by IRI', function () {
+    it('returns single blog post by IRI', function (): void {
         $listQuery = <<<'GRAPHQL'
         {
             blogPostsBlogPosts {

@@ -11,14 +11,14 @@ declare(strict_types=1);
 
 uses(Tests\MahoBackendTestCase::class);
 
-describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
-    beforeEach(function () {
+describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function (): void {
+    beforeEach(function (): void {
         // Clean API products cache before each test
         Mage::app()->getCache()->clean(['API_PRODUCTS']);
     });
 
-    describe('Cache Tag Cleaning', function () {
-        it('cleans cache with API_PRODUCTS tag', function () {
+    describe('Cache Tag Cleaning', function (): void {
+        it('cleans cache with API_PRODUCTS tag', function (): void {
             $cache = Mage::app()->getCache();
 
             // Store a value with the API_PRODUCTS tag
@@ -34,7 +34,7 @@ describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
             expect($cache->load('api_products_test_key'))->toBeFalse();
         });
 
-        it('does not clean cache with different tags', function () {
+        it('does not clean cache with different tags', function (): void {
             $cache = Mage::app()->getCache();
 
             // Store values with different tags
@@ -53,8 +53,8 @@ describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
         });
     });
 
-    describe('Observer Methods', function () {
-        it('invalidates cache on product save', function () {
+    describe('Observer Methods', function (): void {
+        it('invalidates cache on product save', function (): void {
             $cache = Mage::app()->getCache();
             $observer = new Maho_ApiPlatform_Model_Observer();
 
@@ -70,7 +70,7 @@ describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
             expect($cache->load('api_products_category_5'))->toBeFalse();
         });
 
-        it('invalidates cache on category save', function () {
+        it('invalidates cache on category save', function (): void {
             $cache = Mage::app()->getCache();
             $observer = new Maho_ApiPlatform_Model_Observer();
 
@@ -86,7 +86,7 @@ describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
             expect($cache->load('api_products_category_10'))->toBeFalse();
         });
 
-        it('invalidates cache on stock update', function () {
+        it('invalidates cache on stock update', function (): void {
             $cache = Mage::app()->getCache();
             $observer = new Maho_ApiPlatform_Model_Observer();
 
@@ -102,7 +102,7 @@ describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
             expect($cache->load('api_products_stock_test'))->toBeFalse();
         });
 
-        it('invalidates cache on price rule application', function () {
+        it('invalidates cache on price rule application', function (): void {
             $cache = Mage::app()->getCache();
             $observer = new Maho_ApiPlatform_Model_Observer();
 
@@ -119,8 +119,8 @@ describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
         });
     });
 
-    describe('Multiple Cache Entries', function () {
-        it('cleans all entries with API_PRODUCTS tag', function () {
+    describe('Multiple Cache Entries', function (): void {
+        it('cleans all entries with API_PRODUCTS tag', function (): void {
             $cache = Mage::app()->getCache();
             $observer = new Maho_ApiPlatform_Model_Observer();
 
@@ -149,8 +149,8 @@ describe('Maho_ApiPlatform_Model_Observer Cache Invalidation', function () {
     });
 });
 
-describe('ProductProvider Cache Integration', function () {
-    it('generates consistent cache keys for same parameters', function () {
+describe('ProductProvider Cache Integration', function (): void {
+    it('generates consistent cache keys for same parameters', function (): void {
         // Use reflection to test the private method
         $provider = new \Maho\ApiPlatform\State\Provider\ProductProvider();
         $reflection = new ReflectionClass($provider);
@@ -166,7 +166,7 @@ describe('ProductProvider Cache Integration', function () {
         expect($key1)->toBe($key2);
     });
 
-    it('generates different cache keys for different parameters', function () {
+    it('generates different cache keys for different parameters', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\ProductProvider();
         $reflection = new ReflectionClass($provider);
         $method = $reflection->getMethod('getCollectionCacheKey');
@@ -185,7 +185,7 @@ describe('ProductProvider Cache Integration', function () {
         expect($key2)->not->toBe($key3);
     });
 
-    it('ignores empty filter values in cache key', function () {
+    it('ignores empty filter values in cache key', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\ProductProvider();
         $reflection = new ReflectionClass($provider);
         $method = $reflection->getMethod('getCollectionCacheKey');
@@ -200,7 +200,7 @@ describe('ProductProvider Cache Integration', function () {
         expect($key1)->toBe($key2);
     });
 
-    it('sorts filter keys for consistent cache keys', function () {
+    it('sorts filter keys for consistent cache keys', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\ProductProvider();
         $reflection = new ReflectionClass($provider);
         $method = $reflection->getMethod('getCollectionCacheKey');
@@ -217,8 +217,8 @@ describe('ProductProvider Cache Integration', function () {
     });
 });
 
-describe('ProductProvider DTO Serialization', function () {
-    it('converts Product DTO to array correctly', function () {
+describe('ProductProvider DTO Serialization', function (): void {
+    it('converts Product DTO to array correctly', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\ProductProvider();
         $reflection = new ReflectionClass($provider);
         $method = $reflection->getMethod('productDtoToArray');
@@ -243,7 +243,7 @@ describe('ProductProvider DTO Serialization', function () {
         expect($array['categoryIds'])->toBe([5, 10]);
     });
 
-    it('reconstructs Product DTO from array correctly', function () {
+    it('reconstructs Product DTO from array correctly', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\ProductProvider();
         $reflection = new ReflectionClass($provider);
         $method = $reflection->getMethod('arrayToProductDto');
@@ -275,7 +275,7 @@ describe('ProductProvider DTO Serialization', function () {
         expect($dto->averageRating)->toBe(4.5);
     });
 
-    it('round-trips Product DTO through cache serialization', function () {
+    it('round-trips Product DTO through cache serialization', function (): void {
         $provider = new \Maho\ApiPlatform\State\Provider\ProductProvider();
         $reflection = new ReflectionClass($provider);
         $toArray = $reflection->getMethod('productDtoToArray');

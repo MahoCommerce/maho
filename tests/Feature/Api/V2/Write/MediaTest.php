@@ -16,9 +16,9 @@ declare(strict_types=1);
  * @group write
  */
 
-describe('Media Upload Permission Enforcement (REST)', function () {
+describe('Media Upload Permission Enforcement (REST)', function (): void {
 
-    it('denies upload without authentication', function () {
+    it('denies upload without authentication', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
@@ -30,7 +30,7 @@ describe('Media Upload Permission Enforcement (REST)', function () {
         expect($response['status'])->toBe(401);
     });
 
-    it('denies upload with customer token (wrong role)', function () {
+    it('denies upload with customer token (wrong role)', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
@@ -42,7 +42,7 @@ describe('Media Upload Permission Enforcement (REST)', function () {
         expect($response['status'])->toBeForbidden();
     });
 
-    it('denies upload without correct permission', function () {
+    it('denies upload without correct permission', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'test_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
@@ -57,9 +57,9 @@ describe('Media Upload Permission Enforcement (REST)', function () {
 
 });
 
-describe('Media Upload (REST)', function () {
+describe('Media Upload (REST)', function (): void {
 
-    it('uploads an image with correct permission and verifies response', function () {
+    it('uploads an image with correct permission and verifies response', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(2, 2);
         $red = imagecolorallocate($img, 255, 0, 0);
@@ -96,7 +96,7 @@ describe('Media Upload (REST)', function () {
         expect($response['json']['dimensions'])->toHaveKey('height');
     });
 
-    it('uploads with custom folder', function () {
+    it('uploads with custom folder', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
@@ -115,7 +115,7 @@ describe('Media Upload (REST)', function () {
         expect($response['json']['path'])->toContain('test/subfolder');
     });
 
-    it('uploads with "all" permission', function () {
+    it('uploads with "all" permission', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);
@@ -135,7 +135,7 @@ describe('Media Upload (REST)', function () {
     });
 
 
-    it('deletes uploaded media file', function () {
+    it('deletes uploaded media file', function (): void {
         $tmpFile = tempnam(sys_get_temp_dir(), 'pest_media_') . '.png';
         $img = imagecreatetruecolor(1, 1);
         imagepng($img, $tmpFile);

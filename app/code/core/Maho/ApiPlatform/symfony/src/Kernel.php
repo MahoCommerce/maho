@@ -188,7 +188,7 @@ class Kernel extends BaseKernel
             return;
         }
 
-        spl_autoload_register(function (string $class) use ($namespaces) {
+        spl_autoload_register(function (string $class) use ($namespaces): void {
             foreach ($namespaces as $prefix => $baseDir) {
                 $prefixLen = strlen($prefix);
                 if (strncmp($prefix, $class, $prefixLen) === 0) {

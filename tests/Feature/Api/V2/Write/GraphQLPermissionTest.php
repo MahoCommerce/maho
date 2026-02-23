@@ -15,13 +15,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('GraphQL Public Queries', function () {
+describe('GraphQL Public Queries', function (): void {
 
-    it('allows public product query without auth', function () {
+    it('allows public product query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
             productsProducts {
@@ -42,7 +42,7 @@ describe('GraphQL Public Queries', function () {
         expect($response['json']['data'])->toHaveKey('productsProducts');
     });
 
-    it('allows public category query without auth', function () {
+    it('allows public category query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
             categoriesCategories {
@@ -62,7 +62,7 @@ describe('GraphQL Public Queries', function () {
         expect($response['json']['data'])->toHaveKey('categoriesCategories');
     });
 
-    it('allows public CMS page query without auth', function () {
+    it('allows public CMS page query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
             cmsPagesCmsPages {
@@ -82,7 +82,7 @@ describe('GraphQL Public Queries', function () {
         expect($response['json']['data'])->toHaveKey('cmsPagesCmsPages');
     });
 
-    it('allows public blog post query without auth', function () {
+    it('allows public blog post query without auth', function (): void {
         $query = <<<'GRAPHQL'
         {
             blogPostsBlogPosts {
@@ -104,9 +104,9 @@ describe('GraphQL Public Queries', function () {
 
 });
 
-describe('GraphQL Mutation Permissions', function () {
+describe('GraphQL Mutation Permissions', function (): void {
 
-    it('denies cart creation without valid masked ID', function () {
+    it('denies cart creation without valid masked ID', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             createCartCart(input: { maskedId: "invalid" }) {
@@ -122,7 +122,7 @@ describe('GraphQL Mutation Permissions', function () {
         expect($errors)->not->toBeEmpty();
     });
 
-    it('denies review submission without auth', function () {
+    it('denies review submission without auth', function (): void {
         $query = <<<'GRAPHQL'
         mutation {
             submitReviewReview(input: {
@@ -143,7 +143,7 @@ describe('GraphQL Mutation Permissions', function () {
         expect($errors)->not->toBeEmpty();
     });
 
-    it('allows query with service token', function () {
+    it('allows query with service token', function (): void {
         $token = serviceToken(['all']);
 
         $query = <<<'GRAPHQL'
@@ -165,7 +165,7 @@ describe('GraphQL Mutation Permissions', function () {
         expect($response['json']['errors'] ?? [])->toBeEmpty();
     });
 
-    it('allows query with customer token', function () {
+    it('allows query with customer token', function (): void {
         $token = customerToken();
 
         $query = <<<'GRAPHQL'
@@ -186,7 +186,7 @@ describe('GraphQL Mutation Permissions', function () {
         expect($response['json'])->toHaveKey('data');
     });
 
-    it('denies query with expired token', function () {
+    it('denies query with expired token', function (): void {
         $token = expiredToken();
 
         $query = <<<'GRAPHQL'
@@ -212,7 +212,7 @@ describe('GraphQL Mutation Permissions', function () {
         }
     });
 
-    it('denies query with invalid token', function () {
+    it('denies query with invalid token', function (): void {
         $token = invalidToken();
 
         $query = <<<'GRAPHQL'

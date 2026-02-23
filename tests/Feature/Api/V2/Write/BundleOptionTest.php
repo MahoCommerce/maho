@@ -8,13 +8,13 @@ declare(strict_types=1);
  * @group write
  */
 
-afterAll(function () {
+afterAll(function (): void {
     cleanupTestData();
 });
 
-describe('Bundle Options — CRUD Lifecycle', function () {
+describe('Bundle Options — CRUD Lifecycle', function (): void {
 
-    it('creates a bundle product, adds option with selections, reads, deletes', function () {
+    it('creates a bundle product, adds option with selections, reads, deletes', function (): void {
         $token = serviceToken(['products/write', 'products/delete', 'products/read']);
         $suffix = substr(uniqid(), -6);
 
@@ -84,7 +84,7 @@ describe('Bundle Options — CRUD Lifecycle', function () {
         expect(count($emptyOptions))->toBe(0);
     });
 
-    it('rejects bundle operations on a simple product', function () {
+    it('rejects bundle operations on a simple product', function (): void {
         $token = serviceToken(['products/write', 'products/delete']);
         $suffix = substr(uniqid(), -6);
         $simple = apiPost('/api/products', [
