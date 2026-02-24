@@ -28,11 +28,8 @@ if ($requestPath !== '/') {
         'zip', 'gz', 'tar', 'rar', '7z',
     ];
     if (in_array($ext, $staticExts, true)) {
-        $realPath = realpath(__DIR__ . $requestPath);
-        if ($realPath === false || !str_starts_with($realPath, __DIR__)) {
-            http_response_code(404);
-            exit;
-        }
+        http_response_code(404);
+        exit;
     }
 }
 
