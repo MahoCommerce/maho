@@ -21,7 +21,7 @@ if ($requestPath !== '/') {
     $ext = strtolower(pathinfo($requestPath, PATHINFO_EXTENSION));
     $staticExts = [
         'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg', 'svgz', 'ico', 'bmp', 'apng',
-        'css', 'js', 'mjs', 'map',
+        'css', 'js', 'mjs', 'map', 'json', 'xml',
         'woff', 'woff2', 'ttf', 'otf', 'eot',
         'mp3', 'mp4', 'ogg', 'webm', 'wav', 'flac', 'aac', 'm4a', 'm4v', 'ogv', 'mov',
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
