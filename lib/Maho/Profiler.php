@@ -37,6 +37,7 @@ class Profiler
         'mage::app::init_front_controller',
         'dispatch.controller.action',
         'OBSERVER:',
+        'BLOCK:',
         'cron.job',
         'email.send',
     ];
