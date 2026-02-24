@@ -131,24 +131,31 @@ class Mage_Core_Model_Cache
      */
     public function load(string $id): mixed
     {
-        $item = $this->getCacheAdapter()->getItem($this->_id($id)); // @phpstan-ignore method.internalClass
-        if ($item->isHit()) {
-            return $item->get();
+        \Maho\Profiler::start('cache.load', ['cache.key' => $id]);
+        try {
+            $item = $this->getCacheAdapter()->getItem($this->_id($id)); // @phpstan-ignore method.internalClass
+            return $item->isHit() ? $item->get() : false;
+        } finally {
+            \Maho\Profiler::stop('cache.load');
         }
-        return false;
     }
 
     public function save(mixed $data, string $id, array $tags = [], ?int $lifeTime = null): bool
     {
-        $cacheItem = $this->cacheAdapter->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
-            ->set($data)
-            ->tag($this->_tags($tags));
+        \Maho\Profiler::start('cache.save', ['cache.key' => $id, 'cache.tags' => implode(',', $tags)]);
+        try {
+            $cacheItem = $this->cacheAdapter->getItem($this->_id($id)) // @phpstan-ignore method.internalClass
+                ->set($data)
+                ->tag($this->_tags($tags));
 
-        if ($lifeTime) {
-            $cacheItem->expiresAfter($lifeTime);
+            if ($lifeTime) {
+                $cacheItem->expiresAfter($lifeTime);
+            }
+
+            return $this->cacheAdapter->save($cacheItem); // @phpstan-ignore method.internalClass
+        } finally {
+            \Maho\Profiler::stop('cache.save');
         }
-
-        return $this->cacheAdapter->save($cacheItem); // @phpstan-ignore method.internalClass
     }
 
     /**
@@ -164,7 +171,12 @@ class Mage_Core_Model_Cache
      */
     public function remove(string $id): bool
     {
-        return $this->cacheAdapter->deleteItem($this->_id($id)); // @phpstan-ignore method.internalClass
+        \Maho\Profiler::start('cache.remove', ['cache.key' => $id]);
+        try {
+            return $this->cacheAdapter->deleteItem($this->_id($id)); // @phpstan-ignore method.internalClass
+        } finally {
+            \Maho\Profiler::stop('cache.remove');
+        }
     }
 
     /**
@@ -172,20 +184,24 @@ class Mage_Core_Model_Cache
      */
     public function clean(array|string $tags = []): bool
     {
-        $args = func_get_args();
-        if (count($args) > 1 && is_array($args[1])) {
-            $tags = $args[1];
-        }
+        \Maho\Profiler::start('cache.clean');
+        try {
+            $args = func_get_args();
+            if (count($args) > 1 && is_array($args[1])) {
+                $tags = $args[1];
+            }
 
-        if (!empty($tags) && !is_array($tags)) {
-            $tags = [$tags];
-        }
+            if (!empty($tags) && !is_array($tags)) {
+                $tags = [$tags];
+            }
 
-        if (is_array($tags) && count($tags) > 0) {
-            return $this->cacheAdapter->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
+            if (is_array($tags) && count($tags) > 0) {
+                return $this->cacheAdapter->invalidateTags($this->_tags($tags)); // @phpstan-ignore method.internalClass
+            }
+            return $this->flush();
+        } finally {
+            \Maho\Profiler::stop('cache.clean');
         }
-
-        return $this->flush();
     }
 
     public function prune(): bool
@@ -198,7 +214,12 @@ class Mage_Core_Model_Cache
 
     public function flush(): bool
     {
-        return $this->cacheAdapter->clear(); // @phpstan-ignore method.internalClass
+        \Maho\Profiler::start('cache.flush');
+        try {
+            return $this->cacheAdapter->clear(); // @phpstan-ignore method.internalClass
+        } finally {
+            \Maho\Profiler::stop('cache.flush');
+        }
     }
 
     /**

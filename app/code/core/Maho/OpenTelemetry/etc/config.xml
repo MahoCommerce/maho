@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_OpenTelemetry>
+            <version>25.02.0</version>
+        </Maho_OpenTelemetry>
+    </modules>
+
+    <global>
+        <models>
+            <opentelemetry>
+                <class>Maho_OpenTelemetry_Model</class>
+            </opentelemetry>
+        </models>
+
+        <helpers>
+            <opentelemetry>
+                <class>Maho_OpenTelemetry_Helper</class>
+            </opentelemetry>
+        </helpers>
+
+        <!-- Default configuration -->
+        <opentelemetry>
+            <enabled>0</enabled>
+            <service_name>maho-store</service_name>
+            <endpoint></endpoint>
+            <sampling_rate>0.1</sampling_rate><!-- 10% default sampling -->
+            <export_logs>0</export_logs><!-- Opt-in for log export -->
+            <headers></headers>
+        </opentelemetry>
+    </global>
+
+    <default>
+        <dev>
+            <opentelemetry>
+                <enabled>0</enabled>
+                <service_name>maho-store</service_name>
+                <endpoint></endpoint>
+                <sampling_rate>0.1</sampling_rate>
+                <export_logs>0</export_logs>
+            </opentelemetry>
+        </dev>
+    </default>
+</config>

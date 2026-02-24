@@ -20,6 +20,28 @@ class Profiler
     private static bool $_enabled = false;
     private static bool $_memory_get_usage = false;
 
+    /**
+     * Stack of active OpenTelemetry spans indexed by timer name
+     * @var array<string, \Maho_OpenTelemetry_Model_Span>
+     */
+    private static array $_spans = [];
+
+    /**
+     * Profiler timer prefixes that should create OpenTelemetry spans.
+     * Only meaningful high-level operations are included to avoid noise.
+     */
+    private static array $_spanPrefixes = [
+        'mage::app::init',
+        'mage::app::dispatch',
+        'mage::dispatch',
+        'mage::app::init_front_controller',
+        'dispatch.controller.action',
+        'OBSERVER:',
+        'BLOCK:',
+        'cron.job',
+        'email.send',
+    ];
+
     public static function enable(): void
     {
         self::$_enabled = true;
@@ -59,9 +81,26 @@ class Profiler
         self::$_timers[$timerName]['count']++;
     }
 
-    public static function start(string $timerName): void
+    /**
+     * Start profiling timer and create OpenTelemetry span
+     *
+     * @param string $timerName The name for the profiler timer (will be used as span name)
+     * @param array $attributes Optional OpenTelemetry span attributes
+     */
+    public static function start(string $timerName, array $attributes = []): void
     {
         self::resume($timerName);
+
+        // Create OTel span for meaningful profiler timers
+        $tracer = \Mage::getTracer();
+        if ($tracer) {
+            foreach (self::$_spanPrefixes as $prefix) {
+                if (str_starts_with($timerName, $prefix)) {
+                    self::$_spans[$timerName] = $tracer->startSpan($timerName, $attributes);
+                    break;
+                }
+            }
+        }
     }
 
     public static function pause(string $timerName): void
@@ -88,6 +127,16 @@ class Profiler
     public static function stop(string $timerName): void
     {
         self::pause($timerName);
+
+        // End corresponding OTel span if one was created
+        if (isset(self::$_spans[$timerName])) {
+            try {
+                self::$_spans[$timerName]->end();
+            } catch (\Throwable $e) {
+                // Don't let span errors affect profiler
+            }
+            unset(self::$_spans[$timerName]);
+        }
     }
 
     public static function fetch(string $timerName, string $key = 'sum'): false|array|int|float

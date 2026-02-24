@@ -93,6 +93,21 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         }
     }
 
+    // Record as OpenTelemetry span event (non-blocking, no-op if tracer disabled)
+    Mage::getTracer()?->getActiveSpan()?->addEvent('php.error', [
+        'error.type' => match ($errno) {
+            E_ERROR => 'error', E_WARNING => 'warning', E_PARSE => 'parse_error',
+            E_NOTICE => 'notice', E_CORE_ERROR => 'core_error', E_CORE_WARNING => 'core_warning',
+            E_COMPILE_ERROR => 'compile_error', E_COMPILE_WARNING => 'compile_warning',
+            E_USER_ERROR => 'user_error', E_USER_WARNING => 'user_warning',
+            E_USER_NOTICE => 'user_notice', E_RECOVERABLE_ERROR => 'recoverable_error',
+            E_DEPRECATED => 'deprecated', default => "unknown_$errno",
+        },
+        'error.message' => $errstr,
+        'code.filepath' => $errfile,
+        'code.lineno' => $errline,
+    ]);
+
     $errorMessage = '';
 
     match ($errno) {

@@ -900,49 +900,61 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      */
     final public function toHtml()
     {
-        Mage::dispatchEvent('core_block_abstract_to_html_before', ['block' => $this]);
-        if (Mage::getStoreConfig('advanced/modules_disable_output/' . $this->getModuleName())) {
-            return '';
-        }
-        $html = $this->_loadCache();
-        if ($html === false) {
-            $translate = Mage::getSingleton('core/translate');
-            /** @var Mage_Core_Model_Translate $translate */
-            if ($this->hasData('translate_inline')) {
-                $translate->setTranslateInline($this->getData('translate_inline'));
+        $blockName = $this->getNameInLayout() ?: get_class($this);
+        $timerName = 'BLOCK:' . $blockName;
+        \Maho\Profiler::start($timerName, [
+            'block.class' => get_class($this),
+            'block.name' => $blockName,
+            'block.template' => $this->getTemplate() ?: '',
+        ]);
+
+        try {
+            Mage::dispatchEvent('core_block_abstract_to_html_before', ['block' => $this]);
+            if (Mage::getStoreConfig('advanced/modules_disable_output/' . $this->getModuleName())) {
+                return '';
+            }
+            $html = $this->_loadCache();
+            if ($html === false) {
+                $translate = Mage::getSingleton('core/translate');
+                /** @var Mage_Core_Model_Translate $translate */
+                if ($this->hasData('translate_inline')) {
+                    $translate->setTranslateInline($this->getData('translate_inline'));
+                }
+
+                $this->_beforeToHtml();
+                $html = $this->_toHtml();
+                $this->_saveCache($html);
+
+                if ($this->hasData('translate_inline')) {
+                    $translate->setTranslateInline(true);
+                }
+            }
+            $html = $this->_afterToHtml($html);
+
+            /**
+             * Check framing options
+             */
+            if ($this->_frameOpenTag) {
+                $html = '<' . $this->_frameOpenTag . '>' . $html . '<' . $this->_frameCloseTag . '>';
             }
 
-            $this->_beforeToHtml();
-            $html = $this->_toHtml();
-            $this->_saveCache($html);
-
-            if ($this->hasData('translate_inline')) {
-                $translate->setTranslateInline(true);
+            /**
+             * Use single transport object instance for all blocks
+             */
+            if (self::$_transportObject === null) {
+                self::$_transportObject = new \Maho\DataObject();
             }
-        }
-        $html = $this->_afterToHtml($html);
+            self::$_transportObject->setHtml($html);
+            Mage::dispatchEvent(
+                'core_block_abstract_to_html_after',
+                ['block' => $this, 'transport' => self::$_transportObject],
+            );
+            $html = self::$_transportObject->getHtml();
 
-        /**
-         * Check framing options
-         */
-        if ($this->_frameOpenTag) {
-            $html = '<' . $this->_frameOpenTag . '>' . $html . '<' . $this->_frameCloseTag . '>';
+            return $html;
+        } finally {
+            \Maho\Profiler::stop($timerName);
         }
-
-        /**
-         * Use single transport object instance for all blocks
-         */
-        if (self::$_transportObject === null) {
-            self::$_transportObject = new \Maho\DataObject();
-        }
-        self::$_transportObject->setHtml($html);
-        Mage::dispatchEvent(
-            'core_block_abstract_to_html_after',
-            ['block' => $this, 'transport' => self::$_transportObject],
-        );
-        $html = self::$_transportObject->getHtml();
-
-        return $html;
     }
 
     /**

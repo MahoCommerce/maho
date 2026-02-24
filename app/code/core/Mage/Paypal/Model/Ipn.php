@@ -116,7 +116,7 @@ class Mage_Paypal_Model_Ipn
         $postbackUrl = $this->_config->getPostbackUrl();
         $this->_debugData['postback_to'] = $postbackUrl;
 
-        $client = \Symfony\Component\HttpClient\HttpClient::create([
+        $client = \Maho\Http\Client::create([
             'verify_peer' => $this->_config->verifyPeer,
         ]);
 
