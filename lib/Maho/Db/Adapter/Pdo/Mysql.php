@@ -295,21 +295,13 @@ class Mysql extends AbstractPdoAdapter
     #[\Override]
     public function query(string|\Maho\Db\Select $sql, array|int|string|float $bind = []): \Maho\Db\Statement\Pdo\Mysql
     {
-        // OpenTelemetry: Start span if tracer available (fast null check)
-        $span = \Mage::startSpan('db.query', [
-            'db.system' => 'mysql',
-            'db.name' => $this->_config['dbname'] ?? '',
-        ]);
-
         $this->_debugTimer();
+        $span = null;
         try {
             $this->_checkDdlTransaction($sql);
             $this->_prepareQuery($sql, $bind);
 
-            // OpenTelemetry: Add SQL operation type after _prepareQuery() converts to string
-            if ($span) {
-                $span->setAttribute('db.operation', $this->_getOperationType((string) $sql));
-            }
+            $span = $this->_startQuerySpan($sql, $bind);
 
             // Connect if not already connected
             $this->_connect();
@@ -329,12 +321,10 @@ class Mysql extends AbstractPdoAdapter
             // Wrap the result in \Maho\Db\Statement\Pdo\Mysql for compatibility
             $result = new \Maho\Db\Statement\Pdo\Mysql($this, $result);
 
-            // OpenTelemetry: Mark span as successful
             $span?->setStatus('ok');
         } catch (\Exception $e) {
             $this->_debugStat(self::DEBUG_QUERY, $sql, $bind);
 
-            // OpenTelemetry: Record error in span (avoid recordException to prevent leaking SQL with bind values)
             $span?->setStatus('error', $e::class . ': ' . ($e->getCode() ?: 'unknown'));
 
             // Detect implicit rollback - MySQL SQLSTATE: ER_LOCK_WAIT_TIMEOUT or ER_LOCK_DEADLOCK
@@ -352,7 +342,6 @@ class Mysql extends AbstractPdoAdapter
 
             $this->_debugException($e);
         } finally {
-            // OpenTelemetry: End span
             $span?->end();
         }
         $this->_debugStat(self::DEBUG_QUERY, $sql, $bind, $result);
@@ -4076,17 +4065,10 @@ class Mysql extends AbstractPdoAdapter
         return $value;
     }
 
-    /**
-     * Get SQL operation type (SELECT, INSERT, UPDATE, DELETE, etc.)
-     *
-     * @param string $sql SQL query string
-     * @return string Operation type in uppercase
-     */
-    protected function _getOperationType(string $sql): string
+    #[\Override]
+    protected function _getDbSystem(): string
     {
-        $sql = trim($sql);
-        $firstSpace = strpos($sql, ' ');
-        return $firstSpace !== false ? strtoupper(substr($sql, 0, $firstSpace)) : 'UNKNOWN';
+        return 'mysql';
     }
 
     /**
