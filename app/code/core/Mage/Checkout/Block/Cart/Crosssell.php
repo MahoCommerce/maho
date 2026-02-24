@@ -155,6 +155,7 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
         $this->_addProductAttributesAndPrices($collection);
 
         Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($collection);
+        // Always filter out-of-stock regardless of setting, since cart crosssell items are meant for immediate purchase
         Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
 
         return $collection;
