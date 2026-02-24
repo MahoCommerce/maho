@@ -1677,13 +1677,15 @@ abstract class AbstractPdoAdapter implements AdapterInterface
      * Start an OpenTelemetry span for a database query
      *
      * Call after _prepareQuery() so $sql is a string and $bind is normalized.
+     * The SQL is sent with ? placeholders only — bind values are never included
+     * to avoid leaking sensitive data (passwords, tokens, encrypted CC numbers).
      */
     protected function _startQuerySpan(string $sql, array $bind): ?\Maho_OpenTelemetry_Model_Span
     {
         $span = \Mage::startSpan('db.query', [
             'db.system' => $this->_getDbSystem(),
             'db.name' => $this->_config['dbname'] ?? '',
-            'db.statement' => $this->_interpolateQuery($sql, $bind),
+            'db.statement' => $sql,
             'db.operation' => $this->_getOperationType($sql),
         ]);
 
@@ -1703,41 +1705,6 @@ abstract class AbstractPdoAdapter implements AdapterInterface
     protected function _getDbSystem(): string
     {
         return 'other_sql';
-    }
-
-    /**
-     * Interpolate bind values into the SQL query for tracing
-     *
-     * Produces a human-readable query with actual values. This is only used
-     * for the trace span attribute, never for execution.
-     */
-    protected function _interpolateQuery(string $sql, array $bind): string
-    {
-        if (empty($bind)) {
-            return $sql;
-        }
-
-        $position = 0;
-        return preg_replace_callback('/\?/', function () use ($bind, &$position) {
-            if (!array_key_exists($position, $bind)) {
-                $position++;
-                return '?';
-            }
-            $value = $bind[$position];
-            $position++;
-            if ($value === null) {
-                return 'NULL';
-            }
-            if (is_int($value) || is_float($value)) {
-                return (string) $value;
-            }
-            // Truncate long values to keep spans manageable
-            $str = (string) $value;
-            if (strlen($str) > 100) {
-                $str = substr($str, 0, 100) . '...';
-            }
-            return "'" . addslashes($str) . "'";
-        }, $sql);
     }
 
     /**
