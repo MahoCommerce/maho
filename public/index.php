@@ -20,20 +20,12 @@ $requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '/';
 if ($requestPath !== '/') {
     $ext = strtolower(pathinfo($requestPath, PATHINFO_EXTENSION));
     $staticExts = [
-        // Images
         'jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'svg', 'svgz', 'ico', 'bmp', 'apng',
-        // Fonts
-        'woff', 'woff2', 'ttf', 'otf', 'eot',
-        // CSS/JS
         'css', 'js', 'mjs', 'map',
-        // Audio/Video
+        'woff', 'woff2', 'ttf', 'otf', 'eot',
         'mp3', 'mp4', 'ogg', 'webm', 'wav', 'flac', 'aac', 'm4a', 'm4v', 'ogv', 'mov',
-        // Documents
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
-        // Archives
         'zip', 'gz', 'tar', 'rar', '7z',
-        // Other
-        'swf',
     ];
     if (in_array($ext, $staticExts, true)) {
         $realPath = realpath(__DIR__ . $requestPath);
