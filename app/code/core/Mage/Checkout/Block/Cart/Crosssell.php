@@ -155,7 +155,9 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
         $this->_addProductAttributesAndPrices($collection);
 
         Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($collection);
-        Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+        if (!Mage::helper('cataloginventory')->isShowOutOfStock()) {
+            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($collection);
+        }
 
         return $collection;
     }
