@@ -124,6 +124,11 @@ $table = $connection
         $installer->getIdxName('blog/category', ['level']),
         ['level'],
     )
+    ->addIndex(
+        $installer->getIdxName('blog/category', ['url_key', 'parent_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
+        ['url_key', 'parent_id'],
+        ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
+    )
     ->addForeignKey(
         $installer->getFkName('blog/category', 'entity_type_id', 'eav/entity_type', 'entity_type_id'),
         'entity_type_id',
