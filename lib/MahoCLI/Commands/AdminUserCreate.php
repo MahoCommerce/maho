@@ -32,6 +32,7 @@ class AdminUserCreate extends BaseMahoCommand
         $this->initMaho();
 
         $role = Mage::getModel('admin/roles')->getCollection()
+            ->addFieldToFilter('role_type', 'G')
             ->addFieldToFilter('tree_level', 1)
             ->setOrder('role_id', 'ASC')
             ->getFirstItem();
@@ -63,7 +64,7 @@ class AdminUserCreate extends BaseMahoCommand
         $email = $questionHelper->ask($input, $output, $question);
         $email = trim($email);
         if (!strlen($email)) {
-            $output->writeln('<error>Username cannot be empty</error>');
+            $output->writeln('<error>Email cannot be empty</error>');
             return Command::INVALID;
         }
 
