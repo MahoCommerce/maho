@@ -535,9 +535,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function saveFile(): self
+    public function saveFile(): \Intervention\Image\EncodedImage
     {
-        match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
+        $encoded = match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
             IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
             IMAGETYPE_GIF => $this->getImage()->toGif(),
             IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
@@ -547,8 +547,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $filename = $this->getNewFile();
         @mkdir(dirname($filename), recursive: true);
-        $this->getImage()->save($filename);
-        return $this;
+        $encoded->save($filename);
+
+        return $encoded;
     }
 
     public function getUrl(): string

@@ -64,6 +64,8 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         $model->setTransformParams($params);
         $model->setBaseFile($params['_sourceFile']);
 
+        // Process image on cache miss (race condition: another request may have
+        // already generated this file, in which case we just serve from disk)
         if (!$model->isCached()) {
             if ($params['_angle'] != 0) {
                 $model->rotate($params['_angle']);
@@ -72,21 +74,20 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
             if (isset($params['_watermarkFile'])) {
                 $model->setWatermark($params['_watermarkFile']);
             }
-            $model->saveFile();
+            $encoded = $model->saveFile();
+
+            $this->getResponse()
+                ->setHeader('Content-Type', $encoded->mediaType())
+                ->setHeader('Content-Length', (string) $encoded->size())
+                ->setHeader('Cache-Control', 'public, max-age=31536000, immutable')
+                ->setBody((string) $encoded);
+            return;
         }
 
-        // Serve the image
+        // Serve cached file from disk (race condition path)
         $file = $model->getNewFile();
-        $mime = match ((int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
-            IMAGETYPE_AVIF => 'image/avif',
-            IMAGETYPE_GIF  => 'image/gif',
-            IMAGETYPE_JPEG => 'image/jpeg',
-            IMAGETYPE_PNG  => 'image/png',
-            default        => 'image/webp',
-        };
-
         $this->getResponse()
-            ->setHeader('Content-Type', $mime)
+            ->setHeader('Content-Type', mime_content_type($file))
             ->setHeader('Content-Length', (string) filesize($file))
             ->setHeader('Cache-Control', 'public, max-age=31536000, immutable')
             ->setBody(file_get_contents($file));
