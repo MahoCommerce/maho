@@ -342,6 +342,40 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
+     * Hydrate the model from a transform params array (inverse of getTransformParams).
+     */
+    public function setTransformParams(array $params): self
+    {
+        $this->setDestinationSubdir($params['sub']);
+        $this->setWidth($params['w']);
+        $this->setHeight($params['h']);
+        $this->setQuality($params['q']);
+        $this->setKeepAspectRatio($params['ar']);
+        $this->setKeepFrame($params['fr']);
+        $this->setKeepTransparency($params['tr']);
+        $this->setConstrainOnly($params['co']);
+        $this->setBackgroundColor(array_map(
+            fn($hex) => hexdec($hex),
+            str_split($params['bg'], 2),
+        ));
+        $this->setAngle($params['an']);
+
+        if (isset($params['wm'])) {
+            $this->setWatermarkFile($params['wm']);
+            $this->setWatermarkImageOpacity($params['wmo']);
+            $this->setWatermarkPosition($params['wmp']);
+            if ($params['wmw']) {
+                $this->setWatermarkWidth($params['wmw']);
+            }
+            if ($params['wmh']) {
+                $this->setWatermarkHeigth($params['wmh']);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
      * Return all transformation parameters that define the output image.
      * Used both for building cache path hashes and for signed URL token payloads.
      */
