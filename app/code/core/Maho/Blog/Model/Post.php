@@ -46,7 +46,7 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     public function getStores(): array
     {
         if (!$this->hasStores()) {
-            $stores = $this->_getResource()->lookupStoreIds($this->getId());
+            $stores = $this->_getResource()->lookupStoreIds((int) $this->getId());
             $this->setStores($stores);
         }
         $stores = $this->_getData('stores');

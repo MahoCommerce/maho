@@ -217,7 +217,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
     protected function _afterLoad(\Maho\DataObject $object): self
     {
         if ($object->getId()) {
-            $stores = $this->lookupStoreIds($object->getId());
+            $stores = $this->lookupStoreIds((int) $object->getId());
             $object->setData('stores', $stores);
         }
 
@@ -226,7 +226,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
 
     protected function _saveStoreRelations(\Maho\DataObject $category): void
     {
-        $oldStores = $this->lookupStoreIds($category->getId());
+        $oldStores = $this->lookupStoreIds((int) $category->getId());
         $newStores = (array) $category->getStores();
 
         $table = $this->_storeTable;
@@ -255,7 +255,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
 
     protected function _savePostRelations(\Maho\DataObject $category): void
     {
-        $oldPostIds = $this->lookupPostIds($category->getId());
+        $oldPostIds = $this->lookupPostIds((int) $category->getId());
         $newPostIds = (array) $category->getData('post_ids');
 
         $table = $this->_postCategoryTable;

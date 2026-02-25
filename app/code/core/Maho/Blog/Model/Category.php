@@ -50,7 +50,7 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
     public function getStores(): array
     {
         if (!$this->hasStores()) {
-            $stores = $this->_getResource()->lookupStoreIds($this->getId());
+            $stores = $this->_getResource()->lookupStoreIds((int) $this->getId());
             $this->setStores($stores);
         }
         $stores = $this->_getData('stores');
@@ -106,7 +106,7 @@ class Maho_Blog_Model_Category extends Mage_Core_Model_Abstract
     public function getPostIds(): array
     {
         if (!$this->hasData('post_ids')) {
-            $postIds = $this->_getResource()->lookupPostIds($this->getId());
+            $postIds = $this->_getResource()->lookupPostIds((int) $this->getId());
             $this->setData('post_ids', $postIds);
         }
         return $this->getData('post_ids') ?: [];

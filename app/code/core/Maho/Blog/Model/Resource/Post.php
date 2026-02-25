@@ -80,7 +80,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
 
     protected function _saveStoreRelations(\Maho\DataObject $post): void
     {
-        $oldStores = $this->lookupStoreIds($post->getId());
+        $oldStores = $this->lookupStoreIds((int) $post->getId());
         $newStores = (array) $post->getStores();
 
         $table = $this->_storeTable;
@@ -254,7 +254,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
     protected function _afterLoad(\Maho\DataObject $object): self
     {
         if ($object->getId()) {
-            $stores = $this->lookupStoreIds($object->getId());
+            $stores = $this->lookupStoreIds((int) $object->getId());
             $object->setData('stores', $stores);
 
             $categoryIds = $this->lookupCategoryIds($object->getId());
