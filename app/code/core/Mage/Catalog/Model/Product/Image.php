@@ -87,6 +87,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     protected $_watermarkImageOpacity = 70;
 
     /**
+     * Relative file path (e.g. /c/a/image.jpg) as originally passed to setBaseFile().
+     * Stored separately from _baseFile (which is absolute) to avoid exposing
+     * server filesystem paths in signed URL tokens.
+     */
+    protected ?string $_sourceFile = null;
+
+    /**
      * @var string directory
      */
     protected static $_baseMediaPath;
@@ -331,46 +338,66 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        // build new filename (most important params)
-        $path = [
+        // Store the relative file path for signed URL tokens
+        $this->_sourceFile = $file;
+
+        // build cache file path from transform params
+        $this->_newFile = Maho::buildImageResizeCachePath(
+            $this->getTransformParams(),
             self::$_baseMediaPath,
-            'cache',
-            Mage::app()->getStore()->getId(),
-            $path[] = $this->getDestinationSubdir(),
-        ];
-        if ((!empty($this->_width)) || (!empty($this->_height))) {
-            $path[] = "{$this->_width}x{$this->_height}";
-        }
-
-        // add misc params as a hash
-        $miscParams = [
-            ($this->_keepAspectRatio ? '' : 'non') . 'proportional',
-            ($this->_keepFrame ? '' : 'no') . 'frame',
-            ($this->_keepTransparency ? '' : 'no') . 'transparency',
-            ($this->_constrainOnly ? 'do' : 'not') . 'constrainonly',
-            $this->_backgroundColorStr,
-            'angle' . $this->_angle,
-            'quality' . $this->_quality,
-        ];
-
-        if ($this->getWatermarkFile()) {
-            $miscParams[] = $this->getWatermarkFile();
-            $miscParams[] = $this->getWatermarkImageOpacity();
-            $miscParams[] = $this->getWatermarkPosition();
-            $miscParams[] = $this->getWatermarkWidth();
-            $miscParams[] = $this->getWatermarkHeigth();
-        }
-
-        $path[] = md5(implode('_', $miscParams));
-
-        // replacing file extension based on target file type
-        $targetFileExtension = image_type_to_extension(Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
-        $file = preg_replace('/\.[^.]+$/', $targetFileExtension, $file);
-
-        // append prepared filename
-        $this->_newFile = implode('/', $path) . $file; // the $file contains heading slash
+            $file,
+        );
 
         return $this;
+    }
+
+    /**
+     * Allowlist of properties that define the image transformation.
+     * Used by both getTransformParams() and setTransformParams().
+     */
+    private const TRANSFORM_PARAMS = [
+        '_width',
+        '_height',
+        '_quality',
+        '_keepAspectRatio',
+        '_keepFrame',
+        '_keepTransparency',
+        '_constrainOnly',
+        '_backgroundColorStr',
+        '_sourceFile',
+        '_destinationSubdir',
+        '_angle',
+        '_watermarkFile',
+        '_watermarkPosition',
+        '_watermarkWidth',
+        '_watermarkHeigth',
+        '_watermarkImageOpacity',
+    ];
+
+    /**
+     * Hydrate the model from a transform params array (inverse of getTransformParams).
+     */
+    public function setTransformParams(array $params): self
+    {
+        foreach (self::TRANSFORM_PARAMS as $prop) {
+            if (array_key_exists($prop, $params)) {
+                $this->$prop = $params[$prop];
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * Return all transformation parameters that define the output image.
+     * Used both for building cache path hashes and for signed URL token payloads.
+     */
+    public function getTransformParams(): array
+    {
+        $params = [];
+        foreach (self::TRANSFORM_PARAMS as $prop) {
+            $params[$prop] = $this->$prop;
+        }
+        return $params;
     }
 
     /**
@@ -427,6 +454,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function rotate(float $angle): self
     {
         $angle = (int) $angle;
+        if ($angle % 360 === 0) {
+            return $this;
+        }
         $this->getImage()->rotate($angle, $this->_backgroundColorStr);
         return $this;
     }
@@ -509,7 +539,11 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
     public function saveFile(): self
     {
-        match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
+        $this->rotate($this->_angle);
+        $this->resize();
+        $this->setWatermark($this->_watermarkFile);
+
+        $encoded = match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
             IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
             IMAGETYPE_GIF => $this->getImage()->toGif(),
             IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
@@ -519,7 +553,8 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $filename = $this->getNewFile();
         @mkdir(dirname($filename), recursive: true);
-        $this->getImage()->save($filename);
+        $encoded->save($filename);
+
         return $this;
     }
 
