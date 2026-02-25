@@ -12,7 +12,7 @@
 $post = $this->getPost();
 ?>
 
-<div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
+<div class="blog_post_date"><?= $this->formatDate($post->getPublishDate() ?? $post->getCreatedAt()) ?></div>
 
 <?php if ($post->hasImage()): ?>
     <img class="blog_post_image" src="<?= $post->getImageUrl() ?>" alt="<?= $this->escapeHtml($post->getTitle()) ?>" />

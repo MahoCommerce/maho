@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  *
  * @method string getContent() Returns raw content. For frontend display, use getFilteredContent() instead.
- * @method string getPublishedAt()
+ * @method string getPublishDate()
  * @method string getTitle()
  * @method string getImage()
  */

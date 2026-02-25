@@ -1,5 +1,6 @@
 "-- Top Level --","-- Top Level --"
 "-- Use System Default --","-- Use System Default --"
+"A category with URL key ""%s"" already exists under the same parent.","A category with URL key ""%s"" already exists under the same parent."
 "Add Category","Add Category"
 "Add Post","Add Post"
 "Blog","Blog"

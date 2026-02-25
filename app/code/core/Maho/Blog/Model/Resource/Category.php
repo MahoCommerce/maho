@@ -53,19 +53,7 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
 
     public function getStaticAttributeCodes(): array
     {
-        return [
-            'parent_id',
-            'path',
-            'level',
-            'position',
-            'name',
-            'url_key',
-            'is_active',
-            'meta_title',
-            'meta_keywords',
-            'meta_description',
-            'meta_robots',
-        ];
+        return Mage::getModel('blog/category')->getStaticAttributes();
     }
 
     #[\Override]
@@ -100,6 +88,23 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
             $locale = Mage::getStoreConfig(Mage_Core_Model_Locale::XML_PATH_DEFAULT_LOCALE, $storeId);
             $urlKey = Mage::getModel('catalog/product_url')->formatUrlKey($object->getData('name'), $locale);
             $object->setData('url_key', $urlKey);
+        }
+
+        // Ensure url_key is unique among siblings (same parent_id)
+        $urlKey = $object->getData('url_key');
+        $parentId = (int) ($object->getData('parent_id') ?: Maho_Blog_Model_Category::ROOT_PARENT_ID);
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getEntityTable(), ['entity_id'])
+            ->where('url_key = ?', $urlKey)
+            ->where('parent_id = ?', $parentId);
+        if ($object->getId()) {
+            $select->where('entity_id != ?', $object->getId());
+        }
+        if ($adapter->fetchOne($select)) {
+            Mage::throwException(
+                Mage::helper('blog')->__('A category with URL key "%s" already exists under the same parent.', $urlKey),
+            );
         }
 
         // Calculate level and path from parent

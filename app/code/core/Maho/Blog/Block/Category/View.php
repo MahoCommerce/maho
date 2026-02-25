@@ -59,11 +59,11 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
                 $categoryTable = $this->_posts->getTable('blog/category');
 
                 // Get this category + all descendants via path
-                $categoryId = $adapter->quote($category->getId());
-                $pathPrefix = $adapter->quote($category->getPath() . '/%');
+                $categoryIdQuoted = $adapter->quote($category->getId());
+                $pathPrefixQuoted = $adapter->quote($category->getPath() . '/%');
                 $descendantSelect = $adapter->select()
                     ->from($categoryTable, ['entity_id'])
-                    ->where("entity_id = {$categoryId} OR path LIKE {$pathPrefix}");
+                    ->where("entity_id = {$categoryIdQuoted} OR path LIKE {$pathPrefixQuoted}");
 
                 $this->_posts->getSelect()->join(
                     ['bpc' => $this->_posts->getTable('blog/post_category')],

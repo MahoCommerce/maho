@@ -15,21 +15,17 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
 {
     public const ENTITY = 'blog_category';
 
-    protected array $_staticAttributes = [
-        'parent_id',
-        'path',
-        'level',
-        'position',
-        'name',
-        'url_key',
-        'is_active',
-        'meta_title',
-        'meta_keywords',
-        'meta_description',
-        'meta_robots',
-    ];
+    protected ?array $_staticAttributes = null;
 
     protected bool $_isFilteringStaticAttribute = false;
+
+    protected function _getStaticAttributes(): array
+    {
+        if ($this->_staticAttributes === null) {
+            $this->_staticAttributes = Mage::getModel('blog/category')->getStaticAttributes();
+        }
+        return $this->_staticAttributes;
+    }
 
     #[\Override]
     protected function _construct(): void
@@ -107,7 +103,7 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
 
     public function isStaticAttribute(string $attribute): bool
     {
-        return in_array($attribute, $this->_staticAttributes, true);
+        return in_array($attribute, $this->_getStaticAttributes(), true);
     }
 
     #[\Override]
@@ -128,7 +124,7 @@ class Maho_Blog_Model_Resource_Category_Collection extends Mage_Eav_Model_Entity
     {
         if ($attribute === '*' || (is_array($attribute) && in_array('*', $attribute))) {
             $this->_selectAttributes = [];
-            foreach ($this->_staticAttributes as $staticAttr) {
+            foreach ($this->_getStaticAttributes() as $staticAttr) {
                 $this->_selectAttributes[] = $staticAttr;
             }
         }
