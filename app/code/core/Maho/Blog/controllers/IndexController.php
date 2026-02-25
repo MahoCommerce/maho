@@ -87,6 +87,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        /** @var Mage_Page_Block_Html_Breadcrumbs|false $breadcrumbs */
         $breadcrumbs = $this->getLayout()->getBlock('breadcrumbs');
         if (!$breadcrumbs) {
             return;
