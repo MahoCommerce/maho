@@ -291,33 +291,33 @@ final class Maho
      */
     public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
     {
-        $path = [$baseMediaPath, 'cache', $params['sid'], $params['sub']];
+        $path = [$baseMediaPath, 'cache', $params['_sid'], $params['_destinationSubdir']];
 
-        if (!empty($params['w']) || !empty($params['h'])) {
-            $path[] = "{$params['w']}x{$params['h']}";
+        if (!empty($params['_width']) || !empty($params['_height'])) {
+            $path[] = "{$params['_width']}x{$params['_height']}";
         }
 
         $miscParams = [
-            ($params['ar'] ? '' : 'non') . 'proportional',
-            ($params['fr'] ? '' : 'no') . 'frame',
-            ($params['tr'] ? '' : 'no') . 'transparency',
-            ($params['co'] ? 'do' : 'not') . 'constrainonly',
-            $params['bg'],
-            'angle' . $params['an'],
-            'quality' . $params['q'],
+            ($params['_keepAspectRatio'] ? '' : 'non') . 'proportional',
+            ($params['_keepFrame'] ? '' : 'no') . 'frame',
+            ($params['_keepTransparency'] ? '' : 'no') . 'transparency',
+            ($params['_constrainOnly'] ? 'do' : 'not') . 'constrainonly',
+            $params['_backgroundColorStr'],
+            'angle' . $params['_angle'],
+            'quality' . $params['_quality'],
         ];
 
-        if (isset($params['wm'])) {
-            $miscParams[] = $params['wm'];
-            $miscParams[] = $params['wmo'];
-            $miscParams[] = $params['wmp'];
-            $miscParams[] = $params['wmw'];
-            $miscParams[] = $params['wmh'];
+        if (isset($params['_watermarkFile'])) {
+            $miscParams[] = $params['_watermarkFile'];
+            $miscParams[] = $params['_watermarkImageOpacity'];
+            $miscParams[] = $params['_watermarkPosition'];
+            $miscParams[] = $params['_watermarkWidth'];
+            $miscParams[] = $params['_watermarkHeigth'];
         }
 
         $path[] = md5(implode('_', $miscParams));
 
-        $targetExt = image_type_to_extension((int) $params['fmt']);
+        $targetExt = image_type_to_extension((int) $params['_fmt']);
         $file = preg_replace('/\.[^.]+$/', $targetExt, $sourceFile);
 
         return implode('/', $path) . $file;

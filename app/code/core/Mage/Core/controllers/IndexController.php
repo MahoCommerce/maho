@@ -43,16 +43,13 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        $requiredKeys = ['src', 'w', 'h', 'q', 'fmt', 'ar', 'fr', 'tr', 'co', 'bg', 'an', 'sub', 'sid', 'ph'];
-        foreach ($requiredKeys as $requiredKey) {
-            if (!array_key_exists($requiredKey, $params)) {
-                $this->getResponse()->setHttpResponseCode(400);
-                return;
-            }
+        if (!isset($params['_baseFile'])) {
+            $this->getResponse()->setHttpResponseCode(400);
+            return;
         }
 
         // Path traversal protection
-        $realSrc = realpath($params['src']);
+        $realSrc = realpath($params['_baseFile']);
         if ($realSrc === false) {
             $this->getResponse()->setHttpResponseCode(404);
             return;
@@ -89,19 +86,19 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         $model->setBaseFile($relativeFile);
 
         if (!$model->isCached()) {
-            if ($params['an'] != 0) {
-                $model->rotate($params['an']);
+            if ($params['_angle'] != 0) {
+                $model->rotate($params['_angle']);
             }
             $model->resize();
-            if (isset($params['wm'])) {
-                $model->setWatermark($params['wm']);
+            if (isset($params['_watermarkFile'])) {
+                $model->setWatermark($params['_watermarkFile']);
             }
             $model->saveFile();
         }
 
         // Serve the image
         $file = $model->getNewFile();
-        $mime = match ((int) $params['fmt']) {
+        $mime = match ((int) $params['_fmt']) {
             IMAGETYPE_AVIF => 'image/avif',
             IMAGETYPE_GIF  => 'image/gif',
             IMAGETYPE_JPEG => 'image/jpeg',

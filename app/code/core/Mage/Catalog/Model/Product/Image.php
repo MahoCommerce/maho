@@ -346,32 +346,11 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      */
     public function setTransformParams(array $params): self
     {
-        $this->setDestinationSubdir($params['sub']);
-        $this->setWidth($params['w']);
-        $this->setHeight($params['h']);
-        $this->setQuality($params['q']);
-        $this->setKeepAspectRatio($params['ar']);
-        $this->setKeepFrame($params['fr']);
-        $this->setKeepTransparency($params['tr']);
-        $this->setConstrainOnly($params['co']);
-        $this->setBackgroundColor(array_map(
-            fn($hex) => hexdec($hex),
-            str_split($params['bg'], 2),
-        ));
-        $this->setAngle($params['an']);
-
-        if (isset($params['wm'])) {
-            $this->setWatermarkFile($params['wm']);
-            $this->setWatermarkImageOpacity($params['wmo']);
-            $this->setWatermarkPosition($params['wmp']);
-            if ($params['wmw']) {
-                $this->setWatermarkWidth($params['wmw']);
-            }
-            if ($params['wmh']) {
-                $this->setWatermarkHeigth($params['wmh']);
+        foreach ($params as $prop => $value) {
+            if (property_exists($this, $prop)) {
+                $this->$prop = $value;
             }
         }
-
         return $this;
     }
 
@@ -381,31 +360,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      */
     public function getTransformParams(): array
     {
-        $params = [
-            'src' => $this->_baseFile,
-            'w'   => $this->_width,
-            'h'   => $this->_height,
-            'q'   => $this->_quality,
-            'fmt' => (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type'),
-            'ar'  => $this->_keepAspectRatio,
-            'fr'  => $this->_keepFrame,
-            'tr'  => $this->_keepTransparency,
-            'co'  => $this->_constrainOnly,
-            'bg'  => $this->_backgroundColorStr,
-            'an'  => $this->_angle,
-            'sub' => $this->getDestinationSubdir(),
-            'sid' => (int) Mage::app()->getStore()->getId(),
-            'ph'  => $this->_isBaseFilePlaceholder,
-        ];
-
-        if ($this->getWatermarkFile()) {
-            $params['wm']  = $this->getWatermarkFile();
-            $params['wmo'] = $this->getWatermarkImageOpacity();
-            $params['wmp'] = $this->getWatermarkPosition();
-            $params['wmw'] = $this->getWatermarkWidth();
-            $params['wmh'] = $this->getWatermarkHeigth();
-        }
-
+        $params = get_object_vars($this);
+        $params['_fmt'] = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
+        $params['_sid'] = (int) Mage::app()->getStore()->getId();
         return $params;
     }
 
