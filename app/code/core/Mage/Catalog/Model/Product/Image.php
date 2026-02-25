@@ -540,13 +540,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      */
     public function processImage(): \Intervention\Image\EncodedImage
     {
-        if ($this->_angle != 0) {
-            $this->rotate($this->_angle);
-        }
+        $this->rotate($this->_angle);
         $this->resize();
-        if ($this->_watermarkFile) {
-            $this->setWatermark($this->_watermarkFile);
-        }
+        $this->setWatermark($this->_watermarkFile);
         return $this->saveFile();
     }
 
