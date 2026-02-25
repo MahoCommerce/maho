@@ -1,0 +1,21 @@
+<?php
+/**
+ * Maho
+ *
+ * @category    design
+ * @package     default_default
+ * @copyright   Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Maho_Blog_Block_Adminhtml_Category $this */
+?>
+<div class="content-header">
+    <h3><?= Mage::helper('blog')->__('Blog Categories') ?></h3>
+    <p class="content-buttons a-right">
+        <?= $this->getButtonsHtml() ?>
+    </p>
+</div>
+<div>
+    <?= $this->getChildHtml('grid') ?>
+</div>

@@ -4,13 +4,18 @@
  *
  * @category    design
  * @package     base_default
- * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright   Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/** @var Maho_Blog_Block_Post_List $this */
+/** @var Maho_Blog_Block_Category_View $this */
+$category = $this->getCategory();
 $posts = $this->getPosts();
 ?>
+
+<?php if ($category->hasImage()): ?>
+    <img class="blog_category_image" src="<?= $category->getImageUrl() ?>" alt="<?= $this->escapeHtml($category->getName()) ?>" />
+<?php endif ?>
 
 <?php if ($posts->getSize()): ?>
     <div id="blog_posts">
@@ -35,5 +40,5 @@ $posts = $this->getPosts();
         </div>
     <?php endif ?>
 <?php else: ?>
-    <p class="note-msg"><?= $this->__('There are no blog posts to display.') ?></p>
+    <p class="note-msg"><?= $this->__('There are no blog posts in this category.') ?></p>
 <?php endif ?>

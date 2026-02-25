@@ -12,7 +12,7 @@
 <config>
     <modules>
         <Maho_Blog>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </Maho_Blog>
     </modules>
     <global>
@@ -30,6 +30,15 @@
                     <post_store>
                         <table>blog_post_store</table>
                     </post_store>
+                    <category>
+                        <table>blog_category_entity</table>
+                    </category>
+                    <category_store>
+                        <table>blog_category_store</table>
+                    </category_store>
+                    <post_category>
+                        <table>blog_post_category</table>
+                    </post_category>
                     <eav_attribute>
                         <table>blog_eav_attribute</table>
                     </eav_attribute>
@@ -198,6 +207,7 @@
                 <show_in_navigation>1</show_in_navigation>
                 <url_prefix>blog</url_prefix>
                 <posts_per_page>20</posts_per_page>
+                <enable_categories>0</enable_categories>
             </general>
             <search>
                 <enable_autosuggest>1</enable_autosuggest>

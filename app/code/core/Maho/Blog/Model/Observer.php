@@ -18,6 +18,8 @@ class Maho_Blog_Model_Observer
         $entityKey = 'blog_index';
         if ($post = Mage::registry('current_blog_post')) {
             $entityKey = 'blog_post_' . $post->getId();
+        } elseif ($category = Mage::registry('current_blog_category')) {
+            $entityKey = 'blog_category_' . $category->getId();
         }
 
         Mage::register('current_entity_key', $entityKey, true);
@@ -33,15 +35,41 @@ class Maho_Blog_Model_Observer
         $menu = $observer->getMenu();
         $tree = $menu->getTree();
 
+        $isBlogActive = Mage::app()->getRequest()->getModuleName() === 'blog';
+        $helper = Mage::helper('blog');
+
         $blogNode = new \Maho\Data\Tree\Node([
-            'name' => Mage::helper('blog')->__('Blog'),
+            'name' => $helper->__('Blog'),
             'id' => 'blog-node',
-            'url' => Mage::helper('blog')->getBlogUrl(),
-            'has_active' => false, // Blog has no children, so always false
-            'is_active' => Mage::app()->getRequest()->getModuleName() === 'blog',
+            'url' => $helper->getBlogUrl(),
+            'has_active' => $isBlogActive && $helper->areCategoriesEnabled(),
+            'is_active' => $isBlogActive,
         ], 'id', $tree, $menu);
 
         $menu->addChild($blogNode);
+
+        // Add category children under blog node when categories are enabled
+        if ($helper->areCategoriesEnabled()) {
+            $currentCategory = Mage::registry('current_blog_category');
+            $categories = Mage::getResourceModel('blog/category_collection')
+                ->addRootFilter()
+                ->addActiveFilter()
+                ->addStoreFilter(Mage::app()->getStore())
+                ->addParentFilter(Maho_Blog_Model_Category::ROOT_PARENT_ID)
+                ->setOrder('position', 'ASC');
+
+            foreach ($categories as $category) {
+                $isActive = $currentCategory && (int) $currentCategory->getId() === (int) $category->getId();
+                $categoryNode = new \Maho\Data\Tree\Node([
+                    'name' => $category->getName(),
+                    'id' => 'blog-category-' . $category->getId(),
+                    'url' => $category->getUrl(),
+                    'has_active' => false,
+                    'is_active' => $isActive,
+                ], 'id', $tree, $blogNode);
+                $blogNode->addChild($categoryNode);
+            }
+        }
     }
 
     /**
@@ -88,6 +116,16 @@ class Maho_Blog_Model_Observer
                 $blogPost->setImageTitle($post->getTitle()); // Use post title as image title (same as frontend alt text)
             }
             $blogItems[] = $blogPost;
+        }
+
+        // Add category URLs when categories are enabled
+        if (Mage::helper('blog')->areCategoriesEnabled()) {
+            $categories = $this->getBlogCategoriesForSitemap($storeId);
+            foreach ($categories as $category) {
+                $blogCategory = new \Maho\DataObject();
+                $blogCategory->setUrl(str_replace($baseUrl, '', $category->getUrl()));
+                $blogItems[] = $blogCategory;
+            }
         }
 
         // Generate blog sitemap files
@@ -221,6 +259,22 @@ class Maho_Blog_Model_Observer
         }
 
         return '<url>' . $row . '</url>' . "\n";
+    }
+
+    protected function getBlogCategoriesForSitemap(int $storeId): array
+    {
+        /** @var Maho_Blog_Model_Resource_Category_Collection $collection */
+        $collection = Mage::getResourceModel('blog/category_collection')
+            ->addRootFilter()
+            ->addActiveFilter()
+            ->addStoreFilter($storeId);
+
+        $categories = [];
+        foreach ($collection as $category) {
+            $categories[] = $category;
+        }
+
+        return $categories;
     }
 
     protected function getBlogPostsForSitemap(int $storeId): array

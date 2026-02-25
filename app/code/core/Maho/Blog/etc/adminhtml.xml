@@ -13,11 +13,22 @@
     <menu>
         <cms>
             <children>
-                <blog_posts module="blog">
-                    <title>Blog Posts</title>
-                    <action>adminhtml/blog_post</action>
+                <blog module="blog">
+                    <title>Blog</title>
                     <sort_order>10</sort_order>
-                </blog_posts>
+                    <children>
+                        <posts module="blog">
+                            <title>Posts</title>
+                            <action>adminhtml/blog_post</action>
+                            <sort_order>10</sort_order>
+                        </posts>
+                        <categories module="blog">
+                            <title>Categories</title>
+                            <action>adminhtml/blog_category</action>
+                            <sort_order>20</sort_order>
+                        </categories>
+                    </children>
+                </blog>
             </children>
         </cms>
     </menu>
@@ -27,9 +38,17 @@
                 <children>
                     <cms>
                         <children>
-                            <blog_posts>
-                                <title>Blog Posts</title>
-                            </blog_posts>
+                            <blog>
+                                <title>Blog</title>
+                                <children>
+                                    <posts>
+                                        <title>Posts</title>
+                                    </posts>
+                                    <categories>
+                                        <title>Categories</title>
+                                    </categories>
+                                </children>
+                            </blog>
                         </children>
                     </cms>
                     <system>

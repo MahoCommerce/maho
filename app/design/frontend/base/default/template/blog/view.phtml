@@ -12,7 +12,6 @@
 $post = $this->getPost();
 ?>
 
-<h1><?= $this->escapeHtml($post->getTitle()) ?></h1>
 <div class="blog_post_date"><?= $this->formatDate($post->getPublishedAt() ?? $post->getCreatedAt()) ?></div>
 
 <?php if ($post->hasImage()): ?>

@@ -55,6 +55,46 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         return $postsPerPage > 0 ? $postsPerPage : 20; // Default fallback
     }
 
+    public function areCategoriesEnabled(): bool
+    {
+        return $this->isEnabled() && Mage::getStoreConfigFlag('blog/general/enable_categories');
+    }
+
+    public function getCategoryUrlPrefix(): string
+    {
+        return $this->__('category');
+    }
+
+    public function getCategoryUrl(Maho_Blog_Model_Category $category, ?int $storeId = null): string
+    {
+        $blogPrefix = $this->getBlogUrlPrefix($storeId);
+        $catPrefix = $this->getCategoryUrlPrefix($storeId);
+        $path = $blogPrefix . '/' . $catPrefix . '/' . $this->getCategoryUrlPath($category) . '/';
+        return Mage::getBaseUrl() . $path;
+    }
+
+    public function getCategoryUrlPath(Maho_Blog_Model_Category $category): string
+    {
+        $pathIds = $category->getPathIds();
+        if (empty($pathIds)) {
+            return $category->getUrlKey();
+        }
+
+        $segments = [];
+        foreach ($pathIds as $id) {
+            if ((int) $id === (int) $category->getId()) {
+                $segments[] = $category->getUrlKey();
+            } else {
+                $parent = Mage::getModel('blog/category')->load($id);
+                if ($parent->getId() && $parent->getUrlKey()) {
+                    $segments[] = $parent->getUrlKey();
+                }
+            }
+        }
+
+        return implode('/', $segments);
+    }
+
     /**
      * Get truncated content for preview
      */

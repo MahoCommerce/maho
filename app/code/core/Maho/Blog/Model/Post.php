@@ -89,6 +89,18 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
         return $this->_staticAttributes;
     }
 
+    /**
+     * Get category IDs assigned to this post
+     */
+    public function getCategories(): array
+    {
+        if (!$this->hasData('category_ids')) {
+            $categoryIds = $this->_getResource()->lookupCategoryIds($this->getId());
+            $this->setData('category_ids', $categoryIds);
+        }
+        return $this->getData('category_ids') ?: [];
+    }
+
     public function getUrl(): string
     {
         $helper = Mage::helper('blog');

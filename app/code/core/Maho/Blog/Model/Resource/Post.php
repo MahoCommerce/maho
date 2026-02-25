@@ -71,6 +71,10 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
             $this->_saveStoreRelations($object);
         }
 
+        if ($object->hasData('categories')) {
+            $this->_saveCategoryRelations($object);
+        }
+
         return parent::_afterSave($object);
     }
 
@@ -252,8 +256,51 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         if ($object->getId()) {
             $stores = $this->lookupStoreIds($object->getId());
             $object->setData('stores', $stores);
+
+            $categoryIds = $this->lookupCategoryIds($object->getId());
+            $object->setData('category_ids', $categoryIds);
         }
 
         return parent::_afterLoad($object);
+    }
+
+    public function lookupCategoryIds(int $postId): array
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getTable('blog/post_category'), 'category_id')
+            ->where('post_id = ?', (int) $postId);
+
+        return $adapter->fetchCol($select);
+    }
+
+    protected function _saveCategoryRelations(\Maho\DataObject $post): void
+    {
+        $oldCategoryIds = $this->lookupCategoryIds($post->getId());
+        $newCategoryIds = (array) $post->getData('categories');
+
+        $table = $this->getTable('blog/post_category');
+        $adapter = $this->_getWriteAdapter();
+
+        $delete = array_diff($oldCategoryIds, $newCategoryIds);
+        if (!empty($delete)) {
+            $adapter->delete($table, [
+                'post_id = ?' => (int) $post->getId(),
+                'category_id IN (?)' => $delete,
+            ]);
+        }
+
+        $insert = array_diff($newCategoryIds, $oldCategoryIds);
+        if (!empty($insert)) {
+            $data = [];
+            foreach ($insert as $categoryId) {
+                $data[] = [
+                    'post_id' => (int) $post->getId(),
+                    'category_id' => (int) $categoryId,
+                    'position' => 0,
+                ];
+            }
+            $adapter->insertMultiple($table, $data);
+        }
     }
 }
