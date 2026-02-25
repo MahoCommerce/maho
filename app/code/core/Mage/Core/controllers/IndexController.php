@@ -79,7 +79,6 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
             $this->getResponse()
                 ->setHeader('Content-Type', $encoded->mediaType())
                 ->setHeader('Content-Length', (string) $encoded->size())
-                ->setHeader('Cache-Control', 'public, max-age=31536000, immutable')
                 ->setBody((string) $encoded);
             return;
         }
@@ -89,7 +88,6 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         $this->getResponse()
             ->setHeader('Content-Type', mime_content_type($file))
             ->setHeader('Content-Length', (string) filesize($file))
-            ->setHeader('Cache-Control', 'public, max-age=31536000, immutable')
             ->setBody(file_get_contents($file));
     }
 }
