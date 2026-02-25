@@ -50,6 +50,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         Mage::register('current_blog_category', $category);
         $this->loadLayout();
         $this->_initPageTitle($category->getName());
+        $this->_initMeta($category);
         $this->_initBreadcrumbs($category);
         $this->renderLayout();
     }
@@ -71,6 +72,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         Mage::register('current_blog_post', $post);
         $this->loadLayout();
         $this->_initPageTitle($post->getTitle());
+        $this->_initMeta($post);
         $this->_initBreadcrumbs(null, $post);
         $this->renderLayout();
     }
@@ -85,6 +87,27 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         $headBlock = $this->getLayout()->getBlock('head');
         if ($headBlock) {
             $headBlock->setTitle($title);
+        }
+    }
+
+    protected function _initMeta(\Maho\DataObject $entity): void
+    {
+        $headBlock = $this->getLayout()->getBlock('head');
+        if (!$headBlock) {
+            return;
+        }
+
+        if ($entity->getMetaTitle()) {
+            $headBlock->setTitle($entity->getMetaTitle());
+        }
+        if ($entity->getMetaDescription()) {
+            $headBlock->setDescription($entity->getMetaDescription());
+        }
+        if ($entity->getMetaKeywords()) {
+            $headBlock->setKeywords($entity->getMetaKeywords());
+        }
+        if ($entity->getMetaRobots()) {
+            $headBlock->setRobots($entity->getMetaRobots());
         }
     }
 
@@ -127,9 +150,12 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
                     ->addFieldToFilter('entity_id', ['in' => $parentIds]);
 
                 $parentsById = [];
+                $urlKeys = [];
                 foreach ($parentCollection as $parent) {
                     $parentsById[(int) $parent->getId()] = $parent;
+                    $urlKeys[(int) $parent->getId()] = $parent->getUrlKey();
                 }
+                $urlKeys[(int) $category->getId()] = $category->getUrlKey();
 
                 foreach ($parentIds as $parentId) {
                     $parent = $parentsById[(int) $parentId] ?? null;
@@ -137,7 +163,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
                         $breadcrumbs->addCrumb('category_' . $parent->getId(), [
                             'label' => $parent->getName(),
                             'title' => $parent->getName(),
-                            'link'  => $helper->getCategoryUrl($parent),
+                            'link'  => $helper->getCategoryUrl($parent, null, $urlKeys),
                         ]);
                     }
                 }

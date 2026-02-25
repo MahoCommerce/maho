@@ -66,15 +66,18 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         return $prefix ?: 'category';
     }
 
-    public function getCategoryUrl(Maho_Blog_Model_Category $category, ?int $storeId = null): string
+    public function getCategoryUrl(Maho_Blog_Model_Category $category, ?int $storeId = null, ?array $urlKeys = null): string
     {
         $blogPrefix = $this->getBlogUrlPrefix($storeId);
         $catPrefix = $this->getCategoryUrlPrefix();
-        $path = $blogPrefix . '/' . $catPrefix . '/' . $this->getCategoryUrlPath($category) . '/';
+        $path = $blogPrefix . '/' . $catPrefix . '/' . $this->getCategoryUrlPath($category, $urlKeys) . '/';
         return Mage::getBaseUrl() . $path;
     }
 
-    public function getCategoryUrlPath(Maho_Blog_Model_Category $category): string
+    /**
+     * @param array<int, string>|null $urlKeys Pre-loaded entity_id => url_key pairs to avoid DB queries
+     */
+    public function getCategoryUrlPath(Maho_Blog_Model_Category $category, ?array $urlKeys = null): string
     {
         $pathIds = $category->getPathIds();
         if (empty($pathIds)) {
@@ -82,11 +85,14 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         $ancestorIds = array_filter($pathIds, fn($id) => (int) $id !== (int) $category->getId());
-        $urlKeys = [];
-        if (!empty($ancestorIds)) {
+        if ($urlKeys !== null) {
+            // Use pre-loaded url keys
+        } elseif (!empty($ancestorIds)) {
             /** @var Maho_Blog_Model_Resource_Category $resource */
             $resource = Mage::getResourceSingleton('blog/category');
             $urlKeys = $resource->getUrlKeysByIds($ancestorIds);
+        } else {
+            $urlKeys = [];
         }
 
         $segments = [];

@@ -15,6 +15,9 @@ class Maho_Blog_Block_Category_Sidebar extends Mage_Core_Block_Template
 {
     protected ?array $_categoryTree = null;
 
+    /** @var array<int, string> Pre-loaded entity_id => url_key for all loaded categories */
+    protected ?array $_urlKeys = null;
+
     #[\Override]
     protected function _beforeToHtml(): self
     {
@@ -56,16 +59,27 @@ class Maho_Blog_Block_Category_Sidebar extends Mage_Core_Block_Template
             // Build tree from flat collection
             $items = [];
             $children = [];
+            $this->_urlKeys = [];
             foreach ($collection as $category) {
                 $items[$category->getId()] = $category;
                 $parentId = (int) $category->getParentId();
                 $children[$parentId][] = $category->getId();
+                $this->_urlKeys[(int) $category->getId()] = $category->getUrlKey();
             }
 
             $this->_categoryTree = $this->_buildTree($items, $children, Maho_Blog_Model_Category::ROOT_PARENT_ID);
         }
 
         return $this->_categoryTree;
+    }
+
+    /**
+     * @return array<int, string> Pre-loaded entity_id => url_key for all loaded categories
+     */
+    public function getUrlKeys(): array
+    {
+        $this->getCategoryTree();
+        return $this->_urlKeys ?? [];
     }
 
     /**

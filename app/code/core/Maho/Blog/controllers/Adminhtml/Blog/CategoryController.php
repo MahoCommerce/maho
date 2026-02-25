@@ -163,13 +163,18 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
             );
         } else {
             try {
+                $deleted = 0;
                 foreach ($categoryIds as $categoryId) {
                     $category = Mage::getModel('blog/category')->load($categoryId);
+                    if (!$category->getId()) {
+                        continue;
+                    }
                     Mage::getResourceSingleton('blog/category')->deleteDescendants((int) $category->getId());
                     $category->delete();
+                    $deleted++;
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(
-                    Mage::helper('blog')->__('Total of %d category(s) were deleted', count($categoryIds)),
+                    Mage::helper('blog')->__('Total of %d category(s) were deleted', $deleted),
                 );
             } catch (Exception $e) {
                 Mage::getSingleton('adminhtml/session')->addError($e->getMessage());

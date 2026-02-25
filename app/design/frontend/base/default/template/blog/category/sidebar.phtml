@@ -11,6 +11,8 @@
 /** @var Maho_Blog_Block_Category_Sidebar $this */
 $tree = $this->getCategoryTree();
 $currentId = $this->getCurrentCategoryId();
+$urlKeys = $this->getUrlKeys();
+$helper = Mage::helper('blog');
 
 if (empty($tree)) {
     return;
@@ -23,14 +25,14 @@ if (empty($tree)) {
             <dt><?= $this->__('Categories') ?></dt>
             <dd>
                 <?php
-                $renderTree = function (array $nodes, int $currentId = null) use (&$renderTree) {
+                $renderTree = function (array $nodes, int $currentId = null) use (&$renderTree, $helper, $urlKeys) {
                     echo '<ol>';
                     foreach ($nodes as $node) {
                         $category = $node['category'];
                         $isActive = $currentId && (int) $category->getId() === $currentId;
                         $class = $isActive ? ' class="active"' : '';
                         echo '<li' . $class . '>';
-                        echo '<a href="' . $category->getUrl() . '">' . $this->escapeHtml($category->getName()) . '</a>';
+                        echo '<a href="' . $helper->getCategoryUrl($category, null, $urlKeys) . '">' . $this->escapeHtml($category->getName()) . '</a>';
                         if (!empty($node['children'])) {
                             $renderTree($node['children'], $currentId);
                         }
