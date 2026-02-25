@@ -72,8 +72,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     /** @var \Intervention\Image\Interfaces\ImageInterface */
     protected $image;
 
-    protected ?\Intervention\Image\Interfaces\EncodedImageInterface $encodedImage = null;
-
     protected ?array $imageInfo = null;
 
     /**
@@ -543,7 +541,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $this->resize();
         $this->setWatermark($this->_watermarkFile);
 
-        $this->encodedImage = match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
+        $encoded = match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
             IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
             IMAGETYPE_GIF => $this->getImage()->toGif(),
             IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
@@ -553,14 +551,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $filename = $this->getNewFile();
         @mkdir(dirname($filename), recursive: true);
-        $this->encodedImage->save($filename);
+        $encoded->save($filename);
 
         return $this;
-    }
-
-    public function getEncodedImage(): ?\Intervention\Image\Interfaces\EncodedImageInterface
-    {
-        return $this->encodedImage;
     }
 
     public function getUrl(): string

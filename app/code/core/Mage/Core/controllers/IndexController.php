@@ -66,16 +66,8 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
 
         if (!$model->isCached()) {
             $model->saveFile();
-            $encoded = $model->getEncodedImage();
-
-            $this->getResponse()
-                ->setHeader('Content-Type', $encoded->mediaType())
-                ->setHeader('Content-Length', (string) $encoded->size())
-                ->setBody((string) $encoded);
-            return;
         }
 
-        // Serve cached file from disk (race condition path)
         $file = $model->getNewFile();
         $this->getResponse()
             ->setHeader('Content-Type', mime_content_type($file))
