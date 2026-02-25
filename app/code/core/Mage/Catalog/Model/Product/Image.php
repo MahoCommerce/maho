@@ -331,46 +331,48 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        // build new filename (most important params)
-        $path = [
+        // build cache file path from transform params
+        $this->_newFile = Maho::buildImageResizeCachePath(
+            $this->getTransformParams(),
             self::$_baseMediaPath,
-            'cache',
-            Mage::app()->getStore()->getId(),
-            $path[] = $this->getDestinationSubdir(),
-        ];
-        if ((!empty($this->_width)) || (!empty($this->_height))) {
-            $path[] = "{$this->_width}x{$this->_height}";
-        }
+            $file,
+        );
 
-        // add misc params as a hash
-        $miscParams = [
-            ($this->_keepAspectRatio ? '' : 'non') . 'proportional',
-            ($this->_keepFrame ? '' : 'no') . 'frame',
-            ($this->_keepTransparency ? '' : 'no') . 'transparency',
-            ($this->_constrainOnly ? 'do' : 'not') . 'constrainonly',
-            $this->_backgroundColorStr,
-            'angle' . $this->_angle,
-            'quality' . $this->_quality,
+        return $this;
+    }
+
+    /**
+     * Return all transformation parameters that define the output image.
+     * Used both for building cache path hashes and for signed URL token payloads.
+     */
+    public function getTransformParams(): array
+    {
+        $params = [
+            'src' => $this->_baseFile,
+            'w'   => $this->_width,
+            'h'   => $this->_height,
+            'q'   => $this->_quality,
+            'fmt' => (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type'),
+            'ar'  => $this->_keepAspectRatio,
+            'fr'  => $this->_keepFrame,
+            'tr'  => $this->_keepTransparency,
+            'co'  => $this->_constrainOnly,
+            'bg'  => $this->_backgroundColorStr,
+            'an'  => $this->_angle,
+            'sub' => $this->getDestinationSubdir(),
+            'sid' => (int) Mage::app()->getStore()->getId(),
+            'ph'  => $this->_isBaseFilePlaceholder,
         ];
 
         if ($this->getWatermarkFile()) {
-            $miscParams[] = $this->getWatermarkFile();
-            $miscParams[] = $this->getWatermarkImageOpacity();
-            $miscParams[] = $this->getWatermarkPosition();
-            $miscParams[] = $this->getWatermarkWidth();
-            $miscParams[] = $this->getWatermarkHeigth();
+            $params['wm']  = $this->getWatermarkFile();
+            $params['wmo'] = $this->getWatermarkImageOpacity();
+            $params['wmp'] = $this->getWatermarkPosition();
+            $params['wmw'] = $this->getWatermarkWidth();
+            $params['wmh'] = $this->getWatermarkHeigth();
         }
 
-        $path[] = md5(implode('_', $miscParams));
-
-        // replacing file extension based on target file type
-        $targetFileExtension = image_type_to_extension(Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
-        $file = preg_replace('/\.[^.]+$/', $targetFileExtension, $file);
-
-        // append prepared filename
-        $this->_newFile = implode('/', $path) . $file; // the $file contains heading slash
-
-        return $this;
+        return $params;
     }
 
     /**

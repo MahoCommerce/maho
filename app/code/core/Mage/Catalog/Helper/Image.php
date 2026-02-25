@@ -368,16 +368,12 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
             if ($model->isCached()) {
                 return $model->getUrl();
             }
-            if ($this->_scheduleRotate) {
-                $model->rotate($this->getAngle());
-            }
-            if ($this->_scheduleResize) {
-                $model->resize();
-            }
-            if ($this->getWatermark()) {
-                $model->setWatermark($this->getWatermark());
-            }
-            $url = $model->saveFile()->getUrl();
+
+            // Return a signed URL for deferred generation instead of
+            // processing the image synchronously during page render.
+            $params = $model->getTransformParams();
+            $query = Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex());
+            $url = Mage::getUrl('catalog/image/resize', ['_query' => $query, '_nosid' => true]);
         } catch (Exception $e) {
             Mage::logException($e);
             $url = Mage::getDesign()->getSkinUrl($this->getPlaceholder());

@@ -250,4 +250,76 @@ final class Maho
 
         Mage::throwException('No image driver found');
     }
+
+    /**
+     * Sign image transformation parameters into a query string: "t=...&s=..."
+     */
+    public static function signImageResizeRequest(array $params, string $key): string
+    {
+        $t = base64_encode(json_encode($params, JSON_THROW_ON_ERROR));
+        $s = hash_hmac('sha256', $t, $key);
+        return 't=' . urlencode($t) . '&s=' . $s;
+    }
+
+    /**
+     * Verify a signed image resize request and return decoded parameters, or null on failure.
+     */
+    public static function verifyImageResizeRequest(string $t, string $s, string $key): ?array
+    {
+        $expected = hash_hmac('sha256', $t, $key);
+        if (!hash_equals($expected, $s)) {
+            return null;
+        }
+
+        $decoded = base64_decode($t, true);
+        if ($decoded === false) {
+            return null;
+        }
+
+        $params = json_decode($decoded, true);
+        if (!is_array($params)) {
+            return null;
+        }
+
+        return $params;
+    }
+
+    /**
+     * Build the cache file path for a resized product image from transform params.
+     * Single source of truth used by both Mage_Catalog_Model_Product_Image::setBaseFile()
+     * and image.php to ensure consistent cache paths.
+     */
+    public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
+    {
+        $path = [$baseMediaPath, 'cache', $params['sid'], $params['sub']];
+
+        if (!empty($params['w']) || !empty($params['h'])) {
+            $path[] = "{$params['w']}x{$params['h']}";
+        }
+
+        $miscParams = [
+            ($params['ar'] ? '' : 'non') . 'proportional',
+            ($params['fr'] ? '' : 'no') . 'frame',
+            ($params['tr'] ? '' : 'no') . 'transparency',
+            ($params['co'] ? 'do' : 'not') . 'constrainonly',
+            $params['bg'],
+            'angle' . $params['an'],
+            'quality' . $params['q'],
+        ];
+
+        if (isset($params['wm'])) {
+            $miscParams[] = $params['wm'];
+            $miscParams[] = $params['wmo'];
+            $miscParams[] = $params['wmp'];
+            $miscParams[] = $params['wmw'];
+            $miscParams[] = $params['wmh'];
+        }
+
+        $path[] = md5(implode('_', $miscParams));
+
+        $targetExt = image_type_to_extension((int) $params['fmt']);
+        $file = preg_replace('/\.[^.]+$/', $targetExt, $sourceFile);
+
+        return implode('/', $path) . $file;
+    }
 }
