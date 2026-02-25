@@ -72,7 +72,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     /** @var \Intervention\Image\Interfaces\ImageInterface */
     protected $image;
 
-    protected ?\Intervention\Image\EncodedImage $encodedImage = null;
+    protected ?\Intervention\Image\Interfaces\EncodedImageInterface $encodedImage = null;
 
     protected ?array $imageInfo = null;
 
@@ -558,7 +558,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
-    public function getEncodedImage(): ?\Intervention\Image\EncodedImage
+    public function getEncodedImage(): ?\Intervention\Image\Interfaces\EncodedImageInterface
     {
         return $this->encodedImage;
     }
