@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -135,6 +137,9 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
             try {
                 $model = Mage::getModel('blog/category');
                 $model->load($id);
+
+                // Delete all descendant categories first
+                Mage::getResourceSingleton('blog/category')->deleteDescendants((int) $model->getId());
                 $model->delete();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(
@@ -160,6 +165,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
             try {
                 foreach ($categoryIds as $categoryId) {
                     $category = Mage::getModel('blog/category')->load($categoryId);
+                    Mage::getResourceSingleton('blog/category')->deleteDescendants((int) $category->getId());
                     $category->delete();
                 }
                 Mage::getSingleton('adminhtml/session')->addSuccess(

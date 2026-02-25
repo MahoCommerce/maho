@@ -62,7 +62,8 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function getCategoryUrlPrefix(): string
     {
-        return $this->__('category');
+        $prefix = Mage::getStoreConfig('blog/general/category_url_prefix');
+        return $prefix ?: 'category';
     }
 
     public function getCategoryUrl(Maho_Blog_Model_Category $category, ?int $storeId = null): string

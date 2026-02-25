@@ -39,6 +39,14 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
+        // Verify category is assigned to the current store
+        $storeId = (int) Mage::app()->getStore()->getId();
+        $categoryStores = $category->getStores();
+        if (!in_array(0, $categoryStores) && !in_array($storeId, $categoryStores)) {
+            $this->_forward('noRoute');
+            return;
+        }
+
         Mage::register('current_blog_category', $category);
         $this->loadLayout();
         $this->_initPageTitle($category->getName());

@@ -41,7 +41,6 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
     {
         if (!$this->_posts) {
             $category = $this->getCategory();
-            $today = Mage_Core_Model_Locale::today();
             $page = (int) $this->getRequest()->getParam('p', 1);
             $pageSize = Mage::helper('blog')->getPostsPerPage();
 
@@ -60,10 +59,11 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
                 $categoryTable = $this->_posts->getTable('blog/category');
 
                 // Get this category + all descendants via path
+                $categoryId = $adapter->quote($category->getId());
+                $pathPrefix = $adapter->quote($category->getPath() . '/%');
                 $descendantSelect = $adapter->select()
                     ->from($categoryTable, ['entity_id'])
-                    ->where('entity_id = ?', $category->getId())
-                    ->orWhere('path LIKE ?', $category->getPath() . '/%');
+                    ->where("entity_id = {$categoryId} OR path LIKE {$pathPrefix}");
 
                 $this->_posts->getSelect()->join(
                     ['bpc' => $this->_posts->getTable('blog/post_category')],
@@ -75,6 +75,7 @@ class Maho_Blog_Block_Category_View extends Mage_Core_Block_Template
                 )->distinct();
             }
 
+            $today = Mage_Core_Model_Locale::today();
             $this->_posts->getSelect()->where(
                 'publish_date IS NULL OR publish_date <= ?',
                 $today,

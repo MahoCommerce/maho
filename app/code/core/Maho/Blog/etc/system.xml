@@ -37,6 +37,14 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </enable_categories>
+                        <category_url_prefix translate="label">
+                            <label>Category URL Prefix</label>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <depends><enable_categories>1</enable_categories></depends>
+                        </category_url_prefix>
                         <show_in_navigation translate="label">
                             <label>Show in Navigation</label>
                             <frontend_type>select</frontend_type>

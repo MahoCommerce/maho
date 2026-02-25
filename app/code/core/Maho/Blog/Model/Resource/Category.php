@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -273,6 +275,33 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
                 ];
             }
             $adapter->insertMultiple($table, $data);
+        }
+    }
+
+    /**
+     * Delete all descendant categories (children, grandchildren, etc.)
+     */
+    public function deleteDescendants(int $categoryId): void
+    {
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getEntityTable(), ['entity_id', 'path'])
+            ->where('entity_id = ?', $categoryId);
+        $category = $adapter->fetchRow($select);
+
+        if (!$category) {
+            return;
+        }
+
+        // Find all descendants via path
+        $descendantSelect = $adapter->select()
+            ->from($this->getEntityTable(), ['entity_id'])
+            ->where('path LIKE ?', $category['path'] . '/%');
+        $descendantIds = $adapter->fetchCol($descendantSelect);
+
+        if (!empty($descendantIds)) {
+            $writeAdapter = $this->_getWriteAdapter();
+            $writeAdapter->delete($this->getEntityTable(), ['entity_id IN (?)' => $descendantIds]);
         }
     }
 

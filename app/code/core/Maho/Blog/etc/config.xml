@@ -208,6 +208,7 @@
                 <url_prefix>blog</url_prefix>
                 <posts_per_page>20</posts_per_page>
                 <enable_categories>0</enable_categories>
+                <category_url_prefix>category</category_url_prefix>
             </general>
             <search>
                 <enable_autosuggest>1</enable_autosuggest>
