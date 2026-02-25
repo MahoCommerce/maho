@@ -371,7 +371,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
 
             // Return a signed URL for deferred generation instead of
             // processing the image synchronously during page render.
-            $params = $model->getProperties();
+            $params = $model->getTransformParams();
             $query = Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex());
             $url = Mage::getUrl('core/index/resize', ['_query' => $query, '_nosid' => true]);
         } catch (Exception $e) {

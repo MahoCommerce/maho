@@ -87,6 +87,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     protected $_watermarkImageOpacity = 70;
 
     /**
+     * Relative file path (e.g. /c/a/image.jpg) as originally passed to setBaseFile().
+     * Stored separately from _baseFile (which is absolute) to avoid exposing
+     * server filesystem paths in signed URL tokens.
+     */
+    protected ?string $_sourceFile = null;
+
+    /**
      * @var string directory
      */
     protected static $_baseMediaPath;
@@ -331,9 +338,12 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
             return $this;
         }
 
+        // Store the relative file path for signed URL tokens
+        $this->_sourceFile = $file;
+
         // build cache file path from transform params
         $this->_newFile = Maho::buildImageResizeCachePath(
-            $this->getProperties(),
+            $this->getTransformParams(),
             self::$_baseMediaPath,
             $file,
         );
@@ -342,13 +352,38 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Hydrate the model from a transform params array (inverse of getProperties).
+     * Allowlist of properties that define the image transformation.
+     * Used by both getTransformParams() and setTransformParams().
+     */
+    private const TRANSFORM_PARAMS = [
+        '_width',
+        '_height',
+        '_quality',
+        '_keepAspectRatio',
+        '_keepFrame',
+        '_keepTransparency',
+        '_constrainOnly',
+        '_backgroundColor',
+        '_backgroundColorStr',
+        '_sourceFile',
+        '_isBaseFilePlaceholder',
+        '_destinationSubdir',
+        '_angle',
+        '_watermarkFile',
+        '_watermarkPosition',
+        '_watermarkWidth',
+        '_watermarkHeigth',
+        '_watermarkImageOpacity',
+    ];
+
+    /**
+     * Hydrate the model from a transform params array (inverse of getTransformParams).
      */
     public function setTransformParams(array $params): self
     {
-        foreach ($params as $prop => $value) {
-            if (property_exists($this, $prop)) {
-                $this->$prop = $value;
+        foreach (self::TRANSFORM_PARAMS as $prop) {
+            if (array_key_exists($prop, $params)) {
+                $this->$prop = $params[$prop];
             }
         }
         return $this;
@@ -358,9 +393,13 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      * Return all transformation parameters that define the output image.
      * Used both for building cache path hashes and for signed URL token payloads.
      */
-    public function getProperties(): array
+    public function getTransformParams(): array
     {
-        return get_object_vars($this);
+        $params = [];
+        foreach (self::TRANSFORM_PARAMS as $prop) {
+            $params[$prop] = $this->$prop;
+        }
+        return $params;
     }
 
     /**

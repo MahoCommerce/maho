@@ -43,32 +43,17 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        if (!isset($params['_baseFile'])) {
+        if (!isset($params['_sourceFile']) || !is_string($params['_sourceFile'])) {
             $this->getResponse()->setHttpResponseCode(400);
             return;
         }
 
-        // Path traversal protection
-        $realSrc = realpath($params['_baseFile']);
-        if ($realSrc === false) {
-            $this->getResponse()->setHttpResponseCode(404);
-            return;
-        }
+        // Reconstruct the absolute path from the relative file and known base media path
+        $baseMediaPath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaPath();
+        $realSrc = realpath($baseMediaPath . $params['_sourceFile']);
 
-        $allowedPrefixes = array_filter([
-            realpath(Mage::getBaseDir('media')),
-            realpath(Mage::getBaseDir('skin')),
-        ]);
-
-        $allowed = false;
-        foreach ($allowedPrefixes as $prefix) {
-            if (str_starts_with($realSrc, $prefix . DIRECTORY_SEPARATOR)) {
-                $allowed = true;
-                break;
-            }
-        }
-
-        if (!$allowed) {
+        // Path traversal protection — resolved path must stay within media/
+        if ($realSrc === false || !str_starts_with($realSrc, realpath($baseMediaPath) . DIRECTORY_SEPARATOR)) {
             $this->getResponse()->setHttpResponseCode(403);
             return;
         }
@@ -77,13 +62,7 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         /** @var Mage_Catalog_Model_Product_Image $model */
         $model = Mage::getModel('catalog/product_image');
         $model->setTransformParams($params);
-
-        $baseMediaPath = Mage::getSingleton('catalog/product_media_config')->getBaseMediaPath();
-        $relativeFile = str_replace($baseMediaPath, '', $realSrc);
-        if (!str_starts_with($relativeFile, '/')) {
-            $relativeFile = '/' . basename($realSrc);
-        }
-        $model->setBaseFile($relativeFile);
+        $model->setBaseFile($params['_sourceFile']);
 
         if (!$model->isCached()) {
             if ($params['_angle'] != 0) {
