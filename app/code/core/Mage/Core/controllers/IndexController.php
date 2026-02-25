@@ -65,7 +65,8 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         $model->setBaseFile($params['_sourceFile']);
 
         if (!$model->isCached()) {
-            $encoded = $model->saveFile();
+            $model->saveFile();
+            $encoded = $model->getEncodedImage();
 
             $this->getResponse()
                 ->setHeader('Content-Type', $encoded->mediaType())
