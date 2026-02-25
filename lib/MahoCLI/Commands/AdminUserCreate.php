@@ -31,10 +31,12 @@ class AdminUserCreate extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $role = Mage::getModel('admin/roles')
-            ->load('Administrators', 'role_name');
+        $role = Mage::getModel('admin/roles')->getCollection()
+            ->addFieldToFilter('tree_level', 1)
+            ->setOrder('role_id', 'ASC')
+            ->getFirstItem();
         if (!$role->getId()) {
-            $output->writeln('<error>Role "Administrators" not found</error>');
+            $output->writeln('<error>No admin role found</error>');
             return Command::FAILURE;
         }
 
