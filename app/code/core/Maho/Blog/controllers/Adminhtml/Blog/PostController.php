@@ -11,7 +11,7 @@
 
 class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'cms/blog_posts';
+    public const ADMIN_RESOURCE = 'cms/blog/posts';
 
     #[\Override]
     public function preDispatch()
@@ -23,7 +23,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     protected function _initAction(): self
     {
         $this->loadLayout()
-            ->_setActiveMenu('cms/blog_posts');
+            ->_setActiveMenu('cms/blog/posts');
         return $this;
     }
 
@@ -157,6 +157,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     #[\Override]
     protected function _isAllowed(): bool
     {
-        return Mage::getSingleton('admin/session')->isAllowed('cms/blog_posts');
+        return Mage::getSingleton('admin/session')->isAllowed('cms/blog/posts');
     }
 }

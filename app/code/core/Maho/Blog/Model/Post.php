@@ -11,7 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  *
  * @method string getContent() Returns raw content. For frontend display, use getFilteredContent() instead.
- * @method string getPublishedAt()
+ * @method string getPublishDate()
  * @method string getTitle()
  * @method string getImage()
  */
@@ -46,7 +46,7 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     public function getStores(): array
     {
         if (!$this->hasStores()) {
-            $stores = $this->_getResource()->lookupStoreIds($this->getId());
+            $stores = $this->_getResource()->lookupStoreIds((int) $this->getId());
             $this->setStores($stores);
         }
         $stores = $this->_getData('stores');
@@ -87,6 +87,18 @@ class Maho_Blog_Model_Post extends Mage_Core_Model_Abstract
     public function getStaticAttributes(): array
     {
         return $this->_staticAttributes;
+    }
+
+    /**
+     * Get category IDs assigned to this post
+     */
+    public function getCategories(): array
+    {
+        if (!$this->hasData('category_ids')) {
+            $categoryIds = $this->_getResource()->lookupCategoryIds($this->getId());
+            $this->setData('category_ids', $categoryIds);
+        }
+        return $this->getData('category_ids') ?: [];
     }
 
     public function getUrl(): string

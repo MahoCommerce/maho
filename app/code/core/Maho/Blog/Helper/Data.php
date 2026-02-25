@@ -55,6 +55,58 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
         return $postsPerPage > 0 ? $postsPerPage : 20; // Default fallback
     }
 
+    public function areCategoriesEnabled(): bool
+    {
+        return $this->isEnabled() && Mage::getStoreConfigFlag('blog/general/enable_categories');
+    }
+
+    public function getCategoryUrlPrefix(): string
+    {
+        $prefix = Mage::getStoreConfig('blog/general/category_url_prefix');
+        return $prefix ?: 'category';
+    }
+
+    public function getCategoryUrl(Maho_Blog_Model_Category $category, ?int $storeId = null, ?array $urlKeys = null): string
+    {
+        $blogPrefix = $this->getBlogUrlPrefix($storeId);
+        $catPrefix = $this->getCategoryUrlPrefix();
+        $path = $blogPrefix . '/' . $catPrefix . '/' . $this->getCategoryUrlPath($category, $urlKeys) . '/';
+        return Mage::getBaseUrl() . $path;
+    }
+
+    /**
+     * @param array<int, string>|null $urlKeys Pre-loaded entity_id => url_key pairs to avoid DB queries
+     */
+    public function getCategoryUrlPath(Maho_Blog_Model_Category $category, ?array $urlKeys = null): string
+    {
+        $pathIds = $category->getPathIds();
+        if (empty($pathIds)) {
+            return $category->getUrlKey();
+        }
+
+        $ancestorIds = array_filter($pathIds, fn($id) => (int) $id !== (int) $category->getId());
+        if ($urlKeys !== null) {
+            // Use pre-loaded url keys
+        } elseif (!empty($ancestorIds)) {
+            /** @var Maho_Blog_Model_Resource_Category $resource */
+            $resource = Mage::getResourceSingleton('blog/category');
+            $urlKeys = $resource->getUrlKeysByIds($ancestorIds);
+        } else {
+            $urlKeys = [];
+        }
+
+        $segments = [];
+        foreach ($pathIds as $id) {
+            if ((int) $id === (int) $category->getId()) {
+                $segments[] = $category->getUrlKey();
+            } elseif (isset($urlKeys[$id])) {
+                $segments[] = $urlKeys[$id];
+            }
+        }
+
+        return implode('/', $segments);
+    }
+
     /**
      * Get truncated content for preview
      */

@@ -18,9 +18,57 @@
             <block type="blog/adminhtml_post_edit_tabs" name="blog_post_edit_tabs">
                 <block type="blog/adminhtml_post_edit_tab_content" name="blog_post_edit_tab_content" />
                 <block type="blog/adminhtml_post_edit_tab_meta" name="blog_post_edit_tab_meta" />
+                <block type="blog/adminhtml_post_edit_tab_categories" name="blog_post_edit_tab_categories" />
                 <action method="addTab"><name>content_section</name><block>blog_post_edit_tab_content</block></action>
                 <action method="addTab"><name>meta_section</name><block>blog_post_edit_tab_meta</block></action>
+                <action method="addTab"><name>categories_section</name><block>blog_post_edit_tab_categories</block></action>
             </block>
         </reference>
     </adminhtml_blog_post_edit>
+
+    <adminhtml_blog_category_index>
+        <reference name="head">
+            <action method="setTitle" translate="title"><title>Blog Categories</title></action>
+        </reference>
+        <reference name="content">
+            <block type="blog/adminhtml_category" name="categories"/>
+        </reference>
+    </adminhtml_blog_category_index>
+
+    <adminhtml_blog_category_edit>
+        <update handle="editor"/>
+        <reference name="content">
+            <block type="blog/adminhtml_category_edit" name="categories_edit"/>
+        </reference>
+        <reference name="left">
+            <block type="blog/adminhtml_category_edit_tabs" name="blog_category_edit_tabs">
+                <block type="blog/adminhtml_category_edit_tab_general" name="blog_category_edit_tab_general" />
+                <block type="blog/adminhtml_category_edit_tab_meta" name="blog_category_edit_tab_meta" />
+                <action method="addTab"><name>general_section</name><block>blog_category_edit_tab_general</block></action>
+                <action method="addTab"><name>meta_section</name><block>blog_category_edit_tab_meta</block></action>
+            </block>
+        </reference>
+    </adminhtml_blog_category_edit>
+
+    <adminhtml_blog_category_posts>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="blog/adminhtml_category_edit_tab_posts" name="blog_category_edit_tab_posts" />
+            <block type="adminhtml/widget_grid_serializer" name="posts_grid_serializer">
+                <reference name="posts_grid_serializer">
+                    <action method="initSerializerBlock">
+                        <grid_block_name>blog_category_edit_tab_posts</grid_block_name>
+                        <data_callback>getSelectedCategoryPosts</data_callback>
+                        <hidden_input_name>post_ids</hidden_input_name>
+                        <reload_param_name>posts_category</reload_param_name>
+                    </action>
+                </reference>
+            </block>
+        </block>
+    </adminhtml_blog_category_posts>
+
+    <adminhtml_blog_category_postsgrid>
+        <block type="core/text_list" name="root" output="toHtml">
+            <block type="blog/adminhtml_category_edit_tab_posts" name="blog_category_edit_tab_posts" />
+        </block>
+    </adminhtml_blog_category_postsgrid>
 </layout>
