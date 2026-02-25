@@ -25,7 +25,7 @@ if (empty($tree)) {
             <dt><?= $this->__('Categories') ?></dt>
             <dd>
                 <?php
-                $renderTree = function (array $nodes, int $currentId = null) use (&$renderTree, $helper, $urlKeys) {
+                $renderTree = function (array $nodes, ?int $currentId = null) use (&$renderTree, $helper, $urlKeys) {
                     echo '<ol>';
                     foreach ($nodes as $node) {
                         $category = $node['category'];
