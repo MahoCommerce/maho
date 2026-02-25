@@ -366,7 +366,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         '_backgroundColor',
         '_backgroundColorStr',
         '_sourceFile',
-        '_isBaseFilePlaceholder',
         '_destinationSubdir',
         '_angle',
         '_watermarkFile',
