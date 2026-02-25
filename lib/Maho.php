@@ -291,7 +291,8 @@ final class Maho
      */
     public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
     {
-        $path = [$baseMediaPath, 'cache', $params['_sid'], $params['_destinationSubdir']];
+        $storeId = (int) \Mage::app()->getStore()->getId();
+        $path = [$baseMediaPath, 'cache', $storeId, $params['_destinationSubdir']];
 
         if (!empty($params['_width']) || !empty($params['_height'])) {
             $path[] = "{$params['_width']}x{$params['_height']}";
@@ -317,7 +318,7 @@ final class Maho
 
         $path[] = md5(implode('_', $miscParams));
 
-        $targetExt = image_type_to_extension((int) $params['_fmt']);
+        $targetExt = image_type_to_extension((int) \Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
         $file = preg_replace('/\.[^.]+$/', $targetExt, $sourceFile);
 
         return implode('/', $path) . $file;

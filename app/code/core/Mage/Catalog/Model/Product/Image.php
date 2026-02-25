@@ -333,7 +333,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         // build cache file path from transform params
         $this->_newFile = Maho::buildImageResizeCachePath(
-            $this->getTransformParams(),
+            $this->getProperties(),
             self::$_baseMediaPath,
             $file,
         );
@@ -342,7 +342,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Hydrate the model from a transform params array (inverse of getTransformParams).
+     * Hydrate the model from a transform params array (inverse of getProperties).
      */
     public function setTransformParams(array $params): self
     {
@@ -358,12 +358,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
      * Return all transformation parameters that define the output image.
      * Used both for building cache path hashes and for signed URL token payloads.
      */
-    public function getTransformParams(): array
+    public function getProperties(): array
     {
-        $params = get_object_vars($this);
-        $params['_fmt'] = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
-        $params['_sid'] = (int) Mage::app()->getStore()->getId();
-        return $params;
+        return get_object_vars($this);
     }
 
     /**

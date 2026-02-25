@@ -98,7 +98,7 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
 
         // Serve the image
         $file = $model->getNewFile();
-        $mime = match ((int) $params['_fmt']) {
+        $mime = match ((int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
             IMAGETYPE_AVIF => 'image/avif',
             IMAGETYPE_GIF  => 'image/gif',
             IMAGETYPE_JPEG => 'image/jpeg',
