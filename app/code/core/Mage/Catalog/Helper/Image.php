@@ -16,6 +16,13 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
     public const XML_NODE_PRODUCT_SMALL_IMAGE_WIDTH = 'catalog/product_image/small_width';
     public const XML_NODE_PRODUCT_MAX_DIMENSION = 'catalog/product_image/max_dimension';
 
+    /**
+     * Set to true when a deferred resize URL is returned instead of a direct
+     * cache URL.  Block caching must be suppressed for the rest of the request
+     * so that the temporary resize URLs are not persisted in the block cache.
+     */
+    public bool $hasDeferredImages = false;
+
     protected $_moduleName = 'Mage_Catalog';
 
     /**
@@ -371,6 +378,7 @@ class Mage_Catalog_Helper_Image extends Mage_Core_Helper_Abstract
 
             // Return a signed URL for deferred generation instead of
             // processing the image synchronously during page render.
+            $this->hasDeferredImages = true;
             $params = $model->getTransformParams();
             $query = Maho::signImageResizeRequest($params, Mage::getEncryptionKeyAsHex());
             $url = Mage::getUrl('core/index/resize', ['_query' => $query, '_nosid' => true]);
