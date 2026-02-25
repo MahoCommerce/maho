@@ -535,6 +535,21 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         return $this;
     }
 
+    /**
+     * Apply all transformations (rotate, resize, watermark) and save to cache.
+     */
+    public function processImage(): \Intervention\Image\EncodedImage
+    {
+        if ($this->_angle != 0) {
+            $this->rotate($this->_angle);
+        }
+        $this->resize();
+        if ($this->_watermarkFile) {
+            $this->setWatermark($this->_watermarkFile);
+        }
+        return $this->saveFile();
+    }
+
     public function saveFile(): \Intervention\Image\EncodedImage
     {
         $encoded = match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {

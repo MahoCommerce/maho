@@ -64,17 +64,8 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
         $model->setTransformParams($params);
         $model->setBaseFile($params['_sourceFile']);
 
-        // Process image on cache miss (race condition: another request may have
-        // already generated this file, in which case we just serve from disk)
         if (!$model->isCached()) {
-            if ($params['_angle'] != 0) {
-                $model->rotate($params['_angle']);
-            }
-            $model->resize();
-            if (isset($params['_watermarkFile'])) {
-                $model->setWatermark($params['_watermarkFile']);
-            }
-            $encoded = $model->saveFile();
+            $encoded = $model->processImage();
 
             $this->getResponse()
                 ->setHeader('Content-Type', $encoded->mediaType())
