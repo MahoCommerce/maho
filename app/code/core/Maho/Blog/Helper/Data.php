@@ -80,15 +80,20 @@ class Maho_Blog_Helper_Data extends Mage_Core_Helper_Abstract
             return $category->getUrlKey();
         }
 
+        $ancestorIds = array_filter($pathIds, fn($id) => (int) $id !== (int) $category->getId());
+        $urlKeys = [];
+        if (!empty($ancestorIds)) {
+            /** @var Maho_Blog_Model_Resource_Category $resource */
+            $resource = Mage::getResourceSingleton('blog/category');
+            $urlKeys = $resource->getUrlKeysByIds($ancestorIds);
+        }
+
         $segments = [];
         foreach ($pathIds as $id) {
             if ((int) $id === (int) $category->getId()) {
                 $segments[] = $category->getUrlKey();
-            } else {
-                $parent = Mage::getModel('blog/category')->load($id);
-                if ($parent->getId() && $parent->getUrlKey()) {
-                    $segments[] = $parent->getUrlKey();
-                }
+            } elseif (isset($urlKeys[$id])) {
+                $segments[] = $urlKeys[$id];
             }
         }
 

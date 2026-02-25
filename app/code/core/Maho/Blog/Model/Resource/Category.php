@@ -317,4 +317,61 @@ class Maho_Blog_Model_Resource_Category extends Mage_Eav_Model_Entity_Abstract
         $result = $adapter->fetchOne($select);
         return $result ? (int) $result : null;
     }
+
+    /**
+     * Resolve a full category URL path (e.g. ['parent-key', 'child-key']) to a category ID,
+     * validating each segment matches the expected parent chain.
+     */
+    public function getCategoryIdByFullPath(array $segments, int $storeId): ?int
+    {
+        $parentId = Maho_Blog_Model_Category::ROOT_PARENT_ID;
+        $categoryId = null;
+        $stores = [Mage_Core_Model_App::ADMIN_STORE_ID, $storeId];
+        $adapter = $this->_getReadAdapter();
+
+        foreach ($segments as $urlKey) {
+            $select = $adapter->select()
+                ->from(['bc' => $this->getEntityTable()], ['entity_id'])
+                ->join(
+                    ['bcs' => $this->_storeTable],
+                    'bc.entity_id = bcs.category_id',
+                    [],
+                )
+                ->where('bc.url_key = ?', $urlKey)
+                ->where('bc.parent_id = ?', $parentId)
+                ->where('bcs.store_id IN (?)', $stores)
+                ->where('bc.is_active = ?', 1)
+                ->order('bcs.store_id DESC')
+                ->limit(1);
+
+            $result = $adapter->fetchOne($select);
+            if (!$result) {
+                return null;
+            }
+            $categoryId = (int) $result;
+            $parentId = $categoryId;
+        }
+
+        return $categoryId;
+    }
+
+    /**
+     * Batch load url_keys for multiple category IDs
+     *
+     * @return array<int, string> Map of entity_id => url_key
+     */
+    public function getUrlKeysByIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        $adapter = $this->_getReadAdapter();
+        $select = $adapter->select()
+            ->from($this->getEntityTable(), ['entity_id', 'url_key'])
+            ->where('entity_id IN (?)', $ids);
+
+        $rows = $adapter->fetchPairs($select);
+        return $rows ?: [];
+    }
 }

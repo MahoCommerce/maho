@@ -111,18 +111,27 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         if ($category) {
             // Walk up the path to add all parent categories
             $pathIds = explode('/', $category->getPath());
-            // Remove root category ID and the current category from the path
             $rootId = Maho_Blog_Model_Category::ROOT_PARENT_ID;
-            $pathIds = array_filter($pathIds, fn($id) => (int) $id !== $rootId && (int) $id !== (int) $category->getId());
+            $parentIds = array_filter($pathIds, fn($id) => (int) $id !== $rootId && (int) $id !== (int) $category->getId());
 
-            foreach ($pathIds as $parentId) {
-                $parent = Mage::getModel('blog/category')->load($parentId);
-                if ($parent->getId()) {
-                    $breadcrumbs->addCrumb('category_' . $parent->getId(), [
-                        'label' => $parent->getName(),
-                        'title' => $parent->getName(),
-                        'link'  => $helper->getCategoryUrl($parent),
-                    ]);
+            if (!empty($parentIds)) {
+                $parentCollection = Mage::getResourceModel('blog/category_collection')
+                    ->addFieldToFilter('entity_id', ['in' => $parentIds]);
+
+                $parentsById = [];
+                foreach ($parentCollection as $parent) {
+                    $parentsById[(int) $parent->getId()] = $parent;
+                }
+
+                foreach ($parentIds as $parentId) {
+                    $parent = $parentsById[(int) $parentId] ?? null;
+                    if ($parent) {
+                        $breadcrumbs->addCrumb('category_' . $parent->getId(), [
+                            'label' => $parent->getName(),
+                            'title' => $parent->getName(),
+                            'link'  => $helper->getCategoryUrl($parent),
+                        ]);
+                    }
                 }
             }
 

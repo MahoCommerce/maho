@@ -269,12 +269,7 @@ class Maho_Blog_Model_Observer
             ->addActiveFilter()
             ->addStoreFilter($storeId);
 
-        $categories = [];
-        foreach ($collection as $category) {
-            $categories[] = $category;
-        }
-
-        return $categories;
+        return $collection->getItems();
     }
 
     protected function getBlogPostsForSitemap(int $storeId): array

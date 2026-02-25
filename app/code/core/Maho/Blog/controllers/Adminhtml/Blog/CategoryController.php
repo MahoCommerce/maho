@@ -105,7 +105,6 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
 
             try {
                 $model->addData($data)
-                    ->setUpdatedAt(Mage::getSingleton('core/date')->gmtDate())
                     ->save();
 
                 Mage::getSingleton('adminhtml/session')->addSuccess(

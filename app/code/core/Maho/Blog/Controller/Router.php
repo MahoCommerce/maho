@@ -64,11 +64,10 @@ class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abs
             $categoryPattern = '#^' . preg_quote($catPrefix, '#') . '/(.+?)$#';
             if (preg_match($categoryPattern, $pathPart, $catMatches)) {
                 $categoryPath = $catMatches[1];
-                // The last segment is the category url key
                 $segments = explode('/', $categoryPath);
-                $categoryUrlKey = array_pop($segments);
-                $category = Mage::getModel('blog/category');
-                $categoryId = $category->getCategoryIdByUrlKey($categoryUrlKey, $storeId);
+                /** @var Maho_Blog_Model_Resource_Category $resource */
+                $resource = Mage::getResourceSingleton('blog/category');
+                $categoryId = $resource->getCategoryIdByFullPath($segments, $storeId);
                 if ($categoryId) {
                     $request->setModuleName('blog')
                         ->setControllerName('index')
