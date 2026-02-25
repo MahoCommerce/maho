@@ -363,7 +363,6 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         '_keepFrame',
         '_keepTransparency',
         '_constrainOnly',
-        '_backgroundColor',
         '_backgroundColorStr',
         '_sourceFile',
         '_destinationSubdir',
@@ -455,6 +454,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     public function rotate(float $angle): self
     {
         $angle = (int) $angle;
+        if ($angle % 360 === 0) {
+            return $this;
+        }
         $this->getImage()->rotate($angle, $this->_backgroundColorStr);
         return $this;
     }
