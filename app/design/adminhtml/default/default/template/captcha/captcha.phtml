@@ -18,7 +18,8 @@ if (!$helper->isEnabled()) return '';
         MahoCaptcha.setup({
             frontendSelectors: '#loginForm',
             widgetAttributes: <?= $helper->getWidgetAttributes()->toJson() ?>,
-            loadingImageUrl: '<?= $this->getSkinUrl('images/loading.svg') ?>'
+            loadingImageUrl: '<?= $this->getSkinUrl('images/loading.svg') ?>',
+            verifyingText: '<?= $this->jsQuoteEscape($helper->__('Verifying...')) ?>'
         });
     });
 </script>
