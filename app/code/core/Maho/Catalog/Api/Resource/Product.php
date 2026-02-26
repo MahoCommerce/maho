@@ -153,6 +153,12 @@ class Product
     #[ApiProperty(description: 'Final computed price after rules and specials')]
     public ?float $finalPrice = null;
 
+    #[ApiProperty(description: 'Minimum price (useful for bundles/grouped)')]
+    public ?float $minimalPrice = null;
+
+    #[ApiProperty(description: 'Tier pricing thresholds (detail only)')]
+    public array $tierPrices = [];
+
     #[ApiProperty(description: 'Available stock quantity')]
     public ?float $stockQty = null;
 

@@ -560,6 +560,23 @@ final class ProductProvider implements ProviderInterface
             }
         }
 
+        // Minimal price for bundles/grouped ("From $X")
+        $minimalPrice = $product->getMinimalPrice() ?: $product->getData('min_price');
+        if (!$minimalPrice && in_array($dto->type, ['bundle', 'grouped'])) {
+            // load() doesn't join price index — query it directly
+            $resource = \Mage::getSingleton('core/resource');
+            $read = $resource->getConnection('core_read');
+            $table = $resource->getTableName('catalog/product_index_price');
+            $row = $read->fetchRow(
+                "SELECT min_price, max_price FROM {$table} WHERE entity_id = ? LIMIT 1",
+                [(int) $product->getId()],
+            );
+            $minimalPrice = $row['min_price'] ?? null;
+        }
+        if ($minimalPrice) {
+            $dto->minimalPrice = (float) $minimalPrice;
+        }
+
         // Get stock information - use pre-loaded stock item if available (batch loading)
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
@@ -656,6 +673,9 @@ final class ProductProvider implements ProviderInterface
                     ?: 'Links';
                 $dto->linksPurchasedSeparately = (bool) $product->getData('links_purchased_separately');
             }
+
+            // Tier pricing
+            $dto->tierPrices = $this->getTierPrices($product);
         }
 
         return $dto;
@@ -1047,23 +1067,20 @@ final class ProductProvider implements ProviderInterface
     {
         /** @var \Mage_Bundle_Model_Product_Type $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
+        $isDynamic = (int) $product->getPriceType() === 0;
 
-        // Get options
         $optionsCollection = $typeInstance->getOptionsCollection($product);
         if (!$optionsCollection || $optionsCollection->getSize() === 0) {
             return [];
         }
 
-        // Get all option IDs for batch loading selections
         $optionIds = [];
         foreach ($optionsCollection as $option) {
             $optionIds[] = (int) $option->getId();
         }
 
-        // Get all selections for all options at once
         $selectionsCollection = $typeInstance->getSelectionsCollection($optionIds, $product);
 
-        // Group selections by option_id and collect product IDs for stock lookup
         $selectionsByOption = [];
         $selectionProductIds = [];
         foreach ($selectionsCollection as $selection) {
@@ -1072,8 +1089,21 @@ final class ProductProvider implements ProviderInterface
             $selectionProductIds[] = (int) $selection->getProductId();
         }
 
-        // Batch load stock items for all selection products
-        $stockByProduct = $this->batchLoadStockItems(array_unique($selectionProductIds));
+        $uniqueProductIds = array_unique($selectionProductIds);
+        $stockByProduct = $this->batchLoadStockItems($uniqueProductIds);
+
+        // For dynamic pricing, batch-load child products to get actual prices and tier prices
+        $childProducts = [];
+        if ($isDynamic && !empty($uniqueProductIds)) {
+            $collection = \Mage::getResourceModel('catalog/product_collection')
+                ->addIdFilter($uniqueProductIds)
+                ->addAttributeToSelect(['price', 'special_price', 'special_from_date', 'special_to_date'])
+                ->addPriceData()
+                ->addTierPriceData();
+            foreach ($collection as $child) {
+                $childProducts[(int) $child->getId()] = $child;
+            }
+        }
 
         $result = [];
         foreach ($optionsCollection as $option) {
@@ -1084,12 +1114,23 @@ final class ProductProvider implements ProviderInterface
                 $selProductId = (int) $selection->getProductId();
                 $stockItem = $stockByProduct[$selProductId] ?? null;
 
-                $selections[] = [
+                // For dynamic bundles, use child product's final price
+                if ($isDynamic && isset($childProducts[$selProductId])) {
+                    $child = $childProducts[$selProductId];
+                    $selPrice = (float) $child->getFinalPrice();
+                } else {
+                    $selPrice = (float) $selection->getSelectionPriceValue();
+                    if ($selPrice === 0.0) {
+                        $selPrice = (float) $selection->getPrice();
+                    }
+                }
+
+                $selData = [
                     'id' => (int) $selection->getSelectionId(),
                     'productId' => $selProductId,
                     'sku' => $selection->getSku(),
                     'name' => $selection->getName(),
-                    'price' => (float) ($selection->getSelectionPriceValue() ?: $selection->getPrice()),
+                    'price' => $selPrice,
                     'priceType' => (int) $selection->getSelectionPriceType() === 1 ? 'percent' : 'fixed',
                     'inStock' => $stockItem ? (bool) $stockItem->getIsInStock() : false,
                     'isDefault' => (bool) $selection->getIsDefault(),
@@ -1097,9 +1138,15 @@ final class ProductProvider implements ProviderInterface
                     'defaultQty' => (float) ($selection->getSelectionQty() ?: 1),
                     'position' => (int) ($selection->getPosition() ?: 0),
                 ];
+
+                // Include tier prices for dynamic bundle selections
+                if ($isDynamic && isset($childProducts[$selProductId])) {
+                    $selData['tierPrices'] = $this->getTierPrices($childProducts[$selProductId]);
+                }
+
+                $selections[] = $selData;
             }
 
-            // Sort selections by position
             usort($selections, fn($a, $b) => $a['position'] <=> $b['position']);
 
             $result[] = [
@@ -1112,8 +1159,42 @@ final class ProductProvider implements ProviderInterface
             ];
         }
 
-        // Sort options by position
         usort($result, fn($a, $b) => $a['position'] <=> $b['position']);
+
+        return $result;
+    }
+
+
+    /**
+     * Get tier prices for a product
+     * @return array<array{qty: float, price: float, savePercent: int}>
+     */
+    private function getTierPrices(\Mage_Catalog_Model_Product $product): array
+    {
+        $tierPrices = $product->getTierPrice();
+        if (!is_array($tierPrices) || empty($tierPrices)) {
+            return [];
+        }
+
+        $basePrice = (float) $product->getPrice();
+        $result = [];
+        foreach ($tierPrices as $tp) {
+            $tierPrice = (float) ($tp['price'] ?? 0);
+            if ($tierPrice <= 0) {
+                continue;
+            }
+            $savePercent = $basePrice > 0
+                ? (int) round((1 - $tierPrice / $basePrice) * 100)
+                : 0;
+
+            $result[] = [
+                'qty' => (float) ($tp['price_qty'] ?? 1),
+                'price' => $tierPrice,
+                'savePercent' => $savePercent,
+            ];
+        }
+
+        usort($result, fn($a, $b) => $a['qty'] <=> $b['qty']);
 
         return $result;
     }

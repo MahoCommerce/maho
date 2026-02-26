@@ -213,90 +213,12 @@ class CartService
 
         \Mage::log("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
 
-        // TODO: TEMPORARY WORKAROUND - This entire price loading and manual calculation section is a hack
-        // The root issue is that collectTotals() is not working properly when:
-        // 1. Products are loaded in store_id=1 context but prices only exist in store_id=0 (global)
-        // 2. EAV attribute fallback from child store to global store is not working as expected
-        //
-        // PROPER FIX: Investigate why collectTotals() fails and fix the underlying store/price configuration
-        // See: CART_PRICING_WORKAROUND.md for more details
-        //
-        // Get the price - if it's 0 or empty, try loading from global store (store_id=0)
-        $price = $product->getPrice();
-        if (!$price || $price == 0) {
-            \Mage::log("Price is 0 in store {$quote->getStoreId()}, trying to load from global store (0)");
-            $globalProduct = \Mage::getModel('catalog/product')
-                ->setStoreId(0)
-                ->load($productId);
-            $price = $globalProduct->getPrice();
-            \Mage::log("Global store price: {$price}");
-        }
-
-        // Apply catalog price rules if customer is assigned to quote
-        if ($quote->getCustomerGroupId()) {
-            // Get website ID - quote might not have it set yet
-            $websiteId = $quote->getWebsiteId();
-            if (!$websiteId) {
-                $store = \Mage::app()->getStore($quote->getStoreId());
-                $websiteId = $store->getWebsiteId();
-            }
-
-            $catalogRulePrice = $this->getCatalogRulePrice((int) $productId, $quote->getCustomerGroupId(), $websiteId, $quote->getStoreId());
-            if ($catalogRulePrice !== null && $catalogRulePrice < $price) {
-                \Mage::log("Applying catalog rule price: {$catalogRulePrice} (was {$price}) for customer group {$quote->getCustomerGroupId()}");
-                $price = $catalogRulePrice;
-            }
-        }
-
         $result = $quote->addProduct($product, $buyRequest);
 
         // addProduct returns a string error message on failure
         if (is_string($result)) {
             \Mage::log("Failed to add product: {$result}");
             throw new \RuntimeException("Failed to add product: {$result}");
-        }
-
-        // If price is still 0 after addProduct, manually set it on the quote item
-        // For grouped/bundle products, child items have their own SKUs — look up each child's price individually
-        $isGroupedOrBundle = in_array($product->getTypeId(), [\Mage_Catalog_Model_Product_Type::TYPE_GROUPED, \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE], true);
-        $items = $quote->getAllItems();
-        foreach ($items as $item) {
-            if ($item->getPrice() != 0 && $item->getPrice()) {
-                continue; // Price is already set
-            }
-
-            // For simple/configurable: match by SKU; for grouped/bundle: fix all zero-price items
-            if (!$isGroupedOrBundle && $item->getSku() !== $sku) {
-                continue;
-            }
-
-            // Determine the correct price for this item
-            $itemPrice = $price; // Default: parent product's resolved price
-            if ($isGroupedOrBundle) {
-                // Load child product's own price
-                $childProductId = $item->getProductId();
-                $childProduct = \Mage::getModel('catalog/product')->setStoreId($quote->getStoreId())->load($childProductId);
-                $itemPrice = (float) $childProduct->getPrice();
-                if (!$itemPrice || $itemPrice == 0) {
-                    $childProduct = \Mage::getModel('catalog/product')->setStoreId(0)->load($childProductId);
-                    $itemPrice = (float) $childProduct->getPrice();
-                }
-            }
-
-            if ($itemPrice && $itemPrice > 0) {
-                \Mage::log("Manually setting price {$itemPrice} on quote item {$item->getId()} (SKU: {$item->getSku()})");
-                $item->setPrice($itemPrice);
-                $item->setBasePrice($itemPrice);
-                $item->setCustomPrice($itemPrice);
-                $item->setOriginalCustomPrice($itemPrice);
-                $item->getProduct()->setIsSuperMode(true); // Allow custom price
-
-                // Calculate row total manually
-                $rowTotal = $itemPrice * $item->getQty();
-                $item->setRowTotal($rowTotal);
-                $item->setBaseRowTotal($rowTotal);
-                \Mage::log("Set row_total to {$rowTotal}");
-            }
         }
 
         $this->collectAndVerifyTotals($quote);
@@ -330,17 +252,6 @@ class CartService
         }
 
         $item->setQty($qty);
-
-        // TODO: TEMPORARY WORKAROUND - Same pricing fix as in addItem()
-        // Manually recalculate row total because collectTotals() fails
-        // See: CART_PRICING_WORKAROUND.md for more details
-        $price = $item->getPrice();
-        if ($price && $price > 0) {
-            $rowTotal = $price * $qty;
-            $item->setRowTotal($rowTotal);
-            $item->setBaseRowTotal($rowTotal);
-            \Mage::log("Updated item {$itemId} qty to {$qty}, row_total: {$rowTotal}");
-        }
 
         $this->collectAndVerifyTotals($quote);
 
