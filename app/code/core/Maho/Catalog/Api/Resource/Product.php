@@ -263,6 +263,14 @@ class Product
     #[ApiProperty(description: 'Bundle product options and selections (detail only)')]
     public array $bundleOptions = [];
 
+    /**
+     * Additional product attributes visible on the frontend (detail only)
+     * Structure: [['label' => 'Brand', 'value' => 'Nike', 'code' => 'brand']]
+     * @var array<array{label: string, value: string, code: string}>
+     */
+    #[ApiProperty(description: 'Additional product attributes for specifications tab (detail only)')]
+    public array $additionalAttributes = [];
+
     /** @var int[]|null Website IDs for product assignment (write only) */
     #[ApiProperty(description: 'Website IDs for product assignment')]
     public ?array $websiteIds = null;

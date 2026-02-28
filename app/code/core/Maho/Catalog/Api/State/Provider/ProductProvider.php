@@ -435,6 +435,7 @@ final class ProductProvider implements ProviderInterface
         $data['groupedProducts'] = $dto->groupedProducts;
         $data['bundleOptions'] = $dto->bundleOptions;
         $data['downloadableLinks'] = $dto->downloadableLinks;
+        $data['additionalAttributes'] = $dto->additionalAttributes;
         $data['linksTitle'] = $dto->linksTitle;
         $data['pageLayout'] = $dto->pageLayout;
         $data['linksPurchasedSeparately'] = $dto->linksPurchasedSeparately;
@@ -457,6 +458,7 @@ final class ProductProvider implements ProviderInterface
         $dto->groupedProducts = $data['groupedProducts'] ?? null;
         $dto->bundleOptions = $data['bundleOptions'] ?? null;
         $dto->downloadableLinks = $data['downloadableLinks'] ?? null;
+        $dto->additionalAttributes = $data['additionalAttributes'] ?? [];
         $dto->linksTitle = $data['linksTitle'] ?? null;
         $dto->pageLayout = $data['pageLayout'] ?? null;
         $dto->linksPurchasedSeparately = $data['linksPurchasedSeparately'] ?? null;
@@ -674,6 +676,9 @@ final class ProductProvider implements ProviderInterface
                 $dto->linksPurchasedSeparately = (bool) $product->getData('links_purchased_separately');
             }
 
+
+            // Additional attributes ("Specifications" tab)
+            $dto->additionalAttributes = $this->getAdditionalAttributes($product);
             // Tier pricing
             $dto->tierPrices = $this->getTierPrices($product);
         }
@@ -1197,6 +1202,57 @@ final class ProductProvider implements ProviderInterface
         usort($result, fn($a, $b) => $a['qty'] <=> $b['qty']);
 
         return $result;
+    }
+
+
+    /**
+     * Get additional visible attributes for the specifications tab.
+     *
+     * Returns attributes that are marked "Visible on Product View Page" in admin,
+     * excluding core attributes already exposed as dedicated DTO properties.
+     *
+     * @return array<array{label: string, value: string, code: string}>
+     */
+    private function getAdditionalAttributes(\Mage_Catalog_Model_Product $product): array
+    {
+        $attributes = [];
+        $excludeCodes = [
+            'sku', 'name', 'description', 'short_description', 'price', 'special_price',
+            'weight', 'status', 'visibility', 'url_key', 'meta_title', 'meta_description',
+            'meta_keyword', 'image', 'small_image', 'thumbnail', 'page_layout',
+            'tax_class_id', 'country_of_manufacture',
+        ];
+
+        /** @var \Mage_Catalog_Model_Resource_Eav_Attribute[] $productAttributes */
+        $productAttributes = $product->getAttributes();
+
+        foreach ($productAttributes as $attribute) {
+            if (!$attribute->getIsVisibleOnFront()) {
+                continue;
+            }
+            $code = $attribute->getAttributeCode();
+            if (in_array($code, $excludeCodes, true)) {
+                continue;
+            }
+
+            $value = $attribute->getFrontend()->getValue($product);
+            if ($value === null || $value === '' || $value === false || $value === 'N/A' || $value === 'No') {
+                continue;
+            }
+
+            // For multiselect attributes, value may already be comma-separated string
+            if (is_array($value)) {
+                $value = implode(', ', $value);
+            }
+
+            $attributes[] = [
+                'label' => $attribute->getStoreLabel() ?: $attribute->getFrontendLabel() ?: $code,
+                'value' => (string) $value,
+                'code' => $code,
+            ];
+        }
+
+        return $attributes;
     }
 
     /**
