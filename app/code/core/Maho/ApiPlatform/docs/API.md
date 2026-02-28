@@ -36,6 +36,7 @@
   - [Wishlist](#wishlist)
   - [URL Resolver](#url-resolver)
   - [POS Payments](#pos-payments)
+- [Extending the API (Third-Party Modules)](#extending-the-api-third-party-modules)
 
 ---
 
@@ -858,3 +859,136 @@ app/code/core/Maho/
 ├── SalesRule/Api/         # Coupons & price rules
 └── ...                    # Other modules
 ```
+
+---
+
+## Extending the API (Third-Party Modules)
+
+All primary API resources include an `extensions` field — an open array where modules can inject additional data without modifying core API files.
+
+### How It Works
+
+Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho event after building the response object. Your module observes the event and appends data to `$dto->extensions`.
+
+### Available Events
+
+| Event | Dispatched In | Observer Parameters |
+|-------|---------------|---------------------|
+| `api_product_dto_build` | ProductProvider | `product` (model), `for_listing` (bool), `dto` |
+| `api_category_dto_build` | CategoryProvider | `category` (model), `dto` |
+| `api_cms_page_dto_build` | CmsPageProvider | `cms_page` (model), `dto` |
+| `api_cms_block_dto_build` | CmsBlockProvider | `cms_block` (model), `dto` |
+| `api_blog_post_dto_build` | BlogPostProvider | `blog_post` (model), `dto` |
+| `api_store_config_dto_build` | StoreConfigProvider | `store` (model), `dto` |
+| `api_order_dto_build` | OrderProvider | `order` (model), `dto` |
+| `api_order_item_dto_build` | OrderProvider | `order_item` (model), `dto` |
+| `api_customer_dto_build` | CustomerProvider | `customer` (model), `dto` |
+| `api_cart_dto_build` | CartProvider | `quote` (model), `dto` |
+| `api_cart_item_dto_build` | CartProvider | `quote_item` (model), `dto` |
+| `api_review_dto_build` | ReviewProvider | `review` (model), `dto` |
+| `api_wishlist_item_dto_build` | WishlistProvider | `wishlist_item` (model), `dto` |
+
+### Quick Example: Simple Bundles Module
+
+A module that adds bundle component data to products and cart items.
+
+**1. Register the observer** in your module's `config.xml`:
+
+```xml
+<config>
+    <global>
+        <events>
+            <api_product_dto_build>
+                <observers>
+                    <simple_bundles>
+                        <class>Vendor_SimpleBundles_Model_Api_Observer</class>
+                        <method>addBundleToProduct</method>
+                    </simple_bundles>
+                </observers>
+            </api_product_dto_build>
+            <api_cart_item_dto_build>
+                <observers>
+                    <simple_bundles>
+                        <class>Vendor_SimpleBundles_Model_Api_Observer</class>
+                        <method>addBundleToCartItem</method>
+                    </simple_bundles>
+                </observers>
+            </api_cart_item_dto_build>
+        </events>
+    </global>
+</config>
+```
+
+**2. Write the observer:**
+
+```php
+class Vendor_SimpleBundles_Model_Api_Observer
+{
+    public function addBundleToProduct(Varien_Event_Observer $observer): void
+    {
+        $product = $observer->getEvent()->getProduct();
+        $dto = $observer->getEvent()->getDto();
+
+        // Only add bundle data on detail view, not listings
+        if ($observer->getEvent()->getForListing()) {
+            return;
+        }
+
+        $bundleItems = Mage::getModel('simplebundles/item')
+            ->getCollection()
+            ->addProductFilter($product->getId());
+
+        if ($bundleItems->count() === 0) {
+            return;
+        }
+
+        $dto->extensions['simpleBundle'] = [
+            'items' => array_map(fn ($item) => [
+                'sku' => $item->getSku(),
+                'name' => $item->getName(),
+                'qty' => (int) $item->getQty(),
+            ], $bundleItems->getItems()),
+        ];
+    }
+
+    public function addBundleToCartItem(Varien_Event_Observer $observer): void
+    {
+        $quoteItem = $observer->getEvent()->getQuoteItem();
+        $dto = $observer->getEvent()->getDto();
+
+        $bundleData = $quoteItem->getOptionByCode('simple_bundle_data');
+        if (!$bundleData) {
+            return;
+        }
+
+        $dto->extensions['simpleBundle'] = json_decode($bundleData->getValue(), true);
+    }
+}
+```
+
+**3. API response** now includes the extension data:
+
+```json
+{
+  "id": 42,
+  "sku": "OUTFIT-SUMMER",
+  "name": "Summer Festival Outfit",
+  "price": 189.95,
+  "extensions": {
+    "simpleBundle": {
+      "items": [
+        {"sku": "DRESS-FLR-M", "name": "Floral Midi Dress", "qty": 1},
+        {"sku": "HAT-STRAW", "name": "Wide Brim Straw Hat", "qty": 1},
+        {"sku": "SANDAL-TAN-8", "name": "Tan Leather Sandals", "qty": 1}
+      ]
+    }
+  }
+}
+```
+
+### Guidelines
+
+- **Namespace your data** — use a unique key in `extensions` (e.g. `simpleBundle`, not `items`)
+- **Keep it lightweight** — avoid loading heavy collections in listing mode (check `for_listing`)
+- **Return serializable data** — arrays and scalars only, no objects
+- **Extensions are read-only** — the `extensions` field is populated during read operations; for write operations, use standard Maho model events or custom API processors
