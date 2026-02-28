@@ -339,6 +339,9 @@ final class ReviewProvider implements ProviderInterface
         $review->createdAt = $data['createdAt'];
         $review->customerId = isset($data['customerId']) ? (int) $data['customerId'] : null;
 
+        \Mage::dispatchEvent('api_review_dto_build', ['review_model' => $review, 'dto' => $review]);
+
+
         return $review;
     }
 }

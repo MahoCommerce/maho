@@ -436,6 +436,7 @@ final class ProductProvider implements ProviderInterface
         $data['bundleOptions'] = $dto->bundleOptions;
         $data['downloadableLinks'] = $dto->downloadableLinks;
         $data['additionalAttributes'] = $dto->additionalAttributes;
+        $data['extensions'] = $dto->extensions;
         $data['linksTitle'] = $dto->linksTitle;
         $data['pageLayout'] = $dto->pageLayout;
         $data['linksPurchasedSeparately'] = $dto->linksPurchasedSeparately;
@@ -459,6 +460,7 @@ final class ProductProvider implements ProviderInterface
         $dto->bundleOptions = $data['bundleOptions'] ?? null;
         $dto->downloadableLinks = $data['downloadableLinks'] ?? null;
         $dto->additionalAttributes = $data['additionalAttributes'] ?? [];
+        $dto->extensions = $data['extensions'] ?? [];
         $dto->linksTitle = $data['linksTitle'] ?? null;
         $dto->pageLayout = $data['pageLayout'] ?? null;
         $dto->linksPurchasedSeparately = $data['linksPurchasedSeparately'] ?? null;
@@ -683,6 +685,7 @@ final class ProductProvider implements ProviderInterface
             $dto->tierPrices = $this->getTierPrices($product);
         }
 
+        \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => $forListing, 'dto' => $dto]);
         return $dto;
     }
 
@@ -1315,6 +1318,8 @@ final class ProductProvider implements ProviderInterface
         if ($dto->type === \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
             $dto->hasRequiredOptions = true;
         }
+
+
 
         return $dto;
     }

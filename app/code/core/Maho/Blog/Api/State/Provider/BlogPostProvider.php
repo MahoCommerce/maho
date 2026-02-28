@@ -170,6 +170,9 @@ final class BlogPostProvider implements ProviderInterface
                 : $text;
         }
 
+        \Mage::dispatchEvent('api_blog_post_dto_build', ['post' => $post, 'dto' => $dto]);
+
+
         return $dto;
     }
 }

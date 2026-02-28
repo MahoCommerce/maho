@@ -105,4 +105,14 @@ class Review
     public string $status = 'pending';
     public ?string $createdAt = null;
     public ?int $customerId = null;
+
+    /**
+     * Module-provided extension data.
+     * Populated via api_{resource}_dto_build event. Modules can append
+     * arbitrary keyed data here without modifying core API resources.
+     * @var array<string, mixed>
+     */
+    #[ApiProperty(description: 'Module-provided extension data')]
+    public array $extensions = [];
+
 }

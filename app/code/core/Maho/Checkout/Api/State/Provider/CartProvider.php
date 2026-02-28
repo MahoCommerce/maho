@@ -222,6 +222,7 @@ final class CartProvider implements ProviderInterface
             $dto->prices['giftcardAmount'] = $giftcardAmount;
         }
 
+        \Mage::dispatchEvent('api_cart_dto_build', ['quote' => $quote, 'dto' => $dto]);
         return $dto;
     }
 
@@ -296,6 +297,12 @@ final class CartProvider implements ProviderInterface
             $dto->stockStatus = $stockItem->getIsInStock() ? 'in_stock' : 'out_of_stock';
         }
 
+
+
+
+
+
+        \Mage::dispatchEvent('api_cart_item_dto_build', ['item' => $item, 'dto' => $dto]);
         return $dto;
     }
 

@@ -172,6 +172,9 @@ final class CmsBlockProvider implements ProviderInterface
         $dto->createdAt = $block->getCreationTime();
         $dto->updatedAt = $block->getUpdateTime();
 
+        \Mage::dispatchEvent('api_cms_block_dto_build', ['block' => $block, 'dto' => $dto]);
+
+
         return $dto;
     }
 

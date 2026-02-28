@@ -177,6 +177,9 @@ final class CmsPageProvider implements ProviderInterface
         $dto->createdAt = $page->getCreationTime();
         $dto->updatedAt = $page->getUpdateTime();
 
+        \Mage::dispatchEvent('api_cms_page_dto_build', ['page' => $page, 'dto' => $dto]);
+
+
         return $dto;
     }
 

@@ -230,6 +230,9 @@ final class WishlistProvider implements ProviderInterface
         $item->addedAt = $data['addedAt'] ?? null;
         $item->inStock = (bool) ($data['inStock'] ?? true);
 
+        \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $item]);
+
+
         return $item;
     }
 

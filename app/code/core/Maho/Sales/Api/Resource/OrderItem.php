@@ -13,9 +13,12 @@ declare(strict_types=1);
 
 namespace Maho\Sales\Api\Resource;
 
+use ApiPlatform\Metadata\ApiProperty;
+
 /**
  * OrderItem DTO - Data transfer object for order line items
  */
+
 class OrderItem
 {
     public ?int $id = null;
@@ -37,4 +40,14 @@ class OrderItem
     public ?int $productId = null;
     public ?string $productType = null;
     public ?int $parentItemId = null;
+
+    /**
+     * Module-provided extension data.
+     * Populated via api_{resource}_dto_build event. Modules can append
+     * arbitrary keyed data here without modifying core API resources.
+     * @var array<string, mixed>
+     */
+    #[ApiProperty(description: 'Module-provided extension data')]
+    public array $extensions = [];
+
 }

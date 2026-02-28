@@ -220,6 +220,9 @@ final class CustomerProvider implements ProviderInterface
             }
         }
 
+        \Mage::dispatchEvent('api_customer_dto_build', ['customer' => $customer, 'dto' => $dto]);
+
+
         return $dto;
     }
 

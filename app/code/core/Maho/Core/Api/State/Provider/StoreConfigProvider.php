@@ -92,6 +92,9 @@ final class StoreConfigProvider implements ProviderInterface
             86400,
         );
 
+        \Mage::dispatchEvent('api_store_config_dto_build', ['dto' => $dto]);
+
+
         return $dto;
     }
 
@@ -150,6 +153,8 @@ final class StoreConfigProvider implements ProviderInterface
         $dto->defaultTitle = $data['defaultTitle'] ?? null;
         $dto->defaultDescription = $data['defaultDescription'] ?? null;
         $dto->cmsHomePage = $data['cmsHomePage'] ?? 'home';
+        \Mage::dispatchEvent('api_store_config_dto_build', ['dto' => $dto]);
+
         return $dto;
     }
 }

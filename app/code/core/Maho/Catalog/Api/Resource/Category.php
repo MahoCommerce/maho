@@ -24,6 +24,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Maho\Catalog\Api\State\Processor\CategoryProcessor;
 use Maho\Catalog\Api\State\Provider\CategoryProvider;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'Category',
@@ -102,4 +103,14 @@ class Category
     public ?string $pageLayout = null;
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
+
+    /**
+     * Module-provided extension data.
+     * Populated via api_{resource}_dto_build event. Modules can append
+     * arbitrary keyed data here without modifying core API resources.
+     * @var array<string, mixed>
+     */
+    #[ApiProperty(description: 'Module-provided extension data')]
+    public array $extensions = [];
+
 }

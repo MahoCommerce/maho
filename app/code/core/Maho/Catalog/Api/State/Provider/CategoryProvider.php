@@ -207,6 +207,9 @@ final class CategoryProvider implements ProviderInterface
             }
         }
 
+        \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);
+
+
         return $dto;
     }
 

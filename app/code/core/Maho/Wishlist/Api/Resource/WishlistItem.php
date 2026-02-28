@@ -23,6 +23,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\Wishlist\Api\State\Provider\WishlistProvider;
 use Maho\Wishlist\Api\State\Processor\WishlistProcessor;
+use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'WishlistItem',
@@ -112,4 +113,14 @@ class WishlistItem
     public ?string $description = null;
     public ?string $addedAt = null;
     public bool $inStock = true;
+
+    /**
+     * Module-provided extension data.
+     * Populated via api_{resource}_dto_build event. Modules can append
+     * arbitrary keyed data here without modifying core API resources.
+     * @var array<string, mixed>
+     */
+    #[ApiProperty(description: 'Module-provided extension data')]
+    public array $extensions = [];
+
 }

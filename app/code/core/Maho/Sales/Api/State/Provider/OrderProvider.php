@@ -360,6 +360,7 @@ final class OrderProvider implements ProviderInterface
             $dto->shipments = $this->mapShipmentsToDto($order);
         }
 
+        \Mage::dispatchEvent('api_order_dto_build', ['order' => $order, 'dto' => $dto]);
         return $dto;
     }
 
@@ -389,6 +390,12 @@ final class OrderProvider implements ProviderInterface
         $dto->productType = $item->getProductType();
         $dto->parentItemId = $item->getParentItemId() ? (int) $item->getParentItemId() : null;
 
+
+
+
+
+
+        \Mage::dispatchEvent('api_order_item_dto_build', ['item' => $item, 'dto' => $dto]);
         return $dto;
     }
 
