@@ -252,6 +252,28 @@ final class Maho
     }
 
     /**
+     * Return the IMAGETYPE_* constant for the system-configured image format
+     */
+    public static function getConfiguredImageType(): int
+    {
+        return (int) \Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
+    }
+
+    /**
+     * Encode an Intervention Image instance to the system-configured format
+     */
+    public static function encodeImage(\Intervention\Image\Interfaces\ImageInterface $image, ?int $quality = null): \Intervention\Image\Interfaces\EncodedImageInterface
+    {
+        return match (self::getConfiguredImageType()) {
+            IMAGETYPE_AVIF => $image->toAvif($quality),
+            IMAGETYPE_GIF  => $image->toGif(),
+            IMAGETYPE_JPEG => $image->toJpeg($quality),
+            IMAGETYPE_PNG  => $image->toPng(),
+            default        => $image->toWebp($quality),
+        };
+    }
+
+    /**
      * Sign image transformation parameters into a query string: "t=...&s=..."
      */
     public static function signImageResizeRequest(array $params, string $key): string
@@ -318,7 +340,7 @@ final class Maho
 
         $path[] = md5(implode('_', $miscParams));
 
-        $targetExt = image_type_to_extension((int) \Mage::getStoreConfig('system/media_storage_configuration/image_file_type'));
+        $targetExt = image_type_to_extension(self::getConfiguredImageType());
         $file = preg_replace('/\.[^.]+$/', $targetExt, $sourceFile);
 
         return implode('/', $path) . $file;

@@ -543,13 +543,7 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         $this->resize();
         $this->setWatermark($this->_watermarkFile);
 
-        $encoded = match (Mage::getStoreConfig('system/media_storage_configuration/image_file_type')) {
-            IMAGETYPE_AVIF => $this->getImage()->toAvif($this->getQuality()),
-            IMAGETYPE_GIF => $this->getImage()->toGif(),
-            IMAGETYPE_JPEG => $this->getImage()->toJpeg($this->getQuality()),
-            IMAGETYPE_PNG  => $this->getImage()->toPng(),
-            default => $this->getImage()->toWebp($this->getQuality()),
-        };
+        $encoded = Maho::encodeImage($this->getImage(), $this->getQuality());
 
         $filename = $this->getNewFile();
         @mkdir(dirname($filename), recursive: true);
