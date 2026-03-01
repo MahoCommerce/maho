@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\ProductService;
+use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\Catalog\Api\Resource\Product;
 
@@ -528,8 +529,8 @@ final class ProductProvider implements ProviderInterface
         $dto->metaKeywords = $product->getMetaKeyword();
         $dto->pageLayout = $product->getPageLayout() ?: null;
         $dto->name = $product->getName() ?? '';
-        $dto->description = $product->getDescription();
-        $dto->shortDescription = $product->getShortDescription();
+        $dto->description = ContentDirectiveProcessor::process($product->getDescription() ?? '');
+        $dto->shortDescription = ContentDirectiveProcessor::process($product->getShortDescription() ?? '');
         $dto->type = $product->getTypeId();
         $dto->status = (int) $product->getStatus() === \Mage_Catalog_Model_Product_Status::STATUS_ENABLED ? 'enabled' : 'disabled';
         $dto->visibility = match ((int) $product->getVisibility()) {

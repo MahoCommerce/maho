@@ -157,6 +157,27 @@ final class ContentDirectiveProcessor
             $content,
         );
 
+
+        // Process {{widget type="cms/widget_block" ... block_id="..."}} — resolve static block widgets
+        $content = preg_replace_callback(
+            '/\{\{widget\s[^}]*type="cms\/widget_block"[^}]*block_id="([^"]+)"[^}]*\}\}/i',
+            function ($matches) use ($storeId) {
+                $identifier = $matches[1];
+                try {
+                    /** @var \Mage_Cms_Model_Block $block */
+                    $block = \Mage::getModel('cms/block')
+                        ->setStoreId($storeId)
+                        ->load($identifier, 'identifier');
+                    if ($block->getIsActive() && $block->getContent()) {
+                        return self::process($block->getContent());
+                    }
+                } catch (\Throwable) {
+                }
+                return '';
+            },
+            $content,
+        );
+
         // Strip {{widget ...}} directives - they require full page context
         $content = preg_replace(
             '/\{\{widget[^}]*\}\}/i',
