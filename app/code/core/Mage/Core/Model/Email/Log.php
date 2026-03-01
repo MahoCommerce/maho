@@ -55,7 +55,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
         $cutoff = new \DateTimeImmutable("-{$days} days", new \DateTimeZone('UTC'));
 
         $resource = $this->getResource();
-        $connection = $resource->getReadConnection();
+        $connection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $connection->delete(
             $resource->getMainTable(),
             ['created_at < ?' => $cutoff->format('Y-m-d H:i:s')],

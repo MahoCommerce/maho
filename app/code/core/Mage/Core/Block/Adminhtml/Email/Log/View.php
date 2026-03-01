@@ -80,12 +80,22 @@ class Mage_Core_Block_Adminhtml_Email_Log_View extends Mage_Adminhtml_Block_Widg
         $html .= '<fieldset class="fieldset">';
 
         if ($log->getContentType() === 'html') {
-            $containerId = 'email-body-' . $log->getId();
-            $html .= '<div id="' . $containerId . '"></div>'
+            $iframeId = 'email-body-' . $log->getId();
+            $html .= '<iframe id="' . $iframeId . '" sandbox="allow-same-origin"'
+                . ' srcdoc="' . $this->escapeHtml($log->getEmailBody()) . '"'
+                . ' scrolling="no"'
+                . ' style="width:100%;border:1px solid #ccc;overflow:hidden" frameborder="0"></iframe>'
                 . '<script>document.addEventListener("DOMContentLoaded",function(){'
-                . 'var c=document.getElementById(' . Mage::helper('core')->jsonEncode($containerId) . ');'
-                . 'var s=c.attachShadow({mode:"closed"});'
-                . 's.innerHTML=' . Mage::helper('core')->jsonEncode($log->getEmailBody()) . ';'
+                . 'var f=document.getElementById(' . Mage::helper('core')->jsonEncode($iframeId) . ');'
+                . 'function resize(){'
+                . 'try{var h=f.contentDocument.documentElement.scrollHeight;if(h)f.style.height=h+"px"}catch(e){}'
+                . '}'
+                . 'f.addEventListener("load",function(){'
+                . 'resize();'
+                . 'var imgs=f.contentDocument.images;'
+                . 'for(var i=0;i<imgs.length;i++)imgs[i].addEventListener("load",resize);'
+                . 'new MutationObserver(resize).observe(f.contentDocument.body,{childList:true,subtree:true});'
+                . '});'
                 . '});</script>';
         } else {
             $html .= '<pre style="white-space:pre-wrap;background:#f5f5f5;padding:15px;border:1px solid #ccc">'

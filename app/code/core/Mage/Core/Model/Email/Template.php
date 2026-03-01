@@ -437,6 +437,10 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 $email->html($text);
             }
 
+            if ($this->getTemplateId()) {
+                $email->getHeaders()->addTextHeader('X-Maho-Template', (string) $this->getTemplateId());
+            }
+
             $transport = Mage::helper('core')->getMailTransport();
             if (!$transport) {
                 // This means email sending is disabled

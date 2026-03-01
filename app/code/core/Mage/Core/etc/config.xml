@@ -308,7 +308,7 @@
             <smtp>
                 <enabled>sendmail</enabled>
                 <enable_queue>1</enable_queue>
-                <log_enabled>1</log_enabled>
+                <log_enabled>0</log_enabled>
                 <log_clean_after_days>30</log_clean_after_days>
             </smtp>
             <media_storage_configuration>

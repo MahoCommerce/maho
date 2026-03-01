@@ -73,6 +73,11 @@ class Mage_Core_Model_Email_LoggingTransport implements TransportInterface
         $data['email_cc'] = $this->formatAddresses($message->getCc()) ?: null;
         $data['email_bcc'] = $this->formatAddresses($message->getBcc()) ?: null;
 
+        $templateHeader = $message->getHeaders()->get('X-Maho-Template');
+        if ($templateHeader) {
+            $data['template'] = mb_substr($templateHeader->getBodyAsString(), 0, 255);
+        }
+
         if ($message->getHtmlBody()) {
             $data['content_type'] = 'html';
             $data['email_body'] = $message->getHtmlBody();
