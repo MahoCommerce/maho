@@ -260,16 +260,32 @@ final class Maho
     }
 
     /**
+     * Return the dot-prefixed file extension for the system-configured image format (e.g. '.webp', '.jpg')
+     */
+    public static function getConfiguredImageExtension(): string
+    {
+        return match (self::getConfiguredImageType()) {
+            IMAGETYPE_AVIF => '.avif',
+            IMAGETYPE_GIF  => '.gif',
+            IMAGETYPE_JPEG => '.jpg',
+            IMAGETYPE_PNG  => '.png',
+            default        => '.webp',
+        };
+    }
+
+    /**
      * Encode an Intervention Image instance to the system-configured format
      */
     public static function encodeImage(\Intervention\Image\Interfaces\ImageInterface $image, ?int $quality = null): \Intervention\Image\Interfaces\EncodedImageInterface
     {
+        $args = $quality !== null ? [$quality] : [];
+
         return match (self::getConfiguredImageType()) {
-            IMAGETYPE_AVIF => $image->toAvif($quality),
+            IMAGETYPE_AVIF => $image->toAvif(...$args),
             IMAGETYPE_GIF  => $image->toGif(),
-            IMAGETYPE_JPEG => $image->toJpeg($quality),
+            IMAGETYPE_JPEG => $image->toJpeg(...$args),
             IMAGETYPE_PNG  => $image->toPng(),
-            default        => $image->toWebp($quality),
+            default        => $image->toWebp(...$args),
         };
     }
 
@@ -340,7 +356,7 @@ final class Maho
 
         $path[] = md5(implode('_', $miscParams));
 
-        $targetExt = image_type_to_extension(self::getConfiguredImageType());
+        $targetExt = self::getConfiguredImageExtension();
         $file = preg_replace('/\.[^.]+$/', $targetExt, $sourceFile);
 
         return implode('/', $path) . $file;

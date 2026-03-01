@@ -33,6 +33,8 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
     public const SWATCH_LABEL_SUFFIX = '-swatch';
     public const SWATCH_FALLBACK_MEDIA_DIR = 'wysiwyg/swatches';
     public const SWATCH_CACHE_DIR = 'catalog/swatches';
+
+    /** @deprecated since 26.3 — use {@see getSwatchFileExt()} instead */
     public const SWATCH_FILE_EXT = '.png';
 
     /**
@@ -40,7 +42,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
      */
     public static function getSwatchFileExt(): string
     {
-        return image_type_to_extension(Maho::getConfiguredImageType()) ?: '.webp';
+        return Maho::getConfiguredImageExtension();
     }
 
     public const MEDIA_IMAGE_TYPE_BASE = 'base_image';

@@ -328,7 +328,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $originalPathInfo = pathinfo($originalFilePath);
 
             // Get configured image file type and extension
-            $configuredExtension = ltrim(image_type_to_extension(Maho::getConfiguredImageType()) ?: '.webp', '.');
+            $configuredExtension = ltrim(Maho::getConfiguredImageExtension(), '.');
 
             if ($newFilename) {
                 // Always replace extension with configured type
