@@ -340,21 +340,6 @@ class Install extends BaseMahoCommand
     {
         $output->writeln('<comment>Force installation requested - clearing existing installation...</comment>');
 
-        // Check if we're not in interactive mode or user has confirmed
-        if ($input->isInteractive()) {
-            /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
-            $helper = $this->getHelper('question');
-            $question = new \Symfony\Component\Console\Question\ConfirmationQuestion(
-                "\n<question>WARNING: This will clear all tables in the database and remove configuration. Continue? [y/N]</question> ",
-                false,
-            );
-
-            if (!$helper->ask($input, $output, $question)) {
-                $output->writeln('<comment>Operation cancelled.</comment>');
-                return false;
-            }
-        }
-
         // Remove local.xml if it exists (use hardcoded path since Mage isn't initialized yet)
         $localXmlPath = getcwd() . '/app/etc/local.xml';
         if (file_exists($localXmlPath)) {
