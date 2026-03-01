@@ -10,7 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
@@ -438,12 +437,12 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 $email->html($text);
             }
 
-            $dsn = Mage::helper('core')->getMailerDsn();
-            if (!$dsn) {
+            $transport = Mage::helper('core')->getMailTransport();
+            if (!$transport) {
                 // This means email sending is disabled
                 return true;
             }
-            $mailer = new Mailer(Transport::fromDsn($dsn));
+            $mailer = new Mailer($transport);
 
             $transportObj = new \Maho\DataObject();
             Mage::dispatchEvent('email_template_send_before', [
