@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\Catalog\Api\Resource\Category;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -209,12 +210,11 @@ final class CategoryProvider implements ProviderInterface
 
         \Mage::dispatchEvent('api_category_dto_build', ['category' => $category, 'dto' => $dto]);
 
-
         return $dto;
     }
 
     /**
-     * Render a CMS static block by ID, resolving directives without session dependency
+     * Render a CMS static block by ID, resolving directives
      */
     private function renderCmsBlock(int $blockId): ?string
     {
@@ -225,51 +225,9 @@ final class CategoryProvider implements ProviderInterface
             if (!$cmsBlock->getIsActive() || !$cmsBlock->getContent()) {
                 return null;
             }
-            return $this->processDirectives($cmsBlock->getContent());
+            return ContentDirectiveProcessor::process($cmsBlock->getContent());
         } catch (\Throwable) {
             return null;
         }
-    }
-
-    /**
-     * Process CMS directives ({{block}}, {{media}}, {{config}}) without the full rendering pipeline
-     */
-    private function processDirectives(string $content): string
-    {
-        // Resolve {{block type="cms/block" block_id="..."}} by loading referenced blocks recursively
-        $content = (string) preg_replace_callback(
-            '/\{\{block\s+type="cms\/block"\s+block_id="([^"]+)"\s*\}\}/i',
-            function (array $matches): string {
-                $identifier = $matches[1];
-                try {
-                    $block = \Mage::getModel('cms/block')
-                        ->setStoreId(\Mage::app()->getStore()->getId())
-                        ->load($identifier, 'identifier');
-                    if ($block->getIsActive() && $block->getContent()) {
-                        return $this->processDirectives($block->getContent());
-                    }
-                } catch (\Throwable) {
-                }
-                return '';
-            },
-            $content,
-        );
-
-        // Resolve {{media url="..."}}
-        $mediaUrl = \Mage::getBaseUrl('media');
-        $content = (string) preg_replace(
-            '/\{\{media\s+url="([^"]+)"\s*\}\}/i',
-            $mediaUrl . '$1',
-            $content,
-        );
-
-        // Resolve {{config path="..."}}
-        $content = (string) preg_replace_callback(
-            '/\{\{config\s+path="([^"]+)"\s*\}\}/i',
-            fn(array $m): string => (string) \Mage::getStoreConfig($m[1]),
-            $content,
-        );
-
-        return $content;
     }
 }

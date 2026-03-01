@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\Cms\Api\Resource\CmsPage;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -152,7 +153,7 @@ final class CmsPageProvider implements ProviderInterface
         $dto->contentHeading = $page->getContentHeading();
 
         // Process directives for API output
-        $dto->content = $this->processContentForApi($page->getContent() ?? '');
+        $dto->content = ContentDirectiveProcessor::process($page->getContent() ?? '');
 
         $dto->metaKeywords = $page->getMetaKeywords();
         $dto->metaDescription = $page->getMetaDescription();
@@ -179,87 +180,6 @@ final class CmsPageProvider implements ProviderInterface
 
         \Mage::dispatchEvent('api_cms_page_dto_build', ['page' => $page, 'dto' => $dto]);
 
-
         return $dto;
-    }
-
-    /**
-     * Process CMS content for API output
-     *
-     * Handles basic directives (media, config, store) but strips widgets
-     * since they require full page context that's not available in API mode.
-     */
-    private function processContentForApi(string $content): string
-    {
-        if (empty($content)) {
-            return '';
-        }
-
-        $storeId = StoreContext::getStoreId();
-        $store = \Mage::app()->getStore($storeId);
-
-        // Process {{media url="..."}} directive
-        $content = preg_replace_callback(
-            '/\{\{media\s+url=["\']?([^"\'}\s]+)["\']?\s*\}\}/i',
-            function ($matches) use ($store) {
-                $url = $matches[1];
-                return $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_MEDIA) . $url;
-            },
-            $content,
-        );
-
-        // Process {{config path="..."}} directive (whitelist safe paths only)
-        $content = preg_replace_callback(
-            '/\{\{config\s+path=["\']?([^"\'}\s]+)["\']?\s*\}\}/i',
-            function ($matches) use ($storeId) {
-                $path = $matches[1];
-                // Only allow safe, non-sensitive config paths
-                $allowedPrefixes = [
-                    'general/store_information/',
-                    'web/unsecure/',
-                    'web/secure/',
-                    'design/',
-                    'trans_email/',
-                    'contacts/',
-                    'catalog/seo/',
-                ];
-                foreach ($allowedPrefixes as $prefix) {
-                    if (str_starts_with($path, $prefix)) {
-                        return \Mage::getStoreConfig($path, $storeId) ?? '';
-                    }
-                }
-                // Strip unrecognized config directives
-                return '';
-            },
-            $content,
-        );
-
-        // Process {{store url="..."}} directive
-        $content = preg_replace_callback(
-            '/\{\{store\s+url=["\']?([^"\'}\s]+)["\']?\s*\}\}/i',
-            function ($matches) use ($store) {
-                return $store->getUrl($matches[1]);
-            },
-            $content,
-        );
-
-        // Process {{skin url="..."}} directive
-        $content = preg_replace_callback(
-            '/\{\{skin\s+url=["\']?([^"\'}\s]+)["\']?\s*\}\}/i',
-            function ($matches) use ($store) {
-                return $store->getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_SKIN) . $matches[1];
-            },
-            $content,
-        );
-
-        // Strip {{widget ...}} directives - they require full page context
-        // Return empty string or a placeholder comment
-        $content = preg_replace(
-            '/\{\{widget[^}]*\}\}/i',
-            '<!-- widget removed for API -->',
-            $content,
-        );
-
-        return $content;
     }
 }

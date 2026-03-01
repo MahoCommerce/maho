@@ -18,6 +18,7 @@ use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\Blog\Api\Resource\BlogPost;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -137,7 +138,7 @@ final class BlogPostProvider implements ProviderInterface
         $dto->id = (int) $post->getId();
         $dto->title = $post->getTitle() ?? '';
         $dto->urlKey = $post->getUrlKey() ?? '';
-        $dto->content = $post->getContent();
+        $dto->content = ContentDirectiveProcessor::process($post->getContent() ?? '');
         $dto->imageUrl = $post->getImageUrl();
         $dto->publishDate = $post->getPublishDate();
         $dto->metaTitle = $post->getMetaTitle();
@@ -171,7 +172,6 @@ final class BlogPostProvider implements ProviderInterface
         }
 
         \Mage::dispatchEvent('api_blog_post_dto_build', ['post' => $post, 'dto' => $dto]);
-
 
         return $dto;
     }
