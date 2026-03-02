@@ -8,6 +8,7 @@
 
 const MahoCaptcha = {
     loadingImageUrl: null,
+    verifyingText: 'Verifying...',
     altchaWidget: null,
     altchaState: null,
     frontendSelectors: '',
@@ -19,6 +20,7 @@ const MahoCaptcha = {
         this.altchaWidget = document.querySelector('altcha-widget');
         this.frontendSelectors = config.frontendSelectors ?? '';
         this.loadingImageUrl = config.loadingImageUrl ?? '';
+        this.verifyingText = config.verifyingText ?? 'Verifying...';
 
         if (document.readyState === 'loadingImageUrl') {
             document.addEventListener('DOMContentLoaded', this.initForms.bind(this));
@@ -47,6 +49,14 @@ const MahoCaptcha = {
         if (typeof customElements.get('altcha-widget') === 'function') return;
 
         await Promise.all([
+            new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = '/js/altcha-i18n.min.js';
+                script.type = 'module';
+                script.onload = resolve;
+                script.onerror = () => reject(`${script.src} Not Found`);
+                document.head.appendChild(script);
+            }),
             new Promise((resolve, reject) => {
                 const script = document.createElement('script');
                 script.src = '/js/altcha.min.js';
@@ -149,7 +159,7 @@ const MahoCaptcha = {
         this.loaderTimeoutId = setTimeout(() => {
             this.loaderEl = document.createElement('dialog');
             this.loaderEl.className = 'maho-captcha-verifying';
-            this.loaderEl.innerHTML = (this.loadingImageUrl ? '<img src="' + this.loadingImageUrl + '">' : '') + ' Verifying...';
+            this.loaderEl.innerHTML = (this.loadingImageUrl ? '<img src="' + this.loadingImageUrl + '">' : '') + ' ' + this.verifyingText;
             this.loaderEl.addEventListener('close', () => {
                 this.onVerifiedCallback = null;
                 this.hideLoader();

@@ -51,6 +51,13 @@ describe('Customer Attributes Integration Tests', function () {
 
                 if (!empty($dob) && $dob !== '0000-00-00') {
                     $dobMonthDay = date('m-d', strtotime($dob));
+
+                    // In non-leap years, Feb 29 birthdays may be treated as Feb 28 or Mar 1
+                    // depending on the database engine, so skip the naive month-day check
+                    if ($dobMonthDay === '02-29' && date('L') !== '1') {
+                        continue;
+                    }
+
                     expect($dobMonthDay)->toBe($todayMonthDay, "Customer {$customerId} DOB {$dob} should have today's month-day {$todayMonthDay}");
                 }
             }
@@ -75,6 +82,13 @@ describe('Customer Attributes Integration Tests', function () {
 
                 if (!empty($dob) && $dob !== '0000-00-00') {
                     $dobMonthDay = date('m-d', strtotime($dob));
+
+                    // In non-leap years, Feb 29 birthdays may be treated as Feb 28 or Mar 1
+                    // depending on the database engine, so skip the naive month-day check
+                    if ($dobMonthDay === '02-29' && date('L') !== '1') {
+                        continue;
+                    }
+
                     expect($dobMonthDay)->toBe($tomorrowMonthDay, "Customer {$customerId} DOB {$dob} should have tomorrow's month-day {$tomorrowMonthDay}");
                 }
             }

@@ -50,6 +50,8 @@ namespace PHPSTORM_META {
         'api_resource/user' => \Mage_Api_Model_Resource_User::class,
         'api_resource/user_collection' => \Mage_Api_Model_Resource_User_Collection::class,
         'blog_resource/attribute' => \Maho_Blog_Model_Resource_Attribute::class,
+        'blog_resource/category' => \Maho_Blog_Model_Resource_Category::class,
+        'blog_resource/category_collection' => \Maho_Blog_Model_Resource_Category_Collection::class,
         'blog_resource/eav_attribute' => \Maho_Blog_Model_Resource_Eav_Attribute::class,
         'blog_resource/post' => \Maho_Blog_Model_Resource_Post::class,
         'blog_resource/post_collection' => \Maho_Blog_Model_Resource_Post_Collection::class,
