@@ -126,10 +126,10 @@ class Mage_Api_Model_Server_Adapter_Soap extends \Maho\DataObject implements Mag
 
         if ($this->getController()->getRequest()->getParam('wsdl') !== null) {
             // Generating wsdl content from template
+            $wsdlFile = Maho::findFile(Mage::getModuleDir('etc', 'Mage_Api') . DS . 'wsdl.xml');
             $io = new \Maho\Io\File();
-            $io->open(['path' => Mage::getModuleDir('etc', 'Mage_Api')]);
-
-            $wsdlContent = $io->read('wsdl.xml');
+            $io->open(['path' => dirname($wsdlFile)]);
+            $wsdlContent = $io->read($wsdlFile);
 
             $template = Mage::getModel('core/email_template_filter');
 
