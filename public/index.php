@@ -25,6 +25,10 @@ if ($requestPath !== '/') {
         'mp3', 'mp4', 'ogg', 'webm', 'wav', 'flac', 'aac', 'm4a', 'm4v', 'ogv', 'mov',
         'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx',
         'zip', 'gz', 'tar', 'rar', '7z',
+        'sql', 'sqlite', 'db', 'mdb', 'log', 'bak', 'backup', 'old', 'orig', 'swp', 'swo',
+        'phtml', 'phar', 'sh', 'bash', 'py', 'pl', 'rb', 'cgi',
+        'key', 'pem', 'crt', 'cer', 'p12', 'pfx',
+        'yaml', 'yml', 'toml', 'ini', 'conf', 'env', 'htaccess', 'htpasswd',
     ];
     if (in_array($ext, $staticExts, true)) {
         http_response_code(404);
