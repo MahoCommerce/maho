@@ -192,6 +192,8 @@ namespace PHPSTORM_META {
         'core_resource/design' => \Mage_Core_Model_Resource_Design::class,
         'core_resource/design_collection' => \Mage_Core_Model_Resource_Design_Collection::class,
         'core_resource/design_package_collection' => \Mage_Core_Model_Resource_Design_Package_Collection::class,
+        'core_resource/email_log' => \Mage_Core_Model_Resource_Email_Log::class,
+        'core_resource/email_log_collection' => \Mage_Core_Model_Resource_Email_Log_Collection::class,
         'core_resource/email_queue' => \Mage_Core_Model_Resource_Email_Queue::class,
         'core_resource/email_queue_collection' => \Mage_Core_Model_Resource_Email_Queue_Collection::class,
         'core_resource/email_template' => \Mage_Core_Model_Resource_Email_Template::class,

@@ -112,6 +112,24 @@
         </reference>
     </adminhtml_cache_index>
 
+    <!-- Email Log -->
+    <adminhtml_system_email_log_index>
+        <reference name="content">
+            <block type="core/adminhtml_email_log" name="adminhtml.email.log"/>
+        </reference>
+    </adminhtml_system_email_log_index>
+
+    <adminhtml_system_email_log_grid>
+        <remove name="root"/>
+        <block type="core/adminhtml_email_log_grid" name="adminhtml.email.log.grid"/>
+    </adminhtml_system_email_log_grid>
+
+    <adminhtml_system_email_log_view>
+        <reference name="content">
+            <block type="core/adminhtml_email_log_view" name="adminhtml.email.log.view"/>
+        </reference>
+    </adminhtml_system_email_log_view>
+
     <adminhtml_system_email_template_edit>
         <update handle="editor"/>
         <reference name="head">

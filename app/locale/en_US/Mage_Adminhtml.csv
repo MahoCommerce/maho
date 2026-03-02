@@ -92,6 +92,7 @@
 "An error occurred while clearing the configurable swatches image cache.","An error occurred while clearing the configurable swatches image cache."
 "An error occurred while clearing the image cache.","An error occurred while clearing the image cache."
 "An error occurred while clearing the minified CSS/JS cache.","An error occurred while clearing the minified CSS/JS cache."
+"An error occurred while deleting email log entries.","An error occurred while deleting email log entries."
 "An error occurred while deleting email template data. Please review log and try again.","An error occurred while deleting email template data. Please review log and try again."
 "An error occurred while deleting record(s).","An error occurred while deleting record(s)."
 "An error occurred while deleting this role.","An error occurred while deleting this role."

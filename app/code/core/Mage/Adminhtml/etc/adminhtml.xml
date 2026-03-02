@@ -25,6 +25,13 @@
                 <tools translate="title">
                     <title>Tools</title>
                     <sort_order>20</sort_order>
+                    <children>
+                        <email_log translate="title" module="core">
+                            <title>Email Log</title>
+                            <action>adminhtml/system_email_log</action>
+                            <sort_order>10</sort_order>
+                        </email_log>
+                    </children>
                 </tools>
                 <design translate="title">
                     <title>Design</title>
@@ -213,6 +220,11 @@
                             <tools translate="title">
                                 <title>Tools</title>
                                 <sort_order>60</sort_order>
+                                <children>
+                                    <email_log translate="title" module="core">
+                                        <title>Email Log</title>
+                                    </email_log>
+                                </children>
                             </tools>
                             <convert translate="title">
                                 <title>Import/Export</title>
