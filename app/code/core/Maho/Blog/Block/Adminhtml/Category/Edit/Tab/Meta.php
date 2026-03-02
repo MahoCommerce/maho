@@ -52,10 +52,10 @@ class Maho_Blog_Block_Adminhtml_Category_Edit_Tab_Meta extends Mage_Adminhtml_Bl
             'title' => Mage::helper('blog')->__('Meta Robots'),
             'options' => [
                 '' => Mage::helper('blog')->__('-- Use System Default --'),
-                'index,follow' => Mage::helper('blog')->__('INDEX, FOLLOW'),
-                'noindex,follow' => Mage::helper('blog')->__('NOINDEX, FOLLOW'),
-                'index,nofollow' => Mage::helper('blog')->__('INDEX, NOFOLLOW'),
-                'noindex,nofollow' => Mage::helper('blog')->__('NOINDEX, NOFOLLOW'),
+                'index,follow' => 'INDEX, FOLLOW',
+                'noindex,follow' => 'NOINDEX, FOLLOW',
+                'index,nofollow' => 'INDEX, NOFOLLOW',
+                'noindex,nofollow' => 'NOINDEX, NOFOLLOW',
             ],
         ]);
 
