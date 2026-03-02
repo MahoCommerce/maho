@@ -82,8 +82,8 @@ final class CmsPageProcessor implements ProcessorInterface
             'stores' => $storeIds,
         ];
 
-        if ($data->rootTemplate !== null) {
-            $pageData['root_template'] = $data->rootTemplate;
+        if ($data->pageLayout !== null) {
+            $pageData['root_template'] = $data->pageLayout;
         }
 
         $page->setData($pageData);
@@ -126,8 +126,8 @@ final class CmsPageProcessor implements ProcessorInterface
             'stores' => $storeIds,
         ];
 
-        if ($data->rootTemplate !== null) {
-            $updateData['root_template'] = $data->rootTemplate;
+        if ($data->pageLayout !== null) {
+            $updateData['root_template'] = $data->pageLayout;
         }
 
         $page->addData($updateData);
