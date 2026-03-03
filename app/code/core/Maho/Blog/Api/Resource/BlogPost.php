@@ -86,6 +86,8 @@ class BlogPost
     public bool $isActive = true;
     /** @var string[] */
     public array $stores = ['all'];
+    /** @var int[] */
+    public array $categoryIds = [];
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
 

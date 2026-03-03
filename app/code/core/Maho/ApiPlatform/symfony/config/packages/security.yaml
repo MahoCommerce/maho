@@ -52,6 +52,7 @@ security:
         - { path: ^/api/cms-pages, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/cms-blocks, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/blog-posts, roles: PUBLIC_ACCESS, methods: [GET] }
+        - { path: ^/api/blog-categories, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/url-resolver, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/stores, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/countries, roles: PUBLIC_ACCESS, methods: [GET] }

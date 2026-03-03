@@ -74,7 +74,8 @@ class ApiPermissionRegistry
         // ── Content ──
         'cms-pages'  => ['label' => 'CMS Pages', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
         'cms-blocks' => ['label' => 'CMS Blocks', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
-        'blog-posts' => ['label' => 'Blog Posts', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'blog-posts'       => ['label' => 'Blog Posts', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
+        'blog-categories'  => ['label' => 'Blog Categories', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View']],
         'media'      => ['label' => 'Media', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'List', 'write' => 'Upload', 'delete' => 'Delete']],
     ];
 
@@ -83,7 +84,7 @@ class ApiPermissionRegistry
      * These are listed in security.yaml as PUBLIC_ACCESS for GET.
      */
     private const PUBLIC_READ_RESOURCES = [
-        'products', 'categories', 'cms-pages', 'cms-blocks', 'blog-posts', 'stores',
+        'products', 'categories', 'cms-pages', 'cms-blocks', 'blog-posts', 'blog-categories', 'stores',
         'countries', 'url-resolver',
     ];
 
@@ -120,7 +121,8 @@ class ApiPermissionRegistry
         'newsletter'   => 'newsletter',
         'cms-pages'    => 'cms-pages',
         'cms-blocks'   => 'cms-blocks',
-        'blog-posts'   => 'blog-posts',
+        'blog-posts'       => 'blog-posts',
+        'blog-categories'  => 'blog-categories',
         'media'        => 'media',
         'stores'       => 'stores',
         'store-config' => 'stores',
@@ -235,6 +237,9 @@ class ApiPermissionRegistry
         // Blog
         'blogPost'           => 'blog-posts',
         'blogPosts'          => 'blog-posts',
+        // Blog Categories
+        'blogCategory'       => 'blog-categories',
+        'blogCategories'     => 'blog-categories',
         // Stores
         'storeConfig'        => 'stores',
         // Countries

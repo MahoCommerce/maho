@@ -162,6 +162,7 @@ final class BlogPostProvider implements ProviderInterface
         }
         $dto->createdAt = $post->getCreatedAt();
         $dto->updatedAt = $post->getUpdatedAt();
+        $dto->categoryIds = array_map('intval', $post->getCategories());
 
         // Create excerpt from content (first 200 chars, strip HTML)
         if ($post->getContent()) {
