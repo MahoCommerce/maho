@@ -617,5 +617,5 @@ function xssFilter(str) {
     const sanitize = xssKillah();
     const safeNodes = sanitize(str);
     // Filter out comment nodes (nodeType 8) to prevent their text from leaking as visible content
-    return Array.from(safeNodes).filter(n => n.nodeType !== 8).map(n => n.outerHTML || n.textContent).join('');
+    return Array.from(safeNodes).filter(n => n.nodeType !== Node.COMMENT_NODE).map(n => n.outerHTML || n.textContent).join('');
 }
