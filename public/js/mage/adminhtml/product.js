@@ -913,7 +913,7 @@ showNoticeMessage() {
 var onInitDisableFieldsList = [];
 
 function toggleFieldEditMode(toggleIdentifier, fieldContainer) {
-    var el = (toggleIdentifier instanceof HTMLElement) ? toggleIdentifier : document.getElementById(toggleIdentifier);
+    const el = (toggleIdentifier instanceof HTMLElement) ? toggleIdentifier : document.getElementById(toggleIdentifier);
     if (el && el.checked) {
         enableFieldEditMode(fieldContainer);
     } else {
