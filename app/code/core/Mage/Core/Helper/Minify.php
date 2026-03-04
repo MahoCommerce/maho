@@ -307,6 +307,15 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
             return;
         }
 
+        // Don't send preload hints for JS when load-on-intent is active,
+        // as it would defeat the purpose of deferring script downloads
+        if ($as === 'script') {
+            $deferMode = (int) Mage::getStoreConfig('dev/js/defer_mode');
+            if ($deferMode === Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
+                return;
+            }
+        }
+
         // Send Link header for preload
         header("Link: <{$url}>; rel=preload; as={$as}", false);
 
