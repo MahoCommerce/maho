@@ -14,6 +14,12 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('CatalogRule Index Refresh', function () {
     beforeEach(function () {
+        // Set catalog_url indexer to manual mode to prevent URL rewrite
+        // processing during product/store creation (avoids resource model issues in test env)
+        $this->urlIndexer = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_url');
+        $this->originalIndexerMode = $this->urlIndexer?->getMode();
+        $this->urlIndexer?->setMode(Mage_Index_Model_Process::MODE_MANUAL);
+
         // Create second website + store group + store
         $this->testWebsite = Mage::getModel('core/website');
         $this->testWebsite->setCode('test_website_' . uniqid())
@@ -85,6 +91,11 @@ describe('CatalogRule Index Refresh', function () {
         $this->testStore?->delete();
         $this->testStoreGroup?->delete();
         $this->testWebsite?->delete();
+
+        // Restore original indexer mode
+        if ($this->urlIndexer && $this->originalIndexerMode) {
+            $this->urlIndexer->setMode($this->originalIndexerMode);
+        }
     });
 
     it('reindexes catalog rules across multiple websites without error', function () {
