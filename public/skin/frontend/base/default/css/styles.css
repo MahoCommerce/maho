@@ -1237,6 +1237,7 @@ a.button:hover {
   padding-top: 14.5px;
   padding-bottom: 14.5px;
   text-align: center;
+  text-wrap-style: balance;
 }
 .global-site-notice p {
   margin-bottom: 0;
