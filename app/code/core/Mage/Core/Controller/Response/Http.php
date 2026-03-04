@@ -886,10 +886,10 @@ class Mage_Core_Controller_Response_Http
             function ($matches) use (&$scriptIndex, $mode, &$scripts) {
                 // For load on intent mode, transform scripts
                 if ($mode == Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
-                    // Skip if contains our loader, already has data attributes, or is a speculation rules script
+                    // Skip if contains our loader, is a speculation rules script, or has data-maho-nodefer
                     $shouldSkip = str_contains($matches[0], 'mahoLazyJs') ||
                                   str_contains($matches[0], 'type="speculationrules"') ||
-                                  preg_match('/\sdata-(?!maho-script)\w+=/i', $matches[0]);
+                                  preg_match('/\sdata-maho-nodefer[\s>=]/i', $matches[0]);
 
                     if ($shouldSkip) {
                         $scripts[] = $matches[0];
