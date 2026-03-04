@@ -923,6 +923,7 @@ function toggleFieldEditMode(toggleIdentifier, fieldContainer) {
 
 /** @deprecated since 26.4 Use toggleFieldEditMode instead */
 function toogleFieldEditMode(toogleIdentifier, fieldContainer) {
+    console.warn('toogleFieldEditMode is deprecated, use toggleFieldEditMode instead');
     toggleFieldEditMode(toogleIdentifier, fieldContainer);
 }
 
