@@ -1,3 +1,4 @@
+"Additional Product Attributes","Additional Product Attributes"
 "API Endpoint URL","API Endpoint URL"
 "Authentication Type","Authentication Type"
 "Auth Token","Auth Token"
@@ -9,6 +10,7 @@
 "Enabled","Enabled"
 "None","None"
 "Request Timeout (seconds)","Request Timeout (seconds)"
+"Select product attributes to include in the API request payload.","Select product attributes to include in the API request payload."
 "Shipping Bridge","Shipping Bridge"
 "Ship to Applicable Countries","Ship to Applicable Countries"
 "Ship to Specific Countries","Ship to Specific Countries"

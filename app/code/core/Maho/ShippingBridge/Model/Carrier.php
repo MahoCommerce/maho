@@ -156,19 +156,86 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         $items = [];
         $allItems = $request->getAllItems();
         if ($allItems) {
+            $attributeCodes = $this->_getAdditionalAttributeCodes();
+            $productIds = [];
+            $superAttributeMap = [];
+
+            // First pass: collect product IDs and super attributes for configurables
+            foreach ($allItems as $item) {
+                if ($item->getProduct()->isVirtual() || $item->getParentItem()) {
+                    continue;
+                }
+                $productId = (int) $item->getProductId();
+                $productIds[] = $productId;
+
+                if ($item->getProductType() === Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+                    $superAttributeMap[$productId] = $this->_getSuperAttributeCodes($item->getProduct());
+                    // Collect child simple product ID for attribute resolution
+                    if ($item->getHasChildren()) {
+                        foreach ($item->getChildren() as $child) {
+                            $productIds[] = (int) $child->getProductId();
+                        }
+                    }
+                } elseif ($item->getHasChildren() && $item->isShipSeparately()) {
+                    // Ship-separately children will be sent as individual items
+                    foreach ($item->getChildren() as $child) {
+                        if (!$child->getProduct()->isVirtual()) {
+                            $productIds[] = (int) $child->getProductId();
+                        }
+                    }
+                }
+            }
+
+            // Merge all attribute codes needed for the collection query
+            $allSuperCodes = array_unique(array_merge([], ...array_values($superAttributeMap)));
+            $allCodesToLoad = array_unique(array_merge($attributeCodes, $allSuperCodes));
+
+            $products = [];
+            if ($allCodesToLoad && $productIds) {
+                $products = $this->_loadProductAttributes(array_unique($productIds), $allCodesToLoad);
+            }
+
+            // Second pass: build item data
             foreach ($allItems as $item) {
                 if ($item->getProduct()->isVirtual() || $item->getParentItem()) {
                     continue;
                 }
 
-                $items[] = [
-                    'sku' => $item->getSku(),
-                    'name' => $item->getName(),
-                    'qty' => (float) $item->getQty(),
-                    'weight' => (float) $item->getWeight(),
-                    'price' => (float) $item->getPrice(),
-                    'row_total' => (float) $item->getRowTotal(),
-                ];
+                if ($item->getHasChildren() && $item->isShipSeparately()) {
+                    // Ship-separately: send each child as its own item
+                    foreach ($item->getChildren() as $child) {
+                        if ($child->getProduct()->isVirtual()) {
+                            continue;
+                        }
+                        $childData = $this->_buildItemData($child, (float) $item->getQty() * (float) $child->getQty());
+                        $this->_mergeAttributeValues($childData, (int) $child->getProductId(), $attributeCodes, $products);
+                        $items[] = $childData;
+                    }
+                } else {
+                    $itemData = $this->_buildItemData($item);
+                    $parentProductId = (int) $item->getProductId();
+                    $isConfigurable = $item->getProductType() === Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE;
+
+                    // For configurables, resolve attributes from the child simple product
+                    $attrProductId = $parentProductId;
+                    if ($isConfigurable && $item->getHasChildren()) {
+                        $children = $item->getChildren();
+                        $firstChild = reset($children);
+                        if ($firstChild) {
+                            $attrProductId = (int) $firstChild->getProductId();
+                        }
+                    }
+
+                    // Always include super attributes for configurables
+                    $superCodes = $superAttributeMap[$parentProductId] ?? [];
+                    if ($superCodes) {
+                        $this->_mergeAttributeValues($itemData, $attrProductId, $superCodes, $products, $parentProductId);
+                    }
+
+                    // Additional attributes: child first, fall back to parent
+                    $this->_mergeAttributeValues($itemData, $attrProductId, $attributeCodes, $products, $parentProductId);
+                    $items[] = $itemData;
+                }
             }
         }
 
@@ -197,6 +264,97 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         ];
 
         return $payload;
+    }
+
+    protected function _buildItemData(Mage_Sales_Model_Quote_Item_Abstract $item, ?float $qty = null): array
+    {
+        return [
+            'sku' => $item->getSku(),
+            'name' => $item->getName(),
+            'qty' => $qty ?? (float) $item->getQty(),
+            'weight' => (float) $item->getWeight(),
+            'price' => (float) $item->getPrice(),
+            'row_total' => (float) $item->getRowTotal(),
+        ];
+    }
+
+    protected function _mergeAttributeValues(array &$itemData, int $productId, array $attributeCodes, array $products, ?int $fallbackProductId = null): void
+    {
+        if (!$attributeCodes || !isset($products[$productId])) {
+            return;
+        }
+        foreach ($attributeCodes as $code) {
+            $value = $this->_formatAttributeValue($products[$productId], $code);
+            if ($value === null && $fallbackProductId !== null && $fallbackProductId !== $productId && isset($products[$fallbackProductId])) {
+                $value = $this->_formatAttributeValue($products[$fallbackProductId], $code);
+            }
+            $itemData[$code] = $value;
+        }
+    }
+
+    protected function _getSuperAttributeCodes(Mage_Catalog_Model_Product $product): array
+    {
+        /** @var Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
+        $typeInstance = $product->getTypeInstance(true);
+        $codes = [];
+        foreach ($typeInstance->getConfigurableAttributes($product) as $attribute) {
+            $codes[] = $attribute->getProductAttribute()->getAttributeCode();
+        }
+        return $codes;
+    }
+
+    protected function _getAdditionalAttributeCodes(): array
+    {
+        $value = (string) $this->getConfigData('additional_attributes');
+        if ($value === '') {
+            return [];
+        }
+        return array_filter(array_map('trim', explode(',', $value)));
+    }
+
+    /**
+     * @return array<int, Mage_Catalog_Model_Product>
+     */
+    protected function _loadProductAttributes(array $productIds, array $attributeCodes): array
+    {
+        /** @var Mage_Catalog_Model_Resource_Product_Collection $collection */
+        $collection = Mage::getResourceModel('catalog/product_collection');
+        $collection->addAttributeToSelect($attributeCodes);
+        $collection->addFieldToFilter('entity_id', ['in' => $productIds]);
+        $collection->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
+
+        $products = [];
+        foreach ($collection as $product) {
+            $products[(int) $product->getId()] = $product;
+        }
+        return $products;
+    }
+
+    protected function _formatAttributeValue(Mage_Catalog_Model_Product $product, string $code): mixed
+    {
+        $attribute = $product->getResource()->getAttribute($code);
+        if (!$attribute) {
+            return null;
+        }
+
+        $value = $product->getData($code);
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        $inputType = $attribute->getFrontendInput();
+        if ($inputType === 'select' || $inputType === 'multiselect') {
+            $adminText = $attribute->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
+                ->getSource()
+                ->getOptionText($value);
+
+            return [
+                'value' => $value,
+                'label' => $adminText ?: $value,
+            ];
+        }
+
+        return $value;
     }
 
     protected function _buildCustomerData(Mage_Shipping_Model_Rate_Request $request): array
