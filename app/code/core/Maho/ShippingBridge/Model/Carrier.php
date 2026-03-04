@@ -148,7 +148,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
     #[\Override]
     public function isTrackingAvailable()
     {
-        return false;
+        return true;
     }
 
     protected function _buildRequestPayload(Mage_Shipping_Model_Rate_Request $request): array
