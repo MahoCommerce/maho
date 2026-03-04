@@ -14,8 +14,14 @@ uses(Tests\MahoBackendTestCase::class);
 
 describe('CatalogRule Index Refresh', function () {
     beforeEach(function () {
+        // CatalogRule indexer uses MySQL-specific SQL (SET @price), skip on other databases
+        $adapter = Mage::getSingleton('core/resource')->getConnection('core_read');
+        if (!$adapter instanceof Maho\Db\Adapter\Pdo\Mysql) {
+            $this->markTestSkipped('CatalogRule indexer requires MySQL');
+        }
+
         // Set catalog_url indexer to manual mode to prevent URL rewrite
-        // processing during product/store creation (avoids resource model issues in test env)
+        // processing during product/store creation
         $this->urlIndexer = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_url');
         $this->originalIndexerMode = $this->urlIndexer?->getMode();
         $this->urlIndexer?->setMode(Mage_Index_Model_Process::MODE_MANUAL);
@@ -77,7 +83,7 @@ describe('CatalogRule Index Refresh', function () {
     });
 
     afterEach(function () {
-        // Clean up catalogrule index tables first to avoid FK constraint violations
+        // Clean up catalogrule index tables to avoid FK constraint violations
         $resource = Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');
         $websiteId = $this->testWebsite?->getId();
@@ -88,9 +94,9 @@ describe('CatalogRule Index Refresh', function () {
 
         $this->testProduct?->delete();
         $this->testRule?->delete();
-        $this->testStore?->delete();
-        $this->testStoreGroup?->delete();
-        $this->testWebsite?->delete();
+
+        // Don't delete website/store/store_group — deleting them consumes auto-increment IDs
+        // which breaks other tests that assume specific website IDs (e.g. SegmentMatchingTest)
 
         // Restore original indexer mode
         if ($this->urlIndexer && $this->originalIndexerMode) {
