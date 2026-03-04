@@ -166,7 +166,6 @@ Product.Gallery = class {
         this.images[index].removed = (this.getFileElement(file, 'cell-remove input').checked ? 1 : 0);
         this.images[index].disabled = (this.getFileElement(file, 'cell-disable input').checked ? 1 : 0);
         this.getElement('save').value = JSON.stringify(this.images);
-        this.updateState(file);
         this.container.setHasChanges();
     }
     loadImage(file) {
@@ -213,10 +212,6 @@ Product.Gallery = class {
                 this.getFileElement(file, 'cell-' + pair[0] + ' input').checked = true;
             }
         }.bind(this));
-        this.updateState(file);
-    }
-    updateState(file) {
-        // deprecated
     }
     getFileElement(file, element) {
         var selector = '#' + this.prepareId(file) + ' .' + element;
