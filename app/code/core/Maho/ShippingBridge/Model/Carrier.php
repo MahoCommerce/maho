@@ -176,7 +176,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
             'cart' => [
                 'items' => $items,
                 'totals' => [
-                    'subtotal' => (float) $request->getBaseSubtotalInclTax(),
+                    'subtotal' => (float) $request->getPackageValue(),
                     'weight' => (float) $request->getPackageWeight(),
                     'qty' => (float) $request->getPackageQty(),
                 ],
@@ -191,11 +191,33 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 'postcode' => $request->getDestPostcode(),
                 'country_id' => $request->getDestCountryId(),
             ],
-            'currency' => Mage::app()->getStore()->getCurrentCurrencyCode(),
-            'store_id' => (int) Mage::app()->getStore()->getId(),
+            'currency' => $request->getPackageCurrency()->getCurrencyCode(),
+            'store_id' => (int) $request->getStoreId(),
+            'customer' => $this->_buildCustomerData($request),
         ];
 
         return $payload;
+    }
+
+    protected function _buildCustomerData(Mage_Shipping_Model_Rate_Request $request): array
+    {
+        $allItems = $request->getAllItems();
+        $quote = $allItems ? reset($allItems)->getQuote() : null;
+
+        if (!$quote) {
+            return [];
+        }
+
+        $groupId = (int) $quote->getCustomerGroupId();
+        $group = Mage::getModel('customer/group')->load($groupId);
+
+        return [
+            'customer_id' => $quote->getCustomerId() ? (int) $quote->getCustomerId() : null,
+            'email' => $quote->getBillingAddress()->getEmail(),
+            'group_id' => $groupId,
+            'group_code' => $group->getCustomerGroupCode(),
+            'is_guest' => !$quote->getCustomerId(),
+        ];
     }
 
     protected function _parseResponse(string $responseBody): ?array
