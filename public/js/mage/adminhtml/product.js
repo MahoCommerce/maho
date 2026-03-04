@@ -912,12 +912,18 @@ showNoticeMessage() {
 
 var onInitDisableFieldsList = [];
 
-function toogleFieldEditMode(toogleIdentifier, fieldContainer) {
-    if (document.getElementById(toogleIdentifier).checked) {
+function toggleFieldEditMode(toggleIdentifier, fieldContainer) {
+    var el = (toggleIdentifier instanceof HTMLElement) ? toggleIdentifier : document.getElementById(toggleIdentifier);
+    if (el && el.checked) {
         enableFieldEditMode(fieldContainer);
     } else {
         disableFieldEditMode(fieldContainer);
     }
+}
+
+/** @deprecated since 26.4 Use toggleFieldEditMode instead */
+function toogleFieldEditMode(toogleIdentifier, fieldContainer) {
+    toggleFieldEditMode(toogleIdentifier, fieldContainer);
 }
 
 function disableFieldEditMode(fieldContainer) {
