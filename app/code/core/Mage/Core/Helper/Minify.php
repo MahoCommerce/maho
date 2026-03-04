@@ -309,11 +309,10 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
 
         // Don't send preload hints for JS when load-on-intent is active,
         // as it would defeat the purpose of deferring script downloads
-        if ($as === 'script') {
-            $deferMode = (int) Mage::getStoreConfig('dev/js/defer_mode');
-            if ($deferMode === Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT) {
-                return;
-            }
+        if ($as === 'script'
+            && (int) Mage::getStoreConfig('dev/js/defer_mode') === Mage_Core_Model_Source_Js_Defer::MODE_LOAD_ON_INTENT
+        ) {
+            return;
         }
 
         // Send Link header for preload
