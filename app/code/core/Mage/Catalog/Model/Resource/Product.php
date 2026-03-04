@@ -469,7 +469,7 @@ class Mage_Catalog_Model_Resource_Product extends Mage_Catalog_Model_Resource_Ab
             $select->where('t_v_default.entity_id IN (?)', $product);
         }
 
-        $adapter->query($adapter->insertFromSelect($select, $indexTable, [], \Maho\Db\Adapter\AdapterInterface::INSERT_IGNORE));
+        $adapter->query($adapter->insertFromSelect($select, $indexTable, [], \Maho\Db\Adapter\AdapterInterface::INSERT_ON_DUPLICATE));
 
         return $this;
     }
