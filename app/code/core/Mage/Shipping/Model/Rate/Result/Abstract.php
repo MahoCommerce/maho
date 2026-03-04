@@ -20,6 +20,8 @@ declare(strict_types=1);
  * @method string getCarrierTitle()
  * @method string getMethodTitle()
  * @method string getMethodDescription()
+ * @method string getMethodLogo()
+ * @method $this setMethodLogo(string $value)
  */
 
 class Mage_Shipping_Model_Rate_Result_Abstract extends \Maho\DataObject {}

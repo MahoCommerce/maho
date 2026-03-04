@@ -38,7 +38,11 @@
                         <?php endif ?>
 
                         <?php endif ?>
-                        <label for="s_method_<?= $_rate->getCode() ?>"><?= $this->escapeHtml($_rate->getMethodTitle()) ?>
+                        <label for="s_method_<?= $_rate->getCode() ?>">
+                        <?php if ($_rate->getMethodLogo()): ?>
+                            <img src="<?= $this->escapeUrl($_rate->getMethodLogo()) ?>" alt="" style="max-height: 24px; vertical-align: middle; margin-right: 4px;" />
+                        <?php endif ?>
+                        <?= $this->escapeHtml($_rate->getMethodTitle()) ?>
                         <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
                         <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
                         <?= $_excl ?>
