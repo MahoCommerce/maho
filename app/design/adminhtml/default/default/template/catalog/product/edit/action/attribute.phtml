@@ -24,8 +24,7 @@
 </form>
 <script type="text/javascript">
 var attributesForm = new varienForm('attributes_edit_form', '<?= $this->getValidationUrl() ?>');
-attributesForm._processValidationResult = function(transport) {
-    var response = JSON.parse(transport.responseText);
+attributesForm._processValidationResult = function(response) {
 
     if (response.error){
         if (response.attribute && document.getElementById(response.attribute)) {
