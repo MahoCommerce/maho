@@ -1068,15 +1068,10 @@ class Select
                     // Set flag so child Select adds explicit column aliases for SQLite compatibility
                     $target->_forceExplicitAliases = true;
                     $target = $target->assemble();
-                } elseif ($target instanceof Expr) {
-                    $target = trim((string) $target);
-                    if (str_starts_with($target, '(') && str_ends_with($target, ')')) {
-                        $target = substr($target, 1, -1);
-                    }
-                } elseif (is_string($target)) {
-                    // Strip outer parentheses from string SQL - DBAL handles wrapping internally
+                } elseif ($target instanceof Expr || is_string($target)) {
+                    // Convert to string and strip outer parentheses - DBAL handles wrapping internally
                     // This fixes SQLite compatibility where explicit parentheses cause syntax errors
-                    $target = trim($target);
+                    $target = trim((string) $target);
                     if (str_starts_with($target, '(') && str_ends_with($target, ')')) {
                         $target = substr($target, 1, -1);
                     }
