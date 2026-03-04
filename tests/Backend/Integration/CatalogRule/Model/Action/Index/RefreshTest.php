@@ -71,6 +71,15 @@ describe('CatalogRule Index Refresh', function () {
     });
 
     afterEach(function () {
+        // Clean up catalogrule index tables first to avoid FK constraint violations
+        $resource = Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $websiteId = $this->testWebsite?->getId();
+        if ($websiteId) {
+            $write->delete($resource->getTableName('catalogrule/rule_product_price'), ['website_id = ?' => $websiteId]);
+            $write->delete($resource->getTableName('catalogrule/rule_product'), ['website_id = ?' => $websiteId]);
+        }
+
         $this->testProduct?->delete();
         $this->testRule?->delete();
         $this->testStore?->delete();
