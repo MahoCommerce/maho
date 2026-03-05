@@ -32,7 +32,7 @@ class RateLimiter
         }
 
         $safeKey = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $key);
-        $file = $dir . '/'. $safeKey . '.json';
+        $file = $dir . '/' . $safeKey . '.json';
         $now = time();
 
         $fp = fopen($file, 'c+');

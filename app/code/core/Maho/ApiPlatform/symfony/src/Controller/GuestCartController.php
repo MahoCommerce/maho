@@ -779,7 +779,7 @@ class GuestCartController extends AbstractController
             $childParentRows = $adapter->fetchAll(
                 $adapter->select()
                     ->from($superLinkTable, ['product_id', 'parent_id'])
-                    ->where('product_id IN(?)', $needParentIds)
+                    ->where('product_id IN(?)', $needParentIds),
             );
             $childToParent = [];
             $allParentIds = [];
