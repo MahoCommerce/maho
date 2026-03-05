@@ -348,11 +348,11 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
 
         $inputType = $attribute->getFrontendInput();
         if ($inputType === 'select' || $inputType === 'multiselect') {
-            $previousStoreId = $attribute->getStoreId();
-            $adminText = $attribute->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
-                ->getSource()
-                ->getOptionText($value);
-            $attribute->setStoreId($previousStoreId);
+            // Load a fresh attribute instance to avoid changing the "store" on the shared EAV config cache
+            /** @var Mage_Eav_Model_Entity_Attribute $freshAttribute */
+            $freshAttribute = Mage::getModel('eav/entity_attribute')->load($attribute->getId());
+            $freshAttribute->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID);
+            $adminText = $freshAttribute->getSource()->getOptionText($value);
 
             return [
                 'value' => $value,
