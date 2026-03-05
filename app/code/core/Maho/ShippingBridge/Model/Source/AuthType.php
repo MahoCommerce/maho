@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -12,7 +14,7 @@ class Maho_ShippingBridge_Model_Source_AuthType
 {
     public function toOptionArray(): array
     {
-        $helper = Mage::helper('shipping');
+        $helper = Mage::helper('shippingbridge');
         return [
             ['value' => 'none', 'label' => $helper->__('None')],
             ['value' => 'bearer', 'label' => $helper->__('Bearer Token')],

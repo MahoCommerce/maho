@@ -53,14 +53,14 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                     $headers['Authorization'] = 'Bearer ' . $token;
                 }
             } elseif ($authType === 'custom_header') {
-                $headerName = $this->getConfigData('custom_header_name');
+                $headerName = (string) $this->getConfigData('custom_header_name');
                 $token = $this->getConfigData('auth_token');
-                if ($headerName && $token) {
+                if ($headerName && $token && preg_match('/^[a-zA-Z0-9\-]+$/', $headerName)) {
                     $headers[$headerName] = $token;
                 }
             }
 
-            $timeout = (int) $this->getConfigData('timeout') ?: 10;
+            $timeout = min((int) $this->getConfigData('timeout') ?: 10, 60);
 
             if ($this->getConfigFlag('debug')) {
                 Mage::log(
@@ -139,7 +139,11 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
     #[\Override]
     public function getAllowedMethods()
     {
-        return $this->_lastMethods;
+        if ($this->_lastMethods) {
+            return $this->_lastMethods;
+        }
+
+        return ['shippingbridge' => $this->getConfigData('title')];
     }
 
     /**
@@ -253,7 +257,7 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
                 'lastname' => $request->getDestLastname(),
                 'street' => $request->getDestStreet(),
                 'city' => $request->getDestCity(),
-                'region' => $request->getDestRegionCode(),
+                'region' => $this->_getDestRegionName($request),
                 'region_code' => $request->getDestRegionCode(),
                 'postcode' => $request->getDestPostcode(),
                 'country_id' => $request->getDestCountryId(),
@@ -344,9 +348,11 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
 
         $inputType = $attribute->getFrontendInput();
         if ($inputType === 'select' || $inputType === 'multiselect') {
+            $previousStoreId = $attribute->getStoreId();
             $adminText = $attribute->setStoreId(Mage_Core_Model_App::ADMIN_STORE_ID)
                 ->getSource()
                 ->getOptionText($value);
+            $attribute->setStoreId($previousStoreId);
 
             return [
                 'value' => $value,
@@ -355,6 +361,18 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
         }
 
         return $value;
+    }
+
+    protected function _getDestRegionName(Mage_Shipping_Model_Rate_Request $request): ?string
+    {
+        $regionId = $request->getDestRegionId();
+        if ($regionId) {
+            $region = Mage::getModel('directory/region')->load($regionId);
+            if ($region->getId()) {
+                return $region->getName();
+            }
+        }
+        return $request->getDestRegionCode();
     }
 
     protected function _buildCustomerData(Mage_Shipping_Model_Rate_Request $request): array
