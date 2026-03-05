@@ -23,7 +23,9 @@ $_ENV['APP_SECRET'] = \Mage::getStoreConfig('maho_apiplatform/oauth2/secret')
 $corsOrigins = \Mage::getStoreConfig('maho_apiplatform/general/cors_origins');
 if (!$corsOrigins) {
     $baseUrl = (string) \Mage::getStoreConfig('web/secure/base_url');
-    $corsOrigins = parse_url($baseUrl, PHP_URL_SCHEME) . '://' . parse_url($baseUrl, PHP_URL_HOST);
+    $parsed = parse_url($baseUrl);
+    $corsOrigins = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? 'localhost')
+        . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
 }
 $_ENV['CORS_ALLOW_ORIGIN'] = $corsOrigins;
 

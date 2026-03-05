@@ -107,8 +107,8 @@ final class CartProvider implements ProviderInterface
      */
     private function verifyCartAccess(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId = false): void
     {
-        // Admins can access any cart
-        if ($this->isAdmin()) {
+        // Privileged users can access any cart
+        if ($this->isAdmin() || $this->isPosUser() || $this->isApiUser()) {
             return;
         }
 

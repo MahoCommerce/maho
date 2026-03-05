@@ -341,8 +341,14 @@ class AuthController extends AbstractController
         try {
             $payload = $this->jwtService->decodeToken($token);
 
-            // Check if token has been revoked
-            if (isset($payload->jti) && $this->tokenBlacklist->isRevoked($payload->jti)) {
+            // Enforce jti claim and check blacklist
+            if (!isset($payload->jti)) {
+                return new JsonResponse([
+                    'error' => 'invalid_token',
+                    'message' => 'Token missing required jti claim',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+            if ($this->tokenBlacklist->isRevoked($payload->jti)) {
                 return new JsonResponse([
                     'error' => 'token_revoked',
                     'message' => 'Token has been revoked',
@@ -365,6 +371,8 @@ class AuthController extends AbstractController
                 ], Response::HTTP_UNAUTHORIZED);
             }
 
+            // Blacklist the old token to prevent replay
+            $this->tokenBlacklist->revoke($payload->jti, (int) ($payload->exp ?? time() + 86400));
             $newToken = $this->jwtService->generateCustomerToken($customer);
 
             return new JsonResponse([
@@ -836,8 +844,14 @@ class AuthController extends AbstractController
         try {
             $payload = $this->jwtService->decodeToken($token);
 
-            // Check if token has been revoked
-            if (isset($payload->jti) && $this->tokenBlacklist->isRevoked($payload->jti)) {
+            // Enforce jti claim and check blacklist
+            if (!isset($payload->jti)) {
+                return new JsonResponse([
+                    'error' => 'invalid_token',
+                    'message' => 'Token missing required jti claim',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+            if ($this->tokenBlacklist->isRevoked($payload->jti)) {
                 return new JsonResponse([
                     'error' => 'token_revoked',
                     'message' => 'Token has been revoked',
