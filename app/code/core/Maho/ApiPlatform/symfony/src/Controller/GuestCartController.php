@@ -368,6 +368,7 @@ class GuestCartController extends AbstractController
             $appliedCodes[$giftcardCode] = $giftcard->getBalance($quoteCurrency);
 
             $quote->setGiftcardCodes(json_encode($appliedCodes));
+            $quote->setTotalsCollectedFlag(false);
             $quote->collectTotals()->save();
 
             return new JsonResponse($this->mapCartToArray($quote));
@@ -427,6 +428,7 @@ class GuestCartController extends AbstractController
                 $quote->setGiftcardCodes(json_encode($appliedCodes));
             }
 
+            $quote->setTotalsCollectedFlag(false);
             $quote->collectTotals()->save();
 
             return new JsonResponse($this->mapCartToArray($quote));

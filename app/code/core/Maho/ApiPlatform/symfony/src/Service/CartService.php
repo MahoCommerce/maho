@@ -292,6 +292,7 @@ class CartService
         }
 
         $quote->setCouponCode($couponCode);
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
 
@@ -311,6 +312,7 @@ class CartService
     public function removeCoupon(\Mage_Sales_Model_Quote $quote): \Mage_Sales_Model_Quote
     {
         $quote->setCouponCode('');
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
 
@@ -331,6 +333,7 @@ class CartService
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates(1);
 
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
 
@@ -355,6 +358,7 @@ class CartService
 
         $address = $quote->getBillingAddress();
         $address->addData($addressData);
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
 
@@ -390,6 +394,7 @@ class CartService
         }
 
         $address->setShippingMethod($shippingMethod);
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
 
@@ -430,6 +435,7 @@ class CartService
             $payment->setAdditionalData(json_encode($additionalData));
         }
 
+        $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
 
