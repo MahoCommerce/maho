@@ -2368,10 +2368,9 @@ p.required,
   color: var(--maho-color-text-primary);
   background-color: var(--maho-color-background-alt);
   padding: 5px 10px;
-  display: inline-block;
+  display: block;
   width: auto;
   max-width: none;
-  min-width: 250px;
   float: none;
   padding: 6px 10px 6px 40px;
 }
