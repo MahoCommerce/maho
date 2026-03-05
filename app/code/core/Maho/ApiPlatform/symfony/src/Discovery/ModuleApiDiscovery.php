@@ -34,32 +34,67 @@ final class ModuleApiDiscovery
             return self::$cache;
         }
 
-        $basePath = BP . '/app/code/core/Maho';
         $paths = [];
         $namespaces = [];
 
-        if (!is_dir($basePath)) {
-            return self::$cache = ['paths' => [], 'namespaces' => []];
-        }
+        // Scan all code pools for modules with Api/Resource directories
+        $codePools = [
+            'core/Maho' => 'Maho',
+            'community' => null,  // vendor prefix derived from directory structure
+            'local' => null,
+        ];
 
-        foreach (new \DirectoryIterator($basePath) as $item) {
-            if ($item->isDot() || !$item->isDir()) {
+        foreach ($codePools as $pool => $vendorPrefix) {
+            $basePath = BP . '/app/code/' . $pool;
+            if (!is_dir($basePath)) {
                 continue;
             }
 
-            $moduleName = $item->getFilename();
+            if ($vendorPrefix !== null) {
+                // Core pool: Maho/ModuleName/Api/Resource
+                foreach (new \DirectoryIterator($basePath) as $item) {
+                    if ($item->isDot() || !$item->isDir()) {
+                        continue;
+                    }
 
-            // Skip the ApiPlatform module itself — it uses its own mechanism
-            if ($moduleName === 'ApiPlatform') {
-                continue;
-            }
+                    $moduleName = $item->getFilename();
 
-            $apiDir = $basePath . '/' . $moduleName . '/Api';
-            $resourceDir = $apiDir . '/Resource';
+                    // Skip the ApiPlatform module itself — it uses its own mechanism
+                    if ($moduleName === 'ApiPlatform') {
+                        continue;
+                    }
 
-            if (is_dir($resourceDir)) {
-                $paths[] = $resourceDir;
-                $namespaces["Maho\\{$moduleName}\\Api\\"] = $apiDir;
+                    $apiDir = $basePath . '/' . $moduleName . '/Api';
+                    $resourceDir = $apiDir . '/Resource';
+
+                    if (is_dir($resourceDir)) {
+                        $paths[] = $resourceDir;
+                        $namespaces["{$vendorPrefix}\\{$moduleName}\\Api\\"] = $apiDir;
+                    }
+                }
+            } else {
+                // Community/local pools: Vendor/ModuleName/Api/Resource
+                foreach (new \DirectoryIterator($basePath) as $vendor) {
+                    if ($vendor->isDot() || !$vendor->isDir()) {
+                        continue;
+                    }
+                    $vendorName = $vendor->getFilename();
+                    $vendorPath = $basePath . '/' . $vendorName;
+
+                    foreach (new \DirectoryIterator($vendorPath) as $module) {
+                        if ($module->isDot() || !$module->isDir()) {
+                            continue;
+                        }
+                        $moduleName = $module->getFilename();
+                        $apiDir = $vendorPath . '/' . $moduleName . '/Api';
+                        $resourceDir = $apiDir . '/Resource';
+
+                        if (is_dir($resourceDir)) {
+                            $paths[] = $resourceDir;
+                            $namespaces["{$vendorName}\\{$moduleName}\\Api\\"] = $apiDir;
+                        }
+                    }
+                }
             }
         }
 

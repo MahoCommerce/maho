@@ -96,6 +96,12 @@ class AdminGraphQlController
         }
     }
 
+    /** Maximum nesting depth allowed in queries */
+    private const MAX_QUERY_DEPTH = 10;
+
+    /** Maximum query length in bytes */
+    private const MAX_QUERY_LENGTH = 10000;
+
     private function executeQuery(string $query, ?array $variables, array $context): array
     {
         // Initialize handlers
@@ -104,18 +110,29 @@ class AdminGraphQlController
         // Parse and execute
         $query = trim($query);
 
+        // Query size limit
+        if (strlen($query) > self::MAX_QUERY_LENGTH) {
+            return ['errors' => [['message' => 'Query exceeds maximum allowed length']]];
+        }
+
+        // Depth limit — count max nesting of { }
+        $depth = $this->calculateQueryDepth($query);
+        if ($depth > self::MAX_QUERY_DEPTH) {
+            return ['errors' => [['message' => 'Query exceeds maximum depth of ' . self::MAX_QUERY_DEPTH]]];
+        }
+
         // Handle introspection
         if (str_contains($query, '__schema') || str_contains($query, '__type')) {
             return ['data' => $this->getIntrospectionSchema()];
         }
 
-        // Parse operation name
+        // Parse operation name from the query
         if (preg_match('/(?:query|mutation)\s+(\w+)/', $query, $matches)) {
             $operation = $matches[1];
-        } elseif (preg_match('/\{\s*(\w+)/', $query, $matches)) {
+        } elseif (preg_match('/^\{\s*(\w+)/', $query, $matches)) {
             $operation = $matches[1];
         } else {
-            return ['errors' => [['message' => 'Could not parse GraphQL query']]];
+            return ['errors' => [['message' => 'Could not parse GraphQL operation name']]];
         }
 
         try {
@@ -125,6 +142,49 @@ class AdminGraphQlController
             \Mage::logException($e);
             return ['errors' => [['message' => \Mage::getIsDeveloperMode() ? $e->getMessage() : 'An error occurred processing the request']]];
         }
+    }
+
+    /**
+     * Calculate the maximum nesting depth of a GraphQL query
+     */
+    private function calculateQueryDepth(string $query): int
+    {
+        $maxDepth = 0;
+        $currentDepth = 0;
+        $inString = false;
+        $escape = false;
+
+        for ($i = 0, $len = strlen($query); $i < $len; $i++) {
+            $char = $query[$i];
+
+            if ($escape) {
+                $escape = false;
+                continue;
+            }
+
+            if ($char === '\\') {
+                $escape = true;
+                continue;
+            }
+
+            if ($char === '"') {
+                $inString = !$inString;
+                continue;
+            }
+
+            if ($inString) {
+                continue;
+            }
+
+            if ($char === '{') {
+                $currentDepth++;
+                $maxDepth = max($maxDepth, $currentDepth);
+            } elseif ($char === '}') {
+                $currentDepth--;
+            }
+        }
+
+        return $maxDepth;
     }
 
     /**

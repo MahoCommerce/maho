@@ -349,17 +349,17 @@ final class OrderProcessor implements ProcessorInterface
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
         }
 
-        // POS default address
+        // POS default address — all values from store config, nothing hardcoded
+        $sid = $quote->getStoreId();
         $posAddress = [
             'firstname' => 'POS',
             'lastname' => 'Customer',
-            'street' => 'In-Store Pickup',
-            'city' => 'Melbourne',
-            'region' => 'Victoria',
-            'region_id' => 574,
-            'postcode' => '3000',
-            'country_id' => 'AU',
-            'telephone' => '0000000000',
+            'street' => \Mage::getStoreConfig('general/store_information/address', $sid) ?: 'In-Store Pickup',
+            'city' => \Mage::getStoreConfig('general/store_information/city', $sid) ?: 'Store',
+            'region' => \Mage::getStoreConfig('general/store_information/region', $sid) ?: '',
+            'postcode' => \Mage::getStoreConfig('general/store_information/postcode', $sid) ?: '0000',
+            'country_id' => \Mage::getStoreConfig('general/country/default', $sid) ?: 'US',
+            'telephone' => \Mage::getStoreConfig('general/store_information/phone', $sid) ?: '0000000000',
         ];
 
         // Set shipping address and method

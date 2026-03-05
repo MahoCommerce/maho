@@ -74,11 +74,13 @@ class IdempotencyListener
         $read = $resource->getConnection('core_read');
         $table = $resource->getTableName(self::TABLE);
 
-        $existing = $read->fetchRow(
-            "SELECT response_code, response_body, response_headers FROM {$table} "
-            . 'WHERE idempotency_key = ? AND user_scope = ? AND request_path = ? AND request_method = ?',
-            [$idempotencyKey, $scope, $path, $method],
-        );
+        $select = $read->select()
+            ->from($table, ['response_code', 'response_body', 'response_headers'])
+            ->where('idempotency_key = ?', $idempotencyKey)
+            ->where('user_scope = ?', $scope)
+            ->where('request_path = ?', $path)
+            ->where('request_method = ?', $method);
+        $existing = $read->fetchRow($select);
 
         if ($existing) {
             $headers = json_decode($existing['response_headers'] ?? '{}', true) ?: [];
