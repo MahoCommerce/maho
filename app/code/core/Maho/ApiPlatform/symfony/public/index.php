@@ -19,8 +19,13 @@ use Symfony\Component\HttpFoundation\Request;
 
 // Set environment variables from Maho config
 $_ENV['APP_SECRET'] = \Mage::getStoreConfig('maho_apiplatform/oauth2/secret')
-    ?: md5(\Mage::getStoreConfig('web/cookie/cookie_domain') . 'api_platform');
-$_ENV['CORS_ALLOW_ORIGIN'] = \Mage::getStoreConfig('maho_apiplatform/general/cors_origins') ?: '*';
+    ?: hash('sha256', (string) \Mage::getConfig()->getNode('global/crypt/key') . 'symfony_app_secret');
+$corsOrigins = \Mage::getStoreConfig('maho_apiplatform/general/cors_origins');
+if (!$corsOrigins) {
+    $baseUrl = (string) \Mage::getStoreConfig('web/secure/base_url');
+    $corsOrigins = parse_url($baseUrl, PHP_URL_SCHEME) . '://' . parse_url($baseUrl, PHP_URL_HOST);
+}
+$_ENV['CORS_ALLOW_ORIGIN'] = $corsOrigins;
 
 // Boot Symfony kernel
 // Always use prod mode with debug=false to prevent trace leakage in API responses

@@ -96,6 +96,9 @@ final class OrderProcessor implements ProcessorInterface
             throw new NotFoundHttpException('Cart not found');
         }
 
+        // Verify cart ownership
+        $this->verifyCartOwnership($quote, $maskedId !== null);
+
         // Set payment method on quote if provided
         if ($paymentMethod) {
             $quote->getPayment()->setMethod($paymentMethod);
@@ -148,14 +151,13 @@ final class OrderProcessor implements ProcessorInterface
             throw new NotFoundHttpException('Order not found');
         }
 
-        // Verify customer access: customers can only cancel their own orders
-        $customerId = $context['customer_id'] ?? null;
-        $isAdmin = !empty($context['is_admin']);
-        if (!$isAdmin) {
+        // Verify access: customers can only cancel their own orders
+        if (!$this->isAdmin() && !$this->isApiUser()) {
+            $customerId = $this->getAuthenticatedCustomerId();
             if (!$customerId) {
                 throw new BadRequestHttpException('Authentication required to cancel orders');
             }
-            if ($order->getCustomerId() != $customerId) {
+            if ((int) $order->getCustomerId() !== $customerId) {
                 throw new NotFoundHttpException('Order not found');
             }
         }
@@ -613,5 +615,26 @@ final class OrderProcessor implements ProcessorInterface
         $dto->createdAt = $payment->getCreatedAt();
 
         return $dto;
+    }
+
+    /**
+     * Verify the current user has access to place an order for this cart
+     */
+    private function verifyCartOwnership(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId): void
+    {
+        if ($this->isAdmin() || $this->isPosUser() || $this->isApiUser()) {
+            return;
+        }
+
+        $cartCustomerId = $quote->getCustomerId();
+        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
+
+        if ($cartCustomerId) {
+            if ($authenticatedCustomerId === null || (int) $cartCustomerId !== $authenticatedCustomerId) {
+                throw new AccessDeniedHttpException('You can only place orders for your own cart');
+            }
+        } elseif (!$accessedByMaskedId) {
+            throw new AccessDeniedHttpException('Guest carts must be accessed via masked ID');
+        }
     }
 }

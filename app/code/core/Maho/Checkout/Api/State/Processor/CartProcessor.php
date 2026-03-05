@@ -648,22 +648,23 @@ final class CartProcessor implements ProcessorInterface
         $customerId = $this->getAuthenticatedCustomerId();
         $quoteCustomerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
 
-        // If cart belongs to a customer, verify the authenticated user matches
-        if ($quoteCustomerId !== null && $customerId !== null && $quoteCustomerId !== $customerId) {
-            // Allow admin/POS to access any cart
-            if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
-                throw new AccessDeniedHttpException('You do not have access to this cart');
-            }
+        // Admins/POS/API users can access any cart
+        if ($this->isAdmin() || $this->isPosUser() || $this->isApiUser()) {
+            return;
         }
 
-        // If accessing by cartId (not maskedId) and not admin/POS, require ownership
+        // If cart belongs to a customer, verify the authenticated user matches
+        if ($quoteCustomerId !== null) {
+            if ($customerId === null || $quoteCustomerId !== $customerId) {
+                throw new AccessDeniedHttpException('You do not have access to this cart');
+            }
+            return;
+        }
+
+        // Guest cart (no customer_id) — only allow access via maskedId
         $args = $context['args']['input'] ?? [];
         if (!empty($args['cartId']) && empty($args['maskedId'])) {
-            if ($customerId !== null && $quoteCustomerId !== $customerId) {
-                if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
-                    throw new AccessDeniedHttpException('You do not have access to this cart');
-                }
-            }
+            throw new AccessDeniedHttpException('Guest carts can only be accessed via masked ID');
         }
     }
 
@@ -849,7 +850,7 @@ final class CartProcessor implements ProcessorInterface
 
         $prices = [
             'subtotal' => (float) $quote->getSubtotal(),
-            'subtotalInclTax' => (float) ($quote->getSubtotal() + ($shippingAddress ? $shippingAddress->getTaxAmount() : 0)),
+            'subtotalInclTax' => (float) array_reduce($quote->getAllVisibleItems(), fn(float $sum, $item) => $sum + (float) $item->getRowTotalInclTax(), 0.0),
             'subtotalWithDiscount' => (float) $quote->getSubtotalWithDiscount(),
             'discountAmount' => null,
             'shippingAmount' => null,

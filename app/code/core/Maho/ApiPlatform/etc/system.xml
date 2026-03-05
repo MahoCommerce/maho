@@ -21,6 +21,13 @@
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                         </enabled>
+                        <cors_origins translate="label comment">
+                            <label>CORS Allowed Origins</label>
+                            <comment>Comma-separated list of allowed origins. Defaults to store base URL if empty.</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </cors_origins>
                         <legacy_sunset_date translate="label comment">
                             <label>Legacy API Sunset Date</label>
                             <comment>Date when legacy SOAP/REST APIs will be disabled</comment>
@@ -76,6 +83,14 @@
                     <sort_order>20</sort_order>
                     <show_in_default>1</show_in_default>
                     <fields>
+                        <secret translate="label comment">
+                            <label>Symfony App Secret</label>
+                            <comment>Used for CSRF and session signing. Auto-derived from crypt key if empty.</comment>
+                            <frontend_type>obscure</frontend_type>
+                            <backend_model>adminhtml/system_config_backend_encrypted</backend_model>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                        </secret>
                         <token_lifetime translate="label comment">
                             <label>Access Token Lifetime</label>
                             <comment>In seconds (default: 3600 = 1 hour)</comment>

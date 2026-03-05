@@ -341,6 +341,14 @@ class AuthController extends AbstractController
         try {
             $payload = $this->jwtService->decodeToken($token);
 
+            // Check if token has been revoked
+            if (isset($payload->jti) && $this->tokenBlacklist->isRevoked($payload->jti)) {
+                return new JsonResponse([
+                    'error' => 'token_revoked',
+                    'message' => 'Token has been revoked',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
+
             if (!isset($payload->customer_id)) {
                 return new JsonResponse([
                     'error' => 'invalid_token',
@@ -827,6 +835,14 @@ class AuthController extends AbstractController
 
         try {
             $payload = $this->jwtService->decodeToken($token);
+
+            // Check if token has been revoked
+            if (isset($payload->jti) && $this->tokenBlacklist->isRevoked($payload->jti)) {
+                return new JsonResponse([
+                    'error' => 'token_revoked',
+                    'message' => 'Token has been revoked',
+                ], Response::HTTP_UNAUTHORIZED);
+            }
 
             if (!isset($payload->customer_id)) {
                 return new JsonResponse([

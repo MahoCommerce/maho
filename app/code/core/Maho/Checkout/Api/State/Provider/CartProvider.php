@@ -73,7 +73,7 @@ final class CartProvider implements ProviderInterface
             if (!$quote) {
                 return null;
             }
-            $this->verifyCartAccess($quote);
+            $this->verifyCartAccess($quote, true);
             return $this->mapToDto($quote);
         }
 
@@ -91,7 +91,7 @@ final class CartProvider implements ProviderInterface
         }
 
         // Verify cart ownership for authenticated customers
-        $this->verifyCartAccess($quote);
+        $this->verifyCartAccess($quote, $maskedId !== null);
 
         return $this->mapToDto($quote);
     }
@@ -105,7 +105,7 @@ final class CartProvider implements ProviderInterface
      *
      * @throws AccessDeniedHttpException If access denied
      */
-    private function verifyCartAccess(\Mage_Sales_Model_Quote $quote): void
+    private function verifyCartAccess(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId = false): void
     {
         // Admins can access any cart
         if ($this->isAdmin()) {
@@ -120,8 +120,10 @@ final class CartProvider implements ProviderInterface
             if ($authenticatedCustomerId === null || (int) $cartCustomerId !== $authenticatedCustomerId) {
                 throw new AccessDeniedHttpException('You can only access your own cart');
             }
+        } elseif (!$accessedByMaskedId) {
+            // Guest carts accessed by numeric ID require admin role
+            throw new AccessDeniedHttpException('Guest carts can only be accessed via masked ID');
         }
-        // Guest carts (no customer_id) are allowed - they're accessed via public /guest-carts routes
     }
 
     /**
@@ -365,7 +367,7 @@ final class CartProvider implements ProviderInterface
 
         $prices = [
             'subtotal' => (float) $quote->getSubtotal(),
-            'subtotalInclTax' => (float) ($quote->getSubtotal() + ($shippingAddress ? $shippingAddress->getTaxAmount() : 0)),
+            'subtotalInclTax' => (float) array_reduce($quote->getAllVisibleItems(), fn(float $sum, $item) => $sum + (float) $item->getRowTotalInclTax(), 0.0),
             'subtotalWithDiscount' => (float) $quote->getSubtotalWithDiscount(),
             'discountAmount' => null,
             'shippingAmount' => null,
