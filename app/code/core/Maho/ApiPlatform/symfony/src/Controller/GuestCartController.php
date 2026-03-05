@@ -808,7 +808,7 @@ class GuestCartController extends AbstractController
 
         // Batch-load stock items (single query)
         $stockCollection = \Mage::getResourceModel('cataloginventory/stock_item_collection')
-            ->addProductsFilter($productCollection);
+            ->addProductsFilter(iterator_to_array($productCollection));
         $stockMap = [];
         foreach ($stockCollection as $si) {
             $stockMap[(int) $si->getProductId()] = $si->getIsInStock();

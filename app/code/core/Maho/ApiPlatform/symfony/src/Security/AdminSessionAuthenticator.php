@@ -194,7 +194,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
         // Set context for services with HMAC bridge token for verification
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminId;
         $_SERVER['MAHO_ADMIN_USERNAME'] = $admin->getUsername();
-        $_SERVER['MAHO_ADMIN_ROLE_ID'] = $admin->getRole()?->getId() ?? (string) 0;
+        $_SERVER['MAHO_ADMIN_ROLE_ID'] = (string) ($admin->getRole()->getId() ?? 0);
         $_SERVER['MAHO_IS_ADMIN'] = '1';
         $_SERVER['MAHO_API_BRIDGE_TOKEN'] = self::generateBridgeToken((string) $adminId);
 
