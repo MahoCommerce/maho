@@ -35,6 +35,7 @@ namespace PHPSTORM_META {
         current_dataflow_session_id,
         current_destination,
         current_dynamic_rule,
+        current_email_log,
         current_email_sequence,
         current_email_template,
         current_entity_key,

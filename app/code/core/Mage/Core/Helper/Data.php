@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -993,7 +995,7 @@ XML;
             'sendgrid+api' => "$emailTransport://$pass@default",
             'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
             'sweego+api' => "$emailTransport://$pass@default",
-            'sendmail' => "$emailTransport://default",
+            'sendmail' => 'native://default',
             default => '',
         };
 
@@ -1002,6 +1004,22 @@ XML;
         }
 
         return $dsn;
+    }
+
+    public function getMailTransport(): ?TransportInterface
+    {
+        $dsn = $this->getMailerDsn();
+        if (!$dsn) {
+            return null;
+        }
+
+        $transport = Transport::fromDsn($dsn);
+
+        if (Mage::getStoreConfigFlag('system/smtp/log_enabled')) {
+            $transport = new Mage_Core_Model_Email_LoggingTransport($transport);
+        }
+
+        return $transport;
     }
 
     /**

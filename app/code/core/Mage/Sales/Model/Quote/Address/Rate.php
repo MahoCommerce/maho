@@ -98,6 +98,7 @@ class Mage_Sales_Model_Quote_Address_Rate extends Mage_Shipping_Model_Rate_Abstr
                 ->setMethod($rate->getMethod())
                 ->setMethodTitle($rate->getMethodTitle())
                 ->setMethodDescription($rate->getMethodDescription())
+                ->setMethodLogo($rate->getMethodLogo())
                 ->setPrice($rate->getPrice())
             ;
         }

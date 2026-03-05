@@ -241,6 +241,28 @@ describe('Select Query Builder - Complex Queries', function () {
         expect($sql)->toContain('LENGTH(path)');
     });
 
+    it('handles UNION with Db\\Expr targets', function () {
+        $select1 = $this->adapter->select()
+            ->from($this->configTable, ['path'])
+            ->where('scope = ?', 'default')
+            ->limit(1);
+
+        $exprSql = 'SELECT ' . $this->adapter->quote('literal_value') . ' AS path';
+        $exprTarget = new Expr($exprSql);
+
+        $unionSelect = $this->adapter->select()
+            ->union([$select1, $exprTarget]);
+
+        $sql = $unionSelect->assemble();
+
+        expect($sql)->toContain('UNION');
+        expect($sql)->toContain('literal_value');
+
+        // Verify it actually executes without error
+        $results = $this->adapter->fetchAll($unionSelect);
+        expect($results)->toBeArray();
+    });
+
     it('handles UNION queries', function () {
         $select1 = $this->adapter->select()
             ->from($this->configTable, ['path'])
