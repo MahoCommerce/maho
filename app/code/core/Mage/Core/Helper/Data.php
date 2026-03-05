@@ -995,7 +995,7 @@ XML;
             'sendgrid+api' => "$emailTransport://$pass@default",
             'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
             'sweego+api' => "$emailTransport://$pass@default",
-            'sendmail' => "native://default",
+            'sendmail' => 'native://default',
             default => '',
         };
 
