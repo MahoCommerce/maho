@@ -32,36 +32,38 @@ class RateLimiter
         }
 
         $safeKey = preg_replace('/[^a-zA-Z0-9_.-]/', '_', $key);
-        $file = $dir . '/' . $safeKey . '.json';
-
+        $file = $dir . '/'. $safeKey . '.json';
         $now = time();
-        $attempts = [];
 
-        if (file_exists($file)) {
-            $data = @file_get_contents($file);
-            if ($data !== false) {
-                $decoded = json_decode($data, true);
-                if (is_array($decoded)) {
-                    $attempts = $decoded;
-                }
+        $fp = fopen($file, 'c+');
+        if ($fp === false) {
+            return; // Fail open if file can't be created
+        }
+
+        flock($fp, LOCK_EX);
+
+        try {
+            $data = stream_get_contents($fp);
+            $attempts = $data ? (json_decode($data, true) ?? []) : [];
+            $attempts = array_values(array_filter($attempts, fn(int $ts) => $ts > $now - $windowSeconds));
+
+            if (count($attempts) >= $maxAttempts) {
+                $retryAfter = $windowSeconds - ($now - $attempts[0]);
+                throw new TooManyRequestsHttpException(
+                    (string) max(1, $retryAfter),
+                    'Too many requests. Please try again later.',
+                );
             }
+
+            $attempts[] = $now;
+
+            fseek($fp, 0);
+            ftruncate($fp, 0);
+            fwrite($fp, json_encode($attempts));
+        } finally {
+            flock($fp, LOCK_UN);
+            fclose($fp);
         }
-
-        $attempts = array_values(array_filter($attempts, fn(int $ts) => $ts > $now - $windowSeconds));
-
-        if (count($attempts) >= $maxAttempts) {
-            $retryAfter = $windowSeconds - ($now - $attempts[0]);
-            throw new TooManyRequestsHttpException(
-                (string) max(1, $retryAfter),
-                'Too many requests. Please try again later.',
-            );
-        }
-
-        $attempts[] = $now;
-
-        $tmpFile = $file . '.' . getmypid() . '.tmp';
-        file_put_contents($tmpFile, json_encode($attempts));
-        rename($tmpFile, $file);
     }
 
     public function cleanup(int $maxAge = 7200): void

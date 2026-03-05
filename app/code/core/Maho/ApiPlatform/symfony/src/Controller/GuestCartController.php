@@ -749,8 +749,75 @@ class GuestCartController extends AbstractController
             $quote->collectTotals();
         }
 
+        // Batch-load products and stock to avoid N+1 queries
+        $visibleItems = $quote->getAllVisibleItems();
+        $productIds = array_map(fn($item) => (int) $item->getProductId(), $visibleItems);
+
+        // Single collection query for all products
+        $productCollection = \Mage::getResourceModel('catalog/product_collection')
+            ->addIdFilter($productIds)
+            ->addAttributeToSelect(['small_image', 'thumbnail', 'url_key']);
+        $productMap = [];
+        foreach ($productCollection as $p) {
+            $productMap[(int) $p->getId()] = $p;
+        }
+
+        // Find configurable parents for items without thumbnails (single query)
+        $needParentIds = [];
+        foreach ($productMap as $pid => $p) {
+            $thumb = $p->getThumbnail();
+            if (!$thumb || $thumb === 'no_selection') {
+                $needParentIds[] = $pid;
+            }
+        }
+        if (!empty($needParentIds)) {
+            // Single query: get child->parent mapping from super_link table
+            $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
+            $superLinkTable = \Mage::getSingleton('core/resource')->getTableName('catalog/product_super_link');
+            $childParentRows = $adapter->fetchAll(
+                $adapter->select()
+                    ->from($superLinkTable, ['product_id', 'parent_id'])
+                    ->where('product_id IN(?)', $needParentIds)
+            );
+            $childToParent = [];
+            $allParentIds = [];
+            foreach ($childParentRows as $row) {
+                $childToParent[(int) $row['product_id']] = (int) $row['parent_id'];
+                $allParentIds[] = (int) $row['parent_id'];
+            }
+            if (!empty($allParentIds)) {
+                $parentCollection = \Mage::getResourceModel('catalog/product_collection')
+                    ->addIdFilter(array_unique($allParentIds))
+                    ->addAttributeToSelect(['small_image', 'thumbnail', 'url_key']);
+                $parentProducts = [];
+                foreach ($parentCollection as $pp) {
+                    $parentProducts[(int) $pp->getId()] = $pp;
+                }
+                foreach ($childToParent as $childId => $parentId) {
+                    if (isset($parentProducts[$parentId])) {
+                        $parent = $parentProducts[$parentId];
+                        if ($parent->getThumbnail() && $parent->getThumbnail() !== 'no_selection') {
+                            $productMap[$childId] = $parent;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Batch-load stock items (single query)
+        $stockCollection = \Mage::getResourceModel('cataloginventory/stock_item_collection')
+            ->addProductsFilter($productCollection);
+        $stockMap = [];
+        foreach ($stockCollection as $si) {
+            $stockMap[(int) $si->getProductId()] = $si->getIsInStock();
+        }
+
+        $mediaConfig = \Mage::getModel('catalog/product_media_config');
         $items = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
+        foreach ($visibleItems as $item) {
+            $productId = (int) $item->getProductId();
+            $product = $productMap[$productId] ?? null;
+
             $itemData = [
                 'id' => (int) $item->getId(),
                 'sku' => $item->getSku(),
@@ -762,51 +829,29 @@ class GuestCartController extends AbstractController
                 'rowTotalInclTax' => (float) $item->getRowTotalInclTax(),
                 'taxAmount' => (float) ($item->getTaxAmount() ?? 0),
                 'taxPercent' => (float) ($item->getTaxPercent() ?? 0),
-                'productId' => (int) $item->getProductId(),
+                'productId' => $productId,
                 'options' => $this->getItemConfigurationOptions($item),
             ];
 
-            // Get product thumbnail for cart display
-            $productId = (int) $item->getProductId();
-            $product = \Mage::getModel('catalog/product')->load($productId);
-            $thumbnail = $product->getThumbnail();
-
-            // If simple product has no thumbnail, check for configurable parent
-            if (!$thumbnail || $thumbnail === 'no_selection') {
-                $parentIds = \Mage::getModel('catalog/product_type_configurable')
-                    ->getParentIdsByChild($productId);
-
-                if (!empty($parentIds)) {
-                    $parentProduct = \Mage::getModel('catalog/product')->load($parentIds[0]);
-                    if ($parentProduct->getThumbnail() && $parentProduct->getThumbnail() !== 'no_selection') {
-                        $product = $parentProduct;
-                        $thumbnail = $parentProduct->getThumbnail();
+            if ($product) {
+                $thumbnail = $product->getThumbnail();
+                if ($thumbnail && $thumbnail !== 'no_selection') {
+                    try {
+                        $itemData['thumbnailUrl'] = (string) \Mage::helper('catalog/image')
+                            ->init($product, 'small_image')
+                            ->resize(100);
+                    } catch (\Exception $e) {
+                        $itemData['thumbnailUrl'] = $mediaConfig->getMediaUrl($thumbnail);
                     }
                 }
-            }
 
-            if ($thumbnail && $thumbnail !== 'no_selection') {
-                try {
-                    // Use small_image with width-only resize (more reliable than thumbnail with square resize)
-                    $itemData['thumbnailUrl'] = (string) \Mage::helper('catalog/image')
-                        ->init($product, 'small_image')
-                        ->resize(100);
-                } catch (\Exception $e) {
-                    // Fallback to media URL if image helper fails
-                    $mediaConfig = \Mage::getModel('catalog/product_media_config');
-                    $itemData['thumbnailUrl'] = $mediaConfig->getMediaUrl($thumbnail);
+                $urlKey = $product->getUrlKey();
+                if ($urlKey) {
+                    $itemData['urlKey'] = $urlKey;
                 }
             }
 
-            // URL key for product links
-            $urlKey = $product->getUrlKey();
-            if ($urlKey) {
-                $itemData['urlKey'] = $urlKey;
-            }
-
-            // Stock status
-            $stockItem = \Mage::getModel('cataloginventory/stock_item')->loadByProduct($product);
-            $itemData['stockStatus'] = $stockItem->getIsInStock() ? 'in_stock' : 'out_of_stock';
+            $itemData['stockStatus'] = ($stockMap[$productId] ?? false) ? 'in_stock' : 'out_of_stock';
 
             $items[] = $itemData;
         }

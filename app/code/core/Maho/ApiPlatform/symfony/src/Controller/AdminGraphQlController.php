@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Controller;
 
-use Maho\ApiPlatform\Security\AdminSessionAuthenticator;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Service\CustomerService;
 use Maho\ApiPlatform\Service\GraphQL\CartMutationHandler;
@@ -62,39 +61,13 @@ class AdminGraphQlController
         }
 
         try {
-            // Get context from server vars (set by Maho controller) or request
+            // Authentication handled by Symfony firewall (AdminSessionAuthenticator)
+            // $_SERVER context vars are set by the authenticator
             $input = json_decode($content, true) ?? [];
             $storeId = (int) ($_SERVER['MAHO_STORE_ID'] ?? $input['variables']['storeId'] ?? 1);
-            $adminUserId = $_SERVER['MAHO_ADMIN_USER_ID'] ?? null;
-            // Verify bridge token if admin context was set via $_SERVER
-            if ($adminUserId !== null) {
-                if (!AdminSessionAuthenticator::verifyBridgeToken(
-                    (string) $adminUserId,
-                    $_SERVER['MAHO_API_BRIDGE_TOKEN'] ?? '',
-                )) {
-                    $adminUserId = null; // Reject unverified context
-                }
-            }
+            $adminUserId = (int) ($_SERVER['MAHO_ADMIN_USER_ID'] ?? 0);
             $customerId = $_SERVER['MAHO_POS_CUSTOMER_ID'] ?? null;
 
-            // For POS - validate form_key using Maho's standard method
-            // The form_key is tied to the admin session and must be validated properly
-            if ($adminUserId === null && !empty($input['form_key'])) {
-                $session = \Mage::getSingleton('core/session');
-                if ($session->validateFormKey($input['form_key'])) {
-                    // Valid form_key from admin session - get admin user from session
-                    $adminSession = \Mage::getSingleton('admin/session');
-                    if ($adminSession->isLoggedIn()) {
-                        $adminUserId = (int) $adminSession->getUser()->getId();
-                    }
-                }
-            }
-
-            if ($adminUserId === null) {
-                return new JsonResponse([
-                    'errors' => [['message' => 'Admin authentication required']],
-                ], Response::HTTP_UNAUTHORIZED);
-            }
 
             $context = [
                 'store_id' => $storeId,

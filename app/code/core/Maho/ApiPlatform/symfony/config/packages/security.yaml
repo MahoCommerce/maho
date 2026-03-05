@@ -20,10 +20,13 @@ security:
             pattern: ^/api/docs
             security: false
 
-        # Admin GraphQL endpoint - handled by custom controller, no Symfony auth
+        # Admin GraphQL endpoint - authenticated via admin session or bridge token
         api_admin_graphql:
             pattern: ^/api/admin/graphql
-            security: false
+            stateless: true
+            provider: maho_admin
+            custom_authenticators:
+                - Maho\ApiPlatform\Security\AdminSessionAuthenticator
 
         # Public GraphQL endpoint - OAuth2 auth
         api_graphql:

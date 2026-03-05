@@ -760,7 +760,7 @@ class AuthController extends AbstractController
             // Check token expiry (24 hours)
             if ($tokenExpiry) {
                 $tokenCreatedAt = strtotime($tokenExpiry);
-                $expiryHours = (int) \Mage::getStoreConfig('customer/password/reset_link_expiration_period') ?: 24;
+                $expiryHours = (int) \Mage::getStoreConfig('customer/password/reset_link_expiration_period') ?: 2;
                 if (time() - $tokenCreatedAt > ($expiryHours * 3600)) {
                     return new JsonResponse([
                         'error' => 'token_expired',
