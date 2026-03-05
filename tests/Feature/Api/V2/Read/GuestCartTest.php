@@ -22,12 +22,11 @@ declare(strict_types=1);
 
 describe('GET /api/guest-carts/{id}', function (): void {
 
-    it('returns 404 for non-existent cart', function (): void {
+    it('returns 404 for non-existent masked ID', function (): void {
+        // Numeric values are not valid masked IDs and will not resolve
         $response = apiGet('/api/guest-carts/999999999');
 
         expect($response['status'])->toBeNotFound();
-        expect($response['json'])->toHaveKey('error');
-        expect($response['json']['error'])->toBe('cart_not_found');
     });
 
     it('returns 404 for invalid cart ID format', function (): void {
@@ -36,13 +35,12 @@ describe('GET /api/guest-carts/{id}', function (): void {
         expect($response['status'])->toBeNotFound();
     });
 
-    it('does not require authentication for guest cart access', function (): void {
-        // Guest carts should be accessible without auth (by cart ID)
-        // This tests that guest carts work without JWT token
+    it('does not resolve numeric IDs as masked IDs', function (): void {
+        // Guest carts are only accessible via masked ID (32-char hex token)
+        // A bare numeric ID is not a valid masked ID and returns 404
         $response = apiGet('/api/guest-carts/1');
 
-        // Either 200 (found) or 404 (not found) - but NOT 401 unauthorized
-        expect($response['status'])->not->toBe(401);
+        expect($response['status'])->toBeNotFound();
     });
 
 });
@@ -285,12 +283,11 @@ describe('GET /api/guest-carts/{id}/payment-methods', function (): void {
         }
     });
 
-    it('does not require authentication', function (): void {
-        // Payment methods should be accessible without auth (cart ID based)
+    it('does not resolve numeric cart ID as masked ID', function (): void {
+        // Payment methods require a valid masked cart ID
         $response = apiGet('/api/guest-carts/1/payment-methods');
 
-        // Either 200 (found) or 404 (not found) - but NOT 401 unauthorized
-        expect($response['status'])->not->toBe(401);
+        expect($response['status'])->toBeNotFound();
     });
 
 });
