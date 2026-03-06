@@ -110,10 +110,6 @@ class ProductService
             'direction' => $direction,
         ];
 
-        // Cap cache size to prevent unbounded growth in long-running workers
-        if (count(self::$categorySortCache) > 500) {
-            self::$categorySortCache = array_slice(self::$categorySortCache, -250, null, true);
-        }
         self::$categorySortCache[$categoryId] = $result;
         return $result;
     }
@@ -676,17 +672,30 @@ class ProductService
             $collection->addStoreFilter($storeId);
         }
 
+        // Use page-based chunking to avoid loading all products into memory
+        $collection->setPageSize(500);
+        $totalIndexed = 0;
+        $pages = $collection->getLastPageNumber();
         $documents = [];
-        foreach ($collection as $product) {
-            $doc = $this->convertProductToMeilisearchDocument($product);
-            $doc['store_id'] = $storeId ?? 0;
-            $documents[] = $doc;
 
-            // Batch index every 1000 products
-            if (count($documents) >= 1000) {
-                $index->addDocuments($documents);
-                $documents = [];
+        for ($currentPage = 1; $currentPage <= $pages; $currentPage++) {
+            $collection->setCurPage($currentPage);
+
+            foreach ($collection as $product) {
+                $doc = $this->convertProductToMeilisearchDocument($product);
+                $doc['store_id'] = $storeId ?? 0;
+                $documents[] = $doc;
+                $totalIndexed++;
+
+                // Batch index every 1000 products
+                if (count($documents) >= 1000) {
+                    $index->addDocuments($documents);
+                    $documents = [];
+                }
             }
+
+            // Clear collection to free memory before next page
+            $collection->clear();
         }
 
         // Index remaining products
@@ -695,7 +704,7 @@ class ProductService
         }
 
         return [
-            'indexed' => $collection->getSize(),
+            'indexed' => $totalIndexed,
             'index' => $indexName,
             'store_id' => $storeId,
         ];

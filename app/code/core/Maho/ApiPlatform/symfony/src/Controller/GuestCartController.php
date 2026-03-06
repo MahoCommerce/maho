@@ -720,10 +720,10 @@ class GuestCartController extends AbstractController
 
             // Set shipping method
             if (isset($data['shippingMethod'])) {
-                $parts = explode('_', $data['shippingMethod'], 2);
-                if (count($parts) !== 2) {
+                if (!preg_match('/^[a-z0-9]+_[a-z0-9]+$/i', $data['shippingMethod'])) {
                     return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid shipping method format, expected carrier_method'], Response::HTTP_BAD_REQUEST);
                 }
+                $parts = explode('_', $data['shippingMethod'], 2);
                 $this->cartService->setShippingMethod($quote, $parts[0], $parts[1]);
             }
 

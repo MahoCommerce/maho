@@ -519,13 +519,14 @@ class OrderMutationHandler
             }
 
             // Search by increment ID or customer name/email (OR condition)
+            $escapedSearch = addcslashes($search, '%_');
             $orders->addFieldToFilter(
                 ['increment_id', 'customer_email', 'customer_firstname', 'customer_lastname'],
                 [
-                    ['like' => "%{$search}%"],
-                    ['like' => "%{$search}%"],
-                    ['like' => "%{$search}%"],
-                    ['like' => "%{$search}%"],
+                    ['like' => "%{$escapedSearch}%"],
+                    ['like' => "%{$escapedSearch}%"],
+                    ['like' => "%{$escapedSearch}%"],
+                    ['like' => "%{$escapedSearch}%"],
                 ],
             );
 
