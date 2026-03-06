@@ -107,7 +107,10 @@ class GuestCartController extends AbstractController
                 $cartRecreated = true;
             }
 
-            $data = json_decode($request->getContent(), true);
+            $data = $this->decodeJson($request);
+            if ($data === null) {
+                return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
+            }
             $sku = $data['sku'] ?? '';
             $qty = (float) ($data['qty'] ?? 1);
             $options = $data['options'] ?? [];
@@ -152,7 +155,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
+                'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -173,7 +176,10 @@ class GuestCartController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $data = json_decode($request->getContent(), true);
+            $data = $this->decodeJson($request);
+            if ($data === null) {
+                return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
+            }
             $qty = (float) ($data['qty'] ?? 1);
 
             $quote = $this->cartService->updateItem($quote, $itemId, $qty);
@@ -183,7 +189,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
+                'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -211,7 +217,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
+                'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -271,7 +277,10 @@ class GuestCartController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $data = json_decode($request->getContent(), true);
+            $data = $this->decodeJson($request);
+            if ($data === null) {
+                return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
+            }
             $couponCode = $data['code'] ?? '';
 
             if (!$couponCode) {
@@ -377,7 +386,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
+                'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -437,7 +446,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
+                'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -465,7 +474,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
+                'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -486,7 +495,10 @@ class GuestCartController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $data = json_decode($request->getContent(), true);
+            $data = $this->decodeJson($request);
+            if ($data === null) {
+                return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
+            }
             $address = $data['address'] ?? [];
 
             // Set shipping address if provided
@@ -646,7 +658,10 @@ class GuestCartController extends AbstractController
                 ], Response::HTTP_NOT_FOUND);
             }
 
-            $data = json_decode($request->getContent(), true);
+            $data = $this->decodeJson($request);
+            if ($data === null) {
+                return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
+            }
 
             // Check if authenticated customer is placing the order
             $customerId = $this->getAuthenticatedCustomerId();
@@ -667,6 +682,9 @@ class GuestCartController extends AbstractController
 
             // Set email for guest
             if (!$customerId && isset($data['email'])) {
+                if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
+                    return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid email address'], Response::HTTP_BAD_REQUEST);
+                }
                 $quote->setCustomerEmail($data['email']);
             }
 
@@ -703,13 +721,17 @@ class GuestCartController extends AbstractController
             // Set shipping method
             if (isset($data['shippingMethod'])) {
                 $parts = explode('_', $data['shippingMethod'], 2);
-                if (count($parts) === 2) {
-                    $this->cartService->setShippingMethod($quote, $parts[0], $parts[1]);
+                if (count($parts) !== 2) {
+                    return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid shipping method format, expected carrier_method'], Response::HTTP_BAD_REQUEST);
                 }
+                $this->cartService->setShippingMethod($quote, $parts[0], $parts[1]);
             }
 
             // Set payment method
-            $paymentMethod = $data['paymentMethod'] ?? 'checkmo';
+            if (empty($data['paymentMethod'])) {
+                return new JsonResponse(['error' => 'invalid_request', 'message' => 'paymentMethod is required'], Response::HTTP_BAD_REQUEST);
+            }
+            $paymentMethod = $data['paymentMethod'];
             $this->cartService->setPaymentMethod($quote, $paymentMethod);
 
             // Place order
@@ -1036,5 +1058,34 @@ class GuestCartController extends AbstractController
                 'message' => 'An error occurred while loading product options.',
             ], Response::HTTP_BAD_REQUEST);
         }
+    }
+
+    /**
+     * Decode JSON request body with validation
+     */
+    private function decodeJson(Request $request): ?array
+    {
+        $body = $request->getContent();
+        if ($body === '' || $body === '{}') {
+            return [];
+        }
+        $data = json_decode($body, true);
+        if (!is_array($data)) {
+            return null;
+        }
+        return $data;
+    }
+
+    /**
+     * Sanitize exception message for client response.
+     * Only pass through RuntimeException messages (user-facing).
+     * Other exceptions may contain SQL, file paths, or internal details.
+     */
+    private function safeErrorMessage(\Exception $e, string $fallback): string
+    {
+        if ($e instanceof \RuntimeException || $e instanceof \Mage_Core_Exception) {
+            return $e->getMessage() ?: $fallback;
+        }
+        return $fallback;
     }
 }

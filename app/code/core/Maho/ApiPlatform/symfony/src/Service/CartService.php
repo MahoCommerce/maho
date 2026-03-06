@@ -33,8 +33,11 @@ class CartService
             $quote->setStoreId($storeId);
         } else {
             // Use the default store — Mage::app()->getStore() returns admin (0) under Symfony
-            $defaultStoreId = (int) \Mage::app()->getDefaultStoreView()->getId();
-            $quote->setStoreId($defaultStoreId ?: 1);
+            $defaultStore = \Mage::app()->getDefaultStoreView();
+            if (!$defaultStore) {
+                throw new \RuntimeException('No default store view configured');
+            }
+            $quote->setStoreId((int) $defaultStore->getId() ?: 1);
         }
 
         if ($customerId) {

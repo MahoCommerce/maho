@@ -110,6 +110,10 @@ class ProductService
             'direction' => $direction,
         ];
 
+        // Cap cache size to prevent unbounded growth in long-running workers
+        if (count(self::$categorySortCache) > 500) {
+            self::$categorySortCache = array_slice(self::$categorySortCache, -250, null, true);
+        }
         self::$categorySortCache[$categoryId] = $result;
         return $result;
     }
@@ -166,7 +170,7 @@ class ProductService
 
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
-            ->addAttributeToSelect('*')
+            ->addAttributeToSelect(['name', 'sku', 'price', 'special_price', 'status', 'image', 'thumbnail', 'description', $barcodeAttributeCode])
             ->addAttributeToFilter($barcodeAttributeCode, $barcode)
             ->getFirstItem();
 
@@ -464,11 +468,13 @@ class ProductService
         // Apply search query - search across core text attributes
         // Uses contains (%query%) for better results than starts-with
         if (!empty($query)) {
+            // Escape LIKE wildcards to prevent wildcard abuse
+            $escapedQuery = addcslashes($query, '%_');
             $collection->addAttributeToFilter([
-                ['attribute' => 'name', 'like' => "%{$query}%"],
-                ['attribute' => 'sku', 'like' => "%{$query}%"],
-                ['attribute' => 'description', 'like' => "%{$query}%"],
-                ['attribute' => 'short_description', 'like' => "%{$query}%"],
+                ['attribute' => 'name', 'like' => "%{$escapedQuery}%"],
+                ['attribute' => 'sku', 'like' => "%{$escapedQuery}%"],
+                ['attribute' => 'description', 'like' => "%{$escapedQuery}%"],
+                ['attribute' => 'short_description', 'like' => "%{$escapedQuery}%"],
             ]);
         }
 
@@ -518,14 +524,16 @@ class ProductService
         if (isset($filters['sku']['eq'])) {
             $collection->addAttributeToFilter('sku', $filters['sku']['eq']);
         } elseif (isset($filters['sku']['like'])) {
-            $collection->addAttributeToFilter('sku', ['like' => "%{$filters['sku']['like']}%"]);
+            $skuFilter = addcslashes($filters['sku']['like'], '%_');
+            $collection->addAttributeToFilter('sku', ['like' => "%{$skuFilter}%"]);
         }
 
         // Apply name filter
         if (isset($filters['name']['eq'])) {
             $collection->addAttributeToFilter('name', $filters['name']['eq']);
         } elseif (isset($filters['name']['like'])) {
-            $collection->addAttributeToFilter('name', ['like' => "%{$filters['name']['like']}%"]);
+            $nameFilter = addcslashes($filters['name']['like'], '%_');
+            $collection->addAttributeToFilter('name', ['like' => "%{$nameFilter}%"]);
         }
 
         // Apply EAV attribute filters via catalog_product_index_eav
@@ -652,7 +660,11 @@ class ProductService
         // Get all products (for POS, include disabled and out of stock)
         $collection = \Mage::getModel('catalog/product')
             ->getCollection()
-            ->addAttributeToSelect('*');
+            ->addAttributeToSelect([
+                'name', 'sku', 'price', 'special_price', 'status',
+                'image', 'thumbnail', 'description', 'type_id',
+                $this->getBarcodeAttributeCode(),
+            ]);
 
         // For non-POS index, filter to enabled and in-stock products only
         if (!$posIndex) {

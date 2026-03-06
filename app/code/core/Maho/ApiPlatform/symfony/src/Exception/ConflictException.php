@@ -44,7 +44,7 @@ class ConflictException extends ApiException
         return new self(
             message: 'An account with this email already exists',
             errorCode: 'duplicate_email',
-            details: ['email' => $email],
+            details: [],
         );
     }
 
