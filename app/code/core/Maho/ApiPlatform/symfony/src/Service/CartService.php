@@ -18,6 +18,7 @@ namespace Maho\ApiPlatform\Service;
  */
 class CartService
 {
+    private const MAX_ITEM_QTY = 10000;
     /**
      * Create empty cart
      *
@@ -129,7 +130,7 @@ class CartService
         if ($qty <= 0) {
             throw new \RuntimeException('Quantity must be greater than zero');
         }
-        if ($qty > 10000) {
+        if ($qty > self::MAX_ITEM_QTY) {
             throw new \RuntimeException('Quantity cannot exceed 10,000');
         }
 
@@ -244,7 +245,7 @@ class CartService
         if ($qty <= 0) {
             throw new \RuntimeException('Quantity must be greater than zero');
         }
-        if ($qty > 10000) {
+        if ($qty > self::MAX_ITEM_QTY) {
             throw new \RuntimeException('Quantity cannot exceed 10,000');
         }
 
@@ -669,7 +670,7 @@ class CartService
 
             // Add PO number for purchaseorder payment method
             if ($paymentMethod === 'purchaseorder') {
-                $paymentData['po_number'] = 'POS-' . date('YmdHis');
+                $paymentData['po_number'] = 'POS-' . \Mage::getModel('core/date')->date('YmdHis');
             }
 
             $orderCreateModel->getQuote()->getPayment()->addData($paymentData);

@@ -31,6 +31,9 @@ class GuestCartController extends AbstractController
 {
     use AuthenticationTrait;
 
+    private const THUMBNAIL_SIZE = 100;
+    private const NO_SELECTION = 'no_selection';
+
     private CartService $cartService;
 
     public function __construct(Security $security)
@@ -791,7 +794,7 @@ class GuestCartController extends AbstractController
         $needParentIds = [];
         foreach ($productMap as $pid => $p) {
             $thumb = $p->getThumbnail();
-            if (!$thumb || $thumb === 'no_selection') {
+            if (!$thumb || $thumb === self::NO_SELECTION) {
                 $needParentIds[] = $pid;
             }
         }
@@ -821,7 +824,7 @@ class GuestCartController extends AbstractController
                 foreach ($childToParent as $childId => $parentId) {
                     if (isset($parentProducts[$parentId])) {
                         $parent = $parentProducts[$parentId];
-                        if ($parent->getThumbnail() && $parent->getThumbnail() !== 'no_selection') {
+                        if ($parent->getThumbnail() && $parent->getThumbnail() !== self::NO_SELECTION) {
                             $productMap[$childId] = $parent;
                         }
                     }
@@ -831,7 +834,7 @@ class GuestCartController extends AbstractController
 
         // Batch-load stock items (single query)
         $stockCollection = \Mage::getResourceModel('cataloginventory/stock_item_collection')
-            ->addProductsFilter(iterator_to_array($productCollection));
+            ->addFieldToFilter('product_id', ['in' => $productIds]);
         $stockMap = [];
         foreach ($stockCollection as $si) {
             $stockMap[(int) $si->getProductId()] = $si->getIsInStock();
@@ -860,11 +863,11 @@ class GuestCartController extends AbstractController
 
             if ($product) {
                 $thumbnail = $product->getThumbnail();
-                if ($thumbnail && $thumbnail !== 'no_selection') {
+                if ($thumbnail && $thumbnail !== self::NO_SELECTION) {
                     try {
                         $itemData['thumbnailUrl'] = (string) \Mage::helper('catalog/image')
                             ->init($product, 'small_image')
-                            ->resize(100);
+                            ->resize(self::THUMBNAIL_SIZE);
                     } catch (\Exception $e) {
                         $itemData['thumbnailUrl'] = $mediaConfig->getMediaUrl($thumbnail);
                     }
@@ -959,7 +962,7 @@ class GuestCartController extends AbstractController
     private function getItemConfigurationOptions(\Mage_Sales_Model_Quote_Item $item): array
     {
         try {
-            $typeId = $item->getProductType() ?: $item->getProduct()->getTypeId();
+            $typeId = $item->getProductType() ?: \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE;
 
             $rawOptions = match ($typeId) {
                 \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE => \Mage::helper('bundle/catalog_product_configuration')->getOptions($item),
