@@ -623,11 +623,9 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die;
         } catch (Mage_Core_Model_Store_Exception $e) {
-            Maho::errorReport([], 404);
-            die;
+            self::printException($e, '', 404);
         } catch (Exception $e) {
             self::printException($e);
-            die;
         }
     }
 
@@ -663,13 +661,11 @@ final class Mage
             header('Location: ' . self::getBaseUrl());
             die();
         } catch (Mage_Core_Model_Store_Exception $e) {
-            Maho::errorReport([], 404);
-            die();
+            self::printException($e, '', 404);
         } catch (Exception $e) {
             if (self::isInstalled()) {
                 self::dispatchEvent('mage_run_installed_exception', ['exception' => $e]);
                 self::printException($e);
-                exit();
             }
             try {
                 self::dispatchEvent('mage_run_exception', ['exception' => $e]);
@@ -821,7 +817,7 @@ final class Mage
     /**
      * Display exception
      */
-    public static function printException(Throwable $e, $extra = '')
+    public static function printException(Throwable $e, string $extra = '', int $httpResponseCode = 503): never
     {
         if (self::$_isDeveloperMode) {
             print '<pre>';
@@ -847,7 +843,7 @@ final class Mage
                 $reportData['script_name'] = $_SERVER['SCRIPT_NAME'];
             }
 
-            Maho::errorReport($reportData);
+            Maho::errorReport($reportData, $httpResponseCode);
         }
 
         die();
