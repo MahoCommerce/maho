@@ -13,15 +13,10 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Controller;
 
-use Maho\ApiPlatform\Service\CartService;
-use Maho\ApiPlatform\Service\CustomerService;
 use Maho\ApiPlatform\Service\GraphQL\CartMutationHandler;
 use Maho\ApiPlatform\Service\GraphQL\CustomerQueryHandler;
 use Maho\ApiPlatform\Service\GraphQL\OrderMutationHandler;
 use Maho\ApiPlatform\Service\GraphQL\ProductQueryHandler;
-use Maho\ApiPlatform\Service\OrderService;
-use Maho\ApiPlatform\Service\PaymentService;
-use Maho\ApiPlatform\Service\ProductService;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,6 +32,12 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/api/admin/graphql', name: 'api_admin_graphql', methods: ['GET', 'POST'])]
 class AdminGraphQlController
 {
+    public function __construct(
+        private ProductQueryHandler $productHandler,
+        private CartMutationHandler $cartHandler,
+        private OrderMutationHandler $orderHandler,
+        private CustomerQueryHandler $customerHandler,
+    ) {}
     public function __invoke(Request $request): Response
     {
         // GET requests return info about the endpoint
@@ -104,8 +105,6 @@ class AdminGraphQlController
 
     private function executeQuery(string $query, ?array $variables, array $context): array
     {
-        // Initialize handlers
-        $handlers = $this->initializeHandlers($context['store_id']);
 
         // Parse and execute
         $query = trim($query);
@@ -136,7 +135,7 @@ class AdminGraphQlController
         }
 
         try {
-            $data = $this->resolveOperation($operation, $variables ?? [], $context, $handlers);
+            $data = $this->resolveOperation($operation, $variables ?? [], $context);
             return ['data' => $data];
         } catch (\Exception $e) {
             \Mage::logException($e);
@@ -188,133 +187,86 @@ class AdminGraphQlController
     }
 
     /**
-     * Initialize domain handlers with their dependencies
-     *
-     * @return array<string, ProductQueryHandler|CartMutationHandler|OrderMutationHandler|CustomerQueryHandler>
-     */
-    private function initializeHandlers(int $storeId): array
-    {
-        // Get Meilisearch client if available
-        $meilisearchClient = null;
-        $indexBaseName = null;
-        if (\Mage::helper('core')->isModuleEnabled('Meilisearch_Search')) {
-            try {
-                /** @phpstan-ignore-next-line */
-                $meilisearchHelper = \Mage::helper('meilisearch_search/meilisearchhelper');
-                /** @phpstan-ignore-next-line */
-                $meilisearchClient = $meilisearchHelper->getClient();
-                /** @phpstan-ignore-next-line */
-                $productHelper = \Mage::helper('meilisearch_search/entity_producthelper');
-                /** @phpstan-ignore-next-line */
-                $indexBaseName = $productHelper->getBaseIndexName($storeId);
-            } catch (\Exception $e) {
-                \Mage::logException($e);
-            }
-        }
-
-        // Create services
-        $productService = new ProductService($meilisearchClient, $indexBaseName);
-        $cartService = new CartService();
-        $customerService = new CustomerService();
-        $orderService = new OrderService();
-
-        // Create handlers
-        return [
-            'product' => new ProductQueryHandler($productService),
-            'cart' => new CartMutationHandler($cartService),
-            'order' => new OrderMutationHandler($orderService),
-            'customer' => new CustomerQueryHandler($customerService),
-        ];
-    }
-
-    /**
      * Route operation to appropriate handler
-     *
-     * @param array<string, ProductQueryHandler|CartMutationHandler|OrderMutationHandler|CustomerQueryHandler> $handlers
      */
-    private function resolveOperation(string $operation, array $variables, array $context, array $handlers): array
+    private function resolveOperation(string $operation, array $variables, array $context): array
     {
-        $productHandler = $handlers['product'];
-        $cartHandler = $handlers['cart'];
-        $orderHandler = $handlers['order'];
-        $customerHandler = $handlers['customer'];
-
         return match ($operation) {
             // Product operations (camelCase)
             'product', 'getProduct', 'GetProduct'
-                => $productHandler->handleGetProduct($variables),
+                => $this->productHandler->handleGetProduct($variables),
             'productBySku', 'getProductBySku', 'GetProductBySku'
-                => $productHandler->handleGetProductBySku($variables),
+                => $this->productHandler->handleGetProductBySku($variables),
             'productByBarcode', 'getProductByBarcode', 'GetProductByBarcode'
-                => $productHandler->handleGetProductByBarcode($variables),
+                => $this->productHandler->handleGetProductByBarcode($variables),
             'products', 'searchProducts', 'getProducts', 'GetProducts', 'SearchProducts'
-                => $productHandler->handleSearchProducts($variables, $context),
+                => $this->productHandler->handleSearchProducts($variables, $context),
             'getConfigurableProduct', 'GetConfigurableProduct'
-                => $productHandler->handleGetConfigurableProduct($variables),
+                => $this->productHandler->handleGetConfigurableProduct($variables),
 
             // Cart operations (camelCase)
             'cart', 'getCart', 'GetCart'
-                => $cartHandler->handleGetCart($variables),
+                => $this->cartHandler->handleGetCart($variables),
             'createCart', 'createEmptyCart', 'CreateCart'
-                => $cartHandler->handleCreateCart($variables, $context),
+                => $this->cartHandler->handleCreateCart($variables, $context),
             'addToCart', 'addItemToCart', 'AddToCart'
-                => $cartHandler->handleAddToCart($variables),
+                => $this->cartHandler->handleAddToCart($variables),
             'updateQty', 'updateCartItem', 'UpdateQty'
-                => $cartHandler->handleUpdateQty($variables),
+                => $this->cartHandler->handleUpdateQty($variables),
             'removeItem', 'removeItemFromCart', 'RemoveItem'
-                => $cartHandler->handleRemoveItem($variables),
+                => $this->cartHandler->handleRemoveItem($variables),
             'setItemFulfillment', 'setCartItemFulfillment', 'SetItemFulfillment'
-                => $cartHandler->handleSetItemFulfillment($variables),
+                => $this->cartHandler->handleSetItemFulfillment($variables),
             'applyCoupon', 'applyCouponToCart', 'ApplyCoupon'
-                => $cartHandler->handleApplyCoupon($variables),
+                => $this->cartHandler->handleApplyCoupon($variables),
             'removeCoupon', 'removeCouponFromCart', 'RemoveCoupon'
-                => $cartHandler->handleRemoveCoupon($variables),
+                => $this->cartHandler->handleRemoveCoupon($variables),
             'assignCustomerToCart', 'AssignCustomerToCart'
-                => $cartHandler->handleAssignCustomer($variables),
+                => $this->cartHandler->handleAssignCustomer($variables),
 
             // Gift card operations (camelCase)
             'checkGiftCard', 'CheckGiftCard', 'checkGiftCardBalance', 'checkGiftcardBalance', 'CheckGiftCardBalance'
-                => $cartHandler->handleCheckGiftCardBalance($variables),
+                => $this->cartHandler->handleCheckGiftCardBalance($variables),
             'applyGiftCard', 'applyGiftcardToCart', 'ApplyGiftCard'
-                => $cartHandler->handleApplyGiftCard($variables),
+                => $this->cartHandler->handleApplyGiftCard($variables),
             'removeGiftCard', 'removeGiftcardFromCart', 'RemoveGiftCard'
-                => $cartHandler->handleRemoveGiftCard($variables),
+                => $this->cartHandler->handleRemoveGiftCard($variables),
 
             // Shipping operations (camelCase)
             'availableShippingMethods', 'getShippingMethods', 'GetShippingMethods'
-                => $cartHandler->handleShippingMethods($variables),
+                => $this->cartHandler->handleShippingMethods($variables),
 
             // Order operations (camelCase)
             'placeOrder', 'PlaceOrder'
-                => $orderHandler->handlePlaceOrder($variables, $context),
+                => $this->orderHandler->handlePlaceOrder($variables, $context),
             'placeOrderWithSplitPayments', 'PlaceOrderWithSplitPayments'
-                => $orderHandler->handlePlaceOrderWithSplitPayments($variables, $context),
+                => $this->orderHandler->handlePlaceOrderWithSplitPayments($variables, $context),
             'orderPayments', 'getOrderPayments', 'GetOrderPayments'
-                => $orderHandler->handleOrderPayments($variables),
+                => $this->orderHandler->handleOrderPayments($variables),
             'lookupOrder', 'getOrderByIncrementId', 'LookupOrder'
-                => $orderHandler->handleLookupOrder($variables),
+                => $this->orderHandler->handleLookupOrder($variables),
             'customerOrders', 'getCustomerOrders', 'CustomerOrders'
-                => $orderHandler->handleGetCustomerOrders($variables),
+                => $this->orderHandler->handleGetCustomerOrders($variables),
             'recentOrders', 'getRecentOrders', 'RecentOrders'
-                => $orderHandler->handleRecentOrders($variables),
+                => $this->orderHandler->handleRecentOrders($variables),
             'searchOrders', 'SearchOrders'
-                => $orderHandler->handleSearchOrders($variables),
+                => $this->orderHandler->handleSearchOrders($variables),
             'processReturn', 'createCreditMemo', 'ProcessReturn'
-                => $orderHandler->handleProcessReturn($variables, $context),
+                => $this->orderHandler->handleProcessReturn($variables, $context),
 
             // Customer operations (camelCase)
             'customers', 'searchCustomers', 'getCustomers', 'GetCustomers', 'SearchCustomers'
-                => $customerHandler->handleSearchCustomers($variables),
+                => $this->customerHandler->handleSearchCustomers($variables),
             'customer', 'getCustomer', 'GetCustomer'
-                => $customerHandler->handleGetCustomer($variables),
+                => $this->customerHandler->handleGetCustomer($variables),
             'createCustomer', 'CreateCustomer'
-                => $customerHandler->handleCreateCustomer($variables),
+                => $this->customerHandler->handleCreateCustomer($variables),
             'updateCustomerAddress', 'UpdateCustomerAddress', 'updateAddress', 'UpdateAddress'
-                => $customerHandler->handleUpdateCustomerAddress($variables),
+                => $this->customerHandler->handleUpdateCustomerAddress($variables),
 
             // Category operations (camelCase)
             'categories', 'getCategories', 'GetCategories'
-                => $customerHandler->handleGetCategories($variables, $context),
+                => $this->customerHandler->handleGetCategories($variables, $context),
 
             default => throw new BadRequestHttpException("Unknown operation: {$operation}"),
         };

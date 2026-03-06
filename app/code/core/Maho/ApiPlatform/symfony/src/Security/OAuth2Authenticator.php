@@ -35,14 +35,10 @@ class OAuth2Authenticator extends AbstractAuthenticator
     private const AUTHORIZATION_HEADER = 'Authorization';
     private const BEARER_PREFIX = 'Bearer ';
 
-    private JwtService $jwtService;
-    private TokenBlacklist $tokenBlacklist;
-
-    public function __construct()
-    {
-        $this->jwtService = new JwtService();
-        $this->tokenBlacklist = new TokenBlacklist();
-    }
+    public function __construct(
+        private JwtService $jwtService,
+        private TokenBlacklist $tokenBlacklist,
+    ) {}
 
     /**
      * Check if this authenticator supports the request

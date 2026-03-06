@@ -34,12 +34,11 @@ class GuestCartController extends AbstractController
     private const THUMBNAIL_SIZE = 100;
     private const NO_SELECTION = 'no_selection';
 
-    private CartService $cartService;
-
-    public function __construct(Security $security)
-    {
+    public function __construct(
+        Security $security,
+        private CartService $cartService,
+    ) {
         $this->security = $security;
-        $this->cartService = new CartService();
     }
 
     /**
