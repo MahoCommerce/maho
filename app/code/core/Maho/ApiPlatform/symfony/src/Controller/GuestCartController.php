@@ -166,7 +166,7 @@ class GuestCartController extends AbstractController
     /**
      * Update item quantity
      */
-    #[Route('/api/guest-carts/{cartId}/items/{itemId}', name: 'api_guest_cart_item_update', methods: ['POST'])]
+    #[Route('/api/guest-carts/{cartId}/items/{itemId}', name: 'api_guest_cart_item_update', methods: ['PUT'])]
     public function updateItem(string $cartId, int $itemId, Request $request): JsonResponse
     {
         try {
