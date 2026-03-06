@@ -43,18 +43,6 @@ parameters:
 			path: app/Mage.php
 
 		-
-			rawMessage: 'Method Mage::printException() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/Mage.php
-
-		-
-			rawMessage: 'Method Mage::printException() has parameter $extra with no type specified.'
-			identifier: missingType.parameter
-			count: 1
-			path: app/Mage.php
-
-		-
 			rawMessage: 'Method Mage::register() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10431,7 +10419,7 @@ parameters:
 		-
 			rawMessage: Variable $query might not be defined.
 			identifier: variable.undefined
-			count: 2
+			count: 1
 			path: app/code/core/Mage/ConfigurableSwatches/Model/Resource/Catalog/Product/Type/Configurable/Product/Collection.php
 
 		-

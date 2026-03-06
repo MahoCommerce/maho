@@ -26,6 +26,6 @@ class Mage_Install_Model_Observer
     {
         echo '<h2>There was a problem proceeding with Maho installation.</h2>';
         echo '<p>Please contact developers with error messages on this page.</p>';
-        echo Mage::printException($observer->getEvent()->getException());
+        Mage::printException($observer->getEvent()->getException());
     }
 }
