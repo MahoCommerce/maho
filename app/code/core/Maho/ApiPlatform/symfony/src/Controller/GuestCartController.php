@@ -166,7 +166,7 @@ class GuestCartController extends AbstractController
     /**
      * Update item quantity
      */
-    #[Route('/api/guest-carts/{cartId}/items/{itemId}', name: 'api_guest_cart_item_update', methods: ['PUT'])]
+    #[Route('/api/guest-carts/{cartId}/items/{itemId}', name: 'api_guest_cart_item_update', methods: ['POST'])]
     public function updateItem(string $cartId, int $itemId, Request $request): JsonResponse
     {
         try {
@@ -267,7 +267,7 @@ class GuestCartController extends AbstractController
     /**
      * Apply coupon code
      */
-    #[Route('/api/guest-carts/{cartId}/coupon', name: 'api_guest_cart_apply_coupon', methods: ['PUT'])]
+    #[Route('/api/guest-carts/{cartId}/coupon', name: 'api_guest_cart_apply_coupon', methods: ['POST'])]
     public function applyCoupon(string $cartId, Request $request): JsonResponse
     {
         try {
