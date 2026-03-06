@@ -36,6 +36,7 @@
   - [Wishlist](#wishlist)
   - [URL Resolver](#url-resolver)
   - [POS Payments](#pos-payments)
+- [Web Server Configuration](#web-server-configuration)
 - [Extending the API (Third-Party Modules)](#extending-the-api-third-party-modules)
 
 ---
@@ -858,6 +859,179 @@ app/code/core/Maho/
 ├── Sales/Api/             # Orders, shipments, credit memos, invoices
 ├── SalesRule/Api/         # Coupons & price rules
 └── ...                    # Other modules
+```
+
+---
+
+## Web Server Configuration
+
+All web servers must route `/api/*` requests to `rest.php` (the Symfony API Platform entry point). Below are example configurations for the three most common setups.
+
+### Nginx
+
+Add these blocks **before** the main `location /` block in your nginx config.
+
+```nginx
+# API Platform REST/GraphQL endpoints - no basic auth required
+location ^~ /api/ {
+    # Bypass any site-wide basic auth / IP restrictions
+    satisfy any;
+    allow all;
+    auth_basic off;
+
+    # CORS headers for API access
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match' always;
+    add_header 'Access-Control-Expose-Headers' 'ETag, X-Idempotency-Replayed, Link' always;
+
+    # Handle preflight requests
+    if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match';
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain; charset=utf-8';
+        add_header 'Content-Length' 0;
+        return 204;
+    }
+
+    # Route to Symfony API Platform via rest.php
+    try_files $uri /rest.php$is_args$args;
+}
+
+# REST API PHP handler - no basic auth required
+location = /rest.php {
+    satisfy any;
+    allow all;
+    auth_basic off;
+
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/run/php/your-pool.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param PATH_INFO $fastcgi_path_info;
+    fastcgi_param PHP_VALUE "upload_max_filesize=100M \n post_max_size=100M \n max_execution_time=600";
+    fastcgi_read_timeout 600;
+    fastcgi_send_timeout 600;
+    fastcgi_connect_timeout 60;
+}
+
+# Optional: Rate limiting for public mutation endpoints
+# Define zone in the http {} block:
+#   limit_req_zone $binary_remote_addr zone=api_write:10m rate=10r/s;
+#
+# Then add a location block BEFORE the ^~ /api/ block:
+#   location ~ ^/api/(newsletter|contact|auth/token|guest-carts) {
+#       satisfy any;
+#       allow all;
+#       auth_basic off;
+#       limit_req zone=api_write burst=5 nodelay;
+#       try_files $uri /rest.php$is_args$args;
+#   }
+```
+
+### Apache (.htaccess)
+
+Add these rules to your `public/.htaccess` **before** the main `RewriteRule .* index.php` catch-all.
+
+```apacheconf
+<IfModule mod_rewrite.c>
+    RewriteEngine on
+
+    # ---- API Platform routing ----
+
+    # Pass Authorization header through (required for JWT in CGI/FastCGI mode)
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle CORS preflight requests for /api/
+    RewriteCond %{REQUEST_METHOD} OPTIONS
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteRule ^(.*)$ $1 [R=204,L]
+
+    # Route /api/* to rest.php (Symfony API Platform)
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^api/(.*)$ rest.php [QSA,L]
+
+    # ---- End API Platform routing ----
+</IfModule>
+
+# CORS headers for API endpoints
+<IfModule mod_headers.c>
+    <LocationMatch "^/api/">
+        Header always set Access-Control-Allow-Origin "*"
+        Header always set Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+        Header always set Access-Control-Allow-Headers "Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match"
+        Header always set Access-Control-Expose-Headers "ETag, X-Idempotency-Replayed, Link"
+    </LocationMatch>
+</IfModule>
+
+# If using basic auth site-wide, exclude /api/ and rest.php:
+#
+# <LocationMatch "^/(api/|rest\.php)">
+#     Satisfy Any
+#     Allow from all
+#     AuthType None
+#     Require all granted
+# </LocationMatch>
+```
+
+### FrankenPHP / Caddy
+
+```caddyfile
+maho.example.com {
+    root * /var/www/maho/public
+
+    # ---- API Platform routing ----
+
+    # CORS headers for API endpoints
+    @api path /api/*
+    header @api Access-Control-Allow-Origin "*"
+    header @api Access-Control-Allow-Methods "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    header @api Access-Control-Allow-Headers "Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match"
+    header @api Access-Control-Expose-Headers "ETag, X-Idempotency-Replayed, Link"
+
+    # Handle CORS preflight
+    @preflight {
+        method OPTIONS
+        path /api/*
+    }
+    respond @preflight 204
+
+    # Route /api/* to rest.php
+    @apiRoute {
+        path /api/*
+        not file
+    }
+    rewrite @apiRoute /rest.php
+
+    # ---- End API Platform routing ----
+
+    # Static files
+    @static file
+    handle @static {
+        file_server
+    }
+
+    # Everything else to index.php (Maho front controller)
+    php_server {
+        index index.php
+    }
+}
+
+# Worker mode (optional — persistent PHP workers for better performance)
+# Uncomment to use FrankenPHP worker mode with rest.php:
+#
+# {
+#     frankenphp {
+#         worker /var/www/maho/public/rest.php 4
+#     }
+# }
+#
+# Note: Worker mode keeps the PHP process alive between requests.
+# Maho's Mage::init() runs once, subsequent requests reuse the bootstrap.
+# This can significantly reduce response times but requires testing to
+# ensure no state leaks between requests.
 ```
 
 ---
