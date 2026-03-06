@@ -123,7 +123,7 @@ class CustomerQueryHandler
                     ->setStreet($input['street'] ?? 'TBC')
                     ->setCity($input['city'] ?? 'TBC')
                     ->setPostcode($input['postcode'] ?? '0000')
-                    ->setCountryId($input['countryId'] ?? 'AU')
+                    ->setCountryId($input['countryId'] ?? \Maho\ApiPlatform\Service\StoreDefaults::getCountryId())
                     ->setIsDefaultBilling(true)
                     ->setIsDefaultShipping(true);
                 $address->save();
@@ -190,7 +190,7 @@ class CustomerQueryHandler
         if (isset($input['countryId'])) {
             $address->setCountryId($input['countryId']);
         } elseif (!$address->getCountryId()) {
-            $address->setCountryId('AU');
+            $address->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId());
         }
 
         try {

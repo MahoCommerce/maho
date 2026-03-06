@@ -328,7 +328,7 @@ class CartService
     public function setShippingAddress(\Mage_Sales_Model_Quote $quote, array $addressData): \Mage_Sales_Model_Quote
     {
         $address = $quote->getShippingAddress();
-        $address->addData($this->sanitizeAddressData($addressData));
+        $address->addData(StoreDefaults::filterAddressKeys($this->sanitizeAddressData($addressData)));
 
         // Flag to trigger shipping rate collection
         $address->setCollectShippingRates(1);
@@ -351,13 +351,13 @@ class CartService
     {
         if ($sameAsShipping) {
             $shippingAddress = $quote->getShippingAddress();
-            $addressData = $shippingAddress->getData();
+            $addressData = StoreDefaults::extractAddressFields($shippingAddress);
         } else {
             $addressData = $this->sanitizeAddressData($addressData);
         }
 
         $address = $quote->getBillingAddress();
-        $address->addData($addressData);
+        $address->addData(StoreDefaults::filterAddressKeys($addressData));
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
@@ -750,7 +750,7 @@ class CartService
         } catch (\Exception $e) {
             \Mage::log("Error placing order with payment method '{$paymentMethod}': " . $e->getMessage());
             \Mage::logException($e);
-            throw new \RuntimeException('Failed to place order');
+            throw new \RuntimeException('Failed to place order: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -765,6 +765,12 @@ class CartService
         $convertor = \Mage::getModel('sales/convert_order');
         $invoice = $convertor->toInvoice($order);
 
+        // Index parent item quantities to avoid N+1 queries
+        $parentQtys = [];
+        foreach ($order->getAllItems() as $item) {
+            $parentQtys[$item->getId()] = $item->getQtyOrdered();
+        }
+
         // Browse order items and add to invoice
         foreach ($order->getAllItems() as $orderItem) {
             $invoiceItem = $convertor->itemToInvoiceItem($orderItem);
@@ -772,7 +778,7 @@ class CartService
 
             // Handle child items with parent
             if ($qty <= 0 && $orderItem->getParentItemId() > 0) {
-                $qty = \Mage::getModel('sales/order_item')->load($orderItem->getParentItemId())->getQtyOrdered();
+                $qty = $parentQtys[$orderItem->getParentItemId()] ?? 0;
             }
 
             $invoiceItem->setQty($qty);
@@ -780,7 +786,7 @@ class CartService
         }
 
         // Add comments if provided
-        if ($comments != '') {
+        if ($comments !== '') {
             $invoice->addComment($comments, false);
         }
 
@@ -811,9 +817,15 @@ class CartService
         $convertor = \Mage::getModel('sales/convert_order');
         $shipment = $convertor->toShipment($order);
 
+        // Index parent item quantities to avoid N+1 queries
+        $parentQtys = [];
+        foreach ($order->getAllItems() as $item) {
+            $parentQtys[$item->getId()] = $item->getQtyOrdered();
+        }
+
         foreach ($order->getAllItems() as $orderItem) {
             // Skip dummy items and items with no qty to ship
-            if (!$orderItem->isDummy(true) && !$orderItem->getQtyToShip()) {
+            if ($orderItem->isDummy(true) || !$orderItem->getQtyToShip()) {
                 continue;
             }
 
@@ -828,7 +840,7 @@ class CartService
 
             // Handle child items with parent
             if ($qty == 0 && $orderItem->getParentItemId() > 0) {
-                $qty = \Mage::getModel('sales/order_item')->load($orderItem->getParentItemId())->getQtyOrdered();
+                $qty = $parentQtys[$orderItem->getParentItemId()] ?? 0;
             }
 
             $shipmentItem->setQty($qty);
@@ -954,13 +966,26 @@ class CartService
 
         $hasChanges = false;
 
+        // Batch-load products to avoid N+1 queries
+        $productIds = [];
+        foreach ($quote->getAllVisibleItems() as $item) {
+            $productIds[] = $item->getProductId();
+        }
+        $productCollection = \Mage::getResourceModel('catalog/product_collection')
+            ->addIdFilter($productIds)
+            ->addAttributeToSelect('price')
+            ->setStoreId($quote->getStoreId());
+        $productPrices = [];
+        foreach ($productCollection as $p) {
+            $productPrices[$p->getId()] = (float) $p->getPrice();
+        }
+
         foreach ($quote->getAllVisibleItems() as $item) {
             $productId = $item->getProductId();
             $originalPrice = $item->getPrice();
 
-            // Get base price from product
-            $product = \Mage::getModel('catalog/product')->load($productId);
-            $basePrice = $product->getPrice();
+            // Get base price from batch-loaded products
+            $basePrice = $productPrices[$productId] ?? 0;
 
             // Try to get catalog rule price
             $catalogRulePrice = $this->getCatalogRulePrice(

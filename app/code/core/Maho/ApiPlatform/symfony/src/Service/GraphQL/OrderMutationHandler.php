@@ -86,17 +86,8 @@ class OrderMutationHandler
         }
 
         // POS default address
-        $posAddress = [
-            'firstname' => 'POS',
-            'lastname' => 'Customer',
-            'street' => 'In-Store Pickup',
-            'city' => 'Melbourne',
-            'region' => 'Victoria',
-            'region_id' => 574,
-            'postcode' => '3000',
-            'country_id' => 'AU',
-            'telephone' => '0000000000',
-        ];
+        $posAddress = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
+
 
         if (!$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();
@@ -215,17 +206,8 @@ class OrderMutationHandler
             $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
         }
 
-        $posAddress = [
-            'firstname' => 'POS',
-            'lastname' => 'Customer',
-            'street' => 'In-Store Pickup',
-            'city' => 'Melbourne',
-            'region' => 'Victoria',
-            'region_id' => 574,
-            'postcode' => '3000',
-            'country_id' => 'AU',
-            'telephone' => '0000000000',
-        ];
+        $posAddress = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
+
 
         if (!$quote->isVirtual()) {
             $shippingAddress = $quote->getShippingAddress();

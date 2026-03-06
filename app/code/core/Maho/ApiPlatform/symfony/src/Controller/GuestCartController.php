@@ -16,6 +16,7 @@ namespace Maho\ApiPlatform\Controller;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
+use Maho\ApiPlatform\Service\StoreDefaults;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -490,7 +491,7 @@ class GuestCartController extends AbstractController
 
             // Set shipping address if provided
             if (!empty($address)) {
-                $countryId = $address['countryId'] ?? 'AU';
+                $countryId = $address['countryId'] ?? StoreDefaults::getCountryId((int) $quote->getStoreId());
                 $regionText = $address['region'] ?? '';
                 $regionId = $address['regionId'] ?? null;
 
@@ -678,7 +679,7 @@ class GuestCartController extends AbstractController
                     'city' => $data['shippingAddress']['city'] ?? '',
                     'region' => $data['shippingAddress']['region'] ?? '',
                     'postcode' => $data['shippingAddress']['postcode'] ?? '',
-                    'country_id' => $data['shippingAddress']['countryId'] ?? 'AU',
+                    'country_id' => $data['shippingAddress']['countryId'] ?? StoreDefaults::getCountryId((int) $quote->getStoreId()),
                     'telephone' => $data['shippingAddress']['telephone'] ?? '',
                 ];
                 $this->cartService->setShippingAddress($quote, $addressData);
@@ -693,7 +694,7 @@ class GuestCartController extends AbstractController
                     'city' => $data['billingAddress']['city'] ?? '',
                     'region' => $data['billingAddress']['region'] ?? '',
                     'postcode' => $data['billingAddress']['postcode'] ?? '',
-                    'country_id' => $data['billingAddress']['countryId'] ?? 'AU',
+                    'country_id' => $data['billingAddress']['countryId'] ?? StoreDefaults::getCountryId((int) $quote->getStoreId()),
                     'telephone' => $data['billingAddress']['telephone'] ?? '',
                 ];
                 $this->cartService->setBillingAddress($quote, $addressData);
@@ -724,7 +725,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'order_failed',
-                'message' => 'Failed to place order',
+                'message' => $e->getMessage() ?: 'Failed to place order',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -904,10 +905,20 @@ class GuestCartController extends AbstractController
         }
 
         $quoteCurrency = $quote->getQuoteCurrencyCode();
+
+        // Batch-load gift cards to avoid N+1 queries
+        $codes = array_keys($giftcardCodes);
+        $giftcardCollection = \Mage::getModel('giftcard/giftcard')->getCollection()
+            ->addFieldToFilter('code', ['in' => $codes]);
+        $giftcardMap = [];
+        foreach ($giftcardCollection as $gc) {
+            $giftcardMap[$gc->getCode()] = $gc;
+        }
+
         $cards = [];
         foreach ($giftcardCodes as $code => $appliedAmount) {
-            $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
-            $balance = $giftcard->getId() ? $giftcard->getBalance($quoteCurrency) : 0.0;
+            $giftcard = $giftcardMap[$code] ?? null;
+            $balance = $giftcard ? $giftcard->getBalance($quoteCurrency) : 0.0;
             $cards[] = [
                 'code' => (string) $code,
                 'balance' => (float) $balance,

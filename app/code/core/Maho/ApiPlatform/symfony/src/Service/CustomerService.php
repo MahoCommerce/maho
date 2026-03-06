@@ -351,7 +351,7 @@ class CustomerService
                 ->setFirstname($firstName)
                 ->setLastname($lastName)
                 ->setTelephone($telephone)
-                ->setCountryId('AU') // Default to Australia
+                ->setCountryId(\Maho\ApiPlatform\Service\StoreDefaults::getCountryId()) // Default to Australia
                 ->setIsDefaultBilling(true)
                 ->setIsDefaultShipping(true);
 

@@ -393,7 +393,8 @@ class CartMutationHandler
 
         $shippingAddress = $quote->getShippingAddress();
         if (!$shippingAddress->getCountryId()) {
-            $shippingAddress->setCountryId('AU')->setPostcode('3000')->setRegionId(574)->setCollectShippingRates(1);
+            $defaults = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
+            $shippingAddress->setCountryId($defaults['country_id'])->setPostcode($defaults['postcode'])->setRegionId($defaults['region_id'])->setCollectShippingRates(1);
         }
 
         $shippingAddress->collectShippingRates();
@@ -478,7 +479,7 @@ class CartMutationHandler
             ],
             'appliedCoupon' => $quote->getCouponCode() ? ['code' => $quote->getCouponCode()] : null,
             'appliedGiftcards' => $this->mapAppliedGiftcards($quote),
-            'currency' => $quote->getQuoteCurrencyCode() ?: 'AUD',
+            'currency' => $quote->getQuoteCurrencyCode() ?: \Maho\ApiPlatform\Service\StoreDefaults::getCurrencyCode($quote->getStoreId() ? (int) $quote->getStoreId() : null),
         ];
     }
 
