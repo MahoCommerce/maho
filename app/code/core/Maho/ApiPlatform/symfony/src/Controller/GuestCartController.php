@@ -151,7 +151,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => 'An error occurred while processing your request',
+                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -182,7 +182,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => 'An error occurred while processing your request',
+                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -210,7 +210,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => 'An error occurred while processing your request',
+                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -376,7 +376,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => 'An error occurred while processing your request',
+                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -436,7 +436,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => 'An error occurred while processing your request',
+                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
@@ -464,7 +464,7 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse([
                 'error' => 'error',
-                'message' => 'An error occurred while processing your request',
+                'message' => $e->getMessage() ?: 'An error occurred while processing your request',
             ], Response::HTTP_BAD_REQUEST);
         }
     }
