@@ -136,7 +136,7 @@ class VatValidator {
             if (currentRequestId !== this.requestId) {
                 return;
             }
-            this.setStatus('error', 'Validation failed');
+            this.setStatus('error');
         }
     }
 
@@ -153,17 +153,9 @@ class VatValidator {
         }
 
         if (response.valid) {
-            if (response.format_only) {
-                this.setStatus('warning', 'Format valid (not verified online)');
-            } else {
-                this.setStatus('valid', 'VAT number verified');
-            }
+            this.setStatus(response.format_only ? 'warning' : 'valid', response.message);
         } else {
-            if (response.format_valid) {
-                this.setStatus('invalid', 'VAT number not registered');
-            } else {
-                this.setStatus('invalid', 'Invalid VAT format');
-            }
+            this.setStatus('invalid', response.message);
         }
     }
 
@@ -175,7 +167,6 @@ class VatValidator {
             case 'validating':
                 symbol = '…';
                 color = '#666';
-                message = 'Validating...';
                 break;
             case 'valid':
                 symbol = '✓';
