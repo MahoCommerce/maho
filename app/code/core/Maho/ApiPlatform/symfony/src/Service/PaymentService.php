@@ -1,0 +1,221 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_ApiPlatform
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+namespace Maho\ApiPlatform\Service;
+
+/**
+ * Payment Service - Business logic for POS payment operations
+ */
+class PaymentService
+{
+    /**
+     * Get payments for an order
+     *
+     * @param int $orderId
+     * @return \Maho_Pos_Model_Resource_Payment_Collection
+     */
+    /** @phpstan-ignore-next-line */
+    public function getOrderPayments(int $orderId): \Maho_Pos_Model_Resource_Payment_Collection
+    {
+        /** @phpstan-ignore-next-line */
+        $collection = \Mage::getModel('maho_pos/payment')->getCollection();
+        $collection->addOrderFilter($orderId)
+            ->setOrder('created_at', 'ASC');
+
+        return $collection;
+    }
+
+    /**
+     * Record a payment for an order
+     *
+     * @throws \Mage_Core_Exception
+     * @phpstan-ignore-next-line
+     */
+    public function recordPayment(
+        int $orderId,
+        int $registerId,
+        string $methodCode,
+        float $amount,
+        ?string $terminalId = null,
+        ?string $transactionId = null,
+        ?string $cardType = null,
+        ?string $cardLast4 = null,
+        ?string $authCode = null,
+        ?array $receiptData = null,
+        /** @phpstan-ignore-next-line */
+        string $status = \Maho_Pos_Model_Payment::STATUS_CAPTURED,
+    ) {
+        // Use transaction with row locking to prevent race conditions
+        $resource = \Mage::getSingleton('core/resource');
+        $write = $resource->getConnection('core_write');
+        $orderTable = $resource->getTableName('sales/order');
+
+        $write->beginTransaction();
+        try {
+            // Lock the order row to prevent concurrent payment recording
+            $orderRow = $write->fetchRow(
+                $write->select()
+                    ->from($orderTable, ['entity_id', 'grand_total', 'order_currency_code'])
+                    ->where('entity_id = ?', $orderId)
+                    ->forUpdate(),
+            );
+
+            if (!$orderRow) {
+                throw new \Mage_Core_Exception('Order not found');
+            }
+
+            $orderTotal = (float) $orderRow['grand_total'];
+            $currencyCode = $orderRow['order_currency_code'];
+
+            // Validate cumulative payments don't exceed order total (within lock)
+            $existingPaid = $this->getTotalPaidAmount($orderId);
+            $tolerance = 0.01;
+            if (($existingPaid + $amount) > ($orderTotal + $tolerance)) {
+                throw new \Mage_Core_Exception(
+                    "Payment would exceed order total. Order total: {$orderTotal}, already paid: {$existingPaid}, attempted: {$amount}",
+                );
+            }
+
+            // Create payment record
+            /** @phpstan-ignore-next-line */
+            $payment = \Mage::getModel('maho_pos/payment');
+            /** @phpstan-ignore-next-line */
+            $payment->setData([
+                'order_id' => $orderId,
+                'register_id' => $registerId,
+                'method_code' => $methodCode,
+                'amount' => $amount,
+                'base_amount' => $amount, // TODO: Convert to base currency if needed
+                'currency_code' => $currencyCode,
+                'terminal_id' => $terminalId,
+                'transaction_id' => $transactionId,
+                'card_type' => $cardType,
+                'card_last4' => $cardLast4,
+                'auth_code' => $authCode,
+                'receipt_data' => $receiptData,
+                'status' => $status,
+            ]);
+
+            /** @phpstan-ignore-next-line */
+            $payment->save();
+
+            $write->commit();
+        } catch (\Exception $e) {
+            $write->rollBack();
+            throw $e;
+        }
+
+        return $payment;
+    }
+
+    /**
+     * Record multiple payments for an order (split payment)
+     *
+     * @param array $payments Array of payment data
+     * @return array Array of created payment models
+     * @throws \Mage_Core_Exception
+     */
+    public function recordMultiplePayments(int $orderId, int $registerId, array $payments): array
+    {
+        $createdPayments = [];
+
+        // Load order
+        $order = \Mage::getModel('sales/order')->load($orderId);
+        if (!$order->getId()) {
+            throw new \Mage_Core_Exception('Order not found');
+        }
+
+        // Validate total amount matches order total
+        $totalPaid = 0.0;
+        foreach ($payments as $paymentData) {
+            $totalPaid += (float) $paymentData['amount'];
+        }
+
+        $orderTotal = (float) $order->getGrandTotal();
+        $tolerance = 0.01; // Allow 1 cent tolerance for rounding
+
+        if (abs($totalPaid - $orderTotal) > $tolerance) {
+            throw new \Mage_Core_Exception(
+                "Total payment amount ({$totalPaid}) does not match order total ({$orderTotal})",
+            );
+        }
+
+        // Create each payment
+        foreach ($payments as $paymentData) {
+            $payment = $this->recordPayment(
+                $orderId,
+                $registerId,
+                $paymentData['methodCode'],
+                (float) $paymentData['amount'],
+                $paymentData['terminalId'] ?? null,
+                $paymentData['transactionId'] ?? null,
+                $paymentData['cardType'] ?? null,
+                $paymentData['cardLast4'] ?? null,
+                $paymentData['authCode'] ?? null,
+                $paymentData['receiptData'] ?? null,
+                /** @phpstan-ignore-next-line */
+                \Maho_Pos_Model_Payment::STATUS_CAPTURED,
+            );
+
+            $createdPayments[] = $payment;
+        }
+
+        return $createdPayments;
+    }
+
+    /**
+     * Get total paid amount for an order
+     */
+    public function getTotalPaidAmount(int $orderId): float
+    {
+        /** @phpstan-ignore-next-line */
+        $resource = \Mage::getResourceModel('maho_pos/payment');
+        /** @phpstan-ignore-next-line */
+        return $resource->getTotalPaidAmount($orderId);
+    }
+
+    /**
+     * Validate if order is fully paid
+     */
+    public function isOrderFullyPaid(int $orderId): bool
+    {
+        $order = \Mage::getModel('sales/order')->load($orderId);
+        if (!$order->getId()) {
+            return false;
+        }
+
+        $totalPaid = $this->getTotalPaidAmount($orderId);
+        $orderTotal = (float) $order->getGrandTotal();
+
+        return abs($totalPaid - $orderTotal) < 0.01; // 1 cent tolerance
+    }
+
+    /**
+     * Get payment methods available for POS
+     */
+    public function getAvailablePaymentMethods(): array
+    {
+        /** @phpstan-ignore-next-line */
+        return \Maho_Pos_Model_Payment::getPaymentMethods();
+    }
+
+    /**
+     * Get display label for a payment method code from Maho's live configuration
+     */
+    public static function getMethodLabel(string $methodCode): string
+    {
+        $title = \Mage::getStoreConfig('payment/' . $methodCode . '/title');
+
+        return $title ?: $methodCode;
+    }
+}

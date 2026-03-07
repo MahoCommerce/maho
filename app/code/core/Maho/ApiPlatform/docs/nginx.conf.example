@@ -1,0 +1,63 @@
+# Maho API Platform - Nginx Configuration Example
+#
+# REQUIRED: These blocks route /api/* requests to rest.php (Symfony API Platform
+# entry point) and bypass any site-wide basic auth or IP restrictions.
+#
+# Add these blocks BEFORE the main "location /" block in your nginx config.
+
+# API Platform REST/GraphQL endpoints - no basic auth required
+location ^~ /api/ {
+    # Bypass any site-wide basic auth / IP restrictions
+    satisfy any;
+    allow all;
+    auth_basic off;
+
+    # CORS headers for API access
+    add_header 'Access-Control-Allow-Origin' '*' always;
+    add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+    add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match' always;
+    add_header 'Access-Control-Expose-Headers' 'ETag, X-Idempotency-Replayed, Link' always;
+
+    # Handle preflight requests
+    if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, PATCH, DELETE, OPTIONS';
+        add_header 'Access-Control-Allow-Headers' 'Content-Type, Authorization, Accept, X-Store-Code, X-Idempotency-Key, If-None-Match';
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain; charset=utf-8';
+        add_header 'Content-Length' 0;
+        return 204;
+    }
+
+    # Route to Symfony API Platform via rest.php
+    try_files $uri /rest.php$is_args$args;
+}
+
+# REST API PHP handler - no basic auth required
+location = /rest.php {
+    satisfy any;
+    allow all;
+    auth_basic off;
+
+    include snippets/fastcgi-php.conf;
+    fastcgi_pass unix:/run/php/your-pool.sock;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param PATH_INFO $fastcgi_path_info;
+    fastcgi_param PHP_VALUE "upload_max_filesize=100M \n post_max_size=100M \n max_execution_time=600";
+    fastcgi_read_timeout 600;
+    fastcgi_send_timeout 600;
+    fastcgi_connect_timeout 60;
+}
+
+# Optional: Rate limiting for public mutation endpoints
+# Define zone in the http {} block:
+#   limit_req_zone $binary_remote_addr zone=api_write:10m rate=10r/s;
+#
+# Then add a location block BEFORE the ^~ /api/ block:
+#   location ~ ^/api/(newsletter|contact|auth/token|guest-carts) {
+#       satisfy any;
+#       allow all;
+#       auth_basic off;
+#       limit_req zone=api_write burst=5 nodelay;
+#       try_files $uri /rest.php$is_args$args;
+#   }
