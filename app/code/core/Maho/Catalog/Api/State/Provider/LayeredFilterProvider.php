@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @package    Maho_ApiPlatform
+ * @package    Maho_Catalog
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -15,6 +15,7 @@ namespace Maho\Catalog\Api\State\Provider;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Maho\Catalog\Api\Resource\FilterOption;
+use Maho\Catalog\Api\Resource\FilterOptionSwatch;
 use Maho\Catalog\Api\Resource\LayeredFilter;
 use Maho\ApiPlatform\Pagination\ArrayPaginator;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -90,6 +91,10 @@ final class LayeredFilterProvider implements ProviderInterface
         $layer->setCurrentCategory($category);
 
         $filterableAttributes = $layer->getFilterableAttributes();
+
+        // Pre-load all swatch data in one query for all filterable select/multiselect attributes
+        $swatchMap = $this->loadSwatchMap($filterableAttributes);
+
         $filters = [];
 
         foreach ($filterableAttributes as $attribute) {
@@ -107,9 +112,16 @@ final class LayeredFilterProvider implements ProviderInterface
             $items = $filterModel->getItems();
             foreach ($items as $item) {
                 $option = new FilterOption();
+                // For layered nav items, getValue() returns the eav_attribute_option.option_id
                 $option->value = (string) $item->getValue();
                 $option->label = (string) $item->getLabel();
                 $option->count = (int) $item->getCount();
+
+                $optionId = (int) $item->getValue();
+                if (isset($swatchMap[$optionId])) {
+                    $option->swatch = $swatchMap[$optionId];
+                }
+
                 $dto->options[] = $option;
             }
 
@@ -121,6 +133,66 @@ final class LayeredFilterProvider implements ProviderInterface
         usort($filters, fn(LayeredFilter $a, LayeredFilter $b) => $a->position <=> $b->position);
 
         return $filters;
+    }
+
+    /**
+     * Load swatch data for all option IDs across filterable attributes.
+     * Returns a map of option_id => FilterOptionSwatch.
+     *
+     * @param iterable<\Mage_Eav_Model_Entity_Attribute_Abstract> $filterableAttributes
+     * @return array<int, FilterOptionSwatch>
+     */
+    private function loadSwatchMap(iterable $filterableAttributes): array
+    {
+        $attributeIds = [];
+        foreach ($filterableAttributes as $attribute) {
+            if (in_array($attribute->getFrontendInput(), ['select', 'multiselect'], true)) {
+                $attributeIds[] = (int) $attribute->getId();
+            }
+        }
+
+        if (empty($attributeIds)) {
+            return [];
+        }
+
+        $resource = \Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $swatchTable = $resource->getTableName('eav/attribute_option_swatch');
+        $optionTable = $resource->getTableName('eav/attribute_option');
+
+        $select = $read->select()
+            ->from(['s' => $swatchTable], ['option_id', 'value', 'filename'])
+            ->join(
+                ['o' => $optionTable],
+                's.option_id = o.option_id',
+                [],
+            )
+            ->where('o.attribute_id IN (?)', $attributeIds)
+            ->where('(s.value IS NOT NULL AND s.value != "") OR (s.filename IS NOT NULL AND s.filename != "")');
+
+        $rows = $read->fetchAll($select);
+        $map = [];
+
+        $mediaBaseUrl = rtrim(\Mage::getBaseUrl('media'), '/');
+
+        foreach ($rows as $row) {
+            $optionId = (int) $row['option_id'];
+            if (!empty($row['filename'])) {
+                $map[$optionId] = new FilterOptionSwatch(
+                    type: 'image',
+                    value: $mediaBaseUrl . '/attribute/swatch/' . ltrim($row['filename'], '/'),
+                );
+            } elseif (!empty($row['value'])) {
+                // Detect hex color (#RGB, #RRGGBB, #RRGGBBAA) vs text swatch
+                $isHex = preg_match('/^#([0-9a-fA-F]{3,8})$/', $row['value']);
+                $map[$optionId] = new FilterOptionSwatch(
+                    type: $isHex ? 'color' : 'text',
+                    value: $row['value'],
+                );
+            }
+        }
+
+        return $map;
     }
 
     /**
@@ -137,6 +209,7 @@ final class LayeredFilterProvider implements ProviderInterface
                 'value' => $o->value,
                 'label' => $o->label,
                 'count' => $o->count,
+                'swatch' => $o->swatch ? ['type' => $o->swatch->type, 'value' => $o->swatch->value] : null,
             ], $dto->options),
         ];
     }
@@ -156,6 +229,12 @@ final class LayeredFilterProvider implements ProviderInterface
             $option->value = $o['value'] ?? '';
             $option->label = $o['label'] ?? '';
             $option->count = $o['count'] ?? 0;
+            if (!empty($o['swatch'])) {
+                $option->swatch = new FilterOptionSwatch(
+                    type: $o['swatch']['type'] ?? 'color',
+                    value: $o['swatch']['value'] ?? '',
+                );
+            }
             return $option;
         }, $data['options'] ?? []);
         return $dto;
