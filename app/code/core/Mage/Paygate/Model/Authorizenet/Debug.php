@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -26,6 +28,7 @@
  * @method string getResultDump()
  * @method $this setResultDump(string $value)
  */
+
 class Mage_Paygate_Model_Authorizenet_Debug extends Mage_Core_Model_Abstract
 {
     #[\Override]

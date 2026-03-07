@@ -46,11 +46,10 @@ $hasAppliedCodes = !empty($couponCode) || !empty($giftcardCodes);
         <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
     </div>
     <?php endif ?>
-    <?php foreach ($giftcardCodes as $code => $amount): ?>
+    <?php foreach (array_keys($giftcardCodes) as $code): ?>
     <div class="applied-code applied-giftcard" data-type="giftcard" data-code="<?= $this->escapeHtml($code) ?>">
         <span class="code-label"><?= $this->__('Gift Card:') ?></span>
         <span class="code-value"><?= $this->escapeHtml(Mage::helper('giftcard')->maskCode($code)) ?></span>
-        <span class="code-amount">-<?= Mage::helper('core')->currency($amount, true, false) ?></span>
         <button type="button" class="btn-remove-code" title="<?= $this->quoteEscape($this->__('Remove')) ?>">×</button>
     </div>
     <?php endforeach ?>

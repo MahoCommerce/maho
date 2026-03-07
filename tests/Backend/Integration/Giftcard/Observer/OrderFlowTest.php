@@ -102,42 +102,372 @@ describe('Observer: Set Giftcard Price on Quote Item', function () {
     });
 });
 
-describe('Observer: Apply Gift Card to Order', function () {
-    test('transfers gift card amounts from address to order', function () {
-        $observer = Mage::getModel('giftcard/observer');
+describe('Integration: Quote → Order → Admin Totals with Gift Card', function () {
+    beforeEach(function () {
+        $this->helper = Mage::helper('giftcard');
 
-        // Create quote with gift card
-        $quote = Mage::getModel('sales/quote');
-        $quote->setGiftcardCodes(json_encode(['TEST-CODE' => 50.00]));
-        $quote->setBaseGiftcardAmount(50.00);
-        $quote->setGiftcardAmount(50.00);
+        // Find an existing simple product from sample data
+        $productCollection = Mage::getResourceModel('catalog/product_collection')
+            ->addAttributeToFilter('type_id', 'simple')
+            ->addAttributeToFilter('status', 1)
+            ->addAttributeToSelect(['price', 'name'])
+            ->setPageSize(1);
+        $this->product = $productCollection->getFirstItem();
 
-        // Create address
-        $address = Mage::getModel('sales/quote_address');
-        $address->setQuote($quote);
-        $address->setBaseGiftcardAmount(50.00);
-        $address->setGiftcardAmount(50.00);
-
-        // Create order
-        $order = Mage::getModel('sales/order');
-        $order->setGrandTotal(100.00);
-        $order->setBaseGrandTotal(100.00);
-
-        $event = new Maho\Event();
-        $event->setOrder($order);
-        $event->setAddress($address);
-
-        $eventObserver = new Maho\Event\Observer();
-        $eventObserver->setEvent($event);
-
-        $observer->applyGiftcardToOrder($eventObserver);
-
-        expect((float) $order->getBaseGiftcardAmount())->toBe(50.00);
-        expect((float) $order->getGiftcardAmount())->toBe(50.00);
-        expect((float) $order->getGrandTotal())->toBe(50.00); // 100 - 50
+        if (!$this->product->getId()) {
+            $this->markTestSkipped('No simple product available for testing');
+        }
     });
 
-    test('handles null address gracefully', function () {
+    test('full flow: quote → collectTotals → order with gift card → admin totals block', function () {
+        $productPrice = (float) $this->product->getPrice();
+
+        // Create a gift card with $100 balance
+        $giftcard = Mage::getModel('giftcard/giftcard');
+        $giftcard->setCode($this->helper->generateCode());
+        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard->setWebsiteId(1);
+        $giftcard->setBalance(100.00);
+        $giftcard->setInitialBalance(100.00);
+        $giftcard->save();
+
+        // Create quote with product (qty 10 to ensure total > gift card)
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId(1);
+        $quote->addProduct($this->product, 10);
+        $quote->save();
+
+        // Apply gift card
+        $quote->setGiftcardCodes(json_encode([$giftcard->getCode() => 0]));
+
+        // Set shipping address
+        $shippingAddress = $quote->getShippingAddress();
+        $shippingAddress->setCountryId('US');
+        $shippingAddress->setRegionId(12);
+        $shippingAddress->setPostcode('90210');
+        $shippingAddress->setCollectShippingRates(true);
+
+        // Set billing address
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddress->setCountryId('US');
+        $billingAddress->setRegionId(12);
+        $billingAddress->setPostcode('90210');
+        $billingAddress->setFirstname('Test');
+        $billingAddress->setLastname('Customer');
+        $billingAddress->setStreet('123 Test St');
+        $billingAddress->setCity('Beverly Hills');
+        $billingAddress->setTelephone('555-1234');
+        $billingAddress->setEmail('test@example.com');
+
+        // Copy billing info to shipping
+        $shippingAddress->setFirstname('Test');
+        $shippingAddress->setLastname('Customer');
+        $shippingAddress->setStreet('123 Test St');
+        $shippingAddress->setCity('Beverly Hills');
+        $shippingAddress->setTelephone('555-1234');
+        $shippingAddress->setEmail('test@example.com');
+
+        // Set shipping method
+        $shippingAddress->setShippingMethod('flatrate_flatrate');
+
+        // Set payment method
+        $quote->getPayment()->importData(['method' => 'checkmo']);
+
+        // Collect totals — triggers Maho_Giftcard_Model_Total_Quote::collect()
+        $quote->collectTotals();
+
+        // Assert quote totals
+        $address = $quote->getShippingAddress();
+        $giftcardOnAddress = (float) $address->getBaseGiftcardAmount();
+        expect($giftcardOnAddress)->toBe(100.00);
+
+        $grandTotal = (float) $quote->getGrandTotal();
+        $expectedGrand = ($productPrice * 10) - 100.00; // product total minus gift card (shipping may vary)
+        expect($grandTotal)->toBeLessThan($productPrice * 10); // Grand total reduced by gift card
+        expect($grandTotal)->toBeGreaterThan(0); // Not fully covered
+
+        // Convert quote to order
+        $service = new Mage_Sales_Model_Service_Quote($quote);
+        $order = $service->submitOrder();
+
+        // Assert order totals
+        expect($order)->toBeInstanceOf(Mage_Sales_Model_Order::class);
+        expect($order->getId())->toBeGreaterThan(0);
+
+        $orderGiftcardAmount = (float) $order->getGiftcardAmount();
+        $orderBaseGiftcardAmount = (float) $order->getBaseGiftcardAmount();
+        expect($orderGiftcardAmount)->toBe(100.00);
+        expect($orderBaseGiftcardAmount)->toBe(100.00);
+
+        // Gift card codes should be set on order
+        $orderCodes = json_decode($order->getGiftcardCodes(), true);
+        expect($orderCodes)->toBeArray();
+        expect($orderCodes)->toHaveKey($giftcard->getCode());
+
+        // Grand total must equal subtotal + shipping + tax - giftcard (no double deduction)
+        $orderGrand = (float) $order->getGrandTotal();
+        $orderSubtotal = (float) $order->getSubtotal();
+        $orderShipping = (float) $order->getShippingAmount();
+        $orderTax = (float) $order->getTaxAmount();
+        $expectedGrand = $orderSubtotal + $orderShipping + $orderTax - $orderGiftcardAmount;
+        expect($orderGrand)->toBe($expectedGrand);
+        expect($orderGrand)->toBeGreaterThan(0);
+
+        // Reload order from DB to verify saved values match (catches deductGiftcardBalance bug)
+        $reloadedOrder = Mage::getModel('sales/order')->load($order->getId());
+        expect((float) $reloadedOrder->getGrandTotal())->toBe($expectedGrand);
+        expect((float) $reloadedOrder->getGiftcardAmount())->toBe(100.00);
+
+        // Build admin totals block and verify display
+        $layout = Mage::app()->getLayout();
+        $totalsBlock = $layout->createBlock('adminhtml/sales_order_totals', 'order_totals_flow');
+        $totalsBlock->setOrder($order);
+        $totalsBlock->setTemplate('sales/order/totals.phtml');
+
+        $taxBlock = $layout->createBlock('adminhtml/sales_order_totals_tax', 'tax_flow');
+        $taxBlock->setTemplate('sales/order/totals/tax.phtml');
+        $totalsBlock->setChild('tax', $taxBlock);
+
+        $giftcardBlock = $layout->createBlock('giftcard/adminhtml_sales_order_totals_giftcard', 'giftcard_flow');
+        $totalsBlock->setChild('giftcard', $giftcardBlock);
+
+        // toHtml triggers _beforeToHtml → _initTotals → child initTotals()
+        $totalsBlock->toHtml();
+
+        // Assert giftcard total exists with correct value
+        $total = $totalsBlock->getTotal('giftcard');
+        expect($total)->not->toBeNull();
+        expect((float) $total->getValue())->toBe(-100.00);
+        expect((float) $total->getBaseValue())->toBe(-100.00);
+        expect($total->getLabel())->toContain('Gift Cards');
+        expect($total->getLabel())->toContain($giftcard->getCode());
+
+        // Assert correct positioning: tax → giftcard → grand_total
+        $codes = array_keys($totalsBlock->getTotals());
+        $taxPos = array_search('tax', $codes);
+        $giftcardPos = array_search('giftcard', $codes);
+        $grandTotalPos = array_search('grand_total', $codes);
+
+        expect($giftcardPos)->not->toBeFalse('giftcard total should exist');
+        expect($grandTotalPos)->not->toBeFalse('grand_total should exist');
+        if ($taxPos !== false) {
+            expect($giftcardPos)->toBeGreaterThan($taxPos);
+        }
+        expect($giftcardPos)->toBeLessThan($grandTotalPos);
+    });
+
+    test('gift card covering full amount results in zero grand total', function () {
+        $productPrice = (float) $this->product->getPrice();
+
+        // Create a gift card with balance larger than order total
+        $giftcard = Mage::getModel('giftcard/giftcard');
+        $giftcard->setCode($this->helper->generateCode());
+        $giftcard->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard->setWebsiteId(1);
+        $giftcard->setBalance(99999.00);
+        $giftcard->setInitialBalance(99999.00);
+        $giftcard->save();
+
+        // Create quote with single product
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId(1);
+        $quote->addProduct($this->product, 1);
+        $quote->save();
+
+        $quote->setGiftcardCodes(json_encode([$giftcard->getCode() => 0]));
+
+        $shippingAddress = $quote->getShippingAddress();
+        $shippingAddress->setCountryId('US');
+        $shippingAddress->setRegionId(12);
+        $shippingAddress->setPostcode('90210');
+        $shippingAddress->setCollectShippingRates(true);
+        $shippingAddress->setShippingMethod('flatrate_flatrate');
+        $shippingAddress->setFirstname('Test');
+        $shippingAddress->setLastname('Customer');
+        $shippingAddress->setStreet('123 Test St');
+        $shippingAddress->setCity('Beverly Hills');
+        $shippingAddress->setTelephone('555-1234');
+        $shippingAddress->setEmail('test@example.com');
+
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddress->setCountryId('US');
+        $billingAddress->setRegionId(12);
+        $billingAddress->setPostcode('90210');
+        $billingAddress->setFirstname('Test');
+        $billingAddress->setLastname('Customer');
+        $billingAddress->setStreet('123 Test St');
+        $billingAddress->setCity('Beverly Hills');
+        $billingAddress->setTelephone('555-1234');
+        $billingAddress->setEmail('test@example.com');
+
+        // Use free payment method since gift card covers full amount
+        $quote->getPayment()->importData(['method' => 'free']);
+
+        $quote->collectTotals();
+
+        // Grand total should be 0 (not negative)
+        $grandTotal = (float) $quote->getGrandTotal();
+        expect($grandTotal)->toBe(0.0);
+
+        // Gift card amount should be capped at order total
+        $address = $quote->getShippingAddress();
+        $giftcardOnAddress = (float) $address->getBaseGiftcardAmount();
+        expect($giftcardOnAddress)->toBeGreaterThan(0);
+        expect($giftcardOnAddress)->toBeLessThanOrEqual($productPrice + 50); // product + shipping
+    });
+
+    test('order without gift card has no giftcard total in admin block', function () {
+        // Create quote without gift card
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId(1);
+        $quote->addProduct($this->product, 1);
+        $quote->save();
+
+        $shippingAddress = $quote->getShippingAddress();
+        $shippingAddress->setCountryId('US');
+        $shippingAddress->setRegionId(12);
+        $shippingAddress->setPostcode('90210');
+        $shippingAddress->setCollectShippingRates(true);
+        $shippingAddress->setShippingMethod('flatrate_flatrate');
+        $shippingAddress->setFirstname('Test');
+        $shippingAddress->setLastname('Customer');
+        $shippingAddress->setStreet('123 Test St');
+        $shippingAddress->setCity('Beverly Hills');
+        $shippingAddress->setTelephone('555-1234');
+        $shippingAddress->setEmail('test@example.com');
+
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddress->setCountryId('US');
+        $billingAddress->setRegionId(12);
+        $billingAddress->setPostcode('90210');
+        $billingAddress->setFirstname('Test');
+        $billingAddress->setLastname('Customer');
+        $billingAddress->setStreet('123 Test St');
+        $billingAddress->setCity('Beverly Hills');
+        $billingAddress->setTelephone('555-1234');
+        $billingAddress->setEmail('test@example.com');
+
+        $quote->getPayment()->importData(['method' => 'checkmo']);
+        $quote->collectTotals();
+
+        $service = new Mage_Sales_Model_Service_Quote($quote);
+        $order = $service->submitOrder();
+
+        expect((float) $order->getGiftcardAmount())->toBe(0.0);
+
+        // Build admin totals block
+        $layout = Mage::app()->getLayout();
+        $totalsBlock = $layout->createBlock('adminhtml/sales_order_totals', 'order_totals_nogc');
+        $totalsBlock->setOrder($order);
+        $totalsBlock->setTemplate('sales/order/totals.phtml');
+
+        $taxBlock = $layout->createBlock('adminhtml/sales_order_totals_tax', 'tax_nogc');
+        $taxBlock->setTemplate('sales/order/totals/tax.phtml');
+        $totalsBlock->setChild('tax', $taxBlock);
+
+        $giftcardBlock = $layout->createBlock('giftcard/adminhtml_sales_order_totals_giftcard', 'giftcard_nogc');
+        $totalsBlock->setChild('giftcard', $giftcardBlock);
+
+        $totalsBlock->toHtml();
+
+        expect($totalsBlock->getTotal('giftcard'))->toBeFalsy();
+    });
+
+    test('multiple gift cards on one order show combined amount and both codes', function () {
+        // Create two gift cards
+        $giftcard1 = Mage::getModel('giftcard/giftcard');
+        $giftcard1->setCode($this->helper->generateCode());
+        $giftcard1->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard1->setWebsiteId(1);
+        $giftcard1->setBalance(60.00);
+        $giftcard1->setInitialBalance(60.00);
+        $giftcard1->save();
+
+        $giftcard2 = Mage::getModel('giftcard/giftcard');
+        $giftcard2->setCode($this->helper->generateCode());
+        $giftcard2->setStatus(Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE);
+        $giftcard2->setWebsiteId(1);
+        $giftcard2->setBalance(40.00);
+        $giftcard2->setInitialBalance(40.00);
+        $giftcard2->save();
+
+        // Create quote with product (qty 10 to ensure total > combined gift cards)
+        $quote = Mage::getModel('sales/quote');
+        $quote->setStoreId(1);
+        $quote->addProduct($this->product, 10);
+        $quote->save();
+
+        // Apply both gift cards
+        $quote->setGiftcardCodes(json_encode([
+            $giftcard1->getCode() => 0,
+            $giftcard2->getCode() => 0,
+        ]));
+
+        $shippingAddress = $quote->getShippingAddress();
+        $shippingAddress->setCountryId('US');
+        $shippingAddress->setRegionId(12);
+        $shippingAddress->setPostcode('90210');
+        $shippingAddress->setCollectShippingRates(true);
+        $shippingAddress->setShippingMethod('flatrate_flatrate');
+        $shippingAddress->setFirstname('Test');
+        $shippingAddress->setLastname('Customer');
+        $shippingAddress->setStreet('123 Test St');
+        $shippingAddress->setCity('Beverly Hills');
+        $shippingAddress->setTelephone('555-1234');
+        $shippingAddress->setEmail('test@example.com');
+
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddress->setCountryId('US');
+        $billingAddress->setRegionId(12);
+        $billingAddress->setPostcode('90210');
+        $billingAddress->setFirstname('Test');
+        $billingAddress->setLastname('Customer');
+        $billingAddress->setStreet('123 Test St');
+        $billingAddress->setCity('Beverly Hills');
+        $billingAddress->setTelephone('555-1234');
+        $billingAddress->setEmail('test@example.com');
+
+        $quote->getPayment()->importData(['method' => 'checkmo']);
+        $quote->collectTotals();
+
+        // Combined gift card should be 100 (60 + 40)
+        $address = $quote->getShippingAddress();
+        expect((float) $address->getBaseGiftcardAmount())->toBe(100.00);
+
+        // Convert to order
+        $service = new Mage_Sales_Model_Service_Quote($quote);
+        $order = $service->submitOrder();
+
+        expect((float) $order->getGiftcardAmount())->toBe(100.00);
+
+        // Both codes should be in order
+        $orderCodes = json_decode($order->getGiftcardCodes(), true);
+        expect($orderCodes)->toHaveKey($giftcard1->getCode());
+        expect($orderCodes)->toHaveKey($giftcard2->getCode());
+
+        // Build admin totals block
+        $layout = Mage::app()->getLayout();
+        $totalsBlock = $layout->createBlock('adminhtml/sales_order_totals', 'order_totals_multi');
+        $totalsBlock->setOrder($order);
+        $totalsBlock->setTemplate('sales/order/totals.phtml');
+
+        $taxBlock = $layout->createBlock('adminhtml/sales_order_totals_tax', 'tax_multi');
+        $taxBlock->setTemplate('sales/order/totals/tax.phtml');
+        $totalsBlock->setChild('tax', $taxBlock);
+
+        $giftcardBlock = $layout->createBlock('giftcard/adminhtml_sales_order_totals_giftcard', 'giftcard_multi');
+        $totalsBlock->setChild('giftcard', $giftcardBlock);
+
+        $totalsBlock->toHtml();
+
+        $total = $totalsBlock->getTotal('giftcard');
+        expect($total)->not->toBeNull();
+        expect((float) $total->getValue())->toBe(-100.00);
+        expect($total->getLabel())->toContain($giftcard1->getCode());
+        expect($total->getLabel())->toContain($giftcard2->getCode());
+    });
+
+    test('applyGiftcardToOrder handles null address gracefully', function () {
         $observer = Mage::getModel('giftcard/observer');
 
         $order = Mage::getModel('sales/order');
@@ -462,41 +792,6 @@ describe('Observer: Admin Order Gift Card Processing', function () {
     });
 });
 
-describe('Observer: Add Gift Card Total to Admin Order View', function () {
-    test('adds gift card total to order totals block', function () {
-        $observer = Mage::getModel('giftcard/observer');
-
-        // Create order with gift card
-        $order = Mage::getModel('sales/order');
-        $order->setGiftcardAmount(75.00);
-        $order->setBaseGiftcardAmount(75.00);
-        $order->setGiftcardCodes(json_encode(['TEST-CODE' => 75.00]));
-
-        // Create a mock block
-        $block = new Maho\DataObject([
-            'name_in_layout' => 'order_totals',
-            'order' => $order,
-        ]);
-        $block->setNameInLayout('order_totals');
-        $block->setOrder($order);
-
-        // Track added totals
-        $totals = [];
-        $block->setData('totals', $totals);
-
-        $event = new Maho\Event();
-        $event->setBlock($block);
-
-        $eventObserver = new Maho\Event\Observer();
-        $eventObserver->setEvent($event);
-
-        // Note: This test verifies the observer method runs without error
-        // Full block testing would require actual block instantiation
-        $observer->addGiftcardTotalToAdminOrder($eventObserver);
-
-        expect(true)->toBeTrue();
-    });
-});
 describe('Observer: Refund Gift Card on Order Cancel', function () {
     test('refunds gift card balance when order is canceled', function () {
         // Create a gift card with initial balance

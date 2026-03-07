@@ -20,8 +20,13 @@ class Mage_Core_Helper_UnserializeArray extends Mage_Core_Helper_Abstract
      */
     public function unserialize($str)
     {
+        $str = is_null($str) ? '' : $str;
+
+        if (json_validate($str)) {
+            return Mage::helper('core')->jsonDecode($str);
+        }
+
         try {
-            $str = is_null($str) ? '' : $str;
             $result = @unserialize($str, ['allowed_classes' => false]);
             if ($result === false && $str !== serialize(false)) {
                 throw new Exception('Error unserializing data.');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -24,6 +26,7 @@
  * @method int getStoreId()
  * @method $this setStoreId(int $value)
  */
+
 class Mage_Log_Model_Log extends Mage_Core_Model_Abstract
 {
     public const XML_LOG_CLEAN_DAYS    = 'system/log/clean_after_day';

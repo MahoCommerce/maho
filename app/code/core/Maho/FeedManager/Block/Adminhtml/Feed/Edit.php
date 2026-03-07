@@ -1,0 +1,358 @@
+<?php
+
+declare(strict_types=1);
+
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+class Maho_FeedManager_Block_Adminhtml_Feed_Edit extends Mage_Adminhtml_Block_Widget_Form_Container
+{
+    use Maho_FeedManager_Block_Adminhtml_Feed_Edit_FeedRegistryTrait;
+
+    public function __construct()
+    {
+        $this->_objectId = 'id';
+        $this->_blockGroup = 'feedmanager';
+        $this->_controller = 'adminhtml_feed';
+
+        parent::__construct();
+
+        $this->_updateButton('save', 'label', $this->__('Save Feed'));
+        $this->_updateButton('delete', 'label', $this->__('Delete Feed'));
+
+        $this->_addButton('saveandcontinue', [
+            'label' => $this->__('Save and Continue Edit'),
+            'onclick' => 'saveAndContinueEdit()',
+            'class' => 'save',
+        ], -100);
+
+        $this->_addButton('preview', [
+            'label' => $this->__('Preview'),
+            'onclick' => 'showFeedPreview()',
+        ], -91);
+
+        // Add buttons for existing feeds
+        if ($this->_getFeed()->getId()) {
+            $this->_addButton('duplicate', [
+                'label' => $this->__('Duplicate'),
+                'onclick' => "setLocation('" . $this->getUrl('*/*/duplicate', ['id' => $this->_getFeed()->getId()]) . "')",
+                'class' => 'add',
+            ], -95);
+
+            $this->_addButton('generate', [
+                'label' => $this->__('Generate Now'),
+                'onclick' => 'FeedGenerator.saveAndGenerate(' . $this->_getFeed()->getId() . ')',
+                'class' => 'add',
+            ], -90);
+        }
+
+        $this->_formScripts[] = $this->_getFormScripts();
+    }
+
+    #[\Override]
+    public function getHeaderText(): string
+    {
+        $feed = $this->_getFeed();
+        if ($feed->getId()) {
+            return $this->__("Edit Feed '%s'", $this->escapeHtml($feed->getName()));
+        }
+        return $this->__('New Feed');
+    }
+
+    /**
+     * Convert PHP bool to JavaScript boolean string
+     */
+    protected function _boolToJs(bool $value): string
+    {
+        return $value ? 'true' : 'false';
+    }
+
+    /**
+     * Get feed ID for JavaScript (returns 'null' if no ID)
+     */
+    protected function _getFeedIdForJs(): string
+    {
+        $id = $this->_getFeed()->getId();
+        return $id ? (string) $id : 'null';
+    }
+
+    /**
+     * Get form scripts including batch generation JavaScript
+     */
+    protected function _getFormScripts(): string
+    {
+        $initUrl = $this->getUrl('*/*/generateInit');
+        $batchUrl = $this->getUrl('*/*/generateBatch');
+        $finalizeUrl = $this->getUrl('*/*/generateFinalize');
+        $cancelUrl = $this->getUrl('*/*/generateCancel');
+        $resetUrl = $this->getUrl('*/*/forceReset');
+        $uploadUrl = $this->getUrl('*/*/upload');
+
+        // Check if feed has a destination configured
+        $hasDestination = (bool) $this->_getFeed()->getDestinationId();
+        $feedName = Mage::helper('core')->jsonEncode($this->_getFeed()->getName() ?: '');
+
+        $translations = Mage::helper('core')->jsonEncode([
+            'generating' => $this->__('Generating Feed...'),
+            'initializing' => $this->__('Initializing...'),
+            'processing' => $this->__('Processing batch %s of %s...'),
+            'finalizing' => $this->__('Finalizing...'),
+            'completed' => $this->__('Feed generated successfully!'),
+            'failed' => $this->__('Generation failed'),
+            'cancelled' => $this->__('Generation cancelled'),
+            'products' => $this->__('%s products'),
+            'cancel' => $this->__('Cancel'),
+            'close' => $this->__('Close'),
+            'view' => $this->__('View'),
+            'download' => $this->__('Download'),
+            'upload' => $this->__('Upload Now'),
+            'uploading' => $this->__('Uploading...'),
+            'upload_success' => $this->__('Upload successful!'),
+            'upload_failed' => $this->__('Upload failed'),
+            'upload_skipped' => $this->__('Upload skipped'),
+            'progress' => $this->__('%c / %t (%p%)'),
+            'progress_filtered' => $this->__('%i included + %e excluded / %t (%p%)'),
+            'excluded_summary' => $this->__('%s excluded due to filters'),
+            'confirm' => $this->__('Are you sure you want to generate this feed now?'),
+            'confirm_reset' => $this->__('This will clear any stuck generation status. Continue?'),
+            'reset_success' => $this->__('Generation status has been reset.'),
+        ]);
+
+        return <<<JS
+
+            function showFeedPreview() {
+                if (!{$this->_getFeedIdForJs()}) {
+                    alert('{$this->__('Please save the feed first to enable preview.')}');
+                    return;
+                }
+                var format = document.getElementById('feed_file_format')?.value || 'xml';
+                if (format === 'xml' && typeof XmlBuilder !== 'undefined') {
+                    XmlBuilder.showPreview();
+                } else if (format === 'csv' && typeof CsvBuilder !== 'undefined') {
+                    CsvBuilder.showPreview();
+                } else if (format === 'json' && typeof JsonBuilder !== 'undefined') {
+                    JsonBuilder.showPreview();
+                }
+            }
+
+            function saveAndContinueEdit() {
+                var form = document.getElementById('edit_form');
+                if (form) {
+                    var action = form.action;
+                    if (action.indexOf('?') !== -1) {
+                        form.action = action + '&back=edit';
+                    } else {
+                        form.action = action + 'back/edit/';
+                    }
+                    form.submit();
+                }
+            }
+
+            const FeedGenerator = {
+                ...FeedGeneratorBase,
+                urls: {
+                    init: '{$initUrl}',
+                    batch: '{$batchUrl}',
+                    finalize: '{$finalizeUrl}',
+                    cancel: '{$cancelUrl}',
+                    reset: '{$resetUrl}',
+                    upload: '{$uploadUrl}'
+                },
+                translations: {$translations},
+                hasDestination: {$this->_boolToJs($hasDestination)},
+                feedName: {$feedName},
+                currentFeedId: null,
+
+                saveAndGenerate(feedId) {
+                    if (!confirm(this.translations.confirm)) {
+                        return;
+                    }
+
+                    // Always save first, then generate
+                    const form = document.getElementById('edit_form');
+                    if (form) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'generate_after_save';
+                        input.value = '1';
+                        form.appendChild(input);
+                        form.submit();
+                    } else {
+                        // Fallback if no form
+                        this.start(feedId);
+                    }
+                },
+
+                start(feedId, force) {
+                    this.cancelled = false;
+                    this.currentFeedId = feedId;
+
+                    this.showDialog(this.translations.generating,
+                        '<div class="gen-multi-list">' +
+                            this._buildFeedCard(0, this.feedName || this.translations.initializing, '') +
+                        '</div>'
+                    );
+                    this._markFeedActive(0);
+
+                    const params = { id: feedId, form_key: FORM_KEY };
+                    if (force) {
+                        params.force = '1';
+                    }
+
+                    mahoFetch(this.urls.init, {
+                        method: 'POST',
+                        body: new URLSearchParams(params),
+                        loaderArea: false
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            this.showError(data.message);
+                            return;
+                        }
+
+                        this.currentJobId = data.job_id;
+                        this.totalProducts = data.total_products;
+                        this.batchesTotal = data.batches_total;
+
+                        // Update card name from response if available
+                        const nameEl = document.querySelector('#gen-feed-0 .gen-feed-name');
+                        if (nameEl && data.feed_name) nameEl.textContent = data.feed_name;
+
+                        this._updateFeedProgress(0, 0, data.total_products);
+                        this._updateFeedStatus(0,
+                            this.translations.processing.replace('%s', '1').replace('%s', data.batches_total));
+
+                        this.processBatch();
+                    })
+                    .catch(error => {
+                        this.showError(error.message || 'Network error');
+                    });
+                },
+
+                reset(feedId) {
+                    if (!confirm(this.translations.confirm_reset)) {
+                        return;
+                    }
+
+                    mahoFetch(this.urls.reset, {
+                        method: 'POST',
+                        body: new URLSearchParams({ id: feedId, form_key: FORM_KEY }),
+                        loaderArea: false
+                    })
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.message);
+                        } else {
+                            alert(this.translations.reset_success);
+                        }
+                    })
+                    .catch(error => {
+                        alert(error.message || 'Error resetting generation');
+                    });
+                },
+
+                showSuccess(data) {
+                    this._markFeedCompleted(0, data);
+
+                    // Add upload status below the card if available
+                    if (data.upload_status) {
+                        const entry = document.getElementById('gen-feed-0');
+                        if (entry) {
+                            const uploadClass = data.upload_status === 'success' ? 'success-msg' :
+                                (data.upload_status === 'failed' ? 'error-msg' : 'notice-msg');
+                            entry.insertAdjacentHTML('beforeend',
+                                '<div class="' + uploadClass + ' fm-upload-status" style="margin-top:8px">' +
+                                (data.upload_message || data.upload_status) + '</div>');
+                        }
+                    }
+
+                    // Build buttons
+                    const buttonsEl = this.dialog?.querySelector('.dialog-buttons');
+                    let buttonsHtml = '<button type="button" class="cancel" onclick="FeedGenerator.closeDialog()">' +
+                        this.translations.close + '</button>';
+
+                    if (this.hasDestination && data.upload_status !== 'success') {
+                        buttonsHtml += ' <button type="button" id="upload-now-btn" onclick="FeedGenerator.upload()">' +
+                            this.translations.upload + '</button>';
+                    }
+
+                    if (data.file_url) {
+                        const cacheBuster = data.file_url.includes('?') ? '&_=' : '?_=';
+                        const fileUrlWithCb = escapeHtml(data.file_url + cacheBuster + Date.now(), true);
+                        buttonsHtml += ' <a href="' + fileUrlWithCb + '" class="form-button" target="_blank">' +
+                            this.translations.view + '</a>';
+                        buttonsHtml += ' <a href="' + fileUrlWithCb + '" class="form-button" download>' +
+                            this.translations.download + '</a>';
+                    }
+                    if (buttonsEl) buttonsEl.innerHTML = buttonsHtml;
+                },
+
+                upload() {
+                    const btn = document.getElementById('upload-now-btn');
+                    if (btn) {
+                        btn.disabled = true;
+                        btn.textContent = this.translations.uploading;
+                    }
+
+                    mahoFetch(this.urls.upload, {
+                        method: 'POST',
+                        body: new URLSearchParams({ id: this.currentFeedId, form_key: FORM_KEY }),
+                        loaderArea: false
+                    })
+                    .then(data => {
+                        const entry = document.getElementById('gen-feed-0');
+                        if (data.success) {
+                            if (entry) {
+                                // Remove any existing upload status and add success
+                                entry.querySelectorAll('.fm-upload-status').forEach(el => el.remove());
+                                entry.insertAdjacentHTML('beforeend',
+                                    '<div class="success-msg fm-upload-status" style="margin-top:8px">' +
+                                    escapeHtml(data.message) + '</div>');
+                            }
+                            if (btn) btn.remove();
+                        } else {
+                            if (btn) {
+                                btn.disabled = false;
+                                btn.textContent = this.translations.upload;
+                            }
+                            alert(data.message || this.translations.upload_failed);
+                        }
+                    })
+                    .catch(error => {
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.textContent = this.translations.upload;
+                        }
+                        alert(error.message || this.translations.upload_failed);
+                    });
+                }
+            };
+
+            // Auto-start generation if URL has generate/1 parameter (after save)
+            document.addEventListener('DOMContentLoaded', function() {
+                // Check for both path-based (/generate/1/) and query string (?generate=1) formats
+                var shouldGenerate = window.location.pathname.indexOf('/generate/1') !== -1 ||
+                                     window.location.search.indexOf('generate=1') !== -1;
+                var feedId = {$this->_getFeedIdForJs()};
+
+                if (shouldGenerate && feedId) {
+                    // Remove the generate param from URL to prevent re-triggering on refresh
+                    var newUrl = window.location.pathname.replace(/\\/generate\\/1\\/?/, '/');
+                    window.history.replaceState({}, '', newUrl);
+
+                    // Start generation after a short delay to let the page load
+                    // Use force=true to clean up any stuck jobs from the previous save attempt
+                    setTimeout(function() {
+                        FeedGenerator.start(feedId, true);
+                    }, 500);
+                }
+            });
+
+JS;
+    }
+}

@@ -55,8 +55,12 @@ class Mage_CatalogRule_Model_Resource_Rule_Product_Price extends Mage_Core_Model
             $indexAlias = $indexTable;
         }
 
+        // Note: $websiteDate, $entityId, $websiteId, $customerGroupId are trusted SQL column
+        // references passed from callers (e.g. "ip.website_id"), not user-supplied values
         $select->join(['rp' => $this->getMainTable()], "rp.rule_date = {$websiteDate}", [])
-               ->where("rp.product_id = {$entityId} AND rp.website_id = {$websiteId} AND rp.customer_group_id = {$customerGroupId}");
+               ->where("rp.product_id = {$entityId}")
+               ->where("rp.website_id = {$websiteId}")
+               ->where("rp.customer_group_id = {$customerGroupId}");
 
         if (isset($indexAlias)) {
             foreach ($updateFields as $priceField) {

@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_ShippingBridge
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_ShippingBridge>
+            <version>1.0.0</version>
+        </Maho_ShippingBridge>
+    </modules>
+    <global>
+        <models>
+            <shippingbridge>
+                <class>Maho_ShippingBridge_Model</class>
+            </shippingbridge>
+        </models>
+        <helpers>
+            <shippingbridge>
+                <class>Maho_ShippingBridge_Helper</class>
+            </shippingbridge>
+        </helpers>
+    </global>
+    <default>
+        <carriers>
+            <shippingbridge>
+                <active>0</active>
+                <model>shippingbridge/carrier</model>
+                <title>Shipping Bridge</title>
+                <api_url/>
+                <auth_type>none</auth_type>
+                <auth_token backend_model="adminhtml/system_config_backend_encrypted"/>
+                <custom_header_name/>
+                <timeout>10</timeout>
+                <additional_attributes/>
+                <debug>0</debug>
+                <sort_order/>
+                <sallowspecific>0</sallowspecific>
+                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this method, please contact us.</specificerrmsg>
+            </shippingbridge>
+        </carriers>
+    </default>
+</config>

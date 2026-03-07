@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -28,6 +30,7 @@
  * @method string getAllowedAttributes()
  * @method $this setAllowedAttributes() setAllowedAttributes(string $attributes)
  */
+
 class Mage_Api2_Model_Acl_Filter_Attribute extends Mage_Core_Model_Abstract
 {
     /**

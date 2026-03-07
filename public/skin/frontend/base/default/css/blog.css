@@ -87,3 +87,13 @@
         border-radius: 0;
     }
 }
+
+/* Blog category sidebar */
+.blog-categories dd ol ol {
+    padding-left: 15px;
+}
+
+.blog-categories dd ol > li.active > a {
+    color: var(--maho-color-primary);
+    font-weight: 600;
+}

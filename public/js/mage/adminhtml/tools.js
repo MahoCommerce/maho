@@ -616,5 +616,6 @@ function debounce(func, delay) {
 function xssFilter(str) {
     const sanitize = xssKillah();
     const safeNodes = sanitize(str);
-    return Array.from(safeNodes).map(n => n.outerHTML || n.textContent).join('');
+    // Filter out comment nodes to prevent their text from leaking as visible content
+    return Array.from(safeNodes).filter(n => n.nodeType !== Node.COMMENT_NODE).map(n => n.outerHTML || n.textContent).join('');
 }

@@ -39,10 +39,18 @@ class Mage_Reports_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource
     {
         $adapter = $this->_getWriteAdapter();
 
-        $periodCol = match ($type) {
+        // Period expression for inner query (with table alias)
+        $periodColInner = match ($type) {
             'year' => "strftime('%Y-01-01', t.period)",
             'month' => "strftime('%Y-%m-01', t.period)",
             default => 't.period',
+        };
+
+        // Period expression for outer query (using aliased column from subquery)
+        $periodColOuter = match ($type) {
+            'year' => "strftime('%Y-01-01', period)",
+            'month' => "strftime('%Y-%m-01', period)",
+            default => 'period',
         };
 
         $columns = [
@@ -69,8 +77,7 @@ class Mage_Reports_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource
         $selectCols[] = "SUM(t.$column) AS total_qty";
 
         // SQLite supports window functions for ranking
-        $periodExpr = $periodCol;
-        $groupCols = "t.store_id, $periodExpr, t.product_id";
+        $groupCols = "t.store_id, $periodColInner, t.product_id";
 
         // First, aggregate the data
         $aggregateSql = sprintf(
@@ -81,12 +88,13 @@ class Mage_Reports_Model_Resource_Helper_Sqlite extends Mage_Core_Model_Resource
         );
 
         // Now add ranking using ROW_NUMBER() window function
+        // Note: In the outer query, we use column names from the subquery (no 't.' prefix)
         $rankCols = [];
         foreach (array_keys($columns) as $alias) {
             $rankCols[] = $alias;
         }
         $rankCols[] = "total_qty AS $column";
-        $rankCols[] = "ROW_NUMBER() OVER (PARTITION BY store_id, $periodExpr ORDER BY total_qty DESC) AS rating_pos";
+        $rankCols[] = "ROW_NUMBER() OVER (PARTITION BY store_id, $periodColOuter ORDER BY total_qty DESC) AS rating_pos";
 
         $finalCols = $rankCols;
         // Remove unnecessary columns for final insert

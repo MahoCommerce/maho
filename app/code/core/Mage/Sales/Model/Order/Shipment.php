@@ -596,7 +596,7 @@ class Mage_Sales_Model_Order_Shipment extends Mage_Sales_Model_Abstract
         }
 
         if ($this->getPackages() && !is_scalar($this->getPackages())) {
-            $this->setPackages(serialize($this->getPackages()));
+            $this->setPackages(Mage::helper('core')->jsonEncode($this->getPackages()));
         }
 
         return parent::_beforeSave();

@@ -167,12 +167,12 @@ abstract class Mage_Core_Model_Resource_Abstract
                 $object->unsetData($field);
             } else {
                 if (is_object($defaultValue) || is_array($defaultValue)) {
-                    $defaultValue = serialize($defaultValue);
+                    $defaultValue = Mage::helper('core')->jsonEncode($defaultValue);
                 }
                 $object->setData($field, $defaultValue);
             }
         } elseif (is_array($value) || is_object($value)) {
-            $object->setData($field, serialize($value));
+            $object->setData($field, Mage::helper('core')->jsonEncode($value));
         }
 
         return $this;
@@ -189,8 +189,29 @@ abstract class Mage_Core_Model_Resource_Abstract
         $value = $object->getData($field);
         if (empty($value)) {
             $object->setData($field, $defaultValue);
-        } elseif (!is_array($value) && !is_object($value)) {
-            $object->setData($field, unserialize($value, ['allowed_classes' => [\Maho\DataObject::class]]));
+        } elseif (is_string($value)) {
+            if (json_validate($value)) {
+                $object->setData($field, Mage::helper('core')->jsonDecode($value));
+            } else {
+                $data = unserialize($value, ['allowed_classes' => false]);
+                $object->setData($field, $data);
+
+                // Soft-convert legacy serialized data to JSON in the database
+                if ($object->getId() && ($data !== false || $value === serialize(false))
+                    && $this instanceof Mage_Core_Model_Resource_Db_Abstract
+                ) {
+                    try {
+                        $jsonValue = Mage::helper('core')->jsonEncode($data);
+                        $this->_getWriteAdapter()->update(
+                            $this->getMainTable(),
+                            [$field => $jsonValue],
+                            [$this->getIdFieldName() . ' = ?' => $object->getId()],
+                        );
+                    } catch (\Exception $e) {
+                        Mage::logException($e);
+                    }
+                }
+            }
         }
     }
 

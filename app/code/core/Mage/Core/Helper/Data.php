@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Symfony\Component\Mailer\Transport;
+use Symfony\Component\Mailer\Transport\TransportInterface;
 use Symfony\Component\Validator\Validation;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -993,7 +995,7 @@ XML;
             'sendgrid+api' => "$emailTransport://$pass@default",
             'sweego+smtp' => "$emailTransport://$user:$pass@$host:$port",
             'sweego+api' => "$emailTransport://$pass@default",
-            'sendmail' => "$emailTransport://default",
+            'sendmail' => 'native://default',
             default => '',
         };
 
@@ -1002,6 +1004,22 @@ XML;
         }
 
         return $dsn;
+    }
+
+    public function getMailTransport(): ?TransportInterface
+    {
+        $dsn = $this->getMailerDsn();
+        if (!$dsn) {
+            return null;
+        }
+
+        $transport = Transport::fromDsn($dsn);
+
+        if (Mage::getStoreConfigFlag('system/smtp/log_enabled')) {
+            $transport = new Mage_Core_Model_Email_LoggingTransport($transport);
+        }
+
+        return $transport;
     }
 
     /**
@@ -1162,5 +1180,67 @@ XML;
 
         $iconSvg = str_replace('<svg ', '<svg role="' . $role . '" ', $iconSvg);
         return $iconSvg;
+    }
+
+    /**
+     * Re-encrypt columns in a table using batched queries to avoid memory exhaustion.
+     *
+     * @param string[] $columns
+     */
+    public function recryptTable(
+        string $table,
+        string $primaryKey,
+        array $columns,
+        callable $encryptCallback,
+        callable $decryptCallback,
+        int $batchSize = 1000,
+    ): void {
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
+        $lastId = 0;
+
+        $quotedPk = $readConnection->quoteIdentifier($primaryKey);
+
+        while (true) {
+            $select = $readConnection->select()
+                ->from($table, array_merge([$primaryKey], $columns))
+                ->where("$quotedPk > ?", $lastId)
+                ->order("$quotedPk ASC")
+                ->limit($batchSize);
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $conditions[] = $readConnection->quoteIdentifier($column) . ' IS NOT NULL AND '
+                    . $readConnection->quoteIdentifier($column) . " != ''";
+            }
+            $select->where(implode(' OR ', $conditions));
+
+            $rows = $readConnection->fetchAll($select);
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                $updateData = [];
+                foreach ($columns as $column) {
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $decrypted = $decryptCallback($row[$column]);
+                        if ($decrypted !== '') {
+                            $updateData[$column] = $encryptCallback($decrypted);
+                        }
+                    }
+                }
+                if (!empty($updateData)) {
+                    $writeConnection->update(
+                        $table,
+                        $updateData,
+                        ["$quotedPk = ?" => $row[$primaryKey]],
+                    );
+                }
+                $lastId = $row[$primaryKey];
+            }
+
+            unset($rows);
+        }
     }
 }

@@ -68,15 +68,22 @@ class Maho_Giftcard_Block_Adminhtml_Sales_Order_Creditmemo_Totals_Giftcard exten
 
         $baseGiftcardAmount = $source->getBaseGiftcardAmount() ?: ($order ? $order->getBaseGiftcardAmount() : 0);
 
-        // Add total after tax - show as positive since it's money going back to gift card
-        // Use a custom block_html to avoid it being summed into grand_total display
-        $parent->addTotal(new Maho\DataObject([
+        // Show as positive since it's money going back to gift card
+        // Add before grand_total
+        $parent->addTotalBefore(new Maho\DataObject([
             'code'       => 'giftcard',
             'value'      => abs((float) $giftcardAmount),
             'base_value' => abs((float) $baseGiftcardAmount),
             'label'      => $label,
             'is_formated' => false,
-        ]), 'tax');
+        ]), ['grand_total', 'base_grandtotal']);
+
+        // Ensure tax appears before giftcard
+        $taxTotal = $parent->getTotal('tax');
+        if ($taxTotal) {
+            $parent->removeTotal('tax');
+            $parent->addTotalBefore($taxTotal, 'giftcard');
+        }
 
         return $this;
     }

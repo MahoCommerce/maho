@@ -1,0 +1,79 @@
+<?php
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ *
+ * @var Mage_Adminhtml_Block_Template $this
+ */
+$version = Mage::registry('contentversion_preview');
+if (!$version) {
+    return;
+}
+$data = $version->getContentDataDecoded();
+$entityType = $version->getData('entity_type');
+$versionId = (int) $version->getId();
+$typeLabels = [
+    'cms_page' => $this->__('CMS Page'),
+    'cms_block' => $this->__('CMS Block'),
+    'blog_post' => $this->__('Blog Post'),
+];
+$restoreUrl = $this->getUrl('adminhtml/contentversion/restore', ['version_id' => $versionId]);
+$confirmMsg = $this->jsQuoteEscape(
+    $this->__('Are you sure you want to restore this version? The current content will be saved as a new version first.'),
+);
+?>
+<div class="content-header">
+    <h3 class="icon-head"><?= $this->escapeHtml($typeLabels[$entityType] ?? $entityType) ?> — <?= $this->__('Version %s', $version->getData('version_number')) ?></h3>
+    <p class="form-buttons">
+        <button type="button" class="scalable back" onclick="history.back()"><span><?= $this->__('Back') ?></span></button>
+        <button type="button" class="scalable save" onclick="if(confirm('<?= $confirmMsg ?>')) window.location='<?= $this->escapeUrl($restoreUrl) ?>'"><span><?= $this->__('Restore') ?></span></button>
+    </p>
+</div>
+
+<div class="entry-edit" style="margin-top: 1rem;">
+    <div class="entry-edit-head"><h4><?= $this->__('Version Details') ?></h4></div>
+    <fieldset>
+        <table class="form-list" cellspacing="0">
+            <tr>
+                <td class="label"><?= $this->__('Version') ?></td>
+                <td class="value"><?= (int) $version->getData('version_number') ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $this->__('Editor') ?></td>
+                <td class="value"><?= $this->escapeHtml($version->getData('editor')) ?></td>
+            </tr>
+            <tr>
+                <td class="label"><?= $this->__('Date') ?></td>
+                <td class="value"><?= $this->escapeHtml($version->getData('created_at')) ?></td>
+            </tr>
+        </table>
+    </fieldset>
+</div>
+
+<div class="entry-edit" style="margin-top: 1rem;">
+    <div class="entry-edit-head"><h4><?= $this->__('Snapshot Data') ?></h4></div>
+    <fieldset class="fieldset-wide">
+        <table class="form-list" cellspacing="0">
+            <?php foreach ($data as $field => $value): ?>
+            <tr>
+                <td class="label" style="vertical-align: top;"><?= $this->escapeHtml(ucwords(str_replace('_', ' ', $field))) ?></td>
+                <td class="value">
+                    <?php if ($field === 'content'): ?>
+                        <iframe
+                            srcdoc="<?= $this->escapeHtml((string) $value) ?>"
+                            sandbox=""
+                            style="width: 100%; height: 500px; border: 1px solid #ddd; border-radius: 4px; background: #fff;"
+                        ></iframe>
+                    <?php elseif (is_array($value)): ?>
+                        <?= $this->escapeHtml(implode(', ', $value)) ?>
+                    <?php else: ?>
+                        <?= $this->escapeHtml((string) $value) ?>
+                    <?php endif ?>
+                </td>
+            </tr>
+            <?php endforeach ?>
+        </table>
+    </fieldset>
+</div>

@@ -434,9 +434,9 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
 
             // Save option in request, because we have no $_FILES['options']
             $requestOptions[$this->getOption()->getId()] = $value;
-            $result = serialize($value);
+            $result = Mage::helper('core')->jsonEncode($value);
             try {
-                Mage::helper('core/unserializeArray')->unserialize($result);
+                Mage::helper('core')->jsonDecode($result);
             } catch (Exception $e) {
                 Mage::throwException(Mage::helper('catalog')->__('File options format is not valid.'));
             }
@@ -481,7 +481,7 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
                 $value['url'] = ['route' => $this->_customOptionDownloadUrl, 'params' => $customOptionUrlParams];
 
                 $this->_formattedOptionValue = $this->_getOptionHtml($value);
-                $this->getConfigurationItemOption()->setValue(serialize($value));
+                $this->getConfigurationItemOption()->setValue(Mage::helper('core')->jsonEncode($value));
                 return $this->_formattedOptionValue;
             } catch (Exception $e) {
                 return $optionValue;

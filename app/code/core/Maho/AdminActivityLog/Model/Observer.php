@@ -462,38 +462,15 @@ class Maho_AdminActivityLog_Model_Observer
         $output = $observer->getEvent()->getOutput();
         $encryptCallback = $observer->getEvent()->getEncryptCallback();
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
-        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $output->write('Re-encrypting data on adminactivitylog_activity table... ');
-        $table = Mage::getSingleton('core/resource')->getTableName('adminactivitylog/activity');
-
-        // Re-encrypt old_data
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('old_data IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['old_data' => $encryptCallback($decryptCallback($encryptedDataRow['old_data']))],
-                ['activity_id = ?' => $encryptedDataRow['activity_id']],
-            );
-        }
-
-        // Re-encrypt new_data
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('new_data IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['new_data' => $encryptCallback($decryptCallback($encryptedDataRow['new_data']))],
-                ['activity_id = ?' => $encryptedDataRow['activity_id']],
-            );
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('adminactivitylog/activity'),
+            'activity_id',
+            ['old_data', 'new_data'],
+            $encryptCallback,
+            $decryptCallback,
+        );
         $output->writeln('OK');
     }
 

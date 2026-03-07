@@ -35,7 +35,10 @@ class Mage_Adminhtml_JsonController extends Mage_Adminhtml_Controller_Action
     }
 
     /**
-     * Check is allowed access to action
+     * Allow access to all admin users
+     *
+     * This endpoint serves read-only reference data (country/region lists)
+     * required by various admin forms. No ACL restriction is needed.
      *
      * @return true
      */

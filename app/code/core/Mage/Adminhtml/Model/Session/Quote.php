@@ -5,7 +5,7 @@
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -19,14 +19,18 @@
  * @method $this setAllowQuoteItemsGiftMessage(array $value)
  * @method string getCurrencyId()
  * @method $this setCurrencyId(string $value)
+ * @method bool getCustomerIsGuest()
+ * @method $this setCustomerIsGuest(bool $value)
  * @method bool hasCustomerId()
  * @method int getCustomerId()
  * @method $this setCustomerId(int $value)
  * @method int getCustomerGroupId()
+ * @method $this setCustomerGroupId(int $value)
  * @method int|string getOrderId()
  * @method $this setOrderId(int|string $value)
  * @method int|string getQuoteId()
  * @method $this setQuoteId(int|string $value)
+ * @method int|string getReordered()
  * @method $this setReordered(int|string $value)
  * @method int getStoreId()
  * @method $this setStoreId(int $value)

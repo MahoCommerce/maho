@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -13,4 +15,5 @@
  * Core Session Exception
  * Allows dispatching before and after events for each controller action
  */
+
 class Mage_Core_Model_Session_Exception extends Mage_Core_Exception {}

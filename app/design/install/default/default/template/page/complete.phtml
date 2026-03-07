@@ -46,6 +46,13 @@
 
     <p><?= $this->__('Get ready to experience Open-Source eCommerce Evolved.') ?></p>
 
+    <?php if ($langPackCommand = $this->getLanguagePackCommand()): ?>
+    <div class="langpack-notice">
+        <p><?= $this->__('To complete localization, run the following command:') ?></p>
+        <code><?= $this->escapeHtml($langPackCommand) ?></code>
+    </div>
+    <?php endif; ?>
+
     <div class="button-set">
         <a target="_blank" href="<?= $this->getUrl('') ?>" class="form-button">
             <span><?= $this->__('Go to Frontend') ?></span>

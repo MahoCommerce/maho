@@ -1,0 +1,81 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     default_default
+ * @copyright   Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+
+/** @var Mage_Adminhtml_Block_System_Config_Form_Field_TestEmail $this */
+?>
+<style>
+    #test_email_wrapper {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    #test_email_recipient {
+        padding: 4px 8px;
+        width: 250px;
+    }
+    #test_email_result {
+        display: none;
+        margin-top: 8px;
+        padding: 10px 14px;
+        border-radius: 4px;
+        font-size: 13px;
+    }
+    #test_email_result.success {
+        display: block;
+        background: #ecfdf5;
+        border: 1px solid #10b981;
+    }
+    #test_email_result.error {
+        display: block;
+        background: #fef2f2;
+        border: 1px solid #ef4444;
+    }
+</style>
+<script>
+    function sendTestEmail() {
+        const button = document.getElementById('test_email_send_button');
+        const buttonLabel = document.getElementById('test_email_button_label');
+        const resultDiv = document.getElementById('test_email_result');
+        const recipient = document.getElementById('test_email_recipient').value;
+
+        resultDiv.className = '';
+        resultDiv.removeAttribute('style');
+        buttonLabel.textContent = '<?= $this->jsQuoteEscape($this->__('Sending...')) ?>';
+        button.disabled = true;
+
+        const formData = new FormData();
+        formData.append('form_key', FORM_KEY);
+        formData.append('recipient', recipient);
+
+        mahoFetch('<?= $this->getAjaxUrl() ?>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            resultDiv.textContent = response.message;
+            resultDiv.className = response.success ? 'success' : 'error';
+            buttonLabel.textContent = '<?= $this->jsQuoteEscape($this->getButtonLabel()) ?>';
+            button.disabled = false;
+        })
+        .catch(error => {
+            console.error('Test email error:', error);
+            resultDiv.textContent = '<?= $this->jsQuoteEscape($this->__('An error occurred while sending the test email.')) ?>';
+            resultDiv.className = 'error';
+            buttonLabel.textContent = '<?= $this->jsQuoteEscape($this->getButtonLabel()) ?>';
+            button.disabled = false;
+        });
+    }
+</script>
+<div id="test_email_wrapper">
+    <input type="email" id="test_email_recipient" value="<?= $this->escapeHtml($this->getDefaultEmail()) ?>" placeholder="<?= $this->escapeHtml($this->__('Recipient email address')) ?>">
+    <button onclick="sendTestEmail(); return false;" class="scalable" type="button" id="test_email_send_button">
+        <span id="test_email_button_label"><?= $this->escapeHtml($this->getButtonLabel()) ?></span>
+    </button>
+</div>
+<div id="test_email_result"></div>

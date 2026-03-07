@@ -250,4 +250,115 @@ final class Maho
 
         Mage::throwException('No image driver found');
     }
+
+    /**
+     * Return the IMAGETYPE_* constant for the system-configured image format
+     */
+    public static function getConfiguredImageType(): int
+    {
+        return (int) \Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
+    }
+
+    /**
+     * Return the dot-prefixed file extension for the system-configured image format (e.g. '.webp', '.jpg')
+     */
+    public static function getConfiguredImageExtension(): string
+    {
+        return match (self::getConfiguredImageType()) {
+            IMAGETYPE_AVIF => '.avif',
+            IMAGETYPE_GIF  => '.gif',
+            IMAGETYPE_JPEG => '.jpg',
+            IMAGETYPE_PNG  => '.png',
+            default        => '.webp',
+        };
+    }
+
+    /**
+     * Encode an Intervention Image instance to the system-configured format
+     */
+    public static function encodeImage(\Intervention\Image\Interfaces\ImageInterface $image, ?int $quality = null): \Intervention\Image\Interfaces\EncodedImageInterface
+    {
+        $args = $quality !== null ? [$quality] : [];
+
+        return match (self::getConfiguredImageType()) {
+            IMAGETYPE_AVIF => $image->toAvif(...$args),
+            IMAGETYPE_GIF  => $image->toGif(),
+            IMAGETYPE_JPEG => $image->toJpeg(...$args),
+            IMAGETYPE_PNG  => $image->toPng(),
+            default        => $image->toWebp(...$args),
+        };
+    }
+
+    /**
+     * Sign image transformation parameters into a query string: "t=...&s=..."
+     */
+    public static function signImageResizeRequest(array $params, string $key): string
+    {
+        $t = base64_encode(json_encode($params, JSON_THROW_ON_ERROR));
+        $s = hash_hmac('sha256', $t, $key);
+        return 't=' . urlencode($t) . '&s=' . $s;
+    }
+
+    /**
+     * Verify a signed image resize request and return decoded parameters, or null on failure.
+     */
+    public static function verifyImageResizeRequest(string $t, string $s, string $key): ?array
+    {
+        $expected = hash_hmac('sha256', $t, $key);
+        if (!hash_equals($expected, $s)) {
+            return null;
+        }
+
+        $decoded = base64_decode($t, true);
+        if ($decoded === false) {
+            return null;
+        }
+
+        $params = json_decode($decoded, true);
+        if (!is_array($params)) {
+            return null;
+        }
+
+        return $params;
+    }
+
+    /**
+     * Build the cache file path for a resized product image from transform params.
+     * Single source of truth used by both Mage_Catalog_Model_Product_Image::setBaseFile()
+     * and image.php to ensure consistent cache paths.
+     */
+    public static function buildImageResizeCachePath(array $params, string $baseMediaPath, string $sourceFile): string
+    {
+        $storeId = (int) \Mage::app()->getStore()->getId();
+        $path = [$baseMediaPath, 'cache', $storeId, $params['_destinationSubdir']];
+
+        if (!empty($params['_width']) || !empty($params['_height'])) {
+            $path[] = "{$params['_width']}x{$params['_height']}";
+        }
+
+        $miscParams = [
+            ($params['_keepAspectRatio'] ? '' : 'non') . 'proportional',
+            ($params['_keepFrame'] ? '' : 'no') . 'frame',
+            ($params['_keepTransparency'] ? '' : 'no') . 'transparency',
+            ($params['_constrainOnly'] ? 'do' : 'not') . 'constrainonly',
+            $params['_backgroundColorStr'],
+            'angle' . $params['_angle'],
+            'quality' . $params['_quality'],
+        ];
+
+        if (isset($params['_watermarkFile'])) {
+            $miscParams[] = $params['_watermarkFile'];
+            $miscParams[] = $params['_watermarkImageOpacity'];
+            $miscParams[] = $params['_watermarkPosition'];
+            $miscParams[] = $params['_watermarkWidth'];
+            $miscParams[] = $params['_watermarkHeigth'];
+        }
+
+        $path[] = md5(implode('_', $miscParams));
+
+        $targetExt = self::getConfiguredImageExtension();
+        $file = preg_replace('/\.[^.]+$/', $targetExt, $sourceFile);
+
+        return implode('/', $path) . $file;
+    }
 }

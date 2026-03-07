@@ -12,26 +12,17 @@
 
 class Mage_Adminhtml_TaxController extends Mage_Adminhtml_Controller_Action
 {
+    public const ADMIN_RESOURCE = 'system/config/tax';
+
     /**
      * Set tax ignore notification flag and redirect back
      */
     public function ignoreTaxNotificationAction(): void
     {
         $section = $this->getRequest()->getParam('section');
-        if ($section) {
+        if ($section && preg_match('/^[a-zA-Z0-9_]+$/', $section)) {
             Mage::helper('tax')->setIsIgnored('tax/ignore_notification/' . $section, true);
         }
         $this->_redirectReferer();
-    }
-
-    /**
-     * Check is allowed access to action
-     *
-     * @return true
-     */
-    #[\Override]
-    protected function _isAllowed()
-    {
-        return true;
     }
 }

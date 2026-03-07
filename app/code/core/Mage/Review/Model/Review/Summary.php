@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -12,6 +14,7 @@
 /**
  * @method $this setStoreId(int $value)
  */
+
 class Mage_Review_Model_Review_Summary extends Mage_Core_Model_Abstract
 {
     public function __construct()

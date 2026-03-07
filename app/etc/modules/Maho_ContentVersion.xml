@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @category   Maho
+ * @package    Maho_ContentVersion
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<config>
+    <modules>
+        <Maho_ContentVersion>
+            <active>true</active>
+            <codePool>core</codePool>
+            <depends>
+                <Mage_Cms/>
+                <Mage_Adminhtml/>
+            </depends>
+        </Maho_ContentVersion>
+    </modules>
+</config>

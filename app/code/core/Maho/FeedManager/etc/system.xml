@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Maho
+ *
+ * @package    Maho_FeedManager
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+-->
+<config>
+    <sections>
+        <feedmanager translate="label" module="feedmanager">
+            <label>Feed Manager</label>
+            <tab>catalog</tab>
+            <frontend_type>text</frontend_type>
+            <sort_order>400</sort_order>
+            <show_in_default>1</show_in_default>
+            <show_in_website>1</show_in_website>
+            <show_in_store>1</show_in_store>
+            <groups>
+                <general translate="label">
+                    <label>General Settings</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>10</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Module</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>10</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </enabled>
+                        <output_directory translate="label comment">
+                            <label>Output Directory</label>
+                            <comment>Relative to media folder. Default: feeds</comment>
+                            <frontend_type>text</frontend_type>
+                            <backend_model>feedmanager/system_config_backend_outputDirectory</backend_model>
+                            <sort_order>20</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </output_directory>
+                        <batch_size translate="label comment">
+                            <label>Batch Size</label>
+                            <comment>Number of products to process per batch during AJAX generation. Lower values reduce memory usage but increase generation time. Default: 500</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number</validate>
+                            <sort_order>30</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </batch_size>
+                        <log_retention_days translate="label comment">
+                            <label>Log Retention (Days)</label>
+                            <comment>Number of days to keep feed generation logs. Logs older than this will be automatically deleted daily. Set to 0 to disable cleanup. Default: 30</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-digits</validate>
+                            <sort_order>40</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </log_retention_days>
+                        <error_threshold_percent translate="label comment">
+                            <label>Error Threshold (%)</label>
+                            <comment>Maximum percentage of products that can fail before aborting feed generation. For example, 10 means abort if more than 10% of products fail. Set to 0 to disable (never abort). Default: 10</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number validate-number-range number-range-0-100</validate>
+                            <sort_order>50</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>0</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </error_threshold_percent>
+                    </fields>
+                </general>
+            </groups>
+        </feedmanager>
+    </sections>
+</config>

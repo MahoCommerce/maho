@@ -113,7 +113,7 @@
                 try {
                     const result = await mahoFetch(targetUrl, {
                         method: 'POST',
-                        body: new URLSearchParams(new FormData(form)),
+                        body: new FormData(form),
                         loaderArea: form.closest('.product-view')
                     });
 

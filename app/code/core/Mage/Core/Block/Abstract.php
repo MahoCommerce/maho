@@ -1537,6 +1537,11 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         if (is_null($this->getCacheLifetime()) || !$this->_getApp()->useCache(self::CACHE_GROUP)) {
             return false;
         }
+        // Don't cache block HTML that contains deferred image resize URLs —
+        // once the images are generated the next request will cache with direct URLs.
+        if (Mage::helper('catalog/image')->hasDeferredImages) {
+            return false;
+        }
         $cacheKey = $this->getCacheKey();
         /** @var Mage_Core_Model_Session $session */
         $session = Mage::getSingleton('core/session');

@@ -32,7 +32,7 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
 
     public function getPostUrl(): string
     {
-        return $this->getCurrentStep()->getNextUrl();
+        return $this->getUrl('*/*/localePost');
     }
 
     public function getChangeUrl(): string
@@ -88,5 +88,42 @@ class Mage_Install_Block_Locale extends Mage_Install_Block_Abstract
     public function getCurrency(): string
     {
         return Mage::getSingleton('install/session')->getCurrency() ?: Mage::app()->getLocale()->getCurrency();
+    }
+
+    public function needsLocalization(): bool
+    {
+        $locale = $this->getLocale();
+        $parsed = \Locale::parseLocale($locale);
+        return $locale !== 'en_US' && isset($parsed['region']);
+    }
+
+    public function getCountryName(): string
+    {
+        return \Locale::getDisplayRegion($this->getLocale(), 'en');
+    }
+
+    public function getLanguageName(): string
+    {
+        return \Locale::getDisplayLanguage($this->getLocale(), 'en');
+    }
+
+    public function hasLanguagePack(): bool
+    {
+        return in_array($this->getLocale(), Mage_Install_Helper_Data::AVAILABLE_LANGUAGE_PACKS, true);
+    }
+
+    public function canInstallLanguagePack(): bool
+    {
+        return $this->hasLanguagePack() && Mage::helper('install')->isComposerAvailable();
+    }
+
+    public function getLanguagePackName(): string
+    {
+        return 'mahocommerce/maho-language-' . strtolower($this->getLocale());
+    }
+
+    public function getLanguagePackCommand(): string
+    {
+        return 'composer require ' . $this->getLanguagePackName();
     }
 }

@@ -19,4 +19,9 @@ class Mage_Install_Block_Complete extends Mage_Install_Block_Abstract
         parent::__construct();
         $this->setTemplate('page/complete.phtml');
     }
+
+    public function getLanguagePackCommand(): ?string
+    {
+        return Mage::getSingleton('install/session')->getLanguagePackCommand() ?: null;
+    }
 }

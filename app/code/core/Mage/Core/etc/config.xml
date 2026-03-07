@@ -79,6 +79,9 @@
                     <email_recipients>
                         <table>core_email_queue_recipients</table>
                     </email_recipients>
+                    <email_log>
+                        <table>core_email_log</table>
+                    </email_log>
                     <file_storage><table>core_file_storage</table></file_storage>
                     <directory_storage><table>core_directory_storage</table></directory_storage>
                 </entities>
@@ -304,6 +307,9 @@
             </cache>
             <smtp>
                 <enabled>sendmail</enabled>
+                <enable_queue>1</enable_queue>
+                <log_enabled>0</log_enabled>
+                <log_clean_after_days>30</log_clean_after_days>
             </smtp>
             <media_storage_configuration>
                 <image_file_type>18</image_file_type>
@@ -505,6 +511,10 @@
                 <schedule><cron_expr>0 0 * * *</cron_expr></schedule>
                 <run><model>core/email_queue::cleanQueue</model></run>
             </core_email_queue_clean_up>
+            <core_email_log_clean>
+                <schedule><cron_expr>0 2 * * *</cron_expr></schedule>
+                <run><model>core/email_log::cleanOldLogs</model></run>
+            </core_email_log_clean>
             <core_session_clean>
                 <schedule><cron_expr>30 3 * * *</cron_expr></schedule>
                 <run><model>core/session::cleanExpiredSessions</model></run>

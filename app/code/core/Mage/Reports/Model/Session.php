@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -12,6 +14,7 @@
 /**
  * @method $this unsData(string $value)
  */
+
 class Mage_Reports_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     /**

@@ -72,7 +72,7 @@ class Mage_Payment_Model_Restriction_Rule_Condition_Product_Found extends Mage_P
     public function loadAttributeOptions()
     {
         $this->setAttributeOption([
-            null => Mage::helper('payment')->__('Please choose a condition to add.'),
+            '' => Mage::helper('payment')->__('Please choose a condition to add.'),
         ]);
         return $this;
     }

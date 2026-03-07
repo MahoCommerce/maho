@@ -116,8 +116,8 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
 
         // Save product attributes used in rule
         $ruleProductAttributes = array_merge(
-            $this->getProductAttributes(serialize($object->getConditions()->asArray())),
-            $this->getProductAttributes(serialize($object->getActions()->asArray())),
+            $this->getProductAttributes($object->getConditions()->asArray()),
+            $this->getProductAttributes($object->getActions()->asArray()),
         );
         if (count($ruleProductAttributes)) {
             $this->setActualProductAttributes($object, $ruleProductAttributes);
@@ -288,21 +288,31 @@ class Mage_SalesRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abstra
     }
 
     /**
-     * Collect all product attributes used in serialized rule's action or condition
-     *
-     * @param string $serializedString
-     *
-     * @return array
+     * Collect all product attributes used in rule's action or condition array
      */
-    public function getProductAttributes($serializedString)
+    public function getProductAttributes(array $data): array
     {
         $result = [];
-        if (preg_match_all('~s:32:"salesrule/rule_condition_product";s:9:"attribute";s:\d+:"(.*?)"~s', $serializedString, $matches)) {
-            foreach ($matches[1] as $offset => $attributeCode) {
-                $result[] = $attributeCode;
+        $this->_collectProductAttributes($data, $result);
+        return $result;
+    }
+
+    /**
+     * Recursively search condition/action array for product attributes
+     */
+    protected function _collectProductAttributes(array $data, array &$result): void
+    {
+        if (isset($data['type']) && $data['type'] === 'salesrule/rule_condition_product' && isset($data['attribute'])) {
+            $result[] = $data['attribute'];
+        }
+        foreach (['conditions', 'actions'] as $key) {
+            if (isset($data[$key]) && is_array($data[$key])) {
+                foreach ($data[$key] as $child) {
+                    if (is_array($child)) {
+                        $this->_collectProductAttributes($child, $result);
+                    }
+                }
             }
         }
-
-        return $result;
     }
 }

@@ -67,7 +67,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/name',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $adminStore,
             );
             $collection->joinAttribute(
@@ -75,7 +75,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/name',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $store->getId(),
             );
             $collection->joinAttribute(
@@ -83,7 +83,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/status',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $store->getId(),
             );
             $collection->joinAttribute(
@@ -91,7 +91,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
                 'catalog_product/visibility',
                 'entity_id',
                 null,
-                'inner',
+                'left',
                 $store->getId(),
             );
             $collection->joinAttribute(
@@ -104,8 +104,8 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
             );
         } else {
             $collection->addAttributeToSelect('price');
-            $collection->joinAttribute('status', 'catalog_product/status', 'entity_id', null, 'inner');
-            $collection->joinAttribute('visibility', 'catalog_product/visibility', 'entity_id', null, 'inner');
+            $collection->joinAttribute('status', 'catalog_product/status', 'entity_id', null, 'left');
+            $collection->joinAttribute('visibility', 'catalog_product/visibility', 'entity_id', null, 'left');
         }
 
         $this->setCollection($collection);

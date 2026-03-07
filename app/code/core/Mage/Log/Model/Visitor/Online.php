@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -26,6 +28,7 @@
  * @method string getLastUrl()
  * @method $this setLastUrl(string $value)
  */
+
 class Mage_Log_Model_Visitor_Online extends Mage_Core_Model_Abstract
 {
     public const XML_PATH_ONLINE_INTERVAL      = 'customer/online_customers/online_minutes_interval';

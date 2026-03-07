@@ -68,7 +68,7 @@ class Mage_Bundle_Model_Product_Price extends Mage_Catalog_Model_Product_Type_Pr
         if ($product->hasCustomOptions()) {
             $customOption = $product->getCustomOption('bundle_selection_ids');
             if ($customOption) {
-                $selectionIds = unserialize($customOption->getValue(), ['allowed_classes' => false]);
+                $selectionIds = Mage::helper('core/string')->unserialize($customOption->getValue());
                 /** @var Mage_Bundle_Model_Product_Type $productType */
                 $productType = $product->getTypeInstance(true);
                 $selections = $productType->getSelectionsByIds($selectionIds, $product);

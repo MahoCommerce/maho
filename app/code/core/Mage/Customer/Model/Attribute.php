@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -24,6 +26,7 @@
  * @method int getScopeMultilineCount()
  * @method $this setScopeMultilineCount(int $value)
  */
+
 class Mage_Customer_Model_Attribute extends Mage_Eav_Model_Attribute
 {
     /**

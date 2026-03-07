@@ -382,33 +382,27 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         $locale = $this->getLocaleCode();
         $currencies = [];
 
-        // Get all available currencies from ICU data using ResourceBundle
-        $bundle = ResourceBundle::create($locale, 'ICUDATA-curr');
-        if ($bundle !== null) {
+        // For regional locales (e.g. en_GB), the ICU bundle only contains
+        // locale-specific currency name overrides, not the full list.
+        // Load from the root language bundle first, then merge overrides.
+        $primaryLanguage = \Locale::getPrimaryLanguage($locale);
+        $bundlesToLoad = ($primaryLanguage !== $locale)
+            ? [$primaryLanguage, $locale]
+            : [$locale];
+
+        foreach ($bundlesToLoad as $bundleLocale) {
+            $bundle = ResourceBundle::create($bundleLocale, 'ICUDATA-curr');
+            if ($bundle === null) {
+                continue;
+            }
             $currencyData = $bundle->get('Currencies');
-
-            if ($currencyData !== null) {
-                // Get list of all currency codes
-                $allCodes = [];
-                foreach ($currencyData as $code => $data) {
-                    if (strlen($code) === 3 && ctype_alpha($code)) {
-                        $allCodes[] = $code;
-                    }
-                }
-
-                // Now get the data for each code
-                foreach ($allCodes as $code) {
-                    $currInfo = $currencyData->get($code);
-                    if ($currInfo !== null) {
-                        // Get the display name (at index 1)
-                        $displayName = $currInfo->get(1);
-                        if ($displayName !== null) {
-                            $currencies[$code] = $displayName;
-                        } else {
-                            // Fallback to code
-                            $currencies[$code] = $code;
-                        }
-                    }
+            if ($currencyData === null) {
+                continue;
+            }
+            foreach ($currencyData as $code => $data) {
+                if (strlen($code) === 3 && ctype_alpha($code)) {
+                    $displayName = $data->get(1);
+                    $currencies[$code] = $displayName ?? $code;
                 }
             }
         }
@@ -543,13 +537,16 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
      *
      * @param string             $part
      */
-    public function date(string|int|DateTime|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
+    public function date(string|int|DateTime|DateTimeImmutable|null $date = null, ?string $part = null, ?string $locale = null, bool $useTimezone = true): DateTime
     {
         if (!is_int($date) && empty($date)) {
             // $date may be false, but DateTime uses strict compare
             $date = null;
         }
-        if ($part === null && is_numeric($date)) {
+        if ($date instanceof DateTimeInterface) {
+            // If already a DateTime/DateTimeImmutable, convert to mutable DateTime
+            $date = $date instanceof DateTime ? clone $date : DateTime::createFromInterface($date);
+        } elseif ($part === null && is_numeric($date)) {
             $date = new DateTime('@' . $date);
             // DateTime created from timestamp always has +00:00 timezone, convert to UTC
             $date->setTimezone(new DateTimeZone(self::DEFAULT_TIMEZONE));

@@ -754,6 +754,14 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
             return;
         }
 
+        // Verify the wishlist belongs to the logged-in customer
+        $wishlistItem = Mage::getModel('wishlist/item')->load($option->getWishlistItemId());
+        $wishlist = Mage::getModel('wishlist/wishlist')->load($wishlistItem->getWishlistId());
+        if ($wishlist->getCustomerId() != Mage::getSingleton('customer/session')->getCustomerId()) {
+            $this->_forward('noRoute');
+            return;
+        }
+
         $optionId = null;
         if (str_starts_with($option->getCode(), Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX)) {
             $optionId = str_replace(Mage_Catalog_Model_Product_Type_Abstract::OPTION_PREFIX, '', $option->getCode());

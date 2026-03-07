@@ -47,7 +47,7 @@ class Mage_CatalogInventory_Helper_Minsaleqty extends Mage_Core_Helper_Abstract
             if (count($data) == 1 && array_key_exists(Mage_Customer_Model_Group::CUST_GROUP_ALL, $data)) {
                 return (string) $data[Mage_Customer_Model_Group::CUST_GROUP_ALL];
             }
-            return serialize($data);
+            return Mage::helper('core')->jsonEncode($data);
         }
         return '';
     }

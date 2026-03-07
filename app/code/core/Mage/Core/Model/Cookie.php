@@ -154,6 +154,7 @@ class Mage_Core_Model_Cookie
         // Do not permit SameSite=None on unsecure pages, upgrade to Lax
         // https://developers.google.com/search/blog/2020/01/get-ready-for-new-samesitenone-secure
         if ($value === 'None' && $this->isSecure() === false) {
+            Mage::log('SameSite cookie attribute downgraded from None to Lax: HTTPS is required for SameSite=None', Mage::LOG_WARNING);
             return 'Lax';
         }
 

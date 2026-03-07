@@ -813,6 +813,8 @@
                 <base_width>1800</base_width>
                 <small_width>210</small_width>
                 <max_dimension>5000</max_dimension>
+                <keep_frame>1</keep_frame>
+                <background_color>#ffffff</background_color>
             </product_image>
             <seo>
                 <product_url_suffix></product_url_suffix>

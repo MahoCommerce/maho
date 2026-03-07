@@ -165,14 +165,11 @@ class Mage_Customer_Helper_Address extends Mage_Core_Helper_Abstract
     {
         $classes = [];
 
-        /** @var Mage_Customer_Model_Attribute $attribute */
         $attribute = $this->getAttribute($attributeCode);
-        if ($attribute) {
-            array_push($classes, ...explode(' ', $attribute->getFrontend()->getClass()));
-        }
+        array_push($classes, ...explode(' ', $attribute->getFrontend()->getClass()));
 
         if (in_array($attributeCode, ['firstname', 'middlename', 'lastname', 'prefix', 'suffix', 'taxvat'])) {
-            if ($attribute && !$attribute->getIsVisible()) {
+            if (!$attribute->getIsVisible()) {
                 $classes = []; // address attribute is not visible thus its validation rules are not applied
             }
 

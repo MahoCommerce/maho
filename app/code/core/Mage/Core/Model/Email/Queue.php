@@ -10,7 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
@@ -181,8 +180,8 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
         /** @var Mage_Core_Model_Email_Queue $message */
         foreach ($collection as $message) {
             if ($message->getId()) {
-                $dsn = Mage::helper('core')->getMailerDsn();
-                if (!$dsn) {
+                $transport = Mage::helper('core')->getMailTransport();
+                if (!$transport) {
                     $message->setProcessedAt(Mage_Core_Model_Locale::now());
                     $message->save();
                     continue;
@@ -190,7 +189,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
 
                 try {
                     $parameters = new \Maho\DataObject($message->getMessageParameters());
-                    $mailer = new Mailer(Transport::fromDsn($dsn));
+                    $mailer = new Mailer($transport);
                     $email = new Email();
                     $email->subject($parameters->getSubject());
                     $email->from(new Address($parameters->getFromEmail(), $parameters->getFromName()));

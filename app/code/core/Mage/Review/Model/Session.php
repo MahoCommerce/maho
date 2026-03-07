@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -15,6 +17,7 @@
  * @method array getRedirectUrl()
  * @method $this setRedirectUrl(string $value)
  */
+
 class Mage_Review_Model_Session extends Mage_Core_Model_Session_Abstract
 {
     public function __construct()

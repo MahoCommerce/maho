@@ -1,0 +1,45 @@
+<?php
+/**
+ * Maho
+ *
+ * @package     Maho_FeedManager
+ * @copyright   Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ *
+ * @var Mage_Adminhtml_Block_Template $this
+ */
+?>
+<script type="text/javascript">
+document.addEventListener('DOMContentLoaded', function() {
+    const outputType = document.getElementById('rule_output_type');
+    const outputValue = document.getElementById('rule_output_value');
+    const outputAttribute = document.getElementById('rule_output_attribute');
+
+    if (!outputType) return;
+
+    function updateFieldVisibility() {
+        const type = outputType.value;
+        const valueRow = outputValue?.closest('tr');
+        const attrRow = outputAttribute?.closest('tr');
+
+        // Show/hide based on type
+        if (valueRow) {
+            valueRow.style.display = (type === 'static' || type === 'combined') ? '' : 'none';
+        }
+        if (attrRow) {
+            attrRow.style.display = (type === 'attribute' || type === 'combined') ? '' : 'none';
+        }
+
+        // Update label for value field
+        const valueLabel = valueRow?.querySelector('label');
+        if (valueLabel) {
+            valueLabel.textContent = (type === 'combined')
+                ? '<?= $this->jsQuoteEscape($this->__('Prefix')) ?>'
+                : '<?= $this->jsQuoteEscape($this->__('Static Value')) ?>';
+        }
+    }
+
+    outputType.addEventListener('change', updateFieldVisibility);
+    updateFieldVisibility();
+});
+</script>

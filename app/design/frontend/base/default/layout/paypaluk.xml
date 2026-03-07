@@ -13,12 +13,12 @@
 <layout version="0.1.0">
     <checkout_cart_index>
         <reference name="checkout.cart.top_methods">
-            <block type="paypaluk/express_shortcut" name="checkout.cart.methods.paypaluk_express.top" before="-" template="paypal/express/shortcut.phtml">
+            <block type="paypaluk/express_shortcut" name="checkout.cart.methods.paypaluk_express.top" before="-" template="paypal/express/shortcut.phtml" ifconfig="payment/paypaluk_express/active">
                 <action method="setIsQuoteAllowed"><value>1</value></action>
             </block>
         </reference>
         <reference name="checkout.cart.methods">
-            <block type="paypaluk/express_shortcut" name="checkout.cart.methods.paypaluk_express.bottom" before="-" template="paypal/express/shortcut.phtml">
+            <block type="paypaluk/express_shortcut" name="checkout.cart.methods.paypaluk_express.bottom" before="-" template="paypal/express/shortcut.phtml" ifconfig="payment/paypaluk_express/active">
                 <action method="setIsQuoteAllowed"><value>1</value></action>
             </block>
         </reference>
@@ -67,7 +67,7 @@
                 <label>PayPal Express Checkout (Payflow Edition) Shortcut Wrapper</label>
                 <action method="setHtmlTagName"><tag>p</tag></action>
                 <action method="setElementClass"><class>paypal-logo</class></action>
-                <block type="paypaluk/express_shortcut" name="product.info.addtocart.paypaluk" template="paypal/express/shortcut.phtml">
+                <block type="paypaluk/express_shortcut" name="product.info.addtocart.paypaluk" template="paypal/express/shortcut.phtml" ifconfig="payment/paypaluk_express/active">
                     <action method="setIsInCatalogProduct"><value>1</value></action>
                 </block>
             </block>
@@ -77,10 +77,10 @@
 
     <default>
         <reference name="topCart.extra_actions">
-            <block type="paypaluk/express_shortcut" name="paypaluk.partner.top_cart.shortcut" template="paypal/express/shortcut.phtml"/>
+            <block type="paypaluk/express_shortcut" name="paypaluk.partner.top_cart.shortcut" template="paypal/express/shortcut.phtml" ifconfig="payment/paypaluk_express/active"/>
         </reference>
         <reference name="cart_sidebar.extra_actions">
-            <block type="paypaluk/express_shortcut" name="paypaluk.partner.cart_sidebar.shortcut" template="paypal/express/shortcut.phtml"/>
+            <block type="paypaluk/express_shortcut" name="paypaluk.partner.cart_sidebar.shortcut" template="paypal/express/shortcut.phtml" ifconfig="payment/paypaluk_express/active"/>
         </reference>
     </default>
 
@@ -129,7 +129,7 @@
     <SHORTCUT_uk_popup>
         <reference name="product.tooltip">
             <block type="page/html_wrapper" name="product.info.addtocart.paypaluk.wrapper" translate="label">
-                <block type="paypaluk/express_shortcut" name="product.info.addtocart.paypaluk" template="paypal/express/shortcut.phtml">
+                <block type="paypaluk/express_shortcut" name="product.info.addtocart.paypaluk" template="paypal/express/shortcut.phtml" ifconfig="payment/paypaluk_express/active">
                     <action method="setIsInCatalogProduct"><value>1</value></action>
                     <action method="setShowOrPosition"><value>after</value></action>
                 </block>

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /**
  * Maho
  *
@@ -30,6 +32,7 @@
  * @method string getAllowedAttributes()
  * @method $this setAllowedAttributes(string $allowedAttributes)
  */
+
 class Mage_Api2_Model_Acl_Global_Rule extends Mage_Core_Model_Abstract
 {
     /**

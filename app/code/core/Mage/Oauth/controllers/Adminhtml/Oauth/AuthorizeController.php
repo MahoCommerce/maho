@@ -273,7 +273,10 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizeController extends Mage_Adminhtml_Cont
     }
 
     /**
-     * Check admin permissions for this controller
+     * Allow access to all admin users
+     *
+     * OAuth authorization flow requires unrestricted access as it handles
+     * the login and consent screens for third-party application authorization.
      *
      * @return true
      */

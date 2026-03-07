@@ -43,6 +43,10 @@ class Mage_Catalog_Block_Product_List_Crosssell extends Mage_Catalog_Block_Produ
 
         Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($this->_itemCollection);
 
+        if (!Mage::helper('cataloginventory')->isShowOutOfStock()) {
+            Mage::getSingleton('cataloginventory/stock')->addInStockFilterToCollection($this->_itemCollection);
+        }
+
         $this->_itemCollection->load();
 
         foreach ($this->_itemCollection as $product) {

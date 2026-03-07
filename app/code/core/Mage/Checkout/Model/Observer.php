@@ -46,25 +46,15 @@ class Mage_Checkout_Model_Observer
         $output = $observer->getEvent()->getOutput();
         $encryptCallback = $observer->getEvent()->getEncryptCallback();
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
-        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
-        $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
         $output->write('Re-encrypting data on sales_flat_quote table... ');
-
-        $table = Mage::getSingleton('core/resource')->getTableName('sales_flat_quote');
-        $select = $readConnection->select()
-            ->from($table)
-            ->where('password_hash IS NOT NULL');
-        $encryptedData = $readConnection->fetchAll($select);
-
-        foreach ($encryptedData as $encryptedDataRow) {
-            $writeConnection->update(
-                $table,
-                ['password_hash' => $encryptCallback($decryptCallback($encryptedDataRow['password_hash']))],
-                ['entity_id = ?' => $encryptedDataRow['entity_id']],
-            );
-        }
-
+        Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('sales_flat_quote'),
+            'entity_id',
+            ['password_hash'],
+            $encryptCallback,
+            $decryptCallback,
+        );
         $output->writeln('OK');
     }
 }

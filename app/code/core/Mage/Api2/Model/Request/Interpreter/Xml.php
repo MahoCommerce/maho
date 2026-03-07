@@ -42,7 +42,7 @@ class Mage_Api2_Model_Request_Interpreter_Xml implements Mage_Api2_Model_Request
         $body = str_contains($body, '<?xml') ? $body : '<?xml version="1.0"?>' . PHP_EOL . $body;
 
         set_error_handler([$this, '_loadErrorHandler']); // Warnings and errors are suppressed
-        $config = simplexml_load_string($body);
+        $config = simplexml_load_string($body, 'SimpleXMLElement', LIBXML_NONET);
         restore_error_handler();
 
         // Check if there was a error while loading file

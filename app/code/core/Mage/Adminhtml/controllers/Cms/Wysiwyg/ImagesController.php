@@ -328,14 +328,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
             $originalPathInfo = pathinfo($originalFilePath);
 
             // Get configured image file type and extension
-            $configuredType = (int) Mage::getStoreConfig('system/media_storage_configuration/image_file_type');
-            $configuredExtension = match ($configuredType) {
-                IMAGETYPE_AVIF => 'avif',
-                IMAGETYPE_GIF  => 'gif',
-                IMAGETYPE_JPEG => 'jpg',
-                IMAGETYPE_PNG  => 'png',
-                default        => 'webp',
-            };
+            $configuredExtension = ltrim(Maho::getConfiguredImageExtension(), '.');
 
             if ($newFilename) {
                 // Always replace extension with configured type

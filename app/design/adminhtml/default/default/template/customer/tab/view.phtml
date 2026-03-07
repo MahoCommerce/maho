@@ -30,12 +30,12 @@ $createDateStore    = $this->getStoreCreateDate();
         <table cellspacing="2" class="box-left">
             <tr>
                 <td><strong><?= $this->__('Last Logged In:') ?></strong></td>
-                <td><?= $lastLoginDateAdmin ?> (<?= $this->getCurrentStatus() ?>)</td>
+                <td><?= $this->escapeHtml($lastLoginDateAdmin) ?> (<?= $this->getCurrentStatus() ?>)</td>
             </tr>
             <?php if ($lastLoginDateAdmin != $lastLoginDateStore): ?>
             <tr>
                 <td><strong><?= $this->__('Last Logged In (%s):', $this->getStoreLastLoginDateTimezone()) ?></strong></td>
-                <td><?= $lastLoginDateStore ?> (<?= $this->getCurrentStatus() ?>)</td>
+                <td><?= $this->escapeHtml($lastLoginDateStore) ?> (<?= $this->getCurrentStatus() ?>)</td>
             </tr>
             <?php endif ?>
             <tr>

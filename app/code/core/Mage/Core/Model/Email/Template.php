@@ -10,7 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mime\Address;
@@ -341,7 +340,6 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
     public function getInclude($template, array $variables)
     {
         $thisClass = self::class;
-        /** @var Mage_Core_Model_Email_Template $includeTemplate */
         $includeTemplate = new $thisClass();
         $includeTemplate->loadByCode($template);
 
@@ -387,7 +385,12 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
             default => null,
         };
 
-        if ($this->hasQueue() && $this->getQueue() instanceof Mage_Core_Model_Email_Queue) {
+        $useQueue = $this->hasQueue()
+            && $this->getQueue() instanceof Mage_Core_Model_Email_Queue
+            && !Mage::getIsDeveloperMode()
+            && Mage::getStoreConfigFlag('system/smtp/enable_queue');
+
+        if ($useQueue) {
             $emailQueue = $this->getQueue();
             $emailQueue->clearRecipients();
             $emailQueue->setMessageBody($text);
@@ -434,12 +437,16 @@ class Mage_Core_Model_Email_Template extends Mage_Core_Model_Email_Template_Abst
                 $email->html($text);
             }
 
-            $dsn = Mage::helper('core')->getMailerDsn();
-            if (!$dsn) {
+            if ($this->getTemplateId()) {
+                $email->getHeaders()->addTextHeader('X-Maho-Template', (string) $this->getTemplateId());
+            }
+
+            $transport = Mage::helper('core')->getMailTransport();
+            if (!$transport) {
                 // This means email sending is disabled
                 return true;
             }
-            $mailer = new Mailer(Transport::fromDsn($dsn));
+            $mailer = new Mailer($transport);
 
             $transportObj = new \Maho\DataObject();
             Mage::dispatchEvent('email_template_send_before', [
