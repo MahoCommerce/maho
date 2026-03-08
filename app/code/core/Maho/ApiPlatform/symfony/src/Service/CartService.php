@@ -663,7 +663,7 @@ class CartService
             \Mage::log('PlaceOrder - OrderCreateModel initialized');
 
             // Import payment data using orderCreateModel to ensure proper availability
-            $paymentData = array_merge(['method' => $paymentMethod], $additionalPaymentData);
+            $paymentData = array_merge($additionalPaymentData, ['method' => $paymentMethod]);
 
             // Add PO number for purchaseorder payment method
             if ($paymentMethod === 'purchaseorder') {
@@ -716,8 +716,7 @@ class CartService
 
             \Mage::log("Order created: {$order->getIncrementId()} (ID: {$order->getId()})");
 
-
-            // Generate a one-time order token for success page verification
+            // Generate storefront order token and save origin
             $orderToken = bin2hex(random_bytes(16));
             $resource = \Mage::getSingleton('core/resource');
             $db = $resource->getConnection('core_write');
@@ -729,6 +728,7 @@ class CartService
                 ],
                 ['entity_id = ?' => $order->getId()],
             );
+
             $result = [
                 'order_id' => (int) $order->getId(),
                 'increment_id' => $order->getIncrementId(),
@@ -739,16 +739,6 @@ class CartService
                 'shipment' => null,
                 'redirect_url' => null,
             ];
-
-            // Check if payment method requires a redirect (e.g. PayPal, Stripe hosted checkout)
-            try {
-                $redirectUrl = $order->getPayment()->getMethodInstance()->getOrderPlaceRedirectUrl();
-                if ($redirectUrl) {
-                    $result['redirect_url'] = $redirectUrl;
-                }
-            } catch (\Exception $e) {
-                // Payment method Payment method does not support redirect
-            }
 
             // Create invoice (similar to MDN PointOfSales approach)
             if ($order->canInvoice()) {
@@ -770,6 +760,20 @@ class CartService
                 ];
 
                 \Mage::log('Shipment created - order will auto-transition to complete');
+            }
+
+            // Check for redirect-based payment (PayPal, Klarna, hosted checkout, etc.)
+            try {
+                $redirectUrl = $order->getPayment()->getMethodInstance()->getOrderPlaceRedirectUrl();
+                if ($redirectUrl) {
+                    // Append order context so the payment controller can load the correct order
+                    $separator = str_contains($redirectUrl, '?') ? '&' : '?';
+                    $redirectUrl .= $separator . 'order_id=' . (int) $order->getId()
+                        . '&sft=' . urlencode($orderToken);
+                    $result['redirect_url'] = $redirectUrl;
+                }
+            } catch (\Exception $e) {
+                // Payment method may not support redirect — that's fine
             }
 
             return $result;
