@@ -917,28 +917,16 @@ Validation.vatState = new WeakMap();
 Validation.initVatValidation = function(elm) {
     if (Validation.vatState.has(elm)) return;
 
-    const state = { timer: null, requestId: 0, lastValue: null, lastCountry: null, valid: true };
+    const state = { requestId: 0, lastValue: null, lastCountry: null, valid: true };
     Validation.vatState.set(elm, state);
 
     const countryId = elm.dataset.validateVatCountry;
     const countryField = countryId ? document.getElementById(countryId) : null;
 
-    const trigger = () => {
-        clearTimeout(state.timer);
-        const v = elm.value.trim();
-        if (!v || v.length < 4) {
-            Validation.reset(elm);
-            return;
-        }
-        state.timer = setTimeout(() => Validation.doVatValidation(elm), 400);
-    };
-
-    elm.addEventListener('input', trigger);
     elm.addEventListener('blur', () => {
         const v = elm.value.trim();
         const country = countryField?.value || '';
         if (v && v.length >= 4 && (v !== state.lastValue || country !== state.lastCountry)) {
-            clearTimeout(state.timer);
             Validation.doVatValidation(elm);
         }
     });
@@ -951,6 +939,7 @@ Validation.initVatValidation = function(elm) {
             }
         });
     }
+
 };
 
 Validation.doVatValidation = async function(elm) {
@@ -969,9 +958,10 @@ Validation.doVatValidation = async function(elm) {
     const currentRequestId = ++state.requestId;
 
     try {
+        const formKey = elm.closest('form')?.querySelector('input[name="form_key"]')?.value || '';
         const response = await mahoFetch(url, {
             method: 'POST',
-            body: new URLSearchParams({ country, vat_number: vatNumber })
+            body: new URLSearchParams({ country, vat_number: vatNumber, form_key: formKey })
         });
 
         if (currentRequestId !== state.requestId) return;
@@ -985,7 +975,7 @@ Validation.doVatValidation = async function(elm) {
             return;
         }
 
-        if (response.error || !response.valid) {
+        if (!response.valid) {
             state.valid = false;
             Validation.ajaxError(elm, response.message || '');
         } else {
@@ -1007,6 +997,11 @@ Validation.add('validate-vat', 'VAT number validation failed.', function(v, elm)
     if (Validation.get('IsEmpty').test(v)) return true;
     const state = Validation.vatState.get(elm);
     return !state || state.valid;
+});
+
+// Auto-initialize VAT validation on page load so input/blur listeners are attached immediately
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.validate-vat').forEach(elm => Validation.initVatValidation(elm));
 });
 
 /**

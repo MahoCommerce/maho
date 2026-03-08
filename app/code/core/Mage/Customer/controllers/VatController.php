@@ -14,7 +14,6 @@ declare(strict_types=1);
  * VAT validation frontend controller
  *
  * Provides AJAX endpoint for real-time VAT number validation.
- * Uses Maho core rate limiting (system/rate_limit) to prevent abuse.
  */
 class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
 {
@@ -35,7 +34,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
      * - vat_number: VAT number to validate
      *
      * Response JSON:
-     * - error: int (0 = no error, 1 = error)
      * - valid: bool
      * - format_valid: bool
      * - success: bool (request to VIES succeeded)
@@ -46,7 +44,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
     public function validateAction(): void
     {
         $result = [
-            'error' => 1,
             'valid' => false,
             'format_valid' => false,
             'success' => false,
@@ -68,13 +65,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
             // Validate form key (CSRF protection)
             if (!$this->_validateFormKey()) {
                 $result['message'] = $this->__('Invalid form key. Please refresh the page.');
-                $this->_sendJsonResponse($result);
-                return;
-            }
-
-            // Check rate limiting using Maho core system
-            if (Mage::helper('core')->isRateLimitExceeded(false)) {
-                $result['message'] = $this->__('Too many requests. Please wait a moment.');
                 $this->_sendJsonResponse($result);
                 return;
             }
@@ -106,7 +96,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
             $validationResult = $vatHelper->checkVatNumberWithCache($country, $vatNumber);
 
             $result = [
-                'error' => 0,
                 'valid' => (bool) $validationResult->getIsValid(),
                 'format_valid' => (bool) $validationResult->getFormatValid(),
                 'success' => (bool) $validationResult->getRequestSuccess(),
