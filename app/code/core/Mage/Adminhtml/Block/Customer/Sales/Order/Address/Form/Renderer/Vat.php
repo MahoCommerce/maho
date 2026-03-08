@@ -43,7 +43,8 @@ class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extend
     {
         /** @var \Maho\Data\Form $form */
         $form = $this->_element->getForm();
-        return $form->getElement('country_id')->getHtmlId();
+        $element = $form->getElement('country_id');
+        return $element ? $element->getHtmlId() : 'country_id';
     }
 
     /**

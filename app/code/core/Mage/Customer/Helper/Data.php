@@ -997,8 +997,8 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             ]);
         }
 
-        // Check cache
-        $cacheKey = 'vat_validation_' . md5($vatCountryCode . $normalizedVat);
+        // Check cache - always use country code + number without prefix for consistency
+        $cacheKey = 'vat_validation_' . md5($vatCountryCode . '_' . $vatNumberWithoutPrefix);
         $cachedResult = Mage::app()->getCache()->load($cacheKey);
 
         if ($cachedResult !== false) {

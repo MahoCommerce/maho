@@ -130,8 +130,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
      */
     protected function _sendJsonResponse(array $data): void
     {
-        $this->getResponse()
-            ->setHeader('Content-Type', 'application/json', true)
-            ->setBody(Mage::helper('core')->jsonEncode($data));
+        $this->getResponse()->setBodyJson($data);
     }
 }
