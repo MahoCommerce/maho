@@ -119,7 +119,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         'DK' => '/^DK\d{8}$/',
         'EE' => '/^EE\d{9}$/',
         'EL' => '/^EL\d{9}$/',
-        'ES' => '/^ES([A-Z]\d{7}[A-Z]|\d{8}[A-Z]|[A-Z]\d{8})$/',
+        'ES' => '/^ES([A-Z]\d{7}[A-Z]|\d{8}[A-Z])$/',
         'FI' => '/^FI\d{8}$/',
         'FR' => '/^FR[A-HJ-NP-Z0-9]{2}\d{9}$/',
         'GB' => '/^GB(\d{9}|\d{12}|GD\d{3}|HA\d{3})$/',
