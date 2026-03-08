@@ -52,7 +52,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
             ]);
         }
 
-        return $vatHelper->checkVatNumberWithCache($country, $vatNumber);
+        return $vatHelper->checkVatNumber($country, $vatNumber);
     }
 
     /**

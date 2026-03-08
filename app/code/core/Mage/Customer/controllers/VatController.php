@@ -93,7 +93,7 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
             }
 
             // Perform validation
-            $validationResult = $vatHelper->checkVatNumberWithCache($country, $vatNumber);
+            $validationResult = $vatHelper->checkVatNumber($country, $vatNumber);
 
             $result = [
                 'valid' => (bool) $validationResult->getIsValid(),
