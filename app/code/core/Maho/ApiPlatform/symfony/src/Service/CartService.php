@@ -50,12 +50,9 @@ class CartService
 
         $quote->setIsActive(1);
 
-        // Generate and set masked ID for guest carts (before save to include in same transaction)
-        $maskedId = null;
-        if (!$customerId) {
-            $maskedId = $this->generateSecureMaskedId();
-            $quote->setData('masked_quote_id', $maskedId);
-        }
+        // Generate and set masked ID (used by storefront to reference the cart)
+        $maskedId = $this->generateSecureMaskedId();
+        $quote->setData('masked_quote_id', $maskedId);
 
         $quote->save();
 
@@ -573,7 +570,7 @@ class CartService
      * @param string|null $shippingMethod Shipping method code (carrier_method format)
      * @return array Order, invoice, and shipment information
      */
-    public function placeOrder(\Mage_Sales_Model_Quote $quote, string $paymentMethod = 'purchaseorder', ?string $shippingMethod = null, array $additionalPaymentData = []): array
+    public function placeOrder(\Mage_Sales_Model_Quote $quote, string $paymentMethod = 'purchaseorder', ?string $shippingMethod = null, array $additionalPaymentData = [], ?string $storefrontOrigin = null): array
     {
         try {
             \Mage::log("PlaceOrder START - Quote ID: {$quote->getId()}, Customer ID: {$quote->getCustomerId()}");
@@ -719,14 +716,39 @@ class CartService
 
             \Mage::log("Order created: {$order->getIncrementId()} (ID: {$order->getId()})");
 
+
+            // Generate a one-time order token for success page verification
+            $orderToken = bin2hex(random_bytes(16));
+            $resource = \Mage::getSingleton('core/resource');
+            $db = $resource->getConnection('core_write');
+            $db->update(
+                $resource->getTableName('sales/order'),
+                [
+                    'storefront_order_token' => $orderToken,
+                    'storefront_origin' => $storefrontOrigin,
+                ],
+                ['entity_id = ?' => $order->getId()],
+            );
             $result = [
                 'order_id' => (int) $order->getId(),
                 'increment_id' => $order->getIncrementId(),
                 'status' => $order->getStatus(),
                 'grand_total' => (float) $order->getGrandTotal(),
+                'order_token' => $orderToken,
                 'invoice' => null,
                 'shipment' => null,
+                'redirect_url' => null,
             ];
+
+            // Check if payment method requires a redirect (e.g. PayPal, Stripe hosted checkout)
+            try {
+                $redirectUrl = $order->getPayment()->getMethodInstance()->getOrderPlaceRedirectUrl();
+                if ($redirectUrl) {
+                    $result['redirect_url'] = $redirectUrl;
+                }
+            } catch (\Exception $e) {
+                // Payment method Payment method does not support redirect
+            }
 
             // Create invoice (similar to MDN PointOfSales approach)
             if ($order->canInvoice()) {

@@ -49,15 +49,18 @@ class GuestCartController extends AbstractController
     public function createCart(Request $request): JsonResponse
     {
         try {
-            $result = $this->cartService->createEmptyCart();
+            $customerId = $this->getAuthenticatedCustomerId();
+            $result = $this->cartService->createEmptyCart($customerId);
             $quote = $result['quote'];
 
-            return new JsonResponse([
+            $response = [
                 'id' => (int) $quote->getId(),
                 'maskedId' => $result['maskedId'],
                 'itemsCount' => 0,
                 'itemsQty' => 0,
-            ], Response::HTTP_CREATED);
+            ];
+
+            return new JsonResponse($response, Response::HTTP_CREATED);
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -105,7 +108,8 @@ class GuestCartController extends AbstractController
 
             if (!$quote) {
                 // Cart expired, converted to order, or doesn't exist — auto-create a new one
-                $result = $this->cartService->createEmptyCart();
+                $customerId = $this->getAuthenticatedCustomerId();
+                $result = $this->cartService->createEmptyCart($customerId);
                 $quote = $result['quote'];
                 $cartRecreated = true;
             }
@@ -739,14 +743,22 @@ class GuestCartController extends AbstractController
 
             // Place order
             $additionalPaymentData = isset($data['paymentData']) && is_array($data['paymentData']) ? $data['paymentData'] : [];
-            $result = $this->cartService->placeOrder($quote, $paymentMethod, null, $additionalPaymentData);
+            $storefrontOrigin = isset($data['storefrontOrigin']) && is_string($data['storefrontOrigin']) ? $data['storefrontOrigin'] : null;
+            $result = $this->cartService->placeOrder($quote, $paymentMethod, null, $additionalPaymentData, $storefrontOrigin);
 
-            return new JsonResponse([
+            $response = [
                 'orderId' => $result['order_id'],
                 'incrementId' => $result['increment_id'],
                 'status' => $result['status'],
                 'grandTotal' => $result['grand_total'],
-            ], Response::HTTP_CREATED);
+                'orderToken' => $result['order_token'],
+            ];
+
+            if (!empty($result['redirect_url'])) {
+                $response['redirectUrl'] = $result['redirect_url'];
+            }
+
+            return new JsonResponse($response, Response::HTTP_CREATED);
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse([
@@ -762,6 +774,51 @@ class GuestCartController extends AbstractController
      * Security: Guest carts are only accessible via masked IDs (32-char hex tokens).
      * Numeric IDs are sequential and would allow cart enumeration attacks.
      */
+    /**
+     * Verify an order by increment ID and one-time token.
+     * Used by the storefront success page to confirm the order is real.
+     */
+    #[Route('/api/orders/{incrementId}/verify', name: 'api_order_verify', methods: ['POST'])]
+    public function verifyOrder(string $incrementId, Request $request): JsonResponse
+    {
+        try {
+            $data = json_decode($request->getContent(), true);
+            $token = $data['orderToken'] ?? '';
+
+            if (!$token || !$incrementId) {
+                return new JsonResponse(['verified' => false], Response::HTTP_BAD_REQUEST);
+            }
+
+            $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
+            if (!$order || !$order->getId()) {
+                return new JsonResponse(['verified' => false], Response::HTTP_NOT_FOUND);
+            }
+
+            $storedToken = $order->getData('storefront_order_token');
+            if (!$storedToken || !hash_equals($storedToken, $token)) {
+                return new JsonResponse(['verified' => false], Response::HTTP_FORBIDDEN);
+            }
+
+            // Clear the token after successful verification (one-time use)
+            $resource = \Mage::getSingleton('core/resource');
+            $resource->getConnection('core_write')->update(
+                $resource->getTableName('sales/order'),
+                ['storefront_order_token' => null],
+                ['entity_id = ?' => $order->getId()],
+            );
+
+            return new JsonResponse([
+                'verified' => true,
+                'incrementId' => $order->getIncrementId(),
+                'status' => $order->getStatus(),
+                'grandTotal' => (float) $order->getGrandTotal(),
+                'email' => $order->getCustomerEmail(),
+            ]);
+        } catch (\Exception $e) {
+            \Mage::logException($e);
+            return new JsonResponse(['verified' => false], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
     private function loadCart(string $cartId): ?\Mage_Sales_Model_Quote
     {
         return $this->cartService->getCart(null, $cartId);
