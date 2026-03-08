@@ -951,7 +951,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
 
         return [
             'valid' => false,
-            'message' => $this->__('Invalid VAT number format for %s.', $vatCountryCode),
+            'message' => $this->__('Invalid VAT number format for %s.', Mage::getModel('directory/country')->loadByCode($countryCode)->getName()),
         ];
     }
 

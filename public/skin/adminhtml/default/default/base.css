@@ -935,12 +935,13 @@ ul.tabs-horiz li a.active {
 .validation-advice {
     clear: both;
     min-height: 15px;
-    margin: 3px 0 0 9px;
-    background: url(images/validation_advice_bg.gif)no-repeat 2px 1px;
-    padding-left: 16px;
+    margin-top: 3px;
+    padding-left: 20px;
     font-size: .95em;
     font-weight: 700;
-    line-height: 1.25em
+    line-height: 1.25em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23eb5202' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 5l0 14'/%3E%3Cpath d='M18 11l-6 -6'/%3E%3Cpath d='M6 11l6 -6'/%3E%3C/svg%3E") no-repeat 0 1px;
+    background-size: 16px 16px
 }
 
 input.validation-failed,textarea.validation-failed {

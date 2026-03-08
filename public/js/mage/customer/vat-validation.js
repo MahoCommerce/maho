@@ -155,7 +155,7 @@ class VatValidator {
         }
 
         if (response.valid) {
-            this.setStatus(response.format_only ? 'warning' : 'valid', response.message);
+            this.setStatus('valid');
         } else {
             this.setStatus('invalid', response.message);
         }
@@ -166,22 +166,18 @@ class VatValidator {
 
         switch (status) {
             case 'validating':
+                this.indicator.className = 'validation-advice';
                 this.indicator.textContent = '…';
                 this.indicator.style.display = '';
                 break;
             case 'valid':
                 this.vatField.classList.add('validation-passed');
-                this.indicator.textContent = message;
-                this.indicator.style.display = message ? '' : 'none';
-                break;
-            case 'warning':
-                this.vatField.classList.add('validation-passed');
-                this.indicator.textContent = message;
-                this.indicator.style.display = message ? '' : 'none';
+                this.indicator.style.display = 'none';
                 break;
             case 'invalid':
             case 'error':
                 this.vatField.classList.add('validation-failed');
+                this.indicator.className = 'validation-advice';
                 this.indicator.textContent = message;
                 this.indicator.style.display = message ? '' : 'none';
                 break;
@@ -193,6 +189,7 @@ class VatValidator {
 
     clearValidation() {
         this.vatField.classList.remove('validation-passed', 'validation-failed');
+        this.indicator.className = 'validation-advice';
         this.indicator.textContent = '';
         this.indicator.style.display = 'none';
         this.lastValidatedValue = null;
