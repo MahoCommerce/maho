@@ -2250,7 +2250,7 @@ ul.item-options li {
     width: 96.5%
 }
 
-.entry-edit .order-address .validate-vat {
+.entry-edit .order-address div.validate-vat {
     text-align: right;
     padding: 10px 0 0;
     width: 96%

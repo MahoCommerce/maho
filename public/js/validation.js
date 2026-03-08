@@ -171,8 +171,6 @@ class Validation {
         const container = elm.closest('.field-row');
         if (container) {
             container.insertAdjacentElement('afterend', div);
-        } else if (elm.closest('td.value')) {
-            elm.closest('td.value').insertAdjacentElement('beforeend', div);  // corrected from appendChild
         } else if (elm.adviceContainer || elm.advaiceContainer) {
             let adviceContainer = elm.adviceContainer || elm.advaiceContainer;
             if (typeof adviceContainer === 'string' || adviceContainer instanceof String) {
