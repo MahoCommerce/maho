@@ -677,7 +677,16 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
             $vatNumberWithoutPrefix = substr($normalizedVat, strlen($vatCountryCode));
         }
 
-        // Check format first
+        // Check if country is supported
+        if (!$this->hasVatFormatPattern($countryCode)) {
+            return new \Maho\DataObject([
+                'is_valid' => false,
+                'request_success' => false,
+                'country_supported' => false,
+            ]);
+        }
+
+        // Check format
         $formatResult = $this->validateVatFormat($countryCode, $vatNumber);
         if (!$formatResult['valid']) {
             return new \Maho\DataObject([
@@ -1023,7 +1032,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Normalize VAT number by removing spaces, dashes, and converting to uppercase
      */
-    public function normalizeVatNumber(string $vatNumber): string
+    protected function normalizeVatNumber(string $vatNumber): string
     {
         return strtoupper(preg_replace('/[\s\-\.]/', '', $vatNumber));
     }
@@ -1040,7 +1049,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Check if we have a format pattern for the country
      */
-    public function hasVatFormatPattern(string $countryCode): bool
+    protected function hasVatFormatPattern(string $countryCode): bool
     {
         $vatCountryCode = $this->_getCountryCodeForVatNumber($countryCode);
         return isset($this->_vatPatterns[$vatCountryCode]);

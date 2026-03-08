@@ -85,13 +85,6 @@ class Mage_Customer_VatController extends Mage_Core_Controller_Front_Action
                 return;
             }
 
-            // Check if country is supported
-            if (!$vatHelper->hasVatFormatPattern($country)) {
-                $result['country_supported'] = false;
-                $this->_sendJsonResponse($result);
-                return;
-            }
-
             // Perform validation
             $validationResult = $vatHelper->checkVatNumber($country, $vatNumber);
 

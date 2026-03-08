@@ -41,18 +41,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
             ?: $this->getRequest()->getParam('vat')
         ));
 
-        $vatHelper = Mage::helper('customer');
-
-        // Check if country is supported for VAT validation
-        if (!$vatHelper->hasVatFormatPattern($country)) {
-            return new \Maho\DataObject([
-                'is_valid' => false,
-                'request_success' => false,
-                'country_supported' => false,
-            ]);
-        }
-
-        return $vatHelper->checkVatNumber($country, $vatNumber);
+        return Mage::helper('customer')->checkVatNumber($country, $vatNumber);
     }
 
     /**
