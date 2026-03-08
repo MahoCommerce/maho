@@ -34,12 +34,12 @@ $_validateButton = $this->getValidateButton();
         </div>
         <script type="text/javascript">
             document.addEventListener('DOMContentLoaded', function() {
-                if (typeof VatValidator !== 'undefined') {
-                    new VatValidator({
-                        vatFieldId: '<?= $this->jsQuoteEscape($this->getVatFieldId()) ?>',
-                        countryFieldId: '<?= $this->jsQuoteEscape($this->getCountryFieldId()) ?>',
-                        validateUrl: '<?= $this->jsQuoteEscape($this->getAjaxValidateUrl()) ?>'
-                    });
+                var elm = document.getElementById('<?= $this->jsQuoteEscape($this->getVatFieldId()) ?>');
+                if (elm) {
+                    elm.classList.add('validate-vat');
+                    elm.dataset.validateVatUrl = '<?= $this->jsQuoteEscape($this->getAjaxValidateUrl()) ?>';
+                    elm.dataset.validateVatCountry = '<?= $this->jsQuoteEscape($this->getCountryFieldId()) ?>';
+                    Validation.initVatValidation(elm);
                 }
             });
         </script>

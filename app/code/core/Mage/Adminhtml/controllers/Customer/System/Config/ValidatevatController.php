@@ -31,7 +31,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
      *
      * Supports both parameter naming conventions:
      * - 'vat' (legacy admin)
-     * - 'vat_number' (frontend/VatValidator)
+     * - 'vat_number' (frontend validate-vat)
      */
     protected function _validate(): \Maho\DataObject
     {

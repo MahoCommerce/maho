@@ -283,9 +283,6 @@ Customer account address edit page
         <label>Customer My Account Address Edit Form</label>
         <!-- Mage_Customer -->
         <update handle="customer_account"/>
-        <reference name="head">
-            <action method="addJs"><script>mage/customer/vat-validation.js</script></action>
-        </reference>
         <reference name="my.account.wrapper">
             <block type="customer/address_edit" name="customer_address_edit" template="customer/address/edit.phtml"/>
         </reference>

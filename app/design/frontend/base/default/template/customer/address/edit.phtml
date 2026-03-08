@@ -78,7 +78,7 @@
             <li class="wide">
                 <label for="vat_id"><?= $this->__('VAT Number') ?></label>
                 <div class="input-box">
-                    <input type="text" name="vat_id" value="<?= $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?= $this->quoteEscape($this->__('VAT Number')) ?>" id="vat_id" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" />
+                    <input type="text" name="vat_id" value="<?= $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?= $this->quoteEscape($this->__('VAT Number')) ?>" id="vat_id" class="input-text validate-vat <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" data-validate-vat-url="<?= $this->escapeUrl($this->getUrl('customer/vat/validate')) ?>" data-validate-vat-country="country" />
                 </div>
             </li>
             <?php endif ?>
@@ -144,11 +144,4 @@
 <script type="text/javascript">
     var dataForm = new VarienForm('form-validate', true);
     new RegionUpdater('country', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'zip');
-    <?php if ($this->helper('customer/address')->isVatAttributeVisible()): ?>
-    new VatValidator({
-        vatFieldId: 'vat_id',
-        countryFieldId: 'country',
-        validateUrl: '<?= $this->getUrl('customer/vat/validate') ?>'
-    });
-    <?php endif ?>
 </script>

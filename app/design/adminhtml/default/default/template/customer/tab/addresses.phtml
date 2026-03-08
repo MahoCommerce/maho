@@ -654,27 +654,24 @@ class addressesModel {
 const customerAddresses = new addressesModel();
 
 // Initialize VAT validation for existing addresses
-<?php foreach ($addressCollection as $_address): ?>
-if (typeof VatValidator !== 'undefined') {
-    new VatValidator({
-        vatFieldId: '_item<?= $_address->getId() ?>vat_id',
-        countryFieldId: '_item<?= $_address->getId() ?>country_id',
-        validateUrl: '<?= $this->getUrl('adminhtml/customer_system_config_validatevat/validate') ?>'
-    });
+function initVatField(vatFieldId, countryFieldId) {
+    const elm = document.getElementById(vatFieldId);
+    if (!elm) return;
+    elm.classList.add('validate-vat');
+    elm.dataset.validateVatUrl = '<?= $this->jsQuoteEscape($this->getUrl('adminhtml/customer_system_config_validatevat/validate')) ?>';
+    elm.dataset.validateVatCountry = countryFieldId;
+    Validation.initVatValidation(elm);
 }
+
+<?php foreach ($addressCollection as $_address): ?>
+initVatField('_item<?= $_address->getId() ?>vat_id', '_item<?= $_address->getId() ?>country_id');
 <?php endforeach ?>
 
-// Extend addNewAddress to initialize VatValidator for new addresses
+// Extend addNewAddress to initialize VAT validation for new addresses
 const originalAddNewAddress = customerAddresses.addNewAddress.bind(customerAddresses);
 customerAddresses.addNewAddress = function(event) {
     originalAddNewAddress(event);
-    if (typeof VatValidator !== 'undefined') {
-        new VatValidator({
-            vatFieldId: '_item' + this.itemCount + 'vat_id',
-            countryFieldId: '_item' + this.itemCount + 'country_id',
-            validateUrl: '<?= $this->getUrl('adminhtml/customer_system_config_validatevat/validate') ?>'
-        });
-    }
+    initVatField('_item' + this.itemCount + 'vat_id', '_item' + this.itemCount + 'country_id');
 };
 </script>
 </td>
