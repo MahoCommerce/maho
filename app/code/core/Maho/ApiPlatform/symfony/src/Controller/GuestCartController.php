@@ -738,7 +738,8 @@ class GuestCartController extends AbstractController
             $this->cartService->setPaymentMethod($quote, $paymentMethod);
 
             // Place order
-            $result = $this->cartService->placeOrder($quote, $paymentMethod);
+            $additionalPaymentData = isset($data['paymentData']) && is_array($data['paymentData']) ? $data['paymentData'] : [];
+            $result = $this->cartService->placeOrder($quote, $paymentMethod, null, $additionalPaymentData);
 
             return new JsonResponse([
                 'orderId' => $result['order_id'],

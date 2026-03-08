@@ -573,7 +573,7 @@ class CartService
      * @param string|null $shippingMethod Shipping method code (carrier_method format)
      * @return array Order, invoice, and shipment information
      */
-    public function placeOrder(\Mage_Sales_Model_Quote $quote, string $paymentMethod = 'purchaseorder', ?string $shippingMethod = null): array
+    public function placeOrder(\Mage_Sales_Model_Quote $quote, string $paymentMethod = 'purchaseorder', ?string $shippingMethod = null, array $additionalPaymentData = []): array
     {
         try {
             \Mage::log("PlaceOrder START - Quote ID: {$quote->getId()}, Customer ID: {$quote->getCustomerId()}");
@@ -666,7 +666,7 @@ class CartService
             \Mage::log('PlaceOrder - OrderCreateModel initialized');
 
             // Import payment data using orderCreateModel to ensure proper availability
-            $paymentData = ['method' => $paymentMethod];
+            $paymentData = array_merge(['method' => $paymentMethod], $additionalPaymentData);
 
             // Add PO number for purchaseorder payment method
             if ($paymentMethod === 'purchaseorder') {

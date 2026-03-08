@@ -65,6 +65,8 @@ security:
         - { path: ^/api/auth, roles: PUBLIC_ACCESS }
         # Guest cart creation
         - { path: ^/api/guest-carts, roles: PUBLIC_ACCESS }
+        # Payment gateway endpoints (public — any module can register under /api/payments/)
+        - { path: ^/api/payments/, roles: PUBLIC_ACCESS }
         # Customer registration (POST only - creating new account)
         - { path: ^/api/customers$, roles: PUBLIC_ACCESS, methods: [POST] }
         # Newsletter subscribe/unsubscribe (guests allowed)
