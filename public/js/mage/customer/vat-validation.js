@@ -43,9 +43,11 @@ class VatValidator {
     }
 
     createIndicator() {
-        this.indicator = document.createElement('span');
-        this.indicator.style.cssText = 'display:block;margin-top:4px;font-size:12px;';
+        this.indicator = document.createElement('div');
+        this.indicator.className = 'validation-advice';
+        this.indicator.id = `advice-vat-validation-${this.vatField.id}`;
         this.indicator.setAttribute('aria-live', 'polite');
+        this.indicator.style.display = 'none';
         this.vatField.parentNode.appendChild(this.indicator);
     }
 
@@ -160,40 +162,39 @@ class VatValidator {
     }
 
     setStatus(status, message = '') {
-        let symbol = '';
-        let color = '';
+        this.vatField.classList.remove('validation-passed', 'validation-failed');
 
         switch (status) {
             case 'validating':
-                symbol = '…';
-                color = '#666';
+                this.indicator.textContent = '…';
+                this.indicator.style.display = '';
                 break;
             case 'valid':
-                symbol = '✓';
-                color = 'green';
+                this.vatField.classList.add('validation-passed');
+                this.indicator.textContent = message;
+                this.indicator.style.display = message ? '' : 'none';
                 break;
             case 'warning':
-                symbol = '⚠';
-                color = 'orange';
+                this.vatField.classList.add('validation-passed');
+                this.indicator.textContent = message;
+                this.indicator.style.display = message ? '' : 'none';
                 break;
             case 'invalid':
-                symbol = '✗';
-                color = 'red';
-                break;
             case 'error':
-                symbol = '!';
-                color = 'red';
+                this.vatField.classList.add('validation-failed');
+                this.indicator.textContent = message;
+                this.indicator.style.display = message ? '' : 'none';
                 break;
             default:
-                this.indicator.innerHTML = '';
+                this.indicator.style.display = 'none';
                 return;
         }
-
-        this.indicator.innerHTML = `<span style="color:${color}">${symbol} ${message}</span>`;
     }
 
     clearValidation() {
-        this.indicator.innerHTML = '';
+        this.vatField.classList.remove('validation-passed', 'validation-failed');
+        this.indicator.textContent = '';
+        this.indicator.style.display = 'none';
         this.lastValidatedValue = null;
         this.lastValidatedCountry = null;
     }
