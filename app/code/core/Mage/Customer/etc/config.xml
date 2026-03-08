@@ -564,6 +564,11 @@
                 <magic_link_email_template>customer_magic_link_email_template</magic_link_email_template>
                 <magic_link_registration_mode>no_password</magic_link_registration_mode>
             </login>
+            <vat_validation>
+                <enabled>0</enabled>
+                <cache_lifetime>24</cache_lifetime>
+                <offline_fallback>1</offline_fallback>
+            </vat_validation>
             <address>
                 <street_lines>2</street_lines>
                 <prefix_show/>

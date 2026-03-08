@@ -9,7 +9,10 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
-/** @var Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses $this */
+/**
+ * @var Mage_Adminhtml_Block_Customer_Edit_Tab_Addresses $this
+ * @var Mage_Customer_Model_Address[] $addressCollection
+ */
 ?>
 <!-- Addresses list -->
 <table cellspacing="0" class="form-edit">
@@ -649,6 +652,29 @@ class addressesModel {
 }
 
 const customerAddresses = new addressesModel();
+
+<?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>
+// Initialize VAT validation for existing addresses
+function initVatField(vatFieldId, countryFieldId) {
+    const elm = document.getElementById(vatFieldId);
+    if (!elm) return;
+    elm.classList.add('validate-vat');
+    elm.dataset.validateVatUrl = '<?= $this->jsQuoteEscape($this->getUrl('adminhtml/customer_system_config_validatevat/validate')) ?>';
+    elm.dataset.validateVatCountry = countryFieldId;
+    Validation.initVatValidation(elm);
+}
+
+<?php foreach ($addressCollection as $_address): ?>
+initVatField('_item<?= $_address->getId() ?>vat_id', '_item<?= $_address->getId() ?>country_id');
+<?php endforeach ?>
+
+// Extend addNewAddress to initialize VAT validation for new addresses
+const originalAddNewAddress = customerAddresses.addNewAddress.bind(customerAddresses);
+customerAddresses.addNewAddress = function(event) {
+    originalAddNewAddress(event);
+    initVatField('_item' + this.itemCount + 'vat_id', '_item' + this.itemCount + 'country_id');
+};
+<?php endif ?>
 </script>
 </td>
 </tr>
