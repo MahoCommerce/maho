@@ -459,6 +459,15 @@
                     <show_in_website>1</show_in_website>
                     <show_in_store>0</show_in_store>
                     <fields>
+                        <enabled translate="label comment">
+                            <label>Enable Real-time VAT Validation</label>
+                            <comment>Validate VAT numbers against the EU VIES service in real time on address forms.</comment>
+                            <frontend_type>boolean</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </enabled>
                         <cache_lifetime translate="label comment">
                             <label>Cache Lifetime (hours)</label>
                             <comment>How long to cache VIES validation results. Set to 0 to disable caching.</comment>

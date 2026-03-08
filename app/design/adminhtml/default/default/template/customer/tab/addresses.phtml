@@ -653,6 +653,7 @@ class addressesModel {
 
 const customerAddresses = new addressesModel();
 
+<?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>
 // Initialize VAT validation for existing addresses
 function initVatField(vatFieldId, countryFieldId) {
     const elm = document.getElementById(vatFieldId);
@@ -673,6 +674,7 @@ customerAddresses.addNewAddress = function(event) {
     originalAddNewAddress(event);
     initVatField('_item' + this.itemCount + 'vat_id', '_item' + this.itemCount + 'country_id');
 };
+<?php endif ?>
 </script>
 </td>
 </tr>

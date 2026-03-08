@@ -565,6 +565,7 @@
                 <magic_link_registration_mode>no_password</magic_link_registration_mode>
             </login>
             <vat_validation>
+                <enabled>0</enabled>
                 <cache_lifetime>24</cache_lifetime>
                 <offline_fallback>1</offline_fallback>
             </vat_validation>

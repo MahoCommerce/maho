@@ -95,6 +95,7 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
     /**
      * Config paths for VAT validation
      */
+    public const XML_PATH_VAT_VALIDATION_ENABLED = 'customer/vat_validation/enabled';
     public const XML_PATH_VAT_CACHE_LIFETIME = 'customer/vat_validation/cache_lifetime';
     public const XML_PATH_VAT_OFFLINE_FALLBACK = 'customer/vat_validation/offline_fallback';
 
@@ -897,6 +898,14 @@ class Mage_Customer_Helper_Data extends Mage_Core_Helper_Abstract
         // If confirmation is required, check if customer is confirmed
         // Customer is confirmed when confirmation field is null
         return !$customer->getConfirmation();
+    }
+
+    /**
+     * Check if real-time VAT validation is enabled
+     */
+    public function isVatValidationEnabled(): bool
+    {
+        return Mage::getStoreConfigFlag(self::XML_PATH_VAT_VALIDATION_ENABLED);
     }
 
     /**
