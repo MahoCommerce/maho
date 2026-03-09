@@ -7206,7 +7206,6 @@ div.paypal-logo span > img {
 .cms-no-route .std p {
   color: var(--maho-color-text-primary);
   font-size: 0.875rem;
-  font-style: italic;
   line-height: 24px;
 }
 .cms-page-view .std h1,
