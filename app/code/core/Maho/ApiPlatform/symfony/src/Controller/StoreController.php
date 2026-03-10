@@ -116,6 +116,7 @@ class StoreController extends AbstractController
             'locale' => \Mage::getStoreConfig('general/locale/code', $store),
             'timezone' => \Mage::getStoreConfig('general/locale/timezone', $store),
             'weight_unit' => \Mage::getStoreConfig('general/locale/weight_unit', $store),
+            'default_country' => \Mage::getStoreConfig('general/country/default', $store) ?: 'US',
             'base_currency_code' => $store->getBaseCurrencyCode(),
             'default_display_currency_code' => $store->getDefaultCurrencyCode(),
             'root_category_id' => (int) $store->getRootCategoryId(),

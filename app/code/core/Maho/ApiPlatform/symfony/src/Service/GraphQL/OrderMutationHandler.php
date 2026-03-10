@@ -145,7 +145,7 @@ class OrderMutationHandler
         $quote->collectTotals();
         $quote->save();
 
-        $result = $this->orderService->placeOrder(
+        $result = $this->orderService->placeAdminOrder(
             $quote,
             $variables['guestEmail'] ?? null,
             $variables['orderNote'] ?? null,
@@ -260,7 +260,7 @@ class OrderMutationHandler
         $quote->collectTotals();
         $quote->save();
 
-        $result = $this->orderService->placeOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
+        $result = $this->orderService->placeAdminOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
 
         $order = $result['order'];
         $grandTotal = (float) $order->getGrandTotal();

@@ -68,6 +68,7 @@ class GuestCartController extends AbstractController
                 'message' => 'Unable to create cart. Please try again.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
     }
 
     /**
@@ -94,6 +95,7 @@ class GuestCartController extends AbstractController
                 'message' => 'An error occurred while loading the cart.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
     }
 
     /**
@@ -118,6 +120,7 @@ class GuestCartController extends AbstractController
             if ($data === null) {
                 return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
             }
+
             $sku = $data['sku'] ?? '';
             $qty = (float) ($data['qty'] ?? 1);
             $options = $data['options'] ?? [];
@@ -135,18 +138,23 @@ class GuestCartController extends AbstractController
                 if (!empty($options)) {
                     $structured['options'] = $options;
                 }
+
                 if (!empty($data['links'])) {
                     $structured['links'] = $data['links'];
                 }
+
                 if (!empty($data['super_group'])) {
                     $structured['super_group'] = $data['super_group'];
                 }
+
                 if (!empty($data['bundle_option'])) {
                     $structured['bundle_option'] = $data['bundle_option'];
                 }
+
                 if (!empty($data['bundle_option_qty'])) {
                     $structured['bundle_option_qty'] = $data['bundle_option_qty'];
                 }
+
                 $options = $structured;
             }
 
@@ -165,6 +173,7 @@ class GuestCartController extends AbstractController
                 'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -187,6 +196,7 @@ class GuestCartController extends AbstractController
             if ($data === null) {
                 return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
             }
+
             $qty = (float) ($data['qty'] ?? 1);
 
             $quote = $this->cartService->updateItem($quote, $itemId, $qty);
@@ -199,6 +209,7 @@ class GuestCartController extends AbstractController
                 'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -227,6 +238,7 @@ class GuestCartController extends AbstractController
                 'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -266,6 +278,7 @@ class GuestCartController extends AbstractController
                 'message' => 'An error occurred while loading cart totals.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
     }
 
     /**
@@ -288,6 +301,7 @@ class GuestCartController extends AbstractController
             if ($data === null) {
                 return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
             }
+
             $couponCode = $data['code'] ?? '';
 
             if (!$couponCode) {
@@ -307,6 +321,7 @@ class GuestCartController extends AbstractController
                 'message' => 'Could not apply coupon code',
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -343,6 +358,7 @@ class GuestCartController extends AbstractController
                         'message' => 'Gift cards cannot be used to purchase gift card products',
                     ], Response::HTTP_BAD_REQUEST);
                 }
+
             }
 
             // Load gift card by code
@@ -396,6 +412,7 @@ class GuestCartController extends AbstractController
                 'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -456,6 +473,7 @@ class GuestCartController extends AbstractController
                 'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -484,6 +502,7 @@ class GuestCartController extends AbstractController
                 'message' => $this->safeErrorMessage($e, 'An error occurred while processing your request'),
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -506,6 +525,7 @@ class GuestCartController extends AbstractController
             if ($data === null) {
                 return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid JSON in request body'], Response::HTTP_BAD_REQUEST);
             }
+
             $address = $data['address'] ?? [];
 
             // Set shipping address if provided
@@ -521,10 +541,12 @@ class GuestCartController extends AbstractController
                         // Try loading by name
                         $region = \Mage::getModel('directory/region')->loadByName($regionText, $countryId);
                     }
+
                     if ($region->getId()) {
                         $regionId = (int) $region->getId();
                         $regionText = $region->getName(); // Use official name
                     }
+
                 }
 
                 $addressData = [
@@ -565,6 +587,7 @@ class GuestCartController extends AbstractController
                 'message' => 'An error occurred while loading shipping methods.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
     }
 
     /**
@@ -619,6 +642,7 @@ class GuestCartController extends AbstractController
                     // Skip methods that throw exceptions during availability check
                     continue;
                 }
+
             }
 
             // Sort by sort_order
@@ -632,6 +656,7 @@ class GuestCartController extends AbstractController
                 'message' => 'An error occurred while loading payment methods.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
     }
 
     /**
@@ -685,6 +710,7 @@ class GuestCartController extends AbstractController
                         empty($data['email']) ? $customer->getEmail() : $data['email'],
                     );
                 }
+
             }
 
             // Set email for guest
@@ -692,6 +718,7 @@ class GuestCartController extends AbstractController
                 if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
                     return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid email address'], Response::HTTP_BAD_REQUEST);
                 }
+
                 $quote->setCustomerEmail($data['email']);
             }
 
@@ -730,6 +757,7 @@ class GuestCartController extends AbstractController
                 if (!preg_match('/^[a-z0-9]+_[a-z0-9]+$/i', $data['shippingMethod'])) {
                     return new JsonResponse(['error' => 'invalid_request', 'message' => 'Invalid shipping method format, expected carrier_method'], Response::HTTP_BAD_REQUEST);
                 }
+
                 $parts = explode('_', $data['shippingMethod'], 2);
                 $this->cartService->setShippingMethod($quote, $parts[0], $parts[1]);
             }
@@ -738,13 +766,21 @@ class GuestCartController extends AbstractController
             if (empty($data['paymentMethod'])) {
                 return new JsonResponse(['error' => 'invalid_request', 'message' => 'paymentMethod is required'], Response::HTTP_BAD_REQUEST);
             }
+
             $paymentMethod = $data['paymentMethod'];
             $this->cartService->setPaymentMethod($quote, $paymentMethod);
 
             // Place order
             $additionalPaymentData = isset($data['paymentData']) && is_array($data['paymentData']) ? $data['paymentData'] : [];
             $storefrontOrigin = isset($data['storefrontOrigin']) && is_string($data['storefrontOrigin']) ? $data['storefrontOrigin'] : null;
-            $result = $this->cartService->placeOrder($quote, $paymentMethod, null, $additionalPaymentData, $storefrontOrigin);
+
+            // Use frontend checkout flow for storefront orders (validates addresses, email, etc.)
+            // Use admin flow for POS/internal orders (allows disabled products, stock overrides)
+            if ($storefrontOrigin) {
+                $result = $this->cartService->placeOrder($quote, $paymentMethod, $additionalPaymentData, $storefrontOrigin);
+            } else {
+                $result = $this->cartService->placeAdminOrder($quote, $paymentMethod, null, $additionalPaymentData, $storefrontOrigin);
+            }
 
             $response = [
                 'orderId' => $result['order_id'],
@@ -766,6 +802,7 @@ class GuestCartController extends AbstractController
                 'message' => $e->getMessage() ?: 'Failed to place order',
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -851,139 +888,9 @@ class GuestCartController extends AbstractController
             \Mage::logException($e);
             return new JsonResponse(['verified' => false], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+
     }
 
-    /**
-     * Create a customer account from a guest order using a signed token
-     */
-    #[Route('/api/customers/create-from-order', name: 'api_customer_create_from_order', methods: ['POST'])]
-    public function createAccountFromOrder(Request $request): JsonResponse
-    {
-        try {
-            $data = $this->decodeJson($request);
-            if ($data === null) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid request body',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            $accountToken = $data['accountToken'] ?? '';
-            $password = $data['password'] ?? '';
-
-            if (empty($accountToken) || empty($password)) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Account token and password are required',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            if (strlen($password) < 6) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Password must be at least 6 characters',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Validate HMAC token
-            $parts = explode('.', $accountToken, 2);
-            if (count($parts) !== 2) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid account token',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            [$payloadBase64, $signature] = $parts;
-
-            $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
-            $expectedSignature = hash_hmac('sha256', $payloadBase64, $cryptKey);
-
-            if (!hash_equals($expectedSignature, $signature)) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid account token',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            $payload = base64_decode($payloadBase64, true);
-            if ($payload === false) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid account token',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Parse payload: orderId|email|timestamp|action=create_account
-            $payloadParts = explode('|', $payload);
-            if (count($payloadParts) !== 4 || $payloadParts[3] !== 'action=create_account') {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid account token',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            $orderId = $payloadParts[0];
-            $email = $payloadParts[1];
-            $timestamp = (int) $payloadParts[2];
-
-            // Check token expiry (10 minutes)
-            if (abs(time() - $timestamp) > 600) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Account token has expired',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Check if customer already exists — return generic success to avoid revealing info
-            $websiteId = \Mage::app()->getStore()->getWebsiteId();
-            $existingCustomer = \Mage::getModel('customer/customer')
-                ->setWebsiteId($websiteId)
-                ->loadByEmail($email);
-
-            if ($existingCustomer->getId()) {
-                return new JsonResponse([
-                    'success' => true,
-                    'message' => 'Account created successfully',
-                ]);
-            }
-
-            // Load the order
-            $order = \Mage::getModel('sales/order')->load($orderId);
-            if (!$order->getId() || $order->getCustomerEmail() !== $email) {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Invalid account token',
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            // Create customer account
-            $customer = \Mage::getModel('customer/customer');
-            $customer->setWebsiteId($websiteId);
-            $customer->setStoreId(\Mage::app()->getStore()->getId());
-            $customer->setEmail($email);
-            $customer->setFirstname($order->getCustomerFirstname());
-            $customer->setLastname($order->getCustomerLastname());
-            $customer->setPassword($password);
-            $customer->save();
-
-            // Link the order to the new customer
-            $order->setCustomerId($customer->getId());
-            $order->setCustomerIsGuest(0);
-            $order->save();
-
-            return new JsonResponse([
-                'success' => true,
-                'message' => 'Account created successfully',
-            ]);
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'An error occurred while creating the account',
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
     private function loadCart(string $cartId): ?\Mage_Sales_Model_Quote
     {
         return $this->cartService->getCart(null, $cartId);
@@ -1020,7 +927,9 @@ class GuestCartController extends AbstractController
             if (!$thumb || $thumb === self::NO_SELECTION) {
                 $needParentIds[] = $pid;
             }
+
         }
+
         if (!empty($needParentIds)) {
             // Single query: get child->parent mapping from super_link table
             $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
@@ -1036,6 +945,7 @@ class GuestCartController extends AbstractController
                 $childToParent[(int) $row['product_id']] = (int) $row['parent_id'];
                 $allParentIds[] = (int) $row['parent_id'];
             }
+
             if (!empty($allParentIds)) {
                 $parentCollection = \Mage::getResourceModel('catalog/product_collection')
                     ->addIdFilter(array_unique($allParentIds))
@@ -1044,15 +954,20 @@ class GuestCartController extends AbstractController
                 foreach ($parentCollection as $pp) {
                     $parentProducts[(int) $pp->getId()] = $pp;
                 }
+
                 foreach ($childToParent as $childId => $parentId) {
                     if (isset($parentProducts[$parentId])) {
                         $parent = $parentProducts[$parentId];
                         if ($parent->getThumbnail() && $parent->getThumbnail() !== self::NO_SELECTION) {
                             $productMap[$childId] = $parent;
                         }
+
                     }
+
                 }
+
             }
+
         }
 
         // Batch-load stock items (single query)
@@ -1094,12 +1009,14 @@ class GuestCartController extends AbstractController
                     } catch (\Exception $e) {
                         $itemData['thumbnailUrl'] = $mediaConfig->getMediaUrl($thumbnail);
                     }
+
                 }
 
                 $urlKey = $product->getUrlKey();
                 if ($urlKey) {
                     $itemData['urlKey'] = $urlKey;
                 }
+
             }
 
             $itemData['stockStatus'] = ($stockMap[$productId] ?? false) ? 'in_stock' : 'out_of_stock';
@@ -1207,6 +1124,7 @@ class GuestCartController extends AbstractController
                 if ($label !== '' && $value !== '') {
                     $options[] = ['label' => (string) $label, 'value' => $value];
                 }
+
             }
 
             return $options;
@@ -1214,6 +1132,7 @@ class GuestCartController extends AbstractController
             \Mage::log('Error getting item configuration options: ' . $e->getMessage(), \Mage::LOG_WARNING);
             return [];
         }
+
     }
 
     /**
@@ -1243,6 +1162,7 @@ class GuestCartController extends AbstractController
                 if (!empty($parentIds)) {
                     $product = \Mage::getModel('catalog/product')->load($parentIds[0]);
                 }
+
             }
 
             $options = [];
@@ -1266,6 +1186,7 @@ class GuestCartController extends AbstractController
                             'sort_order' => (int) $value->getSortOrder(),
                         ];
                     }
+
                 }
 
                 $options[] = $optionData;
@@ -1284,6 +1205,7 @@ class GuestCartController extends AbstractController
                 'message' => 'An error occurred while loading product options.',
             ], Response::HTTP_BAD_REQUEST);
         }
+
     }
 
     /**
@@ -1295,10 +1217,12 @@ class GuestCartController extends AbstractController
         if ($body === '' || $body === '{}') {
             return [];
         }
+
         $data = json_decode($body, true);
         if (!is_array($data)) {
             return null;
         }
+
         return $data;
     }
 
@@ -1312,6 +1236,8 @@ class GuestCartController extends AbstractController
         if ($e instanceof \RuntimeException || $e instanceof \Mage_Core_Exception) {
             return $e->getMessage() ?: $fallback;
         }
+
         return $fallback;
     }
+
 }

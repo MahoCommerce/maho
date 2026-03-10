@@ -28,7 +28,7 @@ class OrderService
      * @param int|null $employeeId Employee ID (for POS)
      * @return array [order, changeAmount]
      */
-    public function placeOrder(
+    public function placeAdminOrder(
         \Mage_Sales_Model_Quote $quote,
         ?string $guestEmail = null,
         ?string $orderNote = null,
