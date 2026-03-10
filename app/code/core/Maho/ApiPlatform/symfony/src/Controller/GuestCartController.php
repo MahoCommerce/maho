@@ -807,16 +807,181 @@ class GuestCartController extends AbstractController
                 ['entity_id = ?' => $order->getId()],
             );
 
-            return new JsonResponse([
+            // Build items array for analytics
+            $items = [];
+            foreach ($order->getAllVisibleItems() as $item) {
+                $items[] = [
+                    'sku' => $item->getSku(),
+                    'name' => $item->getName(),
+                    'price' => (float) $item->getPriceInclTax(),
+                    'qty' => (int) $item->getQtyOrdered(),
+                ];
+            }
+
+            $responseData = [
                 'verified' => true,
                 'incrementId' => $order->getIncrementId(),
                 'status' => $order->getStatus(),
                 'grandTotal' => (float) $order->getGrandTotal(),
+                'subtotal' => (float) $order->getSubtotalInclTax(),
+                'tax' => (float) $order->getTaxAmount(),
+                'shipping' => (float) $order->getShippingInclTax(),
+                'currency' => $order->getOrderCurrencyCode(),
                 'email' => $order->getCustomerEmail(),
-            ]);
+                'items' => $items,
+            ];
+
+            // Generate account creation token if guest (no existing customer account)
+            $orderEmail = $order->getCustomerEmail();
+            $existingCustomer = \Mage::getModel('customer/customer')
+                ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
+                ->loadByEmail($orderEmail);
+
+            if (!$existingCustomer->getId()) {
+                $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
+                $timestamp = time();
+                $payload = $order->getId() . '|' . $orderEmail . '|' . $timestamp . '|action=create_account';
+                $payloadBase64 = base64_encode($payload);
+                $signature = hash_hmac('sha256', $payloadBase64, $cryptKey);
+                $responseData['accountToken'] = $payloadBase64 . '.' . $signature;
+            }
+
+            return new JsonResponse($responseData);
         } catch (\Exception $e) {
             \Mage::logException($e);
             return new JsonResponse(['verified' => false], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Create a customer account from a guest order using a signed token
+     */
+    #[Route('/api/customers/create-from-order', name: 'api_customer_create_from_order', methods: ['POST'])]
+    public function createAccountFromOrder(Request $request): JsonResponse
+    {
+        try {
+            $data = $this->decodeJson($request);
+            if ($data === null) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid request body',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $accountToken = $data['accountToken'] ?? '';
+            $password = $data['password'] ?? '';
+
+            if (empty($accountToken) || empty($password)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Account token and password are required',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            if (strlen($password) < 6) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Password must be at least 6 characters',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Validate HMAC token
+            $parts = explode('.', $accountToken, 2);
+            if (count($parts) !== 2) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid account token',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            [$payloadBase64, $signature] = $parts;
+
+            $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
+            $expectedSignature = hash_hmac('sha256', $payloadBase64, $cryptKey);
+
+            if (!hash_equals($expectedSignature, $signature)) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid account token',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $payload = base64_decode($payloadBase64, true);
+            if ($payload === false) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid account token',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Parse payload: orderId|email|timestamp|action=create_account
+            $payloadParts = explode('|', $payload);
+            if (count($payloadParts) !== 4 || $payloadParts[3] !== 'action=create_account') {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid account token',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            $orderId = $payloadParts[0];
+            $email = $payloadParts[1];
+            $timestamp = (int) $payloadParts[2];
+
+            // Check token expiry (10 minutes)
+            if (abs(time() - $timestamp) > 600) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Account token has expired',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Check if customer already exists — return generic success to avoid revealing info
+            $websiteId = \Mage::app()->getStore()->getWebsiteId();
+            $existingCustomer = \Mage::getModel('customer/customer')
+                ->setWebsiteId($websiteId)
+                ->loadByEmail($email);
+
+            if ($existingCustomer->getId()) {
+                return new JsonResponse([
+                    'success' => true,
+                    'message' => 'Account created successfully',
+                ]);
+            }
+
+            // Load the order
+            $order = \Mage::getModel('sales/order')->load($orderId);
+            if (!$order->getId() || $order->getCustomerEmail() !== $email) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Invalid account token',
+                ], Response::HTTP_BAD_REQUEST);
+            }
+
+            // Create customer account
+            $customer = \Mage::getModel('customer/customer');
+            $customer->setWebsiteId($websiteId);
+            $customer->setStoreId(\Mage::app()->getStore()->getId());
+            $customer->setEmail($email);
+            $customer->setFirstname($order->getCustomerFirstname());
+            $customer->setLastname($order->getCustomerLastname());
+            $customer->setPassword($password);
+            $customer->save();
+
+            // Link the order to the new customer
+            $order->setCustomerId($customer->getId());
+            $order->setCustomerIsGuest(0);
+            $order->save();
+
+            return new JsonResponse([
+                'success' => true,
+                'message' => 'Account created successfully',
+            ]);
+        } catch (\Exception $e) {
+            \Mage::logException($e);
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'An error occurred while creating the account',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
     private function loadCart(string $cartId): ?\Mage_Sales_Model_Quote
