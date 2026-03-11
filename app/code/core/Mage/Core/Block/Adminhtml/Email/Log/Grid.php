@@ -17,7 +17,6 @@ class Mage_Core_Block_Adminhtml_Email_Log_Grid extends Mage_Adminhtml_Block_Widg
         parent::__construct();
         $this->setId('emailLogGrid');
         $this->setDefaultSort('created_at');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
         $this->setUseAjax(true);
     }

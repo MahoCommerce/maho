@@ -17,7 +17,6 @@ class Maho_FeedManager_Block_Adminhtml_Destination_Grid extends Mage_Adminhtml_B
         parent::__construct();
         $this->setId('feedmanagerDestinationGrid');
         $this->setDefaultSort('destination_id');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
     }
 
