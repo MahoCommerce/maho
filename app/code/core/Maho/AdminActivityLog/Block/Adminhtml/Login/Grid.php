@@ -16,7 +16,6 @@ class Maho_AdminActivityLog_Block_Adminhtml_Login_Grid extends Mage_Adminhtml_Bl
         parent::__construct();
         $this->setId('adminLoginActivityGrid');
         $this->setDefaultSort('created_at');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
         $this->setUseAjax(true);
     }

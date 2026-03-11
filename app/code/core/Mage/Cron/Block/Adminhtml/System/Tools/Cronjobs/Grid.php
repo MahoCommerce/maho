@@ -15,7 +15,6 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         parent::__construct();
         $this->setId('cronjobsGrid');
         $this->setDefaultSort('schedule_id');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
     }
 

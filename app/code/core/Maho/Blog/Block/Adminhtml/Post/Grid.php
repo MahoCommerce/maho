@@ -16,7 +16,6 @@ class Maho_Blog_Block_Adminhtml_Post_Grid extends Mage_Adminhtml_Block_Widget_Gr
         parent::__construct();
         $this->setId('blogPostGrid');
         $this->setDefaultSort('entity_id');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
     }
 
