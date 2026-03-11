@@ -1195,7 +1195,7 @@ XML;
         callable $decryptCallback,
         int $batchSize = 1000,
         ?\Symfony\Component\Console\Output\OutputInterface $output = null,
-    ): void {
+    ): bool {
         $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $lastId = 0;
@@ -1208,7 +1208,7 @@ XML;
         }
         $columns = array_values(array_intersect($columns, $tableColumns));
         if (empty($columns)) {
-            return;
+            return false;
         }
 
         $quotedPk = $readConnection->quoteIdentifier($primaryKey);
@@ -1254,5 +1254,7 @@ XML;
 
             unset($rows);
         }
+
+        return true;
     }
 }

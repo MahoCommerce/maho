@@ -48,7 +48,7 @@ class Mage_Checkout_Model_Observer
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
 
         $output->write('Re-encrypting data on sales_flat_quote table... ');
-        Mage::helper('core')->recryptTable(
+        $result = Mage::helper('core')->recryptTable(
             Mage::getSingleton('core/resource')->getTableName('sales_flat_quote'),
             'entity_id',
             ['password_hash'],
@@ -56,6 +56,6 @@ class Mage_Checkout_Model_Observer
             $decryptCallback,
             output: $output,
         );
-        $output->writeln('OK');
+        $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
     }
 }
