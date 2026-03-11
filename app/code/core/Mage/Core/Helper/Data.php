@@ -1199,6 +1199,16 @@ XML;
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $lastId = 0;
 
+        $tableColumns = array_keys($readConnection->describeTable($table));
+        $missingColumns = array_diff($columns, $tableColumns);
+        foreach ($missingColumns as $column) {
+            Mage::log("recryptTable: column '$column' not found in table '$table', skipping", Mage::LOG_WARNING);
+        }
+        $columns = array_values(array_intersect($columns, $tableColumns));
+        if (empty($columns)) {
+            return;
+        }
+
         $quotedPk = $readConnection->quoteIdentifier($primaryKey);
 
         while (true) {

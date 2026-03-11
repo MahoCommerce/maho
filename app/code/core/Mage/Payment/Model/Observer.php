@@ -180,7 +180,7 @@ class Mage_Payment_Model_Observer
         Mage::helper('core')->recryptTable(
             Mage::getSingleton('core/resource')->getTableName('sales_flat_order_payment'),
             'entity_id',
-            ['cc_number_enc', 'cc_cid_enc'],
+            ['cc_number_enc'],
             $encryptCallback,
             $decryptCallback,
         );
