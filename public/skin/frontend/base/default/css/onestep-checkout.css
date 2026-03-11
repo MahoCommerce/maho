@@ -468,6 +468,7 @@
 
         &:first-child {
             inline-size: 100%;
+            white-space: normal;
         }
     }
 
@@ -478,6 +479,7 @@
         border-block-end: 1px solid var(--maho-color-border-light);
         overflow: hidden;
         text-overflow: ellipsis;
+        word-break: break-word;
 
         &:nth-child(2),
         &:nth-child(3),
