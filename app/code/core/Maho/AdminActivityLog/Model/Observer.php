@@ -470,6 +470,7 @@ class Maho_AdminActivityLog_Model_Observer
             ['old_data', 'new_data'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
         $output->writeln('OK');
     }

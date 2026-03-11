@@ -54,6 +54,7 @@ class Mage_Checkout_Model_Observer
             ['password_hash'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
         $output->writeln('OK');
     }

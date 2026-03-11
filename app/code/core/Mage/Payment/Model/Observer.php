@@ -173,6 +173,7 @@ class Mage_Payment_Model_Observer
             ['cc_number_enc', 'cc_cid_enc'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
         $output->writeln('OK');
 
@@ -183,6 +184,7 @@ class Mage_Payment_Model_Observer
             ['cc_number_enc'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
         $output->writeln('OK');
     }

@@ -29,6 +29,7 @@ class Maho_FeedManager_Model_Observer
             ['config'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
         $output->writeln('OK');
     }

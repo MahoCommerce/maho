@@ -160,6 +160,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             ['twofa_secret'],
             [$this, 'encrypt'],
             [$this, 'decrypt'],
+            output: $output,
         );
         $output->writeln('OK');
     }
