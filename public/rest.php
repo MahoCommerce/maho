@@ -97,5 +97,24 @@ if (str_contains($requestUri, '/api/admin/')) {
     }
 }
 
-// Include Symfony API Platform front controller
-require MAHO_ROOT_DIR . '/app/code/core/Maho/ApiPlatform/symfony/public/index.php';
+// Set environment variables for Symfony
+$_ENV['APP_SECRET'] = Mage::getStoreConfig('maho_apiplatform/oauth2/secret')
+    ?: hash('sha256', (string) Mage::getConfig()->getNode('global/crypt/key') . 'symfony_app_secret');
+$corsOrigins = Mage::getStoreConfig('maho_apiplatform/general/cors_origins');
+if (!$corsOrigins) {
+    $baseUrl = (string) Mage::getStoreConfig('web/secure/base_url');
+    $parsed = parse_url($baseUrl);
+    $corsOrigins = ($parsed['scheme'] ?? 'https') . '://' . ($parsed['host'] ?? 'localhost')
+        . (isset($parsed['port']) ? ':' . $parsed['port'] : '');
+}
+$_ENV['CORS_ALLOW_ORIGIN'] = $corsOrigins;
+
+// Boot Symfony kernel
+// Always use prod mode with debug=false to prevent trace leakage in API responses
+// Errors are still logged - just not exposed to API clients
+$kernel = new Maho\ApiPlatform\Kernel('prod', false);
+
+$request = Symfony\Component\HttpFoundation\Request::createFromGlobals();
+$response = $kernel->handle($request);
+$response->send();
+$kernel->terminate($request, $response);
