@@ -2089,6 +2089,13 @@ div.autocomplete ul li {
     float: left
 }
 
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, .8);
+    z-index: 1;
+}
+
 .overlay span {
     display: block;
     width: 100%;
