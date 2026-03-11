@@ -464,14 +464,15 @@ class Maho_AdminActivityLog_Model_Observer
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
 
         $output->write('Re-encrypting data on adminactivitylog_activity table... ');
-        Mage::helper('core')->recryptTable(
+        $result = Mage::helper('core')->recryptTable(
             Mage::getSingleton('core/resource')->getTableName('adminactivitylog/activity'),
             'activity_id',
             ['old_data', 'new_data'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
-        $output->writeln('OK');
+        $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
     }
 
 }
