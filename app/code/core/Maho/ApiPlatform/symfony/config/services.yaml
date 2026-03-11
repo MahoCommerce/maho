@@ -24,4 +24,8 @@ services:
         tags:
             - { name: 'api_platform.graphql.query_resolver' }
 
+    # ProductService needs a factory because of optional Meilisearch dependency
+    Maho\ApiPlatform\Service\ProductService:
+        factory: ['@Maho\ApiPlatform\Factory\ServiceFactory', 'createProductService']
+
     # Tag all our state providers so CustomQueryResolver can locate them

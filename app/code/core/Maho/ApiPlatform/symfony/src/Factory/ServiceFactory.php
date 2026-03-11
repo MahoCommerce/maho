@@ -14,13 +14,12 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Factory;
 
 use Maho\ApiPlatform\Service\ProductService;
-use Maho\ApiPlatform\Service\CustomerService;
-use Maho\ApiPlatform\Service\CartService;
-use Maho\ApiPlatform\Service\OrderService;
-use Maho\ApiPlatform\Service\PaymentService;
 
 /**
- * Service Factory - Creates service instances with proper dependencies
+ * Service Factory
+ *
+ * Factory methods for services that need special construction logic
+ * (e.g. optional external dependencies that can't be autowired).
  */
 class ServiceFactory
 {
@@ -47,37 +46,5 @@ class ServiceFactory
 
         /** @phpstan-ignore-next-line */
         return new ProductService($meilisearchClient, $indexPrefix);
-    }
-
-    /**
-     * Create CustomerService
-     */
-    public function createCustomerService(): CustomerService
-    {
-        return new CustomerService();
-    }
-
-    /**
-     * Create CartService
-     */
-    public function createCartService(): CartService
-    {
-        return new CartService();
-    }
-
-    /**
-     * Create OrderService
-     */
-    public function createOrderService(): OrderService
-    {
-        return new OrderService();
-    }
-
-    /**
-     * Create PaymentService
-     */
-    public function createPaymentService(): PaymentService
-    {
-        return new PaymentService();
     }
 }
