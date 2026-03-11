@@ -30,12 +30,14 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
          * Calculate how much shipping discount should be applied
          * basing on how much shipping should be refunded.
          */
-        $baseShippingAmount = $creditmemo->getBaseShippingAmount();
-        if ($baseShippingAmount) {
-            $baseShippingDiscount = $baseShippingAmount * $order->getBaseShippingDiscountAmount() / $order->getBaseShippingAmount();
-            $shippingDiscount = $order->getShippingAmount() * $baseShippingDiscount / $order->getBaseShippingAmount();
-            $totalDiscountAmount = $totalDiscountAmount + $shippingDiscount;
-            $baseTotalDiscountAmount = $baseTotalDiscountAmount + $baseShippingDiscount;
+        $baseShippingAmount = (float) $creditmemo->getBaseShippingAmount();
+        $orderBaseShippingAmount = (float) $order->getBaseShippingAmount();
+        if ($baseShippingAmount && $orderBaseShippingAmount) {
+            $shippingRefundRatio = $baseShippingAmount / $orderBaseShippingAmount;
+            $baseShippingDiscount = $shippingRefundRatio * $order->getBaseShippingDiscountAmount();
+            $shippingDiscount = $shippingRefundRatio * $order->getShippingDiscountAmount();
+            $totalDiscountAmount += $shippingDiscount;
+            $baseTotalDiscountAmount += $baseShippingDiscount;
         }
 
         /** @var Mage_Sales_Model_Order_Creditmemo_Item $item */
@@ -55,16 +57,18 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 $baseDiscount = $baseOrderItemDiscount - $orderItem->getBaseDiscountRefunded();
                 if (!$item->isLast()) {
                     $availableQty = $orderItemQty - $orderItem->getQtyRefunded();
-                    $discount = $creditmemo->roundPrice(
-                        $discount / $availableQty * $item->getQty(),
-                        'regular',
-                        true,
-                    );
-                    $baseDiscount = $creditmemo->roundPrice(
-                        $baseDiscount / $availableQty * $item->getQty(),
-                        'base',
-                        true,
-                    );
+                    if ($availableQty > 0) {
+                        $discount = $creditmemo->roundPrice(
+                            $discount / $availableQty * $item->getQty(),
+                            'regular',
+                            true,
+                        );
+                        $baseDiscount = $creditmemo->roundPrice(
+                            $baseDiscount / $availableQty * $item->getQty(),
+                            'base',
+                            true,
+                        );
+                    }
                 }
 
                 $totalDiscountAmount += $discount;
