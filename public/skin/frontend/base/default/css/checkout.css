@@ -1366,6 +1366,15 @@ body.checkout-onepage-index:has(.page-header-minimal):not(:has(.onestep-checkout
     white-space: nowrap;
 }
 
+.onestep-checkout #checkout-review-table tfoot td {
+    white-space: normal;
+    word-break: break-word;
+}
+
+.onestep-checkout #checkout-review-table tfoot td:last-child {
+    white-space: nowrap;
+}
+
 #review-buttons-container {
     display: flex;
     justify-content: space-between;
