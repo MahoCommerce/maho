@@ -31,7 +31,7 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
          * basing on how much shipping should be refunded.
          */
         $baseShippingAmount = $creditmemo->getBaseShippingAmount();
-        if ($baseShippingAmount) {
+        if ((float) $baseShippingAmount && (float) $order->getBaseShippingAmount()) {
             $baseShippingDiscount = $baseShippingAmount * $order->getBaseShippingDiscountAmount() / $order->getBaseShippingAmount();
             $shippingDiscount = $order->getShippingAmount() * $baseShippingDiscount / $order->getBaseShippingAmount();
             $totalDiscountAmount = $totalDiscountAmount + $shippingDiscount;
@@ -55,16 +55,18 @@ class Mage_Sales_Model_Order_Creditmemo_Total_Discount extends Mage_Sales_Model_
                 $baseDiscount = $baseOrderItemDiscount - $orderItem->getBaseDiscountRefunded();
                 if (!$item->isLast()) {
                     $availableQty = $orderItemQty - $orderItem->getQtyRefunded();
-                    $discount = $creditmemo->roundPrice(
-                        $discount / $availableQty * $item->getQty(),
-                        'regular',
-                        true,
-                    );
-                    $baseDiscount = $creditmemo->roundPrice(
-                        $baseDiscount / $availableQty * $item->getQty(),
-                        'base',
-                        true,
-                    );
+                    if ($availableQty > 0) {
+                        $discount = $creditmemo->roundPrice(
+                            $discount / $availableQty * $item->getQty(),
+                            'regular',
+                            true,
+                        );
+                        $baseDiscount = $creditmemo->roundPrice(
+                            $baseDiscount / $availableQty * $item->getQty(),
+                            'base',
+                            true,
+                        );
+                    }
                 }
 
                 $totalDiscountAmount += $discount;
