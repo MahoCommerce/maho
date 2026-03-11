@@ -167,23 +167,25 @@ class Mage_Payment_Model_Observer
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
 
         $output->write('Re-encrypting data on sales_flat_quote_payment table... ');
-        Mage::helper('core')->recryptTable(
+        $result = Mage::helper('core')->recryptTable(
             Mage::getSingleton('core/resource')->getTableName('sales_flat_quote_payment'),
             'payment_id',
             ['cc_number_enc', 'cc_cid_enc'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
-        $output->writeln('OK');
+        $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
 
         $output->write('Re-encrypting data on sales_flat_order_payment table... ');
-        Mage::helper('core')->recryptTable(
+        $result = Mage::helper('core')->recryptTable(
             Mage::getSingleton('core/resource')->getTableName('sales_flat_order_payment'),
             'entity_id',
-            ['cc_number_enc', 'cc_cid_enc'],
+            ['cc_number_enc'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
-        $output->writeln('OK');
+        $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
     }
 }

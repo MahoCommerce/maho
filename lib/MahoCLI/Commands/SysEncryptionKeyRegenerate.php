@@ -154,14 +154,15 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
     protected function recryptAdminUserTable(OutputInterface $output): void
     {
         $output->write('Re-encrypting data on admin_user table... ');
-        Mage::helper('core')->recryptTable(
+        $result = Mage::helper('core')->recryptTable(
             Mage::getSingleton('core/resource')->getTableName('admin_user'),
             'user_id',
             ['twofa_secret'],
             [$this, 'encrypt'],
             [$this, 'decrypt'],
+            output: $output,
         );
-        $output->writeln('OK');
+        $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
     }
 
     protected function recryptCoreConfigDataTable(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection, \Maho\Db\Adapter\AdapterInterface $writeConnection): void

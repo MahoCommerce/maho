@@ -171,8 +171,6 @@ class Validation {
         const container = elm.closest('.field-row');
         if (container) {
             container.insertAdjacentElement('afterend', div);
-        } else if (elm.closest('td.value')) {
-            elm.closest('td.value').insertAdjacentElement('beforeend', div);  // corrected from appendChild
         } else if (elm.adviceContainer || elm.advaiceContainer) {
             let adviceContainer = elm.adviceContainer || elm.advaiceContainer;
             if (typeof adviceContainer === 'string' || adviceContainer instanceof String) {
@@ -904,6 +902,105 @@ function validateCreditCard(input) {
     }
     return sum % 10 === 0;
 }
+
+/**
+ * Async VAT number validation via AJAX
+ *
+ * Usage: add class "validate-vat" to the input and set data attributes:
+ *   data-validate-vat-url="/customer/vat/validate"
+ *   data-validate-vat-country="country_id"  (ID of the country select element)
+ */
+Validation.vatState = new WeakMap();
+
+Validation.initVatValidation = function(elm) {
+    if (Validation.vatState.has(elm)) return;
+
+    const state = { requestId: 0, lastValue: null, lastCountry: null, valid: true };
+    Validation.vatState.set(elm, state);
+
+    const countryId = elm.dataset.validateVatCountry;
+    const countryField = countryId ? document.getElementById(countryId) : null;
+
+    elm.addEventListener('blur', () => {
+        const v = elm.value.trim();
+        const country = countryField?.value || '';
+        if (v && v.length >= 4 && (v !== state.lastValue || country !== state.lastCountry)) {
+            Validation.doVatValidation(elm);
+        }
+    });
+
+    if (countryField) {
+        countryField.addEventListener('change', () => {
+            if (elm.value.trim().length >= 4) {
+                Validation.reset(elm);
+                Validation.doVatValidation(elm);
+            }
+        });
+    }
+
+};
+
+Validation.doVatValidation = async function(elm) {
+    const state = Validation.vatState.get(elm);
+    if (!state) return;
+
+    const url = elm.dataset.validateVatUrl;
+    if (!url) return;
+
+    const vatNumber = elm.value.trim();
+    const countryId = elm.dataset.validateVatCountry;
+    const country = countryId ? document.getElementById(countryId)?.value || '' : '';
+
+    if (!vatNumber || !country) return;
+
+    const currentRequestId = ++state.requestId;
+
+    try {
+        const formKey = elm.closest('form')?.querySelector('input[name="form_key"]')?.value || '';
+        const response = await mahoFetch(url, {
+            method: 'POST',
+            body: new URLSearchParams({ country, vat_number: vatNumber, form_key: formKey })
+        });
+
+        if (currentRequestId !== state.requestId) return;
+
+        state.lastValue = vatNumber;
+        state.lastCountry = country;
+
+        if (response.country_supported === false) {
+            state.valid = true;
+            Validation.reset(elm);
+            return;
+        }
+
+        if (!response.valid) {
+            state.valid = false;
+            Validation.ajaxError(elm, response.message || '');
+        } else {
+            state.valid = true;
+            const advice = Validation.getAdvice('validate-ajax', elm);
+            Validation.hideAdvice(elm, advice);
+            elm.classList.remove('validation-failed', 'validate-ajax');
+            elm.classList.add('validation-passed');
+        }
+    } catch {
+        if (currentRequestId !== state.requestId) return;
+        state.valid = false;
+        Validation.ajaxError(elm, '');
+    }
+};
+
+Validation.add('validate-vat', 'VAT number validation failed.', function(v, elm) {
+    Validation.initVatValidation(elm);
+    if (Validation.get('IsEmpty').test(v)) return true;
+    const state = Validation.vatState.get(elm);
+    return !state || state.valid;
+});
+
+// Auto-initialize VAT validation on page load so input/blur listeners are attached immediately
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.validate-vat').forEach(elm => Validation.initVatValidation(elm));
+});
 
 /**
  * Hash with credit card types which can be simply extended in payment modules

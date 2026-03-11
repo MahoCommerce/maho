@@ -29,6 +29,34 @@ class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extend
     }
 
     /**
+     * Get VAT field HTML ID
+     */
+    public function getVatFieldId(): string
+    {
+        return $this->_element->getHtmlId();
+    }
+
+    /**
+     * Get country field HTML ID
+     */
+    public function getCountryFieldId(): string
+    {
+        /** @var \Maho\Data\Form $form */
+        $form = $this->_element->getForm();
+        $element = $form->getElement('country_id');
+        return $element ? $element->getHtmlId() : 'country_id';
+    }
+
+    /**
+     * Get AJAX validation URL for real-time validation
+     */
+    public function getAjaxValidateUrl(): string
+    {
+        return Mage::getSingleton('adminhtml/url')
+            ->getUrl('*/customer_system_config_validatevat/validate');
+    }
+
+    /**
      * Retrieve validate button block
      *
      * @return Mage_Adminhtml_Block_Widget_Button

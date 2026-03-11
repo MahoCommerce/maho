@@ -114,6 +114,10 @@
     overflow: hidden;
 }
 
+#onestep-review {
+    overflow: visible;
+}
+
 .onestep-section-header {
     padding-block-start: 1rem;
 
@@ -464,6 +468,7 @@
 
         &:first-child {
             inline-size: 100%;
+            white-space: normal;
         }
     }
 
@@ -474,6 +479,7 @@
         border-block-end: 1px solid var(--maho-color-border-light);
         overflow: hidden;
         text-overflow: ellipsis;
+        word-break: break-word;
 
         &:nth-child(2),
         &:nth-child(3),
@@ -503,6 +509,7 @@
         td {
             padding: 0.5rem;
             font-size: 0.875rem;
+            white-space: normal;
             border-block-end: none;
 
             &:last-child {

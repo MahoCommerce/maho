@@ -21,7 +21,6 @@ class Maho_ContentVersion_Block_Adminhtml_Version_Grid extends Mage_Adminhtml_Bl
         parent::__construct();
         $this->setId('contentversion_grid');
         $this->setDefaultSort('version_number');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(false);
         $this->setUseAjax(false);
         $this->setFilterVisibility(false);

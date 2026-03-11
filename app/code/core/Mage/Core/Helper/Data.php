@@ -1194,10 +1194,22 @@ XML;
         callable $encryptCallback,
         callable $decryptCallback,
         int $batchSize = 1000,
-    ): void {
+        ?\Symfony\Component\Console\Output\OutputInterface $output = null,
+    ): bool {
         $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
         $lastId = 0;
+
+        $tableColumns = array_keys($readConnection->describeTable($table));
+        foreach (array_diff($columns, $tableColumns) as $column) {
+            $message = "recryptTable: column '$column' not found in table '$table', skipping";
+            Mage::log($message, Mage::LOG_WARNING);
+            $output?->writeln("<comment>WARNING: $message</comment>");
+        }
+        $columns = array_values(array_intersect($columns, $tableColumns));
+        if (empty($columns)) {
+            return false;
+        }
 
         $quotedPk = $readConnection->quoteIdentifier($primaryKey);
 
@@ -1242,5 +1254,7 @@ XML;
 
             unset($rows);
         }
+
+        return true;
     }
 }

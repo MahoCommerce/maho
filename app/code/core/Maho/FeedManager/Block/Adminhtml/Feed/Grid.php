@@ -17,7 +17,6 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Grid extends Mage_Adminhtml_Block_Wi
         parent::__construct();
         $this->setId('feedmanagerFeedGrid');
         $this->setDefaultSort('feed_id');
-        $this->setDefaultDir('DESC');
         $this->setSaveParametersInSession(true);
     }
 

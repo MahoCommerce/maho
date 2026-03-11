@@ -23,13 +23,14 @@ class Maho_FeedManager_Model_Observer
         $decryptCallback = $observer->getEvent()->getDecryptCallback();
 
         $output->write('Re-encrypting data on feedmanager_destination table... ');
-        Mage::helper('core')->recryptTable(
+        $result = Mage::helper('core')->recryptTable(
             Mage::getSingleton('core/resource')->getTableName('feedmanager/destination'),
             'destination_id',
             ['config'],
             $encryptCallback,
             $decryptCallback,
+            output: $output,
         );
-        $output->writeln('OK');
+        $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
     }
 }
