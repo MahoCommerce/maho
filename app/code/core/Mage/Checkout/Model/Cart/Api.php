@@ -35,7 +35,6 @@ class Mage_Checkout_Model_Cart_Api extends Mage_Checkout_Model_Api_Resource
             $quote = Mage::getModel('sales/quote');
             $quote->setStoreId($storeId)
                     ->setIsActive(false)
-                    ->setIsMultiShipping(false)
                     ->save();
         } catch (Mage_Core_Exception $e) {
             $this->_fault('create_quote_fault', $e->getMessage());
@@ -120,9 +119,6 @@ class Mage_Checkout_Model_Cart_Api extends Mage_Checkout_Model_Api_Resource
         }
 
         $quote = $this->_getQuote($quoteId, $store);
-        if ($quote->getIsMultiShipping()) {
-            $this->_fault('invalid_checkout_type');
-        }
         if ($quote->getCheckoutMethod() == Mage_Checkout_Model_Api_Resource_Customer::MODE_GUEST
                 && !Mage::helper('checkout')->isAllowedGuestCheckout($quote, $quote->getStoreId())
         ) {

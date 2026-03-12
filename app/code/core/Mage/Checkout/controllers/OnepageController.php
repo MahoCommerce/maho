@@ -42,12 +42,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
         // Disable flat for product collection
         Mage::helper('catalog/product_flat')->disableFlatCollection(true);
 
-        $checkoutSessionQuote = Mage::getSingleton('checkout/session')->getQuote();
-        if ($checkoutSessionQuote->getIsMultiShipping()) {
-            $checkoutSessionQuote->setIsMultiShipping(false);
-            $checkoutSessionQuote->removeAllAddresses();
-        }
-
         if (!$this->_canShowForUnregisteredUsers()) {
             $this->norouteAction();
             $this->setFlag('', self::FLAG_NO_DISPATCH, true);
@@ -80,7 +74,6 @@ class Mage_Checkout_OnepageController extends Mage_Checkout_Controller_Action
     {
         if (!$this->getOnepage()->getQuote()->hasItems()
             || $this->getOnepage()->getQuote()->getHasError()
-            || $this->getOnepage()->getQuote()->getIsMultiShipping()
         ) {
             $this->_ajaxRedirectResponse();
             return true;

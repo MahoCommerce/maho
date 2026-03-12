@@ -17,7 +17,6 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
     protected $_infoBlockType = 'paypal/payment_info';
     protected $_isInitializeNeeded      = true;
     protected $_canUseInternal          = false;
-    protected $_canUseForMultishipping  = false;
 
     /**
      * Config instance

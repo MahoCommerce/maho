@@ -79,7 +79,6 @@ class Mage_Paypal_Model_Payflowlink extends Mage_Paypal_Model_Payflowpro
      * Availability options
      */
     protected $_canUseInternal          = false;
-    protected $_canUseForMultishipping  = false;
     protected $_isInitializeNeeded      = true;
 
     /**

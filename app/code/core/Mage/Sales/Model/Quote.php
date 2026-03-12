@@ -794,16 +794,12 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
      */
     public function setShippingAddress(Mage_Sales_Model_Quote_Address $address)
     {
-        if ($this->getIsMultiShipping()) {
-            $this->addAddress($address->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_SHIPPING));
-        } else {
-            $old = $this->getShippingAddress();
+        $old = $this->getShippingAddress();
 
-            if (!empty($old)) {
-                $old->addData($address->getData());
-            } else {
-                $this->addAddress($address->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_SHIPPING));
-            }
+        if (!empty($old)) {
+            $old->addData($address->getData());
+        } else {
+            $this->addAddress($address->setAddressType(Mage_Sales_Model_Quote_Address::TYPE_SHIPPING));
         }
         return $this;
     }
@@ -973,10 +969,6 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
         if ($item) {
             $item->setQuote($this);
-            /**
-             * If we remove item from quote - we can't use multishipping mode
-             */
-            $this->setIsMultiShipping(false);
             $item->isDeleted(true);
             if ($item->getHasChildren()) {
                 foreach ($item->getChildren() as $child) {
@@ -1764,15 +1756,12 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
     }
 
     /**
-     * @param bool $multishipping
      * @return bool
      */
-    public function validateMinimumAmount($multishipping = false)
+    public function validateMinimumAmount()
     {
         $storeId = $this->getStoreId();
         $minOrderActive = Mage::getStoreConfigFlag('sales/minimum_order/active', $storeId);
-        $minOrderMulti  = Mage::getStoreConfigFlag('sales/minimum_order/multi_address', $storeId);
-        $minAmount      = Mage::getStoreConfig('sales/minimum_order/amount', $storeId);
 
         if (!$minOrderActive) {
             return true;
@@ -1780,30 +1769,9 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
         $addresses = $this->getAllAddresses();
 
-        if ($multishipping) {
-            if ($minOrderMulti) {
-                foreach ($addresses as $address) {
-                    foreach ($address->getQuote()->getItemsCollection() as $item) {
-                        $amount = $item->getBaseRowTotal() - $item->getBaseDiscountAmount();
-                        if ($amount < $minAmount) {
-                            return false;
-                        }
-                    }
-                }
-            } else {
-                $baseTotal = 0;
-                foreach ($addresses as $address) {
-                    $baseTotal += $address->getBaseSubtotalWithDiscount();
-                }
-                if ($baseTotal < $minAmount) {
-                    return false;
-                }
-            }
-        } else {
-            foreach ($addresses as $address) {
-                if (!$address->validateMinimumAmount()) {
-                    return false;
-                }
+        foreach ($addresses as $address) {
+            if (!$address->validateMinimumAmount()) {
+                return false;
             }
         }
         return true;

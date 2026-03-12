@@ -50,7 +50,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      */
     public function getInline($type, \Maho\DataObject $entity, $dontDisplayContainer = false)
     {
-        if (!in_array($type, ['onepage_checkout','multishipping_adress'])
+        if ($type !== 'onepage_checkout'
             && !$this->isMessagesAvailable($type, $entity)
         ) {
             return '';
@@ -79,7 +79,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
                     return Mage::getStoreConfigFlag(self::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS, $store);
                 }
                 if ($entity instanceof Mage_Sales_Model_Quote) {
-                    $_type = $entity->getIsMultiShipping() ? self::TYPE_ADDRESS_ITEM : self::TYPE_ITEM;
+                    $_type = self::TYPE_ITEM;
                 } else {
                     $_type = self::TYPE_ORDER_ITEM;
                 }

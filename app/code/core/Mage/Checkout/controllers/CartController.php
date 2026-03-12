@@ -94,8 +94,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     }
 
     /**
-     * Predispatch: remove isMultiShipping option from quote
-     *
      * @return $this
      */
     #[\Override]
@@ -103,11 +101,6 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     {
         parent::preDispatch();
         Mage::helper('catalog/product_flat')->disableFlatCollection(true);
-
-        $cart = $this->_getCart();
-        if ($cart->getQuote()->getIsMultiShipping()) {
-            $cart->getQuote()->setIsMultiShipping(false);
-        }
 
         return $this;
     }

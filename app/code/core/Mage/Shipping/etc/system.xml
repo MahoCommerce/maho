@@ -20,32 +20,6 @@
             <show_in_website>1</show_in_website>
             <show_in_store>0</show_in_store>
             <groups>
-                <option translate="label">
-                    <label>Options</label>
-                    <sort_order>2</sort_order>
-                    <show_in_default>1</show_in_default>
-                    <show_in_website>1</show_in_website>
-                    <show_in_store>0</show_in_store>
-                    <fields>
-                        <checkout_multiple translate="label">
-                            <label>Allow Shipping to Multiple Addresses</label>
-                            <frontend_type>boolean</frontend_type>
-                            <sort_order>1</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </checkout_multiple>
-                        <checkout_multiple_maximum_qty translate="label">
-                            <label>Maximum Qty Allowed for Shipping to Multiple Addresses</label>
-                            <validate>validate-number</validate>
-                            <sort_order>2</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><checkout_multiple>1</checkout_multiple></depends>
-                        </checkout_multiple_maximum_qty>
-                    </fields>
-                </option>
                 <origin translate="label">
                     <label>Origin</label>
                     <sort_order>1</sort_order>
