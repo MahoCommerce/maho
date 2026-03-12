@@ -239,7 +239,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     }
 
     /**
-     * Check availability for multishiping checkout items
+     * Check availability for checkout items
      *
      * @param array $items
      * @param Mage_Core_Model_Store|integer $store

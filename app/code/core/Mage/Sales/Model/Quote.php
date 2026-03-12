@@ -104,8 +104,6 @@
  * @method $this setIsCheckoutCart(bool $value)
  * @method bool getIsCheckoutCart()
  * @method bool getIsMultiPayment()
- * @method int getIsMultiShipping()
- * @method $this setIsMultiShipping(int $value)
  * @method bool getIsSuperMode()
  * @method $this setIsSuperMode(bool $value)
  * @method $this setIsVirtual(int $value)
@@ -1493,7 +1491,7 @@ class Mage_Sales_Model_Quote extends Mage_Core_Model_Abstract
 
     /**
      * Get all quote totals (sorted by priority)
-     * Method process quote states isVirtual and isMultiShipping
+     * Method process quote states isVirtual
      *
      * @return array
      */

@@ -82,8 +82,6 @@
  * @method $this setIsRecurring(int $value)
  * @method int getItemId()
  *
- * @method int getMultishippingQty()
- * @method $this setMultishippingQty(int $value)
  *
  * @method string getName()
  * @method $this setName(string $value)
