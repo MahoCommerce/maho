@@ -2088,10 +2088,6 @@ $table = $installer->getConnection()
         'unsigned'  => true,
         'default'   => '0',
     ], 'Is Virtual')
-    ->addColumn('is_multi_shipping', Maho\Db\Ddl\Table::TYPE_SMALLINT, null, [
-        'unsigned'  => true,
-        'default'   => '0',
-    ], 'Is Multi Shipping')
     ->addColumn('items_count', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
         'unsigned'  => true,
         'default'   => '0',

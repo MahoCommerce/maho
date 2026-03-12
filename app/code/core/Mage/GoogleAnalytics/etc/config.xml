@@ -59,14 +59,6 @@
                     </googleanalytics_order_success>
                 </observers>
             </checkout_onepage_controller_success_action>
-            <checkout_multishipping_controller_success_action>
-                <observers>
-                    <googleanalytics_order_success>
-                        <class>googleanalytics/observer</class>
-                        <method>setGoogleAnalyticsOnOrderSuccessPageView</method>
-                    </googleanalytics_order_success>
-                </observers>
-            </checkout_multishipping_controller_success_action>
             <sales_quote_item_save_after>
                 <observers>
                     <mage_googleanalytics>

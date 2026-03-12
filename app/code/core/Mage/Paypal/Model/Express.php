@@ -47,7 +47,6 @@ class Mage_Paypal_Model_Express extends Mage_Payment_Model_Method_Abstract imple
     protected $_canVoid                     = true;
     protected $_canUseInternal              = false;
     protected $_canUseCheckout              = true;
-    protected $_canUseForMultishipping      = false;
     protected $_canFetchTransactionInfo     = true;
     protected $_canCreateBillingAgreement   = true;
     protected $_canReviewPayment            = true;

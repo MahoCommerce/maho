@@ -43,7 +43,7 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     public const CHECK_USE_FOR_COUNTRY       = 1;
     public const CHECK_USE_FOR_CURRENCY      = 2;
     public const CHECK_USE_CHECKOUT          = 4;
-    public const CHECK_USE_FOR_MULTISHIPPING = 8;
+
     public const CHECK_USE_INTERNAL          = 16;
     public const CHECK_ORDER_TOTAL_MIN_MAX   = 32;
     public const CHECK_RECURRING_PROFILES    = 64;
@@ -99,9 +99,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
 
     /** @var bool */
     protected $_canUseCheckout              = true;
-
-    /** @var bool */
-    protected $_canUseForMultishipping      = true;
 
     /** @var bool */
     protected $_isInitializeNeeded          = false;
@@ -232,16 +229,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
     public function canUseCheckout()
     {
         return $this->_canUseCheckout;
-    }
-
-    /**
-     * Using for multiple shipping address
-     *
-     * @return bool
-     */
-    public function canUseForMultishipping()
-    {
-        return $this->_canUseForMultishipping;
     }
 
     /**
@@ -719,11 +706,6 @@ abstract class Mage_Payment_Model_Method_Abstract extends \Maho\DataObject
         }
         if ($checksBitMask & self::CHECK_USE_CHECKOUT) {
             if (!$this->canUseCheckout()) {
-                return false;
-            }
-        }
-        if ($checksBitMask & self::CHECK_USE_FOR_MULTISHIPPING) {
-            if (!$this->canUseForMultishipping()) {
                 return false;
             }
         }

@@ -169,15 +169,6 @@
                     </giftmessage>
                 </observers>
             </checkout_controller_onepage_save_shipping_method>
-            <checkout_controller_multishipping_shipping_post>
-                <observers>
-                    <giftmessage>
-                        <type>model</type>
-                        <class>giftmessage/observer</class>
-                        <method>checkoutEventCreateGiftMessage</method>
-                    </giftmessage>
-                </observers>
-            </checkout_controller_multishipping_shipping_post>
             <sales_convert_order_to_quote>
                 <observers>
                     <giftmessage>

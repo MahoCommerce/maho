@@ -164,7 +164,6 @@
     <frontend>
         <secure_url>
             <checkout_onepage>/checkout/onepage</checkout_onepage>
-            <checkout_multishipping>/checkout/multishipping</checkout_multishipping>
         </secure_url>
         <events>
             <customer_login>

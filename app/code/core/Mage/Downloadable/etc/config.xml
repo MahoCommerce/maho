@@ -278,14 +278,6 @@
                     </checkout_type_onepage_save_order_after>
                 </observers>
             </checkout_type_onepage_save_order_after>
-            <checkout_type_multishipping_create_orders_single>
-                <observers>
-                    <checkout_type_multishipping_create_orders_single>
-                        <class>downloadable/observer</class>
-                        <method>setHasDownloadableProducts</method>
-                    </checkout_type_multishipping_create_orders_single>
-                </observers>
-            </checkout_type_multishipping_create_orders_single>
             <checkout_allow_guest>
                 <observers>
                     <checkout_allow_guest>

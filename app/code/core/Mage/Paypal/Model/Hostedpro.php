@@ -55,7 +55,6 @@ class Mage_Paypal_Model_Hostedpro extends Mage_Paypal_Model_Direct
      * Availability options
      */
     protected $_canUseInternal          = false;
-    protected $_canUseForMultishipping  = false;
     protected $_canSaveCc               = false;
     protected $_isInitializeNeeded      = true;
 

@@ -564,7 +564,7 @@ class Mage_CatalogInventory_Model_Observer
     }
 
     /**
-     * Subtract qtys of quote item products after multishipping checkout
+     * Subtract qtys of quote item products after checkout
      *
      * @return $this
      */

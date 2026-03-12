@@ -91,7 +91,6 @@ class Mage_Paygate_Model_Authorizenet extends Mage_Payment_Model_Method_Cc
     protected $_canVoid                 = true;
     protected $_canUseInternal          = true;
     protected $_canUseCheckout          = true;
-    protected $_canUseForMultishipping  = true;
     protected $_canSaveCc               = false;
     protected $_canFetchTransactionInfo = true;
 

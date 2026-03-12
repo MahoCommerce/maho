@@ -9688,12 +9688,6 @@ parameters:
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Checkout/Block/Multishipping/Addresses.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Checkout/Block/Onepage/Abstract.php
 
 		-
@@ -9829,12 +9823,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
-
-		-
 			rawMessage: Negated boolean expression is always false.
 			identifier: booleanNot.alwaysFalse
 			count: 1
@@ -9955,60 +9943,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Quote::getBillingAddress() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Checkout_Model_Session::setCheckoutState() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, bool given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canInputShipping() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canSeeOverview() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canSelectAddresses() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canSuccess() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
 			rawMessage: 'Method Mage_Checkout_Model_Type_Onepage::_prepareCustomerQuote() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10040,12 +9974,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setCustomerIsGuest() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
@@ -10105,12 +10033,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/CartController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
 			count: 2
@@ -10126,54 +10048,6 @@ parameters:
 			rawMessage: 'Method Mage_Checkout_Model_Session::getCartWasUpdated() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Session::getDisplaySuccess() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::billingAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::overviewAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::redirectLogin() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::shippingAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::successAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Session::getCartWasUpdated() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
 
 		-
@@ -10184,12 +10058,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Checkout_Model_Session::setUpdateSection() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
@@ -15739,12 +15607,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setReservedOrderId() expects string, null given.'
 			identifier: argument.type
 			count: 1
@@ -18583,12 +18445,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote.php
-
-		-
 			rawMessage: 'Property Mage_Sales_Model_Quote::$_addresses (Mage_Sales_Model_Resource_Order_Address_Collection|null) does not accept Mage_Sales_Model_Resource_Quote_Address_Collection.'
 			identifier: assign.propertyType
 			count: 1
@@ -21418,36 +21274,6 @@ parameters:
 			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/multishipping/address/select.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/base/default/template/checkout/multishipping/item/default.phtml
-
-		-
-			rawMessage: 'Parameter #1 $totals of method Mage_Checkout_Block_Multishipping_Overview::renderTotals() expects Mage_Sales_Model_Order_Total, array<Mage_Sales_Model_Quote_Address_Total> given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/multishipping/overview.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/base/default/template/checkout/multishipping/overview/item.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Block_Multishipping_Shipping::getItemsEditUrl() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/multishipping/shipping.phtml
-
-		-
 			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
 			identifier: whitespace.fileEnd
 			count: 1
@@ -21618,19 +21444,19 @@ parameters:
 		-
 			rawMessage: 'Cannot call method getMessage() on string.'
 			identifier: method.nonObject
-			count: 4
+			count: 2
 			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
 
 		-
 			rawMessage: 'Cannot call method getRecipient() on string.'
 			identifier: method.nonObject
-			count: 4
+			count: 2
 			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
 
 		-
 			rawMessage: 'Cannot call method getSender() on string.'
 			identifier: method.nonObject
-			count: 4
+			count: 2
 			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
 
 		-

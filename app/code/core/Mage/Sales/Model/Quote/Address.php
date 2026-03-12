@@ -530,50 +530,28 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
             $this->_nominalOnly = true; // Now $this->_filterNominal() will return positive values for nominal items
 
             $quoteItems = $this->getQuote()->getItemsCollection();
-            $addressItems = $this->getItemsCollection();
 
             $items = [];
             $nominalItems = [];
             $nonNominalItems = [];
-            if ($this->getQuote()->getIsMultiShipping() && $addressItems->count() > 0) {
-                foreach ($addressItems as $aItem) {
-                    if ($aItem->isDeleted()) {
+            /*
+            * For virtual quote we assign items only to billing address, otherwise - only to shipping address
+            */
+            $addressType = $this->getAddressType();
+            $canAddItems = $this->getQuote()->isVirtual()
+                ? ($addressType == self::TYPE_BILLING)
+                : ($addressType == self::TYPE_SHIPPING);
+
+            if ($canAddItems) {
+                foreach ($quoteItems as $qItem) {
+                    if ($qItem->isDeleted()) {
                         continue;
                     }
-
-                    if (!$aItem->getQuoteItemImported()) {
-                        $qItem = $this->getQuote()->getItemById($aItem->getQuoteItemId());
-                        if ($qItem) {
-                            $aItem->importQuoteItem($qItem);
-                        }
-                    }
-                    $items[] = $aItem;
-                    if ($this->_filterNominal($aItem)) {
-                        $nominalItems[] = $aItem;
+                    $items[] = $qItem;
+                    if ($this->_filterNominal($qItem)) {
+                        $nominalItems[] = $qItem;
                     } else {
-                        $nonNominalItems[] = $aItem;
-                    }
-                }
-            } else {
-                /*
-                * For virtual quote we assign items only to billing address, otherwise - only to shipping address
-                */
-                $addressType = $this->getAddressType();
-                $canAddItems = $this->getQuote()->isVirtual()
-                    ? ($addressType == self::TYPE_BILLING)
-                    : ($addressType == self::TYPE_SHIPPING);
-
-                if ($canAddItems) {
-                    foreach ($quoteItems as $qItem) {
-                        if ($qItem->isDeleted()) {
-                            continue;
-                        }
-                        $items[] = $qItem;
-                        if ($this->_filterNominal($qItem)) {
-                            $nominalItems[] = $qItem;
-                        } else {
-                            $nonNominalItems[] = $qItem;
-                        }
+                        $nonNominalItems[] = $qItem;
                     }
                 }
             }

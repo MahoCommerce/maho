@@ -132,7 +132,7 @@
                     <xsd:element name="quote_id" type="xsd:int" minOccurs="0"/>
                     <xsd:element name="is_active" type="xsd:int" minOccurs="0"/>
                     <xsd:element name="is_virtual" type="xsd:int" minOccurs="0"/>
-                    <xsd:element name="is_multi_shipping" type="xsd:int" minOccurs="0"/>
+
                     <xsd:element name="items_count" type="xsd:double" minOccurs="0"/>
                     <xsd:element name="items_qty" type="xsd:double" minOccurs="0"/>
                     <xsd:element name="orig_order_id" type="xsd:string" minOccurs="0"/>

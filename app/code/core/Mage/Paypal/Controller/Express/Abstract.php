@@ -62,11 +62,6 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
         try {
             $this->_initCheckout();
 
-            if ($this->_getQuote()->getIsMultiShipping()) {
-                $this->_getQuote()->setIsMultiShipping(false);
-                $this->_getQuote()->removeAllAddresses();
-            }
-
             $customer = Mage::getSingleton('customer/session')->getCustomer();
             $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
             if ($customer && $customer->getId()) {

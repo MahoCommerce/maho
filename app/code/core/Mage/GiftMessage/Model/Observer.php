@@ -87,7 +87,6 @@ class Mage_GiftMessage_Model_Observer extends \Maho\DataObject
                     'quote' => $quote,
                     'quote_item' => $quote->getItemById($entityId),
                     'quote_address' => $quote->getAddressById($entityId),
-                    'quote_address_item' => $quote->getAddressById($message['address'])->getItemById($entityId),
                     default => $quote,
                 };
 

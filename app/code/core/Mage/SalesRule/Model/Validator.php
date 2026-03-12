@@ -364,17 +364,6 @@ class Mage_SalesRule_Model_Validator extends Mage_Core_Model_Abstract
                         Mage::throwException(Mage::helper('salesrule')->__('Item totals are not set for rule.'));
                     }
 
-                    /**
-                     * prevent applying whole cart discount for every shipping order, but only for first order
-                     */
-                    if ($quote->getIsMultiShipping()) {
-                        $usedForAddressId = $this->getCartFixedRuleUsedForAddress($rule->getId());
-                        if ($usedForAddressId && $usedForAddressId != $address->getId()) {
-                            break;
-                        } else {
-                            $this->setCartFixedRuleUsedForAddress($rule->getId(), $address->getId());
-                        }
-                    }
                     $cartRules = $address->getCartFixedRules();
                     if (!isset($cartRules[$rule->getId()])) {
                         $cartRules[$rule->getId()] = $rule->getDiscountAmount();

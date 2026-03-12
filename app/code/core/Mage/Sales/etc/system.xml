@@ -195,35 +195,6 @@
                             <show_in_store>1</show_in_store>
                             <depends><active>1</active></depends>
                         </error_message>
-                        <multi_address translate="label">
-                            <label>Validate Each Address Separately in Multi-address Checkout</label>
-                            <sort_order>40</sort_order>
-                            <frontend_type>boolean</frontend_type>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                            <depends><active>1</active></depends>
-                        </multi_address>
-                        <multi_address_description translate="label comment">
-                            <label>Multi-address Description Message</label>
-                            <sort_order>50</sort_order>
-                            <frontend_type>textarea</frontend_type>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <comment>If empty, the default description above will be used.</comment>
-                            <depends><active>1</active></depends>
-                        </multi_address_description>
-                        <multi_address_error_message translate="label comment">
-                            <label>Multi-address Error to Show in Shopping Cart</label>
-                            <sort_order>60</sort_order>
-                            <frontend_type>textarea</frontend_type>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>1</show_in_store>
-                            <comment>If empty, the default error above will be used.</comment>
-                            <depends><active>1</active></depends>
-                        </multi_address_error_message>
                     </fields>
                 </minimum_order>
                 <dashboard translate="label,comment">

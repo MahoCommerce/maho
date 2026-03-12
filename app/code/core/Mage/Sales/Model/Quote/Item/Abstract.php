@@ -560,7 +560,6 @@ abstract class Mage_Sales_Model_Quote_Item_Abstract extends Mage_Core_Model_Abst
 
     /**
      * Get whether the item is nominal
-     * TODO: fix for multishipping checkout
      *
      * @return bool
      */
