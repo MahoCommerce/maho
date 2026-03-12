@@ -123,9 +123,6 @@
                 <paypal>
                     <file>paypal.xml</file>
                 </paypal>
-                <bml>
-                    <file>bml.xml</file>
-                </bml>
             </updates>
         </layout>
         <secure_url>
@@ -211,11 +208,6 @@
                 <verify_peer>1</verify_peer>
                 <skip_order_review_step>1</skip_order_review_step>
             </paypal_express>
-            <paypal_express_bml>
-                <model>paypal/bml</model>
-                <title>Paypal Credit</title>
-                <group>paypal</group>
-            </paypal_express_bml>
             <paypal_direct>
                 <model>paypal/direct</model>
                 <title>PayPal Payments Pro</title>

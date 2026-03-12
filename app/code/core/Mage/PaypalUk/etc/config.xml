@@ -95,11 +95,6 @@
             <paypaluk_express>
                 <model>paypaluk/express</model>
             </paypaluk_express>
-            <paypaluk_express_bml>
-                <model>paypaluk/bml</model>
-                <title>Paypal Credit</title>
-                <group>paypal</group>
-            </paypaluk_express_bml>
             <paypaluk_direct>
                 <model>paypaluk/direct</model>
             </paypaluk_direct>
