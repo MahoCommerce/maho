@@ -82,7 +82,6 @@
  * @method $this setIsRecurring(int $value)
  * @method int getItemId()
  *
- *
  * @method string getName()
  * @method $this setName(string $value)
  * @method int getNoDiscount()
