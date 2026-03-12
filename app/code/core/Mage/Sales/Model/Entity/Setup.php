@@ -55,7 +55,6 @@ class Mage_Sales_Model_Entity_Setup extends Mage_Eav_Model_Entity_Setup
                     'applied_rule_ids'  => ['type' => 'static'],
 
                     'is_virtual'        => ['type' => 'static'],
-                    'is_multi_shipping' => ['type' => 'static'],
                     'is_multi_payment'  => ['type' => 'static'],
 
                     'customer_id'       => ['type' => 'static'],
