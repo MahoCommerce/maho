@@ -114,9 +114,6 @@ td.product-cart-remove a {
 .checkout-types li:first-child {
     margin-left: 0;
 }
-.checkout-types .method-checkout-cart-methods-multishipping {
-    display: block;
-}
 .checkout-types.top li {
     display: inline-block;
 }
