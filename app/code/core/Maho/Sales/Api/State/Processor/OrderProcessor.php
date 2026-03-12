@@ -116,7 +116,7 @@ final class OrderProcessor implements ProcessorInterface
         }
 
         // Place order
-        $result = $this->orderService->placeOrder(
+        $result = $this->orderService->placeAdminOrder(
             $quote,
             $guestEmail,
             $orderNote,
@@ -412,7 +412,7 @@ final class OrderProcessor implements ProcessorInterface
         }
 
         // Place order
-        $result = $this->orderService->placeOrder(
+        $result = $this->orderService->placeAdminOrder(
             $quote,
             null,
             null,

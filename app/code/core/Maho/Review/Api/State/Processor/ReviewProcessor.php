@@ -212,8 +212,8 @@ final class ReviewProcessor implements ProcessorInterface
     private function getRatingOptionId(int $ratingId, int $starValue): ?int
     {
         /** @var \Mage_Rating_Model_Resource_Rating_Option_Collection $optionCollection */
-        /** @phpstan-ignore-next-line */
         $optionCollection = \Mage::getModel('rating/rating_option')->getCollection()
+            /** @phpstan-ignore method.nonObject */
             ->addRatingFilter($ratingId)
             ->setPositionOrder();
 
