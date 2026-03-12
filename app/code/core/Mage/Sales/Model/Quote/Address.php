@@ -530,7 +530,6 @@ class Mage_Sales_Model_Quote_Address extends Mage_Customer_Model_Address_Abstrac
             $this->_nominalOnly = true; // Now $this->_filterNominal() will return positive values for nominal items
 
             $quoteItems = $this->getQuote()->getItemsCollection();
-            $addressItems = $this->getItemsCollection();
 
             $items = [];
             $nominalItems = [];
