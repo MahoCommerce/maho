@@ -263,7 +263,6 @@ class Mage_GiftMessage_Block_Message_Inline extends Mage_Core_Block_Template
      */
     public function isItemMessagesAvailable($item)
     {
-        $type = str_starts_with($this->getType(), 'multi') ? 'address_item' : 'item';
-        return Mage::helper('giftmessage/message')->isMessagesAvailable($type, $item);
+        return Mage::helper('giftmessage/message')->isMessagesAvailable('item', $item);
     }
 }

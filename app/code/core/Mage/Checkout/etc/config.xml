@@ -164,7 +164,6 @@
     <frontend>
         <secure_url>
             <checkout_onepage>/checkout/onepage</checkout_onepage>
-
         </secure_url>
         <events>
             <customer_login>

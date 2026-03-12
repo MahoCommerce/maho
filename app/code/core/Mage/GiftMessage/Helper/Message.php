@@ -18,7 +18,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS = 'sales/gift_options/allow_items';
     public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER = 'sales/gift_options/allow_order';
 
-    public const TYPE_ADDRESS_ITEM  = 'address_item';
     public const TYPE_CONFIG        = 'config';
     public const TYPE_ITEM          = 'item';
     public const TYPE_ITEMS         = 'items';
@@ -99,23 +98,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
             case self::TYPE_ORDER_ITEM:
                 return $this->_getDependenceFromStoreConfig(
                     $entity->getGiftMessageAvailable(),
-                    $store,
-                );
-            case self::TYPE_ADDRESS_ITEM:
-                $storeId = is_numeric($store) ? $store : Mage::app()->getStore($store)->getId();
-                $cacheId = self::TYPE_ADDRESS_ITEM . '_' . $entity->getProductId();
-
-                if (!$this->isCached($cacheId)) {
-                    $this->setCached(
-                        $cacheId,
-                        Mage::getModel('catalog/product')
-                            ->setStoreId($storeId)
-                            ->load($entity->getProductId())
-                            ->getGiftMessageAvailable(),
-                    );
-                }
-                return $this->_getDependenceFromStoreConfig(
-                    $this->getCached($cacheId),
                     $store,
                 );
             default:
@@ -235,23 +217,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
             }
         }
 
-        return false;
-    }
-
-    /**
-     * Check availability for checkout items
-     *
-     * @param array $items
-     * @param Mage_Core_Model_Store|integer $store
-     * @return bool
-     */
-    public function getAvailableForAddressItems($items, $store = null)
-    {
-        foreach ($items as $item) {
-            if ($this->isMessagesAvailable('address_item', $item, $store)) {
-                return true;
-            }
-        }
         return false;
     }
 
