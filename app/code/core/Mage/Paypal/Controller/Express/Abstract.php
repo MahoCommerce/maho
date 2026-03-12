@@ -98,9 +98,6 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
                 $this->_checkout->setIsBillingAgreementRequested($isBARequested);
             }
 
-            // Bill Me Later
-            $this->_checkout->setIsBml((bool) $this->getRequest()->getParam('bml'));
-
             // giropay
             $this->_checkout->prepareGiropayUrls(
                 Mage::getUrl('checkout/onepage/success'),

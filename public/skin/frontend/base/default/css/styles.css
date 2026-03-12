@@ -4321,14 +4321,6 @@ p.product-name a:hover {
   display: block;
   width: 170px;
 }
-.product-view .add-to-cart-buttons .paypal-logo .bml_button {
-  display: block;
-  width: 174px;
-  margin: 0 auto;
-}
-.product-view .add-to-cart-buttons .paypal-logo .bml_button a {
-  text-align: center;
-}
 .product-view .add-to-cart-buttons .paypal-logo .paypal-or {
   display: block;
   margin-bottom: 10px;
@@ -5143,9 +5135,6 @@ label.offcanvas-trigger {
   content: '';
   display: table;
   clear: both;
-}
-.map-popup .map-popup-checkout .paypal-logo .bml_button a {
-  clear: left;
 }
 @media only screen and (max-width: 479px) {
   .map-popup .map-popup-checkout {
@@ -6122,54 +6111,6 @@ body.newsletter-manage-index .newsletter-description {
   }
 }
 
-.top-container .bml-ad {
-  margin-top: 7px;
-  margin-bottom: 7px;
-  text-align: center;
-}
-.top-container .bml-ad span {
-  display: inline-block;
-}
-.top-container .bml-ad span a {
-  display: block;
-}
-
-.bml-ad {
-  display: none;
-  text-align: center;
-  margin-bottom: 5px;
-}
-.bml-ad span {
-  display: block;
-  line-height: 0;
-}
-.bml-ad a {
-  display: inline-block;
-  max-width: 100%;
-}
-.bml-ad a:hover {
-  opacity: 0.7;
-}
-.bml-ad img {
-  height: auto !important;
-  max-width: 100%;
-}
-
-.cart-totals-wrapper .bml-ad.large img {
-  display: block;
-  margin: 0;
-}
-
-@media only screen and (max-width: 770px) {
-  .bml-ad.small {
-    display: block;
-  }
-}
-@media only screen and (min-width: 771px) {
-  .bml-ad.large {
-    display: block;
-  }
-}
 div.paypal-logo {
   text-align: center;
   margin: 15px 0;
@@ -6192,10 +6133,6 @@ div.paypal-logo span > img {
 
 .checkout-types div.paypal-logo {
   text-align: right;
-}
-
-.bml-checkout-type {
-  list-style-type: none;
 }
 
 .sidebar .paypal-logo {

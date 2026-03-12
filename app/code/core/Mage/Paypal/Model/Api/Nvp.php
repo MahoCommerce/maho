@@ -86,7 +86,6 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'PAYFLOWCOLOR'   => 'payflowcolor',
         'LOCALECODE'     => 'locale_code',
         'PAL'            => 'pal',
-        'USERSELECTEDFUNDINGSOURCE' => 'funding_source',
 
         // transaction info
         'TRANSACTIONID'   => 'transaction_id',
@@ -216,7 +215,6 @@ class Mage_Paypal_Model_Api_Nvp extends Mage_Paypal_Model_Api_Abstract
         'GIROPAYCANCELURL', 'GIROPAYSUCCESSURL', 'BANKTXNPENDINGURL',
         'PAGESTYLE', 'HDRIMG', 'HDRBORDERCOLOR', 'HDRBACKCOLOR', 'PAYFLOWCOLOR', 'LOCALECODE',
         'BILLINGTYPE', 'SUBJECT', 'ITEMAMT', 'SHIPPINGAMT', 'TAXAMT', 'REQBILLINGADDRESS',
-        'USERSELECTEDFUNDINGSOURCE',
     ];
     protected $_setExpressCheckoutResponse = ['TOKEN'];
 

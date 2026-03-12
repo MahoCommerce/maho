@@ -15685,18 +15685,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Deprecated.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Block_Bml_Banners::setPosition() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Bml/Banners.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Block_Bml_Banners::setSection() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Bml/Banners.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Block_Express_Review::setPaypalActionPrefix() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -16304,12 +16292,6 @@ parameters:
 
 		-
 			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::returnFromPaypal() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::setIsBml() has no return type specified.'
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
