@@ -33,6 +33,6 @@ class Maho_Paypal_Model_Vault_Token extends Mage_Core_Model_Abstract
             return "PayPal ({$this->getPayerEmail()})";
         }
 
-        return 'Saved Payment Method';
+        return Mage::helper('maho_paypal')->__('Saved Payment Method');
     }
 }

@@ -59,7 +59,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
         assert($payment instanceof Mage_Payment_Model_Info);
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
         if (!$paypalOrderId) {
-            Mage::throwException('PayPal order ID not found.');
+            Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order ID not found.'));
         }
 
         $result = $this->_getApiClient()->authorizeOrder($paypalOrderId);
@@ -104,7 +104,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
             $result = $this->_getApiClient()->captureOrder($paypalOrderId);
             $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
         } else {
-            Mage::throwException('No PayPal authorization or order ID found for capture.');
+            Mage::throwException(Mage::helper('maho_paypal')->__('No PayPal authorization or order ID found for capture.'));
         }
 
         if ($captureId) {
@@ -123,7 +123,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
             ?: $payment->getParentTransactionId();
 
         if (!$captureId) {
-            Mage::throwException('No PayPal capture ID found for refund.');
+            Mage::throwException(Mage::helper('maho_paypal')->__('No PayPal capture ID found for refund.'));
         }
 
         $body = [
@@ -151,7 +151,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
             ?: $payment->getParentTransactionId();
 
         if (!$authId) {
-            Mage::throwException('No PayPal authorization ID found for void.');
+            Mage::throwException(Mage::helper('maho_paypal')->__('No PayPal authorization ID found for void.'));
         }
 
         $this->_getApiClient()->voidAuthorization($authId);

@@ -22,7 +22,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         try {
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             if (!$quote->getId() || !$quote->getItemsCount()) {
-                Mage::throwException('Cart is empty.');
+                Mage::throwException(Mage::helper('maho_paypal')->__('Cart is empty.'));
             }
 
             $methodCode = $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
@@ -42,7 +42,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
             $paypalOrderId = $paypalOrder['id'] ?? null;
             if (!$paypalOrderId) {
-                Mage::throwException('Failed to create PayPal order.');
+                Mage::throwException(Mage::helper('maho_paypal')->__('Failed to create PayPal order.'));
             }
 
             // Store PayPal order ID on quote payment
@@ -71,7 +71,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         try {
             $paypalOrderId = $this->getRequest()->getParam('paypal_order_id');
             if (!$paypalOrderId) {
-                Mage::throwException('Missing PayPal order ID.');
+                Mage::throwException(Mage::helper('maho_paypal')->__('Missing PayPal order ID.'));
             }
 
             $quote = Mage::getSingleton('checkout/session')->getQuote();
@@ -93,7 +93,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
             $status = $paypalResult['status'] ?? '';
             if (!in_array($status, ['COMPLETED', 'APPROVED'])) {
-                Mage::throwException('PayPal order could not be approved. Status: ' . $status);
+                Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order could not be approved. Status: %s', $status));
             }
 
             // Set payment method on quote

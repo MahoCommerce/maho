@@ -42,7 +42,7 @@ class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
             $token = Mage::getModel('maho_paypal/vault_token')->load($tokenId);
 
             if (!$token->getId() || (int) $token->getCustomerId() !== $customerId) {
-                Mage::throwException('Invalid payment method.');
+                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid payment method.'));
             }
 
             // Delete from PayPal
