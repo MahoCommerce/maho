@@ -230,6 +230,19 @@ class Maho_Paypal_Model_Api_Client
             'headers' => $this->_getAuthHeaders(),
         ]);
 
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 201) {
+            $errorBody = $response->getContent(false);
+            $errorData = Mage::helper('core')->jsonDecode($errorBody);
+            $message = $errorData['message'] ?? $errorBody;
+            if (!empty($errorData['details'])) {
+                $details = array_map(fn(array $d) => $d['description'] ?? $d['issue'] ?? '', $errorData['details']);
+                $message .= ' — ' . implode('; ', array_filter($details));
+            }
+            $this->_log('Webhook registration failed', ['url' => $url, 'status' => $statusCode, 'response' => $errorData]);
+            throw new \RuntimeException($message);
+        }
+
         return Mage::helper('core')->jsonDecode($response->getContent());
     }
 

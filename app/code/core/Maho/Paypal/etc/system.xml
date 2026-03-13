@@ -75,23 +75,24 @@
                             <label>Webhook ID</label>
                             <frontend_type>text</frontend_type>
                             <config_path>maho_paypal/credentials/webhook_id</config_path>
-                            <sort_order>60</sort_order>
+                            <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>Automatically populated when registering a webhook.</comment>
+                            <comment>Automatically populated after clicking "Register Webhook". Used to verify the authenticity of incoming PayPal notifications.</comment>
                         </webhook_id>
-                        <register_webhook translate="label">
+                        <register_webhook translate="label comment">
                             <label>Register Webhook</label>
+                            <comment>Registers a webhook with PayPal to receive real-time notifications for payments, refunds, and disputes. Requires a publicly accessible HTTPS URL.</comment>
                             <frontend_type>button</frontend_type>
                             <frontend_model>maho_paypal/adminhtml_system_config_registerWebhook</frontend_model>
-                            <sort_order>70</sort_order>
+                            <sort_order>60</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </register_webhook>
                         <paylater_messaging translate="label comment">
-                            <label>Pay Later Messaging</label>
+                            <label>Enable Pay Later</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
                             <config_path>maho_paypal/general/paylater_messaging</config_path>
@@ -99,7 +100,7 @@
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>Display Pay Later promotional banners on product pages and shopping cart.</comment>
+                            <comment>Pay Later promotional banner is displayed on product pages and shopping cart.</comment>
                         </paylater_messaging>
                     </fields>
                 </maho_paypal_credentials>
