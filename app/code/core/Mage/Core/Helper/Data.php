@@ -953,8 +953,8 @@ XML;
     {
         $coreHelper = Mage::helper('core');
         $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
-        $user = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username'));
-        $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
+        $user = urlencode($coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username')));
+        $pass = urlencode($coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password')));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
         $region = Mage::getStoreConfig('system/smtp/region');
