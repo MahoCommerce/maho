@@ -12,22 +12,21 @@ class MahoPaypalPayLaterMessage {
         this.sdkUrl = el.dataset.sdkUrl;
         this.clientTokenUrl = el.dataset.clientTokenUrl;
         this.amount = el.dataset.amount || '0';
-        this.placement = el.dataset.placement || 'product';
         this._mounted = false;
     }
 
-    async loadSdkAndMount() {
+    async mount() {
         if (this._mounted) return;
 
         try {
             const sdk = await MahoPaypalSdk.init(this.sdkUrl, this.clientTokenUrl);
-            this._renderMessage(sdk);
+            this._render(sdk);
         } catch (err) {
             console.error('PayPal Pay Later message error:', err);
         }
     }
 
-    _renderMessage(sdk) {
+    _render(sdk) {
         if (this._mounted) return;
         this._mounted = true;
 
@@ -37,8 +36,12 @@ class MahoPaypalPayLaterMessage {
 
         const messagesInstance = sdk.createPayPalMessages();
         const messageEl = document.createElement('paypal-message');
-        messageEl.setAttribute('amount', this.amount);
         this.el.appendChild(messageEl);
+
+        messagesInstance.fetchContent({
+            amount: this.amount,
+            onContentReady: (content) => messageEl.setContent(content),
+        });
     }
 }
 
@@ -46,6 +49,6 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.paypal-paylater-message[data-client-token-url]').forEach(function(el) {
         const message = new MahoPaypalPayLaterMessage(el);
         el._paypalPayLater = message;
-        message.loadSdkAndMount();
+        message.mount();
     });
 });
