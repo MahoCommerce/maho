@@ -23444,3 +23444,15 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: lib/Maho/Simplexml/Element.php
+
+		-
+			message: '#Fetching deprecated class constant DEPRECATED_METHODS of class Maho_Paypal_Model_Config#'
+			identifier: classConstant.deprecated
+			count: 1
+			path: app/code/core/Maho/Paypal/Model/Config.php
+
+		-
+			message: '#Property Maho_Paypal_Model_Method_AdvancedCheckout::\$_canSaveCc has no type specified#'
+			identifier: missingType.property
+			count: 1
+			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php

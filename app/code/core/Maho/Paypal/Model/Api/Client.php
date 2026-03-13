@@ -10,13 +10,13 @@
 
 declare(strict_types=1);
 
-use PaypalServerSdk\PaypalServerSdkClientBuilder;
-use PaypalServerSdk\PaypalServerSdkClient;
-use PaypalServerSdk\Authentication\ClientCredentialsAuthCredentialsBuilder;
-use PaypalServerSdk\Environment;
-use PaypalServerSdk\Logging\LoggingConfigurationBuilder;
-use PaypalServerSdk\Logging\RequestLoggingConfigurationBuilder;
-use PaypalServerSdk\Logging\ResponseLoggingConfigurationBuilder;
+use PaypalServerSdkLib\PaypalServerSdkClientBuilder;
+use PaypalServerSdkLib\PaypalServerSdkClient;
+use PaypalServerSdkLib\Authentication\ClientCredentialsAuthCredentialsBuilder;
+use PaypalServerSdkLib\Environment;
+use PaypalServerSdkLib\Logging\LoggingConfigurationBuilder;
+use PaypalServerSdkLib\Logging\RequestLoggingConfigurationBuilder;
+use PaypalServerSdkLib\Logging\ResponseLoggingConfigurationBuilder;
 
 class Maho_Paypal_Model_Api_Client
 {
@@ -78,19 +78,19 @@ class Maho_Paypal_Model_Api_Client
 
     public function createOrder(array $orderRequest): array
     {
-        $response = $this->getSdkClient()->getOrdersController()->ordersCreate($orderRequest);
+        $response = $this->getSdkClient()->getOrdersController()->createOrder($orderRequest);
         return $this->_decodeResponse($response);
     }
 
     public function getOrder(string $orderId): array
     {
-        $response = $this->getSdkClient()->getOrdersController()->ordersGet(['id' => $orderId]);
+        $response = $this->getSdkClient()->getOrdersController()->getOrder(['id' => $orderId]);
         return $this->_decodeResponse($response);
     }
 
     public function authorizeOrder(string $orderId): array
     {
-        $response = $this->getSdkClient()->getOrdersController()->ordersAuthorize([
+        $response = $this->getSdkClient()->getOrdersController()->authorizeOrder([
             'id' => $orderId,
             'body' => new \stdClass(),
         ]);
@@ -99,7 +99,7 @@ class Maho_Paypal_Model_Api_Client
 
     public function captureOrder(string $orderId): array
     {
-        $response = $this->getSdkClient()->getOrdersController()->ordersCapture([
+        $response = $this->getSdkClient()->getOrdersController()->captureOrder([
             'id' => $orderId,
             'body' => new \stdClass(),
         ]);
@@ -108,7 +108,7 @@ class Maho_Paypal_Model_Api_Client
 
     public function captureAuthorization(string $authorizationId, array $body = []): array
     {
-        $response = $this->getSdkClient()->getPaymentsController()->authorizationsCapture([
+        $response = $this->getSdkClient()->getPaymentsController()->captureAuthorizedPayment([
             'authorizationId' => $authorizationId,
             'body' => $body ?: new \stdClass(),
         ]);
@@ -117,7 +117,7 @@ class Maho_Paypal_Model_Api_Client
 
     public function refundCapture(string $captureId, array $body = []): array
     {
-        $response = $this->getSdkClient()->getPaymentsController()->capturesRefund([
+        $response = $this->getSdkClient()->getPaymentsController()->refundCapturedPayment([
             'captureId' => $captureId,
             'body' => $body ?: new \stdClass(),
         ]);
@@ -126,7 +126,7 @@ class Maho_Paypal_Model_Api_Client
 
     public function voidAuthorization(string $authorizationId): array
     {
-        $response = $this->getSdkClient()->getPaymentsController()->authorizationsVoid([
+        $response = $this->getSdkClient()->getPaymentsController()->voidPayment([
             'authorizationId' => $authorizationId,
         ]);
         return $this->_decodeResponse($response);
@@ -134,7 +134,7 @@ class Maho_Paypal_Model_Api_Client
 
     public function getAuthorization(string $authorizationId): array
     {
-        $response = $this->getSdkClient()->getPaymentsController()->authorizationsGet([
+        $response = $this->getSdkClient()->getPaymentsController()->getAuthorizedPayment([
             'authorizationId' => $authorizationId,
         ]);
         return $this->_decodeResponse($response);
@@ -142,7 +142,7 @@ class Maho_Paypal_Model_Api_Client
 
     public function getCapture(string $captureId): array
     {
-        $response = $this->getSdkClient()->getPaymentsController()->capturesGet([
+        $response = $this->getSdkClient()->getPaymentsController()->getCapturedPayment([
             'captureId' => $captureId,
         ]);
         return $this->_decodeResponse($response);
@@ -150,19 +150,19 @@ class Maho_Paypal_Model_Api_Client
 
     public function createSetupToken(array $body): array
     {
-        $response = $this->getSdkClient()->getVaultController()->setupTokensCreate(['body' => $body]);
+        $response = $this->getSdkClient()->getVaultController()->createSetupToken(['body' => $body]);
         return $this->_decodeResponse($response);
     }
 
     public function createPaymentToken(array $body): array
     {
-        $response = $this->getSdkClient()->getVaultController()->paymentTokensCreate(['body' => $body]);
+        $response = $this->getSdkClient()->getVaultController()->createPaymentToken(['body' => $body]);
         return $this->_decodeResponse($response);
     }
 
     public function listPaymentTokens(string $customerId): array
     {
-        $response = $this->getSdkClient()->getVaultController()->customerPaymentTokensGet([
+        $response = $this->getSdkClient()->getVaultController()->listCustomerPaymentTokens([
             'customerId' => $customerId,
         ]);
         return $this->_decodeResponse($response);
@@ -170,7 +170,7 @@ class Maho_Paypal_Model_Api_Client
 
     public function deletePaymentToken(string $tokenId): void
     {
-        $this->getSdkClient()->getVaultController()->paymentTokensDelete(['id' => $tokenId]);
+        $this->getSdkClient()->getVaultController()->deletePaymentToken($tokenId);
     }
 
     public function createWebhook(string $url, array $eventTypes): array

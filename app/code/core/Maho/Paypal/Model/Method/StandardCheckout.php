@@ -56,6 +56,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
     #[\Override]
     public function authorize(\Maho\DataObject $payment, $amount): self
     {
+        assert($payment instanceof Mage_Payment_Model_Info);
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
         if (!$paypalOrderId) {
             Mage::throwException('PayPal order ID not found.');
@@ -78,6 +79,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
     #[\Override]
     public function capture(\Maho\DataObject $payment, $amount): self
     {
+        assert($payment instanceof Mage_Payment_Model_Info);
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
 
         // If we have an authorization, capture it
@@ -103,7 +105,6 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
             $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
         } else {
             Mage::throwException('No PayPal authorization or order ID found for capture.');
-            return $this;
         }
 
         if ($captureId) {
@@ -165,7 +166,7 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
         return $this->void($payment);
     }
 
-    protected function _importPaymentInfo(array $result, \Maho\DataObject $payment): void
+    protected function _importPaymentInfo(array $result, Mage_Payment_Model_Info $payment): void
     {
         $payer = $result['payer'] ?? [];
         if (!empty($payer['email_address'])) {
