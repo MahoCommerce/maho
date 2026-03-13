@@ -4342,6 +4342,7 @@ p.product-name a:hover {
   min-width: 160px;
 }
 .product-view .paypal-shortcut-button {
+  clear: both;
   min-height: 55px;
 }
 .product-view .alert-price,
