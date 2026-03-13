@@ -7,10 +7,10 @@
  */
 
 class MahoPaypalVaultCheckout {
-    constructor(config) {
-        this.createOrderUrl = config.createOrderUrl;
-        this.approveOrderUrl = config.approveOrderUrl;
-        this.methodCode = config.methodCode || 'paypal_vault';
+    constructor(formDiv) {
+        this.createOrderUrl = formDiv.dataset.createOrderUrl;
+        this.approveOrderUrl = formDiv.dataset.approveOrderUrl;
+        this.methodCode = formDiv.dataset.methodCode;
     }
 
     async submit() {
@@ -54,3 +54,17 @@ class MahoPaypalVaultCheckout {
         }
     }
 }
+
+document.addEventListener('payment-method:switched', function(e) {
+    const formDiv = e.target;
+    if (!formDiv.dataset.vault || formDiv._paypalVault) return;
+
+    const checkout = new MahoPaypalVaultCheckout(formDiv);
+    formDiv._paypalVault = checkout;
+
+    if (typeof payment !== 'undefined') {
+        payment.addBeforeValidateFunc(formDiv.dataset.methodCode, function() {
+            return checkout.submit();
+        });
+    }
+}, true);

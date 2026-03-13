@@ -7,20 +7,42 @@
  */
 
 class MahoPaypalAdvancedCheckout {
-    constructor(config) {
-        this.createOrderUrl = config.createOrderUrl;
-        this.approveOrderUrl = config.approveOrderUrl;
-        this.methodCode = config.methodCode || 'paypal_advanced_checkout';
+    constructor(formDiv) {
+        this.formDiv = formDiv;
+        this.createOrderUrl = formDiv.dataset.createOrderUrl;
+        this.approveOrderUrl = formDiv.dataset.approveOrderUrl;
+        this.methodCode = formDiv.dataset.methodCode;
+        this.sdkUrl = formDiv.dataset.sdkUrl;
+        this.sdkNamespace = formDiv.dataset.sdkNamespace;
         this.cardFields = null;
         this._mounted = false;
     }
 
-    mount() {
-        if (this._mounted || typeof paypalCardFields === 'undefined') {
+    loadSdkAndMount() {
+        if (this._mounted) return;
+
+        if (window[this.sdkNamespace]) {
+            this._renderFields();
             return;
         }
 
-        this.cardFields = paypalCardFields.CardFields({
+        const script = document.createElement('script');
+        script.src = this.sdkUrl;
+        script.dataset.namespace = this.sdkNamespace;
+        script.onload = () => this._renderFields();
+        document.head.appendChild(script);
+    }
+
+    _renderFields() {
+        if (this._mounted) return;
+
+        const sdk = window[this.sdkNamespace];
+        if (!sdk) {
+            console.error('PayPal Card Fields SDK not loaded');
+            return;
+        }
+
+        this.cardFields = sdk.CardFields({
             createOrder: () => this.createOrder(),
             onApprove: (data) => this.onApprove(data),
             onError: (err) => this.handleError(err),
@@ -88,3 +110,18 @@ class MahoPaypalAdvancedCheckout {
         }
     }
 }
+
+document.addEventListener('payment-method:switched', function(e) {
+    const formDiv = e.target;
+    if (formDiv.dataset.sdkNamespace !== 'paypalCardFields' || formDiv._paypalAdvanced) return;
+
+    const checkout = new MahoPaypalAdvancedCheckout(formDiv);
+    formDiv._paypalAdvanced = checkout;
+    checkout.loadSdkAndMount();
+
+    if (typeof payment !== 'undefined') {
+        payment.addBeforeValidateFunc(formDiv.dataset.methodCode, function() {
+            return checkout.submitCard();
+        });
+    }
+}, true);

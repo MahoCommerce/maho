@@ -10,26 +10,12 @@
 /** @var Maho_Paypal_Block_Checkout_Standard_Form $this */
 $containerId = 'paypal-button-container-' . $this->getMethodCode();
 ?>
-<div id="payment_form_<?= $this->escapeHtml($this->getMethodCode()) ?>" style="display:none">
+<div id="payment_form_<?= $this->escapeHtml($this->getMethodCode()) ?>" style="display:none"
+    data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
+    data-sdk-namespace="paypal"
+    data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
+    data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
+    data-container-id="<?= $this->escapeHtml($containerId) ?>"
+    data-method-code="<?= $this->escapeHtml($this->getMethodCode()) ?>">
     <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container"></div>
 </div>
-<script src="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>" data-namespace="paypal"></script>
-<script src="<?= $this->escapeUrl($this->getSkinUrl('js/maho/paypal/standard-checkout.js')) ?>"></script>
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const paypalCheckout = new MahoPaypalStandardCheckout({
-        createOrderUrl: <?= Mage::helper('core')->jsonEncode($this->getCreateOrderUrl()) ?>,
-        approveOrderUrl: <?= Mage::helper('core')->jsonEncode($this->getApproveOrderUrl()) ?>,
-        containerId: <?= Mage::helper('core')->jsonEncode($containerId) ?>,
-        methodCode: <?= Mage::helper('core')->jsonEncode($this->getMethodCode()) ?>,
-    });
-
-    if (typeof payment !== 'undefined') {
-        payment.addAfterInitFunction(<?= Mage::helper('core')->jsonEncode($this->getMethodCode()) ?>, function() {
-            paypalCheckout.mount();
-        });
-    } else {
-        paypalCheckout.mount();
-    }
-});
-</script>

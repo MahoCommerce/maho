@@ -7,21 +7,43 @@
  */
 
 class MahoPaypalStandardCheckout {
-    constructor(config) {
-        this.createOrderUrl = config.createOrderUrl;
-        this.approveOrderUrl = config.approveOrderUrl;
-        this.containerId = config.containerId || 'paypal-button-container';
-        this.methodCode = config.methodCode || 'paypal_standard_checkout';
-        this.onError = config.onError || null;
+    constructor(formDiv) {
+        this.formDiv = formDiv;
+        this.createOrderUrl = formDiv.dataset.createOrderUrl;
+        this.approveOrderUrl = formDiv.dataset.approveOrderUrl;
+        this.containerId = formDiv.dataset.containerId;
+        this.methodCode = formDiv.dataset.methodCode;
+        this.sdkUrl = formDiv.dataset.sdkUrl;
+        this.sdkNamespace = formDiv.dataset.sdkNamespace;
+        this._mounted = false;
     }
 
-    mount() {
-        if (typeof paypal === 'undefined') {
+    loadSdkAndMount() {
+        if (this._mounted) return;
+
+        if (window[this.sdkNamespace]) {
+            this._renderButtons();
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = this.sdkUrl;
+        script.dataset.namespace = this.sdkNamespace;
+        script.onload = () => this._renderButtons();
+        document.head.appendChild(script);
+    }
+
+    _renderButtons() {
+        if (this._mounted) return;
+        this._mounted = true;
+
+        const sdk = window[this.sdkNamespace];
+        if (!sdk) {
             console.error('PayPal JS SDK not loaded');
             return;
         }
 
-        paypal.Buttons({
+        sdk.Buttons({
             createOrder: () => this.createOrder(),
             onApprove: (data) => this.onApprove(data),
             onError: (err) => this.handleError(err),
@@ -62,8 +84,22 @@ class MahoPaypalStandardCheckout {
 
     handleError(err) {
         console.error('PayPal error:', err);
-        if (this.onError) {
-            this.onError(err);
-        }
     }
 }
+
+document.addEventListener('payment-method:switched', function(e) {
+    const formDiv = e.target;
+    if (!formDiv.dataset.sdkUrl || formDiv._paypalCheckout) return;
+
+    const checkout = new MahoPaypalStandardCheckout(formDiv);
+    formDiv._paypalCheckout = checkout;
+    checkout.loadSdkAndMount();
+}, true);
+
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.paypal-shortcut-button[data-sdk-url]').forEach(function(el) {
+        const checkout = new MahoPaypalStandardCheckout(el);
+        el._paypalCheckout = checkout;
+        checkout.loadSdkAndMount();
+    });
+});
