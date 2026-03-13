@@ -94,6 +94,14 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
             $order  = Mage::getModel('sales/order')->load($orderId);
             $invoice = $this->_initInvoice($order);
 
+            // Auto-link the invoice when the order has exactly one
+            if (!$invoice) {
+                $invoices = $order->getInvoiceCollection();
+                if ($invoices->getSize() === 1) {
+                    $invoice = $invoices->getFirstItem()->setOrder($order);
+                }
+            }
+
             if (!$this->_canCreditmemo($order)) {
                 return false;
             }

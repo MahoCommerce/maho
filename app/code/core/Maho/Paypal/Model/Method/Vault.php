@@ -92,9 +92,11 @@ class Maho_Paypal_Model_Method_Vault extends Mage_Payment_Model_Method_Abstract
             if ($captureId) {
                 $payment->setTransactionId($captureId);
                 $payment->setIsTransactionClosed(true);
+                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
             } else {
                 $payment->setTransactionId($authId);
                 $payment->setIsTransactionClosed(false);
+                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH);
             }
 
             $stateObject->setState(Mage_Sales_Model_Order::STATE_PROCESSING);

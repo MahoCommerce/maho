@@ -54,9 +54,11 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
             if ($captureId) {
                 $payment->setTransactionId($captureId);
                 $payment->setIsTransactionClosed(true);
+                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
             } else {
                 $payment->setTransactionId($authId);
                 $payment->setIsTransactionClosed(false);
+                $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH);
             }
 
             $stateObject->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
