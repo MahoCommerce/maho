@@ -102,9 +102,17 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
 
     protected function _createClientFromParams(array $params): Maho_Paypal_Model_Api_Client
     {
+        $config = Mage::getModel('paypal/config');
         $clientId = $params['client_id'] ?? '';
         $clientSecret = $params['client_secret'] ?? '';
         $sandbox = ($params['sandbox'] ?? '1') === '1';
+
+        if (preg_match('/^\*+$/', $clientId)) {
+            $clientId = $config->getClientId();
+        }
+        if (preg_match('/^\*+$/', $clientSecret)) {
+            $clientSecret = $config->getClientSecret();
+        }
 
         /** @var Maho_Paypal_Model_Api_Client $client */
         $client = Mage::getModel('maho_paypal/api_client');
