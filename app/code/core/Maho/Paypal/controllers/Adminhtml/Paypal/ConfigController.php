@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Controller_Action
 {
-    public const ADMIN_RESOURCE = 'system/config/maho_paypal';
+    public const ADMIN_RESOURCE = 'system/config/payment';
 
     public const WEBHOOK_EVENT_TYPES = [
         'CHECKOUT.ORDER.APPROVED',
@@ -36,8 +36,9 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         $result = ['success' => false, 'message' => ''];
 
         try {
-            /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client');
+            $params = $this->_getPostedCredentials();
+            $client = $this->_createClientFromParams($params);
+
             if ($client->testConnection()) {
                 $result['success'] = true;
                 $result['message'] = $this->__('Connection successful.');
@@ -58,8 +59,8 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         $result = ['success' => false, 'message' => ''];
 
         try {
-            /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client');
+            $params = $this->_getPostedCredentials();
+            $client = $this->_createClientFromParams($params);
 
             $webhookUrl = Mage::getUrl('paypal/webhook/index', [
                 '_secure' => true,
@@ -88,5 +89,24 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
 
         $this->getResponse()->setHeader('Content-Type', 'application/json');
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+    }
+
+    protected function _getPostedCredentials(): array
+    {
+        $body = $this->getRequest()->getRawBody();
+        return $body ? Mage::helper('core')->jsonDecode($body) : [];
+    }
+
+    protected function _createClientFromParams(array $params): Maho_Paypal_Model_Api_Client
+    {
+        $clientId = $params['client_id'] ?? '';
+        $clientSecret = $params['client_secret'] ?? '';
+        $sandbox = ($params['sandbox'] ?? '1') === '1';
+
+        /** @var Maho_Paypal_Model_Api_Client $client */
+        $client = Mage::getModel('maho_paypal/api_client');
+        $client->setExplicitCredentials($clientId, $clientSecret, $sandbox);
+
+        return $client;
     }
 }

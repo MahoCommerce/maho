@@ -23,6 +23,9 @@ class Maho_Paypal_Model_Api_Client
     protected ?PaypalServerSdkClient $_client = null;
     protected ?Maho_Paypal_Model_Config $_config = null;
     protected ?int $_storeId = null;
+    protected ?string $_explicitClientId = null;
+    protected ?string $_explicitClientSecret = null;
+    protected ?bool $_explicitSandbox = null;
 
     public function __construct(array $args = [])
     {
@@ -34,6 +37,15 @@ class Maho_Paypal_Model_Api_Client
     public function setStoreId(int $storeId): self
     {
         $this->_storeId = $storeId;
+        return $this;
+    }
+
+    public function setExplicitCredentials(string $clientId, string $clientSecret, bool $sandbox): self
+    {
+        $this->_explicitClientId = $clientId;
+        $this->_explicitClientSecret = $clientSecret;
+        $this->_explicitSandbox = $sandbox;
+        $this->_client = null;
         return $this;
     }
 
@@ -51,17 +63,15 @@ class Maho_Paypal_Model_Api_Client
     {
         if ($this->_client === null) {
             $config = $this->getConfig();
+            $clientId = $this->_explicitClientId ?? $config->getClientId($this->_storeId);
+            $clientSecret = $this->_explicitClientSecret ?? $config->getClientSecret($this->_storeId);
+            $sandbox = $this->_explicitSandbox ?? $config->isSandbox($this->_storeId);
 
             $builder = PaypalServerSdkClientBuilder::init()
                 ->clientCredentialsAuthCredentials(
-                    ClientCredentialsAuthCredentialsBuilder::init(
-                        $config->getClientId($this->_storeId),
-                        $config->getClientSecret($this->_storeId),
-                    ),
+                    ClientCredentialsAuthCredentialsBuilder::init($clientId, $clientSecret),
                 )
-                ->environment(
-                    $config->isSandbox($this->_storeId) ? Environment::SANDBOX : Environment::PRODUCTION,
-                );
+                ->environment($sandbox ? Environment::SANDBOX : Environment::PRODUCTION);
 
             if ($config->isDebug($this->_storeId)) {
                 $builder->loggingConfiguration(
@@ -217,10 +227,9 @@ class Maho_Paypal_Model_Api_Client
     public function testConnection(): bool
     {
         $client = $this->_createHttpClient();
-        $config = $this->getConfig();
 
         $response = $client->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
-            'auth_basic' => [$config->getClientId($this->_storeId), $config->getClientSecret($this->_storeId)],
+            'auth_basic' => [$this->_getClientId(), $this->_getClientSecret()],
             'body' => 'grant_type=client_credentials',
             'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
         ]);
@@ -249,9 +258,24 @@ class Maho_Paypal_Model_Api_Client
         return [];
     }
 
+    protected function _getClientId(): string
+    {
+        return $this->_explicitClientId ?? $this->getConfig()->getClientId($this->_storeId);
+    }
+
+    protected function _getClientSecret(): string
+    {
+        return $this->_explicitClientSecret ?? $this->getConfig()->getClientSecret($this->_storeId);
+    }
+
+    protected function _isSandbox(): bool
+    {
+        return $this->_explicitSandbox ?? $this->getConfig()->isSandbox($this->_storeId);
+    }
+
     protected function _getApiUrl(string $path): string
     {
-        $base = $this->getConfig()->isSandbox($this->_storeId)
+        $base = $this->_isSandbox()
             ? 'https://api-m.sandbox.paypal.com'
             : 'https://api-m.paypal.com';
         return $base . $path;
@@ -259,11 +283,10 @@ class Maho_Paypal_Model_Api_Client
 
     protected function _getAuthHeaders(): array
     {
-        $config = $this->getConfig();
         $client = $this->_createHttpClient();
 
         $response = $client->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
-            'auth_basic' => [$config->getClientId($this->_storeId), $config->getClientSecret($this->_storeId)],
+            'auth_basic' => [$this->_getClientId(), $this->_getClientSecret()],
             'body' => 'grant_type=client_credentials',
             'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
         ]);

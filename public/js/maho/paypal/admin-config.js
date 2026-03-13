@@ -6,6 +6,15 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+function mahoPaypalGetCredentials() {
+    return {
+        form_key: typeof FORM_KEY !== 'undefined' ? FORM_KEY : '',
+        sandbox: document.getElementById('payment_maho_paypal_credentials_sandbox')?.value ?? '',
+        client_id: document.getElementById('payment_maho_paypal_credentials_client_id')?.value ?? '',
+        client_secret: document.getElementById('payment_maho_paypal_credentials_client_secret')?.value ?? '',
+    };
+}
+
 async function mahoPaypalTestConnection(button) {
     const url = button.dataset.ajaxUrl;
     const resultSpan = button.nextElementSibling;
@@ -14,7 +23,11 @@ async function mahoPaypalTestConnection(button) {
     resultSpan.style.color = '';
 
     try {
-        const response = await mahoFetch(url, { method: 'POST' });
+        const response = await mahoFetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(mahoPaypalGetCredentials()),
+        });
         resultSpan.textContent = response.message;
         resultSpan.style.color = response.success ? 'green' : 'red';
     } catch (error) {
@@ -33,12 +46,16 @@ async function mahoPaypalRegisterWebhook(button) {
     resultSpan.style.color = '';
 
     try {
-        const response = await mahoFetch(url, { method: 'POST' });
+        const response = await mahoFetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(mahoPaypalGetCredentials()),
+        });
         resultSpan.textContent = response.message;
         resultSpan.style.color = response.success ? 'green' : 'red';
 
         if (response.webhook_id) {
-            const webhookField = document.getElementById('maho_paypal_credentials_webhook_id');
+            const webhookField = document.getElementById('payment_maho_paypal_credentials_webhook_id');
             if (webhookField) {
                 webhookField.value = response.webhook_id;
             }
