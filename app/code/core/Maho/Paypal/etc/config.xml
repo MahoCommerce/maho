@@ -153,6 +153,9 @@
                 <debug>0</debug>
                 <webhook_id/>
             </credentials>
+            <general>
+                <paylater_messaging>0</paylater_messaging>
+            </general>
         </maho_paypal>
         <payment>
             <paypal_standard_checkout>

@@ -53,6 +53,9 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
         return $this;
     }
 
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
     #[\Override]
     public function authorize(\Maho\DataObject $payment, $amount): self
     {
@@ -75,6 +78,9 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
         return $this;
     }
 
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
     #[\Override]
     public function capture(\Maho\DataObject $payment, $amount): self
     {
@@ -114,6 +120,9 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
         return $this;
     }
 
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
     #[\Override]
     public function refund(\Maho\DataObject $payment, $amount): self
     {
@@ -142,6 +151,9 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
         return $this;
     }
 
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
     #[\Override]
     public function void(\Maho\DataObject $payment): self
     {
@@ -158,6 +170,9 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
         return $this;
     }
 
+    /**
+     * @param Mage_Sales_Model_Order_Payment $payment
+     */
     #[\Override]
     public function cancel(\Maho\DataObject $payment): self
     {

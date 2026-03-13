@@ -13,7 +13,7 @@
         <payment>
             <groups>
                 <maho_paypal_credentials translate="label">
-                    <label>PayPal - API Credentials</label>
+                    <label>PayPal - General Settings</label>
                     <sort_order>5</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
@@ -90,6 +90,17 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </register_webhook>
+                        <paylater_messaging translate="label comment">
+                            <label>Pay Later Messaging</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <config_path>maho_paypal/general/paylater_messaging</config_path>
+                            <sort_order>80</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Display Pay Later promotional banners on product pages and shopping cart.</comment>
+                        </paylater_messaging>
                     </fields>
                 </maho_paypal_credentials>
                 <paypal_standard_checkout translate="label comment">

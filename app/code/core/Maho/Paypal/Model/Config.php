@@ -116,6 +116,28 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
         return $this->isNewMethodActive(self::METHOD_VAULT, $storeId);
     }
 
+    public function getMessagesSdkUrl(?int $storeId = null): string
+    {
+        $baseUrl = $this->isSandbox($storeId) ? self::JS_SDK_URL_SANDBOX : self::JS_SDK_URL_LIVE;
+
+        $params = [
+            'client-id' => $this->getClientId($storeId),
+            'currency' => Mage::app()->getStore($storeId)->getCurrentCurrencyCode(),
+            'components' => 'messages',
+        ];
+
+        return $baseUrl . '?' . http_build_query($params);
+    }
+
+    public function isPayLaterMessagingEnabled(?int $storeId = null): bool
+    {
+        return (bool) Mage::getStoreConfigFlag('maho_paypal/general/paylater_messaging', $storeId)
+            && $this->hasCredentials($storeId)
+            && ($this->isNewMethodActive(self::METHOD_STANDARD_CHECKOUT, $storeId)
+                || $this->isNewMethodActive(self::METHOD_ADVANCED_CHECKOUT, $storeId)
+                || $this->isNewMethodActive(self::METHOD_VAULT, $storeId));
+    }
+
     public function getDisabledFundingSources(?int $storeId = null): string
     {
         $sources = array_filter(explode(
