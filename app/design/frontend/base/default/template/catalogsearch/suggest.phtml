@@ -17,7 +17,8 @@ $hasCategories = $categories && count($categories) > 0;
 // Product search block
 $productList = $this->getLayout()->createBlock('catalogsearch/autocomplete_product_list')
     ->setTemplate('catalog/product/list.phtml');
-$numProducts = count($productList->getLoadedProductCollection());
+$products = $productList->getLoadedProductCollection();
+$numProducts = $products->getSize();
 
 // Collect additional autocomplete content through events
 $autocompleteData = new \Maho\DataObject([
