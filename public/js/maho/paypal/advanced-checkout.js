@@ -26,10 +26,15 @@ class MahoPaypalAdvancedCheckout {
             return;
         }
 
+        showLoader(this.formDiv);
         const script = document.createElement('script');
         script.src = this.sdkUrl;
         script.dataset.namespace = this.sdkNamespace;
-        script.onload = () => this._renderFields();
+        script.onload = () => {
+            hideLoader();
+            this._renderFields();
+        };
+        script.onerror = () => hideLoader();
         document.head.appendChild(script);
     }
 
@@ -61,7 +66,7 @@ class MahoPaypalAdvancedCheckout {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ method: this.methodCode }),
-            loaderArea: false,
+            loaderArea: this.formDiv,
         });
 
         if (!response.success || !response.paypal_order_id) {
@@ -93,6 +98,7 @@ class MahoPaypalAdvancedCheckout {
                 paypal_order_id: data.orderID,
                 method: this.methodCode,
             }),
+            loaderArea: this.formDiv,
         });
 
         if (response.success && response.redirect_url) {

@@ -27,7 +27,7 @@ class MahoPaypalVaultCheckout {
                     method: this.methodCode,
                     vault_token_id: tokenSelect.value,
                 }),
-                loaderArea: false,
+                loaderArea: this.formDiv,
             });
 
             if (!createResponse.success || !createResponse.paypal_order_id) {
@@ -41,6 +41,7 @@ class MahoPaypalVaultCheckout {
                     paypal_order_id: createResponse.paypal_order_id,
                     method: this.methodCode,
                 }),
+                loaderArea: this.formDiv,
             });
 
             if (approveResponse.success && approveResponse.redirect_url) {
