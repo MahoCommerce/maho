@@ -27,6 +27,7 @@ class MahoPaypalVaultCheckout {
                     method: this.methodCode,
                     vault_token_id: tokenSelect.value,
                 }),
+                loaderArea: false,
             });
 
             if (!createResponse.success || !createResponse.paypal_order_id) {

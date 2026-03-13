@@ -56,6 +56,7 @@ class MahoPaypalStandardCheckout {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ method: this.methodCode }),
+            loaderArea: false,
         });
 
         if (!response.success || !response.paypal_order_id) {

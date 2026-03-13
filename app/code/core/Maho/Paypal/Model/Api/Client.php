@@ -73,8 +73,13 @@ class Maho_Paypal_Model_Api_Client
                 ->environment($sandbox ? Environment::SANDBOX : Environment::PRODUCTION);
 
             if ($config->isDebug($this->_storeId)) {
+                $logger = new \Monolog\Logger('paypal');
+                $logger->pushHandler(new \Monolog\Handler\StreamHandler(
+                    Mage::getBaseDir('log') . '/paypal.log',
+                ));
                 $builder->loggingConfiguration(
                     LoggingConfigurationBuilder::init()
+                        ->logger($logger)
                         ->requestConfiguration(RequestLoggingConfigurationBuilder::init()->body(true))
                         ->responseConfiguration(ResponseLoggingConfigurationBuilder::init()->body(true)),
                 );
