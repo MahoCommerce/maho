@@ -93,8 +93,11 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
 
     protected function _getPostedCredentials(): array
     {
-        $body = $this->getRequest()->getRawBody();
-        return $body ? Mage::helper('core')->jsonDecode($body) : [];
+        return [
+            'client_id' => (string) $this->getRequest()->getParam('client_id'),
+            'client_secret' => (string) $this->getRequest()->getParam('client_secret'),
+            'sandbox' => (string) $this->getRequest()->getParam('sandbox'),
+        ];
     }
 
     protected function _createClientFromParams(array $params): Maho_Paypal_Model_Api_Client

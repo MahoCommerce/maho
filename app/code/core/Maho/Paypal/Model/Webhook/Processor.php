@@ -53,7 +53,6 @@ class Maho_Paypal_Model_Webhook_Processor
             }
 
             $handler = Mage::getModel($handlerClass);
-            assert($handler instanceof Maho_Paypal_Model_Webhook_Handler_AbstractHandler);
             $handler->handle($payload);
 
             $event->setStatus('processed');

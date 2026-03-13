@@ -20,6 +20,9 @@
                                     <payment translate="title">
                                         <title>Payment Methods</title>
                                     </payment>
+                                    <maho_paypal translate="title">
+                                        <title>Maho PayPal</title>
+                                    </maho_paypal>
                                 </children>
                             </config>
                         </children>

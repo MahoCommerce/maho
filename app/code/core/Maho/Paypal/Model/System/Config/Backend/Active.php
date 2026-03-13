@@ -16,16 +16,18 @@ class Maho_Paypal_Model_System_Config_Backend_Active extends Mage_Core_Model_Con
     protected function _beforeSave()
     {
         if ($this->getValue() === '1') {
-            $config = Mage::getModel('maho_paypal/config');
-            assert($config instanceof Maho_Paypal_Model_Config);
+            if (!$this->_hasCredentialsInRequest()) {
+                $config = Mage::getModel('maho_paypal/config');
 
-            if (!$config->hasCredentials()) {
-                Mage::throwException(
-                    Mage::helper('maho_paypal')->__('PayPal Client ID and Client Secret are required when a PayPal payment method is enabled.'),
-                );
+                if (!$config->hasCredentials()) {
+                    Mage::throwException(
+                        Mage::helper('maho_paypal')->__('PayPal Client ID and Client Secret are required when a PayPal payment method is enabled.'),
+                    );
+                }
             }
 
             if ($this->getPath() === 'payment/paypal_vault/active') {
+                $config ??= Mage::getModel('maho_paypal/config');
                 $standardActive = $config->isNewMethodActive(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
                 $advancedActive = $config->isNewMethodActive(Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT);
                 if (!$standardActive && !$advancedActive) {
@@ -37,5 +39,16 @@ class Maho_Paypal_Model_System_Config_Backend_Active extends Mage_Core_Model_Con
         }
 
         return parent::_beforeSave();
+    }
+
+    protected function _hasCredentialsInRequest(): bool
+    {
+        $groups = Mage::app()->getRequest()->getPost('groups');
+        if (!is_array($groups)) {
+            return false;
+        }
+        $clientId = $groups['maho_paypal_credentials']['fields']['client_id']['value'] ?? '';
+        $clientSecret = $groups['maho_paypal_credentials']['fields']['client_secret']['value'] ?? '';
+        return $clientId !== '' && $clientSecret !== '';
     }
 }

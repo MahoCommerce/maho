@@ -53,7 +53,6 @@ class Maho_Paypal_Model_Api_Client
     {
         if ($this->_config === null) {
             $model = Mage::getModel('paypal/config');
-            assert($model instanceof Maho_Paypal_Model_Config);
             $this->_config = $model;
         }
         return $this->_config;
@@ -234,7 +233,13 @@ class Maho_Paypal_Model_Api_Client
             'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
         ]);
 
-        return $response->getStatusCode() === 200;
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200) {
+            $body = $response->getContent(false);
+            throw new \RuntimeException("PayPal API returned HTTP {$statusCode}: {$body}");
+        }
+
+        return true;
     }
 
     protected function _decodeResponse(mixed $response): array

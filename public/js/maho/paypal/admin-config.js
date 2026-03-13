@@ -7,12 +7,11 @@
  */
 
 function mahoPaypalGetCredentials() {
-    return {
-        form_key: typeof FORM_KEY !== 'undefined' ? FORM_KEY : '',
-        sandbox: document.getElementById('payment_maho_paypal_credentials_sandbox')?.value ?? '',
-        client_id: document.getElementById('payment_maho_paypal_credentials_client_id')?.value ?? '',
-        client_secret: document.getElementById('payment_maho_paypal_credentials_client_secret')?.value ?? '',
-    };
+    const params = new URLSearchParams();
+    params.set('sandbox', document.getElementById('payment_maho_paypal_credentials_sandbox')?.value ?? '');
+    params.set('client_id', document.getElementById('payment_maho_paypal_credentials_client_id')?.value ?? '');
+    params.set('client_secret', document.getElementById('payment_maho_paypal_credentials_client_secret')?.value ?? '');
+    return params;
 }
 
 async function mahoPaypalTestConnection(button) {
@@ -25,8 +24,7 @@ async function mahoPaypalTestConnection(button) {
     try {
         const response = await mahoFetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(mahoPaypalGetCredentials()),
+            body: mahoPaypalGetCredentials(),
         });
         resultSpan.textContent = response.message;
         resultSpan.style.color = response.success ? 'green' : 'red';
@@ -48,8 +46,7 @@ async function mahoPaypalRegisterWebhook(button) {
     try {
         const response = await mahoFetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(mahoPaypalGetCredentials()),
+            body: mahoPaypalGetCredentials(),
         });
         resultSpan.textContent = response.message;
         resultSpan.style.color = response.success ? 'green' : 'red';

@@ -98,7 +98,6 @@ class Maho_Paypal_Block_Shortcut_Button extends Mage_Core_Block_Template
     protected function _getConfig(): Maho_Paypal_Model_Config
     {
         $model = Mage::getModel('paypal/config');
-        assert($model instanceof Maho_Paypal_Model_Config);
         return $model;
     }
 }

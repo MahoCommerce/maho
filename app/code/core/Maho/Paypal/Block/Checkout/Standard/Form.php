@@ -22,7 +22,6 @@ class Maho_Paypal_Block_Checkout_Standard_Form extends Mage_Payment_Block_Form
     public function getConfig(): Maho_Paypal_Model_Config
     {
         $model = Mage::getModel('paypal/config');
-        assert($model instanceof Maho_Paypal_Model_Config);
         return $model;
     }
 

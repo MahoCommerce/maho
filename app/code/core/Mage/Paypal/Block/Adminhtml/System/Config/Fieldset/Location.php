@@ -24,6 +24,9 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
     {
         $js = '
             document.addEventListener("DOMContentLoaded", function() {
+                if (typeof togglePaypalSolutionConfigureButton === "undefined") {
+                    return;
+                }
                 document.querySelectorAll(".with-button button.button").forEach(function(configureButton) {
                     togglePaypalSolutionConfigureButton(configureButton, true);
                 });

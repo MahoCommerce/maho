@@ -86,7 +86,6 @@ class Maho_Paypal_Model_Method_AdvancedCheckout extends Mage_Payment_Model_Metho
     #[\Override]
     public function authorize(\Maho\DataObject $payment, $amount): self
     {
-        assert($payment instanceof Mage_Payment_Model_Info);
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
         if (!$paypalOrderId) {
             Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order ID not found.'));
@@ -109,7 +108,6 @@ class Maho_Paypal_Model_Method_AdvancedCheckout extends Mage_Payment_Model_Metho
     #[\Override]
     public function capture(\Maho\DataObject $payment, $amount): self
     {
-        assert($payment instanceof Mage_Payment_Model_Info);
         $authId = $payment->getAdditionalInformation('paypal_authorization_id')
             ?: $payment->getParentTransactionId();
         $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
@@ -228,7 +226,6 @@ class Maho_Paypal_Model_Method_AdvancedCheckout extends Mage_Payment_Model_Metho
     protected function _getConfig(): Maho_Paypal_Model_Config
     {
         $model = Mage::getModel('paypal/config');
-        assert($model instanceof Maho_Paypal_Model_Config);
         return $model;
     }
 
