@@ -59,4 +59,10 @@ class Maho_Paypal_Block_Checkout_Standard_Form extends Mage_Payment_Block_Form
     {
         return $this->getConfig()->getCurrencyCode();
     }
+
+    public function isVaultAvailable(): bool
+    {
+        return $this->getConfig()->isVaultEnabled()
+            && (bool) Mage::getSingleton('customer/session')->getCustomerId();
+    }
 }

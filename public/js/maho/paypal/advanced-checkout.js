@@ -79,10 +79,11 @@ class MahoPaypalAdvancedCheckout {
         }
 
         try {
+            const saveVault = this.formDiv.querySelector('#paypal_advanced_save_vault')?.checked || false;
             const response = await mahoFetch(this.createOrderUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ method: this.methodCode }),
+                body: JSON.stringify({ method: this.methodCode, save_vault: saveVault }),
                 loaderArea: this.formDiv,
             });
 

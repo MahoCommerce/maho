@@ -49,4 +49,10 @@ class Maho_Paypal_Block_Checkout_Advanced_Form extends Mage_Payment_Block_Form
     {
         return Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
     }
+
+    public function isVaultAvailable(): bool
+    {
+        return $this->getConfig()->isVaultEnabled()
+            && (bool) Mage::getSingleton('customer/session')->getCustomerId();
+    }
 }

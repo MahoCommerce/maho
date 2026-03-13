@@ -12,13 +12,20 @@ class MahoPaypalVaultCheckout {
         this.createOrderUrl = formDiv.dataset.createOrderUrl;
         this.approveOrderUrl = formDiv.dataset.approveOrderUrl;
         this.methodCode = formDiv.dataset.methodCode;
+        this.submitting = false;
     }
 
     async submit() {
+        if (this.submitting) return;
+
         const tokenSelect = document.getElementById('paypal_vault_token');
         if (!tokenSelect || !tokenSelect.value) {
-            return false;
+            alert(Translator.translate('Please select a saved payment method.'));
+            return;
         }
+
+        this.submitting = true;
+        checkout.setLoadWaiting('review');
 
         try {
             const createResponse = await mahoFetch(this.createOrderUrl, {
@@ -28,7 +35,6 @@ class MahoPaypalVaultCheckout {
                     method: this.methodCode,
                     vault_token_id: tokenSelect.value,
                 }),
-                loaderArea: this.formDiv,
             });
 
             if (!createResponse.success || !createResponse.paypal_order_id) {
@@ -42,32 +48,44 @@ class MahoPaypalVaultCheckout {
                     paypal_order_id: createResponse.paypal_order_id,
                     method: this.methodCode,
                 }),
-                loaderArea: this.formDiv,
             });
 
             if (approveResponse.success && approveResponse.redirect_url) {
                 window.location.href = approveResponse.redirect_url;
-                return true;
+                return;
             }
 
             throw new Error(approveResponse.message || 'Payment failed');
         } catch (err) {
             console.error('Vault checkout error:', err);
-            return false;
+            alert(err.message || 'Payment failed. Please try again.');
+            this.submitting = false;
+            checkout.setLoadWaiting(false);
         }
+    }
+
+    static getActiveInstance() {
+        const currentMethod = payment?.currentMethod;
+        if (!currentMethod) return null;
+
+        const formDiv = document.getElementById(`payment_form_${currentMethod}`);
+        return formDiv?._paypalVault || null;
     }
 }
 
 document.addEventListener('payment-method:switched', function(e) {
     const formDiv = e.target;
     if (!formDiv.dataset.vault || formDiv._paypalVault) return;
-
-    const checkout = new MahoPaypalVaultCheckout(formDiv);
-    formDiv._paypalVault = checkout;
-
-    if (typeof payment !== 'undefined') {
-        payment.addBeforeValidateFunction(formDiv.dataset.methodCode, function() {
-            return checkout.submit();
-        });
-    }
+    formDiv._paypalVault = new MahoPaypalVaultCheckout(formDiv);
 }, true);
+
+// Intercept Review.save() to handle vault payments
+const _origReviewSave = Review.prototype.save;
+Review.prototype.save = function() {
+    const vault = MahoPaypalVaultCheckout.getActiveInstance();
+    if (vault) {
+        vault.submit();
+        return;
+    }
+    return _origReviewSave.call(this);
+};

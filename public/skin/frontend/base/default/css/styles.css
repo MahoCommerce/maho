@@ -4130,6 +4130,11 @@ p.product-name a:hover {
   float: right;
   clear: right;
 }
+.product-view .add-to-cart-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 @media only screen and (max-width: 850px) {
   .product-view .product-shop .price-box .price-excluding-tax .label,
@@ -4334,10 +4339,10 @@ p.product-name a:hover {
   line-height: 40px;
   font-size: 1rem;
   padding: 0px 30px;
-  float: left;
   min-width: 160px;
-  width: 100%;
-  white-space: normal;
+}
+.product-view .paypal-shortcut-button {
+  min-height: 55px;
 }
 .product-view .alert-price,
 .product-view .alert-stock {

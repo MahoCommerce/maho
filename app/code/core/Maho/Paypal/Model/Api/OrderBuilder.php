@@ -20,6 +20,9 @@ class Maho_Paypal_Model_Api_OrderBuilder
         string $intent = 'AUTHORIZE',
         ?string $returnUrl = null,
         ?string $cancelUrl = null,
+        ?string $vaultPaymentSource = null,
+        ?string $vaultPaypalTokenId = null,
+        ?string $vaultSourceType = null,
     ): array {
         $currency = $quote->getBaseCurrencyCode();
         $grandTotal = $this->_formatAmount((float) $quote->getBaseGrandTotal());
@@ -43,7 +46,54 @@ class Maho_Paypal_Model_Api_OrderBuilder
             ];
         }
 
+        if ($vaultPaypalTokenId && $vaultSourceType) {
+            $this->_addVaultTokenPaymentSource($orderRequest, $vaultPaypalTokenId, $vaultSourceType);
+        } elseif ($vaultPaymentSource && $quote->getCustomerId()) {
+            $this->_addVaultAttributes($orderRequest, $vaultPaymentSource, (string) $quote->getCustomerId());
+        }
+
         return $orderRequest;
+    }
+
+    protected function _addVaultAttributes(array &$orderRequest, string $paymentSource, string $customerId): void
+    {
+        $vaultData = [
+            'store_in_vault' => 'ON_SUCCESS',
+            'usage_type' => 'MERCHANT',
+            'customer_type' => 'CONSUMER',
+        ];
+
+        if ($paymentSource === 'paypal') {
+            $orderRequest['payment_source']['paypal']['attributes']['vault'] = $vaultData;
+            $orderRequest['payment_source']['paypal']['attributes']['customer'] = [
+                'id' => $customerId,
+            ];
+        } elseif ($paymentSource === 'card') {
+            $orderRequest['payment_source']['card']['attributes']['vault'] = $vaultData;
+            $orderRequest['payment_source']['card']['attributes']['customer'] = [
+                'id' => $customerId,
+            ];
+        }
+    }
+
+    protected function _addVaultTokenPaymentSource(array &$orderRequest, string $paypalTokenId, string $sourceType): void
+    {
+        if ($sourceType === 'card') {
+            $orderRequest['payment_source'] = [
+                'card' => [
+                    'vault_id' => $paypalTokenId,
+                ],
+            ];
+        } elseif ($sourceType === 'paypal') {
+            $orderRequest['payment_source'] = [
+                'paypal' => [
+                    'vault_id' => $paypalTokenId,
+                    'experience_context' => [
+                        'user_action' => 'PAY_NOW',
+                    ],
+                ],
+            ];
+        }
     }
 
     protected function _buildPurchaseUnit(

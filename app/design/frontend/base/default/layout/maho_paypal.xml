@@ -59,13 +59,18 @@
             <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/paylater-message.js</script></action>
         </reference>
-        <reference name="product.info.addtocart">
-            <block type="maho_paypal/shortcut_button" name="product.info.addtocart.maho_paypal" template="maho/paypal/shortcut/button.phtml" ifconfig="payment/paypal_standard_checkout/active">
-                <action method="setIsInCatalogProduct"><value>1</value></action>
+        <reference name="product.info">
+            <block type="core/text_list" name="product.info.extra_buttons" as="extra_buttons">
+                <block type="maho_paypal/shortcut_button" name="product.info.addtocart.maho_paypal" template="maho/paypal/shortcut/button.phtml" ifconfig="payment/paypal_standard_checkout/active">
+                    <action method="setIsInCatalogProduct"><value>1</value></action>
+                </block>
+                <block type="maho_paypal/paylater_message" name="product.info.paylater" after="-" template="maho/paypal/paylater/message.phtml" ifconfig="maho_paypal/general/paylater_messaging">
+                    <action method="setIsInCatalogProduct"><value>1</value></action>
+                </block>
             </block>
-            <block type="maho_paypal/paylater_message" name="product.info.paylater" after="-" template="maho/paypal/paylater/message.phtml" ifconfig="maho_paypal/general/paylater_messaging">
-                <action method="setIsInCatalogProduct"><value>1</value></action>
-            </block>
+        </reference>
+        <reference name="product.info.options.wrapper.bottom">
+            <action method="append"><block>product.info.extra_buttons</block></action>
         </reference>
     </catalog_product_view>
 

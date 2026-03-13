@@ -50,6 +50,9 @@ class MahoPaypalSdk {
         if (document.querySelector('[data-method-code="paypal_advanced_checkout"]')) {
             components.push('card-fields');
         }
+        if (document.querySelector('.paypal-paylater-message')) {
+            components.push('paypal-messages');
+        }
         if (components.length === 0) {
             components.push('paypal-payments');
         }

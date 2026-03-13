@@ -92,6 +92,10 @@ class Maho_Paypal_Model_Api_Client
 
     public function createOrder(array $orderRequest): array
     {
+        if (!isset($orderRequest['paypalRequestId'])) {
+            $orderRequest['paypalRequestId'] = uniqid('maho-', true);
+        }
+        $orderRequest['prefer'] = 'return=representation';
         $response = $this->getSdkClient()->getOrdersController()->createOrder($orderRequest);
         return $this->_decodeResponse($response);
     }

@@ -11,7 +11,7 @@ class MahoPaypalPayLaterMessage {
         this.el = el;
         this.sdkUrl = el.dataset.sdkUrl;
         this.clientTokenUrl = el.dataset.clientTokenUrl;
-        this.amount = parseFloat(el.dataset.amount) || 0;
+        this.amount = el.dataset.amount || '0';
         this.placement = el.dataset.placement || 'product';
         this._mounted = false;
     }
@@ -31,22 +31,14 @@ class MahoPaypalPayLaterMessage {
         if (this._mounted) return;
         this._mounted = true;
 
-        if (!sdk.Messages) {
-            console.warn('PayPal Messages component not available');
+        if (typeof sdk.createPayPalMessages !== 'function') {
             return;
         }
 
-        sdk.Messages({
-            amount: this.amount,
-            placement: this.placement,
-            style: {
-                layout: 'text',
-                logo: {
-                    type: 'primary',
-                    position: 'left',
-                },
-            },
-        }).render(this.el);
+        const messagesInstance = sdk.createPayPalMessages();
+        const messageEl = document.createElement('paypal-message');
+        messageEl.setAttribute('amount', this.amount);
+        this.el.appendChild(messageEl);
     }
 }
 

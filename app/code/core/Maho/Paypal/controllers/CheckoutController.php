@@ -74,9 +74,37 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $intent = $config->getNewPaymentAction($methodCode);
             $paypalIntent = ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) ? 'CAPTURE' : 'AUTHORIZE';
 
+            $vaultPaymentSource = null;
+            if ($this->getRequest()->getParam('save_vault') && $quote->getCustomerId()) {
+                $vaultPaymentSource = match ($methodCode) {
+                    Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT => 'paypal',
+                    Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT => 'card',
+                    default => null,
+                };
+            }
+
+            // For vault payments, resolve the PayPal token ID
+            $vaultTokenId = $this->getRequest()->getParam('vault_token_id');
+            $vaultPaypalTokenId = null;
+            $vaultSourceType = null;
+            if ($vaultTokenId && $methodCode === Maho_Paypal_Model_Config::METHOD_VAULT) {
+                /** @var Maho_Paypal_Model_Vault_Token $vaultToken */
+                $vaultToken = Mage::getModel('maho_paypal/vault_token')->load($vaultTokenId);
+                if ($vaultToken->getId() && $vaultToken->getIsActive()) {
+                    $vaultPaypalTokenId = $vaultToken->getPaypalTokenId();
+                    $vaultSourceType = $vaultToken->getPaymentSourceType();
+                }
+            }
+
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
             $builder = Mage::getModel('maho_paypal/api_orderBuilder');
-            $orderRequest = $builder->buildFromQuote($quote, $paypalIntent);
+            $orderRequest = $builder->buildFromQuote(
+                $quote,
+                $paypalIntent,
+                vaultPaymentSource: $vaultPaymentSource,
+                vaultPaypalTokenId: $vaultPaypalTokenId,
+                vaultSourceType: $vaultSourceType,
+            );
 
             /** @var Maho_Paypal_Model_Api_Client $client */
             $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
@@ -139,14 +167,21 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             /** @var Maho_Paypal_Model_Api_Client $client */
             $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
 
-            // Authorize or capture the PayPal order
-            if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
-                $paypalResult = $client->captureOrder($paypalOrderId);
-            } else {
-                $paypalResult = $client->authorizeOrder($paypalOrderId);
+            // Fetch current order status first
+            $paypalResult = $client->getOrder($paypalOrderId);
+            $status = $paypalResult['status'] ?? '';
+
+            // If order is not yet completed (standard/advanced checkout flow),
+            // authorize or capture it now
+            if ($status !== 'COMPLETED') {
+                if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
+                    $paypalResult = $client->captureOrder($paypalOrderId);
+                } else {
+                    $paypalResult = $client->authorizeOrder($paypalOrderId);
+                }
+                $status = $paypalResult['status'] ?? '';
             }
 
-            $status = $paypalResult['status'] ?? '';
             if (!in_array($status, ['COMPLETED', 'APPROVED'])) {
                 Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order could not be approved. Status: %s', $status));
             }
@@ -158,17 +193,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $payment->setData('paypal_order_id', $paypalOrderId);
 
             // Import transaction IDs
-            if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
-                $captureId = $paypalResult['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
-                if ($captureId) {
-                    $payment->setAdditionalInformation('paypal_capture_id', $captureId);
-                }
-            } else {
-                $authId = $paypalResult['purchase_units'][0]['payments']['authorizations'][0]['id'] ?? null;
-                if ($authId) {
-                    $payment->setAdditionalInformation('paypal_authorization_id', $authId);
-                }
-            }
+            $this->_importTransactionIds($paypalResult, $payment, $intent);
 
             // Import payer info
             $payer = $paypalResult['payer'] ?? [];
@@ -178,6 +203,12 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if (!empty($payer['payer_id'])) {
                 $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
             }
+
+            // Persist payment data before saveOrder() which may reimport payment
+            $payment->save();
+
+            // Save vault token if returned by PayPal
+            $this->_saveVaultToken($paypalResult, $quote);
 
             // Place the Magento order
             $quote->collectTotals();
@@ -199,5 +230,95 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
         $this->getResponse()->setHeader('Content-Type', 'application/json');
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+    }
+
+    protected function _importTransactionIds(array $paypalResult, Mage_Sales_Model_Quote_Payment $payment, string $intent): void
+    {
+        $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
+        $payments = $purchaseUnit['payments'] ?? [];
+
+        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
+            $captureId = $payments['captures'][0]['id'] ?? null;
+            if ($captureId) {
+                $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+            }
+        }
+
+        $authId = $payments['authorizations'][0]['id'] ?? null;
+        if ($authId) {
+            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
+        }
+    }
+
+    protected function _saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void
+    {
+        $customerId = $quote->getCustomerId();
+        if (!$customerId) {
+            return;
+        }
+
+        $paymentSource = $paypalResult['payment_source'] ?? [];
+        $sourceType = null;
+        $vaultData = null;
+        $cardLastFour = null;
+        $cardBrand = null;
+        $cardExpiry = null;
+        $payerEmail = null;
+
+        if (isset($paymentSource['card']['attributes']['vault'])) {
+            $vaultData = $paymentSource['card']['attributes']['vault'];
+            $sourceType = 'card';
+            $cardLastFour = $paymentSource['card']['last_digits'] ?? null;
+            $cardBrand = $paymentSource['card']['brand'] ?? null;
+            $cardExpiry = $paymentSource['card']['expiry'] ?? null;
+        } elseif (isset($paymentSource['paypal']['attributes']['vault'])) {
+            $vaultData = $paymentSource['paypal']['attributes']['vault'];
+            $sourceType = 'paypal';
+            $payerEmail = $paymentSource['paypal']['email_address'] ?? null;
+        }
+
+        if (!$vaultData || ($vaultData['status'] ?? '') !== 'VAULTED') {
+            return;
+        }
+
+        $paypalTokenId = $vaultData['id'] ?? '';
+        if (!$paypalTokenId) {
+            return;
+        }
+
+        /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $existing */
+        $existing = Mage::getResourceModel('maho_paypal/vault_token_collection');
+        $existing->addFieldToFilter('paypal_token_id', $paypalTokenId);
+        if ($existing->getSize() > 0) {
+            return;
+        }
+
+        // Deactivate older tokens for the same payment method
+        /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $oldTokens */
+        $oldTokens = Mage::getResourceModel('maho_paypal/vault_token_collection');
+        $oldTokens->addCustomerFilter((int) $customerId)->addActiveFilter();
+        $oldTokens->addFieldToFilter('payment_source_type', $sourceType);
+        if ($sourceType === 'card') {
+            $oldTokens->addFieldToFilter('card_last_four', $cardLastFour);
+            $oldTokens->addFieldToFilter('card_brand', $cardBrand);
+        } elseif ($sourceType === 'paypal' && $payerEmail) {
+            $oldTokens->addFieldToFilter('payer_email', $payerEmail);
+        }
+        foreach ($oldTokens as $oldToken) {
+            $oldToken->setIsActive(0)->save();
+        }
+
+        /** @var Maho_Paypal_Model_Vault_Token $token */
+        $token = Mage::getModel('maho_paypal/vault_token');
+        $token->setData([
+            'customer_id' => (int) $customerId,
+            'paypal_token_id' => $paypalTokenId,
+            'payment_source_type' => $sourceType,
+            'card_last_four' => $cardLastFour,
+            'card_brand' => $cardBrand,
+            'card_expiry' => $cardExpiry,
+            'payer_email' => $payerEmail,
+        ]);
+        $token->save();
     }
 }
