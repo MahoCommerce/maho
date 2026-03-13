@@ -92,8 +92,9 @@
                         </register_webhook>
                     </fields>
                 </maho_paypal_credentials>
-                <paypal_standard_checkout translate="label">
+                <paypal_standard_checkout translate="label comment">
                     <label>PayPal - Standard Checkout (PayPal Buttons)</label>
+                    <comment>Displays PayPal buttons at checkout. Customers pay with their PayPal account, Pay Later, or other PayPal-supported methods without leaving your site.</comment>
                     <sort_order>6</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
@@ -171,8 +172,9 @@
                         </sort_order>
                     </fields>
                 </paypal_standard_checkout>
-                <paypal_advanced_checkout translate="label">
+                <paypal_advanced_checkout translate="label comment">
                     <label>PayPal - Advanced Checkout (Card Fields)</label>
+                    <comment>Displays inline credit/debit card fields directly on your checkout page. Customers enter their card details without being redirected to PayPal. Requires PayPal Advanced Checkout eligibility.</comment>
                     <sort_order>7</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
@@ -219,8 +221,9 @@
                         </sort_order>
                     </fields>
                 </paypal_advanced_checkout>
-                <paypal_vault translate="label">
+                <paypal_vault translate="label comment">
                     <label>PayPal - Vault (Saved Payment Methods)</label>
+                    <comment>Allows logged-in customers to save their payment methods for faster future checkouts. Saved tokens are stored securely by PayPal.</comment>
                     <sort_order>8</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>

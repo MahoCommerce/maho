@@ -55,7 +55,7 @@ class Maho_Paypal_Model_Observer
         $methods = implode(', ', $deprecated);
         Mage::getSingleton('adminhtml/session')->addNotice(
             Mage::helper('maho_paypal')->__(
-                'Legacy PayPal payment methods are active (%s). Consider migrating to the new PayPal integration under System > Configuration > PayPal (New).',
+                'Legacy PayPal payment methods are active (%s). Consider migrating to the new PayPal integration under System > Configuration > Payment Methods.',
                 $methods,
             ),
         );
