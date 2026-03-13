@@ -1,0 +1,20 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Paypal
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Paypal_Block_Adminhtml_System_Config_TestConnection $this */
+$htmlId = $this->getData('element')->getHtmlId();
+$ajaxUrl = $this->getData('ajax_url');
+?>
+<button id="<?= $this->escapeHtmlAttr($htmlId) ?>_button" type="button" class="scalable"
+    data-ajax-url="<?= $this->escapeUrl($ajaxUrl) ?>"
+    onclick="mahoPaypalTestConnection(this)">
+    <span><?= $this->escapeHtml($this->__('Test Connection')) ?></span>
+</button>
+<span id="<?= $this->escapeHtmlAttr($htmlId) ?>_result"></span>
+<script src="<?= $this->getSkinUrl('js/maho/paypal/admin-config.js') ?>"></script>

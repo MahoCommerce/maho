@@ -1,0 +1,45 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Paypal
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Paypal_Block_Checkout_Advanced_Form $this */
+$methodCode = $this->getMethodCode();
+?>
+<div id="payment_form_<?= $this->escapeHtmlAttr($methodCode) ?>" style="display:none">
+    <div id="paypal-card-number-field" class="paypal-card-field"></div>
+    <div class="paypal-card-row">
+        <div id="paypal-card-expiry-field" class="paypal-card-field"></div>
+        <div id="paypal-card-cvv-field" class="paypal-card-field"></div>
+    </div>
+    <div id="paypal-card-errors" class="validation-advice" style="display:none"></div>
+</div>
+<script src="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>" data-namespace="paypalCardFields"></script>
+<script src="<?= $this->escapeUrl($this->getSkinUrl('js/maho/paypal/advanced-checkout.js')) ?>"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const advancedCheckout = new MahoPaypalAdvancedCheckout({
+        createOrderUrl: <?= Mage::helper('core')->jsonEncode($this->getCreateOrderUrl()) ?>,
+        approveOrderUrl: <?= Mage::helper('core')->jsonEncode($this->getApproveOrderUrl()) ?>,
+        methodCode: <?= Mage::helper('core')->jsonEncode($methodCode) ?>,
+    });
+
+    if (typeof payment !== 'undefined') {
+        payment.addBeforeValidateFunc(<?= Mage::helper('core')->jsonEncode($methodCode) ?>, function() {
+            return advancedCheckout.submitCard();
+        });
+        payment.addAfterInitFunction(<?= Mage::helper('core')->jsonEncode($methodCode) ?>, function() {
+            advancedCheckout.mount();
+        });
+    }
+});
+</script>
+<style>
+.paypal-card-field { margin-bottom: 10px; }
+.paypal-card-row { display: flex; gap: 10px; }
+.paypal-card-row .paypal-card-field { flex: 1; }
+</style>

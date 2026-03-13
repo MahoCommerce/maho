@@ -1,0 +1,92 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    Maho_Paypal
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+declare(strict_types=1);
+
+class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Controller_Action
+{
+    public const ADMIN_RESOURCE = 'system/config/maho_paypal';
+
+    public const WEBHOOK_EVENT_TYPES = [
+        'CHECKOUT.ORDER.APPROVED',
+        'CHECKOUT.ORDER.COMPLETED',
+        'PAYMENT.AUTHORIZATION.CREATED',
+        'PAYMENT.AUTHORIZATION.VOIDED',
+        'PAYMENT.CAPTURE.COMPLETED',
+        'PAYMENT.CAPTURE.PENDING',
+        'PAYMENT.CAPTURE.DECLINED',
+        'PAYMENT.CAPTURE.REFUNDED',
+        'PAYMENT.CAPTURE.REVERSED',
+        'CUSTOMER.DISPUTE.CREATED',
+        'CUSTOMER.DISPUTE.UPDATED',
+        'CUSTOMER.DISPUTE.RESOLVED',
+        'VAULT.PAYMENT-TOKEN.CREATED',
+        'VAULT.PAYMENT-TOKEN.DELETED',
+    ];
+
+    public function testConnectionAction(): void
+    {
+        $result = ['success' => false, 'message' => ''];
+
+        try {
+            /** @var Maho_Paypal_Model_Api_Client $client */
+            $client = Mage::getModel('maho_paypal/api_client');
+            if ($client->testConnection()) {
+                $result['success'] = true;
+                $result['message'] = $this->__('Connection successful.');
+            } else {
+                $result['message'] = $this->__('Connection failed. Please check your credentials.');
+            }
+        } catch (\Throwable $e) {
+            $result['message'] = $this->__('Connection failed: %s', $e->getMessage());
+            Mage::logException($e);
+        }
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json');
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+    }
+
+    public function registerWebhookAction(): void
+    {
+        $result = ['success' => false, 'message' => ''];
+
+        try {
+            /** @var Maho_Paypal_Model_Api_Client $client */
+            $client = Mage::getModel('maho_paypal/api_client');
+
+            $webhookUrl = Mage::getUrl('paypal/webhook/index', [
+                '_secure' => true,
+                '_nosid' => true,
+            ]);
+
+            $response = $client->createWebhook($webhookUrl, self::WEBHOOK_EVENT_TYPES);
+
+            if (!empty($response['id'])) {
+                Mage::getModel('core/config')->saveConfig(
+                    'maho_paypal/credentials/webhook_id',
+                    $response['id'],
+                );
+                Mage::getConfig()->reinit();
+
+                $result['success'] = true;
+                $result['message'] = $this->__('Webhook registered successfully. ID: %s', $response['id']);
+                $result['webhook_id'] = $response['id'];
+            } else {
+                $result['message'] = $this->__('Failed to register webhook.');
+            }
+        } catch (\Throwable $e) {
+            $result['message'] = $this->__('Webhook registration failed: %s', $e->getMessage());
+            Mage::logException($e);
+        }
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json');
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+    }
+}
