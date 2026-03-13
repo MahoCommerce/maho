@@ -4343,7 +4343,6 @@ p.product-name a:hover {
 .product-view .alert-stock {
   clear: both;
 }
-
 @media only screen and (max-width: 479px) {
   .product-view .add-to-cart-buttons .paypal-or {
     line-height: 20px;
@@ -4875,6 +4874,7 @@ label.offcanvas-trigger {
   background-color: var(--maho-color-background-alt);
   padding: 15px 20px;
   border: 1px solid var(--maho-color-border);
+  overflow: hidden;
   border-top: 0;
   margin-bottom: 10px;
 }
