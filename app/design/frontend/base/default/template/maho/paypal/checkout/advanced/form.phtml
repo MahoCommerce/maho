@@ -12,19 +12,20 @@ $methodCode = $this->getMethodCode();
 ?>
 <div id="payment_form_<?= $this->escapeHtml($methodCode) ?>" style="display:none"
     data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
-    data-sdk-namespace="paypalCardFields"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-currency-code="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
     data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
     data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
     data-method-code="<?= $this->escapeHtml($methodCode) ?>">
-    <div id="paypal-card-number-field" class="paypal-card-field"></div>
+    <div id="paypal-card-fields-number" class="paypal-card-field"></div>
     <div class="paypal-card-row">
-        <div id="paypal-card-expiry-field" class="paypal-card-field"></div>
-        <div id="paypal-card-cvv-field" class="paypal-card-field"></div>
+        <div id="paypal-card-fields-expiry" class="paypal-card-field"></div>
+        <div id="paypal-card-fields-cvv" class="paypal-card-field"></div>
     </div>
     <div id="paypal-card-errors" class="validation-advice" style="display:none"></div>
 </div>
 <style>
-.paypal-card-field { margin-bottom: 10px; }
+.paypal-card-field { height: 3rem; margin-bottom: 10px; }
 .paypal-card-row { display: flex; gap: 10px; }
 .paypal-card-row .paypal-card-field { flex: 1; }
 </style>

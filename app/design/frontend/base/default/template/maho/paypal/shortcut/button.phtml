@@ -13,7 +13,11 @@ $containerId = $this->getShortcutHtmlId();
 <div id="<?= $this->escapeHtml($containerId) ?>"
     class="paypal-shortcut-button"
     data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
-    data-sdk-namespace="paypalShortcut"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-currency-code="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
     data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
     data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
-    data-container-id="<?= $this->escapeHtml($containerId) ?>"></div>
+    data-container-id="<?= $this->escapeHtml($containerId) ?>"
+    data-method-code="paypal_standard_checkout">
+    <paypal-button hidden></paypal-button>
+</div>

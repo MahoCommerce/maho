@@ -47,6 +47,16 @@ class Maho_Paypal_Block_Checkout_Standard_Form extends Mage_Payment_Block_Form
 
     public function getJsSdkUrl(): string
     {
-        return $this->getConfig()->getJsSdkUrl(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
+        return $this->getConfig()->getJsSdkUrl();
+    }
+
+    public function getClientTokenUrl(): string
+    {
+        return $this->getConfig()->getClientTokenUrl();
+    }
+
+    public function getCurrencyCode(): string
+    {
+        return $this->getConfig()->getCurrencyCode();
     }
 }

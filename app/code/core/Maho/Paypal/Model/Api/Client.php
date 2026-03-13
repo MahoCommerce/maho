@@ -187,6 +187,32 @@ class Maho_Paypal_Model_Api_Client
         $this->getSdkClient()->getVaultController()->deletePaymentToken($tokenId);
     }
 
+    public function generateClientToken(): string
+    {
+        $client = $this->_createHttpClient();
+
+        $response = $client->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
+            'auth_basic' => [$this->_getClientId(), $this->_getClientSecret()],
+            'body' => 'grant_type=client_credentials&response_type=client_token&intent=sdk_init',
+            'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200) {
+            $body = $response->getContent(false);
+            throw new \RuntimeException("PayPal API returned HTTP {$statusCode}: {$body}");
+        }
+
+        $result = Mage::helper('core')->jsonDecode($response->getContent());
+        $clientToken = $result['access_token'] ?? '';
+
+        if ($clientToken === '') {
+            throw new \RuntimeException('Failed to generate PayPal client token');
+        }
+
+        return $clientToken;
+    }
+
     public function createWebhook(string $url, array $eventTypes): array
     {
         $body = [

@@ -17,7 +17,6 @@ class Maho_Paypal_Model_System_Config_Source_DisableFunding
         $helper = Mage::helper('maho_paypal');
 
         return [
-            ['value' => 'card', 'label' => $helper->__('Credit or Debit Card')],
             ['value' => 'credit', 'label' => $helper->__('PayPal Credit')],
             ['value' => 'paylater', 'label' => $helper->__('Pay Later')],
             ['value' => 'venmo', 'label' => $helper->__('Venmo')],

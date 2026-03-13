@@ -13,6 +13,6 @@ $containerId = $this->getMessageHtmlId();
 <div id="<?= $this->escapeHtml($containerId) ?>"
     class="paypal-paylater-message"
     data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
-    data-sdk-namespace="paypalMessages"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
     data-amount="<?= $this->escapeHtml((string) $this->getAmount()) ?>"
     data-placement="<?= $this->escapeHtml($this->getPlacement()) ?>"></div>

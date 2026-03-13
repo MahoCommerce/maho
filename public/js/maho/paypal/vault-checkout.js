@@ -8,6 +8,7 @@
 
 class MahoPaypalVaultCheckout {
     constructor(formDiv) {
+        this.formDiv = formDiv;
         this.createOrderUrl = formDiv.dataset.createOrderUrl;
         this.approveOrderUrl = formDiv.dataset.approveOrderUrl;
         this.methodCode = formDiv.dataset.methodCode;
@@ -65,7 +66,7 @@ document.addEventListener('payment-method:switched', function(e) {
     formDiv._paypalVault = checkout;
 
     if (typeof payment !== 'undefined') {
-        payment.addBeforeValidateFunc(formDiv.dataset.methodCode, function() {
+        payment.addBeforeValidateFunction(formDiv.dataset.methodCode, function() {
             return checkout.submit();
         });
     }

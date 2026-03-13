@@ -19,8 +19,8 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
     public const PAYMENT_ACTION_AUTHORIZE = 'authorize';
     public const PAYMENT_ACTION_CAPTURE = 'capture';
 
-    public const JS_SDK_URL_SANDBOX = 'https://www.sandbox.paypal.com/sdk/js';
-    public const JS_SDK_URL_LIVE = 'https://www.paypal.com/sdk/js';
+    public const JS_SDK_URL_SANDBOX = 'https://www.sandbox.paypal.com/web-sdk/v6/core';
+    public const JS_SDK_URL_LIVE = 'https://www.paypal.com/web-sdk/v6/core';
 
     /**
      * @deprecated Legacy PayPal methods - use new Maho_Paypal methods instead
@@ -62,42 +62,9 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
         return (string) $this->_getStoreConfig('maho_paypal/credentials/webhook_id', $storeId);
     }
 
-    public function getJsSdkUrl(string $methodCode, ?int $storeId = null): string
+    public function getJsSdkUrl(?int $storeId = null): string
     {
-        $baseUrl = $this->isSandbox($storeId) ? self::JS_SDK_URL_SANDBOX : self::JS_SDK_URL_LIVE;
-        $clientId = $this->getClientId($storeId);
-
-        $params = [
-            'client-id' => $clientId,
-            'currency' => Mage::app()->getStore($storeId)->getCurrentCurrencyCode(),
-        ];
-
-        $intent = $this->getNewPaymentAction($methodCode, $storeId);
-        if ($intent === self::PAYMENT_ACTION_AUTHORIZE) {
-            $params['intent'] = 'authorize';
-        } else {
-            $params['intent'] = 'capture';
-        }
-
-        if ($methodCode === self::METHOD_ADVANCED_CHECKOUT) {
-            $params['components'] = 'card-fields';
-        } elseif ($methodCode === self::METHOD_STANDARD_CHECKOUT) {
-            $params['components'] = 'buttons';
-        }
-
-        if ($methodCode === self::METHOD_VAULT || $this->isVaultEnabled($storeId)) {
-            $params['components'] = ($params['components'] ?? '') . ',vault';
-            $params['components'] = ltrim($params['components'], ',');
-        }
-
-        if ($methodCode === self::METHOD_STANDARD_CHECKOUT) {
-            $disableFunding = $this->getDisabledFundingSources($storeId);
-            if ($disableFunding) {
-                $params['disable-funding'] = $disableFunding;
-            }
-        }
-
-        return $baseUrl . '?' . http_build_query($params);
+        return $this->isSandbox($storeId) ? self::JS_SDK_URL_SANDBOX : self::JS_SDK_URL_LIVE;
     }
 
     public function getNewPaymentAction(string $methodCode, ?int $storeId = null): string
@@ -116,17 +83,9 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
         return $this->isNewMethodActive(self::METHOD_VAULT, $storeId);
     }
 
-    public function getMessagesSdkUrl(?int $storeId = null): string
+    public function getClientTokenUrl(): string
     {
-        $baseUrl = $this->isSandbox($storeId) ? self::JS_SDK_URL_SANDBOX : self::JS_SDK_URL_LIVE;
-
-        $params = [
-            'client-id' => $this->getClientId($storeId),
-            'currency' => Mage::app()->getStore($storeId)->getCurrentCurrencyCode(),
-            'components' => 'messages',
-        ];
-
-        return $baseUrl . '?' . http_build_query($params);
+        return Mage::getUrl('paypal/checkout/clientToken', ['_secure' => true]);
     }
 
     public function isPayLaterMessagingEnabled(?int $storeId = null): bool
@@ -138,18 +97,9 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
                 || $this->isNewMethodActive(self::METHOD_VAULT, $storeId));
     }
 
-    public function getDisabledFundingSources(?int $storeId = null): string
+    public function getCurrencyCode(?int $storeId = null): string
     {
-        $sources = array_filter(explode(
-            ',',
-            (string) $this->_getStoreConfig('payment/paypal_standard_checkout/disable_funding', $storeId),
-        ));
-
-        if ($this->isNewMethodActive(self::METHOD_ADVANCED_CHECKOUT, $storeId) && !in_array('card', $sources)) {
-            $sources[] = 'card';
-        }
-
-        return implode(',', $sources);
+        return Mage::app()->getStore($storeId)->getCurrentCurrencyCode();
     }
 
     public function hasCredentials(?int $storeId = null): bool

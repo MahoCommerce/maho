@@ -82,7 +82,17 @@ class Maho_Paypal_Block_Shortcut_Button extends Mage_Core_Block_Template
 
     public function getJsSdkUrl(): string
     {
-        return $this->_getConfig()->getJsSdkUrl(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
+        return $this->_getConfig()->getJsSdkUrl();
+    }
+
+    public function getClientTokenUrl(): string
+    {
+        return $this->_getConfig()->getClientTokenUrl();
+    }
+
+    public function getCurrencyCode(): string
+    {
+        return $this->_getConfig()->getCurrencyCode();
     }
 
     public function getCreateOrderUrl(): string

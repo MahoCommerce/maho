@@ -13,8 +13,50 @@ declare(strict_types=1);
 class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 {
     /**
-     * Create a PayPal order from the current quote
+     * Parse JSON request body params into the request object
      */
+    #[\Override]
+    public function preDispatch(): static
+    {
+        parent::preDispatch();
+
+        $contentType = $this->getRequest()->getHeader('Content-Type');
+        if ($contentType && str_contains($contentType, 'application/json')) {
+            $body = $this->getRequest()->getRawBody();
+            if ($body) {
+                $data = Mage::helper('core')->jsonDecode($body);
+                if (is_array($data)) {
+                    $this->getRequest()->setParams($data);
+                }
+            }
+        }
+
+        return $this;
+    }
+
+    public function clientTokenAction(): void
+    {
+        $result = ['success' => false];
+
+        try {
+            $quote = Mage::getSingleton('checkout/session')->getQuote();
+            $storeId = $quote->getStoreId() ? (int) $quote->getStoreId() : null;
+
+            /** @var Maho_Paypal_Model_Api_Client $client */
+            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => $storeId]);
+            $clientToken = $client->generateClientToken();
+
+            $result['success'] = true;
+            $result['client_token'] = $clientToken;
+        } catch (\Throwable $e) {
+            $result['message'] = $e->getMessage();
+            Mage::logException($e);
+        }
+
+        $this->getResponse()->setHeader('Content-Type', 'application/json');
+        $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
+    }
+
     public function createOrderAction(): void
     {
         $result = ['success' => false];
@@ -52,6 +94,19 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
             $result['success'] = true;
             $result['paypal_order_id'] = $paypalOrderId;
+
+            $billingAddress = $quote->getBillingAddress();
+            if ($billingAddress && $billingAddress->getFirstname()) {
+                $street = $billingAddress->getStreet();
+                $result['billing_address'] = [
+                    'addressLine1' => $street[0] ?? '',
+                    'addressLine2' => $street[1] ?? '',
+                    'adminArea1' => (string) $billingAddress->getRegionCode(),
+                    'adminArea2' => (string) $billingAddress->getCity(),
+                    'countryCode' => (string) $billingAddress->getCountryId(),
+                    'postalCode' => (string) $billingAddress->getPostcode(),
+                ];
+            }
         } catch (\Throwable $e) {
             $result['message'] = $e->getMessage();
             Mage::logException($e);
@@ -130,6 +185,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             /** @var Mage_Checkout_Model_Type_Onepage $onepage */
             $onepage = Mage::getSingleton('checkout/type_onepage');
             $onepage->saveOrder();
+
+            // Deactivate quote and persist to DB
+            $quote->setIsActive(0);
+            $quote->save();
 
             $result['success'] = true;
             $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);

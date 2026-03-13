@@ -12,10 +12,17 @@ $containerId = 'paypal-button-container-' . $this->getMethodCode();
 ?>
 <div id="payment_form_<?= $this->escapeHtml($this->getMethodCode()) ?>" style="display:none"
     data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
-    data-sdk-namespace="paypal"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-currency-code="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
     data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
     data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
     data-container-id="<?= $this->escapeHtml($containerId) ?>"
     data-method-code="<?= $this->escapeHtml($this->getMethodCode()) ?>">
-    <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container"></div>
+    <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container">
+        <paypal-button hidden></paypal-button>
+    </div>
 </div>
+<style>
+.paypal-button-container paypal-button { display: block; width: 100%; }
+body.paypal-standard-active .btn-checkout { display: none !important; }
+</style>

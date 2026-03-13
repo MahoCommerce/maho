@@ -10,33 +10,31 @@ class MahoPaypalPayLaterMessage {
     constructor(el) {
         this.el = el;
         this.sdkUrl = el.dataset.sdkUrl;
-        this.sdkNamespace = el.dataset.sdkNamespace;
+        this.clientTokenUrl = el.dataset.clientTokenUrl;
         this.amount = parseFloat(el.dataset.amount) || 0;
         this.placement = el.dataset.placement || 'product';
         this._mounted = false;
     }
 
-    loadSdkAndMount() {
+    async loadSdkAndMount() {
         if (this._mounted) return;
 
-        if (window[this.sdkNamespace]) {
-            this._renderMessage();
-            return;
+        try {
+            const sdk = await MahoPaypalSdk.init(this.sdkUrl, this.clientTokenUrl);
+            this._renderMessage(sdk);
+        } catch (err) {
+            console.error('PayPal Pay Later message error:', err);
         }
-
-        const script = document.createElement('script');
-        script.src = this.sdkUrl;
-        script.dataset.namespace = this.sdkNamespace;
-        script.onload = () => this._renderMessage();
-        document.head.appendChild(script);
     }
 
-    _renderMessage() {
+    _renderMessage(sdk) {
         if (this._mounted) return;
         this._mounted = true;
 
-        const sdk = window[this.sdkNamespace];
-        if (!sdk?.Messages) return;
+        if (!sdk.Messages) {
+            console.warn('PayPal Messages component not available');
+            return;
+        }
 
         sdk.Messages({
             amount: this.amount,
@@ -53,7 +51,7 @@ class MahoPaypalPayLaterMessage {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    document.querySelectorAll('.paypal-paylater-message[data-sdk-url]').forEach(function(el) {
+    document.querySelectorAll('.paypal-paylater-message[data-client-token-url]').forEach(function(el) {
         const message = new MahoPaypalPayLaterMessage(el);
         el._paypalPayLater = message;
         message.loadSdkAndMount();

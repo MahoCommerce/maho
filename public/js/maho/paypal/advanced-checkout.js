@@ -11,79 +11,106 @@ class MahoPaypalAdvancedCheckout {
         this.formDiv = formDiv;
         this.createOrderUrl = formDiv.dataset.createOrderUrl;
         this.approveOrderUrl = formDiv.dataset.approveOrderUrl;
-        this.methodCode = formDiv.dataset.methodCode;
         this.sdkUrl = formDiv.dataset.sdkUrl;
-        this.sdkNamespace = formDiv.dataset.sdkNamespace;
-        this.cardFields = null;
+        this.clientTokenUrl = formDiv.dataset.clientTokenUrl;
+        this.currencyCode = formDiv.dataset.currencyCode;
+        this.methodCode = formDiv.dataset.methodCode;
+        this._cardSession = null;
         this._mounted = false;
     }
 
-    loadSdkAndMount() {
+    async loadSdkAndMount() {
         if (this._mounted) return;
 
-        if (window[this.sdkNamespace]) {
-            this._renderFields();
-            return;
-        }
-
-        showLoader(this.formDiv);
-        const script = document.createElement('script');
-        script.src = this.sdkUrl;
-        script.dataset.namespace = this.sdkNamespace;
-        script.onload = () => {
+        try {
+            showLoader(this.formDiv);
+            const sdk = await MahoPaypalSdk.init(this.sdkUrl, this.clientTokenUrl);
             hideLoader();
-            this._renderFields();
-        };
-        script.onerror = () => hideLoader();
-        document.head.appendChild(script);
+            await this._renderFields(sdk);
+        } catch (err) {
+            hideLoader();
+            this.handleError(err);
+        }
     }
 
-    _renderFields() {
+    async _renderFields(sdk) {
         if (this._mounted) return;
 
-        const sdk = window[this.sdkNamespace];
-        if (!sdk) {
-            console.error('PayPal Card Fields SDK not loaded');
+        const paymentMethods = await sdk.findEligibleMethods({ currencyCode: this.currencyCode });
+        if (!paymentMethods.isEligible('advanced_cards')) {
+            const errorDiv = document.getElementById('paypal-card-errors');
+            if (errorDiv) {
+                errorDiv.textContent = 'Card payments are not available at this time. Please choose another payment method.';
+                errorDiv.style.display = 'block';
+            }
             return;
         }
 
-        this.cardFields = sdk.CardFields({
-            createOrder: () => this.createOrder(),
-            onApprove: (data) => this.onApprove(data),
-            onError: (err) => this.handleError(err),
+        this._cardSession = sdk.createCardFieldsOneTimePaymentSession();
+
+        const numberField = this._cardSession.createCardFieldsComponent({
+            type: 'number',
+            placeholder: 'Card number',
+        });
+        const expiryField = this._cardSession.createCardFieldsComponent({
+            type: 'expiry',
+            placeholder: 'MM/YY',
+        });
+        const cvvField = this._cardSession.createCardFieldsComponent({
+            type: 'cvv',
+            placeholder: 'CVV',
         });
 
-        if (this.cardFields.isEligible()) {
-            this.cardFields.NumberField().render('#paypal-card-number-field');
-            this.cardFields.ExpiryField().render('#paypal-card-expiry-field');
-            this.cardFields.CVVField().render('#paypal-card-cvv-field');
+        const numberContainer = document.querySelector('#paypal-card-fields-number');
+        const expiryContainer = document.querySelector('#paypal-card-fields-expiry');
+        const cvvContainer = document.querySelector('#paypal-card-fields-cvv');
+
+        if (numberContainer && expiryContainer && cvvContainer) {
+            numberContainer.appendChild(numberField);
+            expiryContainer.appendChild(expiryField);
+            cvvContainer.appendChild(cvvField);
             this._mounted = true;
         }
     }
 
-    async createOrder() {
-        const response = await mahoFetch(this.createOrderUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ method: this.methodCode }),
-            loaderArea: this.formDiv,
-        });
-
-        if (!response.success || !response.paypal_order_id) {
-            throw new Error(response.message || 'Failed to create PayPal order');
-        }
-
-        return response.paypal_order_id;
-    }
-
     async submitCard() {
-        if (!this.cardFields) {
+        if (!this._cardSession) {
             return false;
         }
 
         try {
-            await this.cardFields.submit();
-            return true;
+            const response = await mahoFetch(this.createOrderUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ method: this.methodCode }),
+                loaderArea: this.formDiv,
+            });
+
+            if (!response.success || !response.paypal_order_id) {
+                throw new Error(response.message || 'Failed to create PayPal order');
+            }
+
+            const submitOptions = {};
+            if (response.billing_address) {
+                submitOptions.billingAddress = response.billing_address;
+            }
+
+            const { state } = await this._cardSession.submit(response.paypal_order_id, submitOptions);
+
+            if (state === 'canceled') {
+                return false;
+            }
+
+            if (state === 'failed') {
+                throw new Error('Card payment failed. Please try again.');
+            }
+
+            if (state === 'succeeded') {
+                await this.onApprove({ orderId: response.paypal_order_id });
+                return true;
+            }
+
+            return false;
         } catch (err) {
             this.handleError(err);
             return false;
@@ -95,7 +122,7 @@ class MahoPaypalAdvancedCheckout {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                paypal_order_id: data.orderID,
+                paypal_order_id: data.orderId,
                 method: this.methodCode,
             }),
             loaderArea: this.formDiv,
@@ -120,15 +147,22 @@ class MahoPaypalAdvancedCheckout {
 
 document.addEventListener('payment-method:switched', function(e) {
     const formDiv = e.target;
-    if (formDiv.dataset.sdkNamespace !== 'paypalCardFields' || formDiv._paypalAdvanced) return;
+    if (formDiv.dataset.methodCode !== 'paypal_advanced_checkout' || formDiv._paypalAdvanced) return;
 
     const checkout = new MahoPaypalAdvancedCheckout(formDiv);
     formDiv._paypalAdvanced = checkout;
     checkout.loadSdkAndMount();
+}, true);
 
-    if (typeof payment !== 'undefined') {
-        payment.addBeforeValidateFunc(formDiv.dataset.methodCode, function() {
-            return checkout.submitCard();
-        });
-    }
+document.addEventListener('click', function(e) {
+    const btn = e.target.closest('.btn-checkout');
+    if (!btn) return;
+    if (typeof payment === 'undefined' || payment.currentMethod !== 'paypal_advanced_checkout') return;
+
+    const formDiv = document.getElementById('payment_form_paypal_advanced_checkout');
+    if (!formDiv || !formDiv._paypalAdvanced) return;
+
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    formDiv._paypalAdvanced.submitCard();
 }, true);

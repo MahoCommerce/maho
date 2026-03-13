@@ -11,7 +11,9 @@
 <layout>
     <checkout_onepage_index>
         <reference name="head">
+            <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/standard-checkout.js</script></action>
+            <action method="addJs" ifconfig="payment/paypal_advanced_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_advanced_checkout/active"><script>maho/paypal/advanced-checkout.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_vault/active"><script>maho/paypal/vault-checkout.js</script></action>
         </reference>
@@ -33,7 +35,9 @@
 
     <checkout_cart_index>
         <reference name="head">
+            <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/standard-checkout.js</script></action>
+            <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/paylater-message.js</script></action>
         </reference>
         <reference name="checkout.cart.methods">
@@ -50,7 +54,9 @@
 
     <catalog_product_view>
         <reference name="head">
+            <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/standard-checkout.js</script></action>
+            <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/paylater-message.js</script></action>
         </reference>
         <reference name="product.info.addtocart">

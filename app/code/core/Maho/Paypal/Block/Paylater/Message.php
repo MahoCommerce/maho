@@ -56,7 +56,12 @@ class Maho_Paypal_Block_Paylater_Message extends Mage_Core_Block_Template
 
     public function getJsSdkUrl(): string
     {
-        return $this->_getConfig()->getMessagesSdkUrl();
+        return $this->_getConfig()->getJsSdkUrl();
+    }
+
+    public function getClientTokenUrl(): string
+    {
+        return $this->_getConfig()->getClientTokenUrl();
     }
 
     protected function _getConfig(): Maho_Paypal_Model_Config

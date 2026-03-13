@@ -46,9 +46,27 @@ class Maho_Paypal_Model_Method_StandardCheckout extends Mage_Payment_Model_Metho
     #[\Override]
     public function initialize($paymentAction, $stateObject): self
     {
-        $stateObject->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
-        $stateObject->setStatus('pending_payment');
-        $stateObject->setIsNotified(false);
+        $payment = $this->getInfoInstance();
+        $captureId = $payment->getAdditionalInformation('paypal_capture_id');
+        $authId = $payment->getAdditionalInformation('paypal_authorization_id');
+
+        if ($captureId || $authId) {
+            if ($captureId) {
+                $payment->setTransactionId($captureId);
+                $payment->setIsTransactionClosed(true);
+            } else {
+                $payment->setTransactionId($authId);
+                $payment->setIsTransactionClosed(false);
+            }
+
+            $stateObject->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+            $stateObject->setStatus('processing');
+            $stateObject->setIsNotified(true);
+        } else {
+            $stateObject->setState(Mage_Sales_Model_Order::STATE_PENDING_PAYMENT);
+            $stateObject->setStatus('pending_payment');
+            $stateObject->setIsNotified(false);
+        }
 
         return $this;
     }
