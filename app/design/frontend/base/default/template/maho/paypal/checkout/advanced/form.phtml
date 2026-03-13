@@ -10,7 +10,7 @@
 /** @var Maho_Paypal_Block_Checkout_Advanced_Form $this */
 $methodCode = $this->getMethodCode();
 ?>
-<div id="payment_form_<?= $this->escapeHtmlAttr($methodCode) ?>" style="display:none">
+<div id="payment_form_<?= $this->escapeHtml($methodCode) ?>" style="display:none">
     <div id="paypal-card-number-field" class="paypal-card-field"></div>
     <div class="paypal-card-row">
         <div id="paypal-card-expiry-field" class="paypal-card-field"></div>

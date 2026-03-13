@@ -11,10 +11,10 @@
 $htmlId = $this->getData('element')->getHtmlId();
 $ajaxUrl = $this->getData('ajax_url');
 ?>
-<button id="<?= $this->escapeHtmlAttr($htmlId) ?>_button" type="button" class="scalable"
+<button id="<?= $this->escapeHtml($htmlId) ?>_button" type="button" class="scalable"
     data-ajax-url="<?= $this->escapeUrl($ajaxUrl) ?>"
     onclick="mahoPaypalTestConnection(this)">
     <span><?= $this->escapeHtml($this->__('Test Connection')) ?></span>
 </button>
-<span id="<?= $this->escapeHtmlAttr($htmlId) ?>_result"></span>
+<span id="<?= $this->escapeHtml($htmlId) ?>_result"></span>
 <script src="<?= $this->getSkinUrl('js/maho/paypal/admin-config.js') ?>"></script>

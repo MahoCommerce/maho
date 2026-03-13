@@ -10,8 +10,8 @@
 /** @var Maho_Paypal_Block_Checkout_Standard_Form $this */
 $containerId = 'paypal-button-container-' . $this->getMethodCode();
 ?>
-<div id="payment_form_<?= $this->escapeHtmlAttr($this->getMethodCode()) ?>" style="display:none">
-    <div id="<?= $this->escapeHtmlAttr($containerId) ?>" class="paypal-button-container"></div>
+<div id="payment_form_<?= $this->escapeHtml($this->getMethodCode()) ?>" style="display:none">
+    <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container"></div>
 </div>
 <script src="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>" data-namespace="paypal"></script>
 <script src="<?= $this->escapeUrl($this->getSkinUrl('js/maho/paypal/standard-checkout.js')) ?>"></script>

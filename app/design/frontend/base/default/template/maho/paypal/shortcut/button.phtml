@@ -10,7 +10,7 @@
 /** @var Maho_Paypal_Block_Shortcut_Button $this */
 $containerId = $this->getShortcutHtmlId();
 ?>
-<div id="<?= $this->escapeHtmlAttr($containerId) ?>" class="paypal-shortcut-button"></div>
+<div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-shortcut-button"></div>
 <script src="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>" data-namespace="paypalShortcut"></script>
 <script src="<?= $this->escapeUrl($this->getSkinUrl('js/maho/paypal/standard-checkout.js')) ?>"></script>
 <script>

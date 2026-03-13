@@ -106,7 +106,7 @@ class Mage_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             Mage_Paypal_Model_Config::METHOD_WPS,
         ])
         ) {
-            /** @var Mage_Paypal_Model_Config $config */
+            /** @var Maho_Paypal_Model_Config $config */
             $config = Mage::getModel('paypal/config')->setMethod($methodCode);
             $url = 'https://www.' . ($config->sandboxFlag ? 'sandbox.' : '')
                 . 'paypal.com/cgi-bin/webscr?cmd=_view-a-trans&id=' . $txnId;
