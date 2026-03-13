@@ -150,6 +150,17 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </visible_on_product>
+                        <disable_funding translate="label comment">
+                            <label>Disable Funding Sources</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <source_model>maho_paypal/system_config_source_disableFunding</source_model>
+                            <config_path>payment/paypal_standard_checkout/disable_funding</config_path>
+                            <sort_order>55</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                            <comment>Select funding sources to hide from PayPal buttons. Credit or Debit Card is automatically disabled when Advanced Checkout is enabled.</comment>
+                        </disable_funding>
                         <line_items_enabled translate="label comment">
                             <label>Transfer Line Items</label>
                             <frontend_type>select</frontend_type>

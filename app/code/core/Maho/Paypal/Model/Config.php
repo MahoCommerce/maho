@@ -90,6 +90,13 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
             $params['components'] = ltrim($params['components'], ',');
         }
 
+        if ($methodCode === self::METHOD_STANDARD_CHECKOUT) {
+            $disableFunding = $this->getDisabledFundingSources($storeId);
+            if ($disableFunding) {
+                $params['disable-funding'] = $disableFunding;
+            }
+        }
+
         return $baseUrl . '?' . http_build_query($params);
     }
 
@@ -107,6 +114,20 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
     public function isVaultEnabled(?int $storeId = null): bool
     {
         return $this->isNewMethodActive(self::METHOD_VAULT, $storeId);
+    }
+
+    public function getDisabledFundingSources(?int $storeId = null): string
+    {
+        $sources = array_filter(explode(
+            ',',
+            (string) $this->_getStoreConfig('payment/paypal_standard_checkout/disable_funding', $storeId),
+        ));
+
+        if ($this->isNewMethodActive(self::METHOD_ADVANCED_CHECKOUT, $storeId) && !in_array('card', $sources)) {
+            $sources[] = 'card';
+        }
+
+        return implode(',', $sources);
     }
 
     public function hasCredentials(?int $storeId = null): bool
