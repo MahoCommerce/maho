@@ -22,7 +22,7 @@ it('has correct capability flags', function () {
     expect($method->canAuthorize())->toBeTrue();
     expect($method->canCapture())->toBeTrue();
     expect($method->canRefund())->toBeTrue();
-    expect($method->canVoid())->toBeTrue();
+    expect($method->canVoid(new \Maho\DataObject()))->toBeTrue();
     expect($method->canUseInternal())->toBeFalse();
     expect($method->canUseCheckout())->toBeTrue();
 });
