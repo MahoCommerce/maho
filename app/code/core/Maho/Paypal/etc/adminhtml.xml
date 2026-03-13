@@ -17,9 +17,9 @@
                         <children>
                             <config>
                                 <children>
-                                    <maho_paypal translate="title">
-                                        <title>PayPal (New)</title>
-                                    </maho_paypal>
+                                    <payment translate="title">
+                                        <title>Payment Methods</title>
+                                    </payment>
                                 </children>
                             </config>
                         </children>

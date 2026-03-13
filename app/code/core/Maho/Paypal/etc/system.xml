@@ -10,18 +10,11 @@
 -->
 <config>
     <sections>
-        <maho_paypal translate="label" module="maho_paypal">
-            <label>PayPal (New)</label>
-            <tab>sales</tab>
-            <frontend_type>text</frontend_type>
-            <sort_order>303</sort_order>
-            <show_in_default>1</show_in_default>
-            <show_in_website>1</show_in_website>
-            <show_in_store>1</show_in_store>
+        <payment>
             <groups>
-                <credentials translate="label">
-                    <label>API Credentials</label>
-                    <sort_order>10</sort_order>
+                <maho_paypal_credentials translate="label">
+                    <label>PayPal - API Credentials</label>
+                    <sort_order>5</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>0</show_in_store>
@@ -98,10 +91,10 @@
                             <show_in_store>0</show_in_store>
                         </register_webhook>
                     </fields>
-                </credentials>
-                <standard_checkout translate="label">
-                    <label>Standard Checkout (PayPal Buttons)</label>
-                    <sort_order>20</sort_order>
+                </maho_paypal_credentials>
+                <paypal_standard_checkout translate="label">
+                    <label>PayPal - Standard Checkout (PayPal Buttons)</label>
+                    <sort_order>6</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
@@ -110,6 +103,7 @@
                             <label>Enabled</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <backend_model>maho_paypal/system_config_backend_active</backend_model>
                             <config_path>payment/paypal_standard_checkout/active</config_path>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
@@ -176,10 +170,10 @@
                             <show_in_store>0</show_in_store>
                         </sort_order>
                     </fields>
-                </standard_checkout>
-                <advanced_checkout translate="label">
-                    <label>Advanced Checkout (Card Fields)</label>
-                    <sort_order>30</sort_order>
+                </paypal_standard_checkout>
+                <paypal_advanced_checkout translate="label">
+                    <label>PayPal - Advanced Checkout (Card Fields)</label>
+                    <sort_order>7</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
@@ -188,6 +182,7 @@
                             <label>Enabled</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <backend_model>maho_paypal/system_config_backend_active</backend_model>
                             <config_path>payment/paypal_advanced_checkout/active</config_path>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
@@ -223,10 +218,10 @@
                             <show_in_store>0</show_in_store>
                         </sort_order>
                     </fields>
-                </advanced_checkout>
-                <vault translate="label">
-                    <label>Vault (Saved Payment Methods)</label>
-                    <sort_order>40</sort_order>
+                </paypal_advanced_checkout>
+                <paypal_vault translate="label">
+                    <label>PayPal - Vault (Saved Payment Methods)</label>
+                    <sort_order>8</sort_order>
                     <show_in_default>1</show_in_default>
                     <show_in_website>1</show_in_website>
                     <show_in_store>1</show_in_store>
@@ -235,6 +230,7 @@
                             <label>Enabled</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <backend_model>maho_paypal/system_config_backend_active</backend_model>
                             <config_path>payment/paypal_vault/active</config_path>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
@@ -260,8 +256,8 @@
                             <show_in_store>0</show_in_store>
                         </sort_order>
                     </fields>
-                </vault>
+                </paypal_vault>
             </groups>
-        </maho_paypal>
+        </payment>
     </sections>
 </config>
