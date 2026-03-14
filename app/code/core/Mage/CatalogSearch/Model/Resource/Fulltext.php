@@ -357,34 +357,36 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
         $boostSku = Mage::getStoreConfigFlag(Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_BOOST_SKU, $query->getStoreId())
             && $this->_getSearchableAttribute('sku');
 
-        if ($boostSku) {
-            $helper = Mage::getResourceHelper('core');
-            $skuLike = $helper->getCILike('e.sku', $queryText, ['position' => 'any']);
-            $where .= ($where ? ' OR ' : '') . $skuLike;
-        }
-
         if ($where != '') {
             $select->where($where);
         }
 
         $this->_foundData = $adapter->fetchPairs($select, $bind);
 
-        if ($boostSku && $this->_foundData) {
-            $productIds = array_keys($this->_foundData);
+        if ($boostSku) {
+            $helper = Mage::getResourceHelper('core');
+            $skuLike = $helper->getCILike('sku', $queryText, ['position' => 'any']);
+
             $skuSelect = $adapter->select()
                 ->from($this->getTable('catalog/product'), ['entity_id', 'sku'])
-                ->where('entity_id IN (?)', $productIds);
+                ->where($skuLike);
             $skus = $adapter->fetchPairs($skuSelect);
 
             $queryLower = mb_strtolower($queryText);
             foreach ($skus as $productId => $sku) {
                 $skuLower = mb_strtolower($sku);
                 if ($skuLower === $queryLower) {
-                    $this->_foundData[$productId] += 10000;
+                    $boost = 10000;
                 } elseif (str_starts_with($skuLower, $queryLower)) {
-                    $this->_foundData[$productId] += 1000;
-                } elseif (str_contains($skuLower, $queryLower)) {
-                    $this->_foundData[$productId] += 100;
+                    $boost = 1000;
+                } else {
+                    $boost = 100;
+                }
+
+                if (isset($this->_foundData[$productId])) {
+                    $this->_foundData[$productId] += $boost;
+                } else {
+                    $this->_foundData[$productId] = $boost;
                 }
             }
         }
