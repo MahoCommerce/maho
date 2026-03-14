@@ -30,8 +30,8 @@ services:
 
     Maho\ApiPlatform\EventListener\DefaultDenyListener:
         arguments:
-            $tokenStorage: '@security.token_storage'
+            $resourceMetadataFactory: '@api_platform.metadata.resource.metadata_collection_factory'
         tags:
-            - { name: kernel.event_listener, event: kernel.request, priority: 7 }
+            - { name: kernel.event_listener, event: kernel.request, priority: 28 }
 
     # Tag all our state providers so CustomQueryResolver can locate them

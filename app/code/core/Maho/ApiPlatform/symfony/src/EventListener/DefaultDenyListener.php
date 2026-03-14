@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\EventListener;
 
-use ApiPlatform\Metadata\HttpOperation;
+use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * Pre-provider authentication enforcement for API Platform operations.
@@ -20,36 +19,25 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
  * expression is evaluated — which means a missing entity returns 404 before
  * the 401 can fire.
  *
- * This listener runs early (before the Provider) and:
- * 1. Returns 401 for operations that require auth when no Bearer token is present
- * 2. Returns 401 for operations with no security attribute (default deny)
- *
- * Operations with security: "true" are skipped (public access).
+ * This listener runs after routing (priority 28, between router at 32 and
+ * API Platform's controller) and rejects unauthenticated requests to
+ * non-public operations before the Provider has a chance to run.
  */
-#[AsEventListener(event: KernelEvents::REQUEST, priority: 7)]
+#[AsEventListener(event: KernelEvents::REQUEST, priority: 28)]
 class DefaultDenyListener
 {
     public function __construct(
-        private readonly TokenStorageInterface $tokenStorage,
+        private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
     ) {}
 
     public function __invoke(RequestEvent $event): void
     {
         $request = $event->getRequest();
 
-        if (!$request->attributes->has('_api_operation')) {
-            return;
-        }
-
-        $operation = $request->attributes->get('_api_operation');
-        if (!$operation instanceof HttpOperation) {
-            return;
-        }
-
-        $security = $operation->getSecurity();
-
-        // Public operations — no auth needed
-        if ($security === 'true' || $security === '"true"') {
+        // Only handle API Platform routes (set by the router)
+        $resourceClass = $request->attributes->get('_api_resource_class');
+        $operationName = $request->attributes->get('_api_operation_name');
+        if ($resourceClass === null || $operationName === null) {
             return;
         }
 
@@ -59,9 +47,23 @@ class DefaultDenyListener
             'Bearer ',
         );
 
+        // If user has a Bearer token, let API Platform handle auth normally
         if ($hasBearerToken) {
-            // User provided a Bearer token — let API Platform evaluate the
-            // security expression and the Provider handle the request normally
+            return;
+        }
+
+        // Look up the operation's security attribute
+        try {
+            $resourceMetadata = $this->resourceMetadataFactory->create($resourceClass);
+            $operation = $resourceMetadata->getOperation($operationName);
+            $security = $operation->getSecurity();
+        } catch (\Throwable) {
+            // If we can't resolve the operation, deny by default
+            $security = null;
+        }
+
+        // Public operations — no auth needed
+        if ($security === 'true' || $security === '"true"') {
             return;
         }
 
