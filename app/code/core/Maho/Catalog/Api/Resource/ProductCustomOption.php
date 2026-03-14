@@ -33,6 +33,7 @@ use Maho\Catalog\Api\State\Provider\ProductCustomOptionProvider;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
+            security: "true",
             description: 'Get all custom options for a product',
         ),
         new Post(

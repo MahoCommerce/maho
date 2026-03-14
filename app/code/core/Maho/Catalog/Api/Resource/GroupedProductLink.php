@@ -33,6 +33,7 @@ use Maho\Catalog\Api\State\Provider\GroupedProductLinkProvider;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
+            security: "true",
             description: 'List associated products in a grouped product',
         ),
         new Put(

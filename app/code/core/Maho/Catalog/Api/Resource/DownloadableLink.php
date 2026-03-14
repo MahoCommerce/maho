@@ -33,6 +33,7 @@ use Maho\Catalog\Api\State\Provider\DownloadableLinkProvider;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
+            security: "true",
             description: 'Get downloadable links for a product',
         ),
         new Post(

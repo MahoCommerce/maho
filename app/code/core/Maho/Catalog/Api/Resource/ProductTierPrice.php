@@ -32,6 +32,7 @@ use Maho\Catalog\Api\State\Provider\ProductTierPriceProvider;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
+            security: "true",
             description: 'Get tier prices for a product',
         ),
         new Put(

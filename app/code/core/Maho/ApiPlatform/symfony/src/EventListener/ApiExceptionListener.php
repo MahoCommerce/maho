@@ -118,9 +118,11 @@ class ApiExceptionListener implements EventSubscriberInterface
         // Handle Symfony Security exceptions - access denied (authenticated but not authorized)
         if ($exception instanceof AccessDeniedException) {
             // If user is not authenticated at all, return 401
-            // Check both the exception message (legacy) and the Authorization header presence
+            // Check for Bearer token specifically (Basic auth is site-level, not API auth)
+            $hasBearerToken = $request !== null
+                && str_starts_with($request->headers->get('Authorization', ''), 'Bearer ');
             $isNotAuthenticated = str_contains($exception->getMessage(), 'not appropriately authenticated')
-                || ($request !== null && !$request->headers->has('Authorization'));
+                || !$hasBearerToken;
             $statusCode = $isNotAuthenticated ? 401 : 403;
             $error = $isNotAuthenticated ? 'unauthorized' : 'forbidden';
             $message = $isNotAuthenticated ? 'Authentication required' : 'Access denied';
@@ -146,9 +148,12 @@ class ApiExceptionListener implements EventSubscriberInterface
         if ($exception instanceof HttpExceptionInterface) {
             $statusCode = $exception->getStatusCode();
 
-            // Convert 403 → 401 when no Authorization header present
+            // Convert 403 → 401 when no Bearer token present
             // (correct HTTP semantics: 401 = "provide credentials", 403 = "credentials insufficient")
-            if ($statusCode === 403 && $request !== null && !$request->headers->has('Authorization')) {
+            // Basic auth is site-level access (dev/staging), not API authentication
+            $hasBearerToken = $request !== null
+                && str_starts_with($request->headers->get('Authorization', ''), 'Bearer ');
+            if ($statusCode === 403 && !$hasBearerToken) {
                 $statusCode = 401;
             }
 

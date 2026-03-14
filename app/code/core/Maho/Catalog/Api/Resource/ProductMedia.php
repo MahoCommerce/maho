@@ -33,6 +33,7 @@ use Maho\Catalog\Api\State\Provider\ProductMediaProvider;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
+            security: "true",
             description: 'List gallery images for a product',
         ),
         new Post(
