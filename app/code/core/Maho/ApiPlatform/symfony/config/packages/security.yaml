@@ -36,7 +36,7 @@ security:
             custom_authenticators:
                 - Maho\ApiPlatform\Security\OAuth2Authenticator
 
-        # REST API - OAuth2 authenticated
+        # REST API - OAuth2 authenticated (optional — unauthenticated requests pass through)
         api:
             pattern: ^/api
             stateless: true
@@ -46,39 +46,7 @@ security:
 
     access_control:
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }
-        - { path: ^/api/graphql$, roles: PUBLIC_ACCESS, methods: [GET] }
-        # GraphQL endpoint is public — per-operation security handles authorization
-        - { path: ^/api/graphql$, roles: PUBLIC_ACCESS, methods: [POST] }
-        # Public read access for storefront (products, categories, CMS, blog, stores, URL resolver, countries)
-        - { path: ^/api/products, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/categories, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/cms-pages, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/cms-blocks, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/blog-posts, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/blog-categories, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/url-resolver, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/stores, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/countries, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/store-config, roles: PUBLIC_ACCESS, methods: [GET] }
-        - { path: ^/api/layered-filters, roles: PUBLIC_ACCESS, methods: [GET] }
-        # Token/auth endpoints are public
-        - { path: ^/api/auth, roles: PUBLIC_ACCESS }
-        # Guest cart creation
-        - { path: ^/api/guest-carts, roles: PUBLIC_ACCESS }
-        # Payment gateway endpoints (public — any module can register under /api/payments/)
-        - { path: ^/api/payments/, roles: PUBLIC_ACCESS }
-        # Order verification (public — uses one-time token for auth)
-        - { path: ^/api/orders/.*/verify, roles: PUBLIC_ACCESS }
-        # Customer registration (POST only - creating new account)
-        - { path: ^/api/customers$, roles: PUBLIC_ACCESS, methods: [POST] }
-        # Newsletter subscribe/unsubscribe (guests allowed)
-        - { path: ^/api/newsletter/subscribe, roles: PUBLIC_ACCESS, methods: [POST] }
-        - { path: ^/api/newsletter/unsubscribe, roles: PUBLIC_ACCESS, methods: [POST] }
-        # Contact form (public)
-        # Order verify (storefront success page — protected by one-time token)
-        - { path: ^/api/orders/.+/verify$, roles: PUBLIC_ACCESS, methods: [POST] }
-        # Guest account creation from order (protected by HMAC token in HttpOnly cookie)
-        - { path: ^/api/customers/create-from-order, roles: PUBLIC_ACCESS, methods: [POST] }
-        - { path: ^/api/contact, roles: PUBLIC_ACCESS }
-        # Everything else requires auth + resource-level permission check
-        - { path: ^/api, roles: [IS_AUTHENTICATED_FULLY, API_USER_PERMISSION] }
+        - { path: ^/api/graphql, roles: PUBLIC_ACCESS }
+        - { path: ^/api/admin/graphql, roles: IS_AUTHENTICATED_FULLY }
+        # All REST API authorization is handled per-operation via #[ApiResource(security: ...)]
+        - { path: ^/api, roles: PUBLIC_ACCESS }

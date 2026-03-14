@@ -35,26 +35,32 @@ use Maho\SalesRule\Api\State\Processor\CouponProcessor;
     operations: [
         new Get(
             uriTemplate: '/coupons/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get a coupon by ID',
         ),
         new GetCollection(
             uriTemplate: '/coupons',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get all coupons',
         ),
         new Post(
             uriTemplate: '/coupons',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Create a new coupon with price rule',
         ),
         new Put(
             uriTemplate: '/coupons/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Update a coupon and its price rule',
         ),
         new Delete(
             uriTemplate: '/coupons/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Delete a coupon and its price rule',
         ),
         new Post(
             uriTemplate: '/coupons/validate',
+            security: "true",
             description: 'Validate a coupon code against a cart',
         ),
     ],

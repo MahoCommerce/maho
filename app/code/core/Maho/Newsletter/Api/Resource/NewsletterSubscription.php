@@ -33,18 +33,21 @@ use Maho\Newsletter\Api\State\Processor\NewsletterProcessor;
         new Get(
             uriTemplate: '/newsletter/status',
             name: 'status',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Get subscription status for authenticated customer',
         ),
         // Subscribe to newsletter (guest or authenticated)
         new Post(
             uriTemplate: '/newsletter/subscribe',
             name: 'subscribe',
+            security: "true",
             description: 'Subscribe to newsletter',
         ),
         // Unsubscribe from newsletter
         new Post(
             uriTemplate: '/newsletter/unsubscribe',
             name: 'unsubscribe',
+            security: "true",
             description: 'Unsubscribe from newsletter',
         ),
     ],

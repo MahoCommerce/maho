@@ -34,6 +34,7 @@ use Maho\Sales\Api\State\Processor\ShipmentProcessor;
     operations: [
         new Get(
             uriTemplate: '/shipments/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get a shipment by ID',
         ),
         new GetCollection(
@@ -41,6 +42,7 @@ use Maho\Sales\Api\State\Processor\ShipmentProcessor;
             uriVariables: [
                 'orderId' => new Link(toProperty: 'orderId'),
             ],
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get shipments for an order',
         ),
         new Post(
@@ -48,6 +50,7 @@ use Maho\Sales\Api\State\Processor\ShipmentProcessor;
             uriVariables: [
                 'orderId' => new Link(toProperty: 'orderId'),
             ],
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Create a shipment for an order',
         ),
     ],

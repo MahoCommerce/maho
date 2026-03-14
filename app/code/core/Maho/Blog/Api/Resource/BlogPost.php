@@ -32,10 +32,12 @@ use ApiPlatform\Metadata\ApiProperty;
     operations: [
         new Get(
             uriTemplate: '/blog-posts/{id}',
+            security: "true",
             description: 'Get a blog post by ID',
         ),
         new GetCollection(
             uriTemplate: '/blog-posts',
+            security: "true",
             description: 'Get blog post collection',
         ),
         new Post(

@@ -36,10 +36,12 @@ use Maho\Review\Api\State\Processor\ReviewProcessor;
             uriVariables: [
                 'productId' => new Link(toProperty: 'productId'),
             ],
+            security: "true",
             description: 'Get reviews for a product',
         ),
         new Get(
             uriTemplate: '/reviews/{id}',
+            security: "true",
             description: 'Get a single review',
         ),
         new Post(
@@ -47,11 +49,13 @@ use Maho\Review\Api\State\Processor\ReviewProcessor;
             uriVariables: [
                 'productId' => new Link(toProperty: 'productId'),
             ],
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Submit a review for a product (requires authentication)',
         ),
         new GetCollection(
             uriTemplate: '/customers/me/reviews',
             name: 'my_reviews',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Get current customer submitted reviews',
         ),
     ],

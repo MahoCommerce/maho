@@ -26,10 +26,12 @@ use Maho\CatalogInventory\Api\State\Processor\StockUpdateProcessor;
     operations: [
         new Put(
             uriTemplate: '/inventory',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Update stock for a single product by SKU',
         ),
         new Put(
             uriTemplate: '/inventory/bulk',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Update stock for multiple products (max 100)',
         ),
     ],

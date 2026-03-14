@@ -28,4 +28,10 @@ services:
     Maho\ApiPlatform\Service\ProductService:
         factory: ['@Maho\ApiPlatform\Factory\ServiceFactory', 'createProductService']
 
+    Maho\ApiPlatform\EventListener\DefaultDenyListener:
+        arguments:
+            $tokenStorage: '@security.token_storage'
+        tags:
+            - { name: kernel.event_listener, event: kernel.request, priority: 7 }
+
     # Tag all our state providers so CustomQueryResolver can locate them

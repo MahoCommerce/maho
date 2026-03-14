@@ -54,7 +54,7 @@ class ApiExceptionListener implements EventSubscriberInterface
             return;
         }
 
-        $response = $this->createErrorResponse($exception);
+        $response = $this->createErrorResponse($exception, $request);
         $event->setResponse($response);
     }
 
@@ -80,7 +80,7 @@ class ApiExceptionListener implements EventSubscriberInterface
         return false;
     }
 
-    private function createErrorResponse(\Throwable $exception): JsonResponse
+    private function createErrorResponse(\Throwable $exception, ?\Symfony\Component\HttpFoundation\Request $request = null): JsonResponse
     {
         // Handle our custom API exceptions
         if ($exception instanceof ApiException) {
@@ -144,9 +144,18 @@ class ApiExceptionListener implements EventSubscriberInterface
         // Handle Symfony HTTP exceptions
         if ($exception instanceof HttpExceptionInterface) {
             $statusCode = $exception->getStatusCode();
+
+            // Convert 403 → 401 when no Authorization header present
+            // (correct HTTP semantics: 401 = "provide credentials", 403 = "credentials insufficient")
+            if ($statusCode === 403 && $request !== null && !$request->headers->has('Authorization')) {
+                $statusCode = 401;
+            }
+
             $data = [
                 'error' => $this->getErrorCodeFromStatusCode($statusCode),
-                'message' => $exception->getMessage() ?: $this->getDefaultMessageForStatusCode($statusCode),
+                'message' => $statusCode === 401
+                    ? 'Authentication required'
+                    : ($exception->getMessage() ?: $this->getDefaultMessageForStatusCode($statusCode)),
                 'code' => $statusCode,
             ];
 
@@ -157,7 +166,8 @@ class ApiExceptionListener implements EventSubscriberInterface
                 ];
             }
 
-            return new JsonResponse($data, $statusCode);
+            $headers = $statusCode === 401 ? ['WWW-Authenticate' => 'Bearer'] : [];
+            return new JsonResponse($data, $statusCode, $headers);
         }
 
         // Handle generic exceptions

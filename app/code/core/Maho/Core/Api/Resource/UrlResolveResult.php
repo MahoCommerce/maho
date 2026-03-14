@@ -26,6 +26,7 @@ use Maho\Core\Api\State\Provider\UrlResolverProvider;
     operations: [
         new GetCollection(
             uriTemplate: '/url-resolver',
+            security: "true",
             description: 'Resolve a URL path to its target (use ?path=your-url)',
         ),
     ],

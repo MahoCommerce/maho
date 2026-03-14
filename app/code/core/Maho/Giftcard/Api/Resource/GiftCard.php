@@ -32,10 +32,12 @@ use Maho\Giftcard\Api\State\Processor\GiftCardProcessor;
     operations: [
         new Get(
             uriTemplate: '/giftcards/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get a gift card by ID',
         ),
         new Post(
             uriTemplate: '/giftcards',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Create a new gift card',
         ),
     ],

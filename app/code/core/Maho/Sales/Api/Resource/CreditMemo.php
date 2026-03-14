@@ -33,16 +33,19 @@ use Maho\Sales\Api\State\Processor\CreditMemoProcessor;
     operations: [
         new Get(
             uriTemplate: '/credit-memos/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get a credit memo by ID',
         ),
         new GetCollection(
             uriTemplate: '/orders/{orderId}/credit-memos',
             uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get credit memos for an order',
         ),
         new Post(
             uriTemplate: '/orders/{orderId}/credit-memos',
             uriVariables: ['orderId' => new Link(toProperty: 'orderId')],
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Create a credit memo / refund for an order',
         ),
     ],

@@ -31,8 +31,8 @@ use ApiPlatform\Metadata\ApiProperty;
     description: 'CMS Block resource',
     provider: CmsBlockProvider::class,
     operations: [
-        new Get(uriTemplate: '/cms-blocks/{id}'),
-        new GetCollection(uriTemplate: '/cms-blocks'),
+        new Get(uriTemplate: '/cms-blocks/{id}', security: "true"),
+        new GetCollection(uriTemplate: '/cms-blocks', security: "true"),
         new Post(
             uriTemplate: '/cms-blocks',
             processor: CmsBlockProcessor::class,

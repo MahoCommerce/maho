@@ -34,19 +34,23 @@ use Maho\Sales\Api\State\Processor\OrderProcessor;
     operations: [
         new Get(
             uriTemplate: '/orders/{id}',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get an order by ID',
         ),
         new GetCollection(
             uriTemplate: '/orders',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
             description: 'Get order collection (admin only)',
         ),
         new GetCollection(
             uriTemplate: '/customers/me/orders',
             name: 'my_orders',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Get current customer order history',
         ),
         new Post(
             uriTemplate: '/orders',
+            security: "true",
             description: 'Place a new order from cart',
         ),
     ],

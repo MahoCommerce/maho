@@ -31,10 +31,12 @@ use Maho\Sales\Api\State\Processor\PaymentProcessor;
     operations: [
         new Get(
             uriTemplate: '/pos-payments/{id}',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
             description: 'Get a POS payment by ID',
         ),
         new GetCollection(
             uriTemplate: '/pos-payments',
+            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
             description: 'Get POS payments collection',
         ),
     ],

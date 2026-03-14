@@ -27,10 +27,12 @@ use Maho\Directory\Api\State\Provider\CountryProvider;
     operations: [
         new Get(
             uriTemplate: '/countries/{id}',
+            security: "true",
             description: 'Get a country by ISO code',
         ),
         new GetCollection(
             uriTemplate: '/countries',
+            security: "true",
             description: 'Get all available countries',
         ),
     ],

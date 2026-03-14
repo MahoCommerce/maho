@@ -25,6 +25,7 @@ use Maho\Catalog\Api\State\Provider\LayeredFilterProvider;
     operations: [
         new GetCollection(
             uriTemplate: '/layered-filters',
+            security: "true",
             description: 'Get available filters for a category',
         ),
     ],

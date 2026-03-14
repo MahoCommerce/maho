@@ -33,24 +33,29 @@ use ApiPlatform\Metadata\ApiProperty;
     operations: [
         new GetCollection(
             uriTemplate: '/customers/me/wishlist',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Get current customer wishlist items',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Add product to wishlist',
         ),
         new Delete(
             uriTemplate: '/customers/me/wishlist/{id}',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Remove item from wishlist',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist/{id}/move-to-cart',
             name: 'move_to_cart',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Move wishlist item to cart',
         ),
         new Post(
             uriTemplate: '/customers/me/wishlist/sync',
             name: 'sync_wishlist',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Sync guest wishlist (localStorage) with customer wishlist',
         ),
     ],

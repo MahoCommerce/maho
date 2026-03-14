@@ -33,10 +33,12 @@ use ApiPlatform\Metadata\ApiProperty;
     operations: [
         new Get(
             uriTemplate: '/categories/{id}',
+            security: "true",
             description: 'Get a category by ID',
         ),
         new GetCollection(
             uriTemplate: '/categories',
+            security: "true",
             description: 'Get category tree',
         ),
         new Post(
