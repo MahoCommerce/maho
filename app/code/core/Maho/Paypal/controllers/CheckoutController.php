@@ -90,7 +90,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if ($vaultTokenId && $methodCode === Maho_Paypal_Model_Config::METHOD_VAULT) {
                 /** @var Maho_Paypal_Model_Vault_Token $vaultToken */
                 $vaultToken = Mage::getModel('maho_paypal/vault_token')->load($vaultTokenId);
-                if ($vaultToken->getId() && $vaultToken->getIsActive()) {
+                if ($vaultToken->getId() && $vaultToken->getIsActive()
+                    && (int) $vaultToken->getCustomerId() === (int) $quote->getCustomerId()) {
                     $vaultPaypalTokenId = $vaultToken->getPaypalTokenId();
                     $vaultSourceType = $vaultToken->getPaymentSourceType();
                 }

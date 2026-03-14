@@ -163,7 +163,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
             $breakdown['shipping'] = ['currency_code' => $currency, 'value' => $this->_formatAmount($shipping)];
         }
 
-        if ($discount > 0 && $discount < $subtotal) {
+        if ($discount > 0) {
             $breakdown['discount'] = ['currency_code' => $currency, 'value' => $this->_formatAmount($discount)];
         }
 

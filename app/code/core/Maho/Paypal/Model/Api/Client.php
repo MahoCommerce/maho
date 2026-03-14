@@ -26,6 +26,7 @@ class Maho_Paypal_Model_Api_Client
     protected ?string $_explicitClientId = null;
     protected ?string $_explicitClientSecret = null;
     protected ?bool $_explicitSandbox = null;
+    protected ?string $_cachedAccessToken = null;
 
     public function __construct(array $args = [])
     {
@@ -336,6 +337,13 @@ class Maho_Paypal_Model_Api_Client
 
     protected function _getAuthHeaders(): array
     {
+        if ($this->_cachedAccessToken !== null) {
+            return [
+                'Authorization' => 'Bearer ' . $this->_cachedAccessToken,
+                'Content-Type' => 'application/json',
+            ];
+        }
+
         $client = $this->_createHttpClient();
 
         $response = $client->request('POST', $this->_getApiUrl('/v1/oauth2/token'), [
@@ -344,10 +352,23 @@ class Maho_Paypal_Model_Api_Client
             'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
         ]);
 
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200) {
+            $body = $response->getContent(false);
+            throw new \RuntimeException("PayPal OAuth token request failed with HTTP {$statusCode}: {$body}");
+        }
+
         $token = Mage::helper('core')->jsonDecode($response->getContent());
+        $accessToken = $token['access_token'] ?? '';
+
+        if ($accessToken === '') {
+            throw new \RuntimeException('PayPal OAuth response missing access_token');
+        }
+
+        $this->_cachedAccessToken = $accessToken;
 
         return [
-            'Authorization' => 'Bearer ' . ($token['access_token'] ?? ''),
+            'Authorization' => 'Bearer ' . $this->_cachedAccessToken,
             'Content-Type' => 'application/json',
         ];
     }

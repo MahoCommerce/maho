@@ -76,7 +76,7 @@
 
     <customer_account>
         <reference name="customer_account_navigation">
-            <action method="addLink" ifconfig="payment/paypal_vault/active">
+            <action method="addLink" translate="label" module="maho_paypal" ifconfig="payment/paypal_vault/active">
                 <name>paypal_vault</name>
                 <path>paypal/vault</path>
                 <label>Saved Payment Methods</label>

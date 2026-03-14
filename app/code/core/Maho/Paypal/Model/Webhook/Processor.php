@@ -37,12 +37,11 @@ class Maho_Paypal_Model_Webhook_Processor
             return;
         }
 
-        if ($this->_isDuplicate($eventId)) {
+        $event = $this->_createEventRecord($payload);
+        if ($event === null) {
             Mage::log("Duplicate webhook event: {$eventId}", Mage::LOG_INFO, 'paypal.log');
             return;
         }
-
-        $event = $this->_createEventRecord($payload);
 
         try {
             $handlerClass = self::HANDLER_MAP[$eventType] ?? null;
@@ -75,15 +74,11 @@ class Maho_Paypal_Model_Webhook_Processor
         $this->process($payload);
     }
 
-    protected function _isDuplicate(string $paypalEventId): bool
-    {
-        /** @var Maho_Paypal_Model_Resource_Webhook_Event_Collection $collection */
-        $collection = Mage::getResourceModel('maho_paypal/webhook_event_collection');
-        $collection->addFieldToFilter('paypal_event_id', $paypalEventId);
-        return $collection->getSize() > 0;
-    }
-
-    protected function _createEventRecord(array $payload): Maho_Paypal_Model_Webhook_Event
+    /**
+     * Attempt to create an event record, relying on the UNIQUE constraint
+     * on paypal_event_id to handle concurrent duplicate deliveries.
+     */
+    protected function _createEventRecord(array $payload): ?Maho_Paypal_Model_Webhook_Event
     {
         /** @var Maho_Paypal_Model_Webhook_Event $event */
         $event = Mage::getModel('maho_paypal/webhook_event');
@@ -96,7 +91,16 @@ class Maho_Paypal_Model_Webhook_Processor
             'status'          => 'processing',
             'payload'         => Mage::helper('core')->jsonEncode($payload),
         ]);
-        $event->save();
+
+        try {
+            $event->save();
+        } catch (\Throwable $e) {
+            if (str_contains($e->getMessage(), 'Duplicate') || str_contains($e->getMessage(), 'UNIQUE') || str_contains($e->getMessage(), 'duplicate')) {
+                return null;
+            }
+            throw $e;
+        }
+
         return $event;
     }
 }

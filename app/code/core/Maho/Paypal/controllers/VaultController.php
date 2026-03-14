@@ -12,10 +12,14 @@ declare(strict_types=1);
 
 class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
 {
+    protected array $_skipFormKeyActions = [];
+
     #[\Override]
     public function preDispatch(): static
     {
         parent::preDispatch();
+
+        $this->_setForcedFormKeyActions(['delete']);
 
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
             $this->_redirect('customer/account/login');
@@ -34,6 +38,11 @@ class Maho_Paypal_VaultController extends Mage_Core_Controller_Front_Action
 
     public function deleteAction(): void
     {
+        if (!$this->getRequest()->isPost()) {
+            $this->_redirect('paypal/vault');
+            return;
+        }
+
         $tokenId = (int) $this->getRequest()->getParam('id');
         $customerId = (int) Mage::getSingleton('customer/session')->getCustomerId();
 

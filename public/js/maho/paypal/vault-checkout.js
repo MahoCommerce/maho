@@ -80,12 +80,15 @@ document.addEventListener('payment-method:switched', function(e) {
 }, true);
 
 // Intercept Review.save() to handle vault payments
-const _origReviewSave = Review.prototype.save;
-Review.prototype.save = function() {
-    const vault = MahoPaypalVaultCheckout.getActiveInstance();
-    if (vault) {
-        vault.submit();
-        return;
-    }
-    return _origReviewSave.call(this);
-};
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof Review === 'undefined') return;
+    const _origReviewSave = Review.prototype.save;
+    Review.prototype.save = function() {
+        const vault = MahoPaypalVaultCheckout.getActiveInstance();
+        if (vault) {
+            vault.submit();
+            return;
+        }
+        return _origReviewSave.call(this);
+    };
+});
