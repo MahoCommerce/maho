@@ -98,6 +98,7 @@ class Mage_Adminhtml_Sales_Order_CreditmemoController extends Mage_Adminhtml_Con
             if (!$invoice) {
                 $invoices = $order->getInvoiceCollection();
                 if ($invoices->getSize() === 1) {
+                    /** @var Mage_Sales_Model_Order_Invoice $invoice */
                     $invoice = $invoices->getFirstItem()->setOrder($order);
                 }
             }
