@@ -118,8 +118,9 @@ class ApiExceptionListener implements EventSubscriberInterface
         // Handle Symfony Security exceptions - access denied (authenticated but not authorized)
         if ($exception instanceof AccessDeniedException) {
             // If user is not authenticated at all, return 401
-            // AccessDeniedException message contains "not appropriately authenticated" for unauthenticated users
-            $isNotAuthenticated = str_contains($exception->getMessage(), 'not appropriately authenticated');
+            // Check both the exception message (legacy) and the Authorization header presence
+            $isNotAuthenticated = str_contains($exception->getMessage(), 'not appropriately authenticated')
+                || ($request !== null && !$request->headers->has('Authorization'));
             $statusCode = $isNotAuthenticated ? 401 : 403;
             $error = $isNotAuthenticated ? 'unauthorized' : 'forbidden';
             $message = $isNotAuthenticated ? 'Authentication required' : 'Access denied';
