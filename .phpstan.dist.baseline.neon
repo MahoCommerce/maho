@@ -16987,12 +16987,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Report.php
 
 		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Coupons_Collection::joinFields() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Coupons/Collection.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Customer_Model_Customer::remove().'
 			identifier: method.notFound
 			count: 1
@@ -17147,12 +17141,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Tag/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Tax_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Tax/Collection.php
 
 		-
 			rawMessage: 'Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported.'
@@ -17801,12 +17789,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Convert/Order.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Collection.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Observer::addVatRequestParamsOrderComment() has no return type specified.'
