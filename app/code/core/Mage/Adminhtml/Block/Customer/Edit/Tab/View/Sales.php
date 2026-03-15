@@ -15,7 +15,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales extends Mage_Adminhtml_B
     /**
      * Sales entity collection
      *
-     * @var Mage_Sales_Model_Entity_Sale_Collection
+     * @var Mage_Sales_Model_Resource_Sale_Collection
      */
     protected $_collection;
 
