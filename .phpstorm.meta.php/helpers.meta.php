@@ -23,7 +23,6 @@ namespace PHPSTORM_META {
         'adminnotification/data' => \Mage_AdminNotification_Helper_Data::class,
         'api/data' => \Mage_Api_Helper_Data::class,
         'api2/data' => \Mage_Api2_Helper_Data::class,
-        'authorizenet/admin' => \Mage_Authorizenet_Helper_Admin::class,
         'authorizenet/data' => \Mage_Authorizenet_Helper_Data::class,
         'blog/data' => \Maho_Blog_Helper_Data::class,
         'captcha/data' => \Maho_Captcha_Helper_Data::class,

@@ -272,8 +272,6 @@ class LegacyRenameMysql4Classes extends BaseMahoCommand
             'Mage_Newsletter_Model_Mysql4_Subscriber_Collection' => 'Mage_Newsletter_Model_Resource_Subscriber_Collection',
             'Mage_Newsletter_Model_Mysql4_Template' => 'Mage_Newsletter_Model_Resource_Template',
             'Mage_Newsletter_Model_Mysql4_Template_Collection' => 'Mage_Newsletter_Model_Resource_Template_Collection',
-            'Mage_Paygate_Model_Mysql4_Authorizenet_Debug' => 'Mage_Paygate_Model_Resource_Authorizenet_Debug',
-            'Mage_Paygate_Model_Mysql4_Authorizenet_Debug_Collection' => 'Mage_Paygate_Model_Resource_Authorizenet_Debug_Collection',
             'Mage_Paypal_Model_Mysql4_Cert' => 'Mage_Paypal_Model_Resource_Cert',
             'Mage_Paypal_Model_Mysql4_Report_Settlement' => 'Mage_Paypal_Model_Resource_Report_Settlement',
             'Mage_Paypal_Model_Mysql4_Report_Settlement_Row' => 'Mage_Paypal_Model_Resource_Report_Settlement_Row',
