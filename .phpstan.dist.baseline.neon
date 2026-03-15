@@ -17809,12 +17809,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Entity/Order/Collection.php
 
 		-
-			rawMessage: 'Call to an undefined method Mage_Sales_Model_Resource_Order_Item::getTypeId().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Collection.php
-
-		-
 			rawMessage: 'Method Mage_Sales_Model_Observer::addVatRequestParamsOrderComment() has no return type specified.'
 			identifier: missingType.return
 			count: 1
