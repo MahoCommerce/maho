@@ -6637,12 +6637,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Select.php
 
 		-
-			rawMessage: Property Mage_Catalog_Block_Product_View_Tabs::$_tabs has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Tabs.php
-
-		-
 			rawMessage: 'Cannot call method setAttributeObj() on class-string|object.'
 			identifier: method.nonObject
 			count: 1
@@ -12445,18 +12439,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Db_Table::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Db/Table.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Db_Table::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Db/Table.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http::load() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12473,18 +12455,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http_Curl::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http/Curl.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http_Curl::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http/Curl.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Interface::load() has no return type specified.'
@@ -12515,30 +12485,6 @@ parameters:
 			identifier: booleanNot.alwaysTrue
 			count: 2
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Soap::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Soap.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Soap::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Soap.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Std::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Std.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Std::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Std.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Container_Abstract::addException() has no return type specified.'
@@ -12973,36 +12919,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_File_Csv::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/File/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_File_Csv::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/File/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_Http::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_Http::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_Interface::walk() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Interface.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Column::getBatchImportModel() has invalid return type Mage_Dataflow_Model_Import_Export.'
 			identifier: class.notFound
 			count: 1
@@ -13073,18 +12989,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Interface.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Serialize::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Serialize.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Serialize::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Serialize.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Xml_Excel::_saveParsedRow() has no return type specified.'
@@ -13493,30 +13397,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Resource/Session.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Adapter_Http::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Adapter_Http::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Parser_Csv::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Parser/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Parser_Csv::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Parser/Csv.php
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
@@ -15145,12 +15025,6 @@ parameters:
 			path: app/code/core/Mage/Page/Block/Html/Topmenu/Renderer.php
 
 		-
-			rawMessage: Property Mage_Page_Block_Redirect::$_formFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Redirect.php
-
-		-
 			rawMessage: Property Mage_Page_Block_Switch::$_storeInUrl has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -15319,12 +15193,6 @@ parameters:
 			path: app/code/core/Mage/Paygate/Model/Authorizenet/Cards.php
 
 		-
-			rawMessage: 'Method Mage_Paygate_Model_Resource_Authorizenet_Debug::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Resource/Authorizenet/Debug.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::cancelPartialAuthorization().'
 			identifier: method.notFound
 			count: 1
@@ -15473,12 +15341,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Payment/Model/Method/Cc.php
-
-		-
-			rawMessage: Property Mage_Payment_Model_Method_Ccsave::$_canSaveCc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Method/Ccsave.php
 
 		-
 			rawMessage: 'Method Mage_Payment_Model_Observer::beforeOrderPaymentSave() has no return type specified.'
@@ -18395,27 +18257,6 @@ parameters:
 			identifier: isset.variable
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
-
-		-
-			rawMessage: '''
-				Call to deprecated method calcTaxAmount() of class Mage_Sales_Model_Quote_Item_Abstract:
-				logic moved to tax totals calculation model
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Tax.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Address_Total_Tax::_saveAppliedTaxes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Tax.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Quote_Address_Total_Tax::$_appliedTaxes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Tax.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Config::getTotalModels() has no return type specified.'
