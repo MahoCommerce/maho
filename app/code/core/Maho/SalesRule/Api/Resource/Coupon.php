@@ -60,7 +60,7 @@ use Maho\SalesRule\Api\State\Processor\CouponProcessor;
         ),
         new Post(
             uriTemplate: '/coupons/validate',
-            security: "true",
+            security: 'true',
             description: 'Validate a coupon code against a cart',
         ),
     ],

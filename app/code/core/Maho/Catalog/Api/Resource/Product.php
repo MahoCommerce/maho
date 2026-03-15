@@ -33,12 +33,12 @@ use Maho\Catalog\Api\State\Provider\ProductProvider;
     operations: [
         new Get(
             uriTemplate: '/products/{id}',
-            security: "true",
+            security: 'true',
             description: 'Get a product by ID',
         ),
         new GetCollection(
             uriTemplate: '/products',
-            security: "true",
+            security: 'true',
             description: 'Get product collection',
         ),
         new Post(

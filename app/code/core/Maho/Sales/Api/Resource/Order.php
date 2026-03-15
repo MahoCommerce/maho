@@ -50,7 +50,7 @@ use Maho\Sales\Api\State\Processor\OrderProcessor;
         ),
         new Post(
             uriTemplate: '/orders',
-            security: "true",
+            security: 'true',
             description: 'Place a new order from cart',
         ),
     ],

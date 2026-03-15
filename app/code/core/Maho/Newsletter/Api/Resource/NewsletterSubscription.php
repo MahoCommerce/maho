@@ -40,14 +40,14 @@ use Maho\Newsletter\Api\State\Processor\NewsletterProcessor;
         new Post(
             uriTemplate: '/newsletter/subscribe',
             name: 'subscribe',
-            security: "true",
+            security: 'true',
             description: 'Subscribe to newsletter',
         ),
         // Unsubscribe from newsletter
         new Post(
             uriTemplate: '/newsletter/unsubscribe',
             name: 'unsubscribe',
-            security: "true",
+            security: 'true',
             description: 'Unsubscribe from newsletter',
         ),
     ],

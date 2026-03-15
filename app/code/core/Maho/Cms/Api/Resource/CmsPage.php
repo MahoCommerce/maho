@@ -30,8 +30,8 @@ use ApiPlatform\Metadata\ApiProperty;
     description: 'CMS Page resource',
     provider: CmsPageProvider::class,
     operations: [
-        new Get(uriTemplate: '/cms-pages/{id}', security: "true"),
-        new GetCollection(uriTemplate: '/cms-pages', security: "true"),
+        new Get(uriTemplate: '/cms-pages/{id}', security: 'true'),
+        new GetCollection(uriTemplate: '/cms-pages', security: 'true'),
         new Post(
             uriTemplate: '/cms-pages',
             processor: CmsPageProcessor::class,

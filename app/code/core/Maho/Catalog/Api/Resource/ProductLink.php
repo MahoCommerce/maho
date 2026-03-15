@@ -35,7 +35,7 @@ use Maho\Catalog\Api\State\Provider\ProductLinkProvider;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             name: 'get_related_links',
-            security: "true",
+            security: 'true',
             description: 'Get related product links',
         ),
         new Put(
@@ -75,7 +75,7 @@ use Maho\Catalog\Api\State\Provider\ProductLinkProvider;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             name: 'get_cross_sell_links',
-            security: "true",
+            security: 'true',
             description: 'Get cross-sell product links',
         ),
         new Put(
@@ -115,7 +115,7 @@ use Maho\Catalog\Api\State\Provider\ProductLinkProvider;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
             name: 'get_up_sell_links',
-            security: "true",
+            security: 'true',
             description: 'Get up-sell product links',
         ),
         new Put(

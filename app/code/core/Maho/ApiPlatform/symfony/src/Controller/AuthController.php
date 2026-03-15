@@ -169,6 +169,14 @@ class AuthController extends AbstractController
                 $cartId = $customerCart->getId() ? (int) $customerCart->getId() : null;
             }
 
+            // Get masked ID and qty for storefront cart restoration
+            $cartMaskedId = null;
+            $cartItemsQty = 0;
+            if (isset($customerCart) && $customerCart->getId()) {
+                $cartMaskedId = $customerCart->getData('masked_quote_id');
+                $cartItemsQty = (float) $customerCart->getItemsQty();
+            }
+
             return new JsonResponse([
                 'token' => $token,
                 'token_type' => 'Bearer',
@@ -180,6 +188,8 @@ class AuthController extends AbstractController
                     'lastName' => $customer->getLastname(),
                 ],
                 'cartId' => $cartId,
+                'cartMaskedId' => $cartMaskedId,
+                'cartItemsQty' => $cartItemsQty,
             ]);
         } catch (\Exception $e) {
             \Mage::logException($e);

@@ -28,12 +28,12 @@ use Maho\Blog\Api\State\Provider\BlogCategoryProvider;
     operations: [
         new Get(
             uriTemplate: '/blog-categories/{id}',
-            security: "true",
+            security: 'true',
             description: 'Get a blog category by ID',
         ),
         new GetCollection(
             uriTemplate: '/blog-categories',
-            security: "true",
+            security: 'true',
             description: 'Get blog category collection',
         ),
     ],

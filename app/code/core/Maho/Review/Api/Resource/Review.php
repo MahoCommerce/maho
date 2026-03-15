@@ -36,12 +36,12 @@ use Maho\Review\Api\State\Processor\ReviewProcessor;
             uriVariables: [
                 'productId' => new Link(toProperty: 'productId'),
             ],
-            security: "true",
+            security: 'true',
             description: 'Get reviews for a product',
         ),
         new Get(
             uriTemplate: '/reviews/{id}',
-            security: "true",
+            security: 'true',
             description: 'Get a single review',
         ),
         new Post(

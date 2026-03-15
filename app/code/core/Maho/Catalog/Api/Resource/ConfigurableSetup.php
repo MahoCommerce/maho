@@ -33,7 +33,7 @@ use Maho\Catalog\Api\State\Provider\ConfigurableSetupProvider;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            security: "true",
+            security: 'true',
             description: 'Get super attributes and child product IDs',
         ),
         new Put(

@@ -33,7 +33,7 @@ use Maho\Catalog\Api\State\Provider\BundleOptionProvider;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            security: "true",
+            security: 'true',
             description: 'Get bundle options with selections',
         ),
         new Post(

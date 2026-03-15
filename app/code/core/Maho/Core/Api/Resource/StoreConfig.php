@@ -27,7 +27,7 @@ use Maho\Core\Api\State\Provider\StoreConfigProvider;
     operations: [
         new Get(
             uriTemplate: '/store-config',
-            security: "true",
+            security: 'true',
             description: 'Get current store configuration',
         ),
     ],

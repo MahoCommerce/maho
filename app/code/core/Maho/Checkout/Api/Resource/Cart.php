@@ -33,12 +33,12 @@ use Maho\Customer\Api\Resource\Address;
     operations: [
         new Get(
             uriTemplate: '/carts/{id}',
-            security: "true",
+            security: 'true',
             description: 'Get a cart by ID',
         ),
         new Post(
             uriTemplate: '/carts',
-            security: "true",
+            security: 'true',
             description: 'Create a new cart',
         ),
     ],
