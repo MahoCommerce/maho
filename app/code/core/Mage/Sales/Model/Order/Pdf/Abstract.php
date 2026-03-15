@@ -97,6 +97,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
         }
 
         $html = '';
+        $isFirst = true;
 
         // Set adminhtml design area for template/block loading
         $originalArea = Mage::getDesign()->getArea();
@@ -118,7 +119,11 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
                 $blockHtml = $block->toHtml();
 
                 if (!empty($blockHtml)) {
+                    if (!$isFirst) {
+                        $html .= '<div style="page-break-before: always;"></div>';
+                    }
                     $html .= $blockHtml;
+                    $isFirst = false;
                 }
 
                 // Clear block reference for memory management
