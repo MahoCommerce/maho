@@ -1522,6 +1522,11 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
                 $session->getSessionIdQueryParam() . '=' . $session->getEncryptedSessionId(),
                 $cacheData,
             );
+            $cacheData = str_replace(
+                $this->_getFormKeyPlaceholder($cacheKey),
+                $session->getFormKey(),
+                $cacheData,
+            );
         }
         return $cacheData;
     }
@@ -1548,6 +1553,11 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         $data = str_replace(
             $session->getSessionIdQueryParam() . '=' . $session->getEncryptedSessionId(),
             $this->_getSidPlaceholder($cacheKey),
+            $data,
+        );
+        $data = str_replace(
+            $session->getFormKey(),
+            $this->_getFormKeyPlaceholder($cacheKey),
             $data,
         );
 
@@ -1589,6 +1599,18 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
         }
 
         return '<!--SID=' . $cacheKey . '-->';
+    }
+
+    /**
+     * Get form key placeholder for cache
+     */
+    protected function _getFormKeyPlaceholder(?string $cacheKey = null): string
+    {
+        if (is_null($cacheKey)) {
+            $cacheKey = $this->getCacheKey();
+        }
+
+        return '<!--FORM_KEY=' . $cacheKey . '-->';
     }
 
     /**

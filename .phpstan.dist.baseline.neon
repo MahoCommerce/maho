@@ -2503,12 +2503,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Info.php
 
 		-
-			rawMessage: 'Parameter #2 $array of function implode expects array<string>, array<int, array<string>|string|null> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Info.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default::getItem() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -3755,12 +3749,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Number.php
-
-		-
-			rawMessage: 'Parameter #2 $array of function implode expects array<string>, list<array<string>|string|null> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Options.php
 
 		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price::$_currencies has no type specified.
@@ -9471,12 +9459,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_CatalogSearch_Helper_Data::checkNotes() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #2 $array of function implode expects array<string>, array<array<string>|string|null> given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
 
