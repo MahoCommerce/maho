@@ -796,7 +796,11 @@ ul.tabs a.changed span.changed,ul.tabs-horiz a.changed span.changed {
     width: 12px;
     height: 12px;
     display: block;
-    color: #090!important
+    color: #090 !important;
+}
+
+ul.tabs-horiz a.active.changed span.changed {
+    color: #fff !important;
 }
 
 ul.tabs a.error span.error,ul.tabs-horiz a.error span.error {
