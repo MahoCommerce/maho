@@ -9,41 +9,74 @@ on:
   workflow_dispatch:
 
 jobs:
-  pest-tests:
-    name: Test Suite (${{ matrix.db }})
+  pest-db:
+    name: Test Suite (${{ matrix.name }})
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        db: [mysql, pgsql, sqlite]
+        include:
+          - name: mysql-8.4
+            db_engine: mysql
+            db_image: mysql:8.4
+            db_user: root
+            db_pass: root
+            health_cmd: mysqladmin ping
+          - name: mysql-latest
+            db_engine: mysql
+            db_image: mysql:latest
+            db_user: root
+            db_pass: root
+            health_cmd: mysqladmin ping
+          - name: mariadb-10.11
+            db_engine: mysql
+            db_image: mariadb:10.11
+            db_user: root
+            db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
+          - name: mariadb-latest
+            db_engine: mysql
+            db_image: mariadb:latest
+            db_user: root
+            db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
+          - name: pgsql-14
+            db_engine: pgsql
+            db_image: postgres:14
+            db_user: postgres
+            db_pass: postgres
+            health_cmd: pg_isready
+          - name: pgsql-latest
+            db_engine: pgsql
+            db_image: postgres:latest
+            db_user: postgres
+            db_pass: postgres
+            health_cmd: pg_isready
 
     services:
-      mysql:
-        image: mysql:latest
+      db:
+        image: ${{ matrix.db_image }}
         env:
           MYSQL_ROOT_PASSWORD: root
           MYSQL_DATABASE: maho
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
-      postgres:
-        image: postgres:latest
-        env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: maho
         ports:
-          - 5432:5432
-        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5
+          - ${{ contains(matrix.db_image, 'postgres') && '5432:5432' || '3306:3306' }}
+        options: >-
+          --health-cmd="${{ matrix.health_cmd }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
-          extensions: ${{ matrix.db == 'pgsql' && 'pdo_pgsql' || (matrix.db == 'sqlite' && 'pdo_sqlite' || '') }}
+          extensions: ${{ matrix.db_engine == 'pgsql' && 'pdo_pgsql' || '' }}
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -62,8 +95,10 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
-      - name: Install Maho (MySQL)
-        if: matrix.db == 'mysql'
+      - name: Print DB version
+        run: docker exec $(docker ps -q) sh -c "mysql --version 2>/dev/null || psql --version 2>/dev/null || mariadb --version 2>/dev/null"
+
+      - name: Install Maho
         run: |
           ./maho install \
             --license_agreement_accepted yes \
@@ -72,9 +107,9 @@ jobs:
             --default_currency USD \
             --db_host 127.0.0.1 \
             --db_name maho \
-            --db_user root \
-            --db_pass root \
-            --db_engine mysql \
+            --db_user ${{ matrix.db_user }} \
+            --db_pass ${{ matrix.db_pass }} \
+            --db_engine ${{ matrix.db_engine }} \
             --url http://maho.test/ \
             --secure_base_url http://maho.test/ \
             --use_secure 0 \
@@ -88,34 +123,38 @@ jobs:
           ./maho index:reindex:all
           ./maho cache:flush
 
-      - name: Install Maho (PostgreSQL)
-        if: matrix.db == 'pgsql'
-        run: |
-          ./maho install \
-            --license_agreement_accepted yes \
-            --locale en_US \
-            --timezone Europe/London \
-            --default_currency USD \
-            --db_host 127.0.0.1 \
-            --db_name maho \
-            --db_user postgres \
-            --db_pass postgres \
-            --db_engine pgsql \
-            --url http://maho.test/ \
-            --secure_base_url http://maho.test/ \
-            --use_secure 0 \
-            --use_secure_admin 0 \
-            --admin_lastname admin \
-            --admin_firstname admin \
-            --admin_email admin@admin.com \
-            --admin_username admin \
-            --admin_password asdasdasd123123123 \
-            --sample_data 1
-          ./maho index:reindex:all
-          ./maho cache:flush
+      - name: Run Pest Tests
+        run: ./vendor/bin/pest --display-errors --display-warnings
 
-      - name: Install Maho (SQLite)
-        if: matrix.db == 'sqlite'
+  pest-sqlite:
+    name: Test Suite (sqlite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.3
+          extensions: pdo_sqlite
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+      - name: Cache dependencies
+        uses: actions/cache@v5
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
+
+      - name: Install Maho
         run: |
           ./maho install \
             --license_agreement_accepted yes \
