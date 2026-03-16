@@ -17,9 +17,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: mysql-lts
+          - name: mysql-8.4
             db_engine: mysql
-            db_image: mysql:lts
+            db_image: mysql:8.4
             db_user: root
             db_pass: root
             health_cmd: mysqladmin ping
@@ -29,9 +29,9 @@ jobs:
             db_user: root
             db_pass: root
             health_cmd: mysqladmin ping
-          - name: mariadb-lts
+          - name: mariadb-10.11
             db_engine: mysql
-            db_image: mariadb:lts
+            db_image: mariadb:10.11
             db_user: root
             db_pass: root
             health_cmd: healthcheck.sh --connect --innodb_initialized
