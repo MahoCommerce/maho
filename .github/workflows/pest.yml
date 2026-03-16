@@ -95,6 +95,9 @@ jobs:
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
+      - name: Print DB version
+        run: docker exec $(docker ps -q) sh -c "mysql --version 2>/dev/null || psql --version 2>/dev/null || mariadb --version 2>/dev/null"
+
       - name: Install Maho
         run: |
           ./maho install \
