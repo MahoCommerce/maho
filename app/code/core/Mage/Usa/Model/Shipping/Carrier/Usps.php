@@ -532,6 +532,9 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
             // International (must come before domestic)
             'Priority Mail Express International' => 'INT_1',
             'Priority Mail International' => 'INT_2',
+            'First-Class Package International Service' => 'INT_15',
+            'First-Class Mail International' => 'INT_13',
+            'Global Express Guaranteed' => 'INT_4',
 
             // Priority Mail Express variations (must come before regular Priority Mail)
             'Priority Mail Express Padded Flat Rate Envelope' => '62',
@@ -583,10 +586,11 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                     foreach ($pricingOption['shippingOptions'] as $shippingOption) {
                         if (!empty($shippingOption['rateOptions'])) {
                             foreach ($shippingOption['rateOptions'] as $rateOption) {
-                                if (!empty($rateOption['rates']) && isset($rateOption['totalPrice'])) {
+                                $totalPrice = $rateOption['totalBasePrice'] ?? $rateOption['totalPrice'] ?? null;
+                                if (!empty($rateOption['rates']) && $totalPrice !== null && (float) $totalPrice > 0) {
                                     foreach ($rateOption['rates'] as $rateData) {
                                         $allRates[] = array_merge($rateData, [
-                                            'totalPrice' => $rateOption['totalPrice'],
+                                            'totalPrice' => (float) $totalPrice,
                                         ]);
                                     }
                                 }
