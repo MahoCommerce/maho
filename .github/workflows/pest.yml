@@ -22,31 +22,37 @@ jobs:
             db_image: mysql:lts
             db_user: root
             db_pass: root
+            health_cmd: mysqladmin ping
           - name: mysql-latest
             db_engine: mysql
             db_image: mysql:latest
             db_user: root
             db_pass: root
+            health_cmd: mysqladmin ping
           - name: mariadb-lts
             db_engine: mysql
             db_image: mariadb:lts
             db_user: root
             db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
           - name: mariadb-latest
             db_engine: mysql
             db_image: mariadb:latest
             db_user: root
             db_pass: root
+            health_cmd: healthcheck.sh --connect --innodb_initialized
           - name: pgsql-14
             db_engine: pgsql
             db_image: postgres:14
             db_user: postgres
             db_pass: postgres
+            health_cmd: pg_isready
           - name: pgsql-latest
             db_engine: pgsql
             db_image: postgres:latest
             db_user: postgres
             db_pass: postgres
+            health_cmd: pg_isready
 
     services:
       db:
@@ -60,10 +66,10 @@ jobs:
         ports:
           - ${{ contains(matrix.db_image, 'postgres') && '5432:5432' || '3306:3306' }}
         options: >-
-          ${{ contains(matrix.db_image, 'postgres')
-            && '--health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5'
-            || '--health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3'
-          }}
+          --health-cmd="${{ matrix.health_cmd }}"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
       - name: Setup PHP
