@@ -83,20 +83,14 @@ class OneStepCheckout {
 
     /**
      * Check if billing form has pre-filled data and trigger shipping method load.
-     * Also triggers payment method load if a shipping method is already selected.
+     * Payment methods are loaded automatically via autoSelectSingleShippingMethod()
+     * when saveBilling() populates the shipping methods and one is pre-checked.
      */
     checkPrefilledBilling() {
         if (!this.billingForm || this.isVirtual) return;
 
         if (this.hasMinimumAddressData('billing')) {
             this.saveBilling();
-        }
-
-        // If a shipping method is already selected (e.g. page refresh),
-        // trigger save to load payment methods
-        const selectedShipping = document.querySelector('input[name="shipping_method"]:checked');
-        if (selectedShipping) {
-            this.saveShippingMethod();
         }
     }
 
@@ -453,11 +447,11 @@ class OneStepCheckout {
     }
 
     /**
-     * If only one shipping method available and checked, trigger save to load payment methods
+     * If a shipping method is already checked, trigger save to load payment methods
      */
     autoSelectSingleShippingMethod() {
-        const shippingMethods = document.querySelectorAll('input[name="shipping_method"]');
-        if (shippingMethods.length === 1 && shippingMethods[0].checked) {
+        const selected = document.querySelector('input[name="shipping_method"]:checked');
+        if (selected) {
             setTimeout(() => this.saveShippingMethod(), 50);
         }
     }
