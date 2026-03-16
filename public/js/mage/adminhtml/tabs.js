@@ -184,6 +184,7 @@ class varienTabs {
                         });
 
                         this.showTabContentImmediately(tab);
+                        varienWindowOnload();
                     }
                 })
                 .catch(error => {
