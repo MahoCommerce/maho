@@ -48,15 +48,11 @@ class Mage_Usa_Model_Shipping_Carrier_UpsAuth extends Mage_Usa_Model_Shipping_Ca
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->getConfigFlag('verify_peer'));
         $responseData = curl_exec($ch);
-        try {
-            if ($responseData === false) {
-                $code = curl_errno($ch);
-                $description = curl_strerror($ch);
-                $message = curl_error($ch);
-                Mage::throwException("cURL Error: ($code) $description - \"$message\"");
-            }
-        } finally {
-            curl_close($ch);
+        if ($responseData === false) {
+            $code = curl_errno($ch);
+            $description = curl_strerror($ch);
+            $message = curl_error($ch);
+            Mage::throwException("cURL Error: ($code) $description - \"$message\"");
         }
 
         $responseData = json_decode($responseData);

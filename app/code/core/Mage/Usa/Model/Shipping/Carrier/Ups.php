@@ -714,7 +714,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
             $this->_debug($debugData);
             $this->_parseRestTrackingResponse($tracking, $responseData);
         }
-        curl_close($ch);
 
         return $this->_trackingResult;
     }
@@ -940,7 +939,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $debugData['result'] = $responseData;
         }
-        curl_close($ch);
 
         $responseData = json_decode($responseData);
         if (!$responseData) {
@@ -1508,7 +1506,6 @@ class Mage_Usa_Model_Shipping_Carrier_Ups extends Mage_Usa_Model_Shipping_Carrie
         } else {
             $debugData['result'] = $responseData;
         }
-        curl_close($ch);
 
         $this->_debug($debugData);
         return $this->_parseRestResponse($responseData);
