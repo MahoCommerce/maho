@@ -583,7 +583,7 @@ class Mage_Usa_Model_Shipping_Carrier_Usps extends Mage_Usa_Model_Shipping_Carri
                     foreach ($pricingOption['shippingOptions'] as $shippingOption) {
                         if (!empty($shippingOption['rateOptions'])) {
                             foreach ($shippingOption['rateOptions'] as $rateOption) {
-                                if (!empty($rateOption['rates'])) {
+                                if (!empty($rateOption['rates']) && isset($rateOption['totalPrice'])) {
                                     foreach ($rateOption['rates'] as $rateData) {
                                         $allRates[] = array_merge($rateData, [
                                             'totalPrice' => $rateOption['totalPrice'],
