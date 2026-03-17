@@ -167,6 +167,11 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                 if ($this->isAlreadyMinified($filePath)) {
                     // Copy already-minified files to maintain consistent URL/caching
                     copy($absolutePath, $cachedFile);
+                } elseif ($type === 'css') {
+                    $minifier = new CSSMinifier($absolutePath);
+                    $minifier->setImportExtensions([]);
+                    $minifiedContent = $minifier->execute($cachedFile);
+                    file_put_contents($cachedFile, $minifiedContent);
                 } else {
                     $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
                     file_put_contents($cachedFile, $minifiedContent);
