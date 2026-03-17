@@ -783,9 +783,19 @@ var ProductMediaManager = {
         }
     },
 
+    capHeight: function() {
+        const g = document.querySelector('.product-image-gallery');
+        const t = document.querySelector('.more-views');
+        if (!g) return;
+        g.style.maxHeight = Math.max(200, window.innerHeight - g.getBoundingClientRect().top - (t ? t.offsetHeight : 0) - 20) + 'px';
+    },
+
     init: function() {
         const gallery = document.querySelector('.product-image-gallery');
         if (!gallery) return;
+
+        this.capHeight();
+        window.addEventListener('resize', () => this.capHeight());
 
         gallery.addEventListener('click', () => {
             const match = gallery.querySelector('.gallery-image.visible')?.id?.match(/image-(\d+)/);

@@ -4178,6 +4178,7 @@ p.product-name a:hover {
 }
 .product-img-box .product-image img {
   max-width: 100%;
+  max-height: 100%;
   height: auto;
   margin: 0px auto;
 }
