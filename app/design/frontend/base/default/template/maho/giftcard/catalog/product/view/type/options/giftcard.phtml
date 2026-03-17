@@ -161,7 +161,7 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
         </div>
         <div class="field">
             <label for="giftcard_sender_email" class="required"><?php echo $this->__('Your Email'); ?></label>
-            <input type="email" name="giftcard_sender_email" id="giftcard_sender_email" class="required-entry validate-email" maxlength="255" required value="<?php echo $preSenderEmail !== null ? $this->escapeHtml($preSenderEmail) : ''; ?>" />
+            <input type="email" name="giftcard_sender_email" id="giftcard_sender_email" class="required-entry validate-email" maxlength="255" required autocomplete="email" value="<?php echo $preSenderEmail !== null ? $this->escapeHtml($preSenderEmail) : ''; ?>" />
         </div>
     </div>
 
@@ -173,7 +173,7 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
         </div>
         <div class="field">
             <label for="giftcard_recipient_email" class="required"><?php echo $this->__('Recipient Email'); ?></label>
-            <input type="email" name="giftcard_recipient_email" id="giftcard_recipient_email" class="required-entry validate-email" maxlength="255" required value="<?php echo $preRecipientEmail !== null ? $this->escapeHtml($preRecipientEmail) : ''; ?>" />
+            <input type="email" name="giftcard_recipient_email" id="giftcard_recipient_email" class="required-entry validate-email" maxlength="255" required autocomplete="off" value="<?php echo $preRecipientEmail !== null ? $this->escapeHtml($preRecipientEmail) : ''; ?>" />
         </div>
     </div>
 
