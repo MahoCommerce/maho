@@ -167,8 +167,12 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
                 if ($this->isAlreadyMinified($filePath)) {
                     // Copy already-minified files to maintain consistent URL/caching
                     copy($absolutePath, $cachedFile);
+                } elseif ($type === 'css') {
+                    $minifier = new CSSMinifier($absolutePath);
+                    $minifier->setImportExtensions([]);
+                    $minifier->minify($cachedFile);
                 } else {
-                    $minifiedContent = $this->minifyContent(file_get_contents($absolutePath), $type);
+                    $minifiedContent = (new JSMinifier(file_get_contents($absolutePath)))->minify();
                     file_put_contents($cachedFile, $minifiedContent);
                 }
                 return $cachedUrl;
@@ -203,18 +207,6 @@ class Mage_Core_Helper_Minify extends Mage_Core_Helper_Abstract
     {
         return file_exists($cachedFile) &&
                filemtime($cachedFile) >= filemtime($sourceFile);
-    }
-
-    /**
-     * Minify content based on type
-     */
-    private function minifyContent(string $content, string $type): string
-    {
-        return match ($type) {
-            'css' => (new CSSMinifier($content))->minify(),
-            'js' => (new JSMinifier($content))->minify(),
-            default => $content,
-        };
     }
 
     /**
