@@ -756,9 +756,31 @@ var ProductMediaManager = {
     },
 
     swapImage: function(target) {
-        document.querySelectorAll('.product-image-gallery .gallery-image').forEach(img => img.classList.remove('visible'));
-        target.classList.add('gallery-image', 'visible');
+        const gallery = document.querySelector('.product-image-gallery');
+        const current = gallery?.querySelector('.gallery-image.visible');
+        if (!gallery || target === current) return;
+
         target.removeAttribute('loading');
+
+        const doSwap = () => {
+            gallery.classList.remove('loading');
+            if (current) current.classList.remove('visible');
+            target.classList.add('gallery-image', 'visible');
+        };
+
+        if (target.complete && target.naturalWidth > 0) {
+            doSwap();
+        } else {
+            gallery.classList.add('loading');
+            target.addEventListener('load', doSwap, { once: true });
+            target.addEventListener('error', doSwap, { once: true });
+        }
+    },
+
+    preloadImage: function(target) {
+        if (target && !target.complete) {
+            target.removeAttribute('loading');
+        }
     },
 
     init: function() {
@@ -774,6 +796,9 @@ var ProductMediaManager = {
             link.addEventListener('click', e => {
                 e.preventDefault();
                 ProductMediaManager.swapImage(document.querySelector('#image-' + link.dataset.imageIndex));
+            });
+            link.addEventListener('mouseenter', () => {
+                ProductMediaManager.preloadImage(document.querySelector('#image-' + link.dataset.imageIndex));
             });
         });
 

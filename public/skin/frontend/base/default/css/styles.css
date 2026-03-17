@@ -4185,6 +4185,33 @@ p.product-name a:hover {
   position: relative;
   overflow: hidden;
   cursor: zoom-in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-image-gallery.loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 56px;
+  margin-top: -28px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 1;
+}
+.product-image-gallery.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  background: url('../images/loading.svg') no-repeat center;
+  background-size: contain;
+  z-index: 2;
 }
 .product-image-gallery .gallery-image {
   display: none;
