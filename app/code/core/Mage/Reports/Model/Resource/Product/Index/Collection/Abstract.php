@@ -50,6 +50,7 @@ abstract class Mage_Reports_Model_Resource_Product_Index_Collection_Abstract ext
                 ],
                 $this->_getWhereCondition(),
             );
+            $this->getSelect()->group('e.entity_id');
             $this->setFlag('is_idx_table_joined', true);
         }
         return $this;
