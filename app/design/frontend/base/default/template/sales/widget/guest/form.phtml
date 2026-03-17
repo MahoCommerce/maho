@@ -19,7 +19,7 @@
                 </strong>
             </div>
             <div class="block-content">
-               <form id="oar_widget_orders_and_returns_form" action="<?= $this->getActionUrl() ?>" method="post" class="search-form" name="guest_post">
+               <form id="oar_widget_orders_and_returns_form" action="<?= $this->getActionUrl() ?>" method="post" class="search-form" name="guest_post" autocomplete="off">
                    <ul class="form-alt">
                        <li>
                            <label class="required"><?= Mage::helper('sales')->__('Find Order By:') ?></label>
@@ -45,7 +45,7 @@
                        <li id="oar-email">
                            <label for="oar_email" class="required"><?= Mage::helper('sales')->__('Email Address') ?> </label>
                            <div class="input-box">
-                               <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" class="input-text validate-email required-entry" id="oar_email" name="oar_email" />
+                               <input type="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" class="input-text validate-email required-entry" id="oar_email" name="oar_email" />
                            </div>
                        </li>
                        <li id="oar-zip" style="display:none;">
