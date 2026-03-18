@@ -19,6 +19,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         }
 
         $this->loadLayout();
+        $this->_switchToSingleColumnIfNoSidebar();
         $this->_initPageTitle(Mage::helper('blog')->__('Blog'));
         $this->_initBreadcrumbs();
         $this->renderLayout();
@@ -49,6 +50,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
 
         Mage::register('current_blog_category', $category);
         $this->loadLayout();
+        $this->_switchToSingleColumnIfNoSidebar();
         $this->_initPageTitle($category->getName());
         $this->_initMeta($category);
         $this->_initBreadcrumbs($category);
@@ -71,10 +73,22 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
 
         Mage::register('current_blog_post', $post);
         $this->loadLayout();
+        $this->_switchToSingleColumnIfNoSidebar();
         $this->_initPageTitle($post->getTitle());
         $this->_initMeta($post);
         $this->_initBreadcrumbs(null, $post);
         $this->renderLayout();
+    }
+
+    protected function _switchToSingleColumnIfNoSidebar(): void
+    {
+        $sidebar = $this->getLayout()->getBlock('blog.category.sidebar');
+        if (!$sidebar || !$sidebar->toHtml()) {
+            $root = $this->getLayout()->getBlock('root');
+            if ($root) {
+                $root->setTemplate('page/1column.phtml');
+            }
+        }
     }
 
     protected function _initPageTitle(string $title): void
