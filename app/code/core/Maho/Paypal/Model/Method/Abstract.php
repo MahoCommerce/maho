@@ -123,11 +123,13 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
             Mage::throwException(Mage::helper('maho_paypal')->__('No PayPal authorization or order ID found for capture.'));
         }
 
-        if ($captureId) {
-            $payment->setTransactionId($captureId);
-            $payment->setIsTransactionClosed(true);
-            $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+        if (!$captureId) {
+            Mage::throwException(Mage::helper('maho_paypal')->__('PayPal capture failed: no capture ID returned.'));
         }
+
+        $payment->setTransactionId($captureId);
+        $payment->setIsTransactionClosed(true);
+        $payment->setAdditionalInformation('paypal_capture_id', $captureId);
 
         return $this;
     }

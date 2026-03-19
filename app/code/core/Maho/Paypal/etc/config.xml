@@ -58,6 +58,16 @@
                 <class>Maho_Paypal_Helper</class>
             </maho_paypal>
         </helpers>
+        <events>
+            <checkout_submit_all_after>
+                <observers>
+                    <maho_paypal_save_order_after_submit>
+                        <class>maho_paypal/observer</class>
+                        <method>saveOrderAfterSubmit</method>
+                    </maho_paypal_save_order_after_submit>
+                </observers>
+            </checkout_submit_all_after>
+        </events>
     </global>
 
     <frontend>
@@ -91,16 +101,6 @@
                 </maho_paypal>
             </updates>
         </layout>
-        <events>
-            <checkout_submit_all_after>
-                <observers>
-                    <maho_paypal_save_order_after_submit>
-                        <class>maho_paypal/observer</class>
-                        <method>saveOrderAfterSubmit</method>
-                    </maho_paypal_save_order_after_submit>
-                </observers>
-            </checkout_submit_all_after>
-        </events>
     </frontend>
 
     <admin>

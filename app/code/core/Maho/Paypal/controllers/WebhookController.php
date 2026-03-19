@@ -12,15 +12,6 @@ declare(strict_types=1);
 
 class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
 {
-    protected array $_skipFormKeyActions = ['index'];
-
-    #[\Override]
-    public function preDispatch(): static
-    {
-        // Skip form key validation for webhook endpoint
-        $this->setFlag('', self::FLAG_NO_CHECK_INSTALLATION, true);
-        return parent::preDispatch();
-    }
 
     public function indexAction(): void
     {

@@ -29,6 +29,12 @@ class Maho_Paypal_Model_Webhook_Handler_VaultTokenCreated extends Maho_Paypal_Mo
             return;
         }
 
+        // PayPal sends the Maho customer ID we passed during vault setup as a string
+        if (!ctype_digit((string) $customerRef)) {
+            $this->_log("VaultTokenCreated: customer reference '{$customerRef}' is not a valid numeric ID, skipping");
+            return;
+        }
+
         $customerId = (int) $customerRef;
         $customer = Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {

@@ -49,6 +49,7 @@ class Maho_Paypal_Model_System_Config_Backend_Active extends Mage_Core_Model_Con
         }
         $clientId = $groups['maho_paypal_credentials']['fields']['client_id']['value'] ?? '';
         $clientSecret = $groups['maho_paypal_credentials']['fields']['client_secret']['value'] ?? '';
-        return $clientId !== '' && $clientSecret !== '';
+        $isPlaceholder = static fn(string $v): bool => $v === '' || (bool) preg_match('/^\*+$/', $v);
+        return !$isPlaceholder($clientId) && !$isPlaceholder($clientSecret);
     }
 }

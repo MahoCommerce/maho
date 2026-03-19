@@ -11,6 +11,7 @@
 <layout>
     <checkout_onepage_index>
         <reference name="head">
+            <action method="addCss"><stylesheet>css/paypal.css</stylesheet></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/standard-checkout.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_advanced_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>

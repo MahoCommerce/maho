@@ -94,11 +94,8 @@ class Maho_Paypal_Model_Webhook_Processor
 
         try {
             $event->save();
-        } catch (\Throwable $e) {
-            if (str_contains($e->getMessage(), 'Duplicate') || str_contains($e->getMessage(), 'UNIQUE') || str_contains($e->getMessage(), 'duplicate')) {
-                return null;
-            }
-            throw $e;
+        } catch (\Doctrine\DBAL\Exception\UniqueConstraintViolationException) {
+            return null;
         }
 
         return $event;

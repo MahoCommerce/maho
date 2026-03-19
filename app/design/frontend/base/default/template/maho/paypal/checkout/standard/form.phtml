@@ -29,21 +29,3 @@ $containerId = 'paypal-button-container-' . $this->getMethodCode();
     </label>
     <?php endif; ?>
 </div>
-<style>
-.paypal-button-container paypal-button { display: block; width: 100%; }
-body.paypal-standard-active .btn-checkout { display: none !important; }
-.paypal-save-vault {
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-    font-size: 13px;
-    color: #555;
-}
-.paypal-save-vault:hover { color: #333; }
-.paypal-save-vault input[type="checkbox"] { accent-color: #003087; width: 16px; height: 16px; cursor: pointer; }
-.paypal-save-vault-icon { display: flex; flex-shrink: 0; color: #999; }
-.paypal-save-vault-icon svg { width: 16px; height: 16px; }
-.paypal-save-vault:has(input:checked) .paypal-save-vault-icon { color: #003087; }
-</style>

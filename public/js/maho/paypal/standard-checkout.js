@@ -102,6 +102,14 @@ class MahoPaypalStandardCheckout {
 
     handleError(err) {
         console.error('PayPal error:', err);
+        let errorDiv = this.formDiv.querySelector('.paypal-standard-errors');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.className = 'paypal-standard-errors validation-advice';
+            this.formDiv.appendChild(errorDiv);
+        }
+        errorDiv.textContent = err?.message || 'An error occurred with PayPal. Please try again.';
+        errorDiv.style.display = '';
     }
 }
 

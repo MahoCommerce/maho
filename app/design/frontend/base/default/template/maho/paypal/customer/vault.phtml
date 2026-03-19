@@ -34,7 +34,7 @@ $tokens = $this->getTokens();
                 <form action="<?= $this->escapeUrl($this->getDeleteUrl((int) $token->getId())) ?>" method="post">
                     <?= $this->getBlockHtml('formkey') ?>
                     <button type="submit" class="link-remove"
-                            onclick="return confirm('<?= $this->escapeHtml($this->__('Are you sure you want to delete this payment method?')) ?>')"
+                            onclick="return confirm('<?= $this->jsQuoteEscape($this->__('Are you sure you want to delete this payment method?')) ?>')"
                     ><?= $this->escapeHtml($this->__('Delete')) ?></button>
                 </form>
             </td>

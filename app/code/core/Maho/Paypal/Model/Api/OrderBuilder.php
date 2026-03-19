@@ -136,10 +136,13 @@ class Maho_Paypal_Model_Api_OrderBuilder
         foreach ($items as $item) {
             $qty = (int) $item->getTotalQty();
             $price = (float) $item->getBaseCalculationPrice();
-            if ($this->_hasPrecisionIssue($price)) {
-                $price = (float) $item->getBaseRowTotal() / $qty;
+            if ($this->_hasPrecisionIssue($price)
+                || round($price * $qty, 2) !== round((float) $item->getBaseRowTotal(), 2)
+            ) {
+                $subtotal += round((float) $item->getBaseRowTotal(), 2);
+            } else {
+                $subtotal += round($price, 2) * $qty;
             }
-            $subtotal += round($price, 2) * $qty;
         }
 
         $tax = (float) $address->getBaseTaxAmount();

@@ -26,7 +26,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if ($body) {
                 $data = Mage::helper('core')->jsonDecode($body);
                 if (is_array($data)) {
-                    $this->getRequest()->setParams($data);
+                    $allowed = ['method', 'save_vault', 'vault_token_id', 'paypal_order_id'];
+                    $this->getRequest()->setParams(array_intersect_key($data, array_flip($allowed)));
                 }
             }
         }
