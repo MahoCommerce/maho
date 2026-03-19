@@ -647,12 +647,12 @@ class OneStepCheckout {
                     loaderArea: false
                 }).then((result) => {
                     if (result.error) {
-                        self.showError(result.message || 'Failed to save billing address');
+                        self.showError(result.message || self.config.messages.saveBillingError);
                         return;
                     }
                     originalSave();
                 }).catch(() => {
-                    self.showError('Failed to save billing address. Please try again.');
+                    self.showError(self.config.messages.saveBillingError);
                 });
                 return;
             }
