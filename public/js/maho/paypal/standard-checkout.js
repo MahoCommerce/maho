@@ -48,11 +48,8 @@ class MahoPaypalStandardCheckout {
             return;
         }
 
-        this._paymentSession = sdk.createPayPalOneTimePaymentSession({
-            onApprove: (data) => this.onApprove(data),
-            onCancel: () => {},
-            onError: (err) => this.handleError(err),
-        });
+        this._sdk = sdk;
+        this._createPaymentSession();
 
         const container = document.getElementById(this.containerId);
         if (!container) return;
@@ -63,14 +60,28 @@ class MahoPaypalStandardCheckout {
         button.removeAttribute('hidden');
         await new Promise(r => setTimeout(r, 500));
         hideLoader();
-        button.addEventListener('click', () => {
-            this._paymentSession.start(
-                { presentationMode: 'modal' },
-                this.createOrder().then(orderId => ({ orderId })),
-            );
+        button.addEventListener('click', async () => {
+            try {
+                const orderId = await this.createOrder();
+                this._paymentSession.start(
+                    { presentationMode: 'popup' },
+                    Promise.resolve({ orderId }),
+                );
+            } catch (err) {
+                this.handleError(err);
+                this._createPaymentSession();
+            }
         });
 
         this._mounted = true;
+    }
+
+    _createPaymentSession() {
+        this._paymentSession = this._sdk.createPayPalOneTimePaymentSession({
+            onApprove: (data) => this.onApprove(data),
+            onCancel: () => {},
+            onError: (err) => this.handleError(err),
+        });
     }
 
     async createOrder() {

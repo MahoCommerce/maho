@@ -66,9 +66,9 @@ class MahoPaypalAdvancedCheckout {
         const cvvContainer = document.querySelector('#paypal-card-fields-cvv');
 
         if (numberContainer && expiryContainer && cvvContainer) {
-            numberContainer.appendChild(numberField);
-            expiryContainer.appendChild(expiryField);
-            cvvContainer.appendChild(cvvField);
+            numberContainer.replaceChildren(numberField);
+            expiryContainer.replaceChildren(expiryField);
+            cvvContainer.replaceChildren(cvvField);
             this._mounted = true;
             await new Promise(r => setTimeout(r, 500));
             hideLoader();

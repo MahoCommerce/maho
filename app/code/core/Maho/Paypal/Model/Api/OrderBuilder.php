@@ -200,7 +200,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
                 'sku' => mb_substr((string) $quoteItem->getSku(), 0, 127),
                 'unit_amount' => [
                     'currency_code' => $currency,
-                    'value' => $this->_formatAmount($price / $qty),
+                    'value' => $this->_formatAmount($price),
                 ],
                 'category' => $quoteItem->getIsVirtual() ? 'DIGITAL_GOODS' : 'PHYSICAL_GOODS',
             ];

@@ -100,9 +100,14 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
             $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+            $returnUrl = Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
+            $cancelUrl = Mage::getUrl('checkout/cart', ['_secure' => true]);
+
             $orderRequest = $builder->buildFromQuote(
                 $quote,
                 $paypalIntent,
+                returnUrl: $returnUrl,
+                cancelUrl: $cancelUrl,
                 vaultPaymentSource: $vaultPaymentSource,
                 vaultPaypalTokenId: $vaultPaypalTokenId,
                 vaultSourceType: $vaultSourceType,
@@ -114,7 +119,12 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
             $paypalOrderId = $paypalOrder['id'] ?? null;
             if (!$paypalOrderId) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Failed to create PayPal order.'));
+                Mage::log('PayPal createOrder response: ' . Mage::helper('core')->jsonEncode($paypalOrder), Mage::LOG_ERROR, 'paypal.log');
+                $apiMessage = $paypalOrder['message'] ?? $paypalOrder['details'][0]['description'] ?? '';
+                $errorMsg = $apiMessage
+                    ? Mage::helper('maho_paypal')->__('Failed to create PayPal order: %s', $apiMessage)
+                    : Mage::helper('maho_paypal')->__('Failed to create PayPal order.');
+                Mage::throwException($errorMsg);
             }
 
             // Store PayPal order ID on quote payment
@@ -209,6 +219,11 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             // Persist payment data before saveOrder() which may reimport payment
             $payment->save();
 
+            // Import address from PayPal if quote has no billing address (product page / cart shortcut flow)
+            if (!$quote->getBillingAddress()->getFirstname()) {
+                $this->_importPaypalAddress($paypalResult, $quote);
+            }
+
             // Save vault token if returned by PayPal
             $this->_saveVaultToken($paypalResult, $quote);
 
@@ -250,6 +265,61 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         if ($authId) {
             $payment->setAdditionalInformation('paypal_authorization_id', $authId);
         }
+    }
+
+    protected function _importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void
+    {
+        $payer = $paypalResult['payer'] ?? [];
+        $shipping = $paypalResult['purchase_units'][0]['shipping'] ?? [];
+        $paypalAddress = $shipping['address'] ?? [];
+        $paypalName = $shipping['name']['full_name'] ?? '';
+
+        if (!$paypalAddress) {
+            return;
+        }
+
+        $nameParts = explode(' ', $paypalName, 2);
+        $firstname = $nameParts[0] ?? '';
+        $lastname = $nameParts[1] ?? $firstname;
+        $email = $payer['email_address'] ?? 'guest@paypal.com';
+
+        $addressData = [
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'street' => implode("\n", array_filter([
+                $paypalAddress['address_line_1'] ?? '',
+                $paypalAddress['address_line_2'] ?? '',
+            ])),
+            'city' => $paypalAddress['admin_area_2'] ?? '',
+            'region' => $paypalAddress['admin_area_1'] ?? '',
+            'postcode' => $paypalAddress['postal_code'] ?? '',
+            'country_id' => $paypalAddress['country_code'] ?? '',
+            'telephone' => $payer['phone']['phone_number']['national_number'] ?? '0000000000',
+        ];
+
+        $billing = $quote->getBillingAddress();
+        $billing->addData($addressData);
+        $billing->setPaymentMethod($quote->getPayment()->getMethod());
+        $billing->save();
+
+        if (!$quote->isVirtual()) {
+            $shippingAddr = $quote->getShippingAddress();
+            $shippingAddr->addData($addressData);
+            $shippingAddr->setSameAsBilling(1);
+            $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
+
+            // Auto-select first available shipping method
+            $rates = $shippingAddr->getAllShippingRates();
+            if (count($rates) > 0) {
+                $shippingAddr->setShippingMethod($rates[0]->getCode());
+            }
+            $shippingAddr->save();
+        }
+
+        $quote->setCustomerEmail($email);
+        $quote->setCustomerFirstname($firstname);
+        $quote->setCustomerLastname($lastname);
     }
 
     protected function _saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void
