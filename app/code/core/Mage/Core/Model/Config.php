@@ -1334,6 +1334,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $className = $this->getHelperClassName($helperAlias);
         if (!class_exists($className)) {
+            Mage::log("Helper class '$className' (alias: '$helperAlias') could not be loaded.", Mage::LOG_WARNING);
             return false;
         }
         \Maho\Profiler::start('CORE::create_object_of::' . $className);
@@ -1407,6 +1408,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
     {
         $className = $this->getModelClassName($modelAlias);
         if (!class_exists($className)) {
+            Mage::log("Model class '$className' (alias: '$modelAlias') could not be loaded.", Mage::LOG_WARNING);
             return false;
         }
         \Maho\Profiler::start('CORE::create_object_of::' . $className);

@@ -17,13 +17,13 @@
             <message>Please choose to register or to checkout as a guest</message>
         </validate-guest>
         <validate-shipping-methods-not-available translate="message">
-            <message>Your order cannot be completed at this time as there is no shipping methods available for it. Please make necessary changes in your shipping address.</message>
+            <message>Your order cannot be completed at this time as there are no shipping methods available for it. Please make necessary changes in your shipping address.</message>
         </validate-shipping-methods-not-available>
         <validate-shipping-methods-required translate="message">
             <message>Please specify shipping method.</message>
         </validate-shipping-methods-required>
         <validate-payment-methods-not-available translate="message">
-            <message>Your order cannot be completed at this time as there is no payment methods available for it.</message>
+            <message>Your order cannot be completed at this time as there are no payment methods available for it.</message>
         </validate-payment-methods-not-available>
         <validate-payment-methods-required translate="message">
             <message>Please specify payment method.</message>
