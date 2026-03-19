@@ -16,6 +16,7 @@ class MahoPaypalStandardCheckout {
         this.currencyCode = formDiv.dataset.currencyCode;
         this.containerId = formDiv.dataset.containerId;
         this.methodCode = formDiv.dataset.methodCode;
+        this.addToCartFormId = formDiv.dataset.addToCartForm || null;
         this._mounted = false;
         this._paymentSession = null;
     }
@@ -73,6 +74,10 @@ class MahoPaypalStandardCheckout {
     }
 
     async createOrder() {
+        if (this.addToCartFormId) {
+            await this._addToCart();
+        }
+
         const saveVault = this.formDiv.querySelector('#paypal_standard_save_vault')?.checked || false;
         const response = await mahoFetch(this.createOrderUrl, {
             method: 'POST',
@@ -86,6 +91,21 @@ class MahoPaypalStandardCheckout {
         }
 
         return response.paypal_order_id;
+    }
+
+    async _addToCart() {
+        const form = document.getElementById(this.addToCartFormId);
+        if (!form) throw new Error('Add to cart form not found');
+
+        const response = await mahoFetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            loaderArea: false,
+        });
+
+        if (response?.error) {
+            throw new Error(response.message || 'Failed to add product to cart');
+        }
     }
 
     async onApprove(data) {

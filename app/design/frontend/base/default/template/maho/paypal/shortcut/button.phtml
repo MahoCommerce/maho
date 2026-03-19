@@ -18,6 +18,7 @@ $containerId = $this->getShortcutHtmlId();
     data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
     data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
     data-container-id="<?= $this->escapeHtml($containerId) ?>"
-    data-method-code="paypal_standard_checkout">
+    data-method-code="paypal_standard_checkout"
+    <?php if ($this->getIsInCatalogProduct()): ?>data-add-to-cart-form="product_addtocart_form"<?php endif; ?>>
     <paypal-button hidden></paypal-button>
 </div>
