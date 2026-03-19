@@ -5,7 +5,7 @@
  *
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -95,10 +95,8 @@ class Mage_Catalog_Block_Product_Compare_List extends Mage_Catalog_Block_Product
                 ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())
                 ->loadComparableAttributes()
                 ->addPriceData()
+                ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds())
                 ->addTaxPercents();
-
-            Mage::getSingleton('catalog/product_visibility')
-                ->addVisibleInSiteFilterToCollection($this->_items);
         }
 
         return $this->_items;

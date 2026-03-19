@@ -1503,7 +1503,7 @@ class Mage_Catalog_Model_Product extends Mage_Catalog_Model_Abstract
      */
     public function getVisibleInSiteVisibilities()
     {
-        return Mage::getSingleton('catalog/product_visibility')->getVisibleInSiteIds();
+        return Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds();
     }
 
     /**
