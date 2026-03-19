@@ -102,16 +102,17 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
 
     protected function _createClientFromParams(array $params): Maho_Paypal_Model_Api_Client
     {
+        $storeId = $this->_resolveStoreId();
         $config = Mage::getModel('paypal/config');
         $clientId = $params['client_id'] ?? '';
         $clientSecret = $params['client_secret'] ?? '';
         $sandbox = ($params['sandbox'] ?? '1') === '1';
 
         if (preg_match('/^\*+$/', $clientId)) {
-            $clientId = $config->getClientId();
+            $clientId = $config->getClientId($storeId);
         }
         if (preg_match('/^\*+$/', $clientSecret)) {
-            $clientSecret = $config->getClientSecret();
+            $clientSecret = $config->getClientSecret($storeId);
         }
 
         /** @var Maho_Paypal_Model_Api_Client $client */
@@ -119,5 +120,20 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
         $client->setExplicitCredentials($clientId, $clientSecret, $sandbox);
 
         return $client;
+    }
+
+    protected function _resolveStoreId(): ?int
+    {
+        $storeCode = $this->getRequest()->getParam('store');
+        if ($storeCode) {
+            return (int) Mage::app()->getStore($storeCode)->getId();
+        }
+
+        $websiteCode = $this->getRequest()->getParam('website');
+        if ($websiteCode) {
+            return (int) Mage::app()->getWebsite($websiteCode)->getDefaultStore()->getId();
+        }
+
+        return null;
     }
 }

@@ -11,6 +11,11 @@ function mahoPaypalGetCredentials() {
     params.set('sandbox', document.getElementById('payment_maho_paypal_credentials_sandbox')?.value ?? '');
     params.set('client_id', document.getElementById('payment_maho_paypal_credentials_client_id')?.value ?? '');
     params.set('client_secret', document.getElementById('payment_maho_paypal_credentials_client_secret')?.value ?? '');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('website')) params.set('website', urlParams.get('website'));
+    if (urlParams.get('store')) params.set('store', urlParams.get('store'));
+
     return params;
 }
 
