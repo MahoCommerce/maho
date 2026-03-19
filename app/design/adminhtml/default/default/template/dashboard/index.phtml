@@ -15,82 +15,65 @@
 <?php if (is_array($this->getChild('diagrams')->getTabsIds())) : ?>
 <script type="text/javascript">
 //<![CDATA[
-function changeDiagramsPeriod(periodObj) {
-    periodParam = periodObj.value ? 'period/' + periodObj.value + '/' : '';
-<?php foreach ($this->getChild('diagrams')->getTabsIds() as $tabId): ?>
-    ajaxBlockParam = 'block/tab_<?= $tabId ?>/';
-    ajaxBlockUrl = '<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => '', 'period' => '']) ?>' + ajaxBlockParam + periodParam;
-    const formData_<?= $tabId ?> = new FormData();
-    formData_<?= $tabId ?>.append('isAjax', 'true');
-    formData_<?= $tabId ?>.append('form_key', FORM_KEY);
+function loadChartJs() {
+    return new Promise(resolve => {
+        if (window.Chart) {
+            resolve();
+            return;
+        }
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+        script.async = true;
+        script.onload = resolve;
+        document.head.appendChild(script);
+    });
+}
 
-    mahoFetch(ajaxBlockUrl, {
-        method: 'POST',
-        body: formData_<?= $tabId ?>
-    })
-    .then(response => {
-        tabContentElementId = '<?= $this->getChild('diagrams')->getId() ?>_<?= $tabId ?>_content';
-        try {
-            let responseData = response;
-            if (typeof response === 'string') {
-                try {
-                    responseData = JSON.parse(response);
-                    if (responseData.error) {
-                        alert(responseData.message);
-                    }
-                    if(responseData.ajaxExpired && responseData.ajaxRedirect) {
-                        setLocation(responseData.ajaxRedirect);
-                    }
-                } catch (e) {
-                    document.getElementById(tabContentElementId).innerHTML = response;
+function initDashboardCharts(container) {
+    container.querySelectorAll('.dashboard-chart').forEach(el => {
+        const canvas = el.querySelector('canvas');
+        if (!canvas) return;
+
+        const labels = JSON.parse(el.dataset.chartLabels);
+        const data = JSON.parse(el.dataset.chartData);
+
+        if (canvas._chartInstance) canvas._chartInstance.destroy();
+        canvas._chartInstance = new Chart(canvas, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    borderColor: '#adb41a',
+                    tension: 0.2
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { display: false }
                 }
-            } else {
-                document.getElementById(tabContentElementId).innerHTML = response;
             }
-        }
-        catch (e) {
-            document.getElementById(tabContentElementId).innerHTML = response;
-        }
-    })
-    .catch(error => {
-        console.error('Ajax block error:', error);
+        });
+    });
+}
+
+function changeDiagramsPeriod(periodObj) {
+    const periodParam = periodObj.value ? 'period/' + periodObj.value + '/' : '';
+
+<?php foreach ($this->getChild('diagrams')->getTabsIds() as $tabId): ?>
+    mahoFetch('<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => '', 'period' => '']) ?>' + 'block/tab_<?= $tabId ?>/' + periodParam, {
+        method: 'POST'
+    }).then(response => {
+        const el = document.getElementById('<?= $this->getChild('diagrams')->getId() ?>_<?= $tabId ?>_content');
+        el.innerHTML = response;
+        loadChartJs().then(() => initDashboardCharts(el));
     });
 <?php endforeach ?>
-    ajaxBlockUrl = '<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => 'totals', 'period' => '']) ?>' + periodParam;
-    const formData2 = new FormData();
-    formData2.append('isAjax', 'true');
-    formData2.append('form_key', FORM_KEY);
 
-    mahoFetch(ajaxBlockUrl, {
-        method: 'POST',
-        body: formData2
-    })
-    .then(response => {
-        tabContentElementId = 'dashboard_diagram_totals';
-        try {
-            let responseData = response;
-            if (typeof response === 'string') {
-                try {
-                    responseData = JSON.parse(response);
-                    if (responseData.error) {
-                        alert(responseData.message);
-                    }
-                    if(responseData.ajaxExpired && responseData.ajaxRedirect) {
-                        setLocation(responseData.ajaxRedirect);
-                    }
-                } catch (e) {
-                    document.getElementById(tabContentElementId).outerHTML = response;
-                }
-            } else {
-                document.getElementById(tabContentElementId).outerHTML = response;
-            }
-        }
-        catch (e) {
-            document.getElementById(tabContentElementId).outerHTML = response;
-        }
-    })
-    .catch(error => {
-        console.error('Ajax block totals error:', error);
+    mahoFetch('<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => 'totals', 'period' => '']) ?>' + periodParam, {
+        method: 'POST'
+    }).then(response => {
+        document.getElementById('dashboard_diagram_totals').outerHTML = response;
     });
 }
 
@@ -100,6 +83,8 @@ function toggleCal(id) {
     calDiv.style.display = calDiv.style.display === 'none' ? 'block' : 'none';
     rangeDiv.style.display = rangeDiv.style.display === 'none' ? 'block' : 'none';
 }
+
+mahoOnReady(() => loadChartJs().then(() => initDashboardCharts(document)));
 //]]>
 </script>
 <?php endif ?>
