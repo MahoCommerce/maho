@@ -33,9 +33,14 @@ class Mage_CatalogSearch_Block_Autocomplete_Product_List extends Mage_Catalog_Bl
             /** @var Mage_CatalogSearch_Model_Resource_Fulltext_Collection $productCollection */
             $productCollection = Mage::getResourceModel('catalogsearch/fulltext_collection');
             $productCollection->addSearchFilter($query)
+                ->addAttributeToSelect('sku')
                 ->setOrder('relevance', 'desc')
                 ->setPageSize(10);
             Mage::getModel('catalog/layer')->prepareProductCollection($productCollection);
+
+            Mage::dispatchEvent('catalogsearch_autocomplete_product_collection', [
+                'collection' => $productCollection,
+            ]);
 
             $this->_productCollection = $productCollection;
         }

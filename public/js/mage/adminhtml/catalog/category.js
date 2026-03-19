@@ -304,6 +304,7 @@ class CategoryEditForm {
             window[this.config.tabsJsObjectName]?.moveTabContentInDest();
             this.initVarienForm();
             this.initProductsGrid();
+            varienWindowOnload();
 
             history.replaceState(null, '', setQueryParams(url, { isAjax: null }));
 

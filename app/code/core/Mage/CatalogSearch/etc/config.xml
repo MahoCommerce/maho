@@ -126,6 +126,7 @@
                 <enable_category_autosuggest>1</enable_category_autosuggest>
                 <category_autosuggest_limit>5</category_autosuggest_limit>
                 <redirect_to_product_if_one_result>1</redirect_to_product_if_one_result>
+                <boost_sku_matches>1</boost_sku_matches>
             </search>
             <advanced_search>
                 <enabled>1</enabled>

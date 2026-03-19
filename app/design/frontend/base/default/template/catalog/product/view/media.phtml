@@ -16,7 +16,7 @@ $_product = $this->getProduct();
 $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 ?>
     <div class="product-image" role="region" aria-label="<?= $this->__('Product Images') ?>">
-        <div class="product-image-gallery">
+        <div class="product-image-gallery" style="aspect-ratio: <?= $mainImage->getOriginalWidth() ?>/<?= $mainImage->getOriginalHeight() ?>">
             <img id="image-main"
                 class="gallery-image visible"
                 src="<?= $mainImage ?>"
@@ -26,10 +26,20 @@ $mainImage = $this->helper('catalog/image')->init($_product, 'image');
 
             <?php $i=0; foreach ($this->getGalleryImages() as $_image): ?>
                 <?php if ($this->isGalleryImageVisible($_image)): ?>
+                    <?php
+                        $galleryHelper = $this->helper('catalog/image')
+                            ->init($_product, 'image', $_image->getFile())
+                            ->keepFrame(false);
+                        $gallerySize = Mage::getStoreConfig(Mage_Catalog_Helper_Image::XML_NODE_PRODUCT_BASE_IMAGE_WIDTH);
+                        if (is_numeric($gallerySize)) {
+                            $galleryHelper->constrainOnly(true)->resize($gallerySize);
+                        }
+                    ?>
                     <img id="image-<?= $i ?>"
                          class="gallery-image" loading="lazy"
-                         src="<?= $this->getGalleryImageUrl($_image) ?>"
-                         data-zoom-image="<?=  $this->getGalleryImageUrl($_image) ?>"
+                         src="<?= $galleryHelper ?>"
+                         data-zoom-image="<?= $galleryHelper ?>"
+                         width="<?= $galleryHelper->getOriginalWidth() ?>" height="<?= $galleryHelper->getOriginalHeight() ?>"
                          alt="<?= $this->escapeHtml($_image->getLabel() ?: $_product->getName() . ' - ' . $this->__('Image') . ' ' . ($i+1)) ?>" />
                 <?php endif ?>
                 <?php $i++; endforeach; ?>

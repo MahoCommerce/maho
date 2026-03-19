@@ -75,7 +75,7 @@ class Mage_CatalogSearch_Model_Resource_Fulltext_Engine extends Mage_Core_Model_
      */
     public function getAllowedVisibility()
     {
-        return Mage::getSingleton('catalog/product_visibility')->getVisibleInSearchIds();
+        return Mage_Catalog_Model_Product_Visibility::getVisibleInSearchIds();
     }
 
     /**

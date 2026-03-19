@@ -67,11 +67,7 @@
         </div>
     <?php elseif($this->getParentBlock()): ?>
         <div class="rv-header empty">
-            <?php
-            /** @var Mage_Catalog_Block_Product_Abstract $parent */
-            $parent = $this->getParentBlock();
-            ?>
-            <?= $parent->getReviewsSummaryHtml($this->getProduct(), 'short', true) ?>
+            <p class="no-rating"><?= $this->__('This product has no reviews yet') ?></p>
             <button type="button" class="button" onclick="document.getElementById('review-dialog').showModal()">
                 <?= $this->__('Be the First to Review') ?>
             </button>

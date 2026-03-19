@@ -82,7 +82,9 @@ class OneStepCheckout {
     }
 
     /**
-     * Check if billing form has pre-filled data and trigger shipping method load
+     * Check if billing form has pre-filled data and trigger shipping method load.
+     * Payment methods are loaded automatically via autoSelectSingleShippingMethod()
+     * when saveBilling() populates the shipping methods and one is pre-checked.
      */
     checkPrefilledBilling() {
         if (!this.billingForm || this.isVirtual) return;
@@ -400,7 +402,14 @@ class OneStepCheckout {
         const paymentForm = document.getElementById('co-payment-form');
         if (!paymentForm) return;
 
-        const formData = new FormData(paymentForm);
+        const selectedMethod = paymentForm.querySelector('input[name="payment[method]"]:checked');
+        if (!selectedMethod) return;
+
+        // Only send the payment method selection, not CC details.
+        // Full payment data (CC number, expiration, etc.) is validated during saveOrder.
+        // Sending incomplete CC fields here would trigger server-side validation errors.
+        const formData = new FormData();
+        formData.set('payment[method]', selectedMethod.value);
 
         // Show review loading immediately since that's what gets updated
         this.setLoading('onestep-review', true);
@@ -413,7 +422,7 @@ class OneStepCheckout {
                     loaderArea: false
                 });
             } catch (error) {
-                // Silently handle errors
+                // Silently handle validation errors during auto-save
             }
         });
         // Refresh review (queued after the above)
@@ -438,11 +447,11 @@ class OneStepCheckout {
     }
 
     /**
-     * If only one shipping method available and checked, trigger save to load payment methods
+     * If a shipping method is already checked, trigger save to load payment methods
      */
     autoSelectSingleShippingMethod() {
-        const shippingMethods = document.querySelectorAll('input[name="shipping_method"]');
-        if (shippingMethods.length === 1 && shippingMethods[0].checked) {
+        const selected = document.querySelector('input[name="shipping_method"]:checked');
+        if (selected) {
             setTimeout(() => this.saveShippingMethod(), 50);
         }
     }

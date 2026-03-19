@@ -91,7 +91,6 @@ class Mage_Core_Block_Pdf extends Mage_Core_Block_Template
             $finfo = finfo_open(FILEINFO_MIME_TYPE);
             if ($finfo) {
                 $mimeType = finfo_buffer($finfo, $content);
-                finfo_close($finfo);
             }
         }
 

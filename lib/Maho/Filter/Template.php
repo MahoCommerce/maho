@@ -162,7 +162,10 @@ class Template
         }
 
         $replacedValue = $this->_getVariable($construction[2], '');
-        return $replacedValue;
+        if ($replacedValue instanceof \DateTimeInterface) {
+            $replacedValue = $replacedValue->format('Y-m-d H:i:s');
+        }
+        return (string) $replacedValue;
     }
 
     public function includeDirective($construction)

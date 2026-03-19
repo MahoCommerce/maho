@@ -49,7 +49,7 @@ class Mage_Sitemap_Model_Resource_Catalog_Product extends Mage_Sitemap_Model_Res
         $this->_addFilter(
             $storeId,
             'visibility',
-            Mage::getSingleton('catalog/product_visibility')->getVisibleInSiteIds(),
+            Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds(),
             'in',
         );
         $this->_addFilter(

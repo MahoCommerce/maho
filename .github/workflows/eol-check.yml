@@ -1,0 +1,99 @@
+name: EOL Version Check
+
+on:
+  schedule:
+    - cron: '0 9 * * 1' # Every Monday at 9:00 UTC
+  workflow_dispatch:
+
+jobs:
+  check-eol:
+    name: Check for EOL versions
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check version lifecycle status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          warnings=""
+          errors=""
+
+          check_version() {
+            local product="$1"
+            local version="$2"
+            local label="$3"
+
+            response=$(curl -sf "https://endoflife.date/api/${product}/${version}.json")
+            if [ $? -ne 0 ]; then
+              errors="${errors}\n- ${label}: failed to fetch EOL data from endoflife.date"
+              return
+            fi
+
+            eol_date=$(echo "$response" | jq -r '.eol')
+            latest=$(echo "$response" | jq -r '.latest')
+
+            if [ "$eol_date" = "false" ] || [ "$eol_date" = "true" ]; then
+              echo "✓ ${label} ${version} (latest: ${latest}) — no EOL date set"
+              return
+            fi
+
+            today=$(date +%Y-%m-%d)
+            warn_date=$(date -d "${eol_date} - 90 days" +%Y-%m-%d 2>/dev/null || date -v-90d -j -f "%Y-%m-%d" "${eol_date}" +%Y-%m-%d)
+
+            if [[ "$today" > "$eol_date" ]]; then
+              errors="${errors}\n- **${label} ${version}** reached EOL on ${eol_date} (latest: ${latest})"
+              echo "✗ ${label} ${version} (latest: ${latest}) — EOL since ${eol_date}"
+            elif [[ "$today" > "$warn_date" ]]; then
+              warnings="${warnings}\n- **${label} ${version}** reaches EOL on ${eol_date} (latest: ${latest})"
+              echo "⚠ ${label} ${version} (latest: ${latest}) — EOL on ${eol_date} (less than 90 days)"
+            else
+              echo "✓ ${label} ${version} (latest: ${latest}) — EOL on ${eol_date}"
+            fi
+          }
+
+          echo "=== Checking version lifecycle status ==="
+          echo ""
+
+          check_version "mysql"   "8.4"   "MySQL"
+          check_version "mariadb" "10.11" "MariaDB"
+          check_version "postgresql" "14" "PostgreSQL"
+          check_version "php"     "8.3"   "PHP"
+
+          echo ""
+          echo "=== Summary ==="
+
+          if [ -n "$errors" ] || [ -n "$warnings" ]; then
+            title="EOL Version Check: action required"
+            body="The weekly EOL check found versions that need attention.\n"
+
+            if [ -n "$errors" ]; then
+              body="${body}\n## EOL Reached\nThese versions have reached end of life and should be replaced:\n${errors}\n"
+            fi
+
+            if [ -n "$warnings" ]; then
+              body="${body}\n## Approaching EOL (< 90 days)\nThese versions will reach end of life soon:\n${warnings}\n"
+            fi
+
+            body="${body}\n---\nSource: [endoflife.date](https://endoflife.date)\nWorkflow: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+
+            existing=$(gh issue list --label "eol-check" --state open --json number --jq '.[0].number')
+
+            if [ -n "$existing" ]; then
+              gh issue comment "$existing" --body "$(echo -e "$body")"
+              echo "Updated existing issue #${existing}"
+            else
+              gh issue create \
+                --title "$title" \
+                --body "$(echo -e "$body")" \
+                --label "eol-check"
+              echo "Created new issue"
+            fi
+
+            if [ -n "$errors" ]; then
+              echo "::error::One or more versions have reached EOL"
+              exit 1
+            fi
+          else
+            echo "All versions are within their support window."
+          fi

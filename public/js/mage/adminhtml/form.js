@@ -168,19 +168,14 @@ if (typeof Element !== 'undefined' && Element.prototype) {
 }
 
 // Global bind changes
-let varienWindowOnloadCache = {};
-function varienWindowOnload(useCache){
-    const dataElements = document.querySelectorAll('input, select, textarea');
-    for(let i = 0; i < dataElements.length; i++){
-        if(dataElements[i] && dataElements[i].id){
-            if ((!useCache) || (!varienWindowOnloadCache[dataElements[i].id])) {
-                dataElements[i].addEventListener('change', function() {
-                    this.setHasChanges();
-                });
-                if (useCache) {
-                    varienWindowOnloadCache[dataElements[i].id] = true;
-                }
-            }
+const varienWindowOnloadBound = new WeakSet();
+function varienWindowOnload() {
+    for (const el of document.querySelectorAll('input, select, textarea')) {
+        if (el.id && !varienWindowOnloadBound.has(el)) {
+            varienWindowOnloadBound.add(el);
+            el.addEventListener('change', function() {
+                this.setHasChanges();
+            });
         }
     }
 }

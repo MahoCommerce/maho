@@ -354,11 +354,36 @@ class Mage_CatalogSearch_Model_Resource_Fulltext extends Mage_Core_Model_Resourc
             $where = $likeCond;
         }
 
+        $boostSku = Mage::getStoreConfigFlag(Mage_CatalogSearch_Model_Fulltext::XML_PATH_CATALOG_SEARCH_BOOST_SKU, $query->getStoreId())
+            && $this->_getSearchableAttribute('sku');
+
+        if ($boostSku) {
+            $select->columns(['sku' => 'e.sku']);
+        }
+
         if ($where != '') {
             $select->where($where);
         }
 
-        $this->_foundData = $adapter->fetchPairs($select, $bind);
+        if ($boostSku) {
+            $rows = $adapter->fetchAll($select, $bind);
+            $this->_foundData = [];
+            $queryLower = mb_strtolower($queryText);
+            foreach ($rows as $row) {
+                $relevance = (float) $row['relevance'];
+                $skuLower = mb_strtolower($row['sku']);
+                if ($skuLower === $queryLower) {
+                    $relevance += 10000;
+                } elseif (str_starts_with($skuLower, $queryLower)) {
+                    $relevance += 1000;
+                } elseif (str_contains($skuLower, $queryLower)) {
+                    $relevance += 100;
+                }
+                $this->_foundData[$row['product_id']] = $relevance;
+            }
+        } else {
+            $this->_foundData = $adapter->fetchPairs($select, $bind);
+        }
 
         return $this;
     }

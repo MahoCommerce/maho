@@ -756,14 +756,46 @@ var ProductMediaManager = {
     },
 
     swapImage: function(target) {
-        document.querySelectorAll('.product-image-gallery .gallery-image').forEach(img => img.classList.remove('visible'));
-        target.classList.add('gallery-image', 'visible');
+        const gallery = document.querySelector('.product-image-gallery');
+        const current = gallery?.querySelector('.gallery-image.visible');
+        if (!gallery || target === current) return;
+
         target.removeAttribute('loading');
+
+        const doSwap = () => {
+            gallery.classList.remove('loading');
+            if (current) current.classList.remove('visible');
+            target.classList.add('gallery-image', 'visible');
+        };
+
+        if (target.complete && target.naturalWidth > 0) {
+            doSwap();
+        } else {
+            gallery.classList.add('loading');
+            target.addEventListener('load', doSwap, { once: true });
+            target.addEventListener('error', doSwap, { once: true });
+        }
+    },
+
+    preloadImage: function(target) {
+        if (target && !target.complete) {
+            target.removeAttribute('loading');
+        }
+    },
+
+    capHeight: function() {
+        const g = document.querySelector('.product-image-gallery');
+        const t = document.querySelector('.more-views');
+        if (!g) return;
+        g.style.maxHeight = Math.max(200, window.innerHeight - g.getBoundingClientRect().top - (t ? t.offsetHeight : 0) - 20) + 'px';
     },
 
     init: function() {
         const gallery = document.querySelector('.product-image-gallery');
         if (!gallery) return;
+
+        this.capHeight();
+        window.addEventListener('resize', () => this.capHeight());
 
         gallery.addEventListener('click', () => {
             const match = gallery.querySelector('.gallery-image.visible')?.id?.match(/image-(\d+)/);
@@ -774,6 +806,9 @@ var ProductMediaManager = {
             link.addEventListener('click', e => {
                 e.preventDefault();
                 ProductMediaManager.swapImage(document.querySelector('#image-' + link.dataset.imageIndex));
+            });
+            link.addEventListener('mouseenter', () => {
+                ProductMediaManager.preloadImage(document.querySelector('#image-' + link.dataset.imageIndex));
             });
         });
 
