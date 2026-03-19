@@ -551,7 +551,7 @@ class ShippingMethod {
     validate() {
         const methods = document.getElementsByName('shipping_method');
         if (methods.length === 0) {
-            alert(Translator.translate('Your order cannot be completed at this time as there is no shipping methods available for it. Please make necessary changes in your shipping address.'));
+            alert(Translator.translate('Your order cannot be completed at this time as there are no shipping methods available for it. Please make necessary changes in your shipping address.'));
             return false;
         }
 
@@ -792,7 +792,7 @@ class Payment {
 
         const methods = document.getElementsByName('payment[method]');
         if (methods.length === 0) {
-            alert(Translator.translate('Your order cannot be completed at this time as there is no payment methods available for it.'));
+            alert(Translator.translate('Your order cannot be completed at this time as there are no payment methods available for it.'));
             return false;
         }
 
