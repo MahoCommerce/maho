@@ -21,7 +21,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     {
         $secretKey = $this->getRequest()->getParam('key');
         try {
-            if ($secretKey != $info['secret_key']) {
+            if (!isset($info['secret_key']) || !hash_equals($info['secret_key'], (string) $secretKey)) {
                 throw new Exception();
             }
 
