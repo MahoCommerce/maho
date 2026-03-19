@@ -16,7 +16,7 @@
 <script type="text/javascript">
 //<![CDATA[
 function loadChartJs() {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
         if (window.Chart) {
             resolve();
             return;
@@ -27,6 +27,7 @@ function loadChartJs() {
         script.crossOrigin = 'anonymous';
         script.async = true;
         script.onload = resolve;
+        script.onerror = () => reject(new Error('Failed to load Chart.js'));
         document.head.appendChild(script);
     });
 }
