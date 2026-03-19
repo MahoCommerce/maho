@@ -5,7 +5,7 @@
  *
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2016-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2016-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -34,33 +34,32 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
     }
 
     /**
-     * Add visible in catalog filter to collection
-     *
+     * @deprecated since 26.5 Use $collection->setVisibility($this->getVisibleInCatalogIds()) instead
      * @return $this
      */
     public function addVisibleInCatalogFilterToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection)
     {
-        $collection->setVisibility($this->getVisibleInCatalogIds());
+        $collection->setVisibility(static::getVisibleInCatalogIds());
         return $this;
     }
+
     /**
-     * Add visibility in searchfilter to collection
-     *
+     * @deprecated since 26.5 Use $collection->setVisibility($this->getVisibleInSearchIds()) instead
      * @return $this
      */
     public function addVisibleInSearchFilterToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection)
     {
-        $collection->setVisibility($this->getVisibleInSearchIds());
+        $collection->setVisibility(static::getVisibleInSearchIds());
         return $this;
     }
+
     /**
-     * Add visibility in site filter to collection
-     *
+     * @deprecated since 26.5 Use $collection->setVisibility($this->getVisibleInSiteIds()) instead
      * @return $this
      */
     public function addVisibleInSiteFilterToCollection(Mage_Catalog_Model_Resource_Product_Collection $collection)
     {
-        $collection->setVisibility($this->getVisibleInSiteIds());
+        $collection->setVisibility(static::getVisibleInSiteIds());
         return $this;
     }
 
@@ -69,7 +68,7 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
      *
      * @return array
      */
-    public function getVisibleInCatalogIds()
+    public static function getVisibleInCatalogIds()
     {
         return [self::VISIBILITY_IN_CATALOG, self::VISIBILITY_BOTH];
     }
@@ -79,7 +78,7 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
      *
      * @return array
      */
-    public function getVisibleInSearchIds()
+    public static function getVisibleInSearchIds()
     {
         return [self::VISIBILITY_IN_SEARCH, self::VISIBILITY_BOTH];
     }
@@ -89,7 +88,7 @@ class Mage_Catalog_Model_Product_Visibility extends \Maho\DataObject
      *
      * @return array
      */
-    public function getVisibleInSiteIds()
+    public static function getVisibleInSiteIds()
     {
         return [self::VISIBILITY_IN_SEARCH, self::VISIBILITY_IN_CATALOG, self::VISIBILITY_BOTH];
     }

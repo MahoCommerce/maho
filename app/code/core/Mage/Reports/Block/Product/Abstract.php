@@ -5,7 +5,7 @@
  *
  * @package    Mage_Reports
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -126,7 +126,8 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
                     ->setCurPage(1);
 
             /* Price data is added to consider item stock status using price index */
-            $this->_collection->addPriceData();
+            $this->_collection->addPriceData()
+                ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds());
 
             $ids = $this->getProductIds();
             if (empty($ids)) {
@@ -138,9 +139,6 @@ abstract class Mage_Reports_Block_Product_Abstract extends Mage_Catalog_Block_Pr
             if ($this-> _useProductIdsOrder && is_array($ids)) {
                 $this->_collection->setSortIds($ids);
             }
-
-            Mage::getSingleton('catalog/product_visibility')
-                ->addVisibleInSiteFilterToCollection($this->_collection);
         }
 
         return $this->_collection;

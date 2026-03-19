@@ -5,7 +5,7 @@
  *
  * @package    Mage_Catalog
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -207,7 +207,7 @@ class Mage_Catalog_Helper_Product_Compare extends Mage_Core_Helper_Url
                 $this->_itemCollection->setVisitorId($this->_logVisitor->getId());
             }
 
-            $this->_productVisibility->addVisibleInSiteFilterToCollection($this->_itemCollection);
+            $this->_itemCollection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds());
 
             /* Price data is added to consider item stock status using price index */
             $this->_itemCollection->addPriceData();
@@ -248,7 +248,7 @@ class Mage_Catalog_Helper_Product_Compare extends Mage_Core_Helper_Url
             /* Price data is added to consider item stock status using price index */
             $collection->addPriceData();
 
-            $this->_productVisibility->addVisibleInSiteFilterToCollection($collection);
+            $collection->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInSiteIds());
 
             $count = $collection->getSize();
         }
