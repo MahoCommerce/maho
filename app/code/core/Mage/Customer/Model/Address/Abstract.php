@@ -326,12 +326,13 @@ class Mage_Customer_Model_Address_Abstract extends Mage_Core_Model_Abstract
      */
     public function getCountryModel()
     {
-        if (!isset(self::$_countryModels[$this->getCountryId()])) {
-            self::$_countryModels[$this->getCountryId()] = Mage::getModel('directory/country')
-                ->load($this->getCountryId());
+        $countryId = (string) $this->getCountryId();
+        if (!isset(self::$_countryModels[$countryId])) {
+            self::$_countryModels[$countryId] = Mage::getModel('directory/country')
+                ->load($countryId);
         }
 
-        return self::$_countryModels[$this->getCountryId()];
+        return self::$_countryModels[$countryId];
     }
 
     /**

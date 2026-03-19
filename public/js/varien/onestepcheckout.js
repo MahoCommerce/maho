@@ -87,9 +87,9 @@ class OneStepCheckout {
      * when saveBilling() populates the shipping methods and one is pre-checked.
      */
     checkPrefilledBilling() {
-        if (!this.billingForm || this.isVirtual) return;
+        if (!this.billingForm) return;
 
-        if (this.hasMinimumAddressData('billing')) {
+        if (this.isVirtual || this.hasMinimumAddressData('billing')) {
             this.saveBilling();
         }
     }
@@ -233,30 +233,34 @@ class OneStepCheckout {
     }
 
     saveBilling() {
-        if (!this.billingForm || this.isVirtual) return;
+        if (!this.billingForm) return;
 
-        // Check if using billing address for shipping or separate shipping address
-        const useForShippingYes = document.getElementById('billing:use_for_shipping_yes');
-        const useForShipping = useForShippingYes ? useForShippingYes.checked : true;
+        if (!this.isVirtual) {
+            // Check if using billing address for shipping or separate shipping address
+            const useForShippingYes = document.getElementById('billing:use_for_shipping_yes');
+            const useForShipping = useForShippingYes ? useForShippingYes.checked : true;
 
-        // Determine which form to check for shipping fields
-        let fieldPrefix;
-        if (useForShipping) {
-            fieldPrefix = 'billing';
-        } else {
-            // Using separate shipping address - don't save billing for shipping estimate
-            fieldPrefix = 'shipping';
-            if (!this.shippingForm) return;
-        }
+            // Determine which form to check for shipping fields
+            let fieldPrefix;
+            if (useForShipping) {
+                fieldPrefix = 'billing';
+            } else {
+                // Using separate shipping address - don't save billing for shipping estimate
+                fieldPrefix = 'shipping';
+                if (!this.shippingForm) return;
+            }
 
-        if (!this.hasMinimumAddressData(fieldPrefix)) {
-            return;
+            if (!this.hasMinimumAddressData(fieldPrefix)) {
+                return;
+            }
         }
 
         const formData = new FormData(this.billingForm);
 
         // Show loading immediately for better UX
-        this.setLoading('onestep-shipping-method', true);
+        if (!this.isVirtual) {
+            this.setLoading('onestep-shipping-method', true);
+        }
 
         this.queueRequest(async () => {
             try {
@@ -266,13 +270,15 @@ class OneStepCheckout {
                     loaderArea: false
                 });
 
-                if (result.success && result.update_section) {
+                if (!this.isVirtual && result.success && result.update_section) {
                     this.updateShippingMethods(result.update_section.html);
                 }
             } catch (error) {
                 // Silently handle errors during auto-save
             } finally {
-                this.setLoading('onestep-shipping-method', false);
+                if (!this.isVirtual) {
+                    this.setLoading('onestep-shipping-method', false);
+                }
             }
         });
     }
@@ -496,14 +502,14 @@ class OneStepCheckout {
      * Refresh shipping methods, payment methods, and review after discount changes
      */
     refreshAfterDiscount() {
+        // Save billing to recalculate totals
+        this.saveBilling();
+
         if (this.isVirtual) {
             // Virtual products: just refresh review
             this.loadReview();
             return;
         }
-
-        // Physical products: refresh shipping methods first
-        this.saveBilling();
 
         // Then refresh payment and review (saveShippingMethod includes loadReview)
         const selectedShipping = document.querySelector('input[name="shipping_method"]:checked');
@@ -627,6 +633,24 @@ class OneStepCheckout {
             // Only proceed if all validations passed
             if (!isValid) {
                 return false;
+            }
+
+            // For virtual orders, save billing address to quote before placing order.
+            // This ensures address data is persisted even if the debounced
+            // auto-save hasn't fired yet (e.g. user filled form and clicked Place Order quickly).
+            // Non-virtual orders already have billing saved via estimateBilling during shipping estimation.
+            if (self.isVirtual && self.billingForm) {
+                const formData = new FormData(self.billingForm);
+                mahoFetch(self.urls.saveBilling, {
+                    method: 'POST',
+                    body: formData,
+                    loaderArea: false
+                }).then(() => {
+                    originalSave();
+                }).catch(() => {
+                    originalSave();
+                });
+                return;
             }
 
             // Call original save
