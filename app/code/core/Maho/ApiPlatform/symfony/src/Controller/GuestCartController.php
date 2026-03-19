@@ -132,7 +132,7 @@ class GuestCartController extends AbstractController
             }
 
             // Convert flat options to structured format when grouped/bundle/downloadable params are present
-            if (!empty($data['super_group']) || !empty($data['bundle_option']) || !empty($data['links'])) {
+            if (!empty($data['super_group']) || !empty($data['bundle_option']) || !empty($data['links']) || !empty($data['options_files'])) {
                 $structured = [];
                 if (!empty($options)) {
                     $structured['options'] = $options;
@@ -154,6 +154,10 @@ class GuestCartController extends AbstractController
                     $structured['bundle_option_qty'] = $data['bundle_option_qty'];
                 }
 
+
+                if (!empty($data['options_files'])) {
+                    $structured['options_files'] = $data['options_files'];
+                }
                 $options = $structured;
             }
 

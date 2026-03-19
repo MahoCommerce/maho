@@ -213,7 +213,63 @@ class CartService
         }
 
         \Mage::log("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
+        // Ensure product has its custom options loaded
+        // (has_options flag may not be set for API-created products)
+        if (empty($product->getOptions())) {
+            $optionsCollection = $product->getProductOptionsCollection();
+            if ($optionsCollection->count() > 0) {
+                foreach ($optionsCollection as $opt) {
+                    $opt->setProduct($product);
+                    $product->addOption($opt);
+                }
+            }
+        }
 
+        // Convert flat date/datetime values to the array format Magento expects
+        $currentOptions = $buyRequest->getData('options') ?: [];
+        if (!empty($currentOptions)) {
+            foreach ($product->getOptions() as $opt) {
+                $optId = (string) $opt->getId();
+                if (!isset($currentOptions[$optId])) {
+                    continue;
+                }
+                $val = $currentOptions[$optId];
+                if (is_string($val) && in_array($opt->getType(), [
+                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE,
+                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME,
+                    \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME,
+                ], true)) {
+                    if ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE) {
+                        $currentOptions[$optId] = ['date' => $val];
+                    } elseif ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_DATE_TIME) {
+                        $currentOptions[$optId] = ['datetime' => $val];
+                    } elseif ($opt->getType() === \Mage_Catalog_Model_Product_Option::OPTION_TYPE_TIME) {
+                        $currentOptions[$optId] = ['time' => $val];
+                    }
+                }
+            }
+            $buyRequest->setData('options', $currentOptions);
+        }
+
+        // Inject API file uploads into buyRequest (prevents forgery — uses DataObject pattern)
+        if (!empty($options['options_files'])) {
+            $optionsFiles = [];
+            foreach ($options['options_files'] as $optionId => $fileData) {
+                $optionId = (int) $optionId;
+                // Verify this option ID belongs to a file-type option on this product
+                $productOption = $product->getOptionById((string) $optionId);
+                if (!$productOption || $productOption->getType() !== \Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
+                    throw new \RuntimeException("Option ID {$optionId} is not a valid file-type option for this product");
+                }
+                if (!is_array($fileData) || empty($fileData['base64_encoded_data']) || empty($fileData['name'])) {
+                    throw new \RuntimeException("File option {$optionId} requires 'name' and 'base64_encoded_data'");
+                }
+                $optionsFiles[$optionId] = $fileData;
+            }
+            if (!empty($optionsFiles)) {
+                $buyRequest->setData('options_files', $optionsFiles);
+            }
+        }
         $result = $quote->addProduct($product, $buyRequest);
 
         // addProduct returns a string error message on failure

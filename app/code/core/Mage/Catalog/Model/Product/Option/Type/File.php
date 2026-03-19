@@ -16,6 +16,17 @@
 class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Product_Option_Type_Default
 {
     /**
+     * MIME types that indicate executable/script content — always rejected for file uploads
+     */
+    protected const DANGEROUS_MIME_TYPES = [
+        'text/x-php', 'application/x-php', 'application/x-httpd-php',
+        'text/x-python', 'text/x-perl', 'text/x-shellscript',
+        'application/x-executable', 'application/x-msdos-program',
+        'application/x-msdownload', 'application/x-dosexec',
+        'application/java-archive', 'application/x-java-applet',
+    ];
+
+    /**
      * Url for custom option download controller
      * @var string
      */
@@ -130,7 +141,18 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
             return $this;
         }
 
-        // Process new uploaded file
+        // Check for API file upload — validated outside try/catch so security errors propagate
+        $buyRequest = $this->getRequest();
+        $apiFileData = $buyRequest->getData('options_files/' . $option->getId());
+        if (is_array($apiFileData) && !empty($apiFileData['base64_encoded_data'])) {
+            if ($option->getType() !== Mage_Catalog_Model_Product_Option::OPTION_TYPE_FILE) {
+                Mage::throwException(Mage::helper('catalog')->__('File upload is only allowed for file-type options.'));
+            }
+            $this->_validateApiFileData($apiFileData);
+            return $this;
+        }
+
+        // Process new uploaded file ($_FILES)
         try {
             $this->_validateUploadedFile();
         } catch (Exception $e) {
@@ -807,6 +829,206 @@ class Mage_Catalog_Model_Product_Option_Type_File extends Mage_Catalog_Model_Pro
         return ini_parse_quantity($_bytes);
     }
 
+
+    /**
+     * Validate file data submitted via API (base64-encoded)
+     *
+     * Security checks per CVE-2025-54263 (PolyShell) defense:
+     * 1. Option type must be 'file' in DB (verified by caller)
+     * 2. Base64 decode with strict mode
+     * 3. Forbidden extensions checked FIRST
+     * 4. Allowed extensions check
+     * 5. finfo_buffer() content-type validation (polyshell defense)
+     * 6. Image content verification via getimagesizefromstring()
+     * 7. File size check
+     * 8. Temp file in var/api/option_files/ (non-web-executable)
+     * 9. Image dimension validation
+     * 10. Move to final destination
+     *
+     * @param array $fileData ['name' => string, 'base64_encoded_data' => string]
+     * @return $this
+     * @throws Mage_Core_Exception
+     */
+    protected function _validateApiFileData(array $fileData)
+    {
+        $option = $this->getOption();
+        $fileName = $fileData['name'] ?? '';
+
+        if (empty($fileName) || empty($fileData['base64_encoded_data'])) {
+            Mage::throwException(Mage::helper('catalog')->__('File name and base64 data are required.'));
+        }
+
+        // 2. Pre-check base64 string length before decoding (DoS defense)
+        // base64 expands ~33%, so max decoded size * 1.34 gives max encoded length
+        $maxEncodedLength = (int) ($this->_getUploadMaxFilesize() * 1.34);
+        if (strlen($fileData['base64_encoded_data']) > $maxEncodedLength) {
+            Mage::throwException(
+                Mage::helper('catalog')->__('The file you uploaded is larger than %s Megabytes allowed by server', $this->_bytesToMbytes($this->_getUploadMaxFilesize())),
+            );
+        }
+
+        // Decode base64 with strict mode
+        $decodedData = base64_decode($fileData['base64_encoded_data'], true);
+        if ($decodedData === false) {
+            Mage::throwException(Mage::helper('catalog')->__('Invalid base64-encoded file data.'));
+        }
+
+        $safeFileName = Mage_Core_Model_File_Uploader::getCorrectFileName($fileName);
+        $fileExtension = strtolower(pathinfo($safeFileName, PATHINFO_EXTENSION));
+
+        // Reject files without extensions
+        if (empty($fileExtension)) {
+            Mage::throwException(Mage::helper('catalog')->__('Files without extensions are not allowed.'));
+        }
+
+        // 3. Forbidden extensions FIRST (security)
+        $_forbidden = $this->_parseExtensionsString(
+            Mage::getStoreConfig('catalog/custom_options/forbidden_extensions'),
+        );
+        if ($_forbidden !== null && in_array($fileExtension, array_map('strtolower', $_forbidden))) {
+            Mage::throwException(
+                Mage::helper('catalog')->__('The following file extensions are not allowed for security reasons: %s', $fileExtension),
+            );
+        }
+
+        // 4. Allowed extensions check
+        $_allowed = $this->_parseExtensionsString($option->getFileExtension());
+        if ($_allowed !== null) {
+            if ($_forbidden !== null) {
+                $forbiddenFound = array_intersect(array_map('strtolower', $_allowed), array_map('strtolower', $_forbidden));
+                if (!empty($forbiddenFound)) {
+                    Mage::throwException(Mage::helper('catalog')->__(
+                        'The following file extensions are not allowed for security reasons: %s',
+                        implode(', ', $forbiddenFound),
+                    ));
+                }
+            }
+            if (!in_array($fileExtension, array_map('strtolower', $_allowed))) {
+                Mage::throwException(
+                    Mage::helper('catalog')->__('The following file extensions are not allowed for security reasons: %s', $fileExtension),
+                );
+            }
+        }
+
+        // 5. finfo_buffer() content validation — polyshell defense (CVE-2025-54263)
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $detectedMime = $finfo->buffer($decodedData);
+
+        if (in_array($detectedMime, self::DANGEROUS_MIME_TYPES)) {
+            Mage::throwException(
+                Mage::helper('catalog')->__('The file content type "%s" is not allowed for security reasons.', $detectedMime),
+            );
+        }
+
+        // 6. For images: verify actual image content and re-render to strip embedded payloads
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff', 'tif'];
+        $imageInfo = null;
+        if (in_array($fileExtension, $imageExtensions)) {
+            $imageInfo = getimagesizefromstring($decodedData);
+            if ($imageInfo === false) {
+                Mage::throwException(
+                    Mage::helper('catalog')->__('The file claims to be an image but does not contain valid image data.'),
+                );
+            }
+            // Re-render image via GD to strip any embedded malicious payloads (polyglot defense)
+            $srcImage = imagecreatefromstring($decodedData);
+            if ($srcImage !== false) {
+                ob_start();
+                match ($fileExtension) {
+                    'png' => imagepng($srcImage),
+                    'gif' => imagegif($srcImage),
+                    'webp' => imagewebp($srcImage),
+                    default => imagejpeg($srcImage, null, 90),
+                };
+                $reRendered = ob_get_clean();
+                imagedestroy($srcImage);
+                if (!empty($reRendered)) {
+                    $decodedData = $reRendered;
+                }
+            }
+        }
+
+        // 7. File size check
+        $fileSize = strlen($decodedData);
+        $maxSize = $this->_getUploadMaxFilesize();
+        if ($fileSize > $maxSize) {
+            Mage::throwException(
+                Mage::helper('catalog')->__('The file you uploaded is larger than %s Megabytes allowed by server', $this->_bytesToMbytes($maxSize)),
+            );
+        }
+
+        // 8. Write temp file to var/api/option_files/ (non-web-executable directory)
+        $tmpDir = Mage::getBaseDir('var') . DS . 'api' . DS . 'option_files';
+        $io = new \Maho\Io\File();
+        if (!is_dir($tmpDir)) {
+            $io->mkdir($tmpDir, 0777, true);
+        }
+
+        $tmpFileName = uniqid('api_opt_', true) . '.' . $fileExtension;
+        $tmpFilePath = $tmpDir . DS . $tmpFileName;
+        if (file_put_contents($tmpFilePath, $decodedData) === false) {
+            Mage::throwException(Mage::helper('catalog')->__('Failed to write temporary file.'));
+        }
+
+        try {
+            // 9. Image dimension validation if limits set
+            $_width = 0;
+            $_height = 0;
+            if ($imageInfo) {
+                $_width = $imageInfo[0];
+                $_height = $imageInfo[1];
+
+                if ($option->getImageSizeX() > 0 && $_width > $option->getImageSizeX()) {
+                    Mage::throwException(
+                        Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY()),
+                    );
+                }
+                if ($option->getImageSizeY() > 0 && $_height > $option->getImageSizeY()) {
+                    Mage::throwException(
+                        Mage::helper('catalog')->__("Maximum allowed image size for '%s' is %sx%s px.", $option->getTitle(), $option->getImageSizeX(), $option->getImageSizeY()),
+                    );
+                }
+            }
+
+            // 10. Move to final destination (same path logic as $_FILES path)
+            $this->_initFilesystem();
+
+            $dispersion = Mage_Core_Model_File_Uploader::getDispretionPath($safeFileName);
+            $fileHash = md5($decodedData);
+            $filePath = $dispersion . DS . $fileHash . '.' . $fileExtension;
+            $fileFullPath = $this->getQuoteTargetDir() . $filePath;
+
+            // Ensure dispersion directory exists
+            $dispersionDir = $this->getQuoteTargetDir() . $dispersion;
+            if (!is_dir($dispersionDir)) {
+                $io->mkdir($dispersionDir, 0777, true);
+            }
+
+            if (!copy($tmpFilePath, $fileFullPath)) {
+                Mage::throwException(Mage::helper('catalog')->__('Failed to save uploaded file.'));
+            }
+
+            // 11. Set user value with same metadata format as regular uploads
+            $this->setUserValue([
+                'type'          => $detectedMime,
+                'title'         => $fileName,
+                'quote_path'    => $this->getQuoteTargetDir(true) . $filePath,
+                'order_path'    => $this->getOrderTargetDir(true) . $filePath,
+                'fullpath'      => $fileFullPath,
+                'size'          => $fileSize,
+                'width'         => $_width,
+                'height'        => $_height,
+                'secret_key'    => substr($fileHash, 0, 20),
+            ]);
+        } finally {
+            // 12. Cleanup temp file
+            if (file_exists($tmpFilePath)) {
+                unlink($tmpFilePath);
+            }
+        }
+
+        return $this;
+    }
     protected function _bytesToMbytes(int $bytes): int
     {
         return (int) ($bytes / (1024 * 1024));
