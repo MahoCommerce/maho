@@ -709,9 +709,14 @@ class OneStepCheckout {
         document.querySelectorAll('.onestep-checkout .validation-failed.custom-error').forEach(el => el.classList.remove('validation-failed', 'custom-error'));
     }
 
-    showError(message, element) {
+    showError(message, element = null) {
         if (Array.isArray(message)) {
             message = message.join('<br>');
+        }
+
+        if (!element) {
+            alert(message);
+            return;
         }
 
         const errorDiv = document.createElement('div');
