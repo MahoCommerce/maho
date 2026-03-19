@@ -23,13 +23,21 @@ class MahoPaypalStandardCheckout {
     async loadSdkAndMount() {
         if (this._mounted) return;
 
+        const container = document.getElementById(this.containerId);
+        let loadingMsg;
+        if (container) {
+            loadingMsg = document.createElement('div');
+            loadingMsg.className = 'paypal-loading';
+            loadingMsg.textContent = 'Loading PayPal…';
+            container.prepend(loadingMsg);
+        }
+
         try {
-            showLoader(this.formDiv);
             const sdk = await MahoPaypalSdk.init(this.sdkUrl, this.clientTokenUrl);
-            hideLoader();
+            loadingMsg?.remove();
             await this._renderButton(sdk);
         } catch (err) {
-            hideLoader();
+            loadingMsg?.remove();
             this.handleError(err);
         }
     }
@@ -114,17 +122,17 @@ class MahoPaypalStandardCheckout {
 }
 
 document.addEventListener('payment-method:switched', function(e) {
+    const isPaypalStandard = e.target.dataset.methodCode === 'paypal_standard_checkout';
+    document.body.classList.toggle('paypal-standard-active', isPaypalStandard);
+
+    if (!isPaypalStandard) return;
+
     const formDiv = e.target;
-    if (formDiv.dataset.methodCode !== 'paypal_standard_checkout' || formDiv._paypalCheckout) return;
+    if (formDiv._paypalCheckout) return;
 
     const checkout = new MahoPaypalStandardCheckout(formDiv);
     formDiv._paypalCheckout = checkout;
     checkout.loadSdkAndMount();
-}, true);
-
-document.addEventListener('payment-method:switched', function(e) {
-    const isPaypalStandard = e.target.dataset.methodCode === 'paypal_standard_checkout';
-    document.body.classList.toggle('paypal-standard-active', isPaypalStandard);
 }, true);
 
 document.addEventListener('payment-method:switched-off', function(e) {

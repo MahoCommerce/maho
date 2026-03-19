@@ -44,6 +44,13 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
         $payment = $this->getInfoInstance();
         $captureId = $payment->getAdditionalInformation('paypal_capture_id');
         $authId = $payment->getAdditionalInformation('paypal_authorization_id');
+        $paypalOrderId = $payment->getAdditionalInformation('paypal_order_id');
+
+        if (!$captureId && !$authId && !$paypalOrderId) {
+            Mage::throwException(
+                Mage::helper('maho_paypal')->__('Please complete the PayPal payment before placing the order.'),
+            );
+        }
 
         if ($captureId || $authId) {
             if ($captureId) {
