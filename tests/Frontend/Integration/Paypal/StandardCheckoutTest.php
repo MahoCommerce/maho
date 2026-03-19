@@ -38,15 +38,13 @@ it('can instantiate config model as rewrite', function () {
     expect($config)->toBeInstanceOf(Maho_Paypal_Model_Config::class);
 });
 
-it('provides JS SDK URL with correct parameters', function () {
+it('provides JS SDK URL for correct environment', function () {
     $config = Mage::getModel('paypal/config');
     Mage::app()->getStore()->setConfig('maho_paypal/credentials/sandbox', '1');
-    Mage::app()->getStore()->setConfig('maho_paypal/credentials/client_id', 'test-client-id');
 
-    $url = $config->getJsSdkUrl(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
+    $url = $config->getJsSdkUrl();
     expect($url)->toContain('sandbox.paypal.com');
-    expect($url)->toContain('client-id=test-client-id');
-    expect($url)->toContain('components=buttons');
+    expect($url)->toBe(Maho_Paypal_Model_Config::JS_SDK_URL_SANDBOX);
 });
 
 it('reports no credentials when not configured', function () {

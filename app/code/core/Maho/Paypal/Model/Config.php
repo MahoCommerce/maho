@@ -99,7 +99,7 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
 
     public function getCurrencyCode(?int $storeId = null): string
     {
-        return Mage::app()->getStore($storeId)->getCurrentCurrencyCode();
+        return Mage::app()->getStore($storeId)->getBaseCurrencyCode();
     }
 
     public function hasCredentials(?int $storeId = null): bool

@@ -27,9 +27,9 @@ it('has correct capability flags', function () {
     expect($method->canUseCheckout())->toBeTrue();
 });
 
-it('extends Cc base class for card field support', function () {
+it('extends shared PayPal abstract base class', function () {
     $method = Mage::getModel('maho_paypal/method_advancedCheckout');
-    expect($method)->toBeInstanceOf(Mage_Payment_Model_Method_Cc::class);
+    expect($method)->toBeInstanceOf(Maho_Paypal_Model_Method_Abstract::class);
 });
 
 it('skips CC validation since card data never touches server', function () {
@@ -38,11 +38,11 @@ it('skips CC validation since card data never touches server', function () {
     expect($result)->toBeInstanceOf(Maho_Paypal_Model_Method_AdvancedCheckout::class);
 });
 
-it('provides JS SDK URL with card-fields component', function () {
+it('provides JS SDK URL for correct environment', function () {
     $config = Mage::getModel('paypal/config');
     Mage::app()->getStore()->setConfig('maho_paypal/credentials/sandbox', '1');
-    Mage::app()->getStore()->setConfig('maho_paypal/credentials/client_id', 'test-client-id');
 
-    $url = $config->getJsSdkUrl(Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT);
-    expect($url)->toContain('components=card-fields');
+    $url = $config->getJsSdkUrl();
+    expect($url)->toContain('sandbox.paypal.com');
+    expect($url)->toBe(Maho_Paypal_Model_Config::JS_SDK_URL_SANDBOX);
 });

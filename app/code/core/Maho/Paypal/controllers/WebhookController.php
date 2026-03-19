@@ -66,8 +66,7 @@ class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
         ];
 
         foreach ($headerKeys as $key) {
-            $serverKey = 'HTTP_' . str_replace('-', '_', $key);
-            $headers[$key] = $_SERVER[$serverKey] ?? $this->getRequest()->getHeader($key) ?: '';
+            $headers[$key] = $this->getRequest()->getHeader($key) ?: '';
         }
 
         return $headers;

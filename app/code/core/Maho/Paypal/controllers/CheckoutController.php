@@ -153,12 +153,12 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
-            $paypalOrderId = $this->getRequest()->getParam('paypal_order_id');
+            $quote = Mage::getSingleton('checkout/session')->getQuote();
+
+            $paypalOrderId = $quote->getPayment()->getAdditionalInformation('paypal_order_id');
             if (!$paypalOrderId) {
                 Mage::throwException(Mage::helper('maho_paypal')->__('Missing PayPal order ID.'));
             }
-
-            $quote = Mage::getSingleton('checkout/session')->getQuote();
             $methodCode = $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
 
             /** @var Maho_Paypal_Model_Config $config */

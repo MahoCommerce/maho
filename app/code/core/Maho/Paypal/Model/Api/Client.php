@@ -249,9 +249,14 @@ class Maho_Paypal_Model_Api_Client
 
     public function verifyWebhookSignature(array $headers, string $body, string $webhookId): bool
     {
+        $certUrl = $headers['PAYPAL-CERT-URL'] ?? '';
+        if (!preg_match('#^https://api(-m)?\.(?:sandbox\.)?paypal\.com/#', $certUrl)) {
+            return false;
+        }
+
         $verifyBody = [
             'auth_algo' => $headers['PAYPAL-AUTH-ALGO'] ?? '',
-            'cert_url' => $headers['PAYPAL-CERT-URL'] ?? '',
+            'cert_url' => $certUrl,
             'transmission_id' => $headers['PAYPAL-TRANSMISSION-ID'] ?? '',
             'transmission_sig' => $headers['PAYPAL-TRANSMISSION-SIG'] ?? '',
             'transmission_time' => $headers['PAYPAL-TRANSMISSION-TIME'] ?? '',
