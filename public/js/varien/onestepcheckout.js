@@ -645,10 +645,14 @@ class OneStepCheckout {
                     method: 'POST',
                     body: formData,
                     loaderArea: false
-                }).then(() => {
+                }).then((result) => {
+                    if (result.error) {
+                        self.showError(result.message || 'Failed to save billing address');
+                        return;
+                    }
                     originalSave();
                 }).catch(() => {
-                    originalSave();
+                    self.showError('Failed to save billing address. Please try again.');
                 });
                 return;
             }
