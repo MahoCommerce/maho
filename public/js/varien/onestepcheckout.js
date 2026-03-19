@@ -601,15 +601,18 @@ class OneStepCheckout {
             if (!self.isVirtual) {
                 const shippingMethodSelected = document.querySelector('input[name="shipping_method"]:checked');
                 if (!shippingMethodSelected) {
-                    self.showError(self.config.messages.selectShippingMethodError);
+                    alert(self.config.messages.selectShippingMethodError);
                     isValid = false;
                 }
             }
 
             // Validate payment method is selected
-            const paymentMethodSelected = document.querySelector('input[name="payment[method]"]:checked');
-            if (!paymentMethodSelected) {
-                self.showError(self.config.messages.selectPaymentMethodError);
+            const paymentMethods = document.querySelectorAll('input[name="payment[method]"]');
+            if (paymentMethods.length === 0) {
+                alert(self.config.messages.noPaymentMethodsError);
+                isValid = false;
+            } else if (![...paymentMethods].some(method => method.checked)) {
+                alert(self.config.messages.selectPaymentMethodError);
                 isValid = false;
             }
 
@@ -647,12 +650,12 @@ class OneStepCheckout {
                     loaderArea: false
                 }).then((result) => {
                     if (result.error) {
-                        self.showError(result.message || self.config.messages.saveBillingError);
+                        alert(result.message || self.config.messages.saveBillingError);
                         return;
                     }
                     originalSave();
                 }).catch(() => {
-                    self.showError(self.config.messages.saveBillingError);
+                    alert(self.config.messages.saveBillingError);
                 });
                 return;
             }
@@ -706,31 +709,19 @@ class OneStepCheckout {
         document.querySelectorAll('.onestep-checkout .validation-failed.custom-error').forEach(el => el.classList.remove('validation-failed', 'custom-error'));
     }
 
-    showError(message, element = null) {
+    showError(message, element) {
         if (Array.isArray(message)) {
             message = message.join('<br>');
         }
 
-        // Create error message element using standard validation-advice class
         const errorDiv = document.createElement('div');
         errorDiv.className = 'validation-advice custom-error';
         errorDiv.innerHTML = message;
 
-        // If element provided, show error near it
-        if (element) {
-            element.classList.add('validation-failed', 'custom-error');
-            // Find the closest container for this specific element (not the whole section)
-            const parent = element.closest('li') || element.closest('.checkbox') || element.closest('label')?.parentElement || element.parentElement;
-            if (parent) {
-                // Insert after the parent element
-                parent.insertAdjacentElement('afterend', errorDiv);
-            }
-        } else {
-            // Show at top of checkout
-            const checkout = document.getElementById('onestep-checkout');
-            if (checkout) {
-                checkout.insertBefore(errorDiv, checkout.firstChild);
-            }
+        element.classList.add('validation-failed', 'custom-error');
+        const parent = element.closest('li') || element.closest('.checkbox') || element.closest('label')?.parentElement || element.parentElement;
+        if (parent) {
+            parent.insertAdjacentElement('afterend', errorDiv);
         }
     }
 
@@ -756,7 +747,7 @@ class OneStepCheckout {
      */
     setStepResponse(response) {
         if (response.error) {
-            this.showError(response.message || response.error);
+            alert(response.message || response.error);
             return false;
         }
 
