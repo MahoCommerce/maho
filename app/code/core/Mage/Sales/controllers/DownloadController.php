@@ -114,18 +114,38 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
             return;
         }
 
-        // Verify the quote belongs to the current customer or session
+        // Verify access: session-based (logged-in customer or checkout session)
+        // OR secret key validation (for admin view or headless/API flows without frontend sessions)
         $quoteItem = Mage::getModel('sales/quote_item')->load($option->getItemId());
         $quote = Mage::getModel('sales/quote')->load($quoteItem->getQuoteId());
         $customerSession = Mage::getSingleton('customer/session');
         $checkoutQuoteId = Mage::getSingleton('checkout/session')->getQuoteId();
 
+        $hasSessionAccess = false;
         if ($quote->getCustomerId()) {
-            if (!$customerSession->isLoggedIn() || $quote->getCustomerId() != $customerSession->getCustomerId()) {
-                $this->_forward('noRoute');
-                return;
+            $hasSessionAccess = $customerSession->isLoggedIn()
+                && $quote->getCustomerId() == $customerSession->getCustomerId();
+        } else {
+            $hasSessionAccess = $quote->getId() == $checkoutQuoteId;
+        }
+
+        // Fallback: validate secret key from URL against the stored file data.
+        // This allows downloads from admin order view and headless storefronts
+        // where no frontend customer/checkout session exists.
+        $hasKeyAccess = false;
+        if (!$hasSessionAccess) {
+            $requestKey = $this->getRequest()->getParam('key');
+            if ($requestKey) {
+                try {
+                    $info = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
+                    $hasKeyAccess = isset($info['secret_key']) && hash_equals($info['secret_key'], $requestKey);
+                } catch (Exception $e) {
+                    // Invalid data — deny access
+                }
             }
-        } elseif ($quote->getId() != $checkoutQuoteId) {
+        }
+
+        if (!$hasSessionAccess && !$hasKeyAccess) {
             $this->_forward('noRoute');
             return;
         }
