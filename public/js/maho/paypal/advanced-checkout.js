@@ -25,7 +25,6 @@ class MahoPaypalAdvancedCheckout {
         try {
             showLoader(this.formDiv);
             const sdk = await MahoPaypalSdk.init(this.sdkUrl, this.clientTokenUrl);
-            hideLoader();
             await this._renderFields(sdk);
         } catch (err) {
             hideLoader();
@@ -35,6 +34,7 @@ class MahoPaypalAdvancedCheckout {
 
     async _renderFields(sdk) {
         if (this._mounted) return;
+        if (!document.body.contains(this.formDiv)) return;
 
         const paymentMethods = await sdk.findEligibleMethods({ currencyCode: this.currencyCode });
         if (!paymentMethods.isEligible('advanced_cards')) {
@@ -70,6 +70,8 @@ class MahoPaypalAdvancedCheckout {
             expiryContainer.appendChild(expiryField);
             cvvContainer.appendChild(cvvField);
             this._mounted = true;
+            await new Promise(r => setTimeout(r, 500));
+            hideLoader();
         }
     }
 
@@ -148,8 +150,9 @@ class MahoPaypalAdvancedCheckout {
 
 document.addEventListener('payment-method:switched', function(e) {
     const formDiv = e.target;
-    if (formDiv.dataset.methodCode !== 'paypal_advanced_checkout' || formDiv._paypalAdvanced) return;
+    if (formDiv.dataset.methodCode !== 'paypal_advanced_checkout') return;
 
+    // Always re-create on new DOM elements (checkout may re-render payment HTML)
     const checkout = new MahoPaypalAdvancedCheckout(formDiv);
     formDiv._paypalAdvanced = checkout;
     checkout.loadSdkAndMount();
