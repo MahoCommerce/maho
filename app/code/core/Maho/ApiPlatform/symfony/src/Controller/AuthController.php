@@ -1023,7 +1023,7 @@ class AuthController extends AbstractController
             }
 
             $payloadParts = explode('|', $payload);
-            if (count($payloadParts) < 4 || ($payloadParts[3] ?? '') !== 'action=create_account') {
+            if (count($payloadParts) < 4 || $payloadParts[3] !== 'action=create_account') {
                 return new JsonResponse([
                     'error' => 'invalid_token',
                     'message' => 'Invalid token action.',
