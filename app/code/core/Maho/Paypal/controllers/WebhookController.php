@@ -12,7 +12,6 @@ declare(strict_types=1);
 
 class Maho_Paypal_WebhookController extends Mage_Core_Controller_Front_Action
 {
-
     public function indexAction(): void
     {
         if (!$this->getRequest()->isPost()) {
