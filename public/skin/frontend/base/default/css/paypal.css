@@ -1,12 +1,6 @@
+.paypal-button-container { min-height: 55px; }
 .paypal-button-container paypal-button { display: block; width: 100%; }
 body.paypal-standard-active .btn-checkout { display: none !important; }
-
-.paypal-loading {
-    padding: 12px;
-    text-align: center;
-    color: #666;
-    font-size: 14px;
-}
 
 .paypal-card-field { height: 3rem; margin-bottom: 10px; }
 .paypal-card-row { display: flex; gap: 10px; }

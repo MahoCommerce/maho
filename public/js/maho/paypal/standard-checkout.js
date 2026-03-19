@@ -24,26 +24,22 @@ class MahoPaypalStandardCheckout {
         if (this._mounted) return;
 
         const container = document.getElementById(this.containerId);
-        let loadingMsg;
-        if (container) {
-            loadingMsg = document.createElement('div');
-            loadingMsg.className = 'paypal-loading';
-            loadingMsg.textContent = 'Loading PayPal…';
-            container.prepend(loadingMsg);
-        }
+        showLoader(container || this.formDiv);
 
         try {
             const sdk = await MahoPaypalSdk.init(this.sdkUrl, this.clientTokenUrl);
-            loadingMsg?.remove();
             await this._renderButton(sdk);
         } catch (err) {
-            loadingMsg?.remove();
+            hideLoader();
             this.handleError(err);
         }
     }
 
     async _renderButton(sdk) {
         if (this._mounted) return;
+
+        // Re-check DOM — the form may have been replaced by checkout re-render
+        if (!document.body.contains(this.formDiv)) return;
 
         const paymentMethods = await sdk.findEligibleMethods({ currencyCode: this.currencyCode });
         if (!paymentMethods.isEligible('paypal')) {
@@ -64,9 +60,11 @@ class MahoPaypalStandardCheckout {
         if (!button) return;
 
         button.removeAttribute('hidden');
+        await new Promise(r => setTimeout(r, 500));
+        hideLoader();
         button.addEventListener('click', () => {
             this._paymentSession.start(
-                { presentationMode: 'auto' },
+                { presentationMode: 'modal' },
                 this.createOrder().then(orderId => ({ orderId })),
             );
         });
@@ -128,8 +126,7 @@ document.addEventListener('payment-method:switched', function(e) {
     if (!isPaypalStandard) return;
 
     const formDiv = e.target;
-    if (formDiv._paypalCheckout) return;
-
+    // Always re-create on new DOM elements (checkout may re-render payment HTML)
     const checkout = new MahoPaypalStandardCheckout(formDiv);
     formDiv._paypalCheckout = checkout;
     checkout.loadSdkAndMount();
