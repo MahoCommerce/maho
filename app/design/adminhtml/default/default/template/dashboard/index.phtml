@@ -22,7 +22,9 @@ function loadChartJs() {
             return;
         }
         const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js';
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js';
+        script.integrity = 'sha512-Y51n9mtKTVBh3Jbx5pZSJNDDMyY+yGe77DGtBPzRlgsf/YLCh13kSZ3JmfHGzYFCmOndraf0sQgfM654b7dJ3w==';
+        script.crossOrigin = 'anonymous';
         script.async = true;
         script.onload = resolve;
         document.head.appendChild(script);
@@ -34,8 +36,14 @@ function initDashboardCharts(container) {
         const canvas = el.querySelector('canvas');
         if (!canvas) return;
 
-        const labels = JSON.parse(el.dataset.chartLabels);
-        const data = JSON.parse(el.dataset.chartData);
+        let labels, data;
+        try {
+            labels = JSON.parse(el.dataset.chartLabels);
+            data = JSON.parse(el.dataset.chartData);
+        } catch (e) {
+            console.error('Dashboard chart: invalid data', e);
+            return;
+        }
 
         if (canvas._chartInstance) canvas._chartInstance.destroy();
         canvas._chartInstance = new Chart(canvas, {
@@ -67,14 +75,14 @@ function changeDiagramsPeriod(periodObj) {
         const el = document.getElementById('<?= $this->getChild('diagrams')->getId() ?>_<?= $tabId ?>_content');
         el.innerHTML = response;
         loadChartJs().then(() => initDashboardCharts(el));
-    });
+    }).catch(e => console.error('Dashboard diagram error:', e));
 <?php endforeach ?>
 
     mahoFetch('<?= $this->getUrl('*/*/ajaxBlock', ['_current' => true, 'block' => 'totals', 'period' => '']) ?>' + periodParam, {
         method: 'POST'
     }).then(response => {
         document.getElementById('dashboard_diagram_totals').outerHTML = response;
-    });
+    }).catch(e => console.error('Dashboard totals error:', e));
 }
 
 function toggleCal(id) {
