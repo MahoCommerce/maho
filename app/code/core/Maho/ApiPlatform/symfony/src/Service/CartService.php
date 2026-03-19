@@ -213,18 +213,6 @@ class CartService
         }
 
         \Mage::log("Product loaded: ID={$product->getId()}, StoreId={$product->getStoreId()}, Price={$product->getPrice()}, FinalPrice={$product->getFinalPrice()}");
-        // Ensure product has its custom options loaded
-        // (has_options flag may not be set for API-created products)
-        if (empty($product->getOptions())) {
-            $optionsCollection = $product->getProductOptionsCollection();
-            if ($optionsCollection->count() > 0) {
-                foreach ($optionsCollection as $opt) {
-                    $opt->setProduct($product);
-                    $product->addOption($opt);
-                }
-            }
-        }
-
         // Convert flat date/datetime values to the array format Magento expects
         $currentOptions = $buyRequest->getData('options') ?: [];
         if (!empty($currentOptions)) {
@@ -890,6 +878,25 @@ class CartService
             }
 
             \Mage::log("PlaceStorefrontOrder - Order created: {$order->getIncrementId()} (ID: {$order->getId()})");
+
+            // Auto-invoice if payment is already captured (e.g. Stripe Elements captures immediately)
+            $payment = $order->getPayment();
+            if ($payment && $payment->getIsTransactionClosed() && $order->canInvoice()) {
+                try {
+                    $invoice = $order->prepareInvoice();
+                    $invoice->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
+                    $invoice->register();
+                    $invoice->getOrder()->setIsInProcess(true);
+                    \Mage::getModel('core/resource_transaction')
+                        ->addObject($invoice)
+                        ->addObject($invoice->getOrder())
+                        ->save();
+                    \Mage::log("PlaceStorefrontOrder - Auto-invoiced: {$order->getIncrementId()}");
+                } catch (\Exception $e) {
+                    \Mage::logException($e);
+                    // Don't fail the order for invoice issues
+                }
+            }
 
             // Generate storefront order token and save origin
             $orderToken = bin2hex(random_bytes(16));

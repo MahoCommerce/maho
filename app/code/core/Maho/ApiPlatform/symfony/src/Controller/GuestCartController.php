@@ -1243,4 +1243,57 @@ class GuestCartController extends AbstractController
         return $fallback;
     }
 
+
+    /**
+     * Download custom option file.
+     * Uses secret_key for authorization (no session required).
+     */
+    #[Route('/api/custom-option-file/{optionId}/{key}', name: 'api_custom_option_file_download', methods: ['GET'])]
+    public function downloadCustomOptionFile(int $optionId, string $key): Response
+    {
+        try {
+            $option = \Mage::getModel('sales/quote_item_option')->load($optionId);
+            if (!$option->getId()) {
+                return new JsonResponse(['error' => 'not_found', 'message' => 'File not found'], Response::HTTP_NOT_FOUND);
+            }
+
+            $value = \Mage::helper('core/unserializeArray')->unserialize($option->getValue());
+            if (!isset($value['secret_key']) || !hash_equals($value['secret_key'], $key)) {
+                return new JsonResponse(['error' => 'forbidden', 'message' => 'Invalid key'], Response::HTTP_FORBIDDEN);
+            }
+
+            // Try order path first, then quote path
+            $filePath = null;
+            foreach (['order_path', 'quote_path'] as $pathKey) {
+                if (!empty($value[$pathKey])) {
+                    $fullPath = \Mage::getBaseDir() . $value[$pathKey];
+                    if (is_file($fullPath) && is_readable($fullPath)) {
+                        $filePath = $fullPath;
+                        break;
+                    }
+                }
+            }
+
+            if (!$filePath) {
+                return new JsonResponse(['error' => 'not_found', 'message' => 'File not found on disk'], Response::HTTP_NOT_FOUND);
+            }
+
+            $mimeType = $value['type'] ?? 'application/octet-stream';
+            $fileName = $value['title'] ?? basename($filePath);
+
+            return new Response(
+                file_get_contents($filePath),
+                Response::HTTP_OK,
+                [
+                    'Content-Type' => $mimeType,
+                    'Content-Disposition' => 'attachment; filename="' . addslashes($fileName) . '"',
+                    'Content-Length' => (string) filesize($filePath),
+                    'Cache-Control' => 'private, max-age=3600',
+                ],
+            );
+        } catch (\Exception $e) {
+            \Mage::logException($e);
+            return new JsonResponse(['error' => 'error', 'message' => 'Download failed'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
 }

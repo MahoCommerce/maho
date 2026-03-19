@@ -115,6 +115,8 @@ final class ProductCustomOptionProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to create option: ' . $e->getMessage());
         }
 
+        $this->syncProductOptionFlags($productId);
+
         // Reload and return
         $option = Mage::getModel('catalog/product_option')->load($option->getId());
         return $this->provider->provide(
@@ -219,6 +221,8 @@ final class ProductCustomOptionProcessor implements ProcessorInterface
             }
         }
 
+        $this->syncProductOptionFlags($productId);
+
         return $this->provider->provide(
             new \ApiPlatform\Metadata\GetCollection(),
             ['productId' => $productId, 'optionId' => $optionId],
@@ -242,6 +246,8 @@ final class ProductCustomOptionProcessor implements ProcessorInterface
         } catch (\Throwable $e) {
             throw new UnprocessableEntityHttpException('Failed to delete option: ' . $e->getMessage());
         }
+
+        $this->syncProductOptionFlags($productId);
 
         return null;
     }
@@ -316,5 +322,35 @@ final class ProductCustomOptionProcessor implements ProcessorInterface
         if (!$user->hasPermission($permission)) {
             throw new AccessDeniedHttpException("Missing permission: {$permission}");
         }
+    }
+
+    /**
+     * Update the product's has_options and required_options flags based on current options.
+     * Must be called after any option create/update/delete.
+     */
+    private function syncProductOptionFlags(int $productId): void
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $read = $resource->getConnection('core_read');
+        $write = $resource->getConnection('core_write');
+        $optionTable = $resource->getTableName('catalog/product_option');
+
+        $hasOptions = (bool) $read->fetchOne(
+            "SELECT COUNT(*) FROM {$optionTable} WHERE product_id = ?",
+            [$productId],
+        );
+        $hasRequired = (bool) $read->fetchOne(
+            "SELECT COUNT(*) FROM {$optionTable} WHERE product_id = ? AND is_require = 1",
+            [$productId],
+        );
+
+        $write->update(
+            $resource->getTableName('catalog/product'),
+            [
+                'has_options' => $hasOptions ? 1 : 0,
+                'required_options' => $hasRequired ? 1 : 0,
+            ],
+            ['entity_id = ?' => $productId],
+        );
     }
 }
