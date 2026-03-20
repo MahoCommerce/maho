@@ -102,6 +102,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $builder = Mage::getModel('maho_paypal/api_orderBuilder');
             $returnUrl = Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
             $cancelUrl = Mage::getUrl('checkout/cart', ['_secure' => true]);
+            $shippingCallbackUrl = Mage::getUrl('paypal/checkout/shippingCallback', ['_secure' => true]);
 
             $orderRequest = $builder->buildFromQuote(
                 $quote,
@@ -111,6 +112,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 vaultPaymentSource: $vaultPaymentSource,
                 vaultPaypalTokenId: $vaultPaypalTokenId,
                 vaultSourceType: $vaultSourceType,
+                shippingCallbackUrl: $shippingCallbackUrl,
             );
 
             /** @var Maho_Paypal_Model_Api_Client $client */
@@ -249,6 +251,145 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
     }
 
+    /**
+     * Server-side callback called directly by PayPal when the buyer changes
+     * their shipping address or selects a shipping option inside the popup.
+     * PayPal POSTs order data and expects updated purchase_units in response.
+     */
+    public function shippingCallbackAction(): void
+    {
+        try {
+            $body = $this->getRequest()->getRawBody();
+            $data = Mage::helper('core')->jsonDecode($body);
+
+            $paypalOrderId = $data['id'] ?? '';
+            $shippingAddress = $data['shipping_address'] ?? [];
+            $selectedOption = $data['selected_shipping_option'] ?? null;
+
+            // Find quote by PayPal order ID
+            $quote = $this->_findQuoteByPaypalOrderId($paypalOrderId);
+            if (!$quote || !$quote->getId() || $quote->isVirtual()) {
+                $this->getResponse()->setHttpResponseCode(422);
+                return;
+            }
+
+            $shippingAddr = $quote->getShippingAddress();
+
+            // Apply address from PayPal (redacted: country, state, city, postal code)
+            if ($shippingAddress) {
+                $shippingAddr->setCountryId($shippingAddress['country_code'] ?? '');
+                $shippingAddr->setRegion($shippingAddress['admin_area_1'] ?? '');
+                $shippingAddr->setCity($shippingAddress['admin_area_2'] ?? '');
+                $shippingAddr->setPostcode($shippingAddress['postal_code'] ?? '');
+            }
+
+            $shippingAddr->setCollectShippingRates(true)->collectShippingRates();
+            $rates = $shippingAddr->getAllShippingRates();
+
+            if (count($rates) === 0) {
+                $this->getResponse()->setHttpResponseCode(422);
+                return;
+            }
+
+            // If buyer selected a specific option, use it; otherwise select the first
+            $selectedCode = $selectedOption['id'] ?? null;
+            $validCodes = array_map(fn($r) => $r->getCode(), $rates);
+            if ($selectedCode && in_array($selectedCode, $validCodes)) {
+                $shippingAddr->setShippingMethod($selectedCode);
+            } else {
+                $shippingAddr->setShippingMethod($rates[0]->getCode());
+            }
+
+            $quote->collectTotals();
+            $quote->save();
+
+            // Build response in PayPal's expected format
+            $currency = $quote->getBaseCurrencyCode();
+
+            /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
+            $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+            $breakdown = $builder->buildBreakdown($quote, $currency);
+
+            $amount = [
+                'currency_code' => $currency,
+                'value' => $this->_formatAmount((float) $quote->getBaseGrandTotal()),
+            ];
+            if ($breakdown !== null) {
+                $amount['breakdown'] = $breakdown;
+            }
+
+            $shippingOptions = [];
+            $currentMethod = $shippingAddr->getShippingMethod();
+            foreach ($rates as $rate) {
+                $shippingOptions[] = [
+                    'id' => $rate->getCode(),
+                    'label' => trim($rate->getCarrierTitle() . ' - ' . $rate->getMethodTitle(), ' -'),
+                    'type' => 'SHIPPING',
+                    'selected' => $rate->getCode() === $currentMethod,
+                    'amount' => [
+                        'currency_code' => $currency,
+                        'value' => $this->_formatAmount((float) $rate->getPrice()),
+                    ],
+                ];
+            }
+
+            $response = [
+                'id' => $paypalOrderId,
+                'purchase_units' => [
+                    [
+                        'reference_id' => 'default',
+                        'amount' => $amount,
+                        'shipping' => [
+                            'options' => $shippingOptions,
+                        ],
+                    ],
+                ],
+            ];
+
+            $this->getResponse()->setHeader('Content-Type', 'application/json');
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
+        } catch (\Throwable $e) {
+            Mage::logException($e);
+            $this->getResponse()->setHttpResponseCode(422);
+        }
+    }
+
+    /**
+     * Find quote by PayPal order ID stored in payment additional information
+     */
+    protected function _findQuoteByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Quote
+    {
+        if (!$paypalOrderId) {
+            return null;
+        }
+
+        // First try session quote
+        $sessionQuote = Mage::getSingleton('checkout/session')->getQuote();
+        if ($sessionQuote->getPayment()->getAdditionalInformation('paypal_order_id') === $paypalOrderId) {
+            return $sessionQuote;
+        }
+
+        // Fallback: search by payment additional info (PayPal callbacks have no session)
+        /** @var Mage_Sales_Model_Resource_Quote_Payment_Collection $payments */
+        $payments = Mage::getResourceModel('sales/quote_payment_collection');
+        $payments->addFieldToFilter('additional_information', ['like' => '%' . $paypalOrderId . '%']);
+        $payments->setPageSize(1);
+
+        $payment = $payments->getFirstItem();
+        if (!$payment->getId()) {
+            return null;
+        }
+
+        /** @var Mage_Sales_Model_Quote $quote */
+        $quote = Mage::getModel('sales/quote')->load($payment->getQuoteId());
+        return $quote->getId() ? $quote : null;
+    }
+
+    protected function _formatAmount(float $amount): string
+    {
+        return number_format(round($amount, 2), 2, '.', '');
+    }
+
     protected function _importTransactionIds(array $paypalResult, Mage_Sales_Model_Quote_Payment $payment, string $intent): void
     {
         $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
@@ -305,13 +446,17 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
         if (!$quote->isVirtual()) {
             $shippingAddr = $quote->getShippingAddress();
+            $previousMethod = $shippingAddr->getShippingMethod();
             $shippingAddr->addData($addressData);
             $shippingAddr->setSameAsBilling(1);
             $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
 
-            // Auto-select first available shipping method
             $rates = $shippingAddr->getAllShippingRates();
-            if (count($rates) > 0) {
+            $availableCodes = array_map(fn($r) => $r->getCode(), $rates);
+
+            if ($previousMethod && in_array($previousMethod, $availableCodes)) {
+                $shippingAddr->setShippingMethod($previousMethod);
+            } elseif (count($rates) > 0) {
                 $shippingAddr->setShippingMethod($rates[0]->getCode());
             }
             $shippingAddr->save();

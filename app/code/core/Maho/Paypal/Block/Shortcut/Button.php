@@ -105,6 +105,7 @@ class Maho_Paypal_Block_Shortcut_Button extends Mage_Core_Block_Template
         return Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
     }
 
+
     protected function _getConfig(): Maho_Paypal_Model_Config
     {
         $model = Mage::getModel('paypal/config');

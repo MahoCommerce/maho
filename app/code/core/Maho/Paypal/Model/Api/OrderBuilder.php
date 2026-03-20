@@ -23,6 +23,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
         ?string $vaultPaymentSource = null,
         ?string $vaultPaypalTokenId = null,
         ?string $vaultSourceType = null,
+        ?string $shippingCallbackUrl = null,
     ): array {
         $currency = $quote->getBaseCurrencyCode();
         $grandTotal = $this->_formatAmount((float) $quote->getBaseGrandTotal());
@@ -35,13 +36,34 @@ class Maho_Paypal_Model_Api_OrderBuilder
         ];
 
         if ($returnUrl && $cancelUrl) {
+            $shippingAddress = $quote->getShippingAddress();
+            $hasShippingAddress = $shippingAddress && $shippingAddress->getFirstname();
+
+            if ($quote->isVirtual()) {
+                $shippingPreference = 'NO_SHIPPING';
+            } elseif ($hasShippingAddress) {
+                $shippingPreference = 'SET_PROVIDED_ADDRESS';
+            } else {
+                $shippingPreference = 'GET_FROM_FILE';
+            }
+
+            $experienceContext = [
+                'return_url' => $returnUrl,
+                'cancel_url' => $cancelUrl,
+                'user_action' => 'PAY_NOW',
+                'shipping_preference' => $shippingPreference,
+            ];
+
+            if ($shippingPreference === 'GET_FROM_FILE' && $shippingCallbackUrl) {
+                $experienceContext['order_update_callback_config'] = [
+                    'callback_events' => ['SHIPPING_ADDRESS', 'SHIPPING_OPTIONS'],
+                    'callback_url' => $shippingCallbackUrl,
+                ];
+            }
+
             $orderRequest['payment_source'] = [
                 'paypal' => [
-                    'experience_context' => [
-                        'return_url' => $returnUrl,
-                        'cancel_url' => $cancelUrl,
-                        'user_action' => 'PAY_NOW',
-                    ],
+                    'experience_context' => $experienceContext,
                 ],
             ];
         }
@@ -110,7 +132,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
             'invoice_id' => $quote->getReservedOrderId() ?: $quote->reserveOrderId()->getReservedOrderId(),
         ];
 
-        $breakdown = $this->_buildBreakdown($quote, $currency);
+        $breakdown = $this->buildBreakdown($quote, $currency);
         if ($breakdown !== null) {
             $purchaseUnit['amount']['breakdown'] = $breakdown;
             $items = $this->_buildLineItems($quote, $currency);
@@ -127,7 +149,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
         return $purchaseUnit;
     }
 
-    protected function _buildBreakdown(Mage_Sales_Model_Quote $quote, string $currency): ?array
+    public function buildBreakdown(Mage_Sales_Model_Quote $quote, string $currency): ?array
     {
         $address = $quote->isVirtual() ? $quote->getBillingAddress() : $quote->getShippingAddress();
 

@@ -108,6 +108,21 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
+    public function patchOrder(string $orderId, array $patchOperations): void
+    {
+        $client = $this->_createHttpClient();
+        $response = $client->request('PATCH', $this->_getApiUrl("/v2/checkout/orders/{$orderId}"), [
+            'json' => $patchOperations,
+            'headers' => $this->_getAuthHeaders(),
+        ]);
+
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 204) {
+            $body = $response->getContent(false);
+            throw new \RuntimeException("PayPal PATCH order failed with HTTP {$statusCode}: {$body}");
+        }
+    }
+
     public function authorizeOrder(string $orderId): array
     {
         $response = $this->getSdkClient()->getOrdersController()->authorizeOrder([
