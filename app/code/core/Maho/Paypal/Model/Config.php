@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-class Maho_Paypal_Model_Config
+class Maho_Paypal_Model_Config extends Maho\DataObject
 {
     public const METHOD_STANDARD_CHECKOUT = 'paypal_standard_checkout';
     public const METHOD_ADVANCED_CHECKOUT = 'paypal_advanced_checkout';
