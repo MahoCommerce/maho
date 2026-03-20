@@ -35,7 +35,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Select_Flatproduct extends M
         }
 
         if ($element->getValue()) {
-            $deprecation = Mage::helper('catalog')->__('Flat Catalog is deprecated and will be removed in a future version. Please consider disabling it.');
+            $deprecation = 'Flat Catalog is deprecated and will be removed in a future version. Please consider disabling it.';
             $comment = $element->getComment();
             $element->setComment('<span style="color:red; font-weight:bold;">' . $deprecation . '</span>' . ($comment ? '<br>' . $comment : ''));
         }
