@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * @deprecated since 26.5 Flat Catalog will be removed in a future version
+ */
 class Mage_Catalog_Model_Product_Flat_Observer
 {
     /**

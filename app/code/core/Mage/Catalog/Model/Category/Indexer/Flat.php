@@ -15,6 +15,9 @@ use Mage_Core_Model_Store as Store;
 use Mage_Core_Model_Store_Group as StoreGroup;
 use Mage_Index_Model_Event as Event;
 
+/**
+ * @deprecated since 26.5 Flat Catalog will be removed in a future version
+ */
 class Mage_Catalog_Model_Category_Indexer_Flat extends Mage_Index_Model_Indexer_Abstract
 {
     /**
