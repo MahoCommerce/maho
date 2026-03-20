@@ -73,7 +73,10 @@
     <frontend>
         <routers>
             <paypal>
+                <use>standard</use>
                 <args>
+                    <module>Maho_Paypal</module>
+                    <frontName>paypal</frontName>
                     <modules>
                         <Maho_Paypal before="Mage_Paypal">Maho_Paypal</Maho_Paypal>
                     </modules>
