@@ -78,7 +78,7 @@
                     <fields/>
                 </paypal_alternative_payment_methods>
                 <paypal_payment_solutions translate="label comment paypal_title" module="paypal">
-                    <label>PayPal Payment Solutions</label>
+                    <label>PayPal Payment Solutions (Deprecated)</label>
                     <sort_order>10</sort_order>
                     <expanded>1</expanded>
                     <show_in_default>1</show_in_default>
