@@ -303,7 +303,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                 }
 
                 document.querySelectorAll(".requires").forEach(function(dependent) {
-                    if (dependent.classList.contains("paypal-ec-enabler")) {
+                    if (dependent.classList.contains("paypal-ec-enabler") && dependent.requiresObj) {
                         dependent.requiresObj.callback = function(required) {
                             if (required.classList.contains("paypal-enabler") && required.value == 0) {
                                 dependent.disabled = true;
