@@ -10,6 +10,24 @@
 
 declare(strict_types=1);
 
+/**
+ * TODO: Remove @method and @property annotations once Mage_Paypal is removed.
+ * These exist only for backward compatibility with legacy Mage_Paypal code
+ * that calls methods/properties on the config object via __call()/__get().
+ *
+ * @method bool isMethodActive(string $method)
+ * @method bool isMethodAvailable(string|null $method = null)
+ * @method bool shouldAskToCreateBillingAgreement()
+ * @method string|null getPaymentMarkWhatIsPaypalUrl(mixed ...$args)
+ * @method string|null getPaymentMarkImageUrl(mixed ...$args)
+ * @method $this setMethod(string $method)
+ * @method $this setStoreId(int $storeId)
+ *
+ * @property bool $visible_on_cart
+ * @property bool $visible_on_product
+ * @property bool $sandboxFlag
+ * @property string|null $businessAccount
+ */
 class Maho_Paypal_Model_Config extends Maho\DataObject
 {
     public const METHOD_STANDARD_CHECKOUT = 'paypal_standard_checkout';
@@ -23,6 +41,8 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
     public const JS_SDK_URL_LIVE = 'https://www.paypal.com/web-sdk/v6/core';
 
     /**
+     * TODO: Remove once Mage_Paypal is removed
+     *
      * @deprecated Legacy PayPal methods - use new Maho_Paypal methods instead
      */
     public const DEPRECATED_METHODS = [
@@ -109,6 +129,8 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
 
     /**
      * Check if any deprecated legacy methods are active
+     *
+     * TODO: Remove once Mage_Paypal is removed
      *
      * @return array<string> Active deprecated method codes
      */

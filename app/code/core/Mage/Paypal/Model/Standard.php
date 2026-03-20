@@ -20,7 +20,7 @@ class Mage_Paypal_Model_Standard extends Mage_Payment_Model_Method_Abstract
 
     /**
      * Config instance
-     * @var Mage_Paypal_Model_Config
+     * @var Mage_Paypal_Model_Config|Maho_Paypal_Model_Config|null
      */
     protected $_config = null;
 

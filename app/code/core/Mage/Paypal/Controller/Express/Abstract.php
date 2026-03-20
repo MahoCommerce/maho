@@ -18,7 +18,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     protected $_checkout = null;
 
     /**
-     * @var Mage_Paypal_Model_Config
+     * @var Mage_Paypal_Model_Config|Maho_Paypal_Model_Config|Mage_Core_Model_Abstract|false|null
      */
     protected $_config = null;
 
