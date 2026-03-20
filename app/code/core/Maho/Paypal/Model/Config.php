@@ -57,6 +57,28 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
         'hosted_pro',
     ];
 
+    /**
+     * TODO: Remove once Mage_Paypal is removed
+     */
+    private ?Mage_Paypal_Model_Config $_legacyConfig = null;
+
+    /**
+     * TODO: Remove once Mage_Paypal is removed
+     */
+    private array $_legacyConstructParams = [];
+
+    public function __construct(array $data = [])
+    {
+        // The old Mage_Paypal_Model_Config constructor expects [$methodCode, $storeId]
+        // positionally, while DataObject expects key-value pairs. Capture the raw
+        // params for forwarding to the legacy config.
+        if ($data && array_is_list($data)) {
+            $this->_legacyConstructParams = $data;
+            $data = [];
+        }
+        parent::__construct($data);
+    }
+
     public function getClientId(?int $storeId = null): string
     {
         return (string) $this->_getStoreConfig('maho_paypal/credentials/client_id', $storeId);
@@ -146,26 +168,42 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
     }
 
     /**
-     * Handle legacy Mage_Paypal method calls gracefully.
-     * The old config had methods like isMethodAvailable(), isMethodActive(),
-     * getMerchantCountry(), shouldAskToCreateBillingAgreement(), etc.
-     * Return null so deprecated code paths silently disable themselves.
+     * Delegate legacy Mage_Paypal method calls to the old config instance.
      *
      * TODO: Remove this method once Mage_Paypal is removed
      */
     #[\Override]
     public function __call($method, $args)
     {
-        if (str_starts_with($method, 'is') || str_starts_with($method, 'should')) {
-            return false;
-        }
-        if (str_starts_with($method, 'get') || str_starts_with($method, 'has')) {
-            return null;
-        }
-        if (str_starts_with($method, 'set') || str_starts_with($method, 'uns')) {
-            return $this;
+        $legacy = $this->_getLegacyConfig();
+        if (method_exists($legacy, $method)) {
+            $result = $legacy->$method(...$args);
+            // Return $this instead of the legacy instance for fluent setters
+            return $result === $legacy ? $this : $result;
         }
         return parent::__call($method, $args);
+    }
+
+    /**
+     * Delegate legacy property access to the old config instance.
+     *
+     * TODO: Remove this method once Mage_Paypal is removed
+     */
+    #[\Override]
+    public function __get($key)
+    {
+        return $this->_getLegacyConfig()->$key;
+    }
+
+    /**
+     * TODO: Remove once Mage_Paypal is removed
+     */
+    private function _getLegacyConfig(): Mage_Paypal_Model_Config
+    {
+        if ($this->_legacyConfig === null) {
+            $this->_legacyConfig = new Mage_Paypal_Model_Config($this->_legacyConstructParams);
+        }
+        return $this->_legacyConfig;
     }
 
     protected function _getStoreConfig(string $path, ?int $storeId = null): mixed
