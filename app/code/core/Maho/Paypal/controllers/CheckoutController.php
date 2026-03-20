@@ -26,7 +26,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if ($body) {
                 $data = Mage::helper('core')->jsonDecode($body);
                 if (is_array($data)) {
-                    $allowed = ['method', 'save_vault', 'vault_token_id', 'paypal_order_id'];
+                    $allowed = ['method', 'save_vault', 'vault_token_id', 'paypal_order_id', 'form_key'];
                     $this->getRequest()->setParams(array_intersect_key($data, array_flip($allowed)));
                 }
             }
@@ -63,6 +63,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
+            if (!$this->_validateFormKey()) {
+                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
+            }
+
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             if (!$quote->getId() || !$quote->getItemsCount()) {
                 Mage::throwException(Mage::helper('maho_paypal')->__('Cart is empty.'));
@@ -166,7 +170,15 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
+            if (!$this->_validateFormKey()) {
+                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
+            }
+
             $quote = Mage::getSingleton('checkout/session')->getQuote();
+
+            if (!$quote->getIsActive()) {
+                Mage::throwException(Mage::helper('maho_paypal')->__('This order has already been placed.'));
+            }
 
             $paypalOrderId = $quote->getPayment()->getAdditionalInformation('paypal_order_id');
             if (!$paypalOrderId) {
@@ -359,7 +371,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
      */
     protected function _findQuoteByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Quote
     {
-        if (!$paypalOrderId) {
+        if (!$paypalOrderId || !preg_match('/^[A-Z0-9]+$/', $paypalOrderId)) {
             return null;
         }
 
@@ -369,10 +381,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             return $sessionQuote;
         }
 
-        // Fallback: search by payment additional info (PayPal callbacks have no session)
+        // Fallback: search by the dedicated paypal_order_id column (PayPal callbacks have no session)
         /** @var Mage_Sales_Model_Resource_Quote_Payment_Collection $payments */
         $payments = Mage::getResourceModel('sales/quote_payment_collection');
-        $payments->addFieldToFilter('additional_information', ['like' => '%' . $paypalOrderId . '%']);
+        $payments->addFieldToFilter('paypal_order_id', $paypalOrderId);
         $payments->setPageSize(1);
 
         $payment = $payments->getFirstItem();
@@ -382,7 +394,18 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
         /** @var Mage_Sales_Model_Quote $quote */
         $quote = Mage::getModel('sales/quote')->load($payment->getQuoteId());
-        return $quote->getId() ? $quote : null;
+
+        if (!$quote->getId() || !$quote->getIsActive()) {
+            return null;
+        }
+
+        // Verify the payment's stored order ID matches exactly
+        $storedOrderId = $quote->getPayment()->getAdditionalInformation('paypal_order_id');
+        if ($storedOrderId !== $paypalOrderId) {
+            return null;
+        }
+
+        return $quote;
     }
 
     protected function _formatAmount(float $amount): string
@@ -422,7 +445,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $nameParts = explode(' ', $paypalName, 2);
         $firstname = $nameParts[0] ?? '';
         $lastname = $nameParts[1] ?? $firstname;
-        $email = $payer['email_address'] ?? 'guest@paypal.com';
+        $email = $payer['email_address'] ?? '';
+        if (!$email) {
+            Mage::throwException(Mage::helper('maho_paypal')->__('PayPal did not return a payer email address.'));
+        }
 
         $addressData = [
             'firstname' => $firstname,

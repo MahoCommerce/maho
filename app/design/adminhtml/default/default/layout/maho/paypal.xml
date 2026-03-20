@@ -9,14 +9,6 @@
  */
 -->
 <layout>
-    <adminhtml_sales_order_view>
-        <reference name="order_payment">
-            <action method="setTemplate">
-                <template>maho/paypal/payment/info.phtml</template>
-            </action>
-        </reference>
-    </adminhtml_sales_order_view>
-
     <adminhtml_sales_order_create_index>
         <reference name="head">
             <action method="addJs"><script>maho/paypal/vault-checkout.js</script></action>

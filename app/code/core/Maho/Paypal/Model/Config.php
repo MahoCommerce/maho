@@ -192,7 +192,11 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
     #[\Override]
     public function __get($key)
     {
-        return $this->_getLegacyConfig()->$key;
+        $legacy = $this->_getLegacyConfig();
+        if (property_exists($legacy, $key)) {
+            return $legacy->$key;
+        }
+        return parent::__get($key);
     }
 
     /**

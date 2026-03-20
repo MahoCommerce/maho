@@ -12,6 +12,8 @@ declare(strict_types=1);
 
 class Maho_Paypal_Block_Checkout_Advanced_Form extends Mage_Payment_Block_Form
 {
+    protected ?Maho_Paypal_Model_Config $_paypalConfig = null;
+
     #[\Override]
     protected function _construct(): void
     {
@@ -21,8 +23,10 @@ class Maho_Paypal_Block_Checkout_Advanced_Form extends Mage_Payment_Block_Form
 
     public function getConfig(): Maho_Paypal_Model_Config
     {
-        $model = Mage::getModel('paypal/config');
-        return $model;
+        if ($this->_paypalConfig === null) {
+            $this->_paypalConfig = Mage::getModel('paypal/config');
+        }
+        return $this->_paypalConfig;
     }
 
     public function getJsSdkUrl(): string

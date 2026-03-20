@@ -27,6 +27,7 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
     protected $_isInitializeNeeded = true;
 
     protected ?Maho_Paypal_Model_Api_Client $_apiClient = null;
+    protected ?Maho_Paypal_Model_Config $_config = null;
 
     #[\Override]
     public function isAvailable($quote = null): bool
@@ -242,7 +243,10 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
 
     protected function _getConfig(): Maho_Paypal_Model_Config
     {
-        return Mage::getModel('paypal/config');
+        if ($this->_config === null) {
+            $this->_config = Mage::getModel('paypal/config');
+        }
+        return $this->_config;
     }
 
     protected function _getApiClient(): Maho_Paypal_Model_Api_Client

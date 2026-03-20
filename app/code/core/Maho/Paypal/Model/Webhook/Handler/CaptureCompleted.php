@@ -27,18 +27,23 @@ class Maho_Paypal_Model_Webhook_Handler_CaptureCompleted extends Maho_Paypal_Mod
         $payment = $order->getPayment();
         $payment->setAdditionalInformation('paypal_capture_id', $captureId);
 
+        $invoice = null;
         if ($order->canInvoice()) {
             $invoice = $order->prepareInvoice();
             $invoice->setRequestedCaptureCase(Mage_Sales_Model_Order_Invoice::CAPTURE_ONLINE);
             $invoice->setTransactionId($captureId);
             $invoice->register();
             $invoice->pay();
-
-            $order->addRelatedObject($invoice);
         }
 
         $order->setState(Mage_Sales_Model_Order::STATE_PROCESSING, true, "PayPal capture completed: {$captureId}");
-        $order->save();
+
+        $transactionSave = Mage::getModel('core/resource_transaction')
+            ->addObject($order);
+        if ($invoice) {
+            $transactionSave->addObject($invoice);
+        }
+        $transactionSave->save();
 
         $this->_log("CaptureCompleted: processed for order {$order->getIncrementId()}");
     }

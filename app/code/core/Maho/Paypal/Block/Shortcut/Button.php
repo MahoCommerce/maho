@@ -13,6 +13,7 @@ declare(strict_types=1);
 class Maho_Paypal_Block_Shortcut_Button extends Mage_Core_Block_Template
 {
     protected bool $_shouldRender = true;
+    protected ?Maho_Paypal_Model_Config $_paypalConfig = null;
 
     #[\Override]
     protected function _beforeToHtml()
@@ -107,7 +108,9 @@ class Maho_Paypal_Block_Shortcut_Button extends Mage_Core_Block_Template
 
     protected function _getConfig(): Maho_Paypal_Model_Config
     {
-        $model = Mage::getModel('paypal/config');
-        return $model;
+        if ($this->_paypalConfig === null) {
+            $this->_paypalConfig = Mage::getModel('paypal/config');
+        }
+        return $this->_paypalConfig;
     }
 }
