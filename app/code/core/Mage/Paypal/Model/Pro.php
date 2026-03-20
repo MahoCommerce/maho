@@ -75,7 +75,6 @@ class Mage_Paypal_Model_Pro
             }
 
             $model = Mage::getModel($this->_configType, $params);
-            assert($model instanceof \Mage_Paypal_Model_Config);
             $this->_config = $model;
         } else {
             $this->_config->setMethod($code);
@@ -92,7 +91,7 @@ class Mage_Paypal_Model_Pro
      * @param int $storeId
      * @return $this
      */
-    public function setConfig(Mage_Paypal_Model_Config $instace, $storeId = null)
+    public function setConfig($instace, $storeId = null)
     {
         $this->_config = $instace;
         if ($storeId !== null) {

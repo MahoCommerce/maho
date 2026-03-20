@@ -123,6 +123,29 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
         return $active;
     }
 
+    /**
+     * Handle legacy Mage_Paypal method calls gracefully.
+     * The old config had methods like isMethodAvailable(), isMethodActive(),
+     * getMerchantCountry(), shouldAskToCreateBillingAgreement(), etc.
+     * Return null so deprecated code paths silently disable themselves.
+     *
+     * TODO: Remove this method once Mage_Paypal is removed
+     */
+    #[\Override]
+    public function __call($method, $args)
+    {
+        if (str_starts_with($method, 'is') || str_starts_with($method, 'should')) {
+            return false;
+        }
+        if (str_starts_with($method, 'get') || str_starts_with($method, 'has')) {
+            return null;
+        }
+        if (str_starts_with($method, 'set') || str_starts_with($method, 'uns')) {
+            return $this;
+        }
+        return parent::__call($method, $args);
+    }
+
     protected function _getStoreConfig(string $path, ?int $storeId = null): mixed
     {
         return Mage::getStoreConfig($path, $storeId);

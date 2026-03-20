@@ -49,9 +49,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     protected function _construct()
     {
         parent::_construct();
-        $classInstance = Mage::getModel($this->_configType, [$this->_configMethod]);
-        assert($classInstance instanceof \Mage_Paypal_Model_Config);
-        $this->_config = $classInstance;
+        $this->_config = Mage::getModel($this->_configType, [$this->_configMethod]);
     }
 
     /**

@@ -138,7 +138,7 @@ class Mage_Paypal_Model_Express_Checkout
         } else {
             throw new Exception('Quote instance is required.');
         }
-        if (isset($params['config']) && $params['config'] instanceof Mage_Paypal_Model_Config) {
+        if (isset($params['config']) && is_object($params['config'])) {
             $this->_config = $params['config'];
         } else {
             throw new Exception('Config instance is required.');
