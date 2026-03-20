@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * @deprecated since 26.5 Flat Catalog will be removed in a future version
+ */
 abstract class Mage_Catalog_Helper_Flat_Abstract extends Mage_Core_Helper_Abstract
 {
     /**

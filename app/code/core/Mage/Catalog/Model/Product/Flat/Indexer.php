@@ -13,6 +13,8 @@
 /**
  * Catalog Product Flat Indexer Model
  *
+ * @deprecated since 26.5 Flat Catalog will be removed in a future version
+ *
  * @package    Mage_Catalog
  *
  * @method Mage_Catalog_Model_Resource_Product_Flat_Indexer _getResource()
