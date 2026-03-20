@@ -16,6 +16,6 @@ class Mage_Paypal_Model_System_Config_Source_PaymentActions_Express
     {
         $configModel = Mage::getModel('paypal/config');
         $configModel->setMethod(Mage_Paypal_Model_Config::METHOD_WPP_EXPRESS);
-        return $configModel->getPaymentActions();
+        return $configModel->getPaymentActions() ?? [];
     }
 }
