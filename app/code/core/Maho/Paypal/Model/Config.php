@@ -10,7 +10,7 @@
 
 declare(strict_types=1);
 
-class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
+class Maho_Paypal_Model_Config
 {
     public const METHOD_STANDARD_CHECKOUT = 'paypal_standard_checkout';
     public const METHOD_ADVANCED_CHECKOUT = 'paypal_advanced_checkout';
@@ -26,15 +26,15 @@ class Maho_Paypal_Model_Config extends Mage_Paypal_Model_Config
      * @deprecated Legacy PayPal methods - use new Maho_Paypal methods instead
      */
     public const DEPRECATED_METHODS = [
-        self::METHOD_WPP_EXPRESS,
-        self::METHOD_WPP_DIRECT,
-        self::METHOD_WPS,
-        self::METHOD_WPP_PE_EXPRESS,
-        self::METHOD_WPP_PE_DIRECT,
-        self::METHOD_PAYFLOWPRO,
-        self::METHOD_PAYFLOWLINK,
-        self::METHOD_PAYFLOWADVANCED,
-        self::METHOD_HOSTEDPRO,
+        'paypal_express',
+        'paypal_direct',
+        'paypal_standard',
+        'paypaluk_express',
+        'paypaluk_direct',
+        'verisign',
+        'payflow_link',
+        'payflow_advanced',
+        'hosted_pro',
     ];
 
     public function getClientId(?int $storeId = null): string
