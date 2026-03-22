@@ -18,9 +18,7 @@ $methodCode = $this->getMethodCode();
     data-vault="1">
     <?php if ($tokens->getSize() > 0): ?>
     <div class="form-list">
-        <label for="paypal_vault_token"><?= $this->escapeHtml($this->__('Select a saved payment method')) ?></label>
         <select name="payment[vault_token_id]" id="paypal_vault_token" class="required-entry">
-            <option value=""><?= $this->escapeHtml($this->__('-- Please Select --')) ?></option>
             <?php foreach ($tokens as $token): ?>
             <option value="<?= $this->escapeHtml($token->getId()) ?>">
                 <?= $this->escapeHtml($token->getDisplayLabel()) ?>
