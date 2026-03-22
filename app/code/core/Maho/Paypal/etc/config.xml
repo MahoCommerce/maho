@@ -157,7 +157,10 @@
                 <webhook_id/>
             </credentials>
             <general>
-                <paylater_messaging>0</paylater_messaging>
+                <paylater_enabled>0</paylater_enabled>
+                <paylater_product>1</paylater_product>
+                <paylater_cart>1</paylater_cart>
+                <paylater_checkout>0</paylater_checkout>
             </general>
         </maho_paypal>
         <payment>

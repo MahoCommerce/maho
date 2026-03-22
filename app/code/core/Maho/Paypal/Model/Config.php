@@ -130,13 +130,21 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
         return Mage::getUrl('paypal/checkout/clientToken', ['_secure' => true]);
     }
 
-    public function isPayLaterMessagingEnabled(?int $storeId = null): bool
+    public function isPayLaterEnabled(string $placement, ?int $storeId = null): bool
     {
-        return (bool) Mage::getStoreConfigFlag('maho_paypal/general/paylater_messaging', $storeId)
+        return Mage::getStoreConfigFlag('maho_paypal/general/paylater_enabled', $storeId)
+            && Mage::getStoreConfigFlag("maho_paypal/general/paylater_{$placement}", $storeId)
             && $this->hasCredentials($storeId)
             && ($this->isNewMethodActive(self::METHOD_STANDARD_CHECKOUT, $storeId)
                 || $this->isNewMethodActive(self::METHOD_ADVANCED_CHECKOUT, $storeId)
                 || $this->isNewMethodActive(self::METHOD_VAULT, $storeId));
+    }
+
+    public function isPayLaterMessagingEnabled(?int $storeId = null): bool
+    {
+        return $this->isPayLaterEnabled('product', $storeId)
+            || $this->isPayLaterEnabled('cart', $storeId)
+            || $this->isPayLaterEnabled('checkout', $storeId);
     }
 
     public function getCurrencyCode(?int $storeId = null): string

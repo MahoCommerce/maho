@@ -9,9 +9,14 @@
  */
 -->
 <layout>
-    <checkout_onepage_index>
+    <default>
         <reference name="head">
             <action method="addCss"><stylesheet>css/paypal.css</stylesheet></action>
+        </reference>
+    </default>
+
+    <checkout_onepage_index>
+        <reference name="head">
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/standard-checkout.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_advanced_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
@@ -38,16 +43,14 @@
         <reference name="head">
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/standard-checkout.js</script></action>
-            <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/sdk-loader.js</script></action>
-            <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/paylater-message.js</script></action>
+            <action method="addJs" ifconfig="maho_paypal/general/paylater_cart"><script>maho/paypal/sdk-loader.js</script></action>
+            <action method="addJs" ifconfig="maho_paypal/general/paylater_cart"><script>maho/paypal/paylater-message.js</script></action>
         </reference>
         <reference name="checkout.cart.methods">
             <block type="maho_paypal/shortcut_button" name="checkout.cart.methods.maho_paypal" template="maho/paypal/shortcut/button.phtml" ifconfig="payment/paypal_standard_checkout/active">
                 <action method="setIsQuoteAllowed"><value>1</value></action>
             </block>
-        </reference>
-        <reference name="checkout.cart.totals">
-            <block type="maho_paypal/paylater_message" name="checkout.cart.paylater" after="-" template="maho/paypal/paylater/message.phtml" ifconfig="maho_paypal/general/paylater_messaging">
+            <block type="maho_paypal/paylater_message" name="checkout.cart.paylater" after="-" template="maho/paypal/paylater/message.phtml" ifconfig="maho_paypal/general/paylater_cart">
                 <action method="setIsQuoteAllowed"><value>1</value></action>
             </block>
         </reference>
@@ -57,15 +60,15 @@
         <reference name="head">
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/sdk-loader.js</script></action>
             <action method="addJs" ifconfig="payment/paypal_standard_checkout/active"><script>maho/paypal/standard-checkout.js</script></action>
-            <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/sdk-loader.js</script></action>
-            <action method="addJs" ifconfig="maho_paypal/general/paylater_messaging"><script>maho/paypal/paylater-message.js</script></action>
+            <action method="addJs" ifconfig="maho_paypal/general/paylater_product"><script>maho/paypal/sdk-loader.js</script></action>
+            <action method="addJs" ifconfig="maho_paypal/general/paylater_product"><script>maho/paypal/paylater-message.js</script></action>
         </reference>
         <reference name="product.info">
             <block type="core/text_list" name="product.info.extra_buttons" as="extra_buttons">
                 <block type="maho_paypal/shortcut_button" name="product.info.addtocart.maho_paypal" template="maho/paypal/shortcut/button.phtml" ifconfig="payment/paypal_standard_checkout/active">
                     <action method="setIsInCatalogProduct"><value>1</value></action>
                 </block>
-                <block type="maho_paypal/paylater_message" name="product.info.paylater" after="-" template="maho/paypal/paylater/message.phtml" ifconfig="maho_paypal/general/paylater_messaging">
+                <block type="maho_paypal/paylater_message" name="product.info.paylater" after="-" template="maho/paypal/paylater/message.phtml" ifconfig="maho_paypal/general/paylater_product">
                     <action method="setIsInCatalogProduct"><value>1</value></action>
                 </block>
             </block>

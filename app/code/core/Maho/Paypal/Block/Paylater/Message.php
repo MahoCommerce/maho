@@ -20,12 +20,13 @@ class Maho_Paypal_Block_Paylater_Message extends Mage_Core_Block_Template
     {
         $result = parent::_beforeToHtml();
 
-        if (!$this->_getConfig()->isPayLaterMessagingEnabled()) {
+        $isInCatalog = (bool) $this->getIsInCatalogProduct();
+        $placement = $isInCatalog ? 'product' : 'cart';
+
+        if (!$this->_getConfig()->isPayLaterEnabled($placement)) {
             $this->_shouldRender = false;
             return $result;
         }
-
-        $isInCatalog = (bool) $this->getIsInCatalogProduct();
 
         if ($isInCatalog) {
             $currentProduct = Mage::registry('current_product');
@@ -34,12 +35,11 @@ class Maho_Paypal_Block_Paylater_Message extends Mage_Core_Block_Template
                 return $result;
             }
             $this->setAmount((float) $currentProduct->getFinalPrice());
-            $this->setPlacement('product');
         } else {
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             $this->setAmount((float) $quote->getGrandTotal());
-            $this->setPlacement('cart');
         }
+        $this->setPlacement($placement);
 
         $this->setMessageHtmlId(Mage::helper('core')->uniqHash('maho_paypal_paylater_'));
 

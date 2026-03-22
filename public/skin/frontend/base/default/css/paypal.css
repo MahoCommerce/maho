@@ -20,3 +20,5 @@ body.paypal-standard-active .btn-checkout { display: none !important; }
 .paypal-save-vault-icon { display: flex; flex-shrink: 0; color: #999; }
 .paypal-save-vault-icon svg { width: 16px; height: 16px; }
 .paypal-save-vault:has(input:checked) .paypal-save-vault-icon { color: #003087; }
+
+.checkout-cart-index .paypal-paylater-message { display: flex; justify-content: flex-end; }
