@@ -143,8 +143,7 @@ class Maho_Paypal_Model_Config extends Maho\DataObject
     public function isPayLaterMessagingEnabled(?int $storeId = null): bool
     {
         return $this->isPayLaterEnabled('product', $storeId)
-            || $this->isPayLaterEnabled('cart', $storeId)
-            || $this->isPayLaterEnabled('checkout', $storeId);
+            || $this->isPayLaterEnabled('cart', $storeId);
     }
 
     public function getCurrencyCode(?int $storeId = null): string
