@@ -40,10 +40,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
-            if (!$this->_validateFormKey()) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
-            }
-
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             $storeId = $quote->getStoreId() ? (int) $quote->getStoreId() : null;
 
