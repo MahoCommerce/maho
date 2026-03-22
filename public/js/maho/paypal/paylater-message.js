@@ -34,12 +34,14 @@ class MahoPaypalPayLaterMessage {
             return;
         }
 
-        const messagesInstance = sdk.createPayPalMessages();
+        const messagesInstance = sdk.createPayPalMessages({
+            amount: parseFloat(this.amount) || 0,
+            placement: this.el.dataset.placement || 'product',
+        });
         const messageEl = document.createElement('paypal-message');
         this.el.appendChild(messageEl);
 
         messagesInstance.fetchContent({
-            amount: this.amount,
             onContentReady: (content) => messageEl.setContent(content),
         });
     }
