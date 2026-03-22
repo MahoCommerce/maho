@@ -85,7 +85,7 @@ class MahoPaypalAdvancedCheckout {
             const response = await mahoFetch(this.createOrderUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ method: this.methodCode, save_vault: saveVault, form_key: FORM_KEY }),
+                body: JSON.stringify({ method: this.methodCode, save_vault: saveVault }),
                 loaderArea: this.formDiv,
             });
 
@@ -127,7 +127,6 @@ class MahoPaypalAdvancedCheckout {
             body: JSON.stringify({
                 paypal_order_id: data.orderId,
                 method: this.methodCode,
-                form_key: FORM_KEY,
             }),
             loaderArea: this.formDiv,
         });

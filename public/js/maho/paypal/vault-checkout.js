@@ -34,7 +34,6 @@ class MahoPaypalVaultCheckout {
                 body: JSON.stringify({
                     method: this.methodCode,
                     vault_token_id: tokenSelect.value,
-                    form_key: FORM_KEY,
                 }),
             });
 
@@ -48,7 +47,6 @@ class MahoPaypalVaultCheckout {
                 body: JSON.stringify({
                     paypal_order_id: createResponse.paypal_order_id,
                     method: this.methodCode,
-                    form_key: FORM_KEY,
                 }),
             });
 
