@@ -757,8 +757,10 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     protected function _prepareGrid()
     {
         $this->_prepareColumns();
+        Mage::dispatchEvent('adminhtml_block_widget_grid_prepare_columns_after', ['grid' => $this, 'grid_block_id' => $this->getId()]);
         $this->_prepareMassactionBlock();
         $this->_prepareCollection();
+        Mage::dispatchEvent('adminhtml_block_widget_grid_prepare_collection_after', ['grid' => $this, 'collection' => $this->getCollection()]);
         return $this;
     }
 
