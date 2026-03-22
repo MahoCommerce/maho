@@ -54,7 +54,7 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
     }
 
     protected function _processAdminVaultOrder(
-        Mage_Payment_Model_Info $payment,
+        Mage_Sales_Model_Order_Payment $payment,
         string $paymentAction,
         \Maho\DataObject $stateObject,
     ): void {
