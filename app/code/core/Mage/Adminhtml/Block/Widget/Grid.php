@@ -228,6 +228,11 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     protected ?array $defaultColumnSettings = null;
 
     /**
+     * @var array<string, bool>
+     */
+    protected array $isAllowedCache = [];
+
+    /**
      * Mage_Adminhtml_Block_Widget_Grid constructor.
      * @param array $attributes
      */
@@ -1958,5 +1963,15 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
     public function getLimitOptions(): array
     {
         return [20, 30, 50, 100, 200, 500, 1000];
+    }
+
+    protected function isAllowed(string $aclPath): bool
+    {
+        if (!isset($this->isAllowedCache[$aclPath])) {
+            /** @var Mage_Admin_Model_Session $session */
+            $session = Mage::getSingleton('admin/session');
+            $this->isAllowedCache[$aclPath] = $session->isAllowed($aclPath);
+        }
+        return $this->isAllowedCache[$aclPath];
     }
 }
