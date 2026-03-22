@@ -29,6 +29,10 @@
                                         <title>SOAP/XML-RPC - Roles</title>
                                         <sort_order>20</sort_order>
                                     </roles>
+                                    <orphaned_resources translate="title">
+                                        <title>Orphaned API Role Resources</title>
+                                        <sort_order>30</sort_order>
+                                    </orphaned_resources>
                                 </children>
                             </api>
                             <config>
@@ -61,6 +65,11 @@
                             <action>adminhtml/api_role</action>
                             <sort_order>20</sort_order>
                         </roles>
+                        <orphaned_resources translate="title">
+                            <title>Orphaned API Role Resources</title>
+                            <action>adminhtml/api_orphanedResource</action>
+                            <sort_order>30</sort_order>
+                        </orphaned_resources>
                     </children>
                 </api>
             </children>
