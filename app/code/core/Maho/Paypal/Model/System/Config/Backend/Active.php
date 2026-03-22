@@ -28,8 +28,10 @@ class Maho_Paypal_Model_System_Config_Backend_Active extends Mage_Core_Model_Con
 
             if ($this->getPath() === 'payment/paypal_vault/active') {
                 $config ??= Mage::getModel('maho_paypal/config');
-                $standardActive = $config->isNewMethodActive(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
-                $advancedActive = $config->isNewMethodActive(Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT);
+                $standardActive = $config->isNewMethodActive(Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT)
+                    || $this->_isMethodActiveInRequest('paypal_standard_checkout');
+                $advancedActive = $config->isNewMethodActive(Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT)
+                    || $this->_isMethodActiveInRequest('paypal_advanced_checkout');
                 if (!$standardActive && !$advancedActive) {
                     Mage::throwException(
                         Mage::helper('maho_paypal')->__('Vault requires at least Standard Checkout or Advanced Checkout to be enabled.'),
@@ -39,6 +41,15 @@ class Maho_Paypal_Model_System_Config_Backend_Active extends Mage_Core_Model_Con
         }
 
         return parent::_beforeSave();
+    }
+
+    protected function _isMethodActiveInRequest(string $groupId): bool
+    {
+        $groups = Mage::app()->getRequest()->getPost('groups');
+        if (!is_array($groups)) {
+            return false;
+        }
+        return ($groups[$groupId]['fields']['active']['value'] ?? '0') === '1';
     }
 
     protected function _hasCredentialsInRequest(): bool
