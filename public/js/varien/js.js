@@ -43,6 +43,16 @@ async function mahoFetch(url, options) {
             fetchOptions.body ??= new URLSearchParams();
             if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
                 fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? FORM_KEY);
+            } else if (typeof fetchOptions.body === 'string') {
+                try {
+                    const parsed = JSON.parse(fetchOptions.body);
+                    if (typeof parsed === 'object' && parsed !== null && !parsed.form_key) {
+                        parsed.form_key = FORM_KEY;
+                        fetchOptions.body = JSON.stringify(parsed);
+                    }
+                } catch (e) {
+                    // Not JSON, skip
+                }
             }
         }
 
