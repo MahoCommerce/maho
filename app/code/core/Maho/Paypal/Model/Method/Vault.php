@@ -40,6 +40,93 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
     }
 
     #[\Override]
+    public function initialize($paymentAction, $stateObject): self
+    {
+        $payment = $this->getInfoInstance();
+        $vaultToken = $payment->getAdditionalInformation('paypal_vault_token');
+
+        if ($vaultToken && !$payment->getAdditionalInformation('paypal_order_id')) {
+            $this->_processAdminVaultOrder($payment, $paymentAction, $stateObject);
+            return $this;
+        }
+
+        return parent::initialize($paymentAction, $stateObject);
+    }
+
+    protected function _processAdminVaultOrder(
+        Mage_Payment_Model_Info $payment,
+        string $paymentAction,
+        \Maho\DataObject $stateObject,
+    ): void {
+        /** @var Mage_Sales_Model_Quote $quote */
+        $quote = $payment->getQuote() ?: Mage::getSingleton('adminhtml/session_quote')->getQuote();
+
+        $vaultTokenId = $payment->getAdditionalInformation('vault_token_id');
+        /** @var Maho_Paypal_Model_Vault_Token $token */
+        $token = Mage::getModel('maho_paypal/vault_token')->load($vaultTokenId);
+
+        $intent = ($paymentAction === 'authorize') ? 'AUTHORIZE' : 'CAPTURE';
+        $quote->reserveOrderId();
+
+        /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
+        $builder = Mage::getModel('maho_paypal/api_orderBuilder');
+        $orderRequest = $builder->buildFromQuote(
+            $quote,
+            $intent,
+            vaultPaypalTokenId: $token->getPaypalTokenId(),
+            vaultSourceType: $token->getPaymentSourceType(),
+        );
+
+        $client = $this->_getApiClient();
+
+        try {
+            $result = $client->createOrder(['body' => $orderRequest]);
+        } catch (\Throwable $e) {
+            Mage::logException($e);
+            Mage::throwException(Mage::helper('maho_paypal')->__('Failed to create PayPal order: %s', $e->getMessage()));
+        }
+
+        $paypalOrderId = $result['id'] ?? null;
+        if (!$paypalOrderId) {
+            Mage::throwException(Mage::helper('maho_paypal')->__('Failed to create PayPal order.'));
+        }
+
+        $payment->setAdditionalInformation('paypal_order_id', $paypalOrderId);
+
+        $payments = $result['purchase_units'][0]['payments'] ?? [];
+        $authId = $payments['authorizations'][0]['id'] ?? null;
+        $captureId = $payments['captures'][0]['id'] ?? null;
+
+        if (!$authId && !$captureId) {
+            if ($intent === 'AUTHORIZE') {
+                $result = $client->authorizeOrder($paypalOrderId);
+                $authId = $result['purchase_units'][0]['payments']['authorizations'][0]['id'] ?? null;
+            } else {
+                $result = $client->captureOrder($paypalOrderId);
+                $captureId = $result['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
+            }
+        }
+
+        if ($captureId) {
+            $payment->setTransactionId($captureId);
+            $payment->setIsTransactionClosed(true);
+            $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+            $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
+        } elseif ($authId) {
+            $payment->setTransactionId($authId);
+            $payment->setIsTransactionClosed(false);
+            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
+            $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_AUTH);
+        }
+
+        $this->_importPaymentInfo($result, $payment);
+
+        $stateObject->setState(Mage_Sales_Model_Order::STATE_PROCESSING);
+        $stateObject->setStatus('processing');
+        $stateObject->setIsNotified(true);
+    }
+
+    #[\Override]
     public function assignData($data): self
     {
         if (!($data instanceof \Maho\DataObject)) {

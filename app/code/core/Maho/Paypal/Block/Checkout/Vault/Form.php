@@ -16,12 +16,20 @@ class Maho_Paypal_Block_Checkout_Vault_Form extends Mage_Payment_Block_Form
     protected function _construct(): void
     {
         parent::_construct();
-        $this->setTemplate('maho/paypal/checkout/vault/form.phtml');
+        if (Mage::app()->getStore()->isAdmin()) {
+            $this->setTemplate('maho/paypal/order/create/vault-form.phtml');
+        } else {
+            $this->setTemplate('maho/paypal/checkout/vault/form.phtml');
+        }
     }
 
     public function getCustomerTokens(): Maho_Paypal_Model_Resource_Vault_Token_Collection
     {
-        $customerId = (int) Mage::getSingleton('customer/session')->getCustomerId();
+        if (Mage::app()->getStore()->isAdmin()) {
+            $customerId = (int) Mage::getSingleton('adminhtml/session_quote')->getCustomerId();
+        } else {
+            $customerId = (int) Mage::getSingleton('customer/session')->getCustomerId();
+        }
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $collection */
         $collection = Mage::getResourceModel('maho_paypal/vault_token_collection');

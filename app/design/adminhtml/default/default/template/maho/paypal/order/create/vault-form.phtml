@@ -7,8 +7,20 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-/** @var Mage_Adminhtml_Block_Template $this */
+/** @var Maho_Paypal_Block_Checkout_Vault_Form $this */
+$tokens = $this->getCustomerTokens();
+$methodCode = $this->getMethodCode();
 ?>
-<div id="admin_paypal_vault_form">
-    <p><?= $this->escapeHtml($this->__('Vault payment will use the customer\'s saved payment methods.')) ?></p>
+<div id="payment_form_<?= $this->escapeHtml($methodCode) ?>" style="display:none">
+    <?php if ($tokens->getSize() > 0): ?>
+    <select name="payment[vault_token_id]" id="paypal_vault_token" class="required-entry">
+        <?php foreach ($tokens as $token): ?>
+        <option value="<?= $this->escapeHtml($token->getId()) ?>">
+            <?= $this->escapeHtml($token->getDisplayLabel()) ?>
+        </option>
+        <?php endforeach; ?>
+    </select>
+    <?php else: ?>
+    <p><?= $this->escapeHtml($this->__('No saved payment methods available for this customer.')) ?></p>
+    <?php endif; ?>
 </div>
