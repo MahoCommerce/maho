@@ -7,7 +7,6 @@ body.paypal-standard-active .btn-checkout { display: none !important; }
 .paypal-card-row .paypal-card-field { flex: 1; }
 
 .paypal-save-vault {
-    margin-top: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
