@@ -46,7 +46,7 @@ async function mahoFetch(url, options) {
             } else if (typeof fetchOptions.body === 'string') {
                 try {
                     const parsed = JSON.parse(fetchOptions.body);
-                    if (typeof parsed === 'object' && parsed !== null && !parsed.form_key) {
+                    if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) && !('form_key' in parsed)) {
                         parsed.form_key = FORM_KEY;
                         fetchOptions.body = JSON.stringify(parsed);
                     }
