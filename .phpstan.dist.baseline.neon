@@ -10332,11 +10332,6 @@ parameters:
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api.php
 
-		-
-			rawMessage: 'Parameter #1 $data (object) of method Mage_Checkout_Model_Cart_Payment_Api_V2::_preparePaymentData() should be compatible with parameter $data (array) of method Mage_Checkout_Model_Cart_Payment_Api::_preparePaymentData()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Observer::loadCustomerQuote() has no return type specified.'

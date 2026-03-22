@@ -13,12 +13,23 @@
 class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resource
 {
     /**
-     * @param array $data
+     * Normalize payment data from SOAP (stdClass) or REST (array) into a plain array.
+     *
+     * @param array|object $data
      * @return array
      */
     protected function _preparePaymentData($data)
     {
-        if (!(is_array($data) && is_null($data[0] ?? null))) {
+        if (is_object($data)) {
+            $data = get_object_vars($data);
+        }
+
+        if (!is_array($data)) {
+            return [];
+        }
+
+        // Legacy SOAP compound type: reject when [0] is present and non-null.
+        if (array_key_exists(0, $data) && $data[0] !== null) {
             return [];
         }
 
@@ -65,9 +76,10 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
     protected function _getPaymentMethodAvailableCcTypes($method)
     {
         $ccTypes = Mage::getSingleton('payment/config')->getCcTypes();
-        $methodCcTypes = explode(',', (string) $method->getConfigData('cctypes'));
+        $raw = $method->getConfigData('cctypes');
+        $methodCcTypes = array_filter(explode(',', is_string($raw) ? $raw : ''), static fn (string $v): bool => $v !== '');
         foreach ($ccTypes as $code => $title) {
-            if (!in_array($code, $methodCcTypes)) {
+            if (!in_array($code, $methodCcTypes, true)) {
                 unset($ccTypes[$code]);
             }
         }
