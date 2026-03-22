@@ -6,6 +6,7 @@
  * @package    Mage_Checkout
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2020-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -17,7 +18,7 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
      */
     protected function _preparePaymentData($data)
     {
-        if (!(is_array($data) && is_null($data[0]))) {
+        if (!(is_array($data) && is_null($data[0] ?? null))) {
             return [];
         }
 
@@ -64,7 +65,7 @@ class Mage_Checkout_Model_Cart_Payment_Api extends Mage_Checkout_Model_Api_Resou
     protected function _getPaymentMethodAvailableCcTypes($method)
     {
         $ccTypes = Mage::getSingleton('payment/config')->getCcTypes();
-        $methodCcTypes = explode(',', $method->getConfigData('cctypes'));
+        $methodCcTypes = explode(',', (string) $method->getConfigData('cctypes'));
         foreach ($ccTypes as $code => $title) {
             if (!in_array($code, $methodCcTypes)) {
                 unset($ccTypes[$code]);
