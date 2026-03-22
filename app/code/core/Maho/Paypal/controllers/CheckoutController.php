@@ -40,6 +40,10 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $result = ['success' => false];
 
         try {
+            if (!$this->_validateFormKey()) {
+                Mage::throwException(Mage::helper('maho_paypal')->__('Invalid form key.'));
+            }
+
             $quote = Mage::getSingleton('checkout/session')->getQuote();
             $storeId = $quote->getStoreId() ? (int) $quote->getStoreId() : null;
 
@@ -72,7 +76,9 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 Mage::throwException(Mage::helper('maho_paypal')->__('Cart is empty.'));
             }
 
-            $methodCode = $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
+            $methodCode = $this->_validateMethodCode(
+                $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT),
+            );
 
             /** @var Maho_Paypal_Model_Config $config */
             $config = Mage::getModel('paypal/config');
@@ -184,7 +190,9 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             if (!$paypalOrderId) {
                 Mage::throwException(Mage::helper('maho_paypal')->__('Missing PayPal order ID.'));
             }
-            $methodCode = $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT);
+            $methodCode = $this->_validateMethodCode(
+                $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT),
+            );
 
             /** @var Maho_Paypal_Model_Config $config */
             $config = Mage::getModel('paypal/config');
@@ -366,9 +374,19 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    /**
-     * Find quote by PayPal order ID stored in payment additional information
-     */
+    protected function _validateMethodCode(string $methodCode): string
+    {
+        $allowed = [
+            Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT,
+            Maho_Paypal_Model_Config::METHOD_ADVANCED_CHECKOUT,
+            Maho_Paypal_Model_Config::METHOD_VAULT,
+        ];
+        if (!in_array($methodCode, $allowed, true)) {
+            Mage::throwException(Mage::helper('maho_paypal')->__('Invalid payment method.'));
+        }
+        return $methodCode;
+    }
+
     protected function _findQuoteByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Quote
     {
         if (!$paypalOrderId || !preg_match('/^[A-Z0-9]+$/', $paypalOrderId)) {

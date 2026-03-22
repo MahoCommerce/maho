@@ -68,9 +68,17 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         }
 
         $supplementaryData = $resource['supplementary_data']['related_ids'] ?? [];
-        $paypalOrderId = $supplementaryData['order_id'] ?? $resource['id'] ?? null;
+        $paypalOrderId = $supplementaryData['order_id'] ?? null;
         if ($paypalOrderId) {
             $order = $this->_loadOrderByPaypalOrderId($paypalOrderId);
+            if ($order) {
+                return $order;
+            }
+        }
+
+        $resourceId = $resource['id'] ?? null;
+        if ($resourceId) {
+            $order = $this->_loadOrderByTransactionId($resourceId);
             if ($order) {
                 return $order;
             }

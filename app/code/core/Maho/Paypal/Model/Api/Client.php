@@ -286,7 +286,13 @@ class Maho_Paypal_Model_Api_Client
             'headers' => $this->_getAuthHeaders(),
         ]);
 
-        $result = Mage::helper('core')->jsonDecode($response->getContent());
+        $statusCode = $response->getStatusCode();
+        if ($statusCode !== 200) {
+            $this->_log('Webhook signature verification failed', ['status' => $statusCode, 'response' => $response->getContent(false)]);
+            return false;
+        }
+
+        $result = Mage::helper('core')->jsonDecode($response->getContent(false));
         return ($result['verification_status'] ?? '') === 'SUCCESS';
     }
 

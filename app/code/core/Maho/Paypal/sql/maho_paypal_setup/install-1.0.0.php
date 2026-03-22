@@ -16,9 +16,7 @@ $installer->startSetup();
 
 $connection = $installer->getConnection();
 
-// -------------------------------------------------------------------------
 // paypal_webhook_event table
-// -------------------------------------------------------------------------
 $webhookTable = $connection
     ->newTable($installer->getTable('maho_paypal/webhook_event'))
     ->addColumn('event_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
@@ -76,9 +74,7 @@ $webhookTable = $connection
 
 $connection->createTable($webhookTable);
 
-// -------------------------------------------------------------------------
 // paypal_vault_token table
-// -------------------------------------------------------------------------
 $vaultTable = $connection
     ->newTable($installer->getTable('maho_paypal/vault_token'))
     ->addColumn('token_id', Maho\Db\Ddl\Table::TYPE_INTEGER, null, [
@@ -145,9 +141,7 @@ $vaultTable = $connection
 
 $connection->createTable($vaultTable);
 
-// -------------------------------------------------------------------------
 // Add paypal_order_id to quote and order payment tables
-// -------------------------------------------------------------------------
 $quotePaymentTable = $installer->getTable('sales/quote_payment');
 $connection->addColumn($quotePaymentTable, 'paypal_order_id', [
     'type'     => Maho\Db\Ddl\Table::TYPE_VARCHAR,
