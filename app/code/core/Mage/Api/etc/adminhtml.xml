@@ -31,7 +31,7 @@
                                     </roles>
                                     <orphaned_resources translate="title">
                                         <title>Orphaned API Role Resources</title>
-                                        <sort_order>30</sort_order>
+                                        <sort_order>99</sort_order>
                                     </orphaned_resources>
                                 </children>
                             </api>
@@ -68,7 +68,7 @@
                         <orphaned_resources translate="title">
                             <title>Orphaned API Role Resources</title>
                             <action>adminhtml/api_orphanedResource</action>
-                            <sort_order>30</sort_order>
+                            <sort_order>99</sort_order>
                         </orphaned_resources>
                     </children>
                 </api>
