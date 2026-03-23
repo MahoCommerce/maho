@@ -99,7 +99,6 @@ class MahoPaypalAdvancedCheckout {
             }
 
             const submitResult = await this._cardSession.submit(response.paypal_order_id, submitOptions);
-            console.log('PayPal card submit result:', submitResult);
 
             if (submitResult.state === 'canceled') {
                 return false;
