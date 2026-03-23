@@ -276,7 +276,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
     {
         try {
             $body = $this->getRequest()->getRawBody();
-            Mage::log('Shipping callback received: ' . $body, Mage::LOG_DEBUG, 'paypal.log');
             $data = Mage::helper('core')->jsonDecode($body);
 
             $paypalOrderId = $data['id'] ?? '';
@@ -286,7 +285,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             // Find quote by PayPal order ID
             $quote = $this->_findQuoteByPaypalOrderId($paypalOrderId);
             if (!$quote || !$quote->getId() || $quote->isVirtual()) {
-                Mage::log('Shipping callback: quote not found for order ' . $paypalOrderId, Mage::LOG_ERROR, 'paypal.log');
                 $this->getResponse()->setHttpResponseCode(422);
                 return;
             }
@@ -305,7 +303,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
             $rates = $shippingAddr->getAllShippingRates();
 
             if (count($rates) === 0) {
-                Mage::log('Shipping callback: no rates for address ' . Mage::helper('core')->jsonEncode($shippingAddress), Mage::LOG_ERROR, 'paypal.log');
                 $this->getResponse()->setHttpResponseCode(422);
                 return;
             }
@@ -363,12 +360,9 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 ],
             ];
 
-            $jsonResponse = Mage::helper('core')->jsonEncode($response);
-            Mage::log('Shipping callback response: ' . $jsonResponse, Mage::LOG_DEBUG, 'paypal.log');
             $this->getResponse()->setHeader('Content-Type', 'application/json');
-            $this->getResponse()->setBody($jsonResponse);
+            $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($response));
         } catch (\Throwable $e) {
-            Mage::log('Shipping callback exception: ' . $e->getMessage(), Mage::LOG_ERROR, 'paypal.log');
             Mage::logException($e);
             $this->getResponse()->setHttpResponseCode(422);
         }
