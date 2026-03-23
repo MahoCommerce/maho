@@ -98,17 +98,19 @@ class MahoPaypalAdvancedCheckout {
                 submitOptions.billingAddress = response.billing_address;
             }
 
-            const { state } = await this._cardSession.submit(response.paypal_order_id, submitOptions);
+            const submitResult = await this._cardSession.submit(response.paypal_order_id, submitOptions);
+            console.log('PayPal card submit result:', submitResult);
 
-            if (state === 'canceled') {
+            if (submitResult.state === 'canceled') {
                 return false;
             }
 
-            if (state === 'failed') {
-                throw new Error('Card payment failed. Please try again.');
+            if (submitResult.state === 'failed') {
+                const detail = submitResult.error?.message || submitResult.message || '';
+                throw new Error(detail || 'Card payment failed. Please try again.');
             }
 
-            if (state === 'succeeded') {
+            if (submitResult.state === 'succeeded') {
                 await this.onApprove({ orderId: response.paypal_order_id });
                 return true;
             }

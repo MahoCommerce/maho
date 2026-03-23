@@ -106,9 +106,15 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
             /** @var Maho_Paypal_Model_Api_OrderBuilder $builder */
             $builder = Mage::getModel('maho_paypal/api_orderBuilder');
-            $returnUrl = Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
-            $cancelUrl = Mage::getUrl('checkout/cart', ['_secure' => true]);
-            $shippingCallbackUrl = Mage::getUrl('paypal/checkout/shippingCallback', ['_secure' => true]);
+
+            $returnUrl = null;
+            $cancelUrl = null;
+            $shippingCallbackUrl = null;
+            if ($methodCode === Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT) {
+                $returnUrl = Mage::getUrl('paypal/checkout/approveOrder', ['_secure' => true]);
+                $cancelUrl = Mage::getUrl('checkout/cart', ['_secure' => true]);
+                $shippingCallbackUrl = Mage::getUrl('paypal/checkout/shippingCallback', ['_secure' => true]);
+            }
 
             $orderRequest = $builder->buildFromQuote(
                 $quote,
