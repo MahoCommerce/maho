@@ -27,7 +27,7 @@ class Maho_AdminActivityLog_Block_Adminhtml_Activity_Grid extends Mage_Adminhtml
 
         // Group by action_group_id to show only one entry per group
         $collection->getSelect()
-            ->group('COALESCE(main_table.action_group_id, main_table.activity_id)')
+            ->group(new Maho\Db\Expr('COALESCE(main_table.action_group_id, main_table.activity_id)'))
             ->columns([
                 'activity_count' => new Maho\Db\Expr('COUNT(*)'),
             ]);
