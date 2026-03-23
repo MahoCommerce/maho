@@ -50,6 +50,7 @@ class Mage_Admin_Model_Resource_Rules_Collection extends Mage_Core_Model_Resourc
     /**
      * Generate and retrieve a resource - permissions map
      * @return array
+     * @deprecated since 26.5
      */
     public function getResourcesPermissionsArray()
     {
