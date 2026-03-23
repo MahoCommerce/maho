@@ -83,7 +83,7 @@ class Maho_Paypal_Model_Api_Client
                         ->logger($logger)
                         ->maskSensitiveHeaders(true)
                         ->requestConfiguration(RequestLoggingConfigurationBuilder::init()->body(true)->headers(true))
-                        ->responseConfiguration(ResponseLoggingConfigurationBuilder::init()->body(false)->headers(true)),
+                        ->responseConfiguration(ResponseLoggingConfigurationBuilder::init()->body(true)->headers(true)),
                 );
             }
 
