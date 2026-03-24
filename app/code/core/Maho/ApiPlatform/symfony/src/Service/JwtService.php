@@ -13,8 +13,14 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use DateTimeImmutable;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Validation\Constraint\IssuedBy;
+use Lcobucci\JWT\Validation\Constraint\PermittedFor;
+use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
+use Lcobucci\Clock\SystemClock;
 
 /**
  * JWT Service - Centralized JWT token management
@@ -27,10 +33,21 @@ class JwtService
     private const CONFIG_PATH_SECRET = 'maho_apiplatform/oauth2/secret';
     private const CONFIG_PATH_LEGACY = 'maho_api/settings/jwt_secret';
     private const TOKEN_EXPIRY_SECONDS = 86400; // 24 hours
-    private const ALGORITHM = 'HS256';
     private const AUDIENCE = 'maho-api';
 
     private ?string $cachedSecret = null;
+    private ?Configuration $config = null;
+
+    private function getConfig(): Configuration
+    {
+        if ($this->config === null) {
+            $this->config = Configuration::forSymmetricSigner(
+                new Sha256(),
+                InMemory::plainText($this->getSecret()),
+            );
+        }
+        return $this->config;
+    }
 
     /**
      * Generate JWT token for a customer
@@ -40,23 +57,23 @@ class JwtService
      */
     public function generateCustomerToken(\Mage_Customer_Model_Customer $customer): string
     {
-        $secret = $this->getSecret();
-        $now = time();
+        $now = new DateTimeImmutable();
+        $config = $this->getConfig();
 
-        $payload = [
-            'iss' => $this->getIssuer(),
-            'aud' => self::AUDIENCE,
-            'jti' => bin2hex(random_bytes(16)),
-            'sub' => 'customer_' . $customer->getId(),
-            'iat' => $now,
-            'exp' => $now + self::TOKEN_EXPIRY_SECONDS,
-            'customer_id' => (int) $customer->getId(),
-            'email' => $customer->getEmail(),
-            'type' => 'customer',
-            'roles' => ['ROLE_USER'],
-        ];
+        $token = $config->builder()
+            ->issuedBy($this->getIssuer())
+            ->permittedFor(self::AUDIENCE)
+            ->identifiedBy(bin2hex(random_bytes(16)))
+            ->relatedTo('customer_' . $customer->getId())
+            ->issuedAt($now)
+            ->expiresAt($now->modify('+' . self::TOKEN_EXPIRY_SECONDS . ' seconds'))
+            ->withClaim('customer_id', (int) $customer->getId())
+            ->withClaim('email', $customer->getEmail())
+            ->withClaim('type', 'customer')
+            ->withClaim('roles', ['ROLE_USER'])
+            ->getToken($config->signer(), $config->signingKey());
 
-        return JWT::encode($payload, $secret, self::ALGORITHM);
+        return $token->toString();
     }
 
     /**
@@ -67,23 +84,23 @@ class JwtService
      */
     public function generateAdminToken(\Mage_Admin_Model_User $admin): string
     {
-        $secret = $this->getSecret();
-        $now = time();
+        $now = new DateTimeImmutable();
+        $config = $this->getConfig();
 
-        $payload = [
-            'iss' => $this->getIssuer(),
-            'aud' => self::AUDIENCE,
-            'jti' => bin2hex(random_bytes(16)),
-            'sub' => 'admin_' . $admin->getId(),
-            'iat' => $now,
-            'exp' => $now + self::TOKEN_EXPIRY_SECONDS,
-            'admin_id' => (int) $admin->getId(),
-            'email' => $admin->getEmail(),
-            'type' => 'admin',
-            'roles' => ['ROLE_ADMIN'],
-        ];
+        $token = $config->builder()
+            ->issuedBy($this->getIssuer())
+            ->permittedFor(self::AUDIENCE)
+            ->identifiedBy(bin2hex(random_bytes(16)))
+            ->relatedTo('admin_' . $admin->getId())
+            ->issuedAt($now)
+            ->expiresAt($now->modify('+' . self::TOKEN_EXPIRY_SECONDS . ' seconds'))
+            ->withClaim('admin_id', (int) $admin->getId())
+            ->withClaim('email', $admin->getEmail())
+            ->withClaim('type', 'admin')
+            ->withClaim('roles', ['ROLE_ADMIN'])
+            ->getToken($config->signer(), $config->signingKey());
 
-        return JWT::encode($payload, $secret, self::ALGORITHM);
+        return $token->toString();
     }
 
     /**
@@ -95,24 +112,24 @@ class JwtService
      */
     public function generateApiUserToken(\Mage_Api_Model_User $apiUser, array $permissions = []): string
     {
-        $secret = $this->getSecret();
-        $now = time();
+        $now = new DateTimeImmutable();
+        $config = $this->getConfig();
 
-        $payload = [
-            'iss' => $this->getIssuer(),
-            'aud' => self::AUDIENCE,
-            'jti' => bin2hex(random_bytes(16)),
-            'sub' => 'api_user_' . $apiUser->getId(),
-            'iat' => $now,
-            'exp' => $now + $this->getTokenExpiry(),
-            'api_user_id' => (int) $apiUser->getId(),
-            'username' => $apiUser->getUsername(),
-            'type' => 'api_user',
-            'roles' => ['ROLE_API_USER'],
-            'permissions' => $permissions,
-        ];
+        $token = $config->builder()
+            ->issuedBy($this->getIssuer())
+            ->permittedFor(self::AUDIENCE)
+            ->identifiedBy(bin2hex(random_bytes(16)))
+            ->relatedTo('api_user_' . $apiUser->getId())
+            ->issuedAt($now)
+            ->expiresAt($now->modify('+' . $this->getTokenExpiry() . ' seconds'))
+            ->withClaim('api_user_id', (int) $apiUser->getId())
+            ->withClaim('username', $apiUser->getUsername())
+            ->withClaim('type', 'api_user')
+            ->withClaim('roles', ['ROLE_API_USER'])
+            ->withClaim('permissions', $permissions)
+            ->getToken($config->signer(), $config->signingKey());
 
-        return JWT::encode($payload, $secret, self::ALGORITHM);
+        return $token->toString();
     }
 
     /**
@@ -158,25 +175,38 @@ class JwtService
      * Decode and validate a JWT token
      *
      * @param string $token The JWT token to decode
-     * @return object The decoded payload
-     * @throws \Firebase\JWT\ExpiredException If token is expired
-     * @throws \Firebase\JWT\SignatureInvalidException If signature is invalid
-     * @throws \UnexpectedValueException If token format is invalid
+     * @return object The decoded payload as stdClass
+     * @throws \Lcobucci\JWT\Validation\RequiredConstraintsViolated If validation fails
+     * @throws \Lcobucci\JWT\Token\InvalidTokenStructure If token format is invalid
      * @throws \RuntimeException If JWT secret is not configured
      */
     public function decodeToken(string $token): object
     {
-        $secret = $this->getSecret();
-        $payload = JWT::decode($token, new Key($secret, self::ALGORITHM));
+        $config = $this->getConfig();
+        $parsed = $config->parser()->parse($token);
 
-        // Validate audience
-        if (($payload->aud ?? null) !== self::AUDIENCE) {
-            throw new \UnexpectedValueException('Invalid token audience');
-        }
+        $constraints = [
+            new IssuedBy($this->getIssuer()),
+            new PermittedFor(self::AUDIENCE),
+            new StrictValidAt(SystemClock::fromUTC()),
+        ];
 
-        // Validate issuer
-        if (($payload->iss ?? null) !== $this->getIssuer()) {
-            throw new \UnexpectedValueException('Invalid token issuer');
+        $config->validator()->assert($parsed, ...$constraints);
+
+        // Convert to stdClass for backward compatibility
+        $claims = $parsed->claims();
+        $payload = new \stdClass();
+        $payload->iss = $claims->get('iss');
+        $payload->aud = $claims->get('aud');
+        $payload->jti = $claims->get('jti');
+        $payload->sub = $claims->get('sub');
+        $payload->iat = $claims->get('iat');
+        $payload->exp = $claims->get('exp');
+
+        foreach (['customer_id', 'admin_id', 'api_user_id', 'email', 'username', 'type', 'roles', 'permissions', 'allowed_store_ids'] as $claim) {
+            if ($claims->has($claim)) {
+                $payload->$claim = $claims->get($claim);
+            }
         }
 
         return $payload;
