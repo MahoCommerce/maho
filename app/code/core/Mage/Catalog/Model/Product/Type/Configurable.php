@@ -863,7 +863,8 @@ class Mage_Catalog_Model_Product_Type_Configurable extends Mage_Catalog_Model_Pr
     public function processBuyRequest($product, $buyRequest)
     {
         $superAttribute = $buyRequest->getSuperAttribute();
-        $superAttribute = (is_array($superAttribute)) ? array_filter($superAttribute, '\intval') : [];
+        // Keep only values that are non-zero when cast to int
+        $superAttribute = (is_array($superAttribute)) ? array_filter($superAttribute, fn(mixed $o) => (int) $o !== 0) : [];
 
         return ['super_attribute' => $superAttribute];
     }

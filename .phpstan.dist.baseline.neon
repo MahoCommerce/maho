@@ -5500,12 +5500,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setEmailSent() expects int, false given.'
 			identifier: argument.type
 			count: 1
@@ -6433,12 +6427,6 @@ parameters:
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getProduct() expects int|string|null, Mage_Catalog_Model_Product|null given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Bundle/Model/Product/Type.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
-			count: 3
 			path: app/code/core/Mage/Bundle/Model/Product/Type.php
 
 		-
@@ -8401,22 +8389,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
 
 		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
 			rawMessage: 'Parameter #3 $product of method Mage_Catalog_Model_Product::addCustomOption() expects int|null, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Grouped.php
 
 		-
 			rawMessage: 'Parameter #3 $product of method Mage_Catalog_Model_Product::addCustomOption() expects int|null, Mage_Catalog_Model_Product given.'
@@ -14104,12 +14080,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product::setIsCustomOptionChanged() invoked with 0 parameters, 1 required.'
 			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Product/Type.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Product/Type.php
 
