@@ -12,6 +12,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.5
+ */
 class Mage_Admin_Helper_Rules_Fallback extends Mage_Core_Helper_Abstract
 {
     /**

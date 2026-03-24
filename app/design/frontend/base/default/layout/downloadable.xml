@@ -48,30 +48,6 @@
         </reference>
     </checkout_onepage_success>
 
-    <checkout_multishipping_addresses>
-        <reference name="checkout_addresses">
-            <action method="addItemRender"><type>downloadable</type><block>downloadable/checkout_cart_item_renderer</block><template>downloadable/checkout/multishipping/item/downloadable.phtml</template></action>
-        </reference>
-    </checkout_multishipping_addresses>
-
-    <checkout_multishipping_shipping>
-        <reference name="checkout_billing_items">
-            <action method="addItemRender"><type>downloadable</type><block>downloadable/checkout_cart_item_renderer</block><template>downloadable/checkout/multishipping/item/downloadable.phtml</template></action>
-        </reference>
-    </checkout_multishipping_shipping>
-
-    <checkout_multishipping_overview>
-        <reference name="checkout_overview">
-            <action method="addItemRender"><type>downloadable</type><block>downloadable/checkout_cart_item_renderer</block><template>downloadable/checkout/multishipping/item/downloadable.phtml</template></action>
-        </reference>
-    </checkout_multishipping_overview>
-
-    <checkout_multishipping_success>
-        <reference name="checkout_success">
-            <block type="downloadable/checkout_success" name="downloadable.checkout.success" template="downloadable/checkout/success.phtml"/>
-        </reference>
-    </checkout_multishipping_success>
-
     <paypal_express_review>
         <reference name="paypal.express.review.details">
             <action method="addItemRender"><type>downloadable</type><block>downloadable/checkout_cart_item_renderer</block><template>downloadable/checkout/onepage/review/item.phtml</template></action>

@@ -100,13 +100,6 @@ class Mage_Paypal_Model_Express_Checkout
     protected $_isBARequested = false;
 
     /**
-     * Flag for Bill Me Later mode
-     *
-     * @var bool
-     */
-    protected $_isBml = false;
-
-    /**
      * Customer ID
      *
      * @var int
@@ -145,7 +138,7 @@ class Mage_Paypal_Model_Express_Checkout
         } else {
             throw new Exception('Quote instance is required.');
         }
-        if (isset($params['config']) && $params['config'] instanceof Mage_Paypal_Model_Config) {
+        if (isset($params['config']) && ($params['config'] instanceof Mage_Paypal_Model_Config || $params['config'] instanceof Maho_Paypal_Model_Config)) {
             $this->_config = $params['config'];
         } else {
             throw new Exception('Config instance is required.');
@@ -216,16 +209,6 @@ class Mage_Paypal_Model_Express_Checkout
     }
 
     /**
-     * Set flag that forces to use BillMeLater
-     *
-     * @param bool $isBml
-     */
-    public function setIsBml($isBml)
-    {
-        $this->_isBml = $isBml;
-    }
-
-    /**
      * Setter for customer
      *
      * @param Mage_Customer_Model_Customer $customer
@@ -289,10 +272,6 @@ class Mage_Paypal_Model_Express_Checkout
                 'giropay_success_url' => $successUrl,
                 'giropay_bank_txn_pending_url' => $pendingUrl,
             ]);
-        }
-
-        if ($this->_isBml) {
-            $this->_api->setFundingSource('BML');
         }
 
         $this->_setBillingAgreementRequest();

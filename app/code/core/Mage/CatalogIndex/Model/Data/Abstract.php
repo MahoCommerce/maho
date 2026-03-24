@@ -32,7 +32,7 @@ class Mage_CatalogIndex_Model_Data_Abstract extends Mage_Core_Model_Abstract
     /**
      * Defines when product type has children
      *
-     * @var int[]|bool[]
+     * @var array<int, bool>|false
      */
     protected $_haveChildren = [
         Mage_CatalogIndex_Model_Retreiver::CHILDREN_FOR_TIERS => true,

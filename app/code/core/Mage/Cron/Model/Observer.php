@@ -14,6 +14,9 @@ class Mage_Cron_Model_Observer
 {
     public const CACHE_KEY_LAST_SCHEDULE_GENERATE_AT   = 'cron_last_schedule_generate_at';
     public const CACHE_KEY_LAST_HISTORY_CLEANUP_AT     = 'cron_last_history_cleanup_at';
+    public const CACHE_KEY_LAST_CRON_STATUS_CHECK      = 'cron_last_status_check';
+    public const CRON_STATUS_CHECK_INTERVAL            = 3600; // 1 hour
+    public const CRON_NOT_RUNNING_THRESHOLD            = 3600; // 1 hour
 
     public const XML_PATH_SCHEDULE_GENERATE_EVERY  = 'system/cron/schedule_generate_every';
     public const XML_PATH_SCHEDULE_AHEAD_FOR       = 'system/cron/schedule_ahead_for';
@@ -25,6 +28,46 @@ class Mage_Cron_Model_Observer
     public const REGEX_RUN_MODEL = '#^([a-z0-9_]+/[a-z0-9_]+)::([a-z0-9_]+)$#i';
 
     protected $_pendingSchedules;
+
+    /**
+     * Check if cron is running and warn admin users if not
+     */
+    public function checkCronStatus(\Maho\Event\Observer $observer): void
+    {
+        if (!Mage::getSingleton('admin/session')->isLoggedIn()) {
+            return;
+        }
+
+        $now = Mage::getSingleton('core/date')->gmtTimestamp();
+        $lastCheck = Mage::app()->loadCache(self::CACHE_KEY_LAST_CRON_STATUS_CHECK);
+        if ($lastCheck && $lastCheck > $now - self::CRON_STATUS_CHECK_INTERVAL) {
+            return;
+        }
+
+        Mage::app()->saveCache($now, self::CACHE_KEY_LAST_CRON_STATUS_CHECK, ['crontab'], null);
+
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $table = $resource->getTableName('cron/schedule');
+
+        $threshold = Mage::getSingleton('core/date')->gmtDate(
+            'Y-m-d H:i:s',
+            $now - self::CRON_NOT_RUNNING_THRESHOLD,
+        );
+
+        $hasRecentExecution = $adapter->fetchOne(
+            $adapter->select()
+                ->from($table, [new \Maho\Db\Expr('1')])
+                ->where('executed_at >= ?', $threshold)
+                ->limit(1),
+        );
+
+        if (!$hasRecentExecution) {
+            Mage::getSingleton('adminhtml/session')->addWarning(
+                Mage::helper('cron')->__('Cron does not appear to be running. No jobs have been executed in the last hour. Please verify that cron is configured on your server.'),
+            );
+        }
+    }
 
     /**
      * Process cron queue

@@ -5,7 +5,7 @@
  *
  * @package    Mage_Bundle
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2018-2023 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2018-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -96,10 +96,8 @@ class Mage_Bundle_Model_Observer
             ->addAttributeToSelect(Mage::getSingleton('catalog/config')->getProductAttributes())
             ->addStoreFilter()
             ->addPriceData()
+            ->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds())
             ->addTaxPercents();
-
-        Mage::getSingleton('catalog/product_visibility')
-            ->addVisibleInCatalogFilterToCollection($bundleCollection);
 
         if (!is_null($limit)) {
             $bundleCollection->setPageSize($limit);

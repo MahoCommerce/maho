@@ -18,7 +18,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
     public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS = 'sales/gift_options/allow_items';
     public const XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ORDER = 'sales/gift_options/allow_order';
 
-    public const TYPE_ADDRESS_ITEM  = 'address_item';
     public const TYPE_CONFIG        = 'config';
     public const TYPE_ITEM          = 'item';
     public const TYPE_ITEMS         = 'items';
@@ -50,7 +49,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
      */
     public function getInline($type, \Maho\DataObject $entity, $dontDisplayContainer = false)
     {
-        if (!in_array($type, ['onepage_checkout','multishipping_adress'])
+        if ($type !== 'onepage_checkout'
             && !$this->isMessagesAvailable($type, $entity)
         ) {
             return '';
@@ -79,7 +78,7 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
                     return Mage::getStoreConfigFlag(self::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS, $store);
                 }
                 if ($entity instanceof Mage_Sales_Model_Quote) {
-                    $_type = $entity->getIsMultiShipping() ? self::TYPE_ADDRESS_ITEM : self::TYPE_ITEM;
+                    $_type = self::TYPE_ITEM;
                 } else {
                     $_type = self::TYPE_ORDER_ITEM;
                 }
@@ -99,23 +98,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
             case self::TYPE_ORDER_ITEM:
                 return $this->_getDependenceFromStoreConfig(
                     $entity->getGiftMessageAvailable(),
-                    $store,
-                );
-            case self::TYPE_ADDRESS_ITEM:
-                $storeId = is_numeric($store) ? $store : Mage::app()->getStore($store)->getId();
-                $cacheId = self::TYPE_ADDRESS_ITEM . '_' . $entity->getProductId();
-
-                if (!$this->isCached($cacheId)) {
-                    $this->setCached(
-                        $cacheId,
-                        Mage::getModel('catalog/product')
-                            ->setStoreId($storeId)
-                            ->load($entity->getProductId())
-                            ->getGiftMessageAvailable(),
-                    );
-                }
-                return $this->_getDependenceFromStoreConfig(
-                    $this->getCached($cacheId),
                     $store,
                 );
             default:
@@ -235,23 +217,6 @@ class Mage_GiftMessage_Helper_Message extends Mage_Core_Helper_Data
             }
         }
 
-        return false;
-    }
-
-    /**
-     * Check availability for multishiping checkout items
-     *
-     * @param array $items
-     * @param Mage_Core_Model_Store|integer $store
-     * @return bool
-     */
-    public function getAvailableForAddressItems($items, $store = null)
-    {
-        foreach ($items as $item) {
-            if ($this->isMessagesAvailable('address_item', $item, $store)) {
-                return true;
-            }
-        }
         return false;
     }
 

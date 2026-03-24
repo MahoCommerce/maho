@@ -13,14 +13,10 @@
 class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_Filter
 {
     /**
-     * Retrieve media file local path directive
-     *
-     * @internal to avoid usage of urls at functions sensitive to "allow_url_fopen" php setting at GD2 adapter
+     * Retrieve media file local path instead of URL, so it can be read by Intervention Image
      *
      * @param array $construction
-     *
      * @return string
-     *
      * @throws Mage_Core_Exception
      */
     #[\Override]
@@ -32,5 +28,26 @@ class Mage_Cms_Model_Adminhtml_Template_Filter extends Mage_Cms_Model_Template_F
         }
 
         return Mage::getBaseDir('media') . DS . $params['url'];
+    }
+
+    /**
+     * Retrieve skin file local path instead of URL, so it can be read by Intervention Image
+     *
+     * @param array $construction
+     * @return string
+     */
+    #[\Override]
+    public function skinDirective($construction)
+    {
+        $params = $this->_getIncludeParameters($construction[2]);
+        if (!isset($params['url'])) {
+            Mage::throwException('Undefined url parameter for skin directive.');
+        }
+
+        $file = $params['url'];
+        unset($params['url']);
+        $params['_type'] = 'skin';
+
+        return Mage::getDesign()->getFilename($file, $params);
     }
 }

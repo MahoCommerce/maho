@@ -320,14 +320,14 @@ class Mage_Adminhtml_Block_Catalog_Product_Grid extends Mage_Adminhtml_Block_Wid
             ],
         ]);
 
-        if (Mage::getSingleton('admin/session')->isAllowed('catalog/update_attributes')) {
+        if ($this->isAllowed('catalog/update_attributes')) {
             $this->getMassactionBlock()->addItem(MassAction::ATTRIBUTES, [
                 'label' => Mage::helper('catalog')->__('Update Attributes'),
                 'url'   => $this->getUrl('*/catalog_product_action_attribute/edit', ['_current' => true]),
             ]);
         }
 
-        if (Mage::getSingleton('admin/session')->isAllowed('catalog/attributes/sets')) {
+        if ($this->isAllowed('catalog/attributes/sets')) {
             $this->getMassactionBlock()->addItem(MassAction::CHANGE_ATTRIBUTE_SET, [
                 'confirm' => Mage::helper('catalog')->__('Changing the attribute set may result in data loss for attributes that do not exist in the new set. Are you sure?'),
                 'label' => Mage::helper('catalog')->__('Change Attribute Set'),

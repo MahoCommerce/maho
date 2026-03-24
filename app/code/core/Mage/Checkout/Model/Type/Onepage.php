@@ -121,15 +121,6 @@ class Mage_Checkout_Model_Type_Onepage
         $collectTotals = false;
 
         /**
-         * Reset multishipping flag before any manipulations with quote address
-         * addAddress method for quote object related on this flag
-         */
-        if ($this->getQuote()->getIsMultiShipping()) {
-            $this->getQuote()->setIsMultiShipping(false);
-            $quoteSave = true;
-        }
-
-        /**
          *  Reset customer balance
          */
         if ($this->getQuote()->getUseCustomerBalance()) {
@@ -567,9 +558,6 @@ class Mage_Checkout_Model_Type_Onepage
     public function validate()
     {
         $quote  = $this->getQuote();
-        if ($quote->getIsMultiShipping()) {
-            Mage::throwException(Mage::helper('checkout')->__('Invalid checkout type.'));
-        }
 
         if ($quote->getCheckoutMethod() == self::METHOD_GUEST && !$quote->isAllowedGuestCheckout()) {
             Mage::throwException(Mage::helper('checkout')->__('Sorry, guest checkout is not enabled. Please try again or contact store owner.'));

@@ -19,20 +19,6 @@ class Maho_Blog_Block_Category_Sidebar extends Mage_Core_Block_Template
     protected ?array $_urlKeys = null;
 
     #[\Override]
-    protected function _beforeToHtml(): self
-    {
-        if (!Mage::helper('blog')->areCategoriesEnabled() || empty($this->getCategoryTree())) {
-            // Switch to 1-column layout when sidebar has no content
-            $root = $this->getLayout()->getBlock('root');
-            if ($root) {
-                $root->setTemplate('page/1column.phtml');
-            }
-        }
-
-        return $this;
-    }
-
-    #[\Override]
     protected function _toHtml(): string
     {
         if (!Mage::helper('blog')->areCategoriesEnabled() || empty($this->getCategoryTree())) {

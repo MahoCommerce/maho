@@ -16,10 +16,6 @@
  * @method string getShortcutHtmlId()
  * @method string getImageUrl()
  * @method string getCheckoutUrl()
- * @method string getBmlShortcutHtmlId()
- * @method string getBmlCheckoutUrl()
- * @method string getBmlImageUrl()
- * @method string getIsBmlEnabled()
  * @method string getConfirmationUrl()
  * @method string getIsInCatalogProduct()
  * @method string getConfirmationMessage()
@@ -117,8 +113,6 @@ class Mage_Paypal_Block_Express_Shortcut extends Mage_Core_Block_Template
         $this->setShortcutHtmlId($helper->uniqHash('ec_shortcut_'))
             ->setCheckoutUrl($this->getUrl($this->_startAction));
 
-        $this->_getBmlShortcut($quote);
-
         // use static image if in catalog
         if ($isInCatalog || $quote === null) {
             $this->setImageUrl($config->getExpressCheckoutShortcutImageUrl(Mage::app()->getLocale()->getLocaleCode()));
@@ -142,27 +136,6 @@ class Mage_Paypal_Block_Express_Shortcut extends Mage_Core_Block_Template
         }
 
         return $result;
-    }
-
-    /**
-     * @param Mage_Sales_Model_Quote $quote
-     *
-     * @return $this
-     */
-    protected function _getBmlShortcut($quote)
-    {
-        /** @var Mage_Core_Helper_Data $helper */
-        $helper = $this->helper('core');
-        $bml = Mage::helper('payment')->getMethodInstance(Mage_Paypal_Model_Config::METHOD_BML);
-        $isBmlEnabled = $bml && $bml->isAvailable($quote);
-        $this->setBmlShortcutHtmlId($helper->uniqHash('ec_shortcut_bml_'))
-            ->setBmlCheckoutUrl($this->getUrl('paypal/bml/start/button/1'))
-            ->setBmlImageUrl('https://www.paypalobjects.com/webstatic/en_US/i/buttons/ppcredit-logo-medium.png')
-            ->setMarketMessage('https://www.paypalobjects.com/webstatic/en_US/btn/btn_bml_text.png')
-            ->setMarketMessageUrl('https://www.securecheckout.billmelater.com/paycapture-content/'
-                . 'fetch?hash=AU826TU8&content=/bmlweb/ppwpsiw.html')
-            ->setIsBmlEnabled($isBmlEnabled);
-        return $this;
     }
 
     /**

@@ -24,6 +24,15 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
     {
         $js = '
             document.addEventListener("DOMContentLoaded", function() {
+                function togglePaypalSolutionConfigureButton(button, enable) {
+                    if (enable) {
+                        button.disabled = false;
+                        button.classList.remove("disabled");
+                    } else {
+                        button.disabled = true;
+                        button.classList.add("disabled");
+                    }
+                }
                 document.querySelectorAll(".with-button button.button").forEach(function(configureButton) {
                     togglePaypalSolutionConfigureButton(configureButton, true);
                 });
@@ -222,26 +231,6 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                         paypalConflictsObject.sharePayflowEnabling(enabler, isEvent);
                     },
 
-                    handleBmlEnabler: function(event) {
-                        required = event.target;
-                        var bml = required.bmlEnabler;
-                        if (required.value == "1") {
-                            bml.value = "1";
-                        }
-                        paypalConflictsObject.toggleBmlEnabler(required);
-                    },
-
-                    toggleBmlEnabler: function(required) {
-                        var bml = $(required).bmlEnabler;
-                        if (!bml) {
-                            return;
-                        }
-                        if (required.value != "1") {
-                            bml.value = "0";
-                            bml.disabled = true;
-                        }
-                        bml.requiresObj.indicateEnabled();
-                    }
                 };
 
                 // fill enablers with conflict data
@@ -296,19 +285,8 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                     }
                 }
 
-                document.querySelectorAll(".paypal-bml").forEach(function(bmlEnabler) {
-                    Array.from(bmlEnabler.classList).forEach(function(className) {
-                        if (className.indexOf("requires-") !== -1) {
-                            var required = document.getElementById(className.replace("requires-", ""));
-                            required.bmlEnabler = bmlEnabler;
-                            required.addEventListener("change", paypalConflictsObject.handleBmlEnabler);
-                        }
-                    });
-                });
-
                 document.querySelectorAll(".paypal-enabler").forEach(function(enablerElement) {
                     paypalConflictsObject.checkPaymentConflicts(enablerElement, "initial");
-                    paypalConflictsObject.toggleBmlEnabler(enablerElement);
                 });
                 if (paypalConflictsObject.isConflict || paypalConflictsObject.ecMissed) {
                     var notification = \'' . $this->helper('core')->jsQuoteEscape($this->__('The following error(s) occured:')) . '\';
@@ -325,7 +303,7 @@ class Mage_Paypal_Block_Adminhtml_System_Config_Fieldset_Location extends Mage_A
                 }
 
                 document.querySelectorAll(".requires").forEach(function(dependent) {
-                    if (dependent.classList.contains("paypal-ec-enabler")) {
+                    if (dependent.classList.contains("paypal-ec-enabler") && dependent.requiresObj) {
                         dependent.requiresObj.callback = function(required) {
                             if (required.classList.contains("paypal-enabler") && required.value == 0) {
                                 dependent.disabled = true;

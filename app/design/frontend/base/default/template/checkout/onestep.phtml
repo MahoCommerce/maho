@@ -123,7 +123,9 @@ $isLoggedIn = $this->isCustomerLoggedIn();
             selectMethodsError: <?= Mage::helper('core')->jsonEncode($this->__('Please select shipping and payment methods before placing your order.')) ?>,
             selectShippingMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a shipping method.')) ?>,
             selectPaymentMethodError: <?= Mage::helper('core')->jsonEncode($this->__('Please select a payment method.')) ?>,
-            genericError: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred while placing your order. Please try again.')) ?>
+            noPaymentMethodsError: <?= Mage::helper('core')->jsonEncode($this->__('Your order cannot be completed at this time as there are no payment methods available for it.')) ?>,
+            genericError: <?= Mage::helper('core')->jsonEncode($this->__('An error occurred while placing your order. Please try again.')) ?>,
+            saveBillingError: <?= Mage::helper('core')->jsonEncode($this->__('Failed to save billing address. Please try again.')) ?>
         }
     });
 

@@ -979,7 +979,7 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
 
 		-
-			rawMessage: 'Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_collection (Mage_Sales_Model_Entity_Sale_Collection) does not accept Maho\Data\Collection\Db.'
+			rawMessage: 'Property Mage_Adminhtml_Block_Customer_Edit_Tab_View_Sales::$_collection (Mage_Sales_Model_Resource_Sale_Collection) does not accept Maho\Data\Collection\Db.'
 			identifier: assign.propertyType
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Customer/Edit/Tab/View/Sales.php
@@ -2503,12 +2503,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Info.php
 
 		-
-			rawMessage: 'Parameter #2 $array of function implode expects array<string>, array<int, array<string>|string|null> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Sales/Order/View/Info.php
-
-		-
 			rawMessage: 'Method Mage_Adminhtml_Block_Sales_Order_View_Items_Renderer_Default::getItem() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -3755,12 +3749,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Number.php
-
-		-
-			rawMessage: 'Parameter #2 $array of function implode expects array<string>, list<array<string>|string|null> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/Block/Widget/Grid/Column/Renderer/Options.php
 
 		-
 			rawMessage: Property Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Price::$_currencies has no type specified.
@@ -5029,6 +5017,15 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Catalog/Category/WidgetController.php
 
 		-
+			rawMessage: '''
+				Call to method getAttribute() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/Catalog/CategoryController.php
+
+		-
 			rawMessage: 'Parameter #1 $value of method Mage_Cms_Model_Wysiwyg_Config::setStoreId() expects string, int given.'
 			identifier: argument.type
 			count: 1
@@ -5485,12 +5482,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
-			rawMessage: 'Parameter #1 $order of method Mage_Sales_Model_Resource_Order_Collection_Abstract::setOrderFilter() expects int|Mage_Sales_Model_Order, array<string, mixed> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setCustomerNoteNotify() expects int, bool given.'
 			identifier: argument.type
 			count: 1
@@ -5498,12 +5489,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order_Shipment::setEmailSent() expects int, true given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
@@ -5555,6 +5540,24 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Adminhtml/controllers/System/AccountController.php
+
+		-
+			rawMessage: '''
+				Call to method rebuild() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/System/CacheController.php
+
+		-
+			rawMessage: '''
+				Call to method rebuild() of deprecated class Mage_Catalog_Model_Resource_Product_Flat_Indexer:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Adminhtml/controllers/System/CacheController.php
 
 		-
 			rawMessage: 'Method Mage_Adminhtml_System_ConfigController::_saveAdvanced() has no return type specified.'
@@ -5971,18 +5974,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Block/Adminhtml/Attribute/Grid.php
 
 		-
-			rawMessage: 'Property Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource::$_treeModel (Mage_Api2_Model_Acl_Global_Rule_Tree) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Api2/Block/Adminhtml/Attribute/Tab/Resource.php
-
-		-
-			rawMessage: 'Property Mage_Api2_Block_Adminhtml_Roles_Tab_Resources::$_treeModel (Mage_Api2_Model_Acl_Global_Rule_Tree) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Api2/Block/Adminhtml/Roles/Tab/Resources.php
-
-		-
 			rawMessage: Variable $adapters might not be defined.
 			identifier: variable.undefined
 			count: 1
@@ -6349,18 +6340,6 @@ parameters:
 			path: app/code/core/Mage/Bundle/Model/CatalogIndex/Data/Bundle.php
 
 		-
-			rawMessage: PHPDoc type bool of property Mage_Bundle_Model_CatalogIndex_Data_Bundle::$_haveChildren is not the same as PHPDoc type array<bool|int> of overridden property Mage_CatalogIndex_Model_Data_Simple::$_haveChildren.
-			identifier: property.phpDocType
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/CatalogIndex/Data/Bundle.php
-
-		-
-			rawMessage: 'Property Mage_Bundle_Model_CatalogIndex_Data_Bundle::$_haveChildren (bool) does not accept default value of type array<int, bool>.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/CatalogIndex/Data/Bundle.php
-
-		-
 			rawMessage: 'Property Mage_Bundle_Model_Option::$_defaultSelection (Mage_Bundle_Model_Selection) does not accept Mage_Catalog_Model_Product.'
 			identifier: assign.propertyType
 			count: 1
@@ -6418,12 +6397,6 @@ parameters:
 			rawMessage: 'Parameter #1 $index of method Maho\DataObject::getProduct() expects int|string|null, Mage_Catalog_Model_Product|null given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Bundle/Model/Product/Type.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
-			count: 3
 			path: app/code/core/Mage/Bundle/Model/Product/Type.php
 
 		-
@@ -6507,6 +6480,24 @@ parameters:
 		-
 			rawMessage: 'Argument of an invalid type string supplied for foreach, only iterables are supported.'
 			identifier: foreach.nonIterable
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Navigation.php
+
+		-
+			rawMessage: '''
+				Call to method isAvailable() of deprecated class Mage_Catalog_Helper_Flat_Abstract:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Block/Navigation.php
+
+		-
+			rawMessage: '''
+				Call to method isBuilt() of deprecated class Mage_Catalog_Helper_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Navigation.php
 
@@ -6635,12 +6626,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Product/View/Options/Type/Select.php
-
-		-
-			rawMessage: Property Mage_Catalog_Block_Product_View_Tabs::$_tabs has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Catalog/Block/Product/View/Tabs.php
 
 		-
 			rawMessage: 'Cannot call method setAttributeObj() on class-string|object.'
@@ -6791,6 +6776,24 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/code/core/Mage/Catalog/Block/Widget/Link.php
+
+		-
+			rawMessage: '''
+				Parameter $collection of method Mage_Catalog_Helper_Category_Url_Rewrite::joinTableToCollection() has typehint with deprecated class Mage_Catalog_Model_Resource_Category_Flat_Collection:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Helper/Category/Url/Rewrite.php
+
+		-
+			rawMessage: '''
+				Parameter $collection of method Mage_Catalog_Helper_Category_Url_Rewrite_Interface::joinTableToCollection() has typehint with deprecated class Mage_Catalog_Model_Resource_Category_Flat_Collection:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: parameter.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Helper/Category/Url/Rewrite/Interface.php
 
 		-
 			rawMessage: 'Parameter #1 $categoryId of method Mage_Catalog_Helper_Data::_isCategoryLink() expects int, string given.'
@@ -7147,8 +7150,188 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Attribute/Backend/Urlkey/Abstract.php
 
 		-
+			rawMessage: '''
+				Call to method checkId() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getAllChildren() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getAnchorsAbove() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getAttribute() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getCategories() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getChildren() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getChildrenAmount() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getChildrenCategories() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getChildrenCategoriesWithInactive() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getParentCategories() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getParentDesignCategory() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getProductCount() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method getProductsPosition() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method isAccessible() of deprecated class Mage_Catalog_Helper_Flat_Abstract:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method isBuilt() of deprecated class Mage_Catalog_Helper_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method isInRootCategoryList() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				Call to method setStoreId() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
 			rawMessage: Left side of && is always true.
 			identifier: booleanAnd.leftAlwaysTrue
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @method for _getResource() references deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: methodTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @method for getResource() references deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: methodTag.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Catalog_Helper_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: varTag.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category.php
 
@@ -7159,10 +7342,28 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Category/Api.php
 
 		-
+			rawMessage: '''
+				Call to method getAttribute() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category/Attribute/Api.php
+
+		-
 			rawMessage: 'Method Mage_Eav_Model_Entity_Attribute_Source_Interface::getAllOptions() invoked with 1 parameter, 0 required.'
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Category/Attribute/Api.php
+
+		-
+			rawMessage: '''
+				Call to method getProductsPosition() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Category/Dynamic/Processor.php
 
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Category_Indexer_Flat::_processEvent() has no return type specified.'
@@ -7591,6 +7792,60 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Observer.php
 
 		-
+			rawMessage: '''
+				Call to method deleteStores() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
+			rawMessage: '''
+				Call to method isAvailable() of deprecated class Mage_Catalog_Helper_Flat_Abstract:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 6
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
+			rawMessage: '''
+				Call to method isBuilt() of deprecated class Mage_Catalog_Helper_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 7
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
+			rawMessage: '''
+				Call to method isEnabled() of deprecated class Mage_Catalog_Helper_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
+			rawMessage: '''
+				Call to method move() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
+			rawMessage: '''
+				Call to method synchronize() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 4
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Observer::_addCategoriesToMenu() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -7624,6 +7879,15 @@ parameters:
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Category_Flat::move() invoked with 3 parameters, 1 required.'
 			identifier: arguments.count
 			count: 1
+			path: app/code/core/Mage/Catalog/Model/Observer.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Catalog_Helper_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: varTag.deprecatedClass
+			count: 6
 			path: app/code/core/Mage/Catalog/Model/Observer.php
 
 		-
@@ -8095,22 +8359,10 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
 
 		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
 			rawMessage: 'Parameter #3 $product of method Mage_Catalog_Model_Product::addCustomOption() expects int|null, Mage_Catalog_Model_Product given.'
 			identifier: argument.type
 			count: 2
 			path: app/code/core/Mage/Catalog/Model/Product/Type/Configurable.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Product/Type/Grouped.php
 
 		-
 			rawMessage: 'Parameter #3 $product of method Mage_Catalog_Model_Product::addCustomOption() expects int|null, Mage_Catalog_Model_Product given.'
@@ -8401,6 +8653,42 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
+			rawMessage: '''
+				Call to method isAccessible() of deprecated class Mage_Catalog_Helper_Flat_Abstract:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
+
+		-
+			rawMessage: '''
+				Call to method isAddChildData() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
+
+		-
+			rawMessage: '''
+				Call to method isBuilt() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
+
+		-
+			rawMessage: '''
+				Call to method isFlatCollectionDisabled() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Product_Collection::_addUrlRewrite() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8425,8 +8713,11 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
-			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Collection::$_urlRewriteCategory (int) does not accept default value of type string.'
-			identifier: property.defaultValue
+			rawMessage: '''
+				Return type of method Mage_Catalog_Model_Resource_Product_Collection::getFlatHelper() has typehint with deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: return.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
@@ -8659,6 +8950,15 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Website.php
 
 		-
+			rawMessage: '''
+				Call to method getAttribute() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/Catalog/Model/Resource/Url.php
+
+		-
 			rawMessage: 'Method Mage_Catalog_Model_Resource_Url::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -8719,6 +9019,24 @@ parameters:
 			path: app/code/core/Mage/Catalog/data/catalog_setup/data-install-1.6.0.0.php
 
 		-
+			rawMessage: '''
+				Fetching class constant CATALOG_CATEGORY_FLAT_PROCESS_CODE of deprecated class Mage_Catalog_Helper_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.13-1.6.0.0.14.php
+
+		-
+			rawMessage: '''
+				Fetching class constant CATALOG_FLAT_PROCESS_CODE of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: classConstant.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Catalog/data/catalog_setup/data-upgrade-1.6.0.0.19.1.3-1.6.0.0.19.1.4.php
+
+		-
 			rawMessage: 'Call to an undefined method Mage_CatalogIndex_Model_Resource_Attribute::checkCount().'
 			identifier: method.notFound
 			count: 1
@@ -8749,16 +9067,31 @@ parameters:
 			path: app/code/core/Mage/CatalogIndex/Model/Data/Grouped.php
 
 		-
-			rawMessage: 'Property Mage_CatalogIndex_Model_Data_Simple::$_haveChildren (array<bool|int>) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Data/Simple.php
+			rawMessage: '''
+				Call to method isAvailable() of deprecated class Mage_Catalog_Helper_Flat_Abstract:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogIndex/Model/Indexer.php
 
 		-
-			rawMessage: 'Property Mage_CatalogIndex_Model_Data_Virtual::$_haveChildren (array<bool|int>) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Data/Virtual.php
+			rawMessage: '''
+				Call to method isBuilt() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogIndex/Model/Indexer.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: varTag.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogIndex/Model/Indexer.php
 
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Indexer_Abstract::cleanup() has no return type specified.'
@@ -8921,6 +9254,15 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Resource/Data/Grouped.php
+
+		-
+			rawMessage: '''
+				Call to method isAddChildData() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogIndex/Model/Resource/Indexer.php
 
 		-
 			rawMessage: 'Method Mage_CatalogIndex_Model_Resource_Indexer::_construct() has no return type specified.'
@@ -9235,6 +9577,33 @@ parameters:
 			path: app/code/core/Mage/CatalogInventory/Model/Stock/Item.php
 
 		-
+			rawMessage: '''
+				Call to method isBuilt() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
+
+		-
+			rawMessage: '''
+				Call to method isEnabled() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
+
+		-
+			rawMessage: '''
+				Instanceof references deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: instanceof.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/CatalogRule/Model/Action/Index/Refresh.php
+
+		-
 			rawMessage: 'Method Mage_CatalogRule_Model_Action_Index_Refresh::_createTemporaryTable() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9343,6 +9712,24 @@ parameters:
 			path: app/code/core/Mage/CatalogRule/Model/Observer.php
 
 		-
+			rawMessage: '''
+				Call to method isBuiltAllStores() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogRule/Model/Resource/Rule.php
+
+		-
+			rawMessage: '''
+				Call to method isEnabled() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 2
+			path: app/code/core/Mage/CatalogRule/Model/Resource/Rule.php
+
+		-
 			rawMessage: 'Method Mage_CatalogRule_Model_Resource_Rule::_construct() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -9364,6 +9751,15 @@ parameters:
 			rawMessage: 'Method Mage_CatalogRule_Model_Resource_Rule::insertRuleData() has no return type specified.'
 			identifier: missingType.return
 			count: 1
+			path: app/code/core/Mage/CatalogRule/Model/Resource/Rule.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: varTag.deprecatedClass
+			count: 2
 			path: app/code/core/Mage/CatalogRule/Model/Resource/Rule.php
 
 		-
@@ -9477,12 +9873,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_CatalogSearch_Helper_Data::checkNotes() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
-
-		-
-			rawMessage: 'Parameter #2 $array of function implode expects array<string>, array<array<string>|string|null> given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/CatalogSearch/Helper/Data.php
 
@@ -9688,12 +10078,6 @@ parameters:
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
 			identifier: argument.type
 			count: 1
-			path: app/code/core/Mage/Checkout/Block/Multishipping/Addresses.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Checkout/Block/Onepage/Abstract.php
 
 		-
@@ -9829,12 +10213,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Api.php
-
-		-
 			rawMessage: Negated boolean expression is always false.
 			identifier: booleanNot.alwaysFalse
 			count: 1
@@ -9881,12 +10259,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api.php
-
-		-
-			rawMessage: 'Parameter #1 $data (object) of method Mage_Checkout_Model_Cart_Payment_Api_V2::_preparePaymentData() should be compatible with parameter $data (array) of method Mage_Checkout_Model_Cart_Payment_Api::_preparePaymentData()'
-			identifier: method.childParameterType
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api/V2.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Observer::loadCustomerQuote() has no return type specified.'
@@ -9955,60 +10327,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Sales_Model_Quote::getBillingAddress() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Checkout_Model_Session::setCheckoutState() expects string, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsActive() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, bool given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
-			identifier: argument.type
-			count: 2
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canInputShipping() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canSeeOverview() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canSelectAddresses() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Type_Multishipping_State::canSuccess() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Multishipping/State.php
-
-		-
 			rawMessage: 'Method Mage_Checkout_Model_Type_Onepage::_prepareCustomerQuote() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -10045,12 +10363,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
 			count: 4
@@ -10067,6 +10379,15 @@ parameters:
 			identifier: nullCoalesce.property
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Type/Onepage.php
+
+		-
+			rawMessage: '''
+				Call to method disableFlatCollection() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_CartController::_emptyShoppingCart() has no return type specified.'
@@ -10105,12 +10426,6 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/CartController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote_Address::setCollectShippingRates() expects int, true given.'
 			identifier: argument.type
 			count: 2
@@ -10123,52 +10438,13 @@ parameters:
 			path: app/code/core/Mage/Checkout/controllers/CartController.php
 
 		-
-			rawMessage: 'Method Mage_Checkout_Model_Session::getCartWasUpdated() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
+			rawMessage: '''
+				Call to method disableFlatCollection() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
 			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_Model_Session::getDisplaySuccess() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::billingAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::overviewAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::redirectLogin() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::shippingAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Method Mage_Checkout_MultishippingController::successAction() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, true given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/MultishippingController.php
+			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Session::getCartWasUpdated() invoked with 1 parameter, 0 required.'
@@ -10184,12 +10460,6 @@ parameters:
 
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Checkout_Model_Session::setUpdateSection() expects string, null given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/controllers/OnepageController.php
@@ -11297,18 +11567,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Email/Template.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Entity_Abstract::getConfig() should return bool|string but returns Maho\Simplexml\Config.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
-
-		-
-			rawMessage: 'Property Mage_Core_Model_Resource_Entity_Abstract::$_config (Maho\Simplexml\Config) does not accept default value of type array.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
 
 		-
 			rawMessage: Property Mage_Core_Model_Resource_Entity_Abstract::$_name has no type specified.
@@ -12577,18 +12835,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Abstract.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Db_Table::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Db/Table.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Db_Table::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Db/Table.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http::load() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -12605,18 +12851,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http_Curl::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http/Curl.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Http_Curl::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Http/Curl.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Interface::load() has no return type specified.'
@@ -12647,30 +12881,6 @@ parameters:
 			identifier: booleanNot.alwaysTrue
 			count: 2
 			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Io.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Soap::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Soap.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Soap::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Soap.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Std::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Std.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Adapter_Std::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Adapter/Std.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Container_Abstract::addException() has no return type specified.'
@@ -13105,36 +13315,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_File_Csv::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/File/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_File_Csv::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/File/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_Http::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_Http::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Iterator_Interface::walk() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Iterator/Interface.php
-
-		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Mapper_Column::getBatchImportModel() has invalid return type Mage_Dataflow_Model_Import_Export.'
 			identifier: class.notFound
 			count: 1
@@ -13205,18 +13385,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Interface.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Serialize::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Serialize.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Serialize::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Convert/Parser/Serialize.php
 
 		-
 			rawMessage: 'Method Mage_Dataflow_Model_Convert_Parser_Xml_Excel::_saveParsedRow() has no return type specified.'
@@ -13627,30 +13795,6 @@ parameters:
 			path: app/code/core/Mage/Dataflow/Model/Resource/Session.php
 
 		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Adapter_Http::load() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Adapter_Http::save() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Adapter/Http.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Parser_Csv::parse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Parser/Csv.php
-
-		-
-			rawMessage: 'Method Mage_Dataflow_Model_Session_Parser_Csv::unparse() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Dataflow/Model/Session/Parser/Csv.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Select::setValue() expects string, int given.'
 			identifier: argument.type
 			count: 1
@@ -13875,12 +14019,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Catalog_Model_Product::setIsCustomOptionChanged() invoked with 0 parameters, 1 required.'
 			identifier: arguments.count
-			count: 1
-			path: app/code/core/Mage/Downloadable/Model/Product/Type.php
-
-		-
-			rawMessage: 'Parameter #2 $callback of function array_filter expects (callable(mixed): bool)|null, ''\\intval'' given.'
-			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Downloadable/Model/Product/Type.php
 
@@ -15277,12 +15415,6 @@ parameters:
 			path: app/code/core/Mage/Page/Block/Html/Topmenu/Renderer.php
 
 		-
-			rawMessage: Property Mage_Page_Block_Redirect::$_formFields has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Page/Block/Redirect.php
-
-		-
 			rawMessage: Property Mage_Page_Block_Switch::$_storeInUrl has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -15451,12 +15583,6 @@ parameters:
 			path: app/code/core/Mage/Paygate/Model/Authorizenet/Cards.php
 
 		-
-			rawMessage: 'Method Mage_Paygate_Model_Resource_Authorizenet_Debug::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paygate/Model/Resource/Authorizenet/Debug.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Payment_Model_Method_Abstract::cancelPartialAuthorization().'
 			identifier: method.notFound
 			count: 1
@@ -15471,12 +15597,6 @@ parameters:
 		-
 			rawMessage: 'Parameter #1 $value of method Mage_Core_Block_Html_Date::setTime() expects string, true given.'
 			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Payment/Block/Catalog/Product/View/Profile.php
-
-		-
-			rawMessage: 'Property Mage_Payment_Block_Catalog_Product_View_Profile::$_profile (Mage_Payment_Model_Recurring_Profile) does not accept default value of type false.'
-			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/Payment/Block/Catalog/Product/View/Profile.php
 
@@ -15607,12 +15727,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Model/Method/Cc.php
 
 		-
-			rawMessage: Property Mage_Payment_Model_Method_Ccsave::$_canSaveCc has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Payment/Model/Method/Ccsave.php
-
-		-
 			rawMessage: 'Method Mage_Payment_Model_Observer::beforeOrderPaymentSave() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -15685,18 +15799,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Block/Adminhtml/System/Config/Fieldset/Deprecated.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Block_Bml_Banners::setPosition() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Bml/Banners.php
-
-		-
-			rawMessage: 'Method Mage_Paypal_Block_Bml_Banners::setSection() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Block/Bml/Banners.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Block_Express_Review::setPaypalActionPrefix() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -15748,12 +15850,6 @@ parameters:
 			rawMessage: 'Parameter #1 $setToken of method Mage_Paypal_Controller_Express_Abstract::_initToken() expects string|null, false given.'
 			identifier: argument.type
 			count: 2
-			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
-
-		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
 			path: app/code/core/Mage/Paypal/Controller/Express/Abstract.php
 
 		-
@@ -16309,12 +16405,6 @@ parameters:
 			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
 
 		-
-			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::setIsBml() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Express/Checkout.php
-
-		-
 			rawMessage: 'Method Mage_Paypal_Model_Express_Checkout::updateShippingMethod() has no return type specified.'
 			identifier: missingType.return
 			count: 1
@@ -16659,12 +16749,6 @@ parameters:
 		-
 			rawMessage: Property Mage_Paypal_Model_Payflowpro::$_canSaveCc has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Property Mage_Paypal_Model_Payflowpro::$_centinelFieldMap (string) does not accept default value of type array<string, string>.'
-			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
 
@@ -17143,12 +17227,6 @@ parameters:
 			path: app/code/core/Mage/Reports/Model/Report.php
 
 		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Coupons_Collection::joinFields() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Coupons/Collection.php
-
-		-
 			rawMessage: 'Call to an undefined method Mage_Customer_Model_Customer::remove().'
 			identifier: method.notFound
 			count: 1
@@ -17303,12 +17381,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Reports/Model/Resource/Tag/Product/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Reports_Model_Resource_Tax_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Reports/Model/Resource/Tax/Collection.php
 
 		-
 			rawMessage: 'Argument of an invalid type Mage_Reports_Model_Report supplied for foreach, only iterables are supported.'
@@ -17575,6 +17647,15 @@ parameters:
 			path: app/code/core/Mage/Rss/Block/Wishlist.php
 
 		-
+			rawMessage: '''
+				Call to method isAvailable() of deprecated class Mage_Catalog_Helper_Flat_Abstract:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Rss/Helper/Data.php
+
+		-
 			rawMessage: 'Cannot call method getId() on true.'
 			identifier: method.nonObject
 			count: 1
@@ -17601,6 +17682,15 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Rss_Helper_Data::disableFlat() has no return type specified.'
 			identifier: missingType.return
+			count: 1
+			path: app/code/core/Mage/Rss/Helper/Data.php
+
+		-
+			rawMessage: '''
+				PHPDoc tag @var references deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: varTag.deprecatedClass
 			count: 1
 			path: app/code/core/Mage/Rss/Helper/Data.php
 
@@ -17917,12 +18007,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Helper/Guest.php
 
 		-
-			rawMessage: 'Parameter #1 $order of method Mage_Sales_Model_Resource_Order_Collection_Abstract::setOrderFilter() expects int|Mage_Sales_Model_Order, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Api2/Order.php
-
-		-
 			rawMessage: 'Parameter #2 $code of method Mage_Api2_Model_Resource::_critical() expects int|null, string given.'
 			identifier: argument.type
 			count: 2
@@ -17957,168 +18041,6 @@ parameters:
 			identifier: arguments.count
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Convert/Order.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Address_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Address/Collection.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Sales_Model_Resource_Order_Item::getTypeId().'
-			identifier: method.notFound
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Creditmemo_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Creditmemo/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Creditmemo_Comment_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Creditmemo/Comment/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Creditmemo_Item_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Creditmemo/Item/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Invoice_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Invoice/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Invoice_Comment_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Invoice/Comment/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Invoice_Item_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Invoice/Item/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Item_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Item/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Payment_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Payment/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Shipment_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Shipment/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Shipment_Comment_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Shipment/Comment/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Shipment_Item_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Shipment/Item/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Shipment_Track_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Shipment/Track/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Order_Status_History_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Order/Status/History/Collection.php
-
-		-
-			rawMessage: 'Call to an undefined method Mage_Sales_Model_Resource_Quote_Collection::addAttributeToSelect().'
-			identifier: method.notFound
-			count: 2
-			path: app/code/core/Mage/Sales/Model/Entity/Quote.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Quote_Address_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Quote_Address_Item_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Item/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Quote_Address_Rate_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Address/Rate/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Quote_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Quote_Item_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Item/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Quote_Payment_Collection::_construct() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Quote/Payment/Collection.php
-
-		-
-			rawMessage: 'Class Mage_Sales_Model_Entity_Sale_Collection implements generic interface IteratorAggregate but does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Sale/Collection.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Entity_Sale_Collection::getIterator() return type with generic class ArrayIterator does not specify its types: TKey, TValue'
-			identifier: missingType.generics
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Sale/Collection.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Entity_Sale_Collection::$_items has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Sale/Collection.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Entity_Sale_Collection::$_totals has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Entity/Sale/Collection.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Observer::addVatRequestParamsOrderComment() has no return type specified.'
@@ -18601,12 +18523,6 @@ parameters:
 			path: app/code/core/Mage/Sales/Model/Quote.php
 
 		-
-			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Quote::setIsMultiShipping() expects int, false given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote.php
-
-		-
 			rawMessage: 'Property Mage_Sales_Model_Quote::$_addresses (Mage_Sales_Model_Resource_Order_Address_Collection|null) does not accept Mage_Sales_Model_Resource_Quote_Address_Collection.'
 			identifier: assign.propertyType
 			count: 1
@@ -18731,27 +18647,6 @@ parameters:
 			identifier: isset.variable
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Shipping.php
-
-		-
-			rawMessage: '''
-				Call to deprecated method calcTaxAmount() of class Mage_Sales_Model_Quote_Item_Abstract:
-				logic moved to tax totals calculation model
-			'''
-			identifier: method.deprecated
-			count: 2
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Tax.php
-
-		-
-			rawMessage: 'Method Mage_Sales_Model_Quote_Address_Total_Tax::_saveAppliedTaxes() has no return type specified.'
-			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Tax.php
-
-		-
-			rawMessage: Property Mage_Sales_Model_Quote_Address_Total_Tax::$_appliedTaxes has no type specified.
-			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Quote/Address/Total/Tax.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Quote_Config::getTotalModels() has no return type specified.'
@@ -19112,6 +19007,24 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sales/Model/Resource/Quote/Item.php
+
+		-
+			rawMessage: '''
+				Call to method disableFlatCollection() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Resource/Quote/Item/Collection.php
+
+		-
+			rawMessage: '''
+				Call to method resetFlatCollection() of deprecated class Mage_Catalog_Helper_Product_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sales/Model/Resource/Quote/Item/Collection.php
 
 		-
 			rawMessage: 'Method Mage_Sales_Model_Resource_Quote_Item_Option::_construct() has no return type specified.'
@@ -19628,6 +19541,15 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Sitemap/Model/Observer.php
+
+		-
+			rawMessage: '''
+				Call to method getAttribute() of deprecated class Mage_Catalog_Model_Resource_Category_Flat:
+				since 26.5 Flat Catalog will be removed in a future version
+			'''
+			identifier: method.deprecatedClass
+			count: 1
+			path: app/code/core/Mage/Sitemap/Model/Resource/Catalog/Category.php
 
 		-
 			rawMessage: 'Method Mage_Sitemap_Model_Resource_Catalog_Category::_construct() has no return type specified.'
@@ -21484,58 +21406,10 @@ parameters:
 			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
 
 		-
-			rawMessage: Left side of && is always true.
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/multishipping/address/select.phtml
-
-		-
-			rawMessage: Variable $this might not be defined.
-			identifier: variable.undefined
-			count: 9
-			path: app/design/frontend/base/default/template/checkout/multishipping/item/default.phtml
-
-		-
-			rawMessage: 'Parameter #1 $totals of method Mage_Checkout_Block_Multishipping_Overview::renderTotals() expects Mage_Sales_Model_Order_Total, array<Mage_Sales_Model_Quote_Address_Total> given.'
-			identifier: argument.type
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/multishipping/overview.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Helper_Data::formatPrice() invoked with 3 parameters, 1 required.'
-			identifier: arguments.count
-			count: 12
-			path: app/design/frontend/base/default/template/checkout/multishipping/overview/item.phtml
-
-		-
-			rawMessage: 'Method Mage_Checkout_Block_Multishipping_Shipping::getItemsEditUrl() invoked with 1 parameter, 0 required.'
-			identifier: arguments.count
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/multishipping/shipping.phtml
-
-		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/payment.phtml
-
-		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping.phtml
-
-		-
 			rawMessage: Ternary operator condition is always true.
 			identifier: ternary.alwaysTrue
 			count: 1
 			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping.phtml
-
-		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping_method.phtml
 
 		-
 			rawMessage: 'Parameter #1 $amount of method Mage_Checkout_Block_Total_Nominal::formatPrice() expects float, string given.'
@@ -21684,19 +21558,19 @@ parameters:
 		-
 			rawMessage: 'Cannot call method getMessage() on string.'
 			identifier: method.nonObject
-			count: 4
+			count: 2
 			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
 
 		-
 			rawMessage: 'Cannot call method getRecipient() on string.'
 			identifier: method.nonObject
-			count: 4
+			count: 2
 			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
 
 		-
 			rawMessage: 'Cannot call method getSender() on string.'
 			identifier: method.nonObject
-			count: 4
+			count: 2
 			path: app/design/frontend/base/default/template/giftmessage/inline.phtml
 
 		-
@@ -21704,12 +21578,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/frontend/base/default/template/page/html/breadcrumbs.phtml
-
-		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/page/html/cookienotice.phtml
 
 		-
 			rawMessage: 'Call to protected method _getRenderedMenuItemAttributes() of class Mage_Page_Block_Html_Topmenu.'
@@ -23685,3 +23553,14 @@ parameters:
 			count: 1
 			path: lib/Maho/Simplexml/Element.php
 
+		-
+			message: '#Fetching deprecated class constant DEPRECATED_METHODS of class Maho_Paypal_Model_Config#'
+			identifier: classConstant.deprecated
+			count: 1
+			path: app/code/core/Maho/Paypal/Model/Config.php
+
+		-
+			message: '#Property Maho_Paypal_Model_Method_AdvancedCheckout::\$_canSaveCc has no type specified#'
+			identifier: missingType.property
+			count: 1
+			path: app/code/core/Maho/Paypal/Model/Method/AdvancedCheckout.php

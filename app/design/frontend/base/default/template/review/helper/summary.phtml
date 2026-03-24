@@ -23,5 +23,5 @@
         </p>
     </div>
 <?php elseif ($this->getDisplayIfEmpty()): ?>
-    <p class="no-rating"><a href="<?= $this->getReviewsUrl() ?>#review-form"><?= $this->__('Be the first to review this product') ?></a></p>
+    <p class="no-rating"><a href="#tab-reviews" onclick="document.querySelector(this.getAttribute('href')).click()"><?= $this->__('Be the first to review this product') ?></a></p>
 <?php endif ?>

@@ -59,4 +59,42 @@ class Mage_Api_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstract
             $adapter->rollBack();
         }
     }
+
+    /**
+     * Set resource ID as ID field name
+     * @see Mage_Adminhtml_Block_Api_OrphanedResource_Grid::_prepareCollection()
+     *
+     * @return $this
+     */
+    public function setResourceIdAsIdFieldName()
+    {
+        $this->_idFieldName = 'resource_id';
+        return $this;
+    }
+
+    /**
+     * Delete orphaned resources
+     *
+     * @throws Mage_Core_Exception
+     */
+    public function deleteOrphanedResources(array $orphanedIds): int
+    {
+        if ($orphanedIds === []) {
+            return 0;
+        }
+
+        $resourceIds = Mage::getModel('api/roles')->getResourcesList2D();
+        $validIds = array_intersect($orphanedIds, $resourceIds);
+        if ($validIds !== []) {
+            throw new Mage_Core_Exception(
+                Mage::helper('adminhtml')->__(
+                    'The following role resource(s) are not orphaned: %s',
+                    implode(', ', $validIds),
+                ),
+            );
+        }
+
+        return $this->_getWriteAdapter()
+            ->delete($this->getMainTable(), ['resource_id IN (?)' => $orphanedIds]);
+    }
 }

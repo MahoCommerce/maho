@@ -14,6 +14,9 @@ class Mage_Paypal_Model_System_Config_Source_BuyerCountry
     public function toOptionArray($isMultiselect = false)
     {
         $supported = Mage::getModel('paypal/config')->getSupportedBuyerCountryCodes();
+        if (!$supported) {
+            return [];
+        }
         return Mage::getResourceModel('directory/country_collection')
             ->addCountryCodeFilter($supported, 'iso2')
             ->loadData()

@@ -15,7 +15,7 @@
 <div class="page-title">
     <h1><?= Mage::helper('contacts')->__('Contact Us') ?></h1>
 </div>
-<form action="<?= $this->getFormAction() ?>" id="contactForm" method="post" class="scaffold-form">
+<form action="<?= $this->getFormAction() ?>" id="contactForm" method="post" class="scaffold-form" autocomplete="off">
     <?= $this->getBlockHtml('formkey') ?>
     <div class="fieldset">
         <ul class="form-list">
@@ -29,7 +29,7 @@
                 <div class="field">
                     <label for="email" class="required"><?= Mage::helper('contacts')->__('Email') ?></label>
                     <div class="input-box">
-                        <input name="email" id="email" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Email')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserEmail()) ?>" class="input-text required-entry validate-email" type="email" autocapitalize="off" autocorrect="off" spellcheck="false" />
+                        <input name="email" id="email" title="<?= $this->quoteEscape(Mage::helper('contacts')->__('Email')) ?>" value="<?= $this->escapeHtml($this->helper('contacts')->getUserEmail()) ?>" class="input-text required-entry validate-email" type="email" autocomplete="email" autocapitalize="off" autocorrect="off" spellcheck="false" />
                     </div>
                 </div>
             </li>

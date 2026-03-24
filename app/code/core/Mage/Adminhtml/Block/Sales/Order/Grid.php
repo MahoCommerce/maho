@@ -5,7 +5,7 @@
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2022-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -112,7 +112,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
             'frame_callback' => [$this, 'decorateStatus'],
         ]);
 
-        if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/view')) {
+        if ($this->isAllowed('sales/order/actions/view')) {
             $this->addColumn(
                 'action',
                 [
@@ -176,21 +176,21 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
         $this->getMassactionBlock()->setFormFieldName('order_ids');
         $this->getMassactionBlock()->setUseSelectAll(false);
 
-        if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/cancel')) {
+        if ($this->isAllowed('sales/order/actions/cancel')) {
             $this->getMassactionBlock()->addItem(MassAction::CANCEL_ORDER, [
                 'label' => Mage::helper('sales')->__('Cancel'),
                 'url'  => $this->getUrl('*/sales_order/massCancel'),
             ]);
         }
 
-        if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/hold')) {
+        if ($this->isAllowed('sales/order/actions/hold')) {
             $this->getMassactionBlock()->addItem(MassAction::HOLD_ORDER, [
                 'label' => Mage::helper('sales')->__('Hold'),
                 'url'  => $this->getUrl('*/sales_order/massHold'),
             ]);
         }
 
-        if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/unhold')) {
+        if ($this->isAllowed('sales/order/actions/unhold')) {
             $this->getMassactionBlock()->addItem(MassAction::UNHOLD_ORDER, [
                 'label' => Mage::helper('sales')->__('Unhold'),
                 'url'  => $this->getUrl('*/sales_order/massUnhold'),
@@ -232,7 +232,7 @@ class Mage_Adminhtml_Block_Sales_Order_Grid extends Mage_Adminhtml_Block_Widget_
     #[\Override]
     public function getRowUrl($row)
     {
-        if (Mage::getSingleton('admin/session')->isAllowed('sales/order/actions/view')) {
+        if ($this->isAllowed('sales/order/actions/view')) {
             return $this->getUrl('*/sales_order/view', ['order_id' => $row->getId()]);
         }
         return false;

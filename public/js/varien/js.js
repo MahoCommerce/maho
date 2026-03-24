@@ -39,10 +39,25 @@ async function mahoFetch(url, options) {
         if (loaderArea !== false && typeof showLoader === 'function') {
             showLoader(loaderArea)
         }
-        if (fetchOptions?.method?.toUpperCase() === 'POST' && typeof FORM_KEY !== 'undefined') {
-            fetchOptions.body ??= new URLSearchParams();
-            if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
-                fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? FORM_KEY);
+        if (fetchOptions?.method?.toUpperCase() === 'POST') {
+            const formKey = typeof FORM_KEY !== 'undefined'
+                ? FORM_KEY
+                : document.querySelector('input[name="form_key"]')?.value;
+            if (formKey) {
+                fetchOptions.body ??= new URLSearchParams();
+                if (fetchOptions.body instanceof URLSearchParams || fetchOptions.body instanceof FormData) {
+                    fetchOptions.body.set('form_key', fetchOptions.body.get('form_key') ?? formKey);
+                } else if (typeof fetchOptions.body === 'string') {
+                    try {
+                        const parsed = JSON.parse(fetchOptions.body);
+                        if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed) && !('form_key' in parsed)) {
+                            parsed.form_key = formKey;
+                            fetchOptions.body = JSON.stringify(parsed);
+                        }
+                    } catch (e) {
+                        // Not JSON, skip
+                    }
+                }
             }
         }
 

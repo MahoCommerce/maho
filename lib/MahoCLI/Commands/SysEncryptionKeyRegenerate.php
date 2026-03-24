@@ -85,37 +85,6 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        // Create backup of local.xml
-        if (!copy($localXmlPath, $backupPath)) {
-            $output->writeln('<error>Failed to create backup file: ' . $backupPath . '</error>');
-            return Command::FAILURE;
-        }
-        $output->writeln('<info>Created backup at: ' . $backupPath . '</info>');
-
-        // Read the current configuration file and replace the encryption key
-        $localXmlContent = file_get_contents($localXmlPath);
-        $updatedContent = preg_replace(
-            '/<key(?:\s+date="[^"]*")?><!\[CDATA\[(.*?)\]\]><\/key>/',
-            '<key date="' . substr($currentDate, 0, 10) . '"><![CDATA[' . $newKey . ']]></key>',
-            $localXmlContent,
-        );
-
-        // Check if replacement was successful
-        if ($updatedContent === $localXmlContent && !str_contains($updatedContent, $newKey)) {
-            $output->writeln('<error>Failed to replace encryption key in configuration</error>');
-            return Command::FAILURE;
-        }
-
-        // Write the updated configuration back to the file
-        if (file_put_contents($localXmlPath, $updatedContent) === false) {
-            $output->writeln('<error>Failed to write updated configuration</error>');
-            return Command::FAILURE;
-        }
-
-        $output->writeln('<info>Encryption key has been successfully updated</info>');
-        $output->writeln('<comment>New key: ' . $newKey . '</comment>');
-        $output->writeln('');
-
         $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
         $writeConnection = Mage::getSingleton('core/resource')->getConnection('core_write');
 
@@ -123,17 +92,88 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
             $output->writeln('<comment>Skipping re-encryption of existing data (M1 key without mcrypt support).</comment>');
             $output->writeln('<comment>Old encrypted data will no longer be decryptable. New data will use the new key.</comment>');
         } else {
-            $this->recryptAdminUserTable($output);
-            $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
-            Mage::app()->getCache()->clean('config');
+            // Phase 1: Validate all encrypted data can be decrypted before making any changes
+            $output->writeln('');
+            $output->writeln('<info>Validating all encrypted data can be decrypted with the current key...</info>');
 
-            Mage::dispatchEvent('encryption_key_regenerated', [
-                'output' => $output,
-                'encrypt_callback' => [$this, 'encrypt'],
-                'decrypt_callback' => [$this, 'decrypt'],
-            ]);
+            $allFailures = $this->validateAllEncryptedData($output, $readConnection);
+
+            if (!empty($allFailures)) {
+                $output->writeln('');
+                $output->writeln('<error>Decryption validation failed! The following values could not be decrypted:</error>');
+                $failureTable = new Table($output);
+                $failureTable->setHeaders(['Table', 'Primary Key', 'Column']);
+                foreach ($allFailures as $failure) {
+                    $failureTable->addRow([$failure['table'], $failure['primary_key'], $failure['column']]);
+                }
+                $failureTable->render();
+                $output->writeln('');
+                $output->writeln('<error>Aborting key regeneration. No changes were made.</error>');
+                $output->writeln('<comment>Fix the undecryptable values above before retrying.</comment>');
+                return Command::FAILURE;
+            }
+
+            $output->writeln('<info>All encrypted data validated successfully.</info>');
+            $output->writeln('');
+
+            // Phase 2: Re-encrypt all data within a transaction
+            $output->writeln('<info>Re-encrypting all data...</info>');
+            $writeConnection->beginTransaction();
+            try {
+                $this->recryptAdminUserTable($output);
+                $this->recryptCoreConfigDataTable($output, $readConnection, $writeConnection);
+
+                Mage::dispatchEvent('encryption_key_regenerated', [
+                    'output' => $output,
+                    'encrypt_callback' => [$this, 'encrypt'],
+                    'decrypt_callback' => [$this, 'decrypt'],
+                ]);
+
+                $writeConnection->commit();
+            } catch (\Throwable $e) {
+                $writeConnection->rollBack();
+                $output->writeln('');
+                $output->writeln('<error>Re-encryption failed, transaction rolled back. No changes were made.</error>');
+                $output->writeln('<error>' . $e->getMessage() . '</error>');
+                return Command::FAILURE;
+            }
+
             Mage::app()->getCache()->clean('config');
         }
+
+        // Phase 3: Update local.xml only after successful DB re-encryption
+        if (!copy($localXmlPath, $backupPath)) {
+            $output->writeln('<error>Failed to create backup file: ' . $backupPath . '</error>');
+            $output->writeln('<error>Database was already re-encrypted. You must manually update the key in local.xml.</error>');
+            $output->writeln('<comment>New key: ' . $newKey . '</comment>');
+            return Command::FAILURE;
+        }
+        $output->writeln('<info>Created backup at: ' . $backupPath . '</info>');
+
+        $localXmlContent = file_get_contents($localXmlPath);
+        $updatedContent = preg_replace(
+            '/<key(?:\s+date="[^"]*")?><!\[CDATA\[(.*?)\]\]><\/key>/',
+            '<key date="' . substr($currentDate, 0, 10) . '"><![CDATA[' . $newKey . ']]></key>',
+            $localXmlContent,
+        );
+
+        if ($updatedContent === $localXmlContent && !str_contains($updatedContent, $newKey)) {
+            $output->writeln('<error>Failed to replace encryption key in configuration</error>');
+            $output->writeln('<error>Database was already re-encrypted. You must manually update the key in local.xml.</error>');
+            $output->writeln('<comment>New key: ' . $newKey . '</comment>');
+            return Command::FAILURE;
+        }
+
+        if (file_put_contents($localXmlPath, $updatedContent) === false) {
+            $output->writeln('<error>Failed to write updated configuration</error>');
+            $output->writeln('<error>Database was already re-encrypted. You must manually update the key in local.xml.</error>');
+            $output->writeln('<comment>New key: ' . $newKey . '</comment>');
+            return Command::FAILURE;
+        }
+
+        $output->writeln('<info>Encryption key has been successfully updated</info>');
+        $output->writeln('<comment>New key: ' . $newKey . '</comment>');
+        $output->writeln('');
 
         if (\Composer\InstalledVersions::isInstalled('mahocommerce/module-mcrypt-compat')) {
             $output->writeln('');
@@ -149,6 +189,95 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         }
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @return array<int, array{table: string, primary_key: mixed, column: string}>
+     */
+    protected function validateAllEncryptedData(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection): array
+    {
+        $helper = Mage::helper('core');
+        $allFailures = [];
+
+        $tablesToValidate = [
+            ['table' => 'admin_user', 'pk' => 'user_id', 'columns' => ['twofa_secret']],
+            ['table' => 'sales_flat_quote_payment', 'pk' => 'payment_id', 'columns' => ['cc_number_enc', 'cc_cid_enc']],
+            ['table' => 'sales_flat_order_payment', 'pk' => 'entity_id', 'columns' => ['cc_number_enc']],
+            ['table' => 'sales_flat_quote', 'pk' => 'entity_id', 'columns' => ['password_hash']],
+            ['table' => 'maho_paypal/vault_token', 'pk' => 'token_id', 'columns' => ['paypal_token_id']],
+            ['table' => 'feedmanager/destination', 'pk' => 'destination_id', 'columns' => ['config']],
+            ['table' => 'adminactivitylog/activity', 'pk' => 'activity_id', 'columns' => ['old_data', 'new_data']],
+        ];
+
+        foreach ($tablesToValidate as $tableInfo) {
+            try {
+                $tableName = Mage::getSingleton('core/resource')->getTableName($tableInfo['table']);
+            } catch (\Mage_Core_Exception) {
+                $output->writeln('Skipping ' . $tableInfo['table'] . ' (module not installed)');
+                continue;
+            }
+            $output->write("Validating $tableName table... ");
+            $failures = $helper->validateDecryptTable(
+                $tableName,
+                $tableInfo['pk'],
+                $tableInfo['columns'],
+                [$this, 'decrypt'],
+            );
+            $output->writeln(empty($failures) ? 'OK' : '<error>' . count($failures) . ' failure(s)</error>');
+            $allFailures = array_merge($allFailures, $failures);
+        }
+
+        // Validate core_config_data
+        $encryptedPaths = $this->getEncryptedConfigPaths();
+        if (!empty($encryptedPaths)) {
+            $output->write('Validating core_config_data table... ');
+            $table = Mage::getSingleton('core/resource')->getTableName('core_config_data');
+            $select = $readConnection->select()
+                ->from($table)
+                ->where('value IS NOT NULL AND path IN (?)', $encryptedPaths);
+            $encryptedData = $readConnection->fetchAll($select);
+
+            $configFailures = 0;
+            foreach ($encryptedData as $row) {
+                $decrypted = $this->decrypt($row['value']);
+                if ($decrypted === '') {
+                    $configFailures++;
+                    $allFailures[] = [
+                        'table' => $table,
+                        'primary_key' => $row['config_id'],
+                        'column' => 'value (' . $row['path'] . ')',
+                    ];
+                }
+            }
+            $output->writeln($configFailures === 0 ? 'OK' : '<error>' . $configFailures . ' failure(s)</error>');
+        }
+
+        return $allFailures;
+    }
+
+    /**
+     * @return string[]
+     */
+    protected function getEncryptedConfigPaths(): array
+    {
+        $encryptedPaths = [];
+        $sections = Mage::getSingleton('adminhtml/config')->getSections();
+        if ($sections) {
+            foreach ($sections->children() as $sectionId => $section) {
+                if ($section->groups) {
+                    foreach ($section->groups->children() as $groupId => $group) {
+                        if ($group->fields) {
+                            foreach ($group->fields->children() as $fieldId => $field) {
+                                if ($field->backend_model && (string) $field->backend_model == 'adminhtml/system_config_backend_encrypted') {
+                                    $encryptedPaths[] = $sectionId . '/' . $groupId . '/' . $fieldId;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return $encryptedPaths;
     }
 
     protected function recryptAdminUserTable(OutputInterface $output): void
@@ -167,25 +296,7 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
 
     protected function recryptCoreConfigDataTable(OutputInterface $output, \Maho\Db\Adapter\AdapterInterface $readConnection, \Maho\Db\Adapter\AdapterInterface $writeConnection): void
     {
-        // Checking if there are any encrypted configurations that should be re-encrypted
-        $encryptedPaths = [];
-        $sections = Mage::getSingleton('adminhtml/config')->getSections();
-        if ($sections) {
-            foreach ($sections->children() as $sectionId => $section) {
-                if ($section->groups) {
-                    foreach ($section->groups->children() as $groupId => $group) {
-                        if ($group->fields) {
-                            foreach ($group->fields->children() as $fieldId => $field) {
-                                if ($field->backend_model && (string) $field->backend_model == 'adminhtml/system_config_backend_encrypted') {
-                                    $path = $sectionId . '/' . $groupId . '/' . $fieldId;
-                                    $encryptedPaths[] = $path;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        $encryptedPaths = $this->getEncryptedConfigPaths();
 
         if (empty($encryptedPaths)) {
             $output->writeln('<info>No encrypted configurations to re-encrypt.</info>');

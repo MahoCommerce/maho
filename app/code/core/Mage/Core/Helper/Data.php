@@ -285,6 +285,36 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->getEncryptor()->decrypt($data);
     }
 
+    /**
+     * Idempotent encryption: decrypts first to get plaintext, then encrypts.
+     * Safe to call on both plaintext and already-encrypted values.
+     */
+    public function encryptIdempotent(string $data): string
+    {
+        $decrypted = $this->tryDecrypt($data);
+        $plaintext = $decrypted ?? $data;
+        return $this->encrypt($plaintext);
+    }
+
+    /**
+     * Attempt to decrypt data, returning null on failure instead of logging exceptions.
+     * Useful when the value may or may not be encrypted.
+     */
+    public function tryDecrypt(?string $data): ?string
+    {
+        if ($data === null || $data === '' || !Mage::isInstalled()) {
+            return null;
+        }
+
+        $minBase64Len = (int) ceil((SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES) * 4 / 3);
+        if (strlen($data) < $minBase64Len || !preg_match('#^[A-Za-z0-9+/=]+$#', $data)) {
+            return null;
+        }
+
+        $result = $this->getEncryptor()->decrypt($data);
+        return ($result !== '') ? $result : null;
+    }
+
     public function validateKey(string $key): bool
     {
         return $this->getEncryptor()->validateKey($key);
@@ -953,8 +983,8 @@ XML;
     {
         $coreHelper = Mage::helper('core');
         $emailTransport = Mage::getStoreConfig('system/smtp/enabled');
-        $user = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username'));
-        $pass = $coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password'));
+        $user = urlencode($coreHelper->decrypt(Mage::getStoreConfig('system/smtp/username')));
+        $pass = urlencode($coreHelper->decrypt(Mage::getStoreConfig('system/smtp/password')));
         $host = Mage::getStoreConfig('system/smtp/host');
         $port = Mage::getStoreConfig('system/smtp/port');
         $region = Mage::getStoreConfig('system/smtp/region');
@@ -1256,5 +1286,72 @@ XML;
         }
 
         return true;
+    }
+
+    /**
+     * Validate that all encrypted values in a table can be decrypted successfully.
+     * Returns an array of failures (empty array = all good).
+     *
+     * @param string[] $columns
+     * @return array<int, array{table: string, primary_key: mixed, column: string}>
+     */
+    public function validateDecryptTable(
+        string $table,
+        string $primaryKey,
+        array $columns,
+        callable $decryptCallback,
+        int $batchSize = 1000,
+    ): array {
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $lastId = 0;
+        $failures = [];
+
+        $tableColumns = array_keys($readConnection->describeTable($table));
+        $columns = array_values(array_intersect($columns, $tableColumns));
+        if (empty($columns)) {
+            return [];
+        }
+
+        $quotedPk = $readConnection->quoteIdentifier($primaryKey);
+
+        while (true) {
+            $select = $readConnection->select()
+                ->from($table, array_merge([$primaryKey], $columns))
+                ->where("$quotedPk > ?", $lastId)
+                ->order("$quotedPk ASC")
+                ->limit($batchSize);
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $conditions[] = $readConnection->quoteIdentifier($column) . ' IS NOT NULL AND '
+                    . $readConnection->quoteIdentifier($column) . " != ''";
+            }
+            $select->where(implode(' OR ', $conditions));
+
+            $rows = $readConnection->fetchAll($select);
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                foreach ($columns as $column) {
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $decrypted = $decryptCallback($row[$column]);
+                        if ($decrypted === '') {
+                            $failures[] = [
+                                'table' => $table,
+                                'primary_key' => $row[$primaryKey],
+                                'column' => $column,
+                            ];
+                        }
+                    }
+                }
+                $lastId = $row[$primaryKey];
+            }
+
+            unset($rows);
+        }
+
+        return $failures;
     }
 }

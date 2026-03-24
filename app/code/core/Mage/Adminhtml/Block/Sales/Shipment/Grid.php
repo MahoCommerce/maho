@@ -5,7 +5,7 @@
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -123,11 +123,11 @@ class Mage_Adminhtml_Block_Sales_Shipment_Grid extends Mage_Adminhtml_Block_Widg
     #[\Override]
     public function getRowUrl($row)
     {
-        if (!Mage::getSingleton('admin/session')->isAllowed('sales/order/shipment')) {
-            return false;
+        if ($this->isAllowed('sales/order/shipment')) {
+            return $this->getUrl('*/sales_shipment/view', ['shipment_id' => $row->getId()]);
         }
 
-        return $this->getUrl('*/sales_shipment/view', ['shipment_id' => $row->getId()]);
+        return false;
     }
 
     /**

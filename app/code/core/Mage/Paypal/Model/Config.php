@@ -62,12 +62,6 @@ class Mage_Paypal_Model_Config
     public const METHOD_WPP_EXPRESS = 'paypal_express';
 
     /**
-     * PayPal Bill Me Later - Express Checkout
-     * @var string
-     */
-    public const METHOD_BML = 'paypal_express_bml';
-
-    /**
      * PayPal Website Payments Pro - Direct Payments
      * @var string
      */
@@ -78,12 +72,6 @@ class Mage_Paypal_Model_Config
      * @var string
      */
     public const METHOD_WPP_PE_DIRECT  = 'paypaluk_direct';
-
-    /**
-     * PayPal Bill Me Later - Express Checkout (Payflow Edition)
-     * @var string
-     */
-    public const METHOD_WPP_PE_BML = 'paypaluk_express_bml';
 
     /**
      * Express Checkout (Payflow Edition)
@@ -721,12 +709,6 @@ class Mage_Paypal_Model_Config
                     $result = true;
                 }
                 break;
-            case self::METHOD_BML:
-                // check for express payments dependence
-                if (!$this->isMethodActive(self::METHOD_WPP_EXPRESS)) {
-                    $result = false;
-                }
-                break;
             case self::METHOD_WPP_PE_EXPRESS:
                 // check for direct payments dependence
                 if ($this->isMethodActive(self::METHOD_WPP_PE_DIRECT)) {
@@ -734,12 +716,6 @@ class Mage_Paypal_Model_Config
                 } elseif (!$this->isMethodActive(self::METHOD_WPP_PE_DIRECT)
                     && !$this->isMethodActive(self::METHOD_PAYFLOWPRO)
                 ) {
-                    $result = false;
-                }
-                break;
-            case self::METHOD_WPP_PE_BML:
-                // check for express payments dependence
-                if (!$this->isMethodActive(self::METHOD_WPP_PE_EXPRESS)) {
                     $result = false;
                 }
                 break;
@@ -876,10 +852,8 @@ class Mage_Paypal_Model_Config
                 self::METHOD_PAYFLOWPRO,
                 self::METHOD_PAYFLOWLINK,
                 self::METHOD_WPP_EXPRESS,
-                self::METHOD_BML,
                 self::METHOD_BILLING_AGREEMENT,
                 self::METHOD_WPP_PE_EXPRESS,
-                self::METHOD_WPP_PE_BML,
             ],
             'CA' => [
                 self::METHOD_WPP_DIRECT,
@@ -1572,12 +1546,6 @@ class Mage_Paypal_Model_Config
             case self::METHOD_WPS:
                 $path = $this->_mapStandardFieldset($fieldName);
                 break;
-            case self::METHOD_BML:
-                $path = $this->_mapBmlFieldset($fieldName);
-                break;
-            case self::METHOD_WPP_PE_BML:
-                $path = $this->_mapBmlUkFieldset($fieldName);
-                break;
             case self::METHOD_WPP_EXPRESS:
             case self::METHOD_WPP_PE_EXPRESS:
                 $path = $this->_mapExpressFieldset($fieldName);
@@ -1595,7 +1563,6 @@ class Mage_Paypal_Model_Config
         if ($path === null) {
             switch ($this->_methodCode) {
                 case self::METHOD_WPP_EXPRESS:
-                case self::METHOD_BML:
                 case self::METHOD_WPP_DIRECT:
                 case self::METHOD_BILLING_AGREEMENT:
                 case self::METHOD_HOSTEDPRO:
@@ -1644,34 +1611,6 @@ class Mage_Paypal_Model_Config
         return match ($fieldName) {
             'transfer_shipping_options', 'solution_type', 'visible_on_cart', 'visible_on_product', 'require_billing_address', 'authorization_honor_period', 'order_valid_period', 'child_authorization_number', 'allow_ba_signup' => "payment/{$this->_methodCode}/{$fieldName}",
             default => $this->_mapMethodFieldset($fieldName),
-        };
-    }
-
-    /**
-     * Map PayPal Express Bill Me Later config fields
-     *
-     * @param string $fieldName
-     * @return string|null
-     */
-    protected function _mapBmlFieldset($fieldName)
-    {
-        return match ($fieldName) {
-            'allow_ba_signup' => 'payment/' . self::METHOD_WPP_EXPRESS . "/{$fieldName}",
-            default => $this->_mapExpressFieldset($fieldName),
-        };
-    }
-
-    /**
-     * Map PayPal Express Bill Me Later config fields (Payflow Edition)
-     *
-     * @param string $fieldName
-     * @return string|null
-     */
-    protected function _mapBmlUkFieldset($fieldName)
-    {
-        return match ($fieldName) {
-            'allow_ba_signup' => 'payment/' . self::METHOD_WPP_PE_EXPRESS . "/{$fieldName}",
-            default => $this->_mapExpressFieldset($fieldName),
         };
     }
 
@@ -1797,51 +1736,4 @@ class Mage_Paypal_Model_Config
         return Mage::getModel('paypal/cert')->loadByWebsite($websiteId, false)->getCertPath();
     }
 
-    /**
-     * Get PublisherId from stored config
-     *
-     * @return mixed
-     */
-    public function getBmlPublisherId()
-    {
-        return Mage::getStoreConfig('payment/paypal_express_bml/publisher_id', $this->_storeId);
-    }
-
-    /**
-     * Get Display option from stored config
-     * @param string $section
-     *
-     * @return mixed
-     */
-    public function getBmlDisplay($section)
-    {
-        $display = Mage::getStoreConfig('payment/paypal_express_bml/' . $section . '_display', $this->_storeId);
-        $ecActive = Mage::getStoreConfig('payment/paypal_express/active', $this->_storeId);
-        $ecUkActive = Mage::getStoreConfig('payment/paypaluk_express/active', $this->_storeId);
-        $bmlActive = Mage::getStoreConfig('payment/paypal_express_bml/active', $this->_storeId);
-        $bmlUkActive = Mage::getStoreConfig('payment/paypaluk_express_bml/active', $this->_storeId);
-        return (($bmlActive && $ecActive) || ($bmlUkActive && $ecUkActive)) ? $display : 0;
-    }
-
-    /**
-     * Get Position option from stored config
-     * @param string $section
-     *
-     * @return mixed
-     */
-    public function getBmlPosition($section)
-    {
-        return Mage::getStoreConfig('payment/paypal_express_bml/' . $section . '_position', $this->_storeId);
-    }
-
-    /**
-     * Get Size option from stored config
-     * @param string $section
-     *
-     * @return mixed
-     */
-    public function getBmlSize($section)
-    {
-        return Mage::getStoreConfig('payment/paypal_express_bml/' . $section . '_size', $this->_storeId);
-    }
 }

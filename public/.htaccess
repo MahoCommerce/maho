@@ -48,7 +48,9 @@ DirectoryIndex index.php
     RewriteEngine on
 
     # Prevent serving "hidden" files like git repository
+    # Allow .thumbs directory used by WYSIWYG media storage
     RewriteCond %{REQUEST_URI} /\.
+    RewriteCond %{REQUEST_URI} !/\.thumbs/
     RewriteRule ^(.*)$ / [R=404,L]
 
     # Uncomment next line to enable light API calls processing

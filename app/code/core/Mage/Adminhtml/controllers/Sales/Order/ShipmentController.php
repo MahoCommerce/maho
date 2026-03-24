@@ -5,7 +5,7 @@
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2017-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2017-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -613,7 +613,8 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
         switch ($request->getParam('massaction_prepare_key')) {
             case 'shipment_ids':
                 $ids = $request->getParam('shipment_ids');
-                array_filter($ids, '\intval');
+                // Keep only values that are non-zero when cast to int
+                $ids = array_filter($ids, fn(mixed $o) => (int) $o !== 0);
                 if (!empty($ids)) {
                     $shipments = Mage::getResourceModel('sales/order_shipment_collection')
                         ->addFieldToFilter('entity_id', ['in' => $ids]);
@@ -621,7 +622,8 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
                 break;
             case 'order_ids':
                 $ids = $request->getParam('order_ids');
-                array_filter($ids, '\intval');
+                // Keep only values that are non-zero when cast to int
+                $ids = array_filter($ids, fn(mixed $o) => (int) $o !== 0);
                 if (!empty($ids)) {
                     $shipments = Mage::getResourceModel('sales/order_shipment_collection')
                         ->setOrderFilter(['in' => $ids]);

@@ -50,6 +50,7 @@
         "mahocommerce/maho-composer-plugin": "^3",
         "matthiasmullie/minify": "^1.3",
         "monolog/monolog": "^3.9",
+        "paypal/paypal-server-sdk": "^2.2",
         "pelago/emogrifier": "^8",
         "php-units-of-measure/php-units-of-measure": "^2.2",
         "spomky-labs/otphp": "^11.3",

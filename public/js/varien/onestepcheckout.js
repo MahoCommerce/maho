@@ -82,12 +82,14 @@ class OneStepCheckout {
     }
 
     /**
-     * Check if billing form has pre-filled data and trigger shipping method load
+     * Check if billing form has pre-filled data and trigger shipping method load.
+     * Payment methods are loaded automatically via autoSelectSingleShippingMethod()
+     * when saveBilling() populates the shipping methods and one is pre-checked.
      */
     checkPrefilledBilling() {
-        if (!this.billingForm || this.isVirtual) return;
+        if (!this.billingForm) return;
 
-        if (this.hasMinimumAddressData('billing')) {
+        if (this.isVirtual || this.hasMinimumAddressData('billing')) {
             this.saveBilling();
         }
     }
@@ -231,30 +233,34 @@ class OneStepCheckout {
     }
 
     saveBilling() {
-        if (!this.billingForm || this.isVirtual) return;
+        if (!this.billingForm) return;
 
-        // Check if using billing address for shipping or separate shipping address
-        const useForShippingYes = document.getElementById('billing:use_for_shipping_yes');
-        const useForShipping = useForShippingYes ? useForShippingYes.checked : true;
+        if (!this.isVirtual) {
+            // Check if using billing address for shipping or separate shipping address
+            const useForShippingYes = document.getElementById('billing:use_for_shipping_yes');
+            const useForShipping = useForShippingYes ? useForShippingYes.checked : true;
 
-        // Determine which form to check for shipping fields
-        let fieldPrefix;
-        if (useForShipping) {
-            fieldPrefix = 'billing';
-        } else {
-            // Using separate shipping address - don't save billing for shipping estimate
-            fieldPrefix = 'shipping';
-            if (!this.shippingForm) return;
-        }
+            // Determine which form to check for shipping fields
+            let fieldPrefix;
+            if (useForShipping) {
+                fieldPrefix = 'billing';
+            } else {
+                // Using separate shipping address - don't save billing for shipping estimate
+                fieldPrefix = 'shipping';
+                if (!this.shippingForm) return;
+            }
 
-        if (!this.hasMinimumAddressData(fieldPrefix)) {
-            return;
+            if (!this.hasMinimumAddressData(fieldPrefix)) {
+                return;
+            }
         }
 
         const formData = new FormData(this.billingForm);
 
         // Show loading immediately for better UX
-        this.setLoading('onestep-shipping-method', true);
+        if (!this.isVirtual) {
+            this.setLoading('onestep-shipping-method', true);
+        }
 
         this.queueRequest(async () => {
             try {
@@ -264,13 +270,15 @@ class OneStepCheckout {
                     loaderArea: false
                 });
 
-                if (result.success && result.update_section) {
+                if (!this.isVirtual && result.success && result.update_section) {
                     this.updateShippingMethods(result.update_section.html);
                 }
             } catch (error) {
                 // Silently handle errors during auto-save
             } finally {
-                this.setLoading('onestep-shipping-method', false);
+                if (!this.isVirtual) {
+                    this.setLoading('onestep-shipping-method', false);
+                }
             }
         });
     }
@@ -400,7 +408,14 @@ class OneStepCheckout {
         const paymentForm = document.getElementById('co-payment-form');
         if (!paymentForm) return;
 
-        const formData = new FormData(paymentForm);
+        const selectedMethod = paymentForm.querySelector('input[name="payment[method]"]:checked');
+        if (!selectedMethod) return;
+
+        // Only send the payment method selection, not CC details.
+        // Full payment data (CC number, expiration, etc.) is validated during saveOrder.
+        // Sending incomplete CC fields here would trigger server-side validation errors.
+        const formData = new FormData();
+        formData.set('payment[method]', selectedMethod.value);
 
         // Show review loading immediately since that's what gets updated
         this.setLoading('onestep-review', true);
@@ -413,7 +428,7 @@ class OneStepCheckout {
                     loaderArea: false
                 });
             } catch (error) {
-                // Silently handle errors
+                // Silently handle validation errors during auto-save
             }
         });
         // Refresh review (queued after the above)
@@ -438,11 +453,11 @@ class OneStepCheckout {
     }
 
     /**
-     * If only one shipping method available and checked, trigger save to load payment methods
+     * If a shipping method is already checked, trigger save to load payment methods
      */
     autoSelectSingleShippingMethod() {
-        const shippingMethods = document.querySelectorAll('input[name="shipping_method"]');
-        if (shippingMethods.length === 1 && shippingMethods[0].checked) {
+        const selected = document.querySelector('input[name="shipping_method"]:checked');
+        if (selected) {
             setTimeout(() => this.saveShippingMethod(), 50);
         }
     }
@@ -487,14 +502,14 @@ class OneStepCheckout {
      * Refresh shipping methods, payment methods, and review after discount changes
      */
     refreshAfterDiscount() {
+        // Save billing to recalculate totals
+        this.saveBilling();
+
         if (this.isVirtual) {
             // Virtual products: just refresh review
             this.loadReview();
             return;
         }
-
-        // Physical products: refresh shipping methods first
-        this.saveBilling();
 
         // Then refresh payment and review (saveShippingMethod includes loadReview)
         const selectedShipping = document.querySelector('input[name="shipping_method"]:checked');
@@ -586,15 +601,18 @@ class OneStepCheckout {
             if (!self.isVirtual) {
                 const shippingMethodSelected = document.querySelector('input[name="shipping_method"]:checked');
                 if (!shippingMethodSelected) {
-                    self.showError(self.config.messages.selectShippingMethodError);
+                    alert(self.config.messages.selectShippingMethodError);
                     isValid = false;
                 }
             }
 
             // Validate payment method is selected
-            const paymentMethodSelected = document.querySelector('input[name="payment[method]"]:checked');
-            if (!paymentMethodSelected) {
-                self.showError(self.config.messages.selectPaymentMethodError);
+            const paymentMethods = document.querySelectorAll('input[name="payment[method]"]');
+            if (paymentMethods.length === 0) {
+                alert(self.config.messages.noPaymentMethodsError);
+                isValid = false;
+            } else if (![...paymentMethods].some(method => method.checked)) {
+                alert(self.config.messages.selectPaymentMethodError);
                 isValid = false;
             }
 
@@ -618,6 +636,28 @@ class OneStepCheckout {
             // Only proceed if all validations passed
             if (!isValid) {
                 return false;
+            }
+
+            // For virtual orders, save billing address to quote before placing order.
+            // This ensures address data is persisted even if the debounced
+            // auto-save hasn't fired yet (e.g. user filled form and clicked Place Order quickly).
+            // Non-virtual orders already have billing saved via estimateBilling during shipping estimation.
+            if (self.isVirtual && self.billingForm) {
+                const formData = new FormData(self.billingForm);
+                mahoFetch(self.urls.saveBilling, {
+                    method: 'POST',
+                    body: formData,
+                    loaderArea: false
+                }).then((result) => {
+                    if (result.error) {
+                        alert(result.message || self.config.messages.saveBillingError);
+                        return;
+                    }
+                    originalSave();
+                }).catch(() => {
+                    alert(self.config.messages.saveBillingError);
+                });
+                return;
             }
 
             // Call original save
@@ -674,26 +714,19 @@ class OneStepCheckout {
             message = message.join('<br>');
         }
 
-        // Create error message element using standard validation-advice class
+        if (!element) {
+            alert(message);
+            return;
+        }
+
         const errorDiv = document.createElement('div');
         errorDiv.className = 'validation-advice custom-error';
         errorDiv.innerHTML = message;
 
-        // If element provided, show error near it
-        if (element) {
-            element.classList.add('validation-failed', 'custom-error');
-            // Find the closest container for this specific element (not the whole section)
-            const parent = element.closest('li') || element.closest('.checkbox') || element.closest('label')?.parentElement || element.parentElement;
-            if (parent) {
-                // Insert after the parent element
-                parent.insertAdjacentElement('afterend', errorDiv);
-            }
-        } else {
-            // Show at top of checkout
-            const checkout = document.getElementById('onestep-checkout');
-            if (checkout) {
-                checkout.insertBefore(errorDiv, checkout.firstChild);
-            }
+        element.classList.add('validation-failed', 'custom-error');
+        const parent = element.closest('li') || element.closest('.checkbox') || element.closest('label')?.parentElement || element.parentElement;
+        if (parent) {
+            parent.insertAdjacentElement('afterend', errorDiv);
         }
     }
 
@@ -719,7 +752,7 @@ class OneStepCheckout {
      */
     setStepResponse(response) {
         if (response.error) {
-            this.showError(response.message || response.error);
+            alert(response.message || response.error);
             return false;
         }
 

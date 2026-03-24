@@ -796,7 +796,11 @@ ul.tabs a.changed span.changed,ul.tabs-horiz a.changed span.changed {
     width: 12px;
     height: 12px;
     display: block;
-    color: #090!important
+    color: #090 !important;
+}
+
+ul.tabs-horiz a.active.changed span.changed {
+    color: #fff !important;
 }
 
 ul.tabs a.error span.error,ul.tabs-horiz a.error span.error {
@@ -3633,11 +3637,6 @@ ul.config-tabs a.last span {
 .comment a {
     color: #888;
     margin-left: 3px
-}
-
-.paypal-payment-notice {
-    font-weight: 700;
-    margin: -10px 0 10px 0
 }
 
 .payment-group-title {

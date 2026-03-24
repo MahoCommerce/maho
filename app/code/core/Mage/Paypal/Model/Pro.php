@@ -27,7 +27,7 @@ class Mage_Paypal_Model_Pro
     /**
      * Config instance
      *
-     * @var Mage_Paypal_Model_Config
+     * @var Mage_Paypal_Model_Config|Maho_Paypal_Model_Config|Mage_Core_Model_Abstract|false|null
      */
     protected $_config = null;
 
@@ -74,9 +74,7 @@ class Mage_Paypal_Model_Pro
                 $params[] = $storeId;
             }
 
-            $model = Mage::getModel($this->_configType, $params);
-            assert($model instanceof \Mage_Paypal_Model_Config);
-            $this->_config = $model;
+            $this->_config = Mage::getModel($this->_configType, $params);
         } else {
             $this->_config->setMethod($code);
             if ($storeId !== null) {
@@ -92,7 +90,7 @@ class Mage_Paypal_Model_Pro
      * @param int $storeId
      * @return $this
      */
-    public function setConfig(Mage_Paypal_Model_Config $instace, $storeId = null)
+    public function setConfig(Mage_Paypal_Model_Config|Maho_Paypal_Model_Config $instace, $storeId = null)
     {
         $this->_config = $instace;
         if ($storeId !== null) {

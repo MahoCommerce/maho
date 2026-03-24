@@ -1,0 +1,18 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Paypal
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Paypal_Block_Paylater_Message $this */
+$containerId = $this->getMessageHtmlId();
+?>
+<div id="<?= $this->escapeHtml($containerId) ?>"
+    class="paypal-paylater-message"
+    data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-amount="<?= $this->escapeHtml((string) $this->getAmount()) ?>"
+    data-placement="<?= $this->escapeHtml($this->getPlacement()) ?>"></div>

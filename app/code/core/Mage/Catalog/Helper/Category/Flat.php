@@ -10,8 +10,16 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * @deprecated since 26.5 Flat Catalog will be removed in a future version
+ */
 class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstract
 {
+    /**
+     * Whether deprecation warning has been logged this request
+     */
+    protected static bool $_deprecationLogged = false;
+
     /**
      * Catalog Category Flat Is Enabled Config
      */
@@ -51,7 +59,16 @@ class Mage_Catalog_Helper_Category_Flat extends Mage_Catalog_Helper_Flat_Abstrac
         if (!($adapter instanceof Maho\Db\Adapter\Pdo\Mysql)) {
             return false;
         }
-        return Mage::getStoreConfigFlag(self::XML_PATH_IS_ENABLED_FLAT_CATALOG_CATEGORY);
+        $enabled = Mage::getStoreConfigFlag(self::XML_PATH_IS_ENABLED_FLAT_CATALOG_CATEGORY);
+        if ($enabled && !self::$_deprecationLogged) {
+            self::$_deprecationLogged = true;
+            Mage::log(
+                'Flat Catalog Category is deprecated and will be removed in a future version. Please disable it in System > Configuration > Catalog > Frontend.',
+                Mage::LOG_WARNING,
+                'deprecated.log',
+            );
+        }
+        return $enabled;
     }
 
     /**

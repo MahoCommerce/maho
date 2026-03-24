@@ -1,0 +1,22 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Paypal
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Paypal_Block_Payment_Info $this */
+?>
+<?= $this->escapeHtml($this->getMethod()->getTitle()) ?>
+<?php if ($_specificInfo = $this->getSpecificInformation()): ?>
+<table class="data-table">
+    <?php foreach ($_specificInfo as $label => $value): ?>
+    <tr>
+        <th><?= $this->escapeHtml($label) ?></th>
+        <td><?= $this->escapeHtml($value) ?></td>
+    </tr>
+    <?php endforeach; ?>
+</table>
+<?php endif; ?>

@@ -4130,6 +4130,11 @@ p.product-name a:hover {
   float: right;
   clear: right;
 }
+.product-view .add-to-cart-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 @media only screen and (max-width: 850px) {
   .product-view .product-shop .price-box .price-excluding-tax .label,
@@ -4178,6 +4183,7 @@ p.product-name a:hover {
 }
 .product-img-box .product-image img {
   max-width: 100%;
+  max-height: 100%;
   height: auto;
   margin: 0px auto;
 }
@@ -4185,6 +4191,33 @@ p.product-name a:hover {
   position: relative;
   overflow: hidden;
   cursor: zoom-in;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.product-image-gallery.loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 56px;
+  margin-top: -28px;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
+  z-index: 1;
+}
+.product-image-gallery.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 32px;
+  height: 32px;
+  margin: -16px 0 0 -16px;
+  background: url('../images/loading.svg') no-repeat center;
+  background-size: contain;
+  z-index: 2;
 }
 .product-image-gallery .gallery-image {
   display: none;
@@ -4321,14 +4354,6 @@ p.product-name a:hover {
   display: block;
   width: 170px;
 }
-.product-view .add-to-cart-buttons .paypal-logo .bml_button {
-  display: block;
-  width: 174px;
-  margin: 0 auto;
-}
-.product-view .add-to-cart-buttons .paypal-logo .bml_button a {
-  text-align: center;
-}
 .product-view .add-to-cart-buttons .paypal-logo .paypal-or {
   display: block;
   margin-bottom: 10px;
@@ -4342,16 +4367,16 @@ p.product-name a:hover {
   line-height: 40px;
   font-size: 1rem;
   padding: 0px 30px;
-  float: left;
   min-width: 160px;
-  width: 100%;
-  white-space: normal;
+}
+.product-view .paypal-shortcut-button {
+  clear: both;
+  min-height: 55px;
 }
 .product-view .alert-price,
 .product-view .alert-stock {
   clear: both;
 }
-
 @media only screen and (max-width: 479px) {
   .product-view .add-to-cart-buttons .paypal-or {
     line-height: 20px;
@@ -4883,6 +4908,7 @@ label.offcanvas-trigger {
   background-color: var(--maho-color-background-alt);
   padding: 15px 20px;
   border: 1px solid var(--maho-color-border);
+  overflow: hidden;
   border-top: 0;
   margin-bottom: 10px;
 }
@@ -5143,9 +5169,6 @@ label.offcanvas-trigger {
   content: '';
   display: table;
   clear: both;
-}
-.map-popup .map-popup-checkout .paypal-logo .bml_button a {
-  clear: left;
 }
 @media only screen and (max-width: 479px) {
   .map-popup .map-popup-checkout {
@@ -6122,54 +6145,6 @@ body.newsletter-manage-index .newsletter-description {
   }
 }
 
-.top-container .bml-ad {
-  margin-top: 7px;
-  margin-bottom: 7px;
-  text-align: center;
-}
-.top-container .bml-ad span {
-  display: inline-block;
-}
-.top-container .bml-ad span a {
-  display: block;
-}
-
-.bml-ad {
-  display: none;
-  text-align: center;
-  margin-bottom: 5px;
-}
-.bml-ad span {
-  display: block;
-  line-height: 0;
-}
-.bml-ad a {
-  display: inline-block;
-  max-width: 100%;
-}
-.bml-ad a:hover {
-  opacity: 0.7;
-}
-.bml-ad img {
-  height: auto !important;
-  max-width: 100%;
-}
-
-.cart-totals-wrapper .bml-ad.large img {
-  display: block;
-  margin: 0;
-}
-
-@media only screen and (max-width: 770px) {
-  .bml-ad.small {
-    display: block;
-  }
-}
-@media only screen and (min-width: 771px) {
-  .bml-ad.large {
-    display: block;
-  }
-}
 div.paypal-logo {
   text-align: center;
   margin: 15px 0;
@@ -6192,10 +6167,6 @@ div.paypal-logo span > img {
 
 .checkout-types div.paypal-logo {
   text-align: right;
-}
-
-.bml-checkout-type {
-  list-style-type: none;
 }
 
 .sidebar .paypal-logo {
@@ -7622,222 +7593,6 @@ body.customer-account .my-account .title-buttons.recurring-profiles-title-button
   width: 100%;
 }
 
-/* ============================================ *
- * Checkout - Multiple Addresses
- * ============================================ */
-body[class*="checkout-multishipping-"] .checkout-progress {
-  width: 100%;
-  float: left;
-  margin-bottom: 25px;
-}
-body[class*="checkout-multishipping-"] .checkout-progress > li {
-  float: left;
-  width: 20%;
-  text-align: center;
-  padding: 8px 1% 6px;
-  background: var(--maho-color-background-alt);
-  text-transform: uppercase;
-  border-bottom: 1px solid var(--maho-color-border);
-  border-right: 1px solid var(--maho-color-border);
-  margin-bottom: 10px;
-}
-body[class*="checkout-multishipping-"] .checkout-progress > li.active {
-  background-color: var(--maho-color-button-secondary);
-}
-body[class*="checkout-multishipping-"] .checkout-progress > li.last {
-  border-right: 0px;
-}
-body[class*="checkout-multishipping-"] .page-title {
-  float: left;
-  width: 100%;
-  margin-bottom: 15px;
-}
-body[class*="checkout-multishipping-"] .page-title h1 {
-  border: 0 none;
-  float: left;
-  margin-top: 2px;
-  margin-right: 2%;
-}
-body[class*="checkout-multishipping-"] .page-title .button {
-  float: right;
-}
-body[class*="checkout-multishipping-"] .multiple-checkout > h2 {
-  text-transform: none;
-  font-size: 1.063rem;
-  margin-bottom: 15px;
-}
-body[class*="checkout-multishipping-"] .messages {
-  float: left;
-  width: 100%;
-}
-body[class*="checkout-multishipping-"] .col-2.col-wide {
-  width: 66%;
-}
-body[class*="checkout-multishipping-"] .col-1.col-narrow {
-  width: 30%;
-}
-body[class*="checkout-multishipping-"] .actions {
-  margin-bottom: 10px;
-}
-body[class*="checkout-multishipping-"] .grand-total {
-  text-align: right;
-  font-size: 1rem;
-  font-weight: bold;
-}
-body[class*="checkout-multishipping-"] #checkout-review-submit {
-  float: right;
-}
-body[class*="checkout-multishipping-"] #review-buttons-container {
-  float: right;
-  text-align: right;
-}
-
-.checkout-multishipping-addresses .btn-remove2 {
-  text-indent: -5555px;
-  display: block;
-  width: 22px;
-  height: 22px;
-}
-
-.checkout-multishipping-shipping .gift-messages {
-  margin-top: 20px;
-}
-.checkout-multishipping-shipping .gift-messages-form {
-  margin-top: 15px;
-}
-.checkout-multishipping-shipping .gift-messages-form h4 {
-  margin-top: 15px;
-  margin-bottom: 5px;
-}
-.checkout-multishipping-shipping .gift-messages-form .form-list {
-  margin-top: 10px;
-  margin-bottom: 25px;
-}
-.checkout-multishipping-shipping .gift-messages-form .item {
-  margin-top: 15px;
-}
-
-.checkout-multishipping-shipping .col-1 .box-title h2, .checkout-multishipping-shipping .col-1 .box-title h3, .checkout-multishipping-shipping .col-1 .box-title h4, .checkout-multishipping-shipping .col-2 .box-title h2, .checkout-multishipping-shipping .col-2 .box-title h3, .checkout-multishipping-shipping .col-2 .box-title h4,
-.checkout-multishipping-billing .col-1 .box-title h2,
-.checkout-multishipping-billing .col-1 .box-title h3,
-.checkout-multishipping-billing .col-1 .box-title h4,
-.checkout-multishipping-billing .col-2 .box-title h2,
-.checkout-multishipping-billing .col-2 .box-title h3,
-.checkout-multishipping-billing .col-2 .box-title h4,
-.checkout-multishipping-overview .col-1 .box-title h2,
-.checkout-multishipping-overview .col-1 .box-title h3,
-.checkout-multishipping-overview .col-1 .box-title h4,
-.checkout-multishipping-overview .col-2 .box-title h2,
-.checkout-multishipping-overview .col-2 .box-title h3,
-.checkout-multishipping-overview .col-2 .box-title h4 {
-  font-weight: normal;
-  width: 100%;
-  background: var(--maho-color-background-alt);
-  border-bottom: 1px solid var(--maho-color-border);
-  padding: 10px;
-  font-size: 0.875rem;
-}
-.checkout-multishipping-shipping .col-1 > h4, .checkout-multishipping-shipping .col-2 > h4,
-.checkout-multishipping-billing .col-1 > h4,
-.checkout-multishipping-billing .col-2 > h4,
-.checkout-multishipping-overview .col-1 > h4,
-.checkout-multishipping-overview .col-2 > h4 {
-  font-weight: normal;
-  width: 100%;
-  background: var(--maho-color-background-alt);
-  border-bottom: 1px solid var(--maho-color-border);
-  padding: 10px;
-  font-size: 0.875rem;
-}
-.checkout-multishipping-shipping .col-1 .box-content, .checkout-multishipping-shipping .col-2 .box-content,
-.checkout-multishipping-billing .col-1 .box-content,
-.checkout-multishipping-billing .col-2 .box-content,
-.checkout-multishipping-overview .col-1 .box-content,
-.checkout-multishipping-overview .col-2 .box-content {
-  margin-bottom: 25px;
-  padding-left: 10px;
-  margin-top: 10px;
-}
-
-.checkout-multishipping-billing .sp-methods dt {
-  float: left;
-  width: 100%;
-}
-
-.checkout-multishipping-payment-customerbalance input.checkbox {
-  margin-left: 15px;
-}
-
-#multiship-addresses-table > tbody > tr > td.a-center.last > a {
-  background-image: none;
-}
-
-#review-order-form > div:nth-child(3) > div.divider {
-  width: 100%;
-  clear: both;
-}
-
-@media only screen and (max-width: 979px) {
-  body[class*="checkout-multishipping-"] .checkout-progress span {
-    word-spacing: 300px;
-  }
-
-  #review-order-form .col-1,
-  #review-order-form .col-2 {
-    float: none;
-    width: auto;
-    border: 0;
-    padding-right: 0;
-    padding-left: 0;
-  }
-}
-@media only screen and (max-width: 770px) {
-  body[class*="checkout-multishipping-"] .checkout-progress span {
-    width: 12px;
-  }
-  body[class*="checkout-multishipping-"] .checkout-progress li {
-    width: 100%;
-    margin: 0;
-    text-align: left;
-    padding-left: 3%;
-    border-right: 0px;
-  }
-  body[class*="checkout-multishipping-"] .checkout-progress span {
-    word-spacing: 1px;
-    width: 12px;
-  }
-  body[class*="checkout-multishipping-"] .box-title {
-    float: left;
-    width: 100%;
-  }
-  body[class*="checkout-multishipping-"] .page-title .button {
-    float: left;
-    margin-bottom: 10px;
-  }
-  body[class*="checkout-multishipping-"] .linearize-table tfoot td {
-    text-align: right;
-  }
-  body[class*="checkout-multishipping-"] .linearize-table select {
-    width: 100%;
-    min-width: 200px;
-  }
-  body[class*="checkout-multishipping-"] .col-1.col-narrow, body[class*="checkout-multishipping-"] .col-2.col-wide {
-    width: 100%;
-    padding: 0;
-  }
-}
-@media only screen and (max-width: 599px) {
-  .checkout-multishipping-addresses .linearize-table tbody td[data-rwd-label] {
-    text-align: left;
-    padding-left: 10px;
-    margin-top: 12px;
-  }
-}
-@media only screen and (max-width: 479px) {
-  body[class*="checkout-multishipping-"] .buttons-set .back-link {
-    display: block;
-  }
-}
 /* ============================================ *
  * Native Date Input Styles
  * ============================================ */

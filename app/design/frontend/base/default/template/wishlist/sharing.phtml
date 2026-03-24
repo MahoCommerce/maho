@@ -15,7 +15,7 @@
     <h1><?= $this->__('Share Your Wishlist') ?></h1>
 </div>
 <?= $this->getMessagesBlock()->toHtml() ?>
-<form action="<?= $this->getSendUrl() ?>" id="form-validate" method="post">
+<form action="<?= $this->getSendUrl() ?>" id="form-validate" method="post" autocomplete="off">
     <div class="fieldset">
         <?= $this->getBlockHtml('formkey') ?>
         <h2 class="legend"><?= $this->__('Sharing Information') ?></h2>

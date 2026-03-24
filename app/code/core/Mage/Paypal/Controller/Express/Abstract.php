@@ -18,7 +18,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     protected $_checkout = null;
 
     /**
-     * @var Mage_Paypal_Model_Config
+     * @var Mage_Paypal_Model_Config|Maho_Paypal_Model_Config|Mage_Core_Model_Abstract|false|null
      */
     protected $_config = null;
 
@@ -49,9 +49,7 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     protected function _construct()
     {
         parent::_construct();
-        $classInstance = Mage::getModel($this->_configType, [$this->_configMethod]);
-        assert($classInstance instanceof \Mage_Paypal_Model_Config);
-        $this->_config = $classInstance;
+        $this->_config = Mage::getModel($this->_configType, [$this->_configMethod]);
     }
 
     /**
@@ -61,11 +59,6 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
     {
         try {
             $this->_initCheckout();
-
-            if ($this->_getQuote()->getIsMultiShipping()) {
-                $this->_getQuote()->setIsMultiShipping(false);
-                $this->_getQuote()->removeAllAddresses();
-            }
 
             $customer = Mage::getSingleton('customer/session')->getCustomer();
             $quoteCheckoutMethod = $this->_getQuote()->getCheckoutMethod();
@@ -97,9 +90,6 @@ abstract class Mage_Paypal_Controller_Express_Abstract extends Mage_Core_Control
             if ($customer && $customer->getId()) {
                 $this->_checkout->setIsBillingAgreementRequested($isBARequested);
             }
-
-            // Bill Me Later
-            $this->_checkout->setIsBml((bool) $this->getRequest()->getParam('bml'));
 
             // giropay
             $this->_checkout->prepareGiropayUrls(

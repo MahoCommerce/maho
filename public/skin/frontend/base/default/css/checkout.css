@@ -114,18 +114,8 @@ td.product-cart-remove a {
 .checkout-types li:first-child {
     margin-left: 0;
 }
-.checkout-types .method-checkout-cart-methods-multishipping {
-    display: block;
-}
 .checkout-types.top li {
     display: inline-block;
-}
-.checkout-types.top .bml_button {
-    display: inline-block;
-    vertical-align: top;
-}
-.checkout-types.top .bml_button img {
-    display: block;
 }
 .checkout-types.top .paypal-logo .paypal-or {
     margin-top: 5px;

@@ -68,15 +68,7 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         }
 
         $helper = Mage::helper('core');
-
-        // Try to decrypt (config from database is encrypted)
-        $decrypted = $helper->decrypt($config);
-        if ($decrypted !== '') {
-            return $helper->jsonDecode($decrypted) ?: [];
-        }
-
-        // If decryption failed, config might be plaintext JSON (before save)
-        return $helper->jsonDecode($config) ?: [];
+        return $helper->jsonDecode($helper->tryDecrypt($config) ?? $config) ?: [];
     }
 
     /**
@@ -238,7 +230,10 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     #[\Override]
     protected function _beforeSave(): self
     {
-        $this->_encryptConfig();
+        $config = $this->getConfig();
+        if (!empty($config)) {
+            $this->setData('config', Mage::helper('core')->encryptIdempotent($config));
+        }
 
         $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         if (!$this->getCreatedAt()) {
@@ -247,36 +242,5 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         $this->setUpdatedAt($now);
 
         return parent::_beforeSave();
-    }
-
-    /**
-     * Encrypt the entire config JSON before saving
-     */
-    protected function _encryptConfig(): void
-    {
-        $config = $this->getConfig();
-        if (empty($config)) {
-            return;
-        }
-
-        $helper = Mage::helper('core');
-
-        // Check if config is already encrypted (re-saving without changes)
-        // If decryption succeeds, we have JSON to work with
-        $decrypted = $helper->decrypt($config);
-        if ($decrypted !== '') {
-            $configArray = $helper->jsonDecode($decrypted);
-        } else {
-            // Config is plaintext JSON (new or modified)
-            $configArray = $helper->jsonDecode($config);
-        }
-
-        if (!is_array($configArray)) {
-            return;
-        }
-
-        // Encrypt the entire config JSON
-        $json = $helper->jsonEncode($configArray);
-        $this->setData('config', $helper->encrypt($json));
     }
 }

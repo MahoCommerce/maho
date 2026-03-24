@@ -63,7 +63,6 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
     protected $_canVoid                 = true;
     protected $_canUseInternal          = true;
     protected $_canUseCheckout          = true;
-    protected $_canUseForMultishipping  = true;
     protected $_canSaveCc = false;
     protected $_isProxy = false;
     protected $_canFetchTransactionInfo = true;
@@ -83,7 +82,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
     /**
      * Centinel cardinal fields map
      *
-     * @var string
+     * @var array<string, string>
      */
     protected $_centinelFieldMap = [
         'centinel_mpivendor'    => 'MPIVENDOR3DS',

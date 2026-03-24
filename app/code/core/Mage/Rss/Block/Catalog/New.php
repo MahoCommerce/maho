@@ -78,7 +78,7 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
             ->applyFrontendPriceLimitations()
         ;
 
-        $products->setVisibility(Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
+        $products->setVisibility(Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
 
         /*
         using resource iterator to load the data one by one
