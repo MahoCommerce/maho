@@ -191,6 +191,7 @@ class JwtService
             new StrictValidAt(SystemClock::fromUTC()),
         ];
 
+        assert($parsed instanceof \Lcobucci\JWT\Token\Plain);
         $config->validator()->assert($parsed, ...$constraints);
 
         // Convert to stdClass for backward compatibility

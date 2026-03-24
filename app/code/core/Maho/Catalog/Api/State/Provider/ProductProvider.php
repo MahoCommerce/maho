@@ -920,7 +920,7 @@ final class ProductProvider implements ProviderInterface
             ->setPageSize(20);
 
         // Filter by visibility (catalog or both)
-        \Mage::getSingleton('catalog/product_visibility')->addVisibleInCatalogFilterToCollection($collection);
+        $collection->setVisibility(\Mage_Catalog_Model_Product_Visibility::getVisibleInCatalogIds());
 
         // Filter out-of-stock products using the stock STATUS index (not the stock item's
         // is_in_stock field which can be stale). Respects "Display Out of Stock Products" config.
