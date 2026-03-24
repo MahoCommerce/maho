@@ -37,10 +37,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Encrypted extends Mage_Core_Mod
             $value = $this->getOldValue();
         }
         if ($value !== '') {
-            $helper = Mage::helper('core');
-            $decrypted = $helper->decrypt($value);
-            $plaintext = ($decrypted !== '') ? $decrypted : $value;
-            $this->setValue($helper->encrypt($plaintext));
+            $this->setValue(Mage::helper('core')->encryptIdempotent($value));
         }
         return $this;
     }

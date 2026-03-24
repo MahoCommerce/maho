@@ -68,9 +68,7 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         }
 
         $helper = Mage::helper('core');
-        $decrypted = $helper->decrypt($config);
-        $json = ($decrypted !== '') ? $decrypted : $config;
-        return $helper->jsonDecode($json) ?: [];
+        return $helper->jsonDecode($helper->tryDecrypt($config) ?? $config) ?: [];
     }
 
     /**
@@ -234,10 +232,7 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     {
         $config = $this->getConfig();
         if (!empty($config)) {
-            $helper = Mage::helper('core');
-            $decrypted = $helper->decrypt($config);
-            $plaintext = ($decrypted !== '') ? $decrypted : $config;
-            $this->setData('config', $helper->encrypt($plaintext));
+            $this->setData('config', Mage::helper('core')->encryptIdempotent($config));
         }
 
         $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);

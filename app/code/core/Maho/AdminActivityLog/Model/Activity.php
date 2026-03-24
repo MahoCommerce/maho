@@ -57,9 +57,7 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         $data = $this->getData('old_data');
         if ($data) {
             $helper = Mage::helper('core');
-            $decrypted = $helper->decrypt($data);
-            $json = ($decrypted !== '') ? $decrypted : $data;
-            return $helper->jsonDecode($json) ?: [];
+            return $helper->jsonDecode($helper->tryDecrypt($data) ?? $data) ?: [];
         }
         return [];
     }
@@ -69,9 +67,7 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         $data = $this->getData('new_data');
         if ($data) {
             $helper = Mage::helper('core');
-            $decrypted = $helper->decrypt($data);
-            $json = ($decrypted !== '') ? $decrypted : $data;
-            return $helper->jsonDecode($json) ?: [];
+            return $helper->jsonDecode($helper->tryDecrypt($data) ?? $data) ?: [];
         }
         return [];
     }
@@ -87,9 +83,7 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         foreach (['old_data', 'new_data'] as $field) {
             $value = $this->getData($field);
             if ($value !== null && $value !== '') {
-                $decrypted = $helper->decrypt($value);
-                $plaintext = ($decrypted !== '') ? $decrypted : $value;
-                $this->setData($field, $helper->encrypt($plaintext));
+                $this->setData($field, $helper->encryptIdempotent($value));
             }
         }
 
