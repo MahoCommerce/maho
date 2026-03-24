@@ -18,6 +18,13 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
      */
     public const ADMIN_RESOURCE = 'catalog/urlrewrite';
 
+    #[\Override]
+    public function preDispatch(): Mage_Adminhtml_Controller_Action
+    {
+        $this->_setForcedFormKeyActions(['delete', 'massDelete']);
+        return parent::preDispatch();
+    }
+
     /**
      * Instantiate urlrewrite, product and category
      *
@@ -195,6 +202,32 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
                     ->addException($e, Mage::helper('adminhtml')->__('An error occurred while deleting URL Rewrite.'));
                 $this->_redirect('*/*/edit/', ['id' => Mage::registry('current_urlrewrite')->getId()]);
                 return;
+            }
+        }
+        $this->_redirect('*/*/');
+    }
+
+    /**
+     * Urlrewrite mass delete action
+     */
+    public function massDeleteAction(): void
+    {
+        $ids = $this->getRequest()->getParam('url_rewrite');
+        if (!is_array($ids)) {
+            Mage::getSingleton('adminhtml/session')->addError(
+                Mage::helper('adminhtml')->__('Please select URL rewrite(s).'),
+            );
+        } else {
+            try {
+                $model = Mage::getSingleton('core/factory')->getUrlRewriteInstance();
+                foreach ($ids as $id) {
+                    $model->load($id)->delete();
+                }
+                Mage::getSingleton('adminhtml/session')->addSuccess(
+                    Mage::helper('adminhtml')->__('Total of %d URL rewrite(s) have been deleted.', count($ids)),
+                );
+            } catch (Exception $e) {
+                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
             }
         }
         $this->_redirect('*/*/');
