@@ -5482,12 +5482,6 @@ parameters:
 			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
 
 		-
-			rawMessage: 'Parameter #1 $order of method Mage_Sales_Model_Resource_Order_Collection_Abstract::setOrderFilter() expects int|Mage_Sales_Model_Order, array<string, mixed> given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Adminhtml/controllers/Sales/Order/ShipmentController.php
-
-		-
 			rawMessage: 'Parameter #1 $value of method Mage_Sales_Model_Order::setCustomerNoteNotify() expects int, bool given.'
 			identifier: argument.type
 			count: 1
