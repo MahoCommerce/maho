@@ -1287,4 +1287,71 @@ XML;
 
         return true;
     }
+
+    /**
+     * Validate that all encrypted values in a table can be decrypted successfully.
+     * Returns an array of failures (empty array = all good).
+     *
+     * @param string[] $columns
+     * @return array<int, array{table: string, primary_key: mixed, column: string}>
+     */
+    public function validateDecryptTable(
+        string $table,
+        string $primaryKey,
+        array $columns,
+        callable $decryptCallback,
+        int $batchSize = 1000,
+    ): array {
+        $readConnection = Mage::getSingleton('core/resource')->getConnection('core_read');
+        $lastId = 0;
+        $failures = [];
+
+        $tableColumns = array_keys($readConnection->describeTable($table));
+        $columns = array_values(array_intersect($columns, $tableColumns));
+        if (empty($columns)) {
+            return [];
+        }
+
+        $quotedPk = $readConnection->quoteIdentifier($primaryKey);
+
+        while (true) {
+            $select = $readConnection->select()
+                ->from($table, array_merge([$primaryKey], $columns))
+                ->where("$quotedPk > ?", $lastId)
+                ->order("$quotedPk ASC")
+                ->limit($batchSize);
+
+            $conditions = [];
+            foreach ($columns as $column) {
+                $conditions[] = $readConnection->quoteIdentifier($column) . ' IS NOT NULL AND '
+                    . $readConnection->quoteIdentifier($column) . " != ''";
+            }
+            $select->where(implode(' OR ', $conditions));
+
+            $rows = $readConnection->fetchAll($select);
+            if (empty($rows)) {
+                break;
+            }
+
+            foreach ($rows as $row) {
+                foreach ($columns as $column) {
+                    if ($row[$column] !== null && $row[$column] !== '') {
+                        $decrypted = $decryptCallback($row[$column]);
+                        if ($decrypted === '') {
+                            $failures[] = [
+                                'table' => $table,
+                                'primary_key' => $row[$primaryKey],
+                                'column' => $column,
+                            ];
+                        }
+                    }
+                }
+                $lastId = $row[$primaryKey];
+            }
+
+            unset($rows);
+        }
+
+        return $failures;
+    }
 }
