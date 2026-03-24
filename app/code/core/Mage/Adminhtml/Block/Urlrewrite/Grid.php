@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Mage_Adminhtml_Block_Widget_Grid_Massaction_Abstract as MassAction;
+
 class Mage_Adminhtml_Block_Urlrewrite_Grid extends Mage_Adminhtml_Block_Widget_Grid
 {
     public function __construct()
@@ -25,6 +27,21 @@ class Mage_Adminhtml_Block_Urlrewrite_Grid extends Mage_Adminhtml_Block_Widget_G
         $collection = Mage::getResourceModel('core/url_rewrite_collection');
         $this->setCollection($collection);
         return parent::_prepareCollection();
+    }
+
+    #[\Override]
+    protected function _prepareMassaction()
+    {
+        $this->setMassactionIdField('url_rewrite_id');
+        $this->getMassactionBlock()->setFormFieldName('url_rewrite');
+
+        $this->getMassactionBlock()->addItem(MassAction::DELETE, [
+            'label'   => Mage::helper('adminhtml')->__('Delete'),
+            'url'     => $this->getUrl('*/*/massDelete'),
+            'confirm' => Mage::helper('adminhtml')->__('Are you sure you want to delete the selected URL rewrites?'),
+        ]);
+
+        return $this;
     }
 
     #[\Override]
