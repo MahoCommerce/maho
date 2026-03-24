@@ -56,9 +56,9 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     }
 
     /**
-     * Get config as array
+     * Get config as decrypted array
      *
-     * In-memory config is always plaintext JSON (decrypted on load and after save).
+     * Handles both encrypted config (from database) and plaintext JSON (before save).
      */
     public function getConfigArray(): array
     {
@@ -67,7 +67,10 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
             return [];
         }
 
-        return Mage::helper('core')->jsonDecode($config) ?: [];
+        $helper = Mage::helper('core');
+        $decrypted = $helper->decrypt($config);
+        $json = ($decrypted !== '') ? $decrypted : $config;
+        return $helper->jsonDecode($json) ?: [];
     }
 
     /**
@@ -231,7 +234,10 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
     {
         $config = $this->getConfig();
         if (!empty($config)) {
-            $this->setData('config', Mage::helper('core')->encrypt($config));
+            $helper = Mage::helper('core');
+            $decrypted = $helper->decrypt($config);
+            $plaintext = ($decrypted !== '') ? $decrypted : $config;
+            $this->setData('config', $helper->encrypt($plaintext));
         }
 
         $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
@@ -241,37 +247,5 @@ class Maho_FeedManager_Model_Destination extends Mage_Core_Model_Abstract
         $this->setUpdatedAt($now);
 
         return parent::_beforeSave();
-    }
-
-    /**
-     * Decrypt config back to plaintext after save to prevent double-encryption
-     */
-    #[\Override]
-    protected function _afterSave(): self
-    {
-        $config = $this->getConfig();
-        if (!empty($config)) {
-            $decrypted = Mage::helper('core')->decrypt($config);
-            if ($decrypted !== '') {
-                $this->setData('config', $decrypted);
-            }
-        }
-        return parent::_afterSave();
-    }
-
-    /**
-     * Decrypt config after loading from database
-     */
-    #[\Override]
-    protected function _afterLoad(): self
-    {
-        $config = $this->getConfig();
-        if (!empty($config)) {
-            $decrypted = Mage::helper('core')->decrypt($config);
-            if ($decrypted !== '') {
-                $this->setData('config', $decrypted);
-            }
-        }
-        return parent::_afterLoad();
     }
 }

@@ -56,7 +56,10 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     {
         $data = $this->getData('old_data');
         if ($data) {
-            return Mage::helper('core')->jsonDecode($data) ?: [];
+            $helper = Mage::helper('core');
+            $decrypted = $helper->decrypt($data);
+            $json = ($decrypted !== '') ? $decrypted : $data;
+            return $helper->jsonDecode($json) ?: [];
         }
         return [];
     }
@@ -65,7 +68,10 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     {
         $data = $this->getData('new_data');
         if ($data) {
-            return Mage::helper('core')->jsonDecode($data) ?: [];
+            $helper = Mage::helper('core');
+            $decrypted = $helper->decrypt($data);
+            $json = ($decrypted !== '') ? $decrypted : $data;
+            return $helper->jsonDecode($json) ?: [];
         }
         return [];
     }
@@ -77,41 +83,17 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
             $this->setCreatedAt(Mage::getModel('core/date')->gmtDate());
         }
 
-        $encryption = Mage::getModel('core/encryption');
+        $helper = Mage::helper('core');
         foreach (['old_data', 'new_data'] as $field) {
             $value = $this->getData($field);
             if ($value !== null && $value !== '') {
-                $this->setData($field, $encryption->encrypt($value));
+                $decrypted = $helper->decrypt($value);
+                $plaintext = ($decrypted !== '') ? $decrypted : $value;
+                $this->setData($field, $helper->encrypt($plaintext));
             }
         }
 
         return parent::_beforeSave();
-    }
-
-    #[\Override]
-    protected function _afterSave()
-    {
-        $encryption = Mage::getModel('core/encryption');
-        foreach (['old_data', 'new_data'] as $field) {
-            $value = $this->getData($field);
-            if ($value !== null && $value !== '') {
-                $this->setData($field, $encryption->decrypt($value));
-            }
-        }
-        return parent::_afterSave();
-    }
-
-    #[\Override]
-    protected function _afterLoad()
-    {
-        $encryption = Mage::getModel('core/encryption');
-        foreach (['old_data', 'new_data'] as $field) {
-            $value = $this->getData($field);
-            if ($value !== null && $value !== '') {
-                $this->setData($field, $encryption->decrypt($value));
-            }
-        }
-        return parent::_afterLoad();
     }
 
     /**

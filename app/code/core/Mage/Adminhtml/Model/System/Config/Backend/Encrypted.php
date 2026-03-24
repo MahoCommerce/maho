@@ -36,23 +36,13 @@ class Mage_Adminhtml_Model_System_Config_Backend_Encrypted extends Mage_Core_Mod
         if (preg_match('/^\*+$/', $this->getValue())) {
             $value = $this->getOldValue();
         }
-        if (!empty($value) && ($encrypted = Mage::helper('core')->encrypt($value))) {
-            $this->setValue($encrypted);
+        if ($value !== '') {
+            $helper = Mage::helper('core');
+            $decrypted = $helper->decrypt($value);
+            $plaintext = ($decrypted !== '') ? $decrypted : $value;
+            $this->setValue($helper->encrypt($plaintext));
         }
         return $this;
-    }
-
-    /**
-     * Decrypt value after saving to prevent double-encryption on consecutive saves
-     */
-    #[\Override]
-    protected function _afterSave()
-    {
-        $value = (string) $this->getValue();
-        if (!empty($value) && ($decrypted = Mage::helper('core')->decrypt($value))) {
-            $this->setValue($decrypted);
-        }
-        return parent::_afterSave();
     }
 
     /**
