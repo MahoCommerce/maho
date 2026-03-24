@@ -434,10 +434,11 @@ class Mage_Adminhtml_Block_System_Config_Form extends Mage_Adminhtml_Block_Widge
 
                     $optionArray = [];
                     if ($method) {
+                        $methodResult = $sourceModel->$method();
                         if ($fieldType == 'multiselect') {
-                            $optionArray = $sourceModel->$method();
+                            $optionArray = $methodResult ?? [];
                         } else {
-                            foreach ($sourceModel->$method() as $value => $label) {
+                            foreach ($methodResult ?? [] as $value => $label) {
                                 $optionArray[] = ['label' => $label, 'value' => $value];
                             }
                         }

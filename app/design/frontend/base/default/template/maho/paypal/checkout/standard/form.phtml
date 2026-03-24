@@ -1,0 +1,31 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Paypal
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Paypal_Block_Checkout_Standard_Form $this */
+$containerId = 'paypal-button-container-' . $this->getMethodCode();
+?>
+<div id="payment_form_<?= $this->escapeHtml($this->getMethodCode()) ?>" style="display:none"
+    data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-currency-code="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
+    data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
+    data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
+    data-container-id="<?= $this->escapeHtml($containerId) ?>"
+    data-method-code="<?= $this->escapeHtml($this->getMethodCode()) ?>">
+    <div id="<?= $this->escapeHtml($containerId) ?>" class="paypal-button-container">
+        <paypal-button hidden></paypal-button>
+    </div>
+    <?php if ($this->isVaultAvailable()): ?>
+    <label class="paypal-save-vault" for="paypal_standard_save_vault">
+        <input type="checkbox" id="paypal_standard_save_vault" name="payment[save_vault]" value="1" />
+        <span class="paypal-save-vault-icon"><?= Mage::helper('core')->getIconSvg('lock', 'outline') ?></span>
+        <span><?= $this->escapeHtml($this->__('Save this payment method for future purchases')) ?></span>
+    </label>
+    <?php endif; ?>
+</div>

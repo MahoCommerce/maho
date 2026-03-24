@@ -1,0 +1,24 @@
+<?php
+/**
+ * Maho
+ *
+ * @package    Maho_Paypal
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+/** @var Maho_Paypal_Block_Shortcut_Button $this */
+$containerId = $this->getShortcutHtmlId();
+?>
+<div id="<?= $this->escapeHtml($containerId) ?>"
+    class="paypal-shortcut-button"
+    data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
+    data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
+    data-currency-code="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
+    data-create-order-url="<?= $this->escapeUrl($this->getCreateOrderUrl()) ?>"
+    data-approve-order-url="<?= $this->escapeUrl($this->getApproveOrderUrl()) ?>"
+    data-container-id="<?= $this->escapeHtml($containerId) ?>"
+    data-method-code="paypal_standard_checkout"
+    <?php if ($this->getIsInCatalogProduct()): ?>data-add-to-cart-form="product_addtocart_form"<?php endif; ?>>
+    <paypal-button hidden></paypal-button>
+</div>

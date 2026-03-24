@@ -21,7 +21,7 @@ class Mage_Paypal_Block_Standard_Form extends Mage_Payment_Block_Form
     /**
      * Config model instance
      *
-     * @var Mage_Paypal_Model_Config
+     * @var Mage_Paypal_Model_Config|Maho_Paypal_Model_Config
      */
     protected $_config;
 

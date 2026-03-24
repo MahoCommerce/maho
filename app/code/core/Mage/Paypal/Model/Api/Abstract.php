@@ -267,7 +267,7 @@ abstract class Mage_Paypal_Model_Api_Abstract extends \Maho\DataObject
      * Config instance setter
      * @return Mage_Paypal_Model_Api_Abstract
      */
-    public function setConfigObject(Mage_Paypal_Model_Config $config)
+    public function setConfigObject(Mage_Paypal_Model_Config|Maho_Paypal_Model_Config $config)
     {
         $this->_config = $config;
         return $this;
