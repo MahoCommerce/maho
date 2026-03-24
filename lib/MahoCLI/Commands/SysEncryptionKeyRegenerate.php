@@ -210,7 +210,12 @@ class SysEncryptionKeyRegenerate extends BaseMahoCommand
         ];
 
         foreach ($tablesToValidate as $tableInfo) {
-            $tableName = Mage::getSingleton('core/resource')->getTableName($tableInfo['table']);
+            try {
+                $tableName = Mage::getSingleton('core/resource')->getTableName($tableInfo['table']);
+            } catch (\Mage_Core_Exception) {
+                $output->writeln('Skipping ' . $tableInfo['table'] . ' (module not installed)');
+                continue;
+            }
             $output->write("Validating $tableName table... ");
             $failures = $helper->validateDecryptTable(
                 $tableName,
