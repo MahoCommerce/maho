@@ -55,6 +55,7 @@ class Maho_Paypal_Model_Webhook_Processor
             $handler->handle($payload);
 
             $event->setStatus('processed');
+            $event->setPayload(null);
             $event->setProcessedAt(Mage_Core_Model_Locale::now());
             $event->save();
         } catch (\Throwable $e) {

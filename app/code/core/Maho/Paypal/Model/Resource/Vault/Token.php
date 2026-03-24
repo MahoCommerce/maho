@@ -17,4 +17,30 @@ class Maho_Paypal_Model_Resource_Vault_Token extends Mage_Core_Model_Resource_Db
     {
         $this->_init('maho_paypal/vault_token', 'token_id');
     }
+
+    #[\Override]
+    protected function _beforeSave(Mage_Core_Model_Abstract $object): self
+    {
+        $paypalTokenId = $object->getData('paypal_token_id');
+        if ($paypalTokenId !== null) {
+            $object->setData('paypal_token_id_hash', hash('sha256', $paypalTokenId));
+            $object->setData('paypal_token_id', Mage::helper('core')->encrypt($paypalTokenId));
+        }
+        return parent::_beforeSave($object);
+    }
+
+    #[\Override]
+    protected function _afterLoad(Mage_Core_Model_Abstract $object): self
+    {
+        $encrypted = $object->getData('paypal_token_id');
+        if ($encrypted !== null && $encrypted !== '') {
+            $object->setData('paypal_token_id', Mage::helper('core')->decrypt($encrypted));
+        }
+        return parent::_afterLoad($object);
+    }
+
+    public static function hashTokenId(string $paypalTokenId): string
+    {
+        return hash('sha256', $paypalTokenId);
+    }
 }

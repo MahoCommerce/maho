@@ -43,9 +43,9 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
     public function initialize($paymentAction, $stateObject): self
     {
         $payment = $this->getInfoInstance();
-        $vaultToken = $payment->getAdditionalInformation('paypal_vault_token');
+        $vaultTokenId = $payment->getAdditionalInformation('vault_token_id');
 
-        if ($vaultToken && !$payment->getAdditionalInformation('paypal_order_id')) {
+        if ($vaultTokenId && !$payment->getAdditionalInformation('paypal_order_id')) {
             $this->_processAdminVaultOrder($payment, $paymentAction, $stateObject);
             return $this;
         }
@@ -144,7 +144,6 @@ class Maho_Paypal_Model_Method_Vault extends Maho_Paypal_Model_Method_Abstract
 
             if ($token->getId() && (int) $token->getCustomerId() === $customerId) {
                 $info->setAdditionalInformation('vault_token_id', $vaultTokenId);
-                $info->setAdditionalInformation('paypal_vault_token', $token->getPaypalTokenId());
                 $info->setAdditionalInformation('vault_label', $token->getDisplayLabel());
             }
         }

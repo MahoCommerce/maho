@@ -20,7 +20,7 @@ class Maho_Paypal_Model_Webhook_Handler_VaultTokenDeleted extends Maho_Paypal_Mo
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $collection */
         $collection = Mage::getResourceModel('maho_paypal/vault_token_collection');
-        $collection->addFieldToFilter('paypal_token_id', $tokenId);
+        $collection->addPaypalTokenFilter($tokenId);
 
         /** @var Maho_Paypal_Model_Vault_Token $token */
         $token = $collection->getFirstItem();

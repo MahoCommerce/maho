@@ -87,9 +87,12 @@ $vaultTable = $connection
         'unsigned' => true,
         'nullable' => false,
     ], 'Customer ID')
-    ->addColumn('paypal_token_id', Maho\Db\Ddl\Table::TYPE_VARCHAR, 64, [
+    ->addColumn('paypal_token_id', Maho\Db\Ddl\Table::TYPE_TEXT, 512, [
         'nullable' => false,
-    ], 'PayPal Vault Token ID')
+    ], 'PayPal Vault Token ID (encrypted)')
+    ->addColumn('paypal_token_id_hash', Maho\Db\Ddl\Table::TYPE_VARCHAR, 64, [
+        'nullable' => true,
+    ], 'SHA-256 hash of PayPal Token ID for lookups')
     ->addColumn('payment_source_type', Maho\Db\Ddl\Table::TYPE_VARCHAR, 32, [
         'nullable' => false,
     ], 'Payment Source Type (card, paypal)')
@@ -122,8 +125,8 @@ $vaultTable = $connection
         'default'  => Maho\Db\Ddl\Table::TIMESTAMP_INIT_UPDATE,
     ], 'Updated At')
     ->addIndex(
-        $installer->getIdxName('maho_paypal/vault_token', ['paypal_token_id'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
-        ['paypal_token_id'],
+        $installer->getIdxName('maho_paypal/vault_token', ['paypal_token_id_hash'], Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE),
+        ['paypal_token_id_hash'],
         ['type' => Maho\Db\Adapter\AdapterInterface::INDEX_TYPE_UNIQUE],
     )
     ->addIndex(
