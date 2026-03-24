@@ -45,7 +45,7 @@ class Maho_Paypal_Model_Webhook_Handler_VaultTokenCreated extends Maho_Paypal_Mo
         // Check for duplicate
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $existing */
         $existing = Mage::getResourceModel('maho_paypal/vault_token_collection');
-        $existing->addFieldToFilter('paypal_token_id', $paypalTokenId);
+        $existing->addPaypalTokenFilter($paypalTokenId);
         if ($existing->getSize() > 0) {
             $this->_log("VaultTokenCreated: token {$paypalTokenId} already exists, skipping");
             return;

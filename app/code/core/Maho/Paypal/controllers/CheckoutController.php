@@ -549,7 +549,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
         /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $existing */
         $existing = Mage::getResourceModel('maho_paypal/vault_token_collection');
-        $existing->addFieldToFilter('paypal_token_id', $paypalTokenId);
+        $existing->addPaypalTokenFilter($paypalTokenId);
         if ($existing->getSize() > 0) {
             return;
         }

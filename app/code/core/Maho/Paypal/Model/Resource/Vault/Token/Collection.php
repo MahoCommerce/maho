@@ -29,4 +29,24 @@ class Maho_Paypal_Model_Resource_Vault_Token_Collection extends Mage_Core_Model_
         $this->addFieldToFilter('is_active', 1);
         return $this;
     }
+
+    public function addPaypalTokenFilter(string $paypalTokenId): self
+    {
+        $this->addFieldToFilter('paypal_token_id_hash', Maho_Paypal_Model_Resource_Vault_Token::hashTokenId($paypalTokenId));
+        return $this;
+    }
+
+    #[\Override]
+    protected function _afterLoad(): self
+    {
+        parent::_afterLoad();
+        $helper = Mage::helper('core');
+        foreach ($this->_items as $item) {
+            $encrypted = $item->getData('paypal_token_id');
+            if ($encrypted !== null && $encrypted !== '') {
+                $item->setData('paypal_token_id', $helper->decrypt($encrypted));
+            }
+        }
+        return $this;
+    }
 }
