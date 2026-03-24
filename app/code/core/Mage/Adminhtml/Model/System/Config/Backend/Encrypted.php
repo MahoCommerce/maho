@@ -43,6 +43,19 @@ class Mage_Adminhtml_Model_System_Config_Backend_Encrypted extends Mage_Core_Mod
     }
 
     /**
+     * Decrypt value after saving to prevent double-encryption on consecutive saves
+     */
+    #[\Override]
+    protected function _afterSave()
+    {
+        $value = (string) $this->getValue();
+        if (!empty($value) && ($decrypted = Mage::helper('core')->decrypt($value))) {
+            $this->setValue($decrypted);
+        }
+        return parent::_afterSave();
+    }
+
+    /**
      * Get & decrypt old value from configuration
      *
      * @return string
