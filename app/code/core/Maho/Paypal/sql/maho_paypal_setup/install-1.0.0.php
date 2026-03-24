@@ -87,7 +87,7 @@ $vaultTable = $connection
         'unsigned' => true,
         'nullable' => false,
     ], 'Customer ID')
-    ->addColumn('paypal_token_id', Maho\Db\Ddl\Table::TYPE_TEXT, 512, [
+    ->addColumn('paypal_token_id', Maho\Db\Ddl\Table::TYPE_TEXT, null, [
         'nullable' => false,
     ], 'PayPal Vault Token ID (encrypted)')
     ->addColumn('paypal_token_id_hash', Maho\Db\Ddl\Table::TYPE_VARCHAR, 64, [
