@@ -57,7 +57,7 @@ class Mage_Catalog_Model_Resource_Product_Collection extends Mage_Catalog_Model_
     /**
      * Add URL rewrite for category
      *
-     * @var int
+     * @var int|string
      */
     protected $_urlRewriteCategory           = '';
 

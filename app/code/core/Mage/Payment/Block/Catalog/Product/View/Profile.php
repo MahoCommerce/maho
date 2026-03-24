@@ -20,7 +20,7 @@ class Mage_Payment_Block_Catalog_Product_View_Profile extends Mage_Core_Block_Te
     /**
      * Recurring profile instance
      *
-     * @var Mage_Payment_Model_Recurring_Profile
+     * @var Mage_Payment_Model_Recurring_Profile|false
      */
     protected $_profile = false;
 
