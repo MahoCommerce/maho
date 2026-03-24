@@ -42,6 +42,25 @@ class Maho_Paypal_Model_Observer
         }
     }
 
+    public function encryptionKeyRegenerated(Maho\Event\Observer $observer): void
+    {
+        /** @var \Symfony\Component\Console\Output\OutputInterface $output */
+        $output = $observer->getEvent()->getOutput();
+        $encryptCallback = $observer->getEvent()->getEncryptCallback();
+        $decryptCallback = $observer->getEvent()->getDecryptCallback();
+
+        $output->write('Re-encrypting data on paypal_vault_token table... ');
+        $result = Mage::helper('core')->recryptTable(
+            Mage::getSingleton('core/resource')->getTableName('maho_paypal/vault_token'),
+            'token_id',
+            ['paypal_token_id'],
+            $encryptCallback,
+            $decryptCallback,
+            output: $output,
+        );
+        $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
+    }
+
     public function addDeprecationNotice(\Maho\DataObject $observer): void
     {
         /** @var Maho_Paypal_Model_Config $config */

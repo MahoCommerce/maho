@@ -67,6 +67,14 @@
                     </maho_paypal_save_order_after_submit>
                 </observers>
             </checkout_submit_all_after>
+            <encryption_key_regenerated>
+                <observers>
+                    <maho_paypal_encryption_key_regenerated>
+                        <class>maho_paypal/observer</class>
+                        <method>encryptionKeyRegenerated</method>
+                    </maho_paypal_encryption_key_regenerated>
+                </observers>
+            </encryption_key_regenerated>
         </events>
     </global>
 
