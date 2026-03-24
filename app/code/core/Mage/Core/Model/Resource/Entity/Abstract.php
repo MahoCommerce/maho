@@ -17,7 +17,7 @@ abstract class Mage_Core_Model_Resource_Entity_Abstract
     /**
      * Configuration object
      *
-     * @var \Maho\Simplexml\Config
+     * @var \Maho\Simplexml\Config|array
      */
     protected $_config = [];
 
@@ -35,7 +35,7 @@ abstract class Mage_Core_Model_Resource_Entity_Abstract
      * Get config by key
      *
      * @param string $key
-     * @return string|boolean
+     * @return \Maho\Simplexml\Config|array|string|false
      */
     public function getConfig($key = '')
     {

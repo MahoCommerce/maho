@@ -82,7 +82,7 @@ class Mage_Paypal_Model_Payflowpro extends Mage_Payment_Model_Method_Cc
     /**
      * Centinel cardinal fields map
      *
-     * @var string
+     * @var array<string, string>
      */
     protected $_centinelFieldMap = [
         'centinel_mpivendor'    => 'MPIVENDOR3DS',

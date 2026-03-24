@@ -5974,18 +5974,6 @@ parameters:
 			path: app/code/core/Mage/Api2/Block/Adminhtml/Attribute/Grid.php
 
 		-
-			rawMessage: 'Property Mage_Api2_Block_Adminhtml_Attribute_Tab_Resource::$_treeModel (Mage_Api2_Model_Acl_Global_Rule_Tree) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Api2/Block/Adminhtml/Attribute/Tab/Resource.php
-
-		-
-			rawMessage: 'Property Mage_Api2_Block_Adminhtml_Roles_Tab_Resources::$_treeModel (Mage_Api2_Model_Acl_Global_Rule_Tree) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Api2/Block/Adminhtml/Roles/Tab/Resources.php
-
-		-
 			rawMessage: Variable $adapters might not be defined.
 			identifier: variable.undefined
 			count: 1
@@ -6348,18 +6336,6 @@ parameters:
 		-
 			rawMessage: 'Method Mage_Bundle_Model_CatalogIndex_Data_Bundle::_prepareLinkFetchSelect() has no return type specified.'
 			identifier: missingType.return
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/CatalogIndex/Data/Bundle.php
-
-		-
-			rawMessage: PHPDoc type bool of property Mage_Bundle_Model_CatalogIndex_Data_Bundle::$_haveChildren is not the same as PHPDoc type array<bool|int> of overridden property Mage_CatalogIndex_Model_Data_Simple::$_haveChildren.
-			identifier: property.phpDocType
-			count: 1
-			path: app/code/core/Mage/Bundle/Model/CatalogIndex/Data/Bundle.php
-
-		-
-			rawMessage: 'Property Mage_Bundle_Model_CatalogIndex_Data_Bundle::$_haveChildren (bool) does not accept default value of type array<int, bool>.'
-			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/Bundle/Model/CatalogIndex/Data/Bundle.php
 
@@ -8737,12 +8713,6 @@ parameters:
 			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
 
 		-
-			rawMessage: 'Property Mage_Catalog_Model_Resource_Product_Collection::$_urlRewriteCategory (int) does not accept default value of type string.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Catalog/Model/Resource/Product/Collection.php
-
-		-
 			rawMessage: '''
 				Return type of method Mage_Catalog_Model_Resource_Product_Collection::getFlatHelper() has typehint with deprecated class Mage_Catalog_Helper_Product_Flat:
 				since 26.5 Flat Catalog will be removed in a future version
@@ -9095,18 +9065,6 @@ parameters:
 			identifier: method.childReturnType
 			count: 1
 			path: app/code/core/Mage/CatalogIndex/Model/Data/Grouped.php
-
-		-
-			rawMessage: 'Property Mage_CatalogIndex_Model_Data_Simple::$_haveChildren (array<bool|int>) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Data/Simple.php
-
-		-
-			rawMessage: 'Property Mage_CatalogIndex_Model_Data_Virtual::$_haveChildren (array<bool|int>) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/CatalogIndex/Model/Data/Virtual.php
 
 		-
 			rawMessage: '''
@@ -10301,7 +10259,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: app/code/core/Mage/Checkout/Model/Cart/Payment/Api.php
-
 
 		-
 			rawMessage: 'Method Mage_Checkout_Model_Observer::loadCustomerQuote() has no return type specified.'
@@ -11610,18 +11567,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: app/code/core/Mage/Core/Model/Resource/Email/Template.php
-
-		-
-			rawMessage: 'Method Mage_Core_Model_Resource_Entity_Abstract::getConfig() should return bool|string but returns Maho\Simplexml\Config.'
-			identifier: return.type
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
-
-		-
-			rawMessage: 'Property Mage_Core_Model_Resource_Entity_Abstract::$_config (Maho\Simplexml\Config) does not accept default value of type array.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Core/Model/Resource/Entity/Abstract.php
 
 		-
 			rawMessage: Property Mage_Core_Model_Resource_Entity_Abstract::$_name has no type specified.
@@ -15656,12 +15601,6 @@ parameters:
 			path: app/code/core/Mage/Payment/Block/Catalog/Product/View/Profile.php
 
 		-
-			rawMessage: 'Property Mage_Payment_Block_Catalog_Product_View_Profile::$_profile (Mage_Payment_Model_Recurring_Profile) does not accept default value of type false.'
-			identifier: property.defaultValue
-			count: 1
-			path: app/code/core/Mage/Payment/Block/Catalog/Product/View/Profile.php
-
-		-
 			rawMessage: Property Mage_Payment_Block_Info_Checkmo::$_mailingAddress has no type specified.
 			identifier: missingType.property
 			count: 1
@@ -16810,12 +16749,6 @@ parameters:
 		-
 			rawMessage: Property Mage_Paypal_Model_Payflowpro::$_canSaveCc has no type specified.
 			identifier: missingType.property
-			count: 1
-			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
-
-		-
-			rawMessage: 'Property Mage_Paypal_Model_Payflowpro::$_centinelFieldMap (string) does not accept default value of type array<string, string>.'
-			identifier: property.defaultValue
 			count: 1
 			path: app/code/core/Mage/Paypal/Model/Payflowpro.php
 
@@ -18072,12 +18005,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: app/code/core/Mage/Sales/Helper/Guest.php
-
-		-
-			rawMessage: 'Parameter #1 $order of method Mage_Sales_Model_Resource_Order_Collection_Abstract::setOrderFilter() expects int|Mage_Sales_Model_Order, array given.'
-			identifier: argument.type
-			count: 1
-			path: app/code/core/Mage/Sales/Model/Api2/Order.php
 
 		-
 			rawMessage: 'Parameter #2 $code of method Mage_Api2_Model_Resource::_critical() expects int|null, string given.'
@@ -21431,28 +21358,10 @@ parameters:
 			path: app/design/frontend/base/default/template/checkout/cart/minicart/items.phtml
 
 		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/payment.phtml
-
-		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping.phtml
-
-		-
 			rawMessage: Ternary operator condition is always true.
 			identifier: ternary.alwaysTrue
 			count: 1
 			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping.phtml
-
-		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/checkout/onepage/progress/shipping_method.phtml
 
 		-
 			rawMessage: 'Parameter #1 $amount of method Mage_Checkout_Block_Total_Nominal::formatPrice() expects float, string given.'
@@ -21621,12 +21530,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: app/design/frontend/base/default/template/page/html/breadcrumbs.phtml
-
-		-
-			rawMessage: File ends with a trailing whitespace. This may cause problems when running the code in the web browser. Remove the closing ?> mark or remove the whitespace.
-			identifier: whitespace.fileEnd
-			count: 1
-			path: app/design/frontend/base/default/template/page/html/cookienotice.phtml
 
 		-
 			rawMessage: 'Call to protected method _getRenderedMenuItemAttributes() of class Mage_Page_Block_Html_Topmenu.'
