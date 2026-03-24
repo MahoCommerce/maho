@@ -292,7 +292,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public function encryptIdempotent(string $data): string
     {
         $decrypted = $this->tryDecrypt($data);
-        $plaintext = ($decrypted !== null) ? $decrypted : $data;
+        $plaintext = $decrypted ?? $data;
         return $this->encrypt($plaintext);
     }
 
