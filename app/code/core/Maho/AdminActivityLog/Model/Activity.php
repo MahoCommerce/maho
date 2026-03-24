@@ -38,15 +38,12 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
             $this->setActionGroupId($data['action_group_id']);
         }
 
-        $encryption = Mage::getModel('core/encryption');
-
+        $helper = Mage::helper('core');
         if (isset($data['old_data']) && is_array($data['old_data'])) {
-            $jsonData = json_encode($data['old_data']);
-            $data['old_data'] = $encryption->encrypt($jsonData);
+            $data['old_data'] = $helper->jsonEncode($data['old_data']);
         }
         if (isset($data['new_data']) && is_array($data['new_data'])) {
-            $jsonData = json_encode($data['new_data']);
-            $data['new_data'] = $encryption->encrypt($jsonData);
+            $data['new_data'] = $helper->jsonEncode($data['new_data']);
         }
 
         $this->setData($data);
@@ -59,10 +56,8 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     {
         $data = $this->getData('old_data');
         if ($data) {
-            $decrypted = Mage::getModel('core/encryption')->decrypt($data);
-            if ($decrypted && json_validate($decrypted)) {
-                return json_decode($decrypted, true);
-            }
+            $helper = Mage::helper('core');
+            return $helper->jsonDecode($helper->tryDecrypt($data) ?? $data) ?: [];
         }
         return [];
     }
@@ -71,10 +66,8 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
     {
         $data = $this->getData('new_data');
         if ($data) {
-            $decrypted = Mage::getModel('core/encryption')->decrypt($data);
-            if ($decrypted && json_validate($decrypted)) {
-                return json_decode($decrypted, true);
-            }
+            $helper = Mage::helper('core');
+            return $helper->jsonDecode($helper->tryDecrypt($data) ?? $data) ?: [];
         }
         return [];
     }
@@ -85,6 +78,15 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
         if (!$this->getId()) {
             $this->setCreatedAt(Mage::getModel('core/date')->gmtDate());
         }
+
+        $helper = Mage::helper('core');
+        foreach (['old_data', 'new_data'] as $field) {
+            $value = $this->getData($field);
+            if ($value !== null && $value !== '') {
+                $this->setData($field, $helper->encryptIdempotent($value));
+            }
+        }
+
         return parent::_beforeSave();
     }
 

@@ -285,6 +285,36 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
         return $this->getEncryptor()->decrypt($data);
     }
 
+    /**
+     * Idempotent encryption: decrypts first to get plaintext, then encrypts.
+     * Safe to call on both plaintext and already-encrypted values.
+     */
+    public function encryptIdempotent(string $data): string
+    {
+        $decrypted = $this->tryDecrypt($data);
+        $plaintext = $decrypted ?? $data;
+        return $this->encrypt($plaintext);
+    }
+
+    /**
+     * Attempt to decrypt data, returning null on failure instead of logging exceptions.
+     * Useful when the value may or may not be encrypted.
+     */
+    public function tryDecrypt(?string $data): ?string
+    {
+        if ($data === null || $data === '' || !Mage::isInstalled()) {
+            return null;
+        }
+
+        $minBase64Len = (int) ceil((SODIUM_CRYPTO_SECRETBOX_NONCEBYTES + SODIUM_CRYPTO_SECRETBOX_MACBYTES) * 4 / 3);
+        if (strlen($data) < $minBase64Len || !preg_match('#^[A-Za-z0-9+/=]+$#', $data)) {
+            return null;
+        }
+
+        $result = $this->getEncryptor()->decrypt($data);
+        return ($result !== '') ? $result : null;
+    }
+
     public function validateKey(string $key): bool
     {
         return $this->getEncryptor()->validateKey($key);
