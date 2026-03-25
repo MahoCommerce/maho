@@ -73,24 +73,14 @@
                         </test_connection>
                         <webhook_id translate="label comment">
                             <label>Webhook ID</label>
-                            <frontend_type>text</frontend_type>
+                            <frontend_type>label</frontend_type>
                             <config_path>maho_paypal/credentials/webhook_id</config_path>
                             <sort_order>70</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
-                            <comment>Automatically populated after clicking "Register Webhook". Used to verify the authenticity of incoming PayPal notifications.</comment>
+                            <comment>Automatically registered when credentials are saved.</comment>
                         </webhook_id>
-                        <register_webhook translate="label comment">
-                            <label>Register Webhook</label>
-                            <comment>Registers a webhook with PayPal to receive real-time notifications for payments, refunds, and disputes. Requires a publicly accessible HTTPS URL.</comment>
-                            <frontend_type>button</frontend_type>
-                            <frontend_model>maho_paypal/adminhtml_system_config_registerWebhook</frontend_model>
-                            <sort_order>60</sort_order>
-                            <show_in_default>1</show_in_default>
-                            <show_in_website>1</show_in_website>
-                            <show_in_store>0</show_in_store>
-                        </register_webhook>
                         <paylater_enabled translate="label">
                             <label>Pay Later Messaging</label>
                             <frontend_type>select</frontend_type>

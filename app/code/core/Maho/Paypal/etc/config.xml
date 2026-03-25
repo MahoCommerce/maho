@@ -59,6 +59,14 @@
             </maho_paypal>
         </helpers>
         <events>
+            <admin_system_config_changed_section_payment>
+                <observers>
+                    <maho_paypal_auto_register_webhook>
+                        <class>maho_paypal/observer</class>
+                        <method>autoRegisterWebhook</method>
+                    </maho_paypal_auto_register_webhook>
+                </observers>
+            </admin_system_config_changed_section_payment>
             <checkout_submit_all_after>
                 <observers>
                     <maho_paypal_save_order_after_submit>
