@@ -188,8 +188,33 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 Mage::throwException(Mage::helper('maho_paypal')->__('This order has already been placed.'));
             }
 
-            $paypalOrderId = $quote->getPayment()->getAdditionalInformation('paypal_order_id');
-            if (!$paypalOrderId) {
+            // Prefer the PayPal order ID sent by the frontend (the one the user actually
+            // approved in the popup) over the quote's stored value, which can be stale
+            // when the buyer retried and a newer createOrder overwrote it.
+            $requestedPaypalOrderId = (string) $this->getRequest()->getParam('paypal_order_id');
+            $storedPaypalOrderId = $quote->getPayment()->getAdditionalInformation('paypal_order_id');
+
+            if ($requestedPaypalOrderId && preg_match('/^[A-Z0-9]+$/', $requestedPaypalOrderId)) {
+                $paypalOrderId = $requestedPaypalOrderId;
+                if ($storedPaypalOrderId && $storedPaypalOrderId !== $paypalOrderId) {
+                    Mage::log(
+                        sprintf(
+                            'PayPal order ID mismatch – quote had "%s", request sent "%s" (quote %s). Using request value.',
+                            $storedPaypalOrderId,
+                            $paypalOrderId,
+                            $quote->getId(),
+                        ),
+                        Mage::LOG_WARNING,
+                        'paypal.log',
+                    );
+                    // Update the quote payment so downstream code sees the correct ID
+                    $quote->getPayment()->setAdditionalInformation('paypal_order_id', $paypalOrderId);
+                    $quote->getPayment()->setData('paypal_order_id', $paypalOrderId);
+                    $quote->getPayment()->save();
+                }
+            } elseif ($storedPaypalOrderId) {
+                $paypalOrderId = $storedPaypalOrderId;
+            } else {
                 Mage::throwException(Mage::helper('maho_paypal')->__('Missing PayPal order ID.'));
             }
             $methodCode = $this->_validateMethodCode(

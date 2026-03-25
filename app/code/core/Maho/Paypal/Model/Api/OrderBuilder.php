@@ -129,7 +129,7 @@ class Maho_Paypal_Model_Api_OrderBuilder
                 'currency_code' => $currency,
                 'value' => $grandTotal,
             ],
-            'invoice_id' => $quote->setReservedOrderId('')->reserveOrderId()->getReservedOrderId(),
+            'invoice_id' => $quote->getReservedOrderId() ?: $quote->reserveOrderId()->getReservedOrderId(),
         ];
 
         $breakdown = $this->buildBreakdown($quote, $currency);
