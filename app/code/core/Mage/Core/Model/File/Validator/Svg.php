@@ -15,14 +15,6 @@ class Mage_Core_Model_File_Validator_Svg
 {
     public const NAME = 'isSvg';
 
-    protected ?string $_originalFileName = null;
-
-    public function setOriginalFileName(string $filename): static
-    {
-        $this->_originalFileName = $filename;
-        return $this;
-    }
-
     /**
      * Validation callback for SVG files
      * Sanitizes SVG content to remove potentially malicious code
@@ -32,13 +24,6 @@ class Mage_Core_Model_File_Validator_Svg
      */
     public function validate(string $filePath): void
     {
-        $filenameToCheck = $this->_originalFileName ?: $filePath;
-        $extension = strtolower(pathinfo($filenameToCheck, PATHINFO_EXTENSION));
-
-        if ($extension !== 'svg') {
-            return;
-        }
-
         $content = file_get_contents($filePath);
 
         if ($content === false || empty($content)) {
