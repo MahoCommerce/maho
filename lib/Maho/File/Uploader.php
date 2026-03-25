@@ -371,7 +371,7 @@ class Uploader
         try {
             if (count($validTypes) > 0) {
                 $validator = Validation::createValidator();
-                $constraint = new Assert\File(['mimeTypes' => $validTypes]);
+                $constraint = new Assert\File(mimeTypes: $validTypes);
                 $violations = $validator->validate($this->_file['tmp_name'], $constraint);
                 return count($violations) === 0;
             }

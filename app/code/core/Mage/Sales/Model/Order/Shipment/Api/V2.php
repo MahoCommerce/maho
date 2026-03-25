@@ -19,7 +19,7 @@ class Mage_Sales_Model_Order_Shipment_Api_V2 extends Mage_Sales_Model_Order_Ship
     protected function _prepareItemQtyData($data)
     {
         $_data = [];
-        foreach ($data as $item) {
+        foreach ($data ?? [] as $item) {
             if (isset($item->order_item_id) && isset($item->qty)) {
                 $_data[$item->order_item_id] = $item->qty;
             }
