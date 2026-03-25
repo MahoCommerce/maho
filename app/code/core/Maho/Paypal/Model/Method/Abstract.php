@@ -58,6 +58,7 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
                 $payment->setTransactionId($captureId);
                 $payment->setIsTransactionClosed(true);
                 $payment->addTransaction(Mage_Sales_Model_Order_Payment_Transaction::TYPE_CAPTURE);
+                $this->_createCaptureInvoice($payment, $captureId);
             } else {
                 $payment->setTransactionId($authId);
                 $payment->setIsTransactionClosed(false);
@@ -198,6 +199,18 @@ abstract class Maho_Paypal_Model_Method_Abstract extends Mage_Payment_Model_Meth
     public function cancel(\Maho\DataObject $payment): self
     {
         return $this->void($payment);
+    }
+
+    protected function _createCaptureInvoice(Mage_Sales_Model_Order_Payment $payment, string $captureId): void
+    {
+        $order = $payment->getOrder();
+        if (!$order->canInvoice()) {
+            return;
+        }
+        $invoice = $order->prepareInvoice();
+        $invoice->setTransactionId($captureId);
+        $invoice->register();
+        $order->addRelatedObject($invoice);
     }
 
     protected function _importPaymentInfo(array $result, Mage_Payment_Model_Info $payment): void
