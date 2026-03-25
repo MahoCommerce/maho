@@ -1091,7 +1091,7 @@ XML;
      */
     public function isValidRegex(string $value, string $pattern): bool
     {
-        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(['pattern' => $pattern]));
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Regex(pattern: $pattern));
         return count($violations) === 0;
     }
 
@@ -1100,15 +1100,7 @@ XML;
      */
     public function isValidLength(string $value, ?int $min = null, ?int $max = null): bool
     {
-        $options = [];
-        if ($min !== null) {
-            $options['min'] = $min;
-        }
-        if ($max !== null) {
-            $options['max'] = $max;
-        }
-
-        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length($options));
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Length(min: $min, max: $max));
         return count($violations) === 0;
     }
 
@@ -1117,15 +1109,7 @@ XML;
      */
     public function isValidRange(mixed $value, int|float|null $min = null, int|float|null $max = null): bool
     {
-        $options = [];
-        if ($min !== null) {
-            $options['min'] = $min;
-        }
-        if ($max !== null) {
-            $options['max'] = $max;
-        }
-
-        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range($options));
+        $violations = $this->getSymfonyValidator()->validate($value, new Assert\Range(min: $min, max: $max));
         return count($violations) === 0;
     }
 
