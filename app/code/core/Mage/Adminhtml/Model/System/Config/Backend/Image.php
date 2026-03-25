@@ -45,6 +45,9 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image extends Mage_Adminhtml_Mo
         // Add SVG validator if SVG is allowed
         if (in_array('svg', $allowedExtensions)) {
             $svgValidator = Mage::getModel('core/file_validator_svg');
+            if ($originalFileName) {
+                $svgValidator->setOriginalFileName($originalFileName);
+            }
             $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Svg::NAME, $svgValidator, 'validate');
         }
     }
