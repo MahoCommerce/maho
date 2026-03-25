@@ -85,7 +85,7 @@ class Maho_CustomerSegmentation_Model_Cron
             return;
         }
 
-        $daysOld = (int) Mage::getStoreConfig('customer_segmentation/email_automation/cleanup_days', 90);
+        $daysOld = (int) (Mage::getStoreConfig('customer_segmentation/email_automation/cleanup_days') ?? 90);
 
         try {
             $resource = Mage::getResourceSingleton('customersegmentation/sequenceProgress');
