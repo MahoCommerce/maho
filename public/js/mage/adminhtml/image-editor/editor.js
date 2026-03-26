@@ -748,6 +748,15 @@ export class MahoImageEditor {
 
     async _save() {
         if (this._saving) return;
+
+        const originalName = this.options.filename || 'image';
+        const newName = prompt('Save as:', originalName);
+        if (!newName) return;
+
+        if (newName === originalName) {
+            if (!confirm(`Overwrite "${originalName}"?`)) return;
+        }
+
         this._saving = true;
         this._saveBtn.disabled = true;
         this._saveBtn.textContent = 'Saving…';
@@ -769,7 +778,7 @@ export class MahoImageEditor {
             const quality = this.options.saveQuality ?? 0.85;
             const blob = await exportBlob(exportCanvas, mimeType, quality);
 
-            await this.options.onSave?.(exportCanvas, blob);
+            await this.options.onSave?.(exportCanvas, blob, newName);
         } finally {
             this._saving = false;
             this._saveBtn.disabled = false;

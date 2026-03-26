@@ -474,8 +474,7 @@ class Mediabrowser {
             }
 
             // Get original filename
-            const smallTags = selectedFile.querySelectorAll('small');
-            const originalFilename = smallTags[smallTags.length - 1]?.textContent || 'image';
+            const originalFilename = selectedFile.dataset.filename || 'image';
 
             // Create editor overlay and container
             const editorContainer = this.createEditorContainer();
@@ -488,8 +487,8 @@ class Mediabrowser {
                 filename: originalFilename,
                 saveFormat: this.imageFileType.mimeType,
                 saveQuality: this.imageQuality,
-                onSave: async (canvas, blob) => {
-                    await this.saveEditedImage(selectedFile.id, originalFilename, blob);
+                onSave: async (canvas, blob, filename) => {
+                    await this.saveEditedImage(selectedFile.id, filename, blob);
                 },
                 onClose: () => {
                     this.closeImageEditor();
