@@ -12,7 +12,6 @@ export function buildFilterString(adjustments) {
     if (adjustments.contrast !== 100) parts.push(`contrast(${adjustments.contrast}%)`);
     if (adjustments.hue !== 0) parts.push(`hue-rotate(${adjustments.hue}deg)`);
     if (adjustments.saturation !== 100) parts.push(`saturate(${adjustments.saturation}%)`);
-    if (adjustments.blur > 0) parts.push(`blur(${adjustments.blur}px)`);
     if (adjustments.warmth > 0) parts.push(`sepia(${adjustments.warmth}%)`);
     return parts.length ? parts.join(' ') : 'none';
 }

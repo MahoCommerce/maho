@@ -193,6 +193,7 @@ export class WatermarkTool {
                     if (!file) return;
                     const img = new Image();
                     img.onload = () => {
+                        URL.revokeObjectURL(img.src);
                         wm.image = img;
                         this.editor.requestRender();
                     };

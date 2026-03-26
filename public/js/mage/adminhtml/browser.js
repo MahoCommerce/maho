@@ -467,8 +467,10 @@ class Mediabrowser {
             }
 
             if (imageUrl.includes('.thumbs')) {
-                const fileName = imageUrl.split('/').pop().split('?')[0];
-                imageUrl = `${window.location.origin}/media/wysiwyg/${fileName}`;
+                imageUrl = imageUrl
+                    .replace(/\/\.thumbs/g, '')
+                    .replace('/wysiwyg//', '/wysiwyg/')
+                    .split('?')[0];
             }
 
             // Get original filename
@@ -486,8 +488,8 @@ class Mediabrowser {
                 filename: originalFilename,
                 saveFormat: this.imageFileType.mimeType,
                 saveQuality: this.imageQuality,
-                onSave: (canvas, blob) => {
-                    this.saveEditedImage(selectedFile.id, originalFilename, blob);
+                onSave: async (canvas, blob) => {
+                    await this.saveEditedImage(selectedFile.id, originalFilename, blob);
                 },
                 onClose: () => {
                     this.closeImageEditor();

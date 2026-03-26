@@ -50,7 +50,6 @@ export class MahoImageEditor {
             contrast: 100,
             hue: 0,
             saturation: 100,
-            blur: 0,
             warmth: 0,
         };
         this.annotations = [];
@@ -296,12 +295,12 @@ export class MahoImageEditor {
 
         zoomGroup.append(zoomOutBtn, this._zoomDisplay, zoomInBtn, fitBtn);
 
-        const saveBtn = document.createElement('button');
-        saveBtn.className = 'maho-ie-btn maho-ie-btn-primary';
-        saveBtn.textContent = 'Save';
-        saveBtn.addEventListener('click', () => this._save());
+        this._saveBtn = document.createElement('button');
+        this._saveBtn.className = 'maho-ie-btn maho-ie-btn-primary';
+        this._saveBtn.textContent = 'Save';
+        this._saveBtn.addEventListener('click', () => this._save());
 
-        actions.append(this._undoBtn, this._redoBtn, zoomGroup, saveBtn);
+        actions.append(this._undoBtn, this._redoBtn, zoomGroup, this._saveBtn);
         header.append(closeBtn, title, actions);
 
         // Body
@@ -384,12 +383,14 @@ export class MahoImageEditor {
     }
 
     _setActiveTool(tool) {
+        const wasActive = this.activeTool === tool;
+
         if (this.activeTool) {
             this.activeTool.deactivate();
             this.activeTool._sidebarBtn?.classList.remove('active');
         }
 
-        if (this.activeTool === tool) {
+        if (wasActive) {
             this.activeTool = null;
             this.setOptions(null);
             this.requestRender();
@@ -744,23 +745,34 @@ export class MahoImageEditor {
     }
 
     async _save() {
-        const state = {
-            adjustments: { ...this.adjustments },
-            annotations: this.annotations,
-            redactions: this.redactions,
-            watermark: this.watermark,
-            frame: this.frame,
-        };
+        if (this._saving) return;
+        this._saving = true;
+        this._saveBtn.disabled = true;
+        this._saveBtn.textContent = 'Saving…';
 
-        const targetW = this.baseCanvas.width;
-        const targetH = this.baseCanvas.height;
-        const exportCanvas = renderToCanvas(this.baseCanvas, state, targetW, targetH);
+        try {
+            const state = {
+                adjustments: { ...this.adjustments },
+                annotations: this.annotations,
+                redactions: this.redactions,
+                watermark: this.watermark,
+                frame: this.frame,
+            };
 
-        const mimeType = this.options.saveFormat || 'image/webp';
-        const quality = this.options.saveQuality ?? 0.85;
-        const blob = await exportBlob(exportCanvas, mimeType, quality);
+            const targetW = this.baseCanvas.width;
+            const targetH = this.baseCanvas.height;
+            const exportCanvas = renderToCanvas(this.baseCanvas, state, targetW, targetH);
 
-        this.options.onSave?.(exportCanvas, blob);
+            const mimeType = this.options.saveFormat || 'image/webp';
+            const quality = this.options.saveQuality ?? 0.85;
+            const blob = await exportBlob(exportCanvas, mimeType, quality);
+
+            await this.options.onSave?.(exportCanvas, blob);
+        } finally {
+            this._saving = false;
+            this._saveBtn.disabled = false;
+            this._saveBtn.textContent = 'Save';
+        }
     }
 
     _snapshot() {

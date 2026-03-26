@@ -40,7 +40,6 @@ export class AdjustTool {
             { key: 'contrast', label: 'Contrast', min: 0, max: 200, val: adj.contrast, step: 1 },
             { key: 'hue', label: 'Hue', min: -180, max: 180, val: adj.hue, step: 1 },
             { key: 'saturation', label: 'Saturation', min: 0, max: 200, val: adj.saturation, step: 1 },
-            { key: 'blur', label: 'Blur', min: 0, max: 20, val: adj.blur, step: 0.5 },
             { key: 'warmth', label: 'Warmth', min: 0, max: 100, val: adj.warmth, step: 1 },
         ];
 
@@ -86,7 +85,6 @@ export class AdjustTool {
                 contrast: 100,
                 hue: 0,
                 saturation: 100,
-                blur: 0,
                 warmth: 0,
             });
             this._pushed = false;
