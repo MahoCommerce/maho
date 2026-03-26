@@ -20,6 +20,7 @@ export class AnnotateTool {
         this.lineWidth = 3;
         this.fontSize = 24;
         this.fontFamily = 'sans-serif';
+        this.opacity = 1;
         this.selected = null;
         this._state = 'idle';
         this._drawing = null;
@@ -71,13 +72,20 @@ export class AnnotateTool {
             return;
         }
 
+        // Image mode: open file picker instead of drawing
+        if (this.mode === 'image') {
+            this.selected = null;
+            this._openImagePicker(ix, iy);
+            return;
+        }
+
         // Start drawing new annotation
         this.selected = null;
         this._closeTextOverlay();
         this._startDrawing(ix, iy);
     }
 
-    onPointerMove(ix, iy) {
+    onPointerMove(ix, iy, e) {
         // Update cursor on hover
         if (this._state === 'idle') {
             if (this.selected && this._hitHandle(ix, iy, this.selected)) {
@@ -89,14 +97,15 @@ export class AnnotateTool {
             }
         }
 
+        const constrain = e?.shiftKey ?? false;
         if (this._state === 'drawing' && this._drawing) {
-            this._updateDrawing(ix, iy);
+            this._updateDrawing(ix, iy, constrain);
             this.editor.requestRender();
         } else if (this._state === 'moving' && this.selected) {
             this._moveAnnotation(ix, iy);
             this.editor.requestRender();
         } else if (this._state === 'resizing' && this.selected) {
-            this._resizeAnnotation(ix, iy);
+            this._resizeAnnotation(ix, iy, constrain);
             this.editor.requestRender();
         }
     }
@@ -155,6 +164,7 @@ export class AnnotateTool {
             { mode: 'line', label: 'Line', icon: this._lineIcon() },
             { mode: 'freehand', label: 'Freehand', icon: this._freehandIcon() },
             { mode: 'text', label: 'Text', icon: this._textIcon() },
+            { mode: 'image', label: 'Image', icon: this._imageIcon() },
         ];
 
         for (const m of modes) {
@@ -175,29 +185,31 @@ export class AnnotateTool {
         // Divider
         el.appendChild(this._divider());
 
-        // Stroke color
-        const strokeGroup = document.createElement('div');
-        strokeGroup.className = 'maho-ie-color';
-        const strokeLabel = document.createElement('label');
-        strokeLabel.textContent = 'Color';
-        const strokeInput = document.createElement('input');
-        strokeInput.type = 'color';
-        strokeInput.value = this.strokeColor;
-        strokeInput.addEventListener('input', () => {
-            this.strokeColor = strokeInput.value;
-            if (this.selected) {
-                this.editor.pushUndo();
-                if (this.selected.strokeColor !== undefined) this.selected.strokeColor = this.strokeColor;
-                if (this.selected.color !== undefined) this.selected.color = this.strokeColor;
-                this.editor.requestRender();
-            }
-            if (this._pendingAnnotation) {
-                this._pendingAnnotation.color = this.strokeColor;
-                this._updateTextOverlayStyle();
-            }
-        });
-        strokeGroup.append(strokeLabel, strokeInput);
-        el.appendChild(strokeGroup);
+        // Stroke color (not for image mode)
+        if (this.mode !== 'image') {
+            const strokeGroup = document.createElement('div');
+            strokeGroup.className = 'maho-ie-color';
+            const strokeLabel = document.createElement('label');
+            strokeLabel.textContent = 'Color';
+            const strokeInput = document.createElement('input');
+            strokeInput.type = 'color';
+            strokeInput.value = this.strokeColor;
+            strokeInput.addEventListener('input', () => {
+                this.strokeColor = strokeInput.value;
+                if (this.selected) {
+                    this.editor.pushUndo();
+                    if (this.selected.strokeColor !== undefined) this.selected.strokeColor = this.strokeColor;
+                    if (this.selected.color !== undefined) this.selected.color = this.strokeColor;
+                    this.editor.requestRender();
+                }
+                if (this._pendingAnnotation) {
+                    this._pendingAnnotation.color = this.strokeColor;
+                    this._updateTextOverlayStyle();
+                }
+            });
+            strokeGroup.append(strokeLabel, strokeInput);
+            el.appendChild(strokeGroup);
+        }
 
         // Font (text mode only)
         if (this.mode === 'text') {
@@ -245,8 +257,8 @@ export class AnnotateTool {
             });
             fsGroup.append(fsLabel, fsInput, fsVal);
             el.appendChild(fsGroup);
-        } else {
-            // Line width (non-text modes)
+        } else if (this.mode !== 'image') {
+            // Line width (shape modes)
             const lwGroup = document.createElement('div');
             lwGroup.className = 'maho-ie-slider';
             const lwLabel = document.createElement('label');
@@ -272,6 +284,33 @@ export class AnnotateTool {
             el.appendChild(lwGroup);
         }
 
+        // Opacity (all modes)
+        const opGroup = document.createElement('div');
+        opGroup.className = 'maho-ie-slider';
+        const opLabel = document.createElement('label');
+        opLabel.textContent = 'Opacity';
+        const opVal = document.createElement('span');
+        opVal.className = 'maho-ie-slider-value';
+        const currentOpacity = this.selected?.opacity ?? this.opacity;
+        opVal.textContent = Math.round(currentOpacity * 100) + '%';
+        const opInput = document.createElement('input');
+        opInput.type = 'range';
+        opInput.min = '5';
+        opInput.max = '100';
+        opInput.value = Math.round(currentOpacity * 100);
+        opInput.addEventListener('input', () => {
+            const val = parseInt(opInput.value) / 100;
+            this.opacity = val;
+            opVal.textContent = opInput.value + '%';
+            if (this.selected) {
+                this.editor.pushUndo();
+                this.selected.opacity = val;
+                this.editor.requestRender();
+            }
+        });
+        opGroup.append(opLabel, opInput, opVal);
+        el.appendChild(opGroup);
+
         // Delete selected
         const delBtn = document.createElement('button');
         delBtn.className = 'maho-ie-opt-btn maho-ie-opt-btn-danger';
@@ -293,7 +332,7 @@ export class AnnotateTool {
 
     _startDrawing(ix, iy) {
         this._state = 'drawing';
-        const base = { lineWidth: this.lineWidth, id: Date.now() };
+        const base = { lineWidth: this.lineWidth, opacity: this.opacity, id: Date.now() };
 
         switch (this.mode) {
             case 'rect':
@@ -317,7 +356,7 @@ export class AnnotateTool {
         }
     }
 
-    _updateDrawing(ix, iy) {
+    _updateDrawing(ix, iy, constrain = false) {
         const d = this._drawing;
         if (!d) return;
 
@@ -325,10 +364,20 @@ export class AnnotateTool {
             case 'rect':
                 d.w = ix - d.x;
                 d.h = iy - d.y;
+                if (constrain) {
+                    const size = Math.max(Math.abs(d.w), Math.abs(d.h));
+                    d.w = size * Math.sign(d.w || 1);
+                    d.h = size * Math.sign(d.h || 1);
+                }
                 break;
             case 'ellipse':
                 d.rx = ix - d.cx;
                 d.ry = iy - d.cy;
+                if (constrain) {
+                    const r = Math.max(Math.abs(d.rx), Math.abs(d.ry));
+                    d.rx = r * Math.sign(d.rx || 1);
+                    d.ry = r * Math.sign(d.ry || 1);
+                }
                 break;
             case 'arrow':
             case 'line':
@@ -508,6 +557,9 @@ export class AnnotateTool {
                 const w = (a.text || '').length * (a.fontSize || 24) * 0.6;
                 return px >= a.x && px <= a.x + w && py >= a.y && py <= a.y + h;
             }
+            case 'image':
+                return px >= a.x - threshold && px <= a.x + a.w + threshold &&
+                       py >= a.y - threshold && py <= a.y + a.h + threshold;
         }
         return false;
     }
@@ -541,6 +593,7 @@ export class AnnotateTool {
                 }
                 break;
             case 'text':
+            case 'image':
                 a.x = orig.x + dx;
                 a.y = orig.y + dy;
                 break;
@@ -563,6 +616,7 @@ export class AnnotateTool {
     _getHandles(a) {
         switch (a.type) {
             case 'rect':
+            case 'image':
                 return [
                     { id: 'tl', x: a.x, y: a.y },
                     { id: 'tr', x: a.x + a.w, y: a.y },
@@ -587,22 +641,38 @@ export class AnnotateTool {
         }
     }
 
-    _resizeAnnotation(ix, iy) {
+    _resizeAnnotation(ix, iy, constrain = false) {
         const a = this.selected;
         const h = this._activeHandle;
 
         switch (a.type) {
             case 'rect':
+            case 'image': {
                 if (h === 'tl') { a.w += a.x - ix; a.h += a.y - iy; a.x = ix; a.y = iy; }
                 if (h === 'tr') { a.w = ix - a.x; a.h += a.y - iy; a.y = iy; }
                 if (h === 'bl') { a.w += a.x - ix; a.x = ix; a.h = iy - a.y; }
                 if (h === 'br') { a.w = ix - a.x; a.h = iy - a.y; }
+                if (constrain) {
+                    const aspect = this._dragOriginal.w / this._dragOriginal.h;
+                    const size = Math.max(Math.abs(a.w), Math.abs(a.h));
+                    if (Math.abs(a.w) / aspect > Math.abs(a.h)) {
+                        a.h = Math.sign(a.h || 1) * Math.abs(a.w) / aspect;
+                    } else {
+                        a.w = Math.sign(a.w || 1) * Math.abs(a.h) * aspect;
+                    }
+                }
                 break;
+            }
             case 'ellipse':
                 if (h === 'r') a.rx = ix - a.cx;
                 if (h === 'l') a.rx = a.cx - ix;
                 if (h === 'b') a.ry = iy - a.cy;
                 if (h === 't') a.ry = a.cy - iy;
+                if (constrain) {
+                    const r = Math.max(Math.abs(a.rx), Math.abs(a.ry));
+                    a.rx = r * Math.sign(a.rx || 1);
+                    a.ry = r * Math.sign(a.ry || 1);
+                }
                 break;
             case 'line':
             case 'arrow':
@@ -626,6 +696,40 @@ export class AnnotateTool {
         }
     }
 
+    _openImagePicker(ix, iy) {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.addEventListener('change', () => {
+            const file = fileInput.files[0];
+            if (!file) return;
+            const img = new Image();
+            img.onload = () => {
+                URL.revokeObjectURL(img.src);
+                const imgW = this.editor.baseCanvas.width;
+                const defaultW = imgW * 0.2;
+                const defaultH = defaultW * (img.height / img.width);
+                this.editor.pushUndo();
+                const annotation = {
+                    type: 'image',
+                    x: ix - defaultW / 2,
+                    y: iy - defaultH / 2,
+                    w: defaultW,
+                    h: defaultH,
+                    image: img,
+                    opacity: this.opacity,
+                    id: Date.now(),
+                };
+                this.editor.annotations.push(annotation);
+                this.selected = annotation;
+                this.editor.setOptions(this.renderOptions());
+                this.editor.requestRender();
+            };
+            img.src = URL.createObjectURL(file);
+        });
+        fileInput.click();
+    }
+
     _divider() {
         const d = document.createElement('div');
         d.className = 'maho-ie-options-divider';
@@ -638,6 +742,7 @@ export class AnnotateTool {
     _lineIcon() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="19" x2="19" y2="5"/></svg>'; }
     _freehandIcon() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17c3-3 6 2 9-1s3-6 6-6"/></svg>'; }
     _textIcon() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 7 4 4 20 4 20 7"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="8" y1="20" x2="16" y2="20"/></svg>'; }
+    _imageIcon() { return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>'; }
 
     destroy() {
         this._closeTextOverlay();

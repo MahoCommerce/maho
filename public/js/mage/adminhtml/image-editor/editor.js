@@ -12,7 +12,6 @@ import { TransformTool } from './tools/transform.js';
 import { AdjustTool } from './tools/adjust.js';
 import { AnnotateTool } from './tools/annotate.js';
 import { RedactTool } from './tools/redact.js';
-import { WatermarkTool } from './tools/watermark.js';
 import { FrameTool } from './tools/frame.js';
 import { renderToCanvas, exportBlob, buildFilterString, drawAnnotation } from './export.js';
 
@@ -54,7 +53,6 @@ export class MahoImageEditor {
         };
         this.annotations = [];
         this.redactions = [];
-        this.watermark = null;
         this.frame = null;
 
         this.activeTool = null;
@@ -367,7 +365,6 @@ export class MahoImageEditor {
             new AdjustTool(this),
             new AnnotateTool(this),
             new RedactTool(this),
-            new WatermarkTool(this),
             new FrameTool(this),
         ];
 
@@ -628,11 +625,6 @@ export class MahoImageEditor {
         }
         ctx.restore();
 
-        // Watermark
-        if (this.watermark) {
-            this._drawWatermarkPreview(ctx);
-        }
-
         ctx.restore();
 
         // Frame foreground (shadow and inside stroke drawn after image)
@@ -678,37 +670,6 @@ export class MahoImageEditor {
             ctx.fillStyle = '#000';
             ctx.fillRect(rx, ry, rw, rh);
         }
-    }
-
-    _drawWatermarkPreview(ctx) {
-        const wm = this.watermark;
-        const imgW = this.baseCanvas.width * this.scale;
-        const imgH = this.baseCanvas.height * this.scale;
-
-        ctx.save();
-        ctx.beginPath();
-        ctx.rect(this.offsetX, this.offsetY, imgW, imgH);
-        ctx.clip();
-        ctx.globalAlpha = wm.opacity ?? 0.5;
-
-        if (wm.type === 'text') {
-            const fontSize = (wm.fontSize || 48) * this.scale;
-            ctx.font = `bold ${fontSize}px ${wm.fontFamily || 'sans-serif'}`;
-            ctx.fillStyle = wm.color || '#ffffff';
-            ctx.textBaseline = 'middle';
-            ctx.textAlign = 'center';
-            const x = (wm.x ?? 0.5) * imgW + this.offsetX;
-            const y = (wm.y ?? 0.5) * imgH + this.offsetY;
-            ctx.fillText(wm.content || 'Watermark', x, y);
-        } else if (wm.type === 'image' && wm.image) {
-            const iw = imgW * (wm.scale || 0.2);
-            const ih = iw * (wm.image.height / wm.image.width);
-            const x = (wm.x ?? 0.5) * imgW + this.offsetX - iw / 2;
-            const y = (wm.y ?? 0.5) * imgH + this.offsetY - ih / 2;
-            ctx.drawImage(wm.image, x, y, iw, ih);
-        }
-
-        ctx.restore();
     }
 
     _drawFramePreview(ctx) {
@@ -775,7 +736,6 @@ export class MahoImageEditor {
                 adjustments: { ...this.adjustments },
                 annotations: this.annotations,
                 redactions: this.redactions,
-                watermark: this.watermark,
                 frame: this.frame,
             };
 
@@ -804,9 +764,14 @@ export class MahoImageEditor {
         return {
             baseCanvas: baseClone,
             adjustments: { ...this.adjustments },
-            annotations: structuredClone(this.annotations),
+            annotations: this.annotations.map(a => {
+                if (a.type === 'image') {
+                    const { image, ...rest } = a;
+                    return { ...structuredClone(rest), image };
+                }
+                return structuredClone(a);
+            }),
             redactions: structuredClone(this.redactions),
-            watermark: this.watermark ? { ...this.watermark } : null,
             frame: this.frame ? { ...this.frame } : null,
         };
     }
@@ -816,7 +781,6 @@ export class MahoImageEditor {
         this.adjustments = snapshot.adjustments;
         this.annotations = snapshot.annotations;
         this.redactions = snapshot.redactions;
-        this.watermark = snapshot.watermark;
         this.frame = snapshot.frame;
         this._fitCanvas();
     }

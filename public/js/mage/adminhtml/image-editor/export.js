@@ -61,11 +61,6 @@ export function renderToCanvas(baseCanvas, state, targetWidth, targetHeight) {
         drawAnnotation(ctx, a, scale);
     }
 
-    // Watermark
-    if (state.watermark) {
-        drawWatermark(ctx, state.watermark, targetWidth, targetHeight);
-    }
-
     ctx.restore();
 
     // Frame foreground decoration
@@ -133,6 +128,9 @@ function drawPixelated(ctx, canvas, rx, ry, rw, rh) {
 
 export function drawAnnotation(ctx, a, scale) {
     ctx.save();
+    if (a.opacity !== undefined && a.opacity < 1) {
+        ctx.globalAlpha = a.opacity;
+    }
     const lw = (a.lineWidth || 2) * scale;
 
     switch (a.type) {
@@ -220,35 +218,13 @@ export function drawAnnotation(ctx, a, scale) {
             }
             break;
         }
+        case 'image': {
+            if (a.image) {
+                ctx.drawImage(a.image, a.x * scale, a.y * scale, a.w * scale, a.h * scale);
+            }
+            break;
+        }
     }
-    ctx.restore();
-}
-
-function drawWatermark(ctx, wm, w, h) {
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, w, h);
-    ctx.clip();
-    ctx.globalAlpha = wm.opacity ?? 0.5;
-
-    if (wm.type === 'text') {
-        const fontSize = wm.fontSize || 48;
-        ctx.font = `bold ${fontSize}px ${wm.fontFamily || 'sans-serif'}`;
-        ctx.fillStyle = wm.color || '#ffffff';
-        ctx.textBaseline = 'middle';
-        ctx.textAlign = 'center';
-        const x = (wm.x ?? 0.5) * w;
-        const y = (wm.y ?? 0.5) * h;
-        ctx.fillText(wm.content || 'Watermark', x, y);
-    } else if (wm.type === 'image' && wm.image) {
-        const imgScale = wm.scale || 0.2;
-        const iw = w * imgScale;
-        const ih = iw * (wm.image.height / wm.image.width);
-        const x = (wm.x ?? 0.5) * w - iw / 2;
-        const y = (wm.y ?? 0.5) * h - ih / 2;
-        ctx.drawImage(wm.image, x, y, iw, ih);
-    }
-
     ctx.restore();
 }
 
