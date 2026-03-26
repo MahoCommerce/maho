@@ -226,6 +226,9 @@ export function drawAnnotation(ctx, a, scale) {
 
 function drawWatermark(ctx, wm, w, h) {
     ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, w, h);
+    ctx.clip();
     ctx.globalAlpha = wm.opacity ?? 0.5;
 
     if (wm.type === 'text') {
@@ -239,8 +242,8 @@ function drawWatermark(ctx, wm, w, h) {
         ctx.fillText(wm.content || 'Watermark', x, y);
     } else if (wm.type === 'image' && wm.image) {
         const imgScale = wm.scale || 0.2;
-        const iw = wm.image.width * imgScale;
-        const ih = wm.image.height * imgScale;
+        const iw = w * imgScale;
+        const ih = iw * (wm.image.height / wm.image.width);
         const x = (wm.x ?? 0.5) * w - iw / 2;
         const y = (wm.y ?? 0.5) * h - ih / 2;
         ctx.drawImage(wm.image, x, y, iw, ih);

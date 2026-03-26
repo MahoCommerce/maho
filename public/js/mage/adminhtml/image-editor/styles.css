@@ -355,6 +355,13 @@
     font-size: 12px;
     font-family: inherit;
     outline: none;
+    -moz-appearance: textfield;
+}
+
+.maho-ie-input input[type="number"]::-webkit-inner-spin-button,
+.maho-ie-input input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .maho-ie-input input:focus {

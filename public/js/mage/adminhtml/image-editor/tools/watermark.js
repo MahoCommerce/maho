@@ -39,17 +39,33 @@ export class WatermarkTool {
 
     deactivate() {}
 
+    _hitTest(wm, ix, iy) {
+        const imgW = this.editor.baseCanvas.width;
+        const imgH = this.editor.baseCanvas.height;
+        const cx = wm.x * imgW;
+        const cy = wm.y * imgH;
+
+        if (wm.type === 'image' && wm.image) {
+            const iw = imgW * (wm.scale || 0.2);
+            const ih = iw * (wm.image.height / wm.image.width);
+            return ix >= cx - iw / 2 && ix <= cx + iw / 2
+                && iy >= cy - ih / 2 && iy <= cy + ih / 2;
+        }
+
+        // Text watermark: estimate bounds from font size
+        const fontSize = wm.fontSize || 48;
+        const text = wm.content || 'Watermark';
+        const estW = text.length * fontSize * 0.6;
+        const estH = fontSize;
+        return ix >= cx - estW / 2 && ix <= cx + estW / 2
+            && iy >= cy - estH / 2 && iy <= cy + estH / 2;
+    }
+
     onPointerDown(ix, iy) {
         const wm = this.editor.watermark;
         if (!wm) return;
 
-        const imgW = this.editor.baseCanvas.width;
-        const imgH = this.editor.baseCanvas.height;
-        const wmX = wm.x * imgW;
-        const wmY = wm.y * imgH;
-        const hitRadius = 40;
-
-        if (Math.abs(ix - wmX) < hitRadius && Math.abs(iy - wmY) < hitRadius) {
+        if (this._hitTest(wm, ix, iy)) {
             this._dragging = true;
             this._dragStart = { x: ix, y: iy };
             this._origPos = { x: wm.x, y: wm.y };
@@ -59,12 +75,7 @@ export class WatermarkTool {
     onPointerMove(ix, iy) {
         // Cursor hint when hovering the watermark
         if (!this._dragging && this.editor.watermark) {
-            const wm = this.editor.watermark;
-            const imgW = this.editor.baseCanvas.width;
-            const imgH = this.editor.baseCanvas.height;
-            const wmX = wm.x * imgW;
-            const wmY = wm.y * imgH;
-            if (Math.abs(ix - wmX) < 40 && Math.abs(iy - wmY) < 40) {
+            if (this._hitTest(this.editor.watermark, ix, iy)) {
                 this.editor.setCursor('move');
             }
         }

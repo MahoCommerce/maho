@@ -677,6 +677,9 @@ export class MahoImageEditor {
         const imgH = this.baseCanvas.height * this.scale;
 
         ctx.save();
+        ctx.beginPath();
+        ctx.rect(this.offsetX, this.offsetY, imgW, imgH);
+        ctx.clip();
         ctx.globalAlpha = wm.opacity ?? 0.5;
 
         if (wm.type === 'text') {
@@ -689,9 +692,8 @@ export class MahoImageEditor {
             const y = (wm.y ?? 0.5) * imgH + this.offsetY;
             ctx.fillText(wm.content || 'Watermark', x, y);
         } else if (wm.type === 'image' && wm.image) {
-            const imgScale = (wm.scale || 0.2) * this.scale;
-            const iw = wm.image.width * imgScale;
-            const ih = wm.image.height * imgScale;
+            const iw = imgW * (wm.scale || 0.2);
+            const ih = iw * (wm.image.height / wm.image.width);
             const x = (wm.x ?? 0.5) * imgW + this.offsetX - iw / 2;
             const y = (wm.y ?? 0.5) * imgH + this.offsetY - ih / 2;
             ctx.drawImage(wm.image, x, y, iw, ih);
