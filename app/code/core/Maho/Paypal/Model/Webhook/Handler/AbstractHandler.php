@@ -114,6 +114,24 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         return $quote;
     }
 
+    /**
+     * Acquire a file lock for the given PayPal order ID to prevent the webhook
+     * and the JS controller from placing the same order concurrently.
+     *
+     * Returns true if the lock was acquired, false if another process holds it.
+     */
+    protected function _acquireLock(string $paypalOrderId): bool
+    {
+        $lock = Mage_Index_Model_Lock::getInstance();
+        return $lock->setLock('paypal_order_' . $paypalOrderId, file: true, block: false);
+    }
+
+    protected function _releaseLock(string $paypalOrderId): void
+    {
+        $lock = Mage_Index_Model_Lock::getInstance();
+        $lock->releaseLock('paypal_order_' . $paypalOrderId, file: true);
+    }
+
     protected function _placeOrderFromPaypalResult(
         Mage_Sales_Model_Quote $quote,
         array $paypalResult,
@@ -159,10 +177,23 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
 
         $quote->collectTotals();
 
-        /** @var Mage_Checkout_Model_Type_Onepage $onepage */
-        $onepage = Mage::getSingleton('checkout/type_onepage');
-        $onepage->setQuote($quote);
-        $onepage->saveOrder();
+        try {
+            /** @var Mage_Checkout_Model_Type_Onepage $onepage */
+            $onepage = Mage::getSingleton('checkout/type_onepage');
+            $onepage->setQuote($quote);
+            $onepage->saveOrder();
+        } catch (\Throwable $e) {
+            Mage::log(
+                sprintf(
+                    'CRITICAL: PayPal order %s was captured/authorized but Mage order placement failed: %s',
+                    $paypalResult['id'],
+                    $e->getMessage(),
+                ),
+                Mage::LOG_ERROR,
+                'paypal.log',
+            );
+            throw $e;
+        }
 
         $quote->setIsActive(0);
         $quote->save();
@@ -175,42 +206,53 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         $paypalAddress = $shipping['address'] ?? [];
         $paypalName = $shipping['name']['full_name'] ?? '';
 
-        if (!$paypalAddress) {
-            return;
-        }
-
-        $nameParts = explode(' ', $paypalName, 2);
-        $firstname = $nameParts[0] ?? '';
-        $lastname = $nameParts[1] ?? $firstname;
         $email = $payer['email_address'] ?? '';
         if (!$email) {
-            return;
+            Mage::throwException(Mage::helper('maho_paypal')->__('PayPal did not return a payer email address.'));
         }
 
-        $addressData = [
+        // Use payer name when shipping name is unavailable (e.g. virtual orders)
+        if (!$paypalName) {
+            $payerName = $payer['name'] ?? [];
+            $firstname = $payerName['given_name'] ?? '';
+            $lastname = $payerName['surname'] ?? $firstname;
+        } else {
+            $nameParts = explode(' ', $paypalName, 2);
+            $firstname = $nameParts[0] ?? '';
+            $lastname = $nameParts[1] ?? $firstname;
+        }
+
+        $quote->setCustomerEmail($email);
+        $quote->setCustomerFirstname($firstname);
+        $quote->setCustomerLastname($lastname);
+
+        $billingData = [
             'firstname' => $firstname,
             'lastname' => $lastname,
             'email' => $email,
-            'street' => implode("\n", array_filter([
-                $paypalAddress['address_line_1'] ?? '',
-                $paypalAddress['address_line_2'] ?? '',
-            ])),
-            'city' => $paypalAddress['admin_area_2'] ?? '',
-            'region' => $paypalAddress['admin_area_1'] ?? '',
-            'postcode' => $paypalAddress['postal_code'] ?? '',
-            'country_id' => $paypalAddress['country_code'] ?? '',
             'telephone' => $payer['phone']['phone_number']['national_number'] ?? '0000000000',
         ];
 
+        if ($paypalAddress) {
+            $billingData['street'] = implode("\n", array_filter([
+                $paypalAddress['address_line_1'] ?? '',
+                $paypalAddress['address_line_2'] ?? '',
+            ]));
+            $billingData['city'] = $paypalAddress['admin_area_2'] ?? '';
+            $billingData['region'] = $paypalAddress['admin_area_1'] ?? '';
+            $billingData['postcode'] = $paypalAddress['postal_code'] ?? '';
+            $billingData['country_id'] = $paypalAddress['country_code'] ?? '';
+        }
+
         $billing = $quote->getBillingAddress();
-        $billing->addData($addressData);
+        $billing->addData($billingData);
         $billing->setPaymentMethod($quote->getPayment()->getMethod());
         $billing->save();
 
-        if (!$quote->isVirtual()) {
+        if (!$quote->isVirtual() && $paypalAddress) {
             $shippingAddr = $quote->getShippingAddress();
             $previousMethod = $shippingAddr->getShippingMethod();
-            $shippingAddr->addData($addressData);
+            $shippingAddr->addData($billingData);
             $shippingAddr->setSameAsBilling(1);
             $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
 
@@ -224,10 +266,6 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
             }
             $shippingAddr->save();
         }
-
-        $quote->setCustomerEmail($email);
-        $quote->setCustomerFirstname($firstname);
-        $quote->setCustomerLastname($lastname);
     }
 
     protected function _log(string $message): void

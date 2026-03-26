@@ -30,28 +30,37 @@ class Maho_Paypal_Model_Webhook_Handler_OrderCompleted extends Maho_Paypal_Model
             return;
         }
 
-        // If a Mage order already exists, nothing to do
-        $existingOrder = $this->_loadOrderByPaypalOrderId($paypalOrderId);
-        if ($existingOrder) {
-            $this->_log("OrderCompleted: Mage order {$existingOrder->getIncrementId()} already exists, skipping");
+        if (!$this->_acquireLock($paypalOrderId)) {
+            $this->_log("OrderCompleted: could not acquire lock for {$paypalOrderId}, another process is handling it");
             return;
         }
 
-        $quote = $this->_findQuoteByPaypalOrderId($paypalOrderId);
-        if (!$quote) {
-            $this->_log("OrderCompleted: no active quote found for PayPal order {$paypalOrderId}");
-            return;
+        try {
+            // If a Mage order already exists, nothing to do
+            $existingOrder = $this->_loadOrderByPaypalOrderId($paypalOrderId);
+            if ($existingOrder) {
+                $this->_log("OrderCompleted: Mage order {$existingOrder->getIncrementId()} already exists, skipping");
+                return;
+            }
+
+            $quote = $this->_findQuoteByPaypalOrderId($paypalOrderId);
+            if (!$quote) {
+                $this->_log("OrderCompleted: no active quote found for PayPal order {$paypalOrderId}");
+                return;
+            }
+
+            $methodCode = $quote->getPayment()->getMethod()
+                ?: Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT;
+
+            /** @var Maho_Paypal_Model_Config $config */
+            $config = Mage::getModel('paypal/config');
+            $intent = $config->getNewPaymentAction($methodCode, (int) $quote->getStoreId());
+
+            // Order is already COMPLETED, no need to capture/authorize again
+            $this->_placeOrderFromPaypalResult($quote, $resource, $methodCode, $intent);
+            $this->_log("OrderCompleted: placed order from webhook for PayPal order {$paypalOrderId}");
+        } finally {
+            $this->_releaseLock($paypalOrderId);
         }
-
-        $methodCode = $quote->getPayment()->getMethod()
-            ?: Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT;
-
-        /** @var Maho_Paypal_Model_Config $config */
-        $config = Mage::getModel('paypal/config');
-        $intent = $config->getNewPaymentAction($methodCode, (int) $quote->getStoreId());
-
-        // Order is already COMPLETED, no need to capture/authorize again
-        $this->_placeOrderFromPaypalResult($quote, $resource, $methodCode, $intent);
-        $this->_log("OrderCompleted: placed order from webhook for PayPal order {$paypalOrderId}");
     }
 }

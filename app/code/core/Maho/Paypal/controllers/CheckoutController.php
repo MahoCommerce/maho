@@ -221,74 +221,100 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                 $this->getRequest()->getParam('method', Maho_Paypal_Model_Config::METHOD_STANDARD_CHECKOUT),
             );
 
-            /** @var Maho_Paypal_Model_Config $config */
-            $config = Mage::getModel('paypal/config');
-            $intent = $config->getNewPaymentAction($methodCode);
+            // Acquire lock to prevent concurrent order placement with webhook handlers
+            $lock = Mage_Index_Model_Lock::getInstance();
+            $lockName = 'paypal_order_' . $paypalOrderId;
+            if (!$lock->setLock($lockName, file: true, block: true)) {
+                Mage::throwException(Mage::helper('maho_paypal')->__('Could not acquire order lock.'));
+            }
 
-            /** @var Maho_Paypal_Model_Api_Client $client */
-            $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
-
-            // Fetch current order status first
-            $paypalResult = $client->getOrder($paypalOrderId);
-            $status = $paypalResult['status'] ?? '';
-
-            // If order is not yet completed (standard/advanced checkout flow),
-            // authorize or capture it now
-            if ($status !== 'COMPLETED') {
-                if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
-                    $paypalResult = $client->captureOrder($paypalOrderId);
+            try {
+                // Re-check quote is still active after acquiring lock (webhook may have placed the order)
+                $quote = Mage::getModel('sales/quote')->load($quote->getId());
+                if (!$quote->getIsActive()) {
+                    /** @var Mage_Sales_Model_Resource_Order_Payment_Collection $orderPayments */
+                    $orderPayments = Mage::getResourceModel('sales/order_payment_collection');
+                    $orderPayments->addFieldToFilter('paypal_order_id', $paypalOrderId);
+                    $orderPayments->setPageSize(1);
+                    if (!$orderPayments->getFirstItem()->getId()) {
+                        Mage::throwException(Mage::helper('maho_paypal')->__('This order has already been placed.'));
+                    }
+                    // Webhook placed the order while we waited for the lock — return success
+                    $result['success'] = true;
+                    $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
                 } else {
-                    $paypalResult = $client->authorizeOrder($paypalOrderId);
+                    /** @var Maho_Paypal_Model_Config $config */
+                    $config = Mage::getModel('paypal/config');
+                    $intent = $config->getNewPaymentAction($methodCode);
+
+                    /** @var Maho_Paypal_Model_Api_Client $client */
+                    $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
+
+                    // Fetch current order status first
+                    $paypalResult = $client->getOrder($paypalOrderId);
+                    $status = $paypalResult['status'] ?? '';
+
+                    // If order is not yet completed (standard/advanced checkout flow),
+                    // authorize or capture it now
+                    if ($status !== 'COMPLETED') {
+                        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
+                            $paypalResult = $client->captureOrder($paypalOrderId);
+                        } else {
+                            $paypalResult = $client->authorizeOrder($paypalOrderId);
+                        }
+                        $status = $paypalResult['status'] ?? '';
+                    }
+
+                    if (!in_array($status, ['COMPLETED', 'APPROVED'])) {
+                        Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order could not be approved. Status: %s', $status));
+                    }
+
+                    // Set payment method on quote
+                    $payment = $quote->getPayment();
+                    $payment->setMethod($methodCode);
+                    $payment->setAdditionalInformation('paypal_order_id', $paypalOrderId);
+                    $payment->setData('paypal_order_id', $paypalOrderId);
+
+                    // Import transaction IDs
+                    $this->_importTransactionIds($paypalResult, $payment, $intent);
+
+                    // Import payer info
+                    $payer = $paypalResult['payer'] ?? [];
+                    if (!empty($payer['email_address'])) {
+                        $payment->setAdditionalInformation('payer_email', $payer['email_address']);
+                    }
+                    if (!empty($payer['payer_id'])) {
+                        $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
+                    }
+
+                    // Persist payment data before saveOrder() which may reimport payment
+                    $payment->save();
+
+                    // Import address from PayPal if quote has no billing address (product page / cart shortcut flow)
+                    if (!$quote->getBillingAddress()->getFirstname()) {
+                        $this->_importPaypalAddress($paypalResult, $quote);
+                    }
+
+                    // Save vault token if returned by PayPal
+                    $this->_saveVaultToken($paypalResult, $quote);
+
+                    // Place the Magento order
+                    $quote->collectTotals();
+
+                    /** @var Mage_Checkout_Model_Type_Onepage $onepage */
+                    $onepage = Mage::getSingleton('checkout/type_onepage');
+                    $onepage->saveOrder();
+
+                    // Deactivate quote and persist to DB
+                    $quote->setIsActive(0);
+                    $quote->save();
+
+                    $result['success'] = true;
+                    $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
                 }
-                $status = $paypalResult['status'] ?? '';
+            } finally {
+                $lock->releaseLock($lockName, file: true);
             }
-
-            if (!in_array($status, ['COMPLETED', 'APPROVED'])) {
-                Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order could not be approved. Status: %s', $status));
-            }
-
-            // Set payment method on quote
-            $payment = $quote->getPayment();
-            $payment->setMethod($methodCode);
-            $payment->setAdditionalInformation('paypal_order_id', $paypalOrderId);
-            $payment->setData('paypal_order_id', $paypalOrderId);
-
-            // Import transaction IDs
-            $this->_importTransactionIds($paypalResult, $payment, $intent);
-
-            // Import payer info
-            $payer = $paypalResult['payer'] ?? [];
-            if (!empty($payer['email_address'])) {
-                $payment->setAdditionalInformation('payer_email', $payer['email_address']);
-            }
-            if (!empty($payer['payer_id'])) {
-                $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
-            }
-
-            // Persist payment data before saveOrder() which may reimport payment
-            $payment->save();
-
-            // Import address from PayPal if quote has no billing address (product page / cart shortcut flow)
-            if (!$quote->getBillingAddress()->getFirstname()) {
-                $this->_importPaypalAddress($paypalResult, $quote);
-            }
-
-            // Save vault token if returned by PayPal
-            $this->_saveVaultToken($paypalResult, $quote);
-
-            // Place the Magento order
-            $quote->collectTotals();
-
-            /** @var Mage_Checkout_Model_Type_Onepage $onepage */
-            $onepage = Mage::getSingleton('checkout/type_onepage');
-            $onepage->saveOrder();
-
-            // Deactivate quote and persist to DB
-            $quote->setIsActive(0);
-            $quote->save();
-
-            $result['success'] = true;
-            $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
         } catch (\Throwable $e) {
             $result['message'] = $e->getMessage();
             Mage::logException($e);
