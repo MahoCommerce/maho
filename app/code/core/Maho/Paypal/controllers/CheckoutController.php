@@ -292,11 +292,11 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 
                     // Import address from PayPal if quote has no billing address (product page / cart shortcut flow)
                     if (!$quote->getBillingAddress()->getFirstname()) {
-                        $this->_importPaypalAddress($paypalResult, $quote);
+                        Mage::helper('maho_paypal')->importPaypalAddress($paypalResult, $quote);
                     }
 
                     // Save vault token if returned by PayPal
-                    $this->_saveVaultToken($paypalResult, $quote);
+                    Mage::helper('maho_paypal')->saveVaultToken($paypalResult, $quote);
 
                     // Place the Magento order
                     $quote->collectTotals();
@@ -500,137 +500,4 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    protected function _importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void
-    {
-        $payer = $paypalResult['payer'] ?? [];
-        $shipping = $paypalResult['purchase_units'][0]['shipping'] ?? [];
-        $paypalAddress = $shipping['address'] ?? [];
-        $paypalName = $shipping['name']['full_name'] ?? '';
-
-        if (!$paypalAddress) {
-            return;
-        }
-
-        $nameParts = explode(' ', $paypalName, 2);
-        $firstname = $nameParts[0] ?? '';
-        $lastname = $nameParts[1] ?? $firstname;
-        $email = $payer['email_address'] ?? '';
-        if (!$email) {
-            Mage::throwException(Mage::helper('maho_paypal')->__('PayPal did not return a payer email address.'));
-        }
-
-        $addressData = [
-            'firstname' => $firstname,
-            'lastname' => $lastname,
-            'email' => $email,
-            'street' => implode("\n", array_filter([
-                $paypalAddress['address_line_1'] ?? '',
-                $paypalAddress['address_line_2'] ?? '',
-            ])),
-            'city' => $paypalAddress['admin_area_2'] ?? '',
-            'region' => $paypalAddress['admin_area_1'] ?? '',
-            'postcode' => $paypalAddress['postal_code'] ?? '',
-            'country_id' => $paypalAddress['country_code'] ?? '',
-            'telephone' => $payer['phone']['phone_number']['national_number'] ?? '0000000000',
-        ];
-
-        $billing = $quote->getBillingAddress();
-        $billing->addData($addressData);
-        $billing->setPaymentMethod($quote->getPayment()->getMethod());
-        $billing->save();
-
-        if (!$quote->isVirtual()) {
-            $shippingAddr = $quote->getShippingAddress();
-            $previousMethod = $shippingAddr->getShippingMethod();
-            $shippingAddr->addData($addressData);
-            $shippingAddr->setSameAsBilling(1);
-            $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
-
-            $rates = $shippingAddr->getAllShippingRates();
-            $availableCodes = array_map(fn($r) => $r->getCode(), $rates);
-
-            if ($previousMethod && in_array($previousMethod, $availableCodes)) {
-                $shippingAddr->setShippingMethod($previousMethod);
-            } elseif (count($rates) > 0) {
-                $shippingAddr->setShippingMethod($rates[0]->getCode());
-            }
-            $shippingAddr->save();
-        }
-
-        $quote->setCustomerEmail($email);
-        $quote->setCustomerFirstname($firstname);
-        $quote->setCustomerLastname($lastname);
-    }
-
-    protected function _saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void
-    {
-        $customerId = $quote->getCustomerId();
-        if (!$customerId) {
-            return;
-        }
-
-        $paymentSource = $paypalResult['payment_source'] ?? [];
-        $sourceType = null;
-        $vaultData = null;
-        $cardLastFour = null;
-        $cardBrand = null;
-        $cardExpiry = null;
-        $payerEmail = null;
-
-        if (isset($paymentSource['card']['attributes']['vault'])) {
-            $vaultData = $paymentSource['card']['attributes']['vault'];
-            $sourceType = 'card';
-            $cardLastFour = $paymentSource['card']['last_digits'] ?? null;
-            $cardBrand = $paymentSource['card']['brand'] ?? null;
-            $cardExpiry = $paymentSource['card']['expiry'] ?? null;
-        } elseif (isset($paymentSource['paypal']['attributes']['vault'])) {
-            $vaultData = $paymentSource['paypal']['attributes']['vault'];
-            $sourceType = 'paypal';
-            $payerEmail = $paymentSource['paypal']['email_address'] ?? null;
-        }
-
-        if (!$vaultData || ($vaultData['status'] ?? '') !== 'VAULTED') {
-            return;
-        }
-
-        $paypalTokenId = $vaultData['id'] ?? '';
-        if (!$paypalTokenId) {
-            return;
-        }
-
-        /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $existing */
-        $existing = Mage::getResourceModel('maho_paypal/vault_token_collection');
-        $existing->addPaypalTokenFilter($paypalTokenId);
-        if ($existing->getSize() > 0) {
-            return;
-        }
-
-        // Deactivate older tokens for the same payment method
-        /** @var Maho_Paypal_Model_Resource_Vault_Token_Collection $oldTokens */
-        $oldTokens = Mage::getResourceModel('maho_paypal/vault_token_collection');
-        $oldTokens->addCustomerFilter((int) $customerId)->addActiveFilter();
-        $oldTokens->addFieldToFilter('payment_source_type', $sourceType);
-        if ($sourceType === 'card') {
-            $oldTokens->addFieldToFilter('card_last_four', $cardLastFour);
-            $oldTokens->addFieldToFilter('card_brand', $cardBrand);
-        } elseif ($sourceType === 'paypal' && $payerEmail) {
-            $oldTokens->addFieldToFilter('payer_email', $payerEmail);
-        }
-        foreach ($oldTokens as $oldToken) {
-            $oldToken->setIsActive(0)->save();
-        }
-
-        /** @var Maho_Paypal_Model_Vault_Token $token */
-        $token = Mage::getModel('maho_paypal/vault_token');
-        $token->setData([
-            'customer_id' => (int) $customerId,
-            'paypal_token_id' => $paypalTokenId,
-            'payment_source_type' => $sourceType,
-            'card_last_four' => $cardLastFour,
-            'card_brand' => $cardBrand,
-            'card_expiry' => $cardExpiry,
-            'payer_email' => $payerEmail,
-        ]);
-        $token->save();
-    }
 }

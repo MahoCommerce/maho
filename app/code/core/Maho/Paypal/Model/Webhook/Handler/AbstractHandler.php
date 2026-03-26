@@ -89,6 +89,10 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
 
     protected function _findQuoteByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Quote
     {
+        if (!$paypalOrderId || !preg_match('/^[A-Z0-9]+$/', $paypalOrderId)) {
+            return null;
+        }
+
         /** @var Mage_Sales_Model_Resource_Quote_Payment_Collection $payments */
         $payments = Mage::getResourceModel('sales/quote_payment_collection');
         $payments->addFieldToFilter('paypal_order_id', $paypalOrderId);
@@ -170,10 +174,16 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
 
         $payment->save();
 
+        /** @var Maho_Paypal_Helper_Data $helper */
+        $helper = Mage::helper('maho_paypal');
+
         // Import address from PayPal if quote has no billing address
         if (!$quote->getBillingAddress()->getFirstname()) {
-            $this->_importPaypalAddress($paypalResult, $quote);
+            $helper->importPaypalAddress($paypalResult, $quote);
         }
+
+        // Save vault token if returned by PayPal
+        $helper->saveVaultToken($paypalResult, $quote);
 
         $quote->collectTotals();
 
@@ -197,75 +207,6 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
 
         $quote->setIsActive(0);
         $quote->save();
-    }
-
-    protected function _importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void
-    {
-        $payer = $paypalResult['payer'] ?? [];
-        $shipping = $paypalResult['purchase_units'][0]['shipping'] ?? [];
-        $paypalAddress = $shipping['address'] ?? [];
-        $paypalName = $shipping['name']['full_name'] ?? '';
-
-        $email = $payer['email_address'] ?? '';
-        if (!$email) {
-            Mage::throwException(Mage::helper('maho_paypal')->__('PayPal did not return a payer email address.'));
-        }
-
-        // Use payer name when shipping name is unavailable (e.g. virtual orders)
-        if (!$paypalName) {
-            $payerName = $payer['name'] ?? [];
-            $firstname = $payerName['given_name'] ?? '';
-            $lastname = $payerName['surname'] ?? $firstname;
-        } else {
-            $nameParts = explode(' ', $paypalName, 2);
-            $firstname = $nameParts[0] ?? '';
-            $lastname = $nameParts[1] ?? $firstname;
-        }
-
-        $quote->setCustomerEmail($email);
-        $quote->setCustomerFirstname($firstname);
-        $quote->setCustomerLastname($lastname);
-
-        $billingData = [
-            'firstname' => $firstname,
-            'lastname' => $lastname,
-            'email' => $email,
-            'telephone' => $payer['phone']['phone_number']['national_number'] ?? '0000000000',
-        ];
-
-        if ($paypalAddress) {
-            $billingData['street'] = implode("\n", array_filter([
-                $paypalAddress['address_line_1'] ?? '',
-                $paypalAddress['address_line_2'] ?? '',
-            ]));
-            $billingData['city'] = $paypalAddress['admin_area_2'] ?? '';
-            $billingData['region'] = $paypalAddress['admin_area_1'] ?? '';
-            $billingData['postcode'] = $paypalAddress['postal_code'] ?? '';
-            $billingData['country_id'] = $paypalAddress['country_code'] ?? '';
-        }
-
-        $billing = $quote->getBillingAddress();
-        $billing->addData($billingData);
-        $billing->setPaymentMethod($quote->getPayment()->getMethod());
-        $billing->save();
-
-        if (!$quote->isVirtual() && $paypalAddress) {
-            $shippingAddr = $quote->getShippingAddress();
-            $previousMethod = $shippingAddr->getShippingMethod();
-            $shippingAddr->addData($billingData);
-            $shippingAddr->setSameAsBilling(1);
-            $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
-
-            $rates = $shippingAddr->getAllShippingRates();
-            $availableCodes = array_map(fn($r) => $r->getCode(), $rates);
-
-            if ($previousMethod && in_array($previousMethod, $availableCodes)) {
-                $shippingAddr->setShippingMethod($previousMethod);
-            } elseif (count($rates) > 0) {
-                $shippingAddr->setShippingMethod($rates[0]->getCode());
-            }
-            $shippingAddr->save();
-        }
     }
 
     protected function _log(string $message): void
