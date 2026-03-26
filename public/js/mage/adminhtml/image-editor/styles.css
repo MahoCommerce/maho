@@ -519,7 +519,7 @@
     z-index: 10;
 }
 
-.maho-ie-text-overlay textarea {
+.maho-ie-text-input {
     background: rgba(0, 0, 0, 0.7);
     border: 2px solid #0090ff;
     border-radius: 4px;
@@ -528,9 +528,11 @@
     font-family: ui-sans-serif, system-ui, sans-serif;
     padding: 4px 8px;
     outline: none;
-    resize: both;
-    min-width: 100px;
-    min-height: 32px;
+    min-width: 20px;
+    min-height: 1em;
+    white-space: pre;
+    word-break: keep-all;
+    overflow: visible;
 }
 
 /* Loading state */

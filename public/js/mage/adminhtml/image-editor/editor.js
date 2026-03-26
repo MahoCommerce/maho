@@ -410,6 +410,7 @@ export class MahoImageEditor {
         this.canvas.addEventListener('pointermove', (e) => this._onPointerMove(e));
         this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e));
         this.canvas.addEventListener('pointerleave', (e) => this._onPointerUp(e));
+        this.canvas.addEventListener('dblclick', (e) => this._onDblClick(e));
 
         // Prevent browser zoom from trackpad pinch
         this.canvasWrap.addEventListener('wheel', (e) => {
@@ -498,6 +499,12 @@ export class MahoImageEditor {
         if (!this.activeTool) return;
         const { ix, iy } = this._toImageCoords(e);
         this.activeTool.onPointerDown(ix, iy, e);
+    }
+
+    _onDblClick(e) {
+        if (!this.activeTool?.onDoubleClick) return;
+        const { ix, iy } = this._toImageCoords(e);
+        this.activeTool.onDoubleClick(ix, iy, e);
     }
 
     _onPointerMove(e) {
@@ -614,7 +621,9 @@ export class MahoImageEditor {
         // Annotations
         ctx.save();
         ctx.translate(this.offsetX, this.offsetY);
+        const editingAnnotation = this.activeTool?._editingExisting ? this.activeTool._pendingAnnotation : null;
         for (const a of this.annotations) {
+            if (a === editingAnnotation) continue;
             drawAnnotation(ctx, a, this.scale);
         }
         ctx.restore();
@@ -684,7 +693,7 @@ export class MahoImageEditor {
 
         if (wm.type === 'text') {
             const fontSize = (wm.fontSize || 48) * this.scale;
-            ctx.font = `bold ${fontSize}px sans-serif`;
+            ctx.font = `bold ${fontSize}px ${wm.fontFamily || 'sans-serif'}`;
             ctx.fillStyle = wm.color || '#ffffff';
             ctx.textBaseline = 'middle';
             ctx.textAlign = 'center';

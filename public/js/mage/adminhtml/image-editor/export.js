@@ -233,7 +233,7 @@ function drawWatermark(ctx, wm, w, h) {
 
     if (wm.type === 'text') {
         const fontSize = wm.fontSize || 48;
-        ctx.font = `bold ${fontSize}px sans-serif`;
+        ctx.font = `bold ${fontSize}px ${wm.fontFamily || 'sans-serif'}`;
         ctx.fillStyle = wm.color || '#ffffff';
         ctx.textBaseline = 'middle';
         ctx.textAlign = 'center';

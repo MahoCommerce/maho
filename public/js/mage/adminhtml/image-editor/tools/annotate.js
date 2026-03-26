@@ -7,6 +7,7 @@
  */
 
 import { drawAnnotation } from '../export.js';
+import { createFontSelect } from '../fonts.js';
 
 const HANDLE_SIZE = 7;
 
@@ -18,6 +19,7 @@ export class AnnotateTool {
         this.fillColor = 'transparent';
         this.lineWidth = 3;
         this.fontSize = 24;
+        this.fontFamily = 'sans-serif';
         this.selected = null;
         this._state = 'idle';
         this._drawing = null;
@@ -109,6 +111,14 @@ export class AnnotateTool {
         this._activeHandle = null;
     }
 
+    onDoubleClick(ix, iy) {
+        const hit = this._hitTest(ix, iy);
+        if (hit && hit.type === 'text') {
+            this.selected = hit;
+            this._editExistingText(hit);
+        }
+    }
+
     onKeyDown(e) {
         if ((e.key === 'Delete' || e.key === 'Backspace') && this.selected && !this._textOverlay) {
             this.editor.pushUndo();
@@ -153,11 +163,10 @@ export class AnnotateTool {
             btn.innerHTML = m.icon;
             btn.title = m.label;
             btn.addEventListener('click', () => {
-                el.querySelectorAll('.maho-ie-opt-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
                 this.mode = m.mode;
                 this.selected = null;
                 this._closeTextOverlay();
+                this.editor.setOptions(this.renderOptions());
                 this.editor.requestRender();
             });
             el.appendChild(btn);
@@ -182,34 +191,86 @@ export class AnnotateTool {
                 if (this.selected.color !== undefined) this.selected.color = this.strokeColor;
                 this.editor.requestRender();
             }
+            if (this._pendingAnnotation) {
+                this._pendingAnnotation.color = this.strokeColor;
+                this._updateTextOverlayStyle();
+            }
         });
         strokeGroup.append(strokeLabel, strokeInput);
         el.appendChild(strokeGroup);
 
-        // Line width
-        const lwGroup = document.createElement('div');
-        lwGroup.className = 'maho-ie-slider';
-        const lwLabel = document.createElement('label');
-        lwLabel.textContent = 'Size';
-        const lwInput = document.createElement('input');
-        lwInput.type = 'range';
-        lwInput.min = '1';
-        lwInput.max = '20';
-        lwInput.value = this.lineWidth;
-        const lwVal = document.createElement('span');
-        lwVal.className = 'maho-ie-slider-value';
-        lwVal.textContent = this.lineWidth;
-        lwInput.addEventListener('input', () => {
-            this.lineWidth = parseInt(lwInput.value);
+        // Font (text mode only)
+        if (this.mode === 'text') {
+            const fontSelect = createFontSelect(this.fontFamily, (value) => {
+                this.fontFamily = value;
+                if (this.selected && this.selected.fontFamily !== undefined) {
+                    this.editor.pushUndo();
+                    this.selected.fontFamily = value;
+                    this.editor.requestRender();
+                }
+                if (this._pendingAnnotation) {
+                    this._pendingAnnotation.fontFamily = value;
+                    this._updateTextOverlayStyle();
+                }
+            });
+            el.appendChild(fontSelect);
+        }
+
+        if (this.mode === 'text') {
+            // Font size (text mode)
+            const fsGroup = document.createElement('div');
+            fsGroup.className = 'maho-ie-slider';
+            const fsLabel = document.createElement('label');
+            fsLabel.textContent = 'Size';
+            const fsInput = document.createElement('input');
+            fsInput.type = 'range';
+            fsInput.min = '12';
+            fsInput.max = '120';
+            fsInput.value = this.fontSize;
+            const fsVal = document.createElement('span');
+            fsVal.className = 'maho-ie-slider-value';
+            fsVal.textContent = this.fontSize;
+            fsInput.addEventListener('input', () => {
+                this.fontSize = parseInt(fsInput.value);
+                fsVal.textContent = this.fontSize;
+                if (this.selected && this.selected.fontSize !== undefined) {
+                    this.editor.pushUndo();
+                    this.selected.fontSize = this.fontSize;
+                    this.editor.requestRender();
+                }
+                if (this._pendingAnnotation) {
+                    this._pendingAnnotation.fontSize = this.fontSize;
+                    this._updateTextOverlayStyle();
+                }
+            });
+            fsGroup.append(fsLabel, fsInput, fsVal);
+            el.appendChild(fsGroup);
+        } else {
+            // Line width (non-text modes)
+            const lwGroup = document.createElement('div');
+            lwGroup.className = 'maho-ie-slider';
+            const lwLabel = document.createElement('label');
+            lwLabel.textContent = 'Size';
+            const lwInput = document.createElement('input');
+            lwInput.type = 'range';
+            lwInput.min = '1';
+            lwInput.max = '20';
+            lwInput.value = this.lineWidth;
+            const lwVal = document.createElement('span');
+            lwVal.className = 'maho-ie-slider-value';
             lwVal.textContent = this.lineWidth;
-            if (this.selected && this.selected.lineWidth !== undefined) {
-                this.editor.pushUndo();
-                this.selected.lineWidth = this.lineWidth;
-                this.editor.requestRender();
-            }
-        });
-        lwGroup.append(lwLabel, lwInput, lwVal);
-        el.appendChild(lwGroup);
+            lwInput.addEventListener('input', () => {
+                this.lineWidth = parseInt(lwInput.value);
+                lwVal.textContent = this.lineWidth;
+                if (this.selected && this.selected.lineWidth !== undefined) {
+                    this.editor.pushUndo();
+                    this.selected.lineWidth = this.lineWidth;
+                    this.editor.requestRender();
+                }
+            });
+            lwGroup.append(lwLabel, lwInput, lwVal);
+            el.appendChild(lwGroup);
+        }
 
         // Delete selected
         const delBtn = document.createElement('button');
@@ -251,7 +312,7 @@ export class AnnotateTool {
                 this._drawing = { ...base, type: 'freehand', points: [{ x: ix, y: iy }], color: this.strokeColor };
                 break;
             case 'text':
-                this._drawing = { ...base, type: 'text', x: ix, y: iy, text: '', color: this.strokeColor, fontSize: this.fontSize, fontFamily: 'sans-serif', bold: false, italic: false };
+                this._drawing = { ...base, type: 'text', x: ix, y: iy, text: '', color: this.strokeColor, fontSize: this.fontSize, fontFamily: this.fontFamily, bold: false, italic: false };
                 break;
         }
     }
@@ -314,8 +375,14 @@ export class AnnotateTool {
         this.editor.requestRender();
     }
 
-    _openTextOverlay(annotation) {
+    _editExistingText(annotation) {
+        this._openTextOverlay(annotation, true);
+    }
+
+    _openTextOverlay(annotation, editing = false) {
         this._closeTextOverlay();
+        this._pendingAnnotation = annotation;
+        this._editingExisting = editing;
         const wrap = this.editor.canvasWrap;
         const canvas = this.editor.canvas;
         const scale = this.editor.scale;
@@ -331,36 +398,66 @@ export class AnnotateTool {
         overlay.style.left = tx + 'px';
         overlay.style.top = ty + 'px';
 
-        const textarea = document.createElement('textarea');
-        textarea.rows = 2;
-        textarea.placeholder = 'Enter text...';
-        textarea.style.fontSize = (annotation.fontSize * scale) + 'px';
-        textarea.style.color = annotation.color;
+        const input = document.createElement('div');
+        input.className = 'maho-ie-text-input';
+        input.contentEditable = 'true';
+        input.style.fontSize = (annotation.fontSize * scale) + 'px';
+        input.style.color = annotation.color;
+        input.style.fontFamily = annotation.fontFamily || 'sans-serif';
 
-        textarea.addEventListener('keydown', (e) => {
+        if (editing && annotation.text) {
+            input.textContent = annotation.text;
+        }
+
+        input.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
-                this._commitText(annotation, textarea.value);
+                this._commitText(annotation, input.innerText);
             } else if (e.key === 'Escape') {
                 this._closeTextOverlay();
+                this.editor.requestRender();
             }
             e.stopPropagation();
         });
 
-        overlay.appendChild(textarea);
+        overlay.appendChild(input);
         wrap.style.position = 'relative';
         wrap.appendChild(overlay);
         this._textOverlay = overlay;
-        textarea.focus();
+        this.editor.requestRender();
+        input.focus();
+
+        if (editing) {
+            const range = document.createRange();
+            range.selectNodeContents(input);
+            range.collapse(false);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+    }
+
+    _updateTextOverlayStyle() {
+        if (!this._textOverlay || !this._pendingAnnotation) return;
+        const el = this._textOverlay.querySelector('.maho-ie-text-input');
+        if (!el) return;
+        const a = this._pendingAnnotation;
+        const scale = this.editor.scale;
+        el.style.color = a.color;
+        el.style.fontFamily = a.fontFamily || 'sans-serif';
+        el.style.fontSize = (a.fontSize * scale) + 'px';
     }
 
     _commitText(annotation, text) {
+        const editing = this._editingExisting;
         this._closeTextOverlay();
         if (!text.trim()) return;
 
-        annotation.text = text;
         this.editor.pushUndo();
-        this.editor.annotations.push(annotation);
+        annotation.text = text;
+        if (!editing) {
+            this.editor.annotations.push(annotation);
+        }
         this.selected = annotation;
         this.editor.requestRender();
     }
@@ -370,6 +467,8 @@ export class AnnotateTool {
             this._textOverlay.remove();
             this._textOverlay = null;
         }
+        this._pendingAnnotation = null;
+        this._editingExisting = false;
     }
 
     _hitTest(ix, iy) {

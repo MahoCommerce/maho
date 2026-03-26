@@ -6,6 +6,8 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 
+import { createFontSelect } from '../fonts.js';
+
 export class WatermarkTool {
     constructor(editor) {
         this.editor = editor;
@@ -29,6 +31,7 @@ export class WatermarkTool {
                 y: 0.5,
                 opacity: 0.3,
                 fontSize: 48,
+                fontFamily: 'sans-serif',
                 color: '#ffffff',
                 image: null,
                 scale: 0.2,
@@ -154,6 +157,12 @@ export class WatermarkTool {
             });
             textGroup.append(textLabel, textInput);
             el.appendChild(textGroup);
+
+            // Font
+            el.appendChild(createFontSelect(wm.fontFamily || 'sans-serif', (value) => {
+                wm.fontFamily = value;
+                this.editor.requestRender();
+            }));
 
             // Font size
             const sizeGroup = document.createElement('div');
