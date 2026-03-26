@@ -82,6 +82,77 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         }
     }
 
+    public function placeOrderFromPaypalResult(
+        Mage_Sales_Model_Quote $quote,
+        array $paypalResult,
+        string $methodCode,
+        string $intent,
+    ): void {
+        $payment = $quote->getPayment();
+        $payment->setMethod($methodCode);
+        $payment->setAdditionalInformation('paypal_order_id', $paypalResult['id']);
+        $payment->setData('paypal_order_id', $paypalResult['id']);
+
+        $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
+        $paymentsData = $purchaseUnit['payments'] ?? [];
+
+        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
+            $captureId = $paymentsData['captures'][0]['id'] ?? null;
+            if ($captureId) {
+                $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+            }
+        }
+
+        $authId = $paymentsData['authorizations'][0]['id'] ?? null;
+        if ($authId) {
+            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
+        }
+
+        $payer = $paypalResult['payer'] ?? [];
+        if (!empty($payer['email_address'])) {
+            $payment->setAdditionalInformation('payer_email', $payer['email_address']);
+        }
+        if (!empty($payer['payer_id'])) {
+            $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
+        }
+
+        $payment->save();
+
+        if (!$quote->getBillingAddress()->getFirstname()) {
+            $this->importPaypalAddress($paypalResult, $quote);
+        }
+
+        $this->saveVaultToken($paypalResult, $quote);
+
+        // Ensure correct checkout method for sessionless contexts (webhooks)
+        if ($quote->getCustomerId() && !$quote->getData('checkout_method')) {
+            $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER);
+        }
+
+        $quote->collectTotals();
+
+        try {
+            /** @var Mage_Checkout_Model_Type_Onepage $onepage */
+            $onepage = Mage::getSingleton('checkout/type_onepage');
+            $onepage->setQuote($quote);
+            $onepage->saveOrder();
+        } catch (\Throwable $e) {
+            Mage::log(
+                sprintf(
+                    'CRITICAL: PayPal order %s was captured/authorized but Mage order placement failed: %s',
+                    $paypalResult['id'],
+                    $e->getMessage(),
+                ),
+                Mage::LOG_ERROR,
+                'paypal.log',
+            );
+            throw $e;
+        }
+
+        $quote->setIsActive(0);
+        $quote->save();
+    }
+
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void
     {
         $customerId = $quote->getCustomerId();

@@ -142,71 +142,9 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         string $methodCode,
         string $intent,
     ): void {
-        $payment = $quote->getPayment();
-        $payment->setMethod($methodCode);
-        $payment->setAdditionalInformation('paypal_order_id', $paypalResult['id']);
-        $payment->setData('paypal_order_id', $paypalResult['id']);
-
-        // Import transaction IDs
-        $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
-        $paymentsData = $purchaseUnit['payments'] ?? [];
-
-        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
-            $captureId = $paymentsData['captures'][0]['id'] ?? null;
-            if ($captureId) {
-                $payment->setAdditionalInformation('paypal_capture_id', $captureId);
-            }
-        }
-
-        $authId = $paymentsData['authorizations'][0]['id'] ?? null;
-        if ($authId) {
-            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
-        }
-
-        // Import payer info
-        $payer = $paypalResult['payer'] ?? [];
-        if (!empty($payer['email_address'])) {
-            $payment->setAdditionalInformation('payer_email', $payer['email_address']);
-        }
-        if (!empty($payer['payer_id'])) {
-            $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
-        }
-
-        $payment->save();
-
         /** @var Maho_Paypal_Helper_Data $helper */
         $helper = Mage::helper('maho_paypal');
-
-        // Import address from PayPal if quote has no billing address
-        if (!$quote->getBillingAddress()->getFirstname()) {
-            $helper->importPaypalAddress($paypalResult, $quote);
-        }
-
-        // Save vault token if returned by PayPal
-        $helper->saveVaultToken($paypalResult, $quote);
-
-        $quote->collectTotals();
-
-        try {
-            /** @var Mage_Checkout_Model_Type_Onepage $onepage */
-            $onepage = Mage::getSingleton('checkout/type_onepage');
-            $onepage->setQuote($quote);
-            $onepage->saveOrder();
-        } catch (\Throwable $e) {
-            Mage::log(
-                sprintf(
-                    'CRITICAL: PayPal order %s was captured/authorized but Mage order placement failed: %s',
-                    $paypalResult['id'],
-                    $e->getMessage(),
-                ),
-                Mage::LOG_ERROR,
-                'paypal.log',
-            );
-            throw $e;
-        }
-
-        $quote->setIsActive(0);
-        $quote->save();
+        $helper->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
     }
 
     protected function _log(string $message): void

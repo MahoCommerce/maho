@@ -237,7 +237,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $orderPayments->addFieldToFilter('paypal_order_id', $paypalOrderId);
                     $orderPayments->setPageSize(1);
                     if (!$orderPayments->getFirstItem()->getId()) {
-                        Mage::throwException(Mage::helper('maho_paypal')->__('This order has already been placed.'));
+                        Mage::throwException(Mage::helper('maho_paypal')->__('Quote is no longer active and no matching order was found.'));
                     }
                     // Webhook placed the order while we waited for the lock — return success
                     $result['success'] = true;
@@ -269,45 +269,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                         Mage::throwException(Mage::helper('maho_paypal')->__('PayPal order could not be approved. Status: %s', $status));
                     }
 
-                    // Set payment method on quote
-                    $payment = $quote->getPayment();
-                    $payment->setMethod($methodCode);
-                    $payment->setAdditionalInformation('paypal_order_id', $paypalOrderId);
-                    $payment->setData('paypal_order_id', $paypalOrderId);
-
-                    // Import transaction IDs
-                    $this->_importTransactionIds($paypalResult, $payment, $intent);
-
-                    // Import payer info
-                    $payer = $paypalResult['payer'] ?? [];
-                    if (!empty($payer['email_address'])) {
-                        $payment->setAdditionalInformation('payer_email', $payer['email_address']);
-                    }
-                    if (!empty($payer['payer_id'])) {
-                        $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
-                    }
-
-                    // Persist payment data before saveOrder() which may reimport payment
-                    $payment->save();
-
-                    // Import address from PayPal if quote has no billing address (product page / cart shortcut flow)
-                    if (!$quote->getBillingAddress()->getFirstname()) {
-                        Mage::helper('maho_paypal')->importPaypalAddress($paypalResult, $quote);
-                    }
-
-                    // Save vault token if returned by PayPal
-                    Mage::helper('maho_paypal')->saveVaultToken($paypalResult, $quote);
-
-                    // Place the Magento order
-                    $quote->collectTotals();
-
-                    /** @var Mage_Checkout_Model_Type_Onepage $onepage */
-                    $onepage = Mage::getSingleton('checkout/type_onepage');
-                    $onepage->saveOrder();
-
-                    // Deactivate quote and persist to DB
-                    $quote->setIsActive(0);
-                    $quote->save();
+                    Mage::helper('maho_paypal')->placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
 
                     $result['success'] = true;
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
@@ -480,24 +442,6 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
     protected function _formatAmount(float $amount): string
     {
         return number_format(round($amount, 2), 2, '.', '');
-    }
-
-    protected function _importTransactionIds(array $paypalResult, Mage_Sales_Model_Quote_Payment $payment, string $intent): void
-    {
-        $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
-        $payments = $purchaseUnit['payments'] ?? [];
-
-        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
-            $captureId = $payments['captures'][0]['id'] ?? null;
-            if ($captureId) {
-                $payment->setAdditionalInformation('paypal_capture_id', $captureId);
-            }
-        }
-
-        $authId = $payments['authorizations'][0]['id'] ?? null;
-        if ($authId) {
-            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
-        }
     }
 
 }
