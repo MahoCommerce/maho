@@ -213,7 +213,7 @@ class Mage_Adminhtml_Block_Cms_Wysiwyg_Images_Content extends Mage_Adminhtml_Blo
     {
         $quality = (int) Mage::getStoreConfig('system/media_storage_configuration/image_quality');
 
-        // Convert to 0-1 scale for filerobot-image-editor
+        // Convert to 0-1 scale for canvas.toBlob() quality parameter
         return $quality / 100;
     }
 }
