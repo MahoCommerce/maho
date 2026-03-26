@@ -410,14 +410,9 @@ export class MahoImageEditor {
         this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e));
         this.canvas.addEventListener('pointerleave', (e) => this._onPointerUp(e));
 
-        // Wheel zoom
+        // Prevent browser zoom from trackpad pinch
         this.canvasWrap.addEventListener('wheel', (e) => {
-            e.preventDefault();
-            const rect = this.canvas.getBoundingClientRect();
-            const cx = e.clientX - rect.left;
-            const cy = e.clientY - rect.top;
-            const factor = e.deltaY < 0 ? ZOOM_STEP : 1 / ZOOM_STEP;
-            this._zoomAtPoint(this.zoom * factor, cx, cy);
+            if (e.ctrlKey) e.preventDefault();
         }, { passive: false });
 
         // Keyboard
