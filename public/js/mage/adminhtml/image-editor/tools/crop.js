@@ -152,29 +152,94 @@ export class CropTool {
         const el = document.createElement('div');
         el.className = 'maho-ie-options-group';
 
-        // Preset aspect ratios
-        const presets = [
-            { label: 'Free', value: null },
-            { label: '1:1', value: 1 },
-            { label: '4:3', value: 4 / 3 },
-            { label: '16:9', value: 16 / 9 },
-            { label: '3:2', value: 3 / 2 },
+        // Preset aspect ratios grouped with separators
+        const groups = [
+            [
+                { label: 'Free', value: null },
+                { label: '1:1', value: 1 },
+            ],
+            [
+                { label: '4:3', value: 4 / 3 },
+                { label: '3:2', value: 3 / 2 },
+                { label: '16:9', value: 16 / 9 },
+                { label: '21:9', value: 21 / 9 },
+            ],
+            [
+                { label: '2:3', value: 2 / 3 },
+                { label: '4:5', value: 4 / 5 },
+                { label: '9:16', value: 9 / 16 },
+            ],
         ];
 
-        for (const p of presets) {
-            const btn = document.createElement('button');
-            btn.className = 'maho-ie-opt-btn';
-            btn.textContent = p.label;
-            btn.addEventListener('click', () => {
-                el.querySelectorAll('.maho-ie-opt-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                if (p.value) {
-                    this._applyAspectRatio(p.value);
-                }
-            });
-            if (!p.value) btn.classList.add('active');
-            el.appendChild(btn);
+        const selectRatio = (activeBtn, value) => {
+            el.querySelectorAll('.maho-ie-opt-btn').forEach(b => b.classList.remove('active'));
+            activeBtn.classList.add('active');
+            customInputs.style.display = 'none';
+            if (value) {
+                this._applyAspectRatio(value);
+            }
+        };
+
+        for (let gi = 0; gi < groups.length; gi++) {
+            for (const p of groups[gi]) {
+                const btn = document.createElement('button');
+                btn.className = 'maho-ie-opt-btn';
+                btn.textContent = p.label;
+                btn.addEventListener('click', () => selectRatio(btn, p.value));
+                if (!p.value) btn.classList.add('active');
+                el.appendChild(btn);
+            }
+            const div = document.createElement('div');
+            div.className = 'maho-ie-options-divider';
+            el.appendChild(div);
         }
+
+        // Custom aspect ratio
+        const customBtn = document.createElement('button');
+        customBtn.className = 'maho-ie-opt-btn';
+        customBtn.textContent = 'Custom';
+        customBtn.addEventListener('click', () => {
+            el.querySelectorAll('.maho-ie-opt-btn').forEach(b => b.classList.remove('active'));
+            customBtn.classList.add('active');
+            customInputs.style.display = 'flex';
+            applyCustom();
+        });
+        el.appendChild(customBtn);
+
+        const customInputs = document.createElement('div');
+        customInputs.style.cssText = 'display:none;align-items:center;gap:4px';
+
+        const wInput = document.createElement('input');
+        wInput.type = 'number';
+        wInput.min = 1;
+        wInput.max = 9999;
+        wInput.value = 16;
+        wInput.className = 'maho-ie-number-input';
+
+        const separator = document.createElement('span');
+        separator.textContent = ':';
+        separator.style.color = '#aaa';
+
+        const hInput = document.createElement('input');
+        hInput.type = 'number';
+        hInput.min = 1;
+        hInput.max = 9999;
+        hInput.value = 9;
+        hInput.className = 'maho-ie-number-input';
+
+        const applyCustom = () => {
+            const w = parseInt(wInput.value);
+            const h = parseInt(hInput.value);
+            if (w > 0 && h > 0) {
+                this._applyAspectRatio(w / h);
+            }
+        };
+
+        wInput.addEventListener('change', applyCustom);
+        hInput.addEventListener('change', applyCustom);
+
+        customInputs.append(wInput, separator, hInput);
+        el.appendChild(customInputs);
 
         // Divider
         const div = document.createElement('div');
