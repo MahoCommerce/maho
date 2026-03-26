@@ -87,6 +87,149 @@ abstract class Maho_Paypal_Model_Webhook_Handler_AbstractHandler
         return null;
     }
 
+    protected function _findQuoteByPaypalOrderId(string $paypalOrderId): ?Mage_Sales_Model_Quote
+    {
+        /** @var Mage_Sales_Model_Resource_Quote_Payment_Collection $payments */
+        $payments = Mage::getResourceModel('sales/quote_payment_collection');
+        $payments->addFieldToFilter('paypal_order_id', $paypalOrderId);
+        $payments->setPageSize(1);
+
+        $payment = $payments->getFirstItem();
+        if (!$payment->getId()) {
+            return null;
+        }
+
+        /** @var Mage_Sales_Model_Quote $quote */
+        $quote = Mage::getModel('sales/quote')->load($payment->getQuoteId());
+
+        if (!$quote->getId() || !$quote->getIsActive()) {
+            return null;
+        }
+
+        $storedOrderId = $quote->getPayment()->getAdditionalInformation('paypal_order_id');
+        if ($storedOrderId !== $paypalOrderId) {
+            return null;
+        }
+
+        return $quote;
+    }
+
+    protected function _placeOrderFromPaypalResult(
+        Mage_Sales_Model_Quote $quote,
+        array $paypalResult,
+        string $methodCode,
+        string $intent,
+    ): void {
+        $payment = $quote->getPayment();
+        $payment->setMethod($methodCode);
+        $payment->setAdditionalInformation('paypal_order_id', $paypalResult['id']);
+        $payment->setData('paypal_order_id', $paypalResult['id']);
+
+        // Import transaction IDs
+        $purchaseUnit = $paypalResult['purchase_units'][0] ?? [];
+        $paymentsData = $purchaseUnit['payments'] ?? [];
+
+        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
+            $captureId = $paymentsData['captures'][0]['id'] ?? null;
+            if ($captureId) {
+                $payment->setAdditionalInformation('paypal_capture_id', $captureId);
+            }
+        }
+
+        $authId = $paymentsData['authorizations'][0]['id'] ?? null;
+        if ($authId) {
+            $payment->setAdditionalInformation('paypal_authorization_id', $authId);
+        }
+
+        // Import payer info
+        $payer = $paypalResult['payer'] ?? [];
+        if (!empty($payer['email_address'])) {
+            $payment->setAdditionalInformation('payer_email', $payer['email_address']);
+        }
+        if (!empty($payer['payer_id'])) {
+            $payment->setAdditionalInformation('payer_id', $payer['payer_id']);
+        }
+
+        $payment->save();
+
+        // Import address from PayPal if quote has no billing address
+        if (!$quote->getBillingAddress()->getFirstname()) {
+            $this->_importPaypalAddress($paypalResult, $quote);
+        }
+
+        $quote->collectTotals();
+
+        /** @var Mage_Checkout_Model_Type_Onepage $onepage */
+        $onepage = Mage::getSingleton('checkout/type_onepage');
+        $onepage->setQuote($quote);
+        $onepage->saveOrder();
+
+        $quote->setIsActive(0);
+        $quote->save();
+    }
+
+    protected function _importPaypalAddress(array $paypalResult, Mage_Sales_Model_Quote $quote): void
+    {
+        $payer = $paypalResult['payer'] ?? [];
+        $shipping = $paypalResult['purchase_units'][0]['shipping'] ?? [];
+        $paypalAddress = $shipping['address'] ?? [];
+        $paypalName = $shipping['name']['full_name'] ?? '';
+
+        if (!$paypalAddress) {
+            return;
+        }
+
+        $nameParts = explode(' ', $paypalName, 2);
+        $firstname = $nameParts[0] ?? '';
+        $lastname = $nameParts[1] ?? $firstname;
+        $email = $payer['email_address'] ?? '';
+        if (!$email) {
+            return;
+        }
+
+        $addressData = [
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'street' => implode("\n", array_filter([
+                $paypalAddress['address_line_1'] ?? '',
+                $paypalAddress['address_line_2'] ?? '',
+            ])),
+            'city' => $paypalAddress['admin_area_2'] ?? '',
+            'region' => $paypalAddress['admin_area_1'] ?? '',
+            'postcode' => $paypalAddress['postal_code'] ?? '',
+            'country_id' => $paypalAddress['country_code'] ?? '',
+            'telephone' => $payer['phone']['phone_number']['national_number'] ?? '0000000000',
+        ];
+
+        $billing = $quote->getBillingAddress();
+        $billing->addData($addressData);
+        $billing->setPaymentMethod($quote->getPayment()->getMethod());
+        $billing->save();
+
+        if (!$quote->isVirtual()) {
+            $shippingAddr = $quote->getShippingAddress();
+            $previousMethod = $shippingAddr->getShippingMethod();
+            $shippingAddr->addData($addressData);
+            $shippingAddr->setSameAsBilling(1);
+            $shippingAddr->setCollectShippingRates(1)->collectShippingRates();
+
+            $rates = $shippingAddr->getAllShippingRates();
+            $availableCodes = array_map(fn($r) => $r->getCode(), $rates);
+
+            if ($previousMethod && in_array($previousMethod, $availableCodes)) {
+                $shippingAddr->setShippingMethod($previousMethod);
+            } elseif (count($rates) > 0) {
+                $shippingAddr->setShippingMethod($rates[0]->getCode());
+            }
+            $shippingAddr->save();
+        }
+
+        $quote->setCustomerEmail($email);
+        $quote->setCustomerFirstname($firstname);
+        $quote->setCustomerLastname($lastname);
+    }
+
     protected function _log(string $message): void
     {
         Mage::log($message, Mage::LOG_INFO, 'paypal.log');

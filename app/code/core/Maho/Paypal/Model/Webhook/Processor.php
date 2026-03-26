@@ -13,6 +13,8 @@ declare(strict_types=1);
 class Maho_Paypal_Model_Webhook_Processor
 {
     protected const HANDLER_MAP = [
+        'CHECKOUT.ORDER.APPROVED'        => 'maho_paypal/webhook_handler_orderApproved',
+        'CHECKOUT.ORDER.COMPLETED'       => 'maho_paypal/webhook_handler_orderCompleted',
         'PAYMENT.CAPTURE.COMPLETED'      => 'maho_paypal/webhook_handler_captureCompleted',
         'PAYMENT.CAPTURE.PENDING'        => 'maho_paypal/webhook_handler_capturePending',
         'PAYMENT.CAPTURE.DECLINED'       => 'maho_paypal/webhook_handler_captureDeclined',
