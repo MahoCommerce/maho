@@ -14,6 +14,10 @@
 
 <a href="<?= $this->getMahoProjectUrl() ?>" target="_blank">Powered by Maho <?= Mage::getVersion() ?></a>
 <span>|</span>
+PHP <?= str_contains(PHP_VERSION, '-')
+    ? substr(PHP_VERSION, 0, strpos(PHP_VERSION, '-'))
+    : PHP_VERSION ?>
+<span>|</span>
 <?= $this->__('Interface Locale: %s', $this->getLanguageSelect()) ?>
 
 <script type="text/javascript">
