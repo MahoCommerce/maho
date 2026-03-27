@@ -34,10 +34,10 @@ class Maho_Paypal_Block_Paylater_Message extends Mage_Core_Block_Template
                 $this->_shouldRender = false;
                 return $result;
             }
-            $this->setAmount((float) $currentProduct->getFinalPrice());
+            $this->setAmount(number_format((float) $currentProduct->getFinalPrice(), 2, '.', ''));
         } else {
             $quote = Mage::getSingleton('checkout/session')->getQuote();
-            $this->setAmount((float) $quote->getGrandTotal());
+            $this->setAmount(number_format((float) $quote->getGrandTotal(), 2, '.', ''));
         }
         $this->setPlacement($placement);
         $this->setCurrencyCode($this->_getConfig()->getCurrencyCode());
