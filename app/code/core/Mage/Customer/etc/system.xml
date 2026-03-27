@@ -27,6 +27,26 @@
             <show_in_website>1</show_in_website>
             <show_in_store>1</show_in_store>
             <groups>
+                <account translate="label">
+                    <label>Account Options</label>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <enabled_in_frontend translate="label comment">
+                            <label>Enable Customer Accounts in Frontend</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <backend_model>customer/config_account_enabled</backend_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                            <comment>When disabled, only guest checkout is available. Customer registration, login, and account pages are disabled.</comment>
+                        </enabled_in_frontend>
+                    </fields>
+                </account>
                 <account_share translate="label">
                     <label>Account Sharing Options</label>
                     <sort_order>10</sort_order>

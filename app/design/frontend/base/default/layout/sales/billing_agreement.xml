@@ -33,7 +33,7 @@
 
     <customer_account>
         <reference name="customer_account_navigation">
-            <action method="addBillingAgreementsLink"/>
+            <action method="addBillingAgreementsLink" ifconfig="customer/account/enabled_in_frontend"/>
         </reference>
     </customer_account>
 </layout>

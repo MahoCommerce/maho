@@ -16,7 +16,7 @@
     <customer_account>
         <!-- Mage_Review -->
         <reference name="customer_account_navigation">
-            <action method="addReviewsLink"/>
+            <action method="addReviewsLink" ifconfig="customer/account/enabled_in_frontend"/>
         </reference>
     </customer_account>
 

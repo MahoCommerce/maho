@@ -53,9 +53,10 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>1</show_in_store>
                         </onestep_checkout_enabled>
-                        <guest_checkout translate="label">
+                        <guest_checkout translate="label comment">
                             <label>Allow Guest Checkout</label>
                             <frontend_type>boolean</frontend_type>
+                            <comment>If customer accounts are disabled in the frontend, guest checkout must remain enabled.</comment>
                             <sort_order>10</sort_order>
                             <show_in_default>1</show_in_default>
                             <show_in_website>1</show_in_website>
