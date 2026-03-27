@@ -13,6 +13,7 @@ import { AdjustTool } from './tools/adjust.js';
 import { AnnotateTool } from './tools/annotate.js';
 import { RedactTool } from './tools/redact.js';
 import { FrameTool } from './tools/frame.js';
+import { RemoveBackgroundTool } from './tools/rembg.js';
 import { renderToCanvas, exportBlob, buildFilterString, drawAnnotation } from './export.js';
 
 const MAX_UNDO = 30;
@@ -366,6 +367,7 @@ export class MahoImageEditor {
             new AnnotateTool(this),
             new RedactTool(this),
             new FrameTool(this),
+            new RemoveBackgroundTool(this),
         ];
 
         this._sidebar.innerHTML = '';
