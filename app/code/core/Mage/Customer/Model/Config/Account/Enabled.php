@@ -29,6 +29,6 @@ class Mage_Customer_Model_Config_Account_Enabled extends Mage_Core_Model_Config_
 
     protected function _getGuestCheckoutValue(): bool
     {
-        return Mage::getStoreConfigFlag('checkout/options/guest_checkout', $this->getScopeId());
+        return Mage::getStoreConfigFlag('checkout/options/guest_checkout');
     }
 }
