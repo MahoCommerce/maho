@@ -213,7 +213,7 @@ class Mediabrowser {
 
     handleUploadComplete(files) {
         for (const el of document.querySelectorAll('div[class*="file-row complete"]')) {
-            document.getElementById(el.id)?.remove();
+            el.remove();
         }
         this.updateContent();
     }
@@ -365,7 +365,8 @@ class Mediabrowser {
                     this.selectFolder(currNode);
                 });
 
-                const spanEl = breadcrumbsEl.appendChild(document.createElement('span'));
+                const sepEl = breadcrumbsEl.appendChild(document.createElement('li'));
+                const spanEl = sepEl.appendChild(document.createElement('span'));
                 spanEl.textContent = ' / ';
 
             } else {
@@ -426,7 +427,6 @@ class Mediabrowser {
                 body: new URLSearchParams({
                     file_id: fileId,
                     node: this.currentNode.id,
-                    form_key: this.getFormKey(),
                 }),
             });
 
@@ -436,10 +436,7 @@ class Mediabrowser {
                 throw new Error(response.message || 'Failed to get image URL');
             }
         } catch (error) {
-            // Fallback to basic construction
-            const baseUrl = window.location.origin;
-            const mediaPath = '/media/wysiwyg';
-            return `${baseUrl}${mediaPath}/${fileId}`;
+            throw new Error('Failed to get image URL: ' + error.message);
         }
     }
 
@@ -459,18 +456,6 @@ class Mediabrowser {
             const fileId = selectedFile.id;
             if (fileId) {
                 imageUrl = await this.getImageUrl(fileId);
-            } else if (imageUrl.includes('.thumbs')) {
-                imageUrl = imageUrl
-                    .replace('/.thumbs', '')
-                    .replace('/wysiwyg//', '/wysiwyg/')
-                    .split('?')[0];
-            }
-
-            if (imageUrl.includes('.thumbs')) {
-                imageUrl = imageUrl
-                    .replace(/\/\.thumbs/g, '')
-                    .replace('/wysiwyg//', '/wysiwyg/')
-                    .split('?')[0];
             }
 
             // Get original filename
@@ -549,7 +534,6 @@ class Mediabrowser {
             const formData = new FormData();
             formData.append('file_id', fileId);
             formData.append('node', this.currentNode.id);
-            formData.append('form_key', this.getFormKey());
             formData.append('new_filename', originalFilename);
             formData.append('edited_image', blob);
 
@@ -577,35 +561,6 @@ class Mediabrowser {
 
         const overlay = document.getElementById('image-editor-overlay');
         if (overlay) overlay.remove();
-    }
-
-    getFormKey() {
-        // Try multiple methods to get the form key
-
-        // Method 1: Global variable
-        if (window.FORM_KEY) {
-            return window.FORM_KEY;
-        }
-
-        // Method 2: Meta tag
-        const metaFormKey = document.querySelector('meta[name="form_key"]');
-        if (metaFormKey) {
-            return metaFormKey.getAttribute('content');
-        }
-
-        // Method 3: Hidden input field
-        const inputFormKey = document.querySelector('input[name="form_key"]');
-        if (inputFormKey) {
-            return inputFormKey.value;
-        }
-
-        // Method 4: From any existing form
-        const formKeyInput = document.querySelector('form input[name="form_key"]');
-        if (formKeyInput) {
-            return formKeyInput.value;
-        }
-
-        return '';
     }
 
     preloadImage(url) {

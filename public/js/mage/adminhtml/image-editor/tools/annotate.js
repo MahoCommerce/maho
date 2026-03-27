@@ -10,7 +10,6 @@ import { drawAnnotation } from '../export.js';
 import { createFontSelect } from '../fonts.js';
 
 const HANDLE_SIZE = 7;
-let _nextAnnotationId = 1;
 
 export class AnnotateTool {
     constructor(editor) {
@@ -30,6 +29,7 @@ export class AnnotateTool {
         this._activeHandle = null;
         this._textOverlay = null;
         this._pushed = false;
+        this._nextAnnotationId = 1;
     }
 
     get name() { return 'annotate'; }
@@ -57,6 +57,7 @@ export class AnnotateTool {
         if (this.selected) {
             const handle = this._hitHandle(ix, iy, this.selected);
             if (handle) {
+                this.editor.pushUndo();
                 this._state = 'resizing';
                 this._activeHandle = handle;
                 this._dragStart = { x: ix, y: iy };
@@ -68,6 +69,7 @@ export class AnnotateTool {
         // Check annotation hit
         const hit = this._hitTest(ix, iy);
         if (hit) {
+            this.editor.pushUndo();
             this.selected = hit;
             this._state = 'moving';
             this._dragStart = { x: ix, y: iy };
@@ -337,7 +339,7 @@ export class AnnotateTool {
 
     _startDrawing(ix, iy) {
         this._state = 'drawing';
-        const base = { lineWidth: this.lineWidth, opacity: this.opacity, id: _nextAnnotationId++ };
+        const base = { lineWidth: this.lineWidth, opacity: this.opacity, id: this._nextAnnotationId++ };
 
         switch (this.mode) {
             case 'rect':
@@ -723,7 +725,7 @@ export class AnnotateTool {
                     h: defaultH,
                     image: img,
                     opacity: this.opacity,
-                    id: _nextAnnotationId++,
+                    id: this._nextAnnotationId++,
                 };
                 this.editor.annotations.push(annotation);
                 this.selected = annotation;

@@ -255,6 +255,9 @@ export class ResizeTool {
         }
         this.editor.pushUndo();
         const src = this.editor.baseCanvas;
+        const scaleX = this.width / src.width;
+        const scaleY = this.height / src.height;
+
         const canvas = document.createElement('canvas');
         canvas.width = this.width;
         canvas.height = this.height;
@@ -262,6 +265,18 @@ export class ResizeTool {
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(src, 0, 0, this.width, this.height);
+
+        // Scale annotation and redaction coordinates to match the new dimensions
+        for (const a of this.editor.annotations) {
+            scaleAnnotation(a, scaleX, scaleY);
+        }
+        for (const r of this.editor.redactions) {
+            r.x *= scaleX;
+            r.y *= scaleY;
+            r.w *= scaleX;
+            r.h *= scaleY;
+        }
+
         this.editor.replaceBase(canvas);
         this.width = canvas.width;
         this.height = canvas.height;
@@ -319,6 +334,38 @@ export class ResizeTool {
     }
 
     destroy() {}
+}
+
+function scaleAnnotation(a, sx, sy) {
+    switch (a.type) {
+        case 'rect':
+        case 'text':
+        case 'image':
+            a.x *= sx;
+            a.y *= sy;
+            if (a.w !== undefined) a.w *= sx;
+            if (a.h !== undefined) a.h *= sy;
+            break;
+        case 'ellipse':
+            a.cx *= sx;
+            a.cy *= sy;
+            a.rx *= sx;
+            a.ry *= sy;
+            break;
+        case 'line':
+        case 'arrow':
+            a.x1 *= sx;
+            a.y1 *= sy;
+            a.x2 *= sx;
+            a.y2 *= sy;
+            break;
+        case 'freehand':
+            for (const p of a.points) {
+                p.x *= sx;
+                p.y *= sy;
+            }
+            break;
+    }
 }
 
 function handleCursor(handle) {

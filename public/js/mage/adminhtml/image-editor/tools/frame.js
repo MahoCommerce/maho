@@ -9,6 +9,7 @@
 export class FrameTool {
     constructor(editor) {
         this.editor = editor;
+        this._pushed = false;
     }
 
     get name() { return 'frame'; }
@@ -18,6 +19,7 @@ export class FrameTool {
     }
 
     activate() {
+        this._pushed = false;
         if (!this.editor.frame) {
             this.editor.frame = { type: 'solid', color: '#ffffff', width: 20 };
             this.editor.requestRender();
@@ -56,6 +58,7 @@ export class FrameTool {
             btn.addEventListener('click', () => {
                 el.querySelectorAll('.maho-ie-opt-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
+                this._pushed = false;
                 if (t.type === 'none') {
                     this.editor.pushUndo();
                     this.editor.frame = null;
@@ -152,6 +155,7 @@ export class FrameTool {
         input.max = max;
         input.value = value;
         input.addEventListener('input', () => {
+            if (!this._pushed) { this.editor.pushUndo(); this._pushed = true; }
             const v = parseInt(input.value);
             val.textContent = v;
             onChange(v);
@@ -168,7 +172,10 @@ export class FrameTool {
         const input = document.createElement('input');
         input.type = 'color';
         input.value = value;
-        input.addEventListener('input', () => onChange(input.value));
+        input.addEventListener('input', () => {
+            if (!this._pushed) { this.editor.pushUndo(); this._pushed = true; }
+            onChange(input.value);
+        });
         group.append(lbl, input);
         el.appendChild(group);
     }

@@ -28,13 +28,18 @@ async function getSegmenter(onProgress) {
     }
 
     pipelinePromise = (async () => {
-        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
-        const device = await hasWebGPU() ? 'webgpu' : 'wasm';
-        return pipeline('background-removal', MODEL_ID, {
-            dtype: MODEL_DTYPE,
-            device,
-            progress_callback: onProgress,
-        });
+        try {
+            const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+            const device = await hasWebGPU() ? 'webgpu' : 'wasm';
+            return pipeline('background-removal', MODEL_ID, {
+                dtype: MODEL_DTYPE,
+                device,
+                progress_callback: onProgress,
+            });
+        } catch (e) {
+            pipelinePromise = null;
+            throw e;
+        }
     })();
 
     return pipelinePromise;
@@ -226,8 +231,10 @@ export class RemoveBackgroundTool {
         const fillBtn = document.createElement('button');
         fillBtn.className = 'maho-ie-opt-btn';
         fillBtn.textContent = 'Apply Background';
+        fillBtn.disabled = !this._transparentCanvas;
         fillBtn.addEventListener('click', () => {
-            const source = this._transparentCanvas || this.editor.baseCanvas;
+            const source = this._transparentCanvas;
+            if (!source) return;
             if (!this._bgApplied) {
                 this.editor.pushUndo();
             }

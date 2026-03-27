@@ -277,6 +277,11 @@ export class CropTool {
             rd.y -= r.y;
         }
 
+        // Remove redactions that are entirely outside the cropped area
+        this.editor.redactions = this.editor.redactions.filter(
+            rd => rd.x + rd.w > 0 && rd.y + rd.h > 0 && rd.x < canvas.width && rd.y < canvas.height
+        );
+
         this.editor.replaceBase(canvas);
 
         this.region = { x: 0, y: 0, w: canvas.width, h: canvas.height };

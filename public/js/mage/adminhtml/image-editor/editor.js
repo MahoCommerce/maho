@@ -82,12 +82,21 @@ export class MahoImageEditor {
     destroy() {
         for (const tool of this.tools) tool.destroy();
         if (this._resizeObserver) this._resizeObserver.disconnect();
+        if (this._eventController) this._eventController.abort();
+        for (const snap of this._undoStack) snap.baseCanvas.width = 0;
+        for (const snap of this._redoStack) snap.baseCanvas.width = 0;
+        this._undoStack = [];
+        this._redoStack = [];
         this.container.innerHTML = '';
     }
 
     pushUndo() {
         this._undoStack.push(this._snapshot());
-        if (this._undoStack.length > MAX_UNDO) this._undoStack.shift();
+        if (this._undoStack.length > MAX_UNDO) {
+            const evicted = this._undoStack.shift();
+            evicted.baseCanvas.width = 0;
+        }
+        for (const snap of this._redoStack) snap.baseCanvas.width = 0;
         this._redoStack = [];
         this._updateUndoButtons();
     }
@@ -374,7 +383,10 @@ export class MahoImageEditor {
         for (const tool of this.tools) {
             const btn = document.createElement('button');
             btn.className = 'maho-ie-tool-btn';
-            btn.innerHTML = tool.icon + '<span>' + tool.label + '</span>';
+            btn.innerHTML = tool.icon;
+            const labelSpan = document.createElement('span');
+            labelSpan.textContent = tool.label;
+            btn.appendChild(labelSpan);
             btn.addEventListener('click', () => this._setActiveTool(tool));
             tool._sidebarBtn = btn;
             this._sidebar.appendChild(btn);
@@ -404,17 +416,20 @@ export class MahoImageEditor {
     }
 
     _bindEvents() {
+        this._eventController = new AbortController();
+        const opts = { signal: this._eventController.signal };
+
         // Canvas pointer events
-        this.canvas.addEventListener('pointerdown', (e) => this._onPointerDown(e));
-        this.canvas.addEventListener('pointermove', (e) => this._onPointerMove(e));
-        this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e));
-        this.canvas.addEventListener('pointerleave', (e) => this._onPointerUp(e));
-        this.canvas.addEventListener('dblclick', (e) => this._onDblClick(e));
+        this.canvas.addEventListener('pointerdown', (e) => this._onPointerDown(e), opts);
+        this.canvas.addEventListener('pointermove', (e) => this._onPointerMove(e), opts);
+        this.canvas.addEventListener('pointerup', (e) => this._onPointerUp(e), opts);
+        this.canvas.addEventListener('pointerleave', (e) => this._onPointerUp(e), opts);
+        this.canvas.addEventListener('dblclick', (e) => this._onDblClick(e), opts);
 
         // Prevent browser zoom from trackpad pinch
         this.canvasWrap.addEventListener('wheel', (e) => {
             if (e.ctrlKey) e.preventDefault();
-        }, { passive: false });
+        }, { passive: false, ...opts });
 
         // Keyboard
         this.container.tabIndex = 0;
@@ -464,7 +479,7 @@ export class MahoImageEditor {
             }
 
             if (this.activeTool) this.activeTool.onKeyDown(e);
-        });
+        }, opts);
 
         this.container.addEventListener('keyup', (e) => {
             if (e.key === ' ') {
@@ -473,7 +488,7 @@ export class MahoImageEditor {
                     this.canvasWrap.classList.remove('panning');
                 }
             }
-        });
+        }, opts);
 
         // Resize observer
         this._resizeObserver = new ResizeObserver(() => {
@@ -642,12 +657,13 @@ export class MahoImageEditor {
     }
 
     _drawPixelatedPreview(ctx, rx, ry, rw, rh) {
-        const blockSize = Math.max(4, Math.floor(Math.min(rw, rh) / 8));
+        const irx = Math.round(rx), iry = Math.round(ry);
+        const w = Math.round(rw), h = Math.round(rh);
+        if (w <= 0 || h <= 0) return;
+        const blockSize = Math.max(4, Math.floor(Math.min(w, h) / 8));
         try {
-            const imgData = ctx.getImageData(rx, ry, rw, rh);
+            const imgData = ctx.getImageData(irx, iry, w, h);
             const data = imgData.data;
-            const w = Math.floor(rw);
-            const h = Math.floor(rh);
 
             for (let by = 0; by < h; by += blockSize) {
                 for (let bx = 0; bx < w; bx += blockSize) {
@@ -664,7 +680,7 @@ export class MahoImageEditor {
                     }
                     if (count) {
                         ctx.fillStyle = `rgb(${Math.round(r / count)},${Math.round(g / count)},${Math.round(b / count)})`;
-                        ctx.fillRect(rx + bx, ry + by, bw, bh);
+                        ctx.fillRect(irx + bx, iry + by, bw, bh);
                     }
                 }
             }

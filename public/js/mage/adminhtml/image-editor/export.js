@@ -88,15 +88,19 @@ export function exportBlob(canvas, mimeType, quality) {
 function drawPixelated(ctx, rx, ry, rw, rh) {
     const blockSize = Math.max(8, Math.floor(Math.min(rw, rh) / 10));
 
+    const w = Math.round(rw);
+    const h = Math.round(rh);
+    if (w <= 0 || h <= 0) return;
+
     // getImageData uses absolute canvas coords (ignores ctx transform),
     // so we need to apply the current transform to get the right position
     const t = ctx.getTransform();
-    const absX = t.e + rx;
-    const absY = t.f + ry;
+    const absX = Math.round(t.e + rx);
+    const absY = Math.round(t.f + ry);
 
     let imgData;
     try {
-        imgData = ctx.getImageData(absX, absY, rw, rh);
+        imgData = ctx.getImageData(absX, absY, w, h);
     } catch {
         ctx.fillStyle = '#000';
         ctx.fillRect(rx, ry, rw, rh);
@@ -105,8 +109,6 @@ function drawPixelated(ctx, rx, ry, rw, rh) {
 
     // Pixelate by averaging blocks
     const data = imgData.data;
-    const w = Math.floor(rw);
-    const h = Math.floor(rh);
 
     for (let by = 0; by < h; by += blockSize) {
         for (let bx = 0; bx < w; bx += blockSize) {
