@@ -35,13 +35,7 @@ class Mage_Payment_Model_Method_Unavailable extends Mage_Payment_Model_Method_Ab
     protected $_canCreateBillingAgreement = false;
     protected $_canManageRecurringProfiles = false;
 
-    protected string $_originalCode;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->_originalCode = '';
-    }
+    protected string $_originalCode = '';
 
     public function setOriginalCode(string $code): self
     {
