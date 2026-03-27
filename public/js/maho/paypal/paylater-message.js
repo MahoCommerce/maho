@@ -36,14 +36,15 @@ class MahoPaypalPayLaterMessage {
         }
 
         const messagesInstance = sdk.createPayPalMessages({
-            amount: parseFloat(this.amount),
-            currency: this.currency,
+            currencyCode: this.currency,
             placement: this.el.dataset.placement || 'product',
         });
         const messageEl = document.createElement('paypal-message');
         this.el.appendChild(messageEl);
 
         messagesInstance.fetchContent({
+            amount: this.amount,
+            currencyCode: this.currency,
             onContentReady: (content) => messageEl.setContent(content),
         });
     }
