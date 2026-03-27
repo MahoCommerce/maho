@@ -41,6 +41,16 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
             return $this;
         }
 
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $action = strtolower($this->getRequest()->getActionName());
+            if ($action === 'logout' || $action === 'logoutsuccess') {
+                return $this;
+            }
+            $this->norouteAction();
+            $this->setFlag('', 'no-dispatch', true);
+            return $this;
+        }
+
         $action = strtolower($this->getRequest()->getActionName());
         $openActions = [
             'create',

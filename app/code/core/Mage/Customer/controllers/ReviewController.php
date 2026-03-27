@@ -13,6 +13,18 @@ declare(strict_types=1);
 
 class Mage_Customer_ReviewController extends Mage_Core_Controller_Front_Action
 {
+    #[\Override]
+    public function preDispatch()
+    {
+        parent::preDispatch();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', 'no-dispatch', true);
+            return $this;
+        }
+        return $this;
+    }
+
     public function indexAction(): void
     {
         $this->loadLayout();

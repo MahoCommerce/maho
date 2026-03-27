@@ -21,7 +21,11 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     public function preDispatch()
     {
         parent::preDispatch();
-        $action = $this->getRequest()->getActionName();
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         $loginUrl = Mage::helper('customer')->getLoginUrl();
 
         if (!Mage::getSingleton('customer/session')->authenticate($this, $loginUrl)) {

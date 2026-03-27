@@ -20,7 +20,7 @@ Customer account pages, rendered for all tabs in dashboard
     <customer_account>
         <!-- Mage_Sales -->
         <reference name="customer_account_navigation">
-            <action method="addLink" translate="label" module="sales"><name>orders</name><path>sales/order/history/</path><label>My Orders</label></action>
+            <action method="addLink" translate="label" module="sales" ifconfig="customer/account/enabled_in_frontend"><name>orders</name><path>sales/order/history/</path><label>My Orders</label></action>
         </reference>
     </customer_account>
 

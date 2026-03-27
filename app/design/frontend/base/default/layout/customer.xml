@@ -34,11 +34,11 @@ Default layout, loads most of the pages
     <default>
         <!-- Mage_Customer -->
         <reference name="top.links">
-            <action method="addLink" translate="label title" module="customer"><label>My Account</label><url helper="customer/getAccountUrl"/><title>My Account</title><prepare/><urlParams/><position>10</position></action>
-            <action method="addLink" translate="label title before_text" module="customer"><label>Register</label><url helper="customer/getRegisterUrl" /><title>Register</title><prepare/><urlParams/><position>100</position><li/><a/></action>
+            <action method="addLink" translate="label title" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>My Account</label><url helper="customer/getAccountUrl"/><title>My Account</title><prepare/><urlParams/><position>10</position></action>
+            <action method="addLink" translate="label title before_text" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>Register</label><url helper="customer/getRegisterUrl" /><title>Register</title><prepare/><urlParams/><position>100</position><li/><a/></action>
         </reference>
         <reference name="footer_links2">
-            <action method="addLink" translate="label title" module="catalog"><label>My Account</label><url helper="customer/getAccountUrl" /><title>My Account</title></action>
+            <action method="addLink" translate="label title" module="catalog" ifconfig="customer/account/enabled_in_frontend"><label>My Account</label><url helper="customer/getAccountUrl" /><title>My Account</title></action>
         </reference>
     </default>
 
@@ -48,8 +48,8 @@ Load this update on every page when customer is logged in
 
     <customer_logged_in>
         <reference name="top.links">
-            <action method="removeLinkByUrl"><url helper="customer/getRegisterUrl" /></action>
-            <action method="addLink" translate="label title" module="customer"><label>Log Out</label><url helper="customer/getLogoutUrl"/><title>Log Out</title><prepare/><urlParams/><position>100</position></action>
+            <action method="removeLinkByUrl" ifconfig="customer/account/enabled_in_frontend"><url helper="customer/getRegisterUrl" /></action>
+            <action method="addLink" translate="label title" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>Log Out</label><url helper="customer/getLogoutUrl"/><title>Log Out</title><prepare/><urlParams/><position>100</position></action>
         </reference>
     </customer_logged_in>
 
@@ -62,7 +62,7 @@ Load this update on every page when customer is logged out
             <block type="customer/form_login" name="customer_form_mini_login" before="-" template="customer/form/mini.login.phtml"/>
         </reference>-->
         <reference name="top.links">
-            <action method="addLink" translate="label title" module="customer"><label>Log In</label><url helper="customer/getLoginUrl"/><title>Log In</title><prepare/><urlParams/><position>100</position></action>
+            <action method="addLink" translate="label title" module="customer" ifconfig="customer/account/enabled_in_frontend"><label>Log In</label><url helper="customer/getLoginUrl"/><title>Log In</title><prepare/><urlParams/><position>100</position></action>
         </reference>
     </customer_logged_out>
 

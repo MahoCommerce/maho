@@ -13,7 +13,7 @@
 <layout version="0.1.0">
     <customer_account>
         <reference name="customer_account_navigation">
-            <action method="addRecurringProfilesLink"/>
+            <action method="addRecurringProfilesLink" ifconfig="customer/account/enabled_in_frontend"/>
         </reference>
     </customer_account>
 
