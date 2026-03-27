@@ -704,37 +704,28 @@ final class ProductProvider implements ProviderInterface
             $productAttribute = $attribute->getProductAttribute();
             $attributeCode = $productAttribute->getAttributeCode();
 
-            // Get all available values from child products
-            $values = [];
-            $usedValues = [];
+            // Collect which option IDs are used by child products
             /** @phpstan-ignore-next-line */
             $childProducts = $typeInstance->getUsedProducts(null, $product);
-
+            $usedValueIds = [];
             foreach ($childProducts as $child) {
                 $valueId = $child->getData($attributeCode);
-                if ($valueId && !isset($usedValues[$valueId])) {
-                    $usedValues[$valueId] = true;
-                    $label = $productAttribute->getSource()->getOptionText($valueId);
-                    $values[] = [
-                        'id' => (int) $valueId,
-                        'label' => $label ?: $valueId,
-                    ];
+                if ($valueId) {
+                    $usedValueIds[$valueId] = true;
                 }
             }
 
-            // Sort values by eav_attribute_option.sort_order
-            if (!empty($values)) {
-                $optionIds = array_column($values, 'id');
-                $resource = \Mage::getSingleton('core/resource');
-                $read = $resource->getConnection('core_read');
-                $sortOrders = $read->fetchPairs(
-                    $read->select()
-                        ->from($resource->getTableName('eav/attribute_option'), ['option_id', 'sort_order'])
-                        ->where('option_id IN (?)', $optionIds)
-                );
-                usort($values, function ($a, $b) use ($sortOrders) {
-                    return ((int) ($sortOrders[$a['id']] ?? 999)) <=> ((int) ($sortOrders[$b['id']] ?? 999));
-                });
+            // Get options from attribute source (already sorted by sort_order),
+            // filtered to only those used by child products
+            $values = [];
+            $allOptions = $productAttribute->getSource()->getAllOptions(false);
+            foreach ($allOptions as $opt) {
+                if (isset($usedValueIds[$opt['value']])) {
+                    $values[] = [
+                        'id' => (int) $opt['value'],
+                        'label' => $opt['label'] ?: $opt['value'],
+                    ];
+                }
             }
 
             $options[] = [
