@@ -515,3 +515,7 @@
 "ZIP","ZIP"
 "Zip/Postal Code","Zip/Postal Code"
 "ZIP/Post Code","ZIP/Post Code"
+"Account Options","Account Options"
+"Customer accounts cannot be disabled because guest checkout is not allowed. Please enable guest checkout first.","Customer accounts cannot be disabled because guest checkout is not allowed. Please enable guest checkout first."
+"Enable Customer Accounts in Frontend","Enable Customer Accounts in Frontend"
+"When disabled, only guest checkout is available. Customer registration, login, and account pages are disabled.","When disabled, only guest checkout is available. Customer registration, login, and account pages are disabled."
