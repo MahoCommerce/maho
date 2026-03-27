@@ -267,6 +267,16 @@ export class CropTool {
         canvas.height = Math.round(r.h);
         const ctx = canvas.getContext('2d');
         ctx.drawImage(src, -Math.round(r.x), -Math.round(r.y));
+
+        // Offset annotations and redactions to match the cropped coordinate space
+        for (const a of this.editor.annotations) {
+            offsetAnnotation(a, -r.x, -r.y);
+        }
+        for (const rd of this.editor.redactions) {
+            rd.x -= r.x;
+            rd.y -= r.y;
+        }
+
         this.editor.replaceBase(canvas);
 
         this.region = { x: 0, y: 0, w: canvas.width, h: canvas.height };
@@ -369,6 +379,34 @@ export class CropTool {
 
 function clamp(v, min, max) {
     return Math.max(min, Math.min(max, v));
+}
+
+function offsetAnnotation(a, dx, dy) {
+    switch (a.type) {
+        case 'rect':
+        case 'text':
+        case 'image':
+            a.x += dx;
+            a.y += dy;
+            break;
+        case 'ellipse':
+            a.cx += dx;
+            a.cy += dy;
+            break;
+        case 'line':
+        case 'arrow':
+            a.x1 += dx;
+            a.y1 += dy;
+            a.x2 += dx;
+            a.y2 += dy;
+            break;
+        case 'freehand':
+            for (const p of a.points) {
+                p.x += dx;
+                p.y += dy;
+            }
+            break;
+    }
 }
 
 function handleCursor(handle) {

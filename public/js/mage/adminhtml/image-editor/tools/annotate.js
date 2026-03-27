@@ -730,6 +730,7 @@ export class AnnotateTool {
                 this.editor.setOptions(this.renderOptions());
                 this.editor.requestRender();
             };
+            img.onerror = () => URL.revokeObjectURL(img.src);
             img.src = URL.createObjectURL(file);
         });
         fileInput.click();

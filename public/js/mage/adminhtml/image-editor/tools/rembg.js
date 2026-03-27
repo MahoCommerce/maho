@@ -10,7 +10,7 @@ const MODEL_ID = 'onnx-community/BEN2-ONNX';
 const MODEL_DTYPE = 'fp16';
 const MAX_PROCESSING_SIZE = 1024;
 
-let pipelineInstance = null;
+let pipelinePromise = null;
 
 async function hasWebGPU() {
     if (!navigator.gpu) return false;
@@ -23,21 +23,21 @@ async function hasWebGPU() {
 }
 
 async function getSegmenter(onProgress) {
-    if (pipelineInstance) {
-        return pipelineInstance;
+    if (pipelinePromise) {
+        return pipelinePromise;
     }
 
-    const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+    pipelinePromise = (async () => {
+        const { pipeline } = await import('https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.8.1');
+        const device = await hasWebGPU() ? 'webgpu' : 'wasm';
+        return pipeline('background-removal', MODEL_ID, {
+            dtype: MODEL_DTYPE,
+            device,
+            progress_callback: onProgress,
+        });
+    })();
 
-    const device = await hasWebGPU() ? 'webgpu' : 'wasm';
-
-    pipelineInstance = await pipeline('background-removal', MODEL_ID, {
-        dtype: MODEL_DTYPE,
-        device,
-        progress_callback: onProgress,
-    });
-
-    return pipelineInstance;
+    return pipelinePromise;
 }
 
 function downscale(canvas, maxSize) {
@@ -154,7 +154,12 @@ export class RemoveBackgroundTool {
 
         const removeBtn = document.createElement('button');
         removeBtn.className = 'maho-ie-opt-btn';
-        removeBtn.textContent = 'Remove Background';
+        if (this._processing) {
+            removeBtn.textContent = 'Processing…';
+            removeBtn.disabled = true;
+        } else {
+            removeBtn.textContent = 'Remove Background';
+        }
         removeBtn.addEventListener('click', () => this._runRemove());
         this._removeBtn = removeBtn;
         el.appendChild(removeBtn);

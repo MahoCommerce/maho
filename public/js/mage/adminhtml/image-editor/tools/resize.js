@@ -8,6 +8,7 @@
 
 const HANDLE_SIZE = 8;
 const MIN_SIZE = 16;
+const MAX_PIXELS = 100_000_000; // 100 megapixels
 
 export class ResizeTool {
     constructor(editor) {
@@ -246,6 +247,10 @@ export class ResizeTool {
 
     _apply() {
         if (this.width === this.editor.baseCanvas.width && this.height === this.editor.baseCanvas.height) {
+            return;
+        }
+        if (this.width * this.height > MAX_PIXELS) {
+            alert(`Image dimensions too large (${this.width}×${this.height}). Maximum is ${MAX_PIXELS.toLocaleString()} total pixels.`);
             return;
         }
         this.editor.pushUndo();

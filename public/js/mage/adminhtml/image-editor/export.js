@@ -49,7 +49,7 @@ export function renderToCanvas(baseCanvas, state, targetWidth, targetHeight) {
         const rh = r.h * scale;
 
         if (r.style === 'pixelate') {
-            drawPixelated(ctx, canvas, rx, ry, rw, rh);
+            drawPixelated(ctx, rx, ry, rw, rh);
         } else {
             ctx.fillStyle = '#000';
             ctx.fillRect(rx, ry, rw, rh);
@@ -85,13 +85,18 @@ export function exportBlob(canvas, mimeType, quality) {
     });
 }
 
-function drawPixelated(ctx, canvas, rx, ry, rw, rh) {
+function drawPixelated(ctx, rx, ry, rw, rh) {
     const blockSize = Math.max(8, Math.floor(Math.min(rw, rh) / 10));
 
-    // Read existing pixels from the canvas (including adjustments)
+    // getImageData uses absolute canvas coords (ignores ctx transform),
+    // so we need to apply the current transform to get the right position
+    const t = ctx.getTransform();
+    const absX = t.e + rx;
+    const absY = t.f + ry;
+
     let imgData;
     try {
-        imgData = ctx.getImageData(rx, ry, rw, rh);
+        imgData = ctx.getImageData(absX, absY, rw, rh);
     } catch {
         ctx.fillStyle = '#000';
         ctx.fillRect(rx, ry, rw, rh);
