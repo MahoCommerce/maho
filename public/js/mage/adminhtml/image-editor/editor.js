@@ -144,6 +144,7 @@ export class MahoImageEditor {
     }
 
     _confirmClose() {
+        if (this._saving) return;
         if (this._undoStack.length === 0) {
             this.options.onClose?.();
             return;
@@ -226,7 +227,6 @@ export class MahoImageEditor {
 
     _updateZoomDisplay() {
         if (this._zoomDisplay) {
-            const pct = Math.round(this.zoom * this._baseScale * 100 / this._baseScale);
             this._zoomDisplay.textContent = Math.round(this.zoom * 100) + '%';
         }
     }
@@ -750,6 +750,9 @@ export class MahoImageEditor {
             const blob = await exportBlob(exportCanvas, mimeType, quality);
 
             await this.options.onSave?.(exportCanvas, blob, newName);
+        } catch (err) {
+            console.error('Save failed:', err);
+            alert('Error saving image: ' + err.message);
         } finally {
             this._saving = false;
             this._saveBtn.disabled = false;

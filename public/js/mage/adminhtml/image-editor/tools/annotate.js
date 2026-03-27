@@ -10,6 +10,7 @@ import { drawAnnotation } from '../export.js';
 import { createFontSelect } from '../fonts.js';
 
 const HANDLE_SIZE = 7;
+let _nextAnnotationId = 1;
 
 export class AnnotateTool {
     constructor(editor) {
@@ -28,6 +29,7 @@ export class AnnotateTool {
         this._dragOriginal = null;
         this._activeHandle = null;
         this._textOverlay = null;
+        this._pushed = false;
     }
 
     get name() { return 'annotate'; }
@@ -39,6 +41,7 @@ export class AnnotateTool {
     activate() {
         this.selected = null;
         this._state = 'idle';
+        this._pushed = false;
     }
 
     deactivate() {
@@ -48,6 +51,8 @@ export class AnnotateTool {
     }
 
     onPointerDown(ix, iy) {
+        this._pushed = false;
+
         // Check handle hit on selected annotation
         if (this.selected) {
             const handle = this._hitHandle(ix, iy, this.selected);
@@ -197,7 +202,7 @@ export class AnnotateTool {
             strokeInput.addEventListener('input', () => {
                 this.strokeColor = strokeInput.value;
                 if (this.selected) {
-                    this.editor.pushUndo();
+                    if (!this._pushed) { this.editor.pushUndo(); this._pushed = true; }
                     if (this.selected.strokeColor !== undefined) this.selected.strokeColor = this.strokeColor;
                     if (this.selected.color !== undefined) this.selected.color = this.strokeColor;
                     this.editor.requestRender();
@@ -216,7 +221,7 @@ export class AnnotateTool {
             const fontSelect = createFontSelect(this.fontFamily, (value) => {
                 this.fontFamily = value;
                 if (this.selected && this.selected.fontFamily !== undefined) {
-                    this.editor.pushUndo();
+                    if (!this._pushed) { this.editor.pushUndo(); this._pushed = true; }
                     this.selected.fontFamily = value;
                     this.editor.requestRender();
                 }
@@ -246,7 +251,7 @@ export class AnnotateTool {
                 this.fontSize = parseInt(fsInput.value);
                 fsVal.textContent = this.fontSize;
                 if (this.selected && this.selected.fontSize !== undefined) {
-                    this.editor.pushUndo();
+                    if (!this._pushed) { this.editor.pushUndo(); this._pushed = true; }
                     this.selected.fontSize = this.fontSize;
                     this.editor.requestRender();
                 }
@@ -275,7 +280,7 @@ export class AnnotateTool {
                 this.lineWidth = parseInt(lwInput.value);
                 lwVal.textContent = this.lineWidth;
                 if (this.selected && this.selected.lineWidth !== undefined) {
-                    this.editor.pushUndo();
+                    if (!this._pushed) { this.editor.pushUndo(); this._pushed = true; }
                     this.selected.lineWidth = this.lineWidth;
                     this.editor.requestRender();
                 }
@@ -303,7 +308,7 @@ export class AnnotateTool {
             this.opacity = val;
             opVal.textContent = opInput.value + '%';
             if (this.selected) {
-                this.editor.pushUndo();
+                if (!this._pushed) { this.editor.pushUndo(); this._pushed = true; }
                 this.selected.opacity = val;
                 this.editor.requestRender();
             }
@@ -332,7 +337,7 @@ export class AnnotateTool {
 
     _startDrawing(ix, iy) {
         this._state = 'drawing';
-        const base = { lineWidth: this.lineWidth, opacity: this.opacity, id: Date.now() };
+        const base = { lineWidth: this.lineWidth, opacity: this.opacity, id: _nextAnnotationId++ };
 
         switch (this.mode) {
             case 'rect':
@@ -718,7 +723,7 @@ export class AnnotateTool {
                     h: defaultH,
                     image: img,
                     opacity: this.opacity,
-                    id: Date.now(),
+                    id: _nextAnnotationId++,
                 };
                 this.editor.annotations.push(annotation);
                 this.selected = annotation;

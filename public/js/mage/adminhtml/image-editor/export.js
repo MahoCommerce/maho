@@ -72,11 +72,15 @@ export function renderToCanvas(baseCanvas, state, targetWidth, targetHeight) {
 }
 
 export function exportBlob(canvas, mimeType, quality) {
-    return new Promise(resolve => {
+    return new Promise((resolve, reject) => {
+        const callback = (blob) => {
+            if (!blob) reject(new Error('Failed to export image'));
+            else resolve(blob);
+        };
         if (mimeType === 'image/png' || mimeType === 'image/gif') {
-            canvas.toBlob(resolve, mimeType);
+            canvas.toBlob(callback, mimeType);
         } else {
-            canvas.toBlob(resolve, mimeType, quality);
+            canvas.toBlob(callback, mimeType, quality);
         }
     });
 }

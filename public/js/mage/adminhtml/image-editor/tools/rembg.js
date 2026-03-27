@@ -137,7 +137,10 @@ export class RemoveBackgroundTool {
         return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2H5z"/><path d="M7 7h4v4H7z" fill="currentColor" opacity="0.3"/><path d="M13 7h4v4h-4z"/><path d="M7 13h4v4H7z"/><path d="M13 13h4v4h-4z" fill="currentColor" opacity="0.3"/></svg>';
     }
 
-    activate() {}
+    activate() {
+        this._transparentCanvas = null;
+        this._bgApplied = false;
+    }
     deactivate() {}
     onPointerDown() {}
     onPointerMove() {}
@@ -211,7 +214,7 @@ export class RemoveBackgroundTool {
         el.appendChild(gradientControls);
 
         modeDropdown.addEventListener('change', () => {
-            gradientControls.style.display = modeDropdown.value === 'gradient' ? 'contents' : 'none';
+            gradientControls.style.display = modeDropdown.value === 'gradient' ? '' : 'none';
             updateLabels();
         });
 

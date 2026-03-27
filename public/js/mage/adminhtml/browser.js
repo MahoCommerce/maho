@@ -480,7 +480,8 @@ class Mediabrowser {
             const editorContainer = this.createEditorContainer();
 
             // Load MahoImageEditor module
-            const editorModule = await import(SKIN_URL + '../../../../js/mage/adminhtml/image-editor/editor.js');
+            const editorUrl = SKIN_URL.replace(/skin\/.*$/, 'js/mage/adminhtml/image-editor/editor.js');
+            const editorModule = await import(editorUrl);
 
             const editor = new editorModule.MahoImageEditor(editorContainer, {
                 source: imageUrl,
