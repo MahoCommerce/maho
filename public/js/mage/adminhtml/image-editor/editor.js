@@ -606,7 +606,10 @@ export class MahoImageEditor {
         // When resize tool is active, stretch the image to match the target size
         let drawW = this.baseCanvas.width * this.scale;
         let drawH = this.baseCanvas.height * this.scale;
+        let resizeScaleX = 1, resizeScaleY = 1;
         if (this.activeTool?.name === 'resize') {
+            resizeScaleX = this.activeTool.width / this.baseCanvas.width;
+            resizeScaleY = this.activeTool.height / this.baseCanvas.height;
             drawW = this.activeTool.width * this.scale;
             drawH = this.activeTool.height * this.scale;
         }
@@ -619,10 +622,10 @@ export class MahoImageEditor {
 
         // Redactions
         for (const r of this.redactions) {
-            const rx = r.x * this.scale + this.offsetX;
-            const ry = r.y * this.scale + this.offsetY;
-            const rw = r.w * this.scale;
-            const rh = r.h * this.scale;
+            const rx = r.x * resizeScaleX * this.scale + this.offsetX;
+            const ry = r.y * resizeScaleY * this.scale + this.offsetY;
+            const rw = r.w * resizeScaleX * this.scale;
+            const rh = r.h * resizeScaleY * this.scale;
 
             if (r.style === 'pixelate') {
                 this._drawPixelatedPreview(ctx, rx, ry, rw, rh);
@@ -635,6 +638,9 @@ export class MahoImageEditor {
         // Annotations
         ctx.save();
         ctx.translate(this.offsetX, this.offsetY);
+        if (resizeScaleX !== 1 || resizeScaleY !== 1) {
+            ctx.scale(resizeScaleX, resizeScaleY);
+        }
         const editingAnnotation = this.activeTool?._editingExisting ? this.activeTool._pendingAnnotation : null;
         for (const a of this.annotations) {
             if (a === editingAnnotation) continue;
