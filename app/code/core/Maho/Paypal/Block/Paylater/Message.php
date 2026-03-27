@@ -40,6 +40,7 @@ class Maho_Paypal_Block_Paylater_Message extends Mage_Core_Block_Template
             $this->setAmount((float) $quote->getGrandTotal());
         }
         $this->setPlacement($placement);
+        $this->setCurrencyCode($this->_getConfig()->getCurrencyCode());
 
         $this->setMessageHtmlId(Mage::helper('core')->uniqHash('maho_paypal_paylater_'));
 

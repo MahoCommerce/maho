@@ -15,4 +15,5 @@ $containerId = $this->getMessageHtmlId();
     data-sdk-url="<?= $this->escapeUrl($this->getJsSdkUrl()) ?>"
     data-client-token-url="<?= $this->escapeUrl($this->getClientTokenUrl()) ?>"
     data-amount="<?= $this->escapeHtml((string) $this->getAmount()) ?>"
+    data-currency="<?= $this->escapeHtml($this->getCurrencyCode()) ?>"
     data-placement="<?= $this->escapeHtml($this->getPlacement()) ?>"></div>
