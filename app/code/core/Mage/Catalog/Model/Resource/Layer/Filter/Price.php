@@ -104,11 +104,22 @@ class Mage_Catalog_Model_Resource_Layer_Filter_Price extends Mage_Core_Model_Res
         $wherePart = $select->getPart(Maho\Db\Select::WHERE);
         $excludedWherePart = Mage_Catalog_Model_Resource_Product_Collection::MAIN_TABLE_ALIAS . '.status';
         foreach ($wherePart as $key => $wherePartItem) {
-            if (str_contains($wherePartItem, $excludedWherePart)) {
-                $wherePart[$key] = new Maho\Db\Expr('1=1');
+            $conditionString = is_array($wherePartItem) ? current($wherePartItem) : $wherePartItem;
+            $conditionKey = is_array($wherePartItem) ? key($wherePartItem) : null;
+
+            if (is_string($conditionString) && str_contains($conditionString, $excludedWherePart)) {
+                $wherePart[$key] = $conditionKey !== null
+                    ? [$conditionKey => '1=1']
+                    : new Maho\Db\Expr('1=1');
                 continue;
             }
-            $wherePart[$key] = $this->_replaceTableAlias($wherePartItem);
+
+            if (is_string($conditionString)) {
+                $replaced = $this->_replaceTableAlias($conditionString);
+                $wherePart[$key] = $conditionKey !== null
+                    ? [$conditionKey => $replaced]
+                    : $replaced;
+            }
         }
         $select->setPart(Maho\Db\Select::WHERE, $wherePart);
         $excludeJoinPart = Mage_Catalog_Model_Resource_Product_Collection::MAIN_TABLE_ALIAS . '.entity_id';
