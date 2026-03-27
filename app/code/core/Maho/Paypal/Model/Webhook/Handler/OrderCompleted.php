@@ -61,6 +61,12 @@ class Maho_Paypal_Model_Webhook_Handler_OrderCompleted extends Maho_Paypal_Model
             $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
             $paypalResult = $client->getOrder($paypalOrderId);
 
+            $status = $paypalResult['status'] ?? '';
+            if ($status !== 'COMPLETED') {
+                $this->_log("OrderCompleted: unexpected status '{$status}' for {$paypalOrderId}, skipping");
+                return;
+            }
+
             $this->_placeOrderFromPaypalResult($quote, $paypalResult, $methodCode, $intent);
             $this->_log("OrderCompleted: placed order from webhook for PayPal order {$paypalOrderId}");
         } finally {

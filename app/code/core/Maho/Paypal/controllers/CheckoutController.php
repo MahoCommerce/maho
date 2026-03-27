@@ -236,10 +236,20 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     $orderPayments = Mage::getResourceModel('sales/order_payment_collection');
                     $orderPayments->addFieldToFilter('paypal_order_id', $paypalOrderId);
                     $orderPayments->setPageSize(1);
-                    if (!$orderPayments->getFirstItem()->getId()) {
+                    $orderPayment = $orderPayments->getFirstItem();
+                    if (!$orderPayment->getId()) {
                         Mage::throwException(Mage::helper('maho_paypal')->__('Quote is no longer active and no matching order was found.'));
                     }
-                    // Webhook placed the order while we waited for the lock — return success
+                    // Webhook placed the order while we waited for the lock — populate
+                    // checkout session so the success page renders instead of redirecting to cart
+                    $order = Mage::getModel('sales/order')->load($orderPayment->getParentId());
+                    if ($order->getId()) {
+                        $checkoutSession = Mage::getSingleton('checkout/session');
+                        $checkoutSession->setLastQuoteId($quote->getId());
+                        $checkoutSession->setLastSuccessQuoteId($quote->getId());
+                        $checkoutSession->setLastOrderId($order->getId());
+                        $checkoutSession->setLastRealOrderId($order->getIncrementId());
+                    }
                     $result['success'] = true;
                     $result['redirect_url'] = Mage::getUrl('checkout/onepage/success', ['_secure' => true]);
                 } else {
