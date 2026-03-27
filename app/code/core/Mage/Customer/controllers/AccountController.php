@@ -47,7 +47,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
                 return $this;
             }
             $this->norouteAction();
-            $this->setFlag('', 'no-dispatch', true);
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             return $this;
         }
 

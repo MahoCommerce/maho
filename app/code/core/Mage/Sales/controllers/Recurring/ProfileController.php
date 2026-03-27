@@ -32,7 +32,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
         }
         if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
             $this->norouteAction();
-            $this->setFlag('', 'no-dispatch', true);
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             return $this;
         }
         $this->_session = Mage::getSingleton('customer/session');

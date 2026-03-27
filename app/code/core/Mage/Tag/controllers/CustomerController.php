@@ -18,7 +18,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         parent::preDispatch();
         if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
             $this->norouteAction();
-            $this->setFlag('', 'no-dispatch', true);
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
             return $this;
         }
         return $this;

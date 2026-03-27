@@ -29,11 +29,6 @@ class Mage_Checkout_Model_Config_GuestCheckout extends Mage_Core_Model_Config_Da
 
     protected function _getCustomerAccountsEnabledValue(): bool
     {
-        $groups = Mage::app()->getRequest()->getPost('groups');
-        if (is_array($groups) && isset($groups['account']['fields']['enabled_in_frontend']['value'])) {
-            return (bool) $groups['account']['fields']['enabled_in_frontend']['value'];
-        }
-
         return Mage::getStoreConfigFlag('customer/account/enabled_in_frontend', $this->getScopeId());
     }
 }

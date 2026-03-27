@@ -29,11 +29,6 @@ class Mage_Customer_Model_Config_Account_Enabled extends Mage_Core_Model_Config_
 
     protected function _getGuestCheckoutValue(): bool
     {
-        $groups = Mage::app()->getRequest()->getPost('groups');
-        if (is_array($groups) && isset($groups['options']['fields']['guest_checkout']['value'])) {
-            return (bool) $groups['options']['fields']['guest_checkout']['value'];
-        }
-
         return Mage::getStoreConfigFlag('checkout/options/guest_checkout', $this->getScopeId());
     }
 }
