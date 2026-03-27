@@ -65,17 +65,14 @@ function applyMask(source, maskCanvas) {
     out.height = height;
     const ctx = out.getContext('2d');
 
-    // Draw original image
     ctx.drawImage(source, 0, 0);
 
-    // Upscale mask to original size and use as alpha
     const maskUpscaled = document.createElement('canvas');
     maskUpscaled.width = width;
     maskUpscaled.height = height;
     const maskCtx = maskUpscaled.getContext('2d');
     maskCtx.drawImage(maskCanvas, 0, 0, width, height);
 
-    // Extract alpha from the mask result and apply to original
     const srcData = ctx.getImageData(0, 0, width, height);
     const maskData = maskCtx.getImageData(0, 0, width, height);
 
@@ -87,12 +84,51 @@ function applyMask(source, maskCanvas) {
     return out;
 }
 
+function fillBackground(source, mode, color1, color2, gradientDirection) {
+    const { width, height } = source;
+    const out = document.createElement('canvas');
+    out.width = width;
+    out.height = height;
+    const ctx = out.getContext('2d');
+
+    if (mode === 'gradient') {
+        let grad;
+        switch (gradientDirection) {
+            case 'to-bottom':
+                grad = ctx.createLinearGradient(0, 0, 0, height);
+                break;
+            case 'to-right':
+                grad = ctx.createLinearGradient(0, 0, width, 0);
+                break;
+            case 'to-br':
+                grad = ctx.createLinearGradient(0, 0, width, height);
+                break;
+            case 'radial':
+                grad = ctx.createRadialGradient(width / 2, height / 2, 0, width / 2, height / 2, Math.max(width, height) / 2);
+                break;
+            default:
+                grad = ctx.createLinearGradient(0, 0, 0, height);
+        }
+        grad.addColorStop(0, color1);
+        grad.addColorStop(1, color2);
+        ctx.fillStyle = grad;
+    } else {
+        ctx.fillStyle = color1;
+    }
+
+    ctx.fillRect(0, 0, width, height);
+    ctx.drawImage(source, 0, 0);
+    return out;
+}
+
 export class RemoveBackgroundTool {
     constructor(editor) {
         this.editor = editor;
         this._processing = false;
         this._statusEl = null;
         this._removeBtn = null;
+        this._transparentCanvas = null;
+        this._bgApplied = false;
     }
 
     get name() { return 'rembg'; }
@@ -113,12 +149,91 @@ export class RemoveBackgroundTool {
         const el = document.createElement('div');
         el.className = 'maho-ie-options-group';
 
-        const btn = document.createElement('button');
-        btn.className = 'maho-ie-opt-btn';
-        btn.textContent = 'Remove Background';
-        btn.addEventListener('click', () => this._run());
-        this._removeBtn = btn;
-        el.appendChild(btn);
+        const removeBtn = document.createElement('button');
+        removeBtn.className = 'maho-ie-opt-btn';
+        removeBtn.textContent = 'Remove Background';
+        removeBtn.addEventListener('click', () => this._runRemove());
+        this._removeBtn = removeBtn;
+        el.appendChild(removeBtn);
+
+        const divider = document.createElement('div');
+        divider.className = 'maho-ie-options-divider';
+        el.appendChild(divider);
+
+        const modeSelect = document.createElement('div');
+        modeSelect.className = 'maho-ie-select';
+        const modeLabel = document.createElement('label');
+        modeLabel.textContent = 'Fill';
+        const modeDropdown = document.createElement('select');
+        modeDropdown.innerHTML = '<option value="solid">Solid</option><option value="gradient">Gradient</option>';
+        modeSelect.append(modeLabel, modeDropdown);
+        el.appendChild(modeSelect);
+
+        const color1Wrap = document.createElement('div');
+        color1Wrap.className = 'maho-ie-color';
+        const color1Label = document.createElement('label');
+        color1Label.textContent = 'Color';
+        const updateLabels = () => {
+            color1Label.textContent = modeDropdown.value === 'gradient' ? 'From' : 'Color';
+        };
+        const color1Input = document.createElement('input');
+        color1Input.type = 'color';
+        color1Input.value = '#ffffff';
+        color1Wrap.append(color1Label, color1Input);
+        el.appendChild(color1Wrap);
+
+        const gradientControls = document.createElement('div');
+        gradientControls.style.cssText = 'display:none';
+
+        const color2Wrap = document.createElement('div');
+        color2Wrap.className = 'maho-ie-color';
+        const color2Label = document.createElement('label');
+        color2Label.textContent = 'To';
+        const color2Input = document.createElement('input');
+        color2Input.type = 'color';
+        color2Input.value = '#e0e0e0';
+        color2Wrap.append(color2Label, color2Input);
+        gradientControls.appendChild(color2Wrap);
+
+        const dirSelect = document.createElement('div');
+        dirSelect.className = 'maho-ie-select';
+        const dirLabel = document.createElement('label');
+        dirLabel.textContent = 'Direction';
+        const dirDropdown = document.createElement('select');
+        dirDropdown.innerHTML =
+            '<option value="to-bottom">↓ Top to bottom</option>' +
+            '<option value="to-right">→ Left to right</option>' +
+            '<option value="to-br">↘ Diagonal</option>' +
+            '<option value="radial">◎ Radial</option>';
+        dirSelect.append(dirLabel, dirDropdown);
+        gradientControls.appendChild(dirSelect);
+
+        el.appendChild(gradientControls);
+
+        modeDropdown.addEventListener('change', () => {
+            gradientControls.style.display = modeDropdown.value === 'gradient' ? 'contents' : 'none';
+            updateLabels();
+        });
+
+        const fillBtn = document.createElement('button');
+        fillBtn.className = 'maho-ie-opt-btn';
+        fillBtn.textContent = 'Apply Background';
+        fillBtn.addEventListener('click', () => {
+            const source = this._transparentCanvas || this.editor.baseCanvas;
+            if (!this._bgApplied) {
+                this.editor.pushUndo();
+            }
+            const result = fillBackground(
+                source,
+                modeDropdown.value,
+                color1Input.value,
+                color2Input.value,
+                dirDropdown.value,
+            );
+            this.editor.replaceBase(result);
+            this._bgApplied = true;
+        });
+        el.appendChild(fillBtn);
 
         const status = document.createElement('span');
         status.style.cssText = 'font-size:11px;color:#a1a1aa';
@@ -128,7 +243,7 @@ export class RemoveBackgroundTool {
         return el;
     }
 
-    async _run() {
+    async _runRemove() {
         if (this._processing) return;
         this._processing = true;
         this._removeBtn.disabled = true;
@@ -160,6 +275,8 @@ export class RemoveBackgroundTool {
                 outputCanvas = maskCanvas;
             }
 
+            this._transparentCanvas = outputCanvas;
+            this._bgApplied = false;
             this.editor.pushUndo();
             this.editor.replaceBase(outputCanvas);
             this._setStatus('Background removed');
