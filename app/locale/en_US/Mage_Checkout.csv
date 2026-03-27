@@ -113,6 +113,7 @@
 "Gift Card:","Gift Card:"
 "Gift Message","Gift Message"
 "Grouped Product Image","Grouped Product Image"
+"Guest checkout cannot be disabled because customer accounts are disabled in the frontend. Please enable customer accounts first.","Guest checkout cannot be disabled because customer accounts are disabled in the frontend. Please enable customer accounts first."
 "Have an account?","Have an account?"
 "HTML","HTML"
 "ID","ID"
@@ -287,4 +288,3 @@
 "You will receive an order confirmation email with details of your order and a link to track its progress.","You will receive an order confirmation email with details of your order and a link to track its progress."
 "Zip","Zip"
 "Zip/Postal Code","Zip/Postal Code"
-"Guest checkout cannot be disabled because customer accounts are disabled in the frontend. Please enable customer accounts first.","Guest checkout cannot be disabled because customer accounts are disabled in the frontend. Please enable customer accounts first."
