@@ -260,8 +260,8 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
                     /** @var Maho_Paypal_Model_Api_Client $client */
                     $client = Mage::getModel('maho_paypal/api_client', ['store_id' => (int) $quote->getStoreId()]);
 
-                    // Fetch current order status first
-                    $paypalResult = $client->getOrder($paypalOrderId);
+                    // Fetch current order status (include payment details in case it's already completed)
+                    $paypalResult = $client->getOrder($paypalOrderId, 'purchase_units.payments');
                     $status = $paypalResult['status'] ?? '';
 
                     // If order is not yet completed (standard/advanced checkout flow),
