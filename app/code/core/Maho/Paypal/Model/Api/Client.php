@@ -102,9 +102,13 @@ class Maho_Paypal_Model_Api_Client
         return $this->_decodeResponse($response);
     }
 
-    public function getOrder(string $orderId): array
+    public function getOrder(string $orderId, ?string $fields = null): array
     {
-        $response = $this->getSdkClient()->getOrdersController()->getOrder(['id' => $orderId]);
+        $options = ['id' => $orderId];
+        if ($fields !== null) {
+            $options['fields'] = $fields;
+        }
+        $response = $this->getSdkClient()->getOrdersController()->getOrder($options);
         return $this->_decodeResponse($response);
     }
 
