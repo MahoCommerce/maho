@@ -722,6 +722,21 @@ final class ProductProvider implements ProviderInterface
                 }
             }
 
+            // Sort values by eav_attribute_option.sort_order
+            if (!empty($values)) {
+                $optionIds = array_column($values, 'id');
+                $resource = \Mage::getSingleton('core/resource');
+                $read = $resource->getConnection('core_read');
+                $sortOrders = $read->fetchPairs(
+                    $read->select()
+                        ->from($resource->getTableName('eav/attribute_option'), ['option_id', 'sort_order'])
+                        ->where('option_id IN (?)', $optionIds)
+                );
+                usort($values, function ($a, $b) use ($sortOrders) {
+                    return ((int) ($sortOrders[$a['id']] ?? 999)) <=> ((int) ($sortOrders[$b['id']] ?? 999));
+                });
+            }
+
             $options[] = [
                 'id' => (int) $attribute->getAttributeId(),
                 'code' => $attributeCode,
