@@ -23,10 +23,10 @@ class Mage_Adminhtml_Block_Api_OrphanedResource_Grid extends Mage_Adminhtml_Bloc
     #[\Override]
     protected function _prepareCollection()
     {
-        $orphanedIds = Mage::getResourceModel('api/rules')->getOrphanedResourceIds();
-
+        $acl = Mage::getModel('api/acl');
+        Mage::getSingleton('api/config')->loadAclResources($acl);
         $collection = Mage::getResourceModel('api/rules_collection')
-            ->addFieldToFilter('resource_id', ['in' => $orphanedIds ?: ['']])
+            ->addFieldToFilter('resource_id', ['nin' => $acl->getResources()])
             ->addFieldToSelect('resource_id');
         $collection->getSelect()->group('resource_id');
 
