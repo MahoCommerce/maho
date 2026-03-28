@@ -30,8 +30,6 @@ export class AdjustTool {
     renderOverlay() {}
 
     renderOptions() {
-        this._pushed = false;
-
         const el = document.createElement('div');
         el.style.cssText = 'display:flex;gap:12px;flex-wrap:wrap;align-items:center';
 

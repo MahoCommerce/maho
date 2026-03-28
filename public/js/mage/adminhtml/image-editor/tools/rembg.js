@@ -310,5 +310,7 @@ export class RemoveBackgroundTool {
         if (this._statusEl) this._statusEl.textContent = text;
     }
 
-    destroy() {}
+    destroy() {
+        pipelinePromise = null;
+    }
 }

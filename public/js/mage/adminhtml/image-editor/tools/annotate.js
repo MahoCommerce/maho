@@ -507,6 +507,7 @@ export class AnnotateTool {
     _commitText(annotation, text) {
         const editing = this._editingExisting;
         this._closeTextOverlay();
+        text = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         if (!text.trim()) return;
 
         this.editor.pushUndo();
@@ -713,6 +714,7 @@ export class AnnotateTool {
             const img = new Image();
             img.onload = () => {
                 URL.revokeObjectURL(img.src);
+                if (this.editor.activeTool !== this) return;
                 const imgW = this.editor.baseCanvas.width;
                 const defaultW = imgW * 0.2;
                 const defaultH = defaultW * (img.height / img.width);

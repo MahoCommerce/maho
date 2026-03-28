@@ -56,6 +56,8 @@ export class FrameTool {
             btn.className = 'maho-ie-opt-btn' + (frame && frame.type === t.type ? ' active' : '') + (!frame && t.type === 'none' ? ' active' : '');
             btn.textContent = t.label;
             btn.addEventListener('click', () => {
+                const currentType = this.editor.frame?.type || 'none';
+                if (t.type === currentType) return;
                 el.querySelectorAll('.maho-ie-opt-btn').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 this._pushed = false;

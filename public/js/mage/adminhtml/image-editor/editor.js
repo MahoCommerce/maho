@@ -124,6 +124,7 @@ export class MahoImageEditor {
     }
 
     replaceBase(canvas) {
+        if (this.baseCanvas) this.baseCanvas.width = 0;
         this.baseCanvas = canvas;
         this.zoom = 1;
         this.panX = 0;
