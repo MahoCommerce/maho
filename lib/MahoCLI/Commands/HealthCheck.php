@@ -18,6 +18,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'health-check',
@@ -558,10 +559,55 @@ class HealthCheck extends BaseMahoCommand
             $output->writeln('');
         }
 
+        // Check for orphaned role resources (requires database)
+        $this->initMaho();
+
+        $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
+        $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
+
         if ($hasErrors) {
             return Command::FAILURE;
         }
 
         return Command::SUCCESS;
+    }
+
+    private function checkOrphanedResources(
+        InputInterface $input,
+        OutputInterface $output,
+        \Mage_Admin_Model_Resource_Rules|\Mage_Api_Model_Resource_Rules $rulesResource,
+        string $label,
+    ): void {
+        $output->write("Checking for orphaned {$label} role resources... ");
+
+        $collection = $rulesResource->getOrphanedResourcesCollection();
+
+        $orphanedIds = [];
+        foreach ($collection as $item) {
+            $orphanedIds[] = $item->getResourceId();
+        }
+
+        if ($orphanedIds === []) {
+            $output->writeln('<info>OK</info>');
+            return;
+        }
+
+        $output->writeln('');
+        $output->writeln('<comment>Warning: Found ' . count($orphanedIds) . " orphaned {$label} role resource(s):</comment>");
+        foreach ($orphanedIds as $resource) {
+            $output->writeln('  - ' . $resource);
+        }
+
+        /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+        $helper = $this->getHelper('question');
+        $question = new ConfirmationQuestion(
+            "<question>Do you want to delete these orphaned {$label} role resources? [y/N]</question> ",
+            false,
+        );
+        if ($helper->ask($input, $output, $question)) {
+            $deleted = $rulesResource->deleteOrphanedResources($orphanedIds);
+            $output->writeln("<info>Deleted {$deleted} orphaned {$label} role resource rule(s).</info>");
+        }
+        $output->writeln('');
     }
 }
