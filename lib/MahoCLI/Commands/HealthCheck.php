@@ -144,6 +144,54 @@ class HealthCheck extends BaseMahoCommand
     }
 
     /**
+     * @return array<int, array{check: string, severity: string, details: string}>
+     */
+    public static function getCheckResults(): array
+    {
+        $checks = [];
+
+        $isOptimized = self::isComposerAutoloaderOptimized();
+        $checks[] = [
+            'check' => 'Composer Autoloader',
+            'severity' => $isOptimized ? 'warning' : 'ok',
+            'details' => $isOptimized ? 'Optimized autoloader detected. This is fine for production, but may cause issues during development. Run "composer dump" to fix.' : '',
+        ];
+
+        $legacyFiles = self::findExistingPaths(self::LEGACY_CORE_FILES);
+        $checks[] = [
+            'check' => 'Legacy Core Files',
+            'severity' => !empty($legacyFiles) ? 'error' : 'ok',
+            'details' => !empty($legacyFiles) ? 'Found old Magento/OpenMage files: ' . implode(', ', $legacyFiles) . '. These should be removed.' : '',
+        ];
+
+        $deprecatedFolders = self::findExistingPaths(self::DEPRECATED_FOLDERS);
+        $checks[] = [
+            'check' => 'Deprecated Folders',
+            'severity' => !empty($deprecatedFolders) ? 'error' : 'ok',
+            'details' => !empty($deprecatedFolders) ? 'Found deprecated folders: ' . implode(', ', $deprecatedFolders) . '. Remove them to avoid unpredictable behavior.' : '',
+        ];
+
+        foreach (['admin' => 'Admin', 'api' => 'API'] as $type => $label) {
+            try {
+                $orphanedIds = self::findOrphanedResourceIds($type);
+                $checks[] = [
+                    'check' => "{$label} Orphaned Role Resources",
+                    'severity' => !empty($orphanedIds) ? 'warning' : 'ok',
+                    'details' => !empty($orphanedIds) ? 'Found ' . count($orphanedIds) . ' orphaned resource(s): ' . implode(', ', $orphanedIds) : '',
+                ];
+            } catch (\Exception) {
+                $checks[] = [
+                    'check' => "{$label} Orphaned Role Resources",
+                    'severity' => 'error',
+                    'details' => 'Unable to check orphaned resources.',
+                ];
+            }
+        }
+
+        return $checks;
+    }
+
+    /**
      * Check frontend themes for common issues
      *
      * @return array{errors: array<string>, warnings: array<string>}

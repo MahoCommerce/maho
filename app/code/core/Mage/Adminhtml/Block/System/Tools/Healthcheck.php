@@ -229,52 +229,18 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
      */
     public function getHealthChecks(): array
     {
-        $checks = [];
-
-        $isOptimized = \MahoCLI\Commands\HealthCheck::isComposerAutoloaderOptimized();
-        $checks[] = [
-            'check' => $this->__('Composer Autoloader'),
-            'status' => $isOptimized ? $this->__('Warning') : $this->__('OK'),
-            'severity' => $isOptimized ? 'warning' : 'ok',
-            'details' => $isOptimized ? $this->__('Optimized autoloader detected. This is fine for production, but may cause issues during development. Run "composer dump" to fix.') : '',
+        $statusLabels = [
+            'ok' => $this->__('OK'),
+            'warning' => $this->__('Warning'),
+            'error' => $this->__('Error'),
         ];
 
-        $legacyFiles = \MahoCLI\Commands\HealthCheck::findExistingPaths(\MahoCLI\Commands\HealthCheck::LEGACY_CORE_FILES);
-        $checks[] = [
-            'check' => $this->__('Legacy Core Files'),
-            'status' => empty($legacyFiles) ? $this->__('OK') : $this->__('Error'),
-            'severity' => empty($legacyFiles) ? 'ok' : 'error',
-            'details' => empty($legacyFiles) ? '' : $this->__('Found old Magento/OpenMage files: %s. These should be removed.', implode(', ', $legacyFiles)),
-        ];
-
-        $deprecatedFolders = \MahoCLI\Commands\HealthCheck::findExistingPaths(\MahoCLI\Commands\HealthCheck::DEPRECATED_FOLDERS);
-        $checks[] = [
-            'check' => $this->__('Deprecated Folders'),
-            'status' => empty($deprecatedFolders) ? $this->__('OK') : $this->__('Error'),
-            'severity' => empty($deprecatedFolders) ? 'ok' : 'error',
-            'details' => empty($deprecatedFolders) ? '' : $this->__('Found deprecated folders: %s. Remove them to avoid unpredictable behavior.', implode(', ', $deprecatedFolders)),
-        ];
-
-        foreach (['admin' => $this->__('Admin'), 'api' => $this->__('API')] as $type => $label) {
-            try {
-                $orphanedIds = \MahoCLI\Commands\HealthCheck::findOrphanedResourceIds($type);
-                $checks[] = [
-                    'check' => $this->__('%s Orphaned Role Resources', $label),
-                    'status' => empty($orphanedIds) ? $this->__('OK') : $this->__('Warning'),
-                    'severity' => empty($orphanedIds) ? 'ok' : 'warning',
-                    'details' => empty($orphanedIds) ? '' : $this->__('Found %d orphaned resource(s): %s', count($orphanedIds), implode(', ', $orphanedIds)),
-                ];
-            } catch (\Exception) {
-                $checks[] = [
-                    'check' => $this->__('%s Orphaned Role Resources', $label),
-                    'status' => $this->__('Error'),
-                    'severity' => 'error',
-                    'details' => $this->__('Unable to check orphaned resources.'),
-                ];
-            }
+        $results = [];
+        foreach (\MahoCLI\Commands\HealthCheck::getCheckResults() as $check) {
+            $check['status'] = $statusLabels[$check['severity']] ?? $check['severity'];
+            $results[] = $check;
         }
-
-        return $checks;
+        return $results;
     }
 
     private function formatBytes(int $bytes): string
