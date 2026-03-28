@@ -7,6 +7,7 @@ declare(strict_types=1);
  *
  * @package    Mage_Adminhtml
  * @copyright  Copyright (c) 2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -23,10 +24,8 @@ class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminh
     #[\Override]
     protected function _prepareCollection()
     {
-        $orphanedIds = Mage::getResourceModel('admin/rules')->getOrphanedResourceIds();
-
         $collection = Mage::getResourceModel('admin/rules_collection')
-            ->addFieldToFilter('resource_id', ['in' => $orphanedIds ?: ['']])
+            ->addFieldToFilter('resource_id', ['nin' => Mage::getSingleton('admin/session')->getAcl()->getResources()])
             ->addFieldToSelect('resource_id');
         $collection->getSelect()->group('resource_id');
 
