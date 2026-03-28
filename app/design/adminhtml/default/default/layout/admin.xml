@@ -112,6 +112,13 @@
         </reference>
     </adminhtml_cache_index>
 
+    <!-- Health Check -->
+    <adminhtml_system_tools_healthcheck_index>
+        <reference name="content">
+            <block type="adminhtml/system_tools_healthcheck" name="adminhtml.system.tools.healthcheck" template="system/tools/healthcheck.phtml"/>
+        </reference>
+    </adminhtml_system_tools_healthcheck_index>
+
     <!-- Email Log -->
     <adminhtml_system_email_log_index>
         <reference name="content">

@@ -29,8 +29,13 @@
                         <email_log translate="title" module="core">
                             <title>Email Log</title>
                             <action>adminhtml/system_email_log</action>
-                            <sort_order>10</sort_order>
+                            <sort_order>20</sort_order>
                         </email_log>
+                        <healthcheck translate="title">
+                            <title>Health Check</title>
+                            <action>adminhtml/system_tools_healthcheck</action>
+                            <sort_order>30</sort_order>
+                        </healthcheck>
                     </children>
                 </tools>
                 <design translate="title">
@@ -224,6 +229,9 @@
                                     <email_log translate="title" module="core">
                                         <title>Email Log</title>
                                     </email_log>
+                                    <healthcheck translate="title">
+                                        <title>Health Check</title>
+                                    </healthcheck>
                                 </children>
                             </tools>
                             <convert translate="title">
