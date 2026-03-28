@@ -18,6 +18,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
     name: 'health-check',
@@ -555,6 +556,57 @@ class HealthCheck extends BaseMahoCommand
             }
             $output->writeln('');
             $output->writeln('See: https://github.com/MahoCommerce/maho/pull/340');
+            $output->writeln('');
+        }
+
+        // Check for orphaned role resources (requires database)
+        $this->initMaho();
+
+        $output->write('Checking for orphaned admin role resources... ');
+        $orphanedAdmin = Mage::getResourceModel('admin/rules')->getOrphanedResourceIds();
+        if ($orphanedAdmin === []) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Found ' . count($orphanedAdmin) . ' orphaned admin role resource(s):</comment>');
+            foreach ($orphanedAdmin as $resource) {
+                $output->writeln('  - ' . $resource);
+            }
+
+            /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(
+                '<question>Do you want to delete these orphaned admin role resources? [y/N]</question> ',
+                false,
+            );
+            if ($helper->ask($input, $output, $question)) {
+                $deleted = Mage::getResourceModel('admin/rules')->deleteOrphanedResources($orphanedAdmin);
+                $output->writeln("<info>Deleted {$deleted} orphaned admin role resource rule(s).</info>");
+            }
+            $output->writeln('');
+        }
+
+        $output->write('Checking for orphaned API role resources... ');
+        $orphanedApi = Mage::getResourceModel('api/rules')->getOrphanedResourceIds();
+        if ($orphanedApi === []) {
+            $output->writeln('<info>OK</info>');
+        } else {
+            $output->writeln('');
+            $output->writeln('<comment>Warning: Found ' . count($orphanedApi) . ' orphaned API role resource(s):</comment>');
+            foreach ($orphanedApi as $resource) {
+                $output->writeln('  - ' . $resource);
+            }
+
+            /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+            $helper = $this->getHelper('question');
+            $question = new ConfirmationQuestion(
+                '<question>Do you want to delete these orphaned API role resources? [y/N]</question> ',
+                false,
+            );
+            if ($helper->ask($input, $output, $question)) {
+                $deleted = Mage::getResourceModel('api/rules')->deleteOrphanedResources($orphanedApi);
+                $output->writeln("<info>Deleted {$deleted} orphaned API role resource rule(s).</info>");
+            }
             $output->writeln('');
         }
 
