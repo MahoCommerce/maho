@@ -580,9 +580,8 @@ class HealthCheck extends BaseMahoCommand
     ): void {
         $output->write("Checking for orphaned {$label} role resources... ");
 
-        /** @phpstan-var \Mage_Admin_Model_Resource_Rules|\Mage_Api_Model_Resource_Rules $rulesResource */
         $rulesResource = Mage::getResourceModel("{$module}/rules");
-        $collection = $rulesResource->getOrphanedResourcesCollection();
+        $collection = $rulesResource->getOrphanedResourcesCollection(); // @phpstan-ignore method.nonObject
 
         $orphanedIds = [];
         foreach ($collection as $item) {
@@ -607,7 +606,7 @@ class HealthCheck extends BaseMahoCommand
             false,
         );
         if ($helper->ask($input, $output, $question)) {
-            $deleted = $rulesResource->deleteOrphanedResources($orphanedIds);
+            $deleted = $rulesResource->deleteOrphanedResources($orphanedIds); // @phpstan-ignore method.nonObject
             $output->writeln("<info>Deleted {$deleted} orphaned {$label} role resource rule(s).</info>");
         }
         $output->writeln('');
