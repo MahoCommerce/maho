@@ -29,12 +29,12 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
 
     public function getServerSoftware(): string
     {
-        return $_SERVER['SERVER_SOFTWARE'] ?? $this->__('Unknown');
+        return $_SERVER['SERVER_SOFTWARE'] ?? 'N/A';
     }
 
     public function getPhpMemoryLimit(): string
     {
-        return ini_get('memory_limit') ?: $this->__('Unknown');
+        return ini_get('memory_limit') ?: 'N/A';
     }
 
     public function getPhpMaxExecutionTime(): string
@@ -44,17 +44,17 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
 
     public function getPhpMaxInputVars(): string
     {
-        return ini_get('max_input_vars') ?: $this->__('Unknown');
+        return ini_get('max_input_vars') ?: 'N/A';
     }
 
     public function getPhpPostMaxSize(): string
     {
-        return ini_get('post_max_size') ?: $this->__('Unknown');
+        return ini_get('post_max_size') ?: 'N/A';
     }
 
     public function getPhpUploadMaxFilesize(): string
     {
-        return ini_get('upload_max_filesize') ?: $this->__('Unknown');
+        return ini_get('upload_max_filesize') ?: 'N/A';
     }
 
     /**
@@ -115,12 +115,12 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
             'jit_enabled' => isset($status['jit']['enabled']) && $status['jit']['enabled'],
             'memory_used' => $this->formatBytes((int) ($status['memory_usage']['used_memory'] ?? 0)),
             'memory_free' => $this->formatBytes((int) ($status['memory_usage']['free_memory'] ?? 0)),
-            'memory_total' => $config ? $this->formatBytes((int) ($config['directives']['opcache.memory_consumption'] ?? 0)) : $this->__('Unknown'),
+            'memory_total' => $config ? $this->formatBytes((int) ($config['directives']['opcache.memory_consumption'] ?? 0)) : 'N/A',
             'memory_wasted' => $this->formatBytes((int) ($status['memory_usage']['wasted_memory'] ?? 0)),
             'memory_wasted_pct' => round($status['memory_usage']['current_wasted_percentage'] ?? 0, 1) . '%',
             'hit_rate' => isset($status['opcache_statistics']['opcache_hit_rate'])
                 ? round($status['opcache_statistics']['opcache_hit_rate'], 1) . '%'
-                : $this->__('N/A'),
+                : 'N/A',
             'hits' => (int) ($status['opcache_statistics']['hits'] ?? 0),
             'misses' => (int) ($status['opcache_statistics']['misses'] ?? 0),
             'cached_scripts' => (int) ($status['opcache_statistics']['num_cached_scripts'] ?? 0),
@@ -152,7 +152,7 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
             $adapter instanceof \Maho\Db\Adapter\Pdo\Pgsql => 'PostgreSQL',
             $adapter instanceof \Maho\Db\Adapter\Pdo\Sqlite => 'SQLite',
             is_object($adapter) => $adapter::class,
-            default => $this->__('Unknown'),
+            default => 'N/A',
         };
     }
 
@@ -167,7 +167,7 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
 
             return (string) $adapter->fetchOne('SELECT VERSION()');
         } catch (\Exception) {
-            return $this->__('Unable to retrieve');
+            return 'N/A';
         }
     }
 
@@ -188,7 +188,7 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
                     'SELECT pg_size_pretty(pg_database_size(?))',
                     [$dbName],
                 );
-                return $size ?: $this->__('Unable to retrieve');
+                return $size ?: 'N/A';
             }
 
             $dbName = (string) Mage::getConfig()->getNode('global/resources/default_setup/connection/dbname');
@@ -197,9 +197,9 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
                 . 'FROM information_schema.tables WHERE table_schema = ?',
                 [$dbName],
             );
-            return $size ? $size . ' MB' : $this->__('Unable to retrieve');
+            return $size ? $size . ' MB' : 'N/A';
         } catch (\Exception) {
-            return $this->__('Unable to retrieve');
+            return 'N/A';
         }
     }
 
@@ -230,9 +230,9 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
     public function getHealthChecks(): array
     {
         $statusLabels = [
-            'ok' => $this->__('OK'),
-            'warning' => $this->__('Warning'),
-            'error' => $this->__('Error'),
+            'ok' => 'OK',
+            'warning' => 'Warning',
+            'error' => 'Error',
         ];
 
         $results = [];
