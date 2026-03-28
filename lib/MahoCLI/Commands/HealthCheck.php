@@ -160,15 +160,15 @@ class HealthCheck extends BaseMahoCommand
         $legacyFiles = self::findExistingPaths(self::LEGACY_CORE_FILES);
         $checks[] = [
             'check' => 'Legacy Core Files',
-            'severity' => !empty($legacyFiles) ? 'error' : 'ok',
-            'details' => !empty($legacyFiles) ? 'Found old Magento/OpenMage files: ' . implode(', ', $legacyFiles) . '. These should be removed.' : '',
+            'severity' => empty($legacyFiles) ? 'ok' : 'error',
+            'details' => empty($legacyFiles) ? '' : 'Found old Magento/OpenMage files: ' . implode(', ', $legacyFiles) . '. These should be removed.',
         ];
 
         $deprecatedFolders = self::findExistingPaths(self::DEPRECATED_FOLDERS);
         $checks[] = [
             'check' => 'Deprecated Folders',
-            'severity' => !empty($deprecatedFolders) ? 'error' : 'ok',
-            'details' => !empty($deprecatedFolders) ? 'Found deprecated folders: ' . implode(', ', $deprecatedFolders) . '. Remove them to avoid unpredictable behavior.' : '',
+            'severity' => empty($deprecatedFolders) ? 'ok' : 'error',
+            'details' => empty($deprecatedFolders) ? '' : 'Found deprecated folders: ' . implode(', ', $deprecatedFolders) . '. Remove them to avoid unpredictable behavior.',
         ];
 
         foreach (['admin' => 'Admin', 'api' => 'API'] as $type => $label) {
@@ -176,8 +176,8 @@ class HealthCheck extends BaseMahoCommand
                 $orphanedIds = self::findOrphanedResourceIds($type);
                 $checks[] = [
                     'check' => "{$label} Orphaned Role Resources",
-                    'severity' => !empty($orphanedIds) ? 'warning' : 'ok',
-                    'details' => !empty($orphanedIds) ? 'Found ' . count($orphanedIds) . ' orphaned resource(s): ' . implode(', ', $orphanedIds) : '',
+                    'severity' => empty($orphanedIds) ? 'ok' : 'warning',
+                    'details' => empty($orphanedIds) ? '' : 'Found ' . count($orphanedIds) . ' orphaned resource(s): ' . implode(', ', $orphanedIds),
                 ];
             } catch (\Exception) {
                 $checks[] = [
