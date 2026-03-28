@@ -74,59 +74,59 @@ $checks = $this->getHealthChecks();
 </style>
 
 <div class="content-header">
-    <h3><?= $this->__('System Health Check') ?></h3>
+    <h3>System Health Check</h3>
 </div>
 
 <div class="healthcheck-grid healthcheck-row-3">
     <div class="healthcheck-section">
-        <h3><?= $this->__('Maho') ?></h3>
+        <h3>Maho</h3>
         <table>
             <tr>
-                <td><?= $this->__('Version') ?></td>
+                <td>Version</td>
                 <td><?= $this->escapeHtml($this->getMahoVersion()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Cache Backend') ?></td>
+                <td>Cache Backend</td>
                 <td><?= $this->escapeHtml($this->getCacheBackend()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Session Storage') ?></td>
+                <td>Session Storage</td>
                 <td><?= $this->escapeHtml($this->getSessionSaveMethod()) ?></td>
             </tr>
         </table>
     </div>
 
     <div class="healthcheck-section">
-        <h3><?= $this->__('Server') ?></h3>
+        <h3>Server</h3>
         <table>
             <tr>
-                <td><?= $this->__('Operating System') ?></td>
+                <td>Operating System</td>
                 <td><?= $this->escapeHtml($this->getOperatingSystem()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Architecture') ?></td>
+                <td>Architecture</td>
                 <td><?= $this->escapeHtml($this->getArchitecture()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Web Server') ?></td>
+                <td>Web Server</td>
                 <td><?= $this->escapeHtml($this->getServerSoftware()) ?></td>
             </tr>
         </table>
     </div>
 
     <div class="healthcheck-section">
-        <h3><?= $this->__('Database') ?></h3>
+        <h3>Database</h3>
         <table>
             <tr>
-                <td><?= $this->__('Type') ?></td>
+                <td>Type</td>
                 <td><?= $this->escapeHtml($this->getDatabaseType()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Version') ?></td>
+                <td>Version</td>
                 <td><?= $this->escapeHtml($this->getDatabaseVersion()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Database Size') ?></td>
+                <td>Size</td>
                 <td><?= $this->escapeHtml($this->getDatabaseSize()) ?></td>
             </tr>
         </table>
@@ -135,34 +135,34 @@ $checks = $this->getHealthChecks();
 
 <div class="healthcheck-grid healthcheck-row-2">
     <div class="healthcheck-section">
-        <h3><?= $this->__('PHP') ?></h3>
+        <h3>PHP</h3>
         <table>
             <tr>
-                <td><?= $this->__('Version') ?></td>
+                <td>Version</td>
                 <td><?= $this->escapeHtml($this->getPhpVersion()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('SAPI') ?></td>
+                <td>SAPI</td>
                 <td><?= $this->escapeHtml($this->getPhpSapi()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Memory Limit') ?></td>
+                <td>Memory Limit</td>
                 <td><?= $this->escapeHtml($this->getPhpMemoryLimit()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Max Execution Time') ?></td>
+                <td>Max Execution Time</td>
                 <td><?= $this->escapeHtml($this->getPhpMaxExecutionTime()) ?>s</td>
             </tr>
             <tr>
-                <td><?= $this->__('Max Input Vars') ?></td>
+                <td>Max Input Vars</td>
                 <td><?= $this->escapeHtml($this->getPhpMaxInputVars()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Post Max Size') ?></td>
+                <td>Post Max Size</td>
                 <td><?= $this->escapeHtml($this->getPhpPostMaxSize()) ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Upload Max Filesize') ?></td>
+                <td>Upload Max Filesize</td>
                 <td><?= $this->escapeHtml($this->getPhpUploadMaxFilesize()) ?></td>
             </tr>
         </table>
@@ -170,45 +170,45 @@ $checks = $this->getHealthChecks();
 
     <?php if ($opcache !== null): ?>
     <div class="healthcheck-section">
-        <h3><?= $this->__('OPcache') ?></h3>
+        <h3>OPcache</h3>
         <table>
             <tr>
-                <td><?= $this->__('Status') ?></td>
+                <td>Status</td>
                 <td class="<?= $opcache['enabled'] ? 'check-ok' : 'check-warning' ?>">
-                    <?= $opcache['enabled'] ? $this->__('Enabled') : $this->__('Disabled') ?>
+                    <?= $opcache['enabled'] ? 'Enabled' : 'Disabled' ?>
                 </td>
             </tr>
             <?php if ($opcache['enabled']): ?>
             <tr>
-                <td><?= $this->__('Memory') ?></td>
-                <td><?= $this->escapeHtml($opcache['memory_used'] . ' / ' . $opcache['memory_total']) ?> (<?= $this->escapeHtml($opcache['memory_free']) ?> <?= $this->__('free') ?>)</td>
+                <td>Memory</td>
+                <td><?= $this->escapeHtml($opcache['memory_used'] . ' / ' . $opcache['memory_total']) ?> (<?= $this->escapeHtml($opcache['memory_free']) ?> free)</td>
             </tr>
             <tr>
-                <td><?= $this->__('Wasted Memory') ?></td>
+                <td>Wasted Memory</td>
                 <td><?= $this->escapeHtml($opcache['memory_wasted'] . ' (' . $opcache['memory_wasted_pct'] . ')') ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Hit Rate') ?></td>
-                <td><?= $this->escapeHtml($opcache['hit_rate']) ?> (<?= number_format($opcache['hits']) ?> <?= $this->__('hits') ?> / <?= number_format($opcache['misses']) ?> <?= $this->__('misses') ?>)</td>
+                <td>Hit Rate</td>
+                <td><?= $this->escapeHtml($opcache['hit_rate']) ?> (<?= number_format($opcache['hits']) ?> hits / <?= number_format($opcache['misses']) ?> misses)</td>
             </tr>
             <tr>
-                <td><?= $this->__('Cached Scripts') ?></td>
+                <td>Cached Scripts</td>
                 <td><?= $opcache['cached_scripts'] ?><?php if ($opcache['max_cached_scripts']): ?> / <?= $opcache['max_cached_scripts'] ?><?php endif ?></td>
             </tr>
             <tr>
-                <td><?= $this->__('Cached Keys') ?></td>
+                <td>Cached Keys</td>
                 <td><?= number_format($opcache['cached_keys']) ?><?php if ($opcache['max_cached_keys']): ?> / <?= number_format($opcache['max_cached_keys']) ?><?php endif ?></td>
             </tr>
             <?php if ($opcache['interned_strings_used']): ?>
             <tr>
-                <td><?= $this->__('Interned Strings') ?></td>
-                <td><?= $this->escapeHtml($opcache['interned_strings_used']) ?> <?= $this->__('used') ?> / <?= $this->escapeHtml($opcache['interned_strings_free']) ?> <?= $this->__('free') ?> (<?= number_format($opcache['interned_strings_count']) ?> <?= $this->__('strings') ?>)</td>
+                <td>Interned Strings</td>
+                <td><?= $this->escapeHtml($opcache['interned_strings_used']) ?> used / <?= $this->escapeHtml($opcache['interned_strings_free']) ?> free (<?= number_format($opcache['interned_strings_count']) ?> strings)</td>
             </tr>
             <?php endif ?>
             <tr>
-                <td><?= $this->__('JIT') ?></td>
+                <td>JIT</td>
                 <td class="<?= $opcache['jit_enabled'] ? 'check-ok' : '' ?>">
-                    <?= $opcache['jit_enabled'] ? $this->__('Enabled') : $this->__('Disabled') ?>
+                    <?= $opcache['jit_enabled'] ? 'Enabled' : 'Disabled' ?>
                     <?php if (isset($opcache['jit_buffer_size'])): ?>
                         (<?= $this->escapeHtml($opcache['jit_buffer_size']) ?>)
                     <?php endif ?>
@@ -218,7 +218,7 @@ $checks = $this->getHealthChecks();
             <tr>
                 <td colspan="2" style="padding: 0;">
                     <details>
-                        <summary style="padding: 8px 15px; cursor: pointer; font-weight: 600; color: #555; user-select: none;"><?= $this->__('All Directives') ?></summary>
+                        <summary style="padding: 8px 15px; cursor: pointer; font-weight: 600; color: #555; user-select: none;">All Directives</summary>
                         <table style="width: 100%;">
                             <?php foreach ($opcache['directives'] as $key => $value): ?>
                             <tr>
@@ -247,7 +247,7 @@ $checks = $this->getHealthChecks();
 
 <div class="healthcheck-grid healthcheck-row-2">
     <div class="healthcheck-section">
-        <h3><?= $this->__('PHP Extensions') ?></h3>
+        <h3>PHP Extensions</h3>
         <div class="ext-grid">
             <?php foreach ($extensions as $name => $loaded): ?>
                 <span class="ext-item <?= $loaded ? 'ext-ok' : 'ext-missing' ?>">
@@ -258,7 +258,7 @@ $checks = $this->getHealthChecks();
     </div>
 
     <div class="healthcheck-section">
-        <h3><?= $this->__('Health Checks') ?></h3>
+        <h3>Health Checks</h3>
         <table>
             <?php foreach ($checks as $check): ?>
             <tr>
