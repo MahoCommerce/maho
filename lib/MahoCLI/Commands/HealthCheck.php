@@ -580,7 +580,7 @@ class HealthCheck extends BaseMahoCommand
     ): void {
         $output->write("Checking for orphaned {$label} role resources... ");
 
-        /** @var Mage_Admin_Model_Resource_Rules|Mage_Api_Model_Resource_Rules $rulesResource */
+        /** @var \Mage_Admin_Model_Resource_Rules|\Mage_Api_Model_Resource_Rules $rulesResource */
         $rulesResource = Mage::getResourceModel("{$module}/rules");
         $collection = $rulesResource->getOrphanedResourcesCollection();
 
