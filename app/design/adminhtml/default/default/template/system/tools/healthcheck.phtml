@@ -264,7 +264,7 @@ $checks = $this->getHealthChecks();
             <tr>
                 <td><?= $this->escapeHtml($check['check']) ?></td>
                 <td>
-                    <span class="check-<?= $check['severity'] ?>">
+                    <span class="check-<?= $this->escapeHtml($check['severity']) ?>">
                         <?= $this->escapeHtml($check['status']) ?>
                     </span>
                     <?php if ($check['details']): ?>

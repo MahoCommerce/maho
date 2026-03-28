@@ -15,7 +15,6 @@ namespace MahoCLI\Commands;
 use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
@@ -26,6 +25,23 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 )]
 class HealthCheck extends BaseMahoCommand
 {
+    public const LEGACY_CORE_FILES = [
+        'app/bootstrap.php',
+        'app/Mage.php',
+        'app/code/core',
+    ];
+
+    public const DEPRECATED_FOLDERS = [
+        'app/code/core/Zend',
+        'lib/Cm',
+        'lib/Credis',
+        'lib/mcryptcompat',
+        'lib/Pelago',
+        'lib/phpseclib',
+        'lib/Zend',
+        'skin',
+    ];
+
     private const DESIGN_PATH = 'app/design/frontend';
     private const SKIN_PATH = 'public/skin/frontend';
 
@@ -84,22 +100,47 @@ class HealthCheck extends BaseMahoCommand
         'Varien_Profiler' => \Maho\Profiler::class,
     ];
 
-    protected function checkComposer(OutputInterface $output): ?int
+    public static function isComposerAutoloaderOptimized(): bool
     {
-        $result = Command::SUCCESS;
+        foreach (spl_autoload_functions() as $autoloader) {
+            if (is_array($autoloader) && $autoloader[0] instanceof \Composer\Autoload\ClassLoader) {
+                return isset($autoloader[0]->getClassMap()['Mage_Core_Model_App']);
+            }
+        }
+        return false;
+    }
 
-        /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
-        $composerClassLoader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
+    /**
+     * @param array<string> $paths
+     * @return array<string>
+     */
+    public static function findExistingPaths(array $paths): array
+    {
+        $existing = [];
+        foreach ($paths as $path) {
+            if (file_exists(MAHO_ROOT_DIR . "/{$path}")) {
+                $existing[] = $path;
+            }
+        }
+        return $existing;
+    }
 
-        $classMap = $composerClassLoader->getClassMap();
-        if (isset($classMap['Mage_Core_Model_App'])) {
-            $result = Command::FAILURE;
-            $output->writeln('');
-            $output->writeln('<comment>Warning: Optimized autoloader detected.</comment>');
-            $output->writeln('Ignore if you are in a production environment, otherwise run: composer dump');
+    /**
+     * @return array<string>
+     */
+    public static function findOrphanedResourceIds(string $type): array
+    {
+        $rulesResource = Mage::getResourceModel("{$type}/rules");
+        if (!method_exists($rulesResource, 'getOrphanedResourcesCollection')) {
+            throw new \RuntimeException("Unable to load {$type}/rules resource model");
         }
 
-        return $result;
+        $collection = $rulesResource->getOrphanedResourcesCollection();
+        $orphanedIds = [];
+        foreach ($collection as $item) {
+            $orphanedIds[] = $item->getResourceId();
+        }
+        return $orphanedIds;
     }
 
     /**
@@ -429,26 +470,19 @@ class HealthCheck extends BaseMahoCommand
 
         // Check for use-include-path in composer.json
         $output->write('Checking composer.json... ');
-        if ($this->checkComposer($output) === Command::SUCCESS) {
-            $output->writeln('<info>OK</info>');
-        } else {
+        if (self::isComposerAutoloaderOptimized()) {
             $hasErrors = true;
             $output->writeln('');
+            $output->writeln('<comment>Warning: Optimized autoloader detected.</comment>');
+            $output->writeln('Ignore if you are in a production environment, otherwise run: composer dump');
+            $output->writeln('');
+        } else {
+            $output->writeln('<info>OK</info>');
         }
 
         // Check for M1 core files
         $output->write('Checking Magento/OpenMage core... ');
-        $folders = [
-            'app/bootstrap.php',
-            'app/Mage.php',
-            'app/code/core',
-        ];
-        $existingFolders = [];
-        foreach ($folders as $folder) {
-            if (file_exists(MAHO_ROOT_DIR . "/{$folder}")) {
-                $existingFolders[] = $folder;
-            }
-        }
+        $existingFolders = self::findExistingPaths(self::LEGACY_CORE_FILES);
 
         if (empty($existingFolders)) {
             $output->writeln('<info>OK</info>');
@@ -483,22 +517,7 @@ class HealthCheck extends BaseMahoCommand
 
         // Check for deprecated folders
         $output->write('Checking for deprecated folders... ');
-        $folders = [
-            'app/code/core/Zend',
-            'lib/Cm',
-            'lib/Credis',
-            'lib/mcryptcompat',
-            'lib/Pelago',
-            'lib/phpseclib',
-            'lib/Zend',
-            'skin',
-        ];
-        $existingFolders = [];
-        foreach ($folders as $folder) {
-            if (file_exists(MAHO_ROOT_DIR . "/{$folder}")) {
-                $existingFolders[] = $folder;
-            }
-        }
+        $existingFolders = self::findExistingPaths(self::DEPRECATED_FOLDERS);
         if (empty($existingFolders)) {
             $output->writeln('<info>OK</info>');
         } else {

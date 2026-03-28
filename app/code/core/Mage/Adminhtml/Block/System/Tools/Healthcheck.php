@@ -231,146 +231,50 @@ class Mage_Adminhtml_Block_System_Tools_Healthcheck extends Mage_Adminhtml_Block
     {
         $checks = [];
 
-        $checks[] = $this->checkComposer();
-        $checks[] = $this->checkMagentoCoreFiles();
-        $checks[] = $this->checkDeprecatedFolders();
-        $checks[] = $this->checkOrphanedResources('admin');
-        $checks[] = $this->checkOrphanedResources('api');
-
-        return $checks;
-    }
-
-    /**
-     * @return array{check: string, status: string, severity: string, details: string}
-     */
-    private function checkComposer(): array
-    {
-        /** @var \Composer\Autoload\ClassLoader $composerClassLoader */
-        $composerClassLoader = require MAHO_ROOT_DIR . '/vendor/autoload.php';
-
-        $classMap = $composerClassLoader->getClassMap();
-        if (isset($classMap['Mage_Core_Model_App'])) {
-            return [
-                'check' => $this->__('Composer Autoloader'),
-                'status' => $this->__('Warning'),
-                'severity' => 'warning',
-                'details' => $this->__('Optimized autoloader detected. This is fine for production, but may cause issues during development. Run "composer dump" to fix.'),
-            ];
-        }
-
-        return [
+        $isOptimized = \MahoCLI\Commands\HealthCheck::isComposerAutoloaderOptimized();
+        $checks[] = [
             'check' => $this->__('Composer Autoloader'),
-            'status' => $this->__('OK'),
-            'severity' => 'ok',
-            'details' => '',
+            'status' => $isOptimized ? $this->__('Warning') : $this->__('OK'),
+            'severity' => $isOptimized ? 'warning' : 'ok',
+            'details' => $isOptimized ? $this->__('Optimized autoloader detected. This is fine for production, but may cause issues during development. Run "composer dump" to fix.') : '',
         ];
-    }
 
-    /**
-     * @return array{check: string, status: string, severity: string, details: string}
-     */
-    private function checkMagentoCoreFiles(): array
-    {
-        $files = ['app/bootstrap.php', 'app/Mage.php', 'app/code/core'];
-        $existing = [];
-        foreach ($files as $file) {
-            if (file_exists(MAHO_ROOT_DIR . "/{$file}")) {
-                $existing[] = $file;
-            }
-        }
-
-        if (!empty($existing)) {
-            return [
-                'check' => $this->__('Legacy Core Files'),
-                'status' => $this->__('Error'),
-                'severity' => 'error',
-                'details' => $this->__('Found old Magento/OpenMage files: %s. These should be removed.', implode(', ', $existing)),
-            ];
-        }
-
-        return [
+        $legacyFiles = \MahoCLI\Commands\HealthCheck::findExistingPaths(\MahoCLI\Commands\HealthCheck::LEGACY_CORE_FILES);
+        $checks[] = [
             'check' => $this->__('Legacy Core Files'),
-            'status' => $this->__('OK'),
-            'severity' => 'ok',
-            'details' => '',
+            'status' => empty($legacyFiles) ? $this->__('OK') : $this->__('Error'),
+            'severity' => empty($legacyFiles) ? 'ok' : 'error',
+            'details' => empty($legacyFiles) ? '' : $this->__('Found old Magento/OpenMage files: %s. These should be removed.', implode(', ', $legacyFiles)),
         ];
-    }
 
-    /**
-     * @return array{check: string, status: string, severity: string, details: string}
-     */
-    private function checkDeprecatedFolders(): array
-    {
-        $folders = [
-            'app/code/core/Zend', 'lib/Cm', 'lib/Credis', 'lib/mcryptcompat',
-            'lib/Pelago', 'lib/phpseclib', 'lib/Zend', 'skin',
-        ];
-        $existing = [];
-        foreach ($folders as $folder) {
-            if (file_exists(MAHO_ROOT_DIR . "/{$folder}")) {
-                $existing[] = $folder;
-            }
-        }
-
-        if (!empty($existing)) {
-            return [
-                'check' => $this->__('Deprecated Folders'),
-                'status' => $this->__('Error'),
-                'severity' => 'error',
-                'details' => $this->__('Found deprecated folders: %s. Remove them to avoid unpredictable behavior.', implode(', ', $existing)),
-            ];
-        }
-
-        return [
+        $deprecatedFolders = \MahoCLI\Commands\HealthCheck::findExistingPaths(\MahoCLI\Commands\HealthCheck::DEPRECATED_FOLDERS);
+        $checks[] = [
             'check' => $this->__('Deprecated Folders'),
-            'status' => $this->__('OK'),
-            'severity' => 'ok',
-            'details' => '',
+            'status' => empty($deprecatedFolders) ? $this->__('OK') : $this->__('Error'),
+            'severity' => empty($deprecatedFolders) ? 'ok' : 'error',
+            'details' => empty($deprecatedFolders) ? '' : $this->__('Found deprecated folders: %s. Remove them to avoid unpredictable behavior.', implode(', ', $deprecatedFolders)),
         ];
-    }
 
-    /**
-     * @return array{check: string, status: string, severity: string, details: string}
-     */
-    private function checkOrphanedResources(string $type): array
-    {
-        $label = $type === 'admin' ? $this->__('Admin') : $this->__('API');
-
-        try {
-            $rulesResource = Mage::getResourceModel("{$type}/rules");
-            if (!method_exists($rulesResource, 'getOrphanedResourcesCollection')) {
-                throw new \RuntimeException("Unable to load {$type}/rules resource model");
-            }
-            $collection = $rulesResource->getOrphanedResourcesCollection();
-
-            $orphanedIds = [];
-            foreach ($collection as $item) {
-                $orphanedIds[] = $item->getResourceId();
-            }
-
-            if (!empty($orphanedIds)) {
-                return [
+        foreach (['admin' => $this->__('Admin'), 'api' => $this->__('API')] as $type => $label) {
+            try {
+                $orphanedIds = \MahoCLI\Commands\HealthCheck::findOrphanedResourceIds($type);
+                $checks[] = [
                     'check' => $this->__('%s Orphaned Role Resources', $label),
-                    'status' => $this->__('Warning'),
-                    'severity' => 'warning',
-                    'details' => $this->__('Found %d orphaned resource(s): %s', count($orphanedIds), implode(', ', $orphanedIds)),
+                    'status' => empty($orphanedIds) ? $this->__('OK') : $this->__('Warning'),
+                    'severity' => empty($orphanedIds) ? 'ok' : 'warning',
+                    'details' => empty($orphanedIds) ? '' : $this->__('Found %d orphaned resource(s): %s', count($orphanedIds), implode(', ', $orphanedIds)),
+                ];
+            } catch (\Exception) {
+                $checks[] = [
+                    'check' => $this->__('%s Orphaned Role Resources', $label),
+                    'status' => $this->__('Error'),
+                    'severity' => 'error',
+                    'details' => $this->__('Unable to check orphaned resources.'),
                 ];
             }
-
-            return [
-                'check' => $this->__('%s Orphaned Role Resources', $label),
-                'status' => $this->__('OK'),
-                'severity' => 'ok',
-                'details' => '',
-            ];
-        } catch (\Exception) {
-            return [
-                'check' => $this->__('%s Orphaned Role Resources', $label),
-                'status' => $this->__('Error'),
-                'severity' => 'error',
-                'details' => $this->__('Unable to check orphaned resources.'),
-            ];
         }
+
+        return $checks;
     }
 
     private function formatBytes(int $bytes): string
