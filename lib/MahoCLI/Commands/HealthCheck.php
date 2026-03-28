@@ -562,8 +562,8 @@ class HealthCheck extends BaseMahoCommand
         // Check for orphaned role resources (requires database)
         $this->initMaho();
 
-        $this->checkOrphanedResources($input, $output, 'admin', 'admin');
-        $this->checkOrphanedResources($input, $output, 'api', 'API');
+        $this->checkOrphanedResources($input, $output, Mage::getResourceModel('admin/rules'), 'admin');
+        $this->checkOrphanedResources($input, $output, Mage::getResourceModel('api/rules'), 'API');
 
         if ($hasErrors) {
             return Command::FAILURE;
@@ -575,13 +575,12 @@ class HealthCheck extends BaseMahoCommand
     private function checkOrphanedResources(
         InputInterface $input,
         OutputInterface $output,
-        string $module,
+        \Mage_Admin_Model_Resource_Rules|\Mage_Api_Model_Resource_Rules $rulesResource,
         string $label,
     ): void {
         $output->write("Checking for orphaned {$label} role resources... ");
 
-        $rulesResource = Mage::getResourceModel("{$module}/rules");
-        $collection = $rulesResource->getOrphanedResourcesCollection(); // @phpstan-ignore method.nonObject
+        $collection = $rulesResource->getOrphanedResourcesCollection();
 
         $orphanedIds = [];
         foreach ($collection as $item) {
@@ -606,7 +605,7 @@ class HealthCheck extends BaseMahoCommand
             false,
         );
         if ($helper->ask($input, $output, $question)) {
-            $deleted = $rulesResource->deleteOrphanedResources($orphanedIds); // @phpstan-ignore method.nonObject
+            $deleted = $rulesResource->deleteOrphanedResources($orphanedIds);
             $output->writeln("<info>Deleted {$deleted} orphaned {$label} role resource rule(s).</info>");
         }
         $output->writeln('');
