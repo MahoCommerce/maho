@@ -84,6 +84,19 @@ class Mage_Admin_Model_Resource_Rules extends Mage_Core_Model_Resource_Db_Abstra
     }
 
     /**
+     * Get collection of orphaned resources (in database but no longer defined in ACL)
+     */
+    public function getOrphanedResourcesCollection(): Mage_Core_Model_Resource_Db_Collection_Abstract
+    {
+        $validResources = Mage::getModel('admin/roles')->getResourcesList2D();
+        $collection = Mage::getResourceModel('admin/rules_collection')
+            ->addFieldToFilter('resource_id', ['nin' => $validResources])
+            ->addFieldToSelect('resource_id');
+        $collection->getSelect()->group('resource_id');
+        return $collection;
+    }
+
+    /**
      * Delete orphaned resources
      *
      * @throws Mage_Core_Exception

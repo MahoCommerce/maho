@@ -580,11 +580,7 @@ class HealthCheck extends BaseMahoCommand
     ): void {
         $output->write("Checking for orphaned {$label} role resources... ");
 
-        $validResources = Mage::getModel("{$module}/roles")->getResourcesList2D();
-        $collection = Mage::getResourceModel("{$module}/rules_collection")
-            ->addFieldToFilter('resource_id', ['nin' => $validResources])
-            ->addFieldToSelect('resource_id');
-        $collection->getSelect()->group('resource_id');
+        $collection = Mage::getResourceModel("{$module}/rules")->getOrphanedResourcesCollection();
 
         $orphanedIds = [];
         foreach ($collection as $item) {

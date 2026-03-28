@@ -23,12 +23,7 @@ class Mage_Adminhtml_Block_Api_OrphanedResource_Grid extends Mage_Adminhtml_Bloc
     #[\Override]
     protected function _prepareCollection()
     {
-        $acl = Mage::getModel('api/acl');
-        Mage::getSingleton('api/config')->loadAclResources($acl);
-        $collection = Mage::getResourceModel('api/rules_collection')
-            ->addFieldToFilter('resource_id', ['nin' => $acl->getResources()])
-            ->addFieldToSelect('resource_id');
-        $collection->getSelect()->group('resource_id');
+        $collection = Mage::getResourceModel('api/rules')->getOrphanedResourcesCollection();
 
         /**
          * In order for mass action selection to work properly, we need to overwrite

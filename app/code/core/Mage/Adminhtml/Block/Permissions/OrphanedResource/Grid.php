@@ -24,10 +24,7 @@ class Mage_Adminhtml_Block_Permissions_OrphanedResource_Grid extends Mage_Adminh
     #[\Override]
     protected function _prepareCollection()
     {
-        $collection = Mage::getResourceModel('admin/rules_collection')
-            ->addFieldToFilter('resource_id', ['nin' => Mage::getSingleton('admin/session')->getAcl()->getResources()])
-            ->addFieldToSelect('resource_id');
-        $collection->getSelect()->group('resource_id');
+        $collection = Mage::getResourceModel('admin/rules')->getOrphanedResourcesCollection();
 
         /**
          * In order for mass action selection to work properly, we need to overwrite
