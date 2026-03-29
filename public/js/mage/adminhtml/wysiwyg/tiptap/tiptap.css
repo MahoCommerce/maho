@@ -154,6 +154,16 @@
             opacity: 1;
             transform: translateX(-50%) translateY(4px);
         }
+
+        &:last-child[title]::after {
+            left: auto;
+            right: 0;
+            transform: translateY(8px);
+        }
+
+        &:last-child[title]:hover::after {
+            transform: translateY(4px);
+        }
     }
 
     select {
@@ -801,6 +811,8 @@
     left: 0;
     z-index: 1000;
     min-width: 180px;
+    max-height: 50vh;
+    overflow-y: auto;
     background-color: var(--tt-color-bg);
     border: 1px solid var(--tt-color-border);
     border-radius: var(--tt-radius-lg);
