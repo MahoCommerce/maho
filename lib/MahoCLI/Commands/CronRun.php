@@ -60,6 +60,11 @@ class CronRun extends BaseMahoCommand
 
         // If the job is in the cron_schedule table, we execute it and "burn" that record
         $jobCode = $modeOrJobCode;
+
+        if (Mage::helper('cron')->isJobDisabled($jobCode)) {
+            $output->writeln("<comment>{$jobCode} is disabled in admin. Running anyway via CLI.</comment>");
+        }
+
         $jobConfig = $this->getJobConfig($jobCode);
         if (!$jobConfig) {
             $output->writeln("<error>Unknown mode/job: {$modeOrJobCode}</error>");

@@ -84,6 +84,9 @@ class Mage_Cron_Model_Observer
 
         /** @var Mage_Cron_Model_Schedule $schedule */
         foreach ($schedules->getIterator() as $schedule) {
+            if (Mage::helper('cron')->isJobDisabled($schedule->getJobCode())) {
+                continue;
+            }
             $jobConfig = $jobsRoot->{$schedule->getJobCode()};
             if (!$jobConfig || !$jobConfig->run) {
                 $jobConfig = $defaultJobsRoot->{$schedule->getJobCode()};
@@ -192,6 +195,9 @@ class Mage_Cron_Model_Observer
         $schedule = Mage::getModel('cron/schedule');
 
         foreach ($jobs as $jobCode => $jobConfig) {
+            if (Mage::helper('cron')->isJobDisabled($jobCode)) {
+                continue;
+            }
             $cronExpr = null;
             if ($jobConfig->schedule->config_path) {
                 $cronExpr = Mage::getStoreConfig((string) $jobConfig->schedule->config_path);
@@ -277,6 +283,10 @@ class Mage_Cron_Model_Observer
     protected function _processAlwaysTask($jobCode, $jobConfig)
     {
         if (!$jobConfig || !$jobConfig->run) {
+            return;
+        }
+
+        if (Mage::helper('cron')->isJobDisabled($jobCode)) {
             return;
         }
 

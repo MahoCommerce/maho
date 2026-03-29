@@ -59,6 +59,9 @@
         </events>
     </crontab>
     <default>
+        <cron>
+            <disabled_jobs></disabled_jobs>
+        </cron>
         <system>
             <cron>
                 <schedule_generate_every>15</schedule_generate_every>

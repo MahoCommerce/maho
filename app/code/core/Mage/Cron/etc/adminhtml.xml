@@ -5,10 +5,15 @@
             <children>
                 <tools>
                     <children>
-                        <cronjobs translate="title" module="cron">
-                            <title>Cron Jobs</title>
-                            <action>adminhtml/system_tools_cronjobs</action>
+                        <cronjobs_configured translate="title" module="cron">
+                            <title>Configured Cron Jobs</title>
+                            <action>adminhtml/system_tools_cronjobs/configured</action>
                             <sort_order>10</sort_order>
+                        </cronjobs_configured>
+                        <cronjobs translate="title" module="cron">
+                            <title>Cron Schedule</title>
+                            <action>adminhtml/system_tools_cronjobs/index</action>
+                            <sort_order>11</sort_order>
                         </cronjobs>
                     </children>
                 </tools>

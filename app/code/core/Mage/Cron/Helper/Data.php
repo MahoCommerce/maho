@@ -8,10 +8,232 @@ declare(strict_types=1);
  * @package    Mage_Cron
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
  * @copyright  Copyright (c) 2022-2024 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
 class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Cron';
+
+    public const CONFIG_PATH_DISABLED_JOBS = 'cron/disabled_jobs';
+
+    public function getConfiguredJobs(): array
+    {
+        $jobs = [];
+        $cronNode = Mage::getConfig()->getNode('crontab/jobs');
+        $defaultCronNode = Mage::getConfig()->getNode('default/crontab/jobs');
+
+        if ($cronNode) {
+            $jobs = array_merge($jobs, $cronNode->asArray());
+        }
+        if ($defaultCronNode) {
+            $jobs = array_merge($jobs, $defaultCronNode->asArray());
+        }
+        ksort($jobs, SORT_NATURAL | SORT_FLAG_CASE);
+
+        $result = [];
+        foreach ($jobs as $jobCode => $jobConfig) {
+            $cronExpr = '';
+            $configPath = '';
+            if (!empty($jobConfig['schedule']['config_path'])) {
+                $configPath = $jobConfig['schedule']['config_path'];
+                $cronExpr = (string) Mage::getStoreConfig($configPath);
+            }
+            if (empty($cronExpr) && !empty($jobConfig['schedule']['cron_expr'])) {
+                $cronExpr = $jobConfig['schedule']['cron_expr'];
+            }
+
+            $result[$jobCode] = [
+                'job_code' => $jobCode,
+                'model_method' => $jobConfig['run']['model'] ?? '',
+                'cron_expr' => $cronExpr,
+                'config_path' => $configPath,
+            ];
+        }
+
+        return $result;
+    }
+
+    public function getHumanReadableCronExpr(string $expr): string
+    {
+        $expr = trim($expr);
+        if ($expr === '') {
+            return $this->__('Not scheduled');
+        }
+        if ($expr === 'always') {
+            return $this->__('Every cron run');
+        }
+
+        $parts = preg_split('#\s+#', $expr, -1, PREG_SPLIT_NO_EMPTY);
+        if (count($parts) < 5) {
+            return $expr;
+        }
+
+        [$min, $hour, $day, $month, $weekday] = $parts;
+
+        if ($min === '*' && $hour === '*' && $day === '*' && $month === '*' && $weekday === '*') {
+            return $this->__('Every minute');
+        }
+
+        if (preg_match('#^\*/(\d+)$#', $min, $m) && $hour === '*' && $day === '*' && $month === '*' && $weekday === '*') {
+            return $this->__('Every %d minutes', (int) $m[1]);
+        }
+
+        if ($min === '0' && $hour === '*' && $day === '*' && $month === '*' && $weekday === '*') {
+            return $this->__('Every hour');
+        }
+
+        if (preg_match('#^\*/(\d+)$#', $hour, $m) && is_numeric($min) && $day === '*' && $month === '*' && $weekday === '*') {
+            return $this->__('Every %d hours at minute %d', (int) $m[1], (int) $min);
+        }
+
+        if (is_numeric($min) && is_numeric($hour) && $day === '*' && $month === '*' && $weekday === '*') {
+            return $this->__('Daily at %s', sprintf('%d:%02d', (int) $hour, (int) $min));
+        }
+
+        if (is_numeric($min) && is_numeric($hour) && $day === '*' && $month === '*' && is_numeric($weekday)) {
+            $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            $dayName = $days[(int) $weekday] ?? $weekday;
+            return $this->__('Weekly on %s at %s', $dayName, sprintf('%d:%02d', (int) $hour, (int) $min));
+        }
+
+        if (is_numeric($min) && is_numeric($hour) && is_numeric($day) && $month === '*' && $weekday === '*') {
+            return $this->__('Monthly on day %d at %s', (int) $day, sprintf('%d:%02d', (int) $hour, (int) $min));
+        }
+
+        return $this->_buildFieldDescription($parts);
+    }
+
+    protected function _buildFieldDescription(array $parts): string
+    {
+        $labels = [];
+
+        if ($parts[0] !== '*') {
+            $labels[] = $this->__('minute %s', $parts[0]);
+        }
+        if ($parts[1] !== '*') {
+            $labels[] = $this->__('hour %s', $parts[1]);
+        }
+        if ($parts[2] !== '*') {
+            $labels[] = $this->__('day %s', $parts[2]);
+        }
+        if ($parts[3] !== '*') {
+            $labels[] = $this->__('month %s', $parts[3]);
+        }
+        if ($parts[4] !== '*') {
+            $labels[] = $this->__('weekday %s', $parts[4]);
+        }
+
+        return $this->__('At %s', implode(', ', $labels));
+    }
+
+    public function getNextRunTime(string $cronExpr): ?string
+    {
+        if (empty($cronExpr) || $cronExpr === 'always') {
+            return null;
+        }
+
+        try {
+            $schedule = Mage::getModel('cron/schedule');
+            $schedule->setCronExpr($cronExpr);
+        } catch (\Exception) {
+            return null;
+        }
+
+        $now = time();
+        $maxTime = $now + 172800; // 48 hours
+
+        for ($time = $now; $time < $maxTime; $time += 60) {
+            if ($schedule->trySchedule($time)) {
+                return date('Y-m-d H:i:s', $time);
+            }
+        }
+
+        return null;
+    }
+
+    public function getLastExecution(string $jobCode): ?array
+    {
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $table = $resource->getTableName('cron/schedule');
+
+        $row = $adapter->fetchRow(
+            $adapter->select()
+                ->from($table, ['executed_at', 'finished_at', 'status'])
+                ->where('job_code = ?', $jobCode)
+                ->where('executed_at IS NOT NULL')
+                ->order('executed_at DESC')
+                ->limit(1),
+        );
+
+        if (!$row) {
+            return null;
+        }
+
+        $duration = null;
+        if ($row['executed_at'] && $row['finished_at']) {
+            $duration = strtotime($row['finished_at']) - strtotime($row['executed_at']);
+        }
+
+        return [
+            'executed_at' => $row['executed_at'],
+            'finished_at' => $row['finished_at'],
+            'status' => $row['status'],
+            'duration' => $duration,
+        ];
+    }
+
+    public function formatDuration(?int $seconds): string
+    {
+        if ($seconds === null) {
+            return '';
+        }
+        if ($seconds < 60) {
+            return $this->__('%ds', $seconds);
+        }
+        $minutes = intdiv($seconds, 60);
+        $secs = $seconds % 60;
+        if ($minutes < 60) {
+            return $secs > 0 ? $this->__('%dm %ds', $minutes, $secs) : $this->__('%dm', $minutes);
+        }
+        $hours = intdiv($minutes, 60);
+        $mins = $minutes % 60;
+        return $mins > 0 ? $this->__('%dh %dm', $hours, $mins) : $this->__('%dh', $hours);
+    }
+
+    public function getDisabledJobs(): array
+    {
+        $value = Mage::getStoreConfig(self::CONFIG_PATH_DISABLED_JOBS);
+        if (empty($value)) {
+            return [];
+        }
+        $decoded = json_decode($value, true);
+        return is_array($decoded) ? $decoded : [];
+    }
+
+    public function isJobDisabled(string $jobCode): bool
+    {
+        return in_array($jobCode, $this->getDisabledJobs(), true);
+    }
+
+    public function setJobDisabled(string $jobCode, bool $disabled): void
+    {
+        $jobs = $this->getDisabledJobs();
+        $key = array_search($jobCode, $jobs, true);
+
+        if ($disabled && $key === false) {
+            $jobs[] = $jobCode;
+        } elseif (!$disabled && $key !== false) {
+            unset($jobs[$key]);
+            $jobs = array_values($jobs);
+        } else {
+            return;
+        }
+
+        $value = empty($jobs) ? '' : json_encode($jobs);
+        Mage::getConfig()->saveConfig(self::CONFIG_PATH_DISABLED_JOBS, $value);
+        Mage::getConfig()->reinit();
+    }
 }
