@@ -45,6 +45,9 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             }
         }
 
+        $model->getConditions()->setJsFormObject('rule_conditions_fieldset');
+        $model->getActions()->setJsFormObject('rule_actions_fieldset');
+
         // Register the current rule for use in blocks
         Mage::register('current_linkrule', $model);
 
