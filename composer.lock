@@ -1197,7 +1197,7 @@
         },
         {
             "name": "mahocommerce/icons",
-            "version": "3.41.0",
+            "version": "3.41.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/icons.git",
@@ -1217,7 +1217,7 @@
             "description": "A huge package of optimized SVG icons",
             "support": {
                 "issues": "https://github.com/MahoCommerce/icons/issues",
-                "source": "https://github.com/MahoCommerce/icons/tree/3.41.0"
+                "source": "https://github.com/MahoCommerce/icons/tree/3.41.1"
             },
             "time": "2026-03-27T00:12:25+00:00"
         },
