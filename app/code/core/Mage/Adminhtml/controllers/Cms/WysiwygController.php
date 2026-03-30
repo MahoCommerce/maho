@@ -33,7 +33,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
                 Mage::throwException(Mage::helper('core')->__('Invalid stream.'));
             }
 
-            $image = Maho::getImageManager()->read($path)->encode();
+            $image = Maho::getImageManager()->decodePath($path)->encodeUsingPath($path);
 
             $this->getResponse()
                 ->setHttpResponseCode(200)

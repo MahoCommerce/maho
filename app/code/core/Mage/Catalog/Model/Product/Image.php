@@ -420,9 +420,9 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
     {
         if (!$this->image) {
             $imageManager = Maho::getImageManager(['blendingColor' => $this->_backgroundColorStr]);
-            $this->image = $imageManager->read($this->getBaseFile());
+            $this->image = $imageManager->decodePath($this->getBaseFile());
             if ($this->_backgroundColor) {
-                $this->image->blendTransparency($this->_backgroundColorStr);
+                $this->image->fillTransparentAreas($this->_backgroundColorStr);
             }
         }
 
@@ -436,14 +436,14 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         }
 
         if ($this->_width && $this->_height) {
-            $this->getImage()->pad($this->_width, $this->_height, $this->_backgroundColorStr);
+            $this->getImage()->containDown($this->_width, $this->_height, $this->_backgroundColorStr);
         } elseif ($this->_keepFrame) {
             if ($this->_width) {
                 $this->setHeight($this->_width);
             } else {
                 $this->setWidth($this->_height);
             }
-            $this->getImage()->pad($this->_width, $this->_height, $this->_backgroundColorStr);
+            $this->getImage()->containDown($this->_width, $this->_height, $this->_backgroundColorStr);
         } else {
             $this->getImage()->scaleDown($this->_width, $this->_height);
         }
@@ -511,26 +511,26 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
         if ($filePath) {
             if ($this->getWatermarkPosition() === 'stretch') {
                 $element = Maho::getImageManager()
-                    ->read($filePath)
+                    ->decodePath($filePath)
                     ->resize($this->getOriginalWidth(), $this->getOriginalHeight());
             } elseif ($this->getWatermarkPosition() === 'tile') {
                 $tile = Maho::getImageManager()
-                    ->read($filePath);
+                    ->decodePath($filePath);
                 $element = Maho::getImageManager()
-                    ->create($this->getOriginalWidth(), $this->getOriginalHeight());
+                    ->createImage($this->getOriginalWidth(), $this->getOriginalHeight());
                 for ($x = 0; $x < ceil($element->width() / $tile->width()); $x++) {
                     for ($y = 0; $y < ceil($element->height() / $tile->height()); $y++) {
-                        $element->place($tile, 'top-left', $x * $tile->width(), $y * $tile->height());
+                        $element->insert($tile, $x * $tile->width(), $y * $tile->height(), 'top-left');
                     }
                 }
             } else {
                 $element = $filePath;
             }
 
-            $this->getImage()->place(
+            $this->getImage()->insert(
                 $element,
-                position: $this->getWatermarkPosition(),
-                opacity: $this->getWatermarkImageOpacity(),
+                alignment: $this->getWatermarkPosition(),
+                transparency: $this->getWatermarkImageOpacity() / 100,
             );
         }
 

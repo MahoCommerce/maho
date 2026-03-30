@@ -51,7 +51,7 @@ class Mage_Catalog_Model_Api2_Product_Image_Rest_Admin_V1 extends Mage_Catalog_M
             // try to create Image object to check if image data is valid
             try {
                 $filePath = "{$apiTempDir}/{$imageFileName}";
-                Maho::getImageManager()->read($filePath);
+                Maho::getImageManager()->decodePath($filePath);
                 Mage::getModel('core/file_validator_image')->validate($filePath);
             } catch (Exception $e) {
                 $ioAdapter->rmdir($apiTempDir, true);
