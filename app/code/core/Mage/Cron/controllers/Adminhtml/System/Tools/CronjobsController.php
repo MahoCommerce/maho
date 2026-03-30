@@ -15,7 +15,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
     #[\Override]
     public function preDispatch(): self
     {
-        $this->_setForcedFormKeyActions(['massDelete', 'massDisable', 'massEnable', 'run', 'toggle']);
+        $this->_setForcedFormKeyActions(['clearHistory', 'massDisable', 'massEnable', 'run', 'toggle']);
         return parent::preDispatch();
     }
 
@@ -32,8 +32,8 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             Mage::helper('cron')->__('Tools'),
         );
         $this->_addBreadcrumb(
-            Mage::helper('cron')->__('Cron Schedule'),
-            Mage::helper('cron')->__('Cron Schedule'),
+            Mage::helper('cron')->__('Cron Jobs'),
+            Mage::helper('cron')->__('Cron Jobs'),
         );
         $this->_addContent($this->getLayout()->createBlock('cron/adminhtml_system_tools_cronjobs'));
         $this->renderLayout();
@@ -47,55 +47,72 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         );
     }
 
-    public function massDeleteAction(): void
+    public function clearHistoryAction(): void
     {
-        $scheduleIds = $this->getRequest()->getParam('schedule_ids');
-        if (!is_array($scheduleIds)) {
-            Mage::getSingleton('adminhtml/session')->addError($this->__('Please select cron job(s).'));
-        } else {
-            try {
-                $collection = Mage::getModel('cron/schedule')->getCollection()
-                    ->addFieldToFilter('schedule_id', ['in' => $scheduleIds]);
-                $deletedCount = count($collection);
-                foreach ($collection as $schedule) {
-                    $schedule->delete();
-                }
-                Mage::getSingleton('adminhtml/session')->addSuccess(
-                    $this->__('Total of %d cron job(s) were deleted.', $deletedCount),
-                );
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-            }
+        try {
+            $resource = Mage::getSingleton('core/resource');
+            $adapter = $resource->getConnection('core_write');
+            $table = $resource->getTableName('cron/schedule');
+            $deleted = $adapter->delete($table, [
+                'status IN (?)' => [
+                    Mage_Cron_Model_Schedule::STATUS_SUCCESS,
+                    Mage_Cron_Model_Schedule::STATUS_MISSED,
+                    Mage_Cron_Model_Schedule::STATUS_ERROR,
+                ],
+            ]);
+            Mage::getSingleton('adminhtml/session')->addSuccess(
+                $this->__('Cron history has been cleared. %d record(s) deleted.', $deleted),
+            );
+        } catch (Exception $e) {
+            Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         }
+
         $this->_redirect('*/*/index');
     }
 
-    public function configuredAction(): void
+    public function historyAction(): void
     {
-        $this->loadLayout();
-        $this->_setActiveMenu('system/tools/cronjobs_configured');
-        $this->_addBreadcrumb(
-            Mage::helper('cron')->__('System'),
-            Mage::helper('cron')->__('System'),
-        );
-        $this->_addBreadcrumb(
-            Mage::helper('cron')->__('Tools'),
-            Mage::helper('cron')->__('Tools'),
-        );
-        $this->_addBreadcrumb(
-            Mage::helper('cron')->__('Configured Cron Jobs'),
-            Mage::helper('cron')->__('Configured Cron Jobs'),
-        );
-        $this->_addContent($this->getLayout()->createBlock('cron/adminhtml_system_tools_cronjobs_configured'));
-        $this->renderLayout();
-    }
+        $jobCode = $this->getRequest()->getParam('job_code');
+        if (!$jobCode) {
+            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No job code specified.')]);
+            return;
+        }
 
-    public function configuredGridAction(): void
-    {
-        $this->loadLayout();
-        $this->getResponse()->setBody(
-            $this->getLayout()->createBlock('cron/adminhtml_system_tools_cronjobs_configured_grid')->toHtml(),
+        /** @var Mage_Cron_Helper_Data $helper */
+        $helper = Mage::helper('cron');
+
+        $resource = Mage::getSingleton('core/resource');
+        $adapter = $resource->getConnection('core_read');
+        $table = $resource->getTableName('cron/schedule');
+
+        $rows = $adapter->fetchAll(
+            $adapter->select()
+                ->from($table)
+                ->where('job_code = ?', $jobCode)
+                ->order('schedule_id DESC')
+                ->limit(50),
         );
+
+        $records = [];
+        foreach ($rows as $row) {
+            $duration = null;
+            if ($row['executed_at'] && $row['finished_at']) {
+                $duration = $helper->formatDuration(strtotime($row['finished_at']) - strtotime($row['executed_at']));
+            }
+
+            $records[] = [
+                'schedule_id' => $row['schedule_id'],
+                'status' => $row['status'],
+                'messages' => $row['messages'] ?? '',
+                'created_at' => $row['created_at'],
+                'scheduled_at' => $row['scheduled_at'],
+                'executed_at' => $row['executed_at'],
+                'finished_at' => $row['finished_at'],
+                'duration' => $duration,
+            ];
+        }
+
+        $this->_sendJsonResponse(['records' => $records]);
     }
 
     public function runAction(): void
@@ -224,7 +241,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $jobCode = $this->getRequest()->getParam('job_code');
         if (!$jobCode) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('No job code specified.'));
-            $this->_redirect('*/*/configured');
+            $this->_redirect('*/*/index');
             return;
         }
 
@@ -247,7 +264,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         }
 
-        $this->_redirect('*/*/configured');
+        $this->_redirect('*/*/index');
     }
 
     public function massDisableAction(): void
@@ -255,7 +272,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $jobCodes = $this->getRequest()->getParam('job_codes');
         if (!is_array($jobCodes)) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('Please select cron job(s).'));
-            $this->_redirect('*/*/configured');
+            $this->_redirect('*/*/index');
             return;
         }
 
@@ -276,7 +293,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         }
 
-        $this->_redirect('*/*/configured');
+        $this->_redirect('*/*/index');
     }
 
     public function massEnableAction(): void
@@ -284,7 +301,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $jobCodes = $this->getRequest()->getParam('job_codes');
         if (!is_array($jobCodes)) {
             Mage::getSingleton('adminhtml/session')->addError($this->__('Please select cron job(s).'));
-            $this->_redirect('*/*/configured');
+            $this->_redirect('*/*/index');
             return;
         }
 
@@ -305,7 +322,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
         }
 
-        $this->_redirect('*/*/configured');
+        $this->_redirect('*/*/index');
     }
 
     #[\Override]

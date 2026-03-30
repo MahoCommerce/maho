@@ -14,8 +14,14 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs extends Mage_Adminhtml_Blo
     {
         $this->_blockGroup = 'cron';
         $this->_controller = 'adminhtml_system_tools_cronjobs';
-        $this->_headerText = Mage::helper('cron')->__('Cron Schedule');
+        $this->_headerText = Mage::helper('cron')->__('Cron Jobs');
         parent::__construct();
         $this->_removeButton('add');
+
+        $this->_addButton('clear_history', [
+            'label' => Mage::helper('cron')->__('Clear History'),
+            'onclick' => "setLocation('{$this->getUrl('*/*/clearHistory')}')",
+            'class' => 'delete',
+        ]);
     }
 }
