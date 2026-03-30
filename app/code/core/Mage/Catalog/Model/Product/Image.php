@@ -509,11 +509,14 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
 
         $filePath = $this->_getWatermarkFilePath();
         if ($filePath) {
-            if ($this->getWatermarkPosition() === 'stretch') {
+            $position = $this->getWatermarkPosition();
+
+            if ($position === 'stretch') {
                 $element = Maho::getImageManager()
                     ->decodePath($filePath)
                     ->resize($this->getOriginalWidth(), $this->getOriginalHeight());
-            } elseif ($this->getWatermarkPosition() === 'tile') {
+                $position = 'top-left';
+            } elseif ($position === 'tile') {
                 $tile = Maho::getImageManager()
                     ->decodePath($filePath);
                 $element = Maho::getImageManager()
@@ -523,13 +526,14 @@ class Mage_Catalog_Model_Product_Image extends Mage_Core_Model_Abstract
                         $element->insert($tile, $x * $tile->width(), $y * $tile->height(), 'top-left');
                     }
                 }
+                $position = 'top-left';
             } else {
                 $element = $filePath;
             }
 
             $this->getImage()->insert(
                 $element,
-                alignment: $this->getWatermarkPosition(),
+                alignment: $position,
                 transparency: $this->getWatermarkImageOpacity() / 100,
             );
         }
