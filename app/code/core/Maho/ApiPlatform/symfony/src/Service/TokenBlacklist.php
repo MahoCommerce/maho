@@ -13,6 +13,14 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
+/**
+ * Filesystem-based JWT token blacklist for logout/revocation.
+ *
+ * IMPORTANT: This implementation uses local filesystem storage. In multi-server
+ * deployments (load-balanced web tier, Kubernetes pods), a token revoked on one
+ * server will NOT be recognized by other servers until the token's natural expiry.
+ * For multi-server setups, replace this with a shared store (Redis, database).
+ */
 class TokenBlacklist
 {
     private string $dir;
