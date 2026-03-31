@@ -15,6 +15,15 @@ namespace Maho\ApiPlatform\Service;
 
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
+/**
+ * Filesystem-based rate limiter for API endpoints.
+ *
+ * IMPORTANT: This implementation uses local filesystem storage. In multi-server
+ * deployments (load-balanced web tier, Kubernetes pods), each server tracks its
+ * own counters independently — effectively multiplying the allowed burst rate by
+ * the number of servers. For multi-server setups, replace this with a shared
+ * store (Redis, database).
+ */
 class RateLimiter
 {
     private string $cacheDir;
