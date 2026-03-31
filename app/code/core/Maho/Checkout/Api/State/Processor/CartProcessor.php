@@ -487,7 +487,7 @@ final class CartProcessor implements ProcessorInterface
         $args = $context['args']['input'] ?? [];
         $maskedId = $args['maskedId'] ?? null;
         $requestedCustomerId = $args['customerId'] ?? null;
-        $authenticatedCustomerId = $context['customer_id'] ?? null;
+        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
 
         if (!$maskedId) {
             throw new \RuntimeException('Masked cart ID is required');
