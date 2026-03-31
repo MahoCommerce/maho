@@ -96,7 +96,7 @@ final class WishlistProcessor implements ProcessorInterface
         if ($operationName === 'move_to_cart') {
             $itemId = (int) ($uriVariables['id'] ?? 0);
             $body = $context['request']?->toArray() ?? [];
-            $qty = (int) ($body['qty'] ?? $data->qty ?? 1);
+            $qty = (int) ($body['qty'] ?? $data->qty);
             $cartId = $body['cartId'] ?? null;
             return $this->moveToCart($itemId, $qty, $cartId);
         }
@@ -115,7 +115,7 @@ final class WishlistProcessor implements ProcessorInterface
         if ($data instanceof WishlistItem && $data->productId) {
             return $this->addToWishlist(
                 $data->productId,
-                $data->qty ?? 1,
+                $data->qty,
                 $data->description,
             );
         }

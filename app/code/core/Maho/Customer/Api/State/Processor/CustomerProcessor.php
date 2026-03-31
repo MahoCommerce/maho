@@ -184,7 +184,7 @@ final class CustomerProcessor implements ProcessorInterface
         $coreHelper = \Mage::helper('core');
 
         // Validate required fields using Maho validation helpers
-        if (!$coreHelper->isValidNotBlank($data->email ?? '')) {
+        if (!$coreHelper->isValidNotBlank($data->email)) {
             throw new BadRequestHttpException('Email is required');
         }
         if (!$coreHelper->isValidEmail($data->email)) {

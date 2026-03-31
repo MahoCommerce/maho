@@ -20,7 +20,6 @@ use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\IssuedBy;
 use Lcobucci\JWT\Validation\Constraint\PermittedFor;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
-use Lcobucci\Clock\SystemClock;
 
 /**
  * JWT Service - Centralized JWT token management
@@ -188,7 +187,13 @@ class JwtService
         $constraints = [
             new IssuedBy($this->getIssuer()),
             new PermittedFor(self::AUDIENCE),
-            new StrictValidAt(SystemClock::fromUTC()),
+            new StrictValidAt(new class implements \Psr\Clock\ClockInterface {
+                #[\Override]
+                public function now(): \DateTimeImmutable
+                {
+                    return new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+                }
+            }),
         ];
 
         assert($parsed instanceof \Lcobucci\JWT\Token\Plain);
