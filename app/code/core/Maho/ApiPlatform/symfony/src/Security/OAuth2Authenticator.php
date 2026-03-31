@@ -149,7 +149,11 @@ class OAuth2Authenticator extends AbstractAuthenticator
             $apiUserId = (int) $payload->api_user_id;
 
             // Re-validate API user permissions from database instead of trusting JWT
-            $permissions = $this->loadFreshApiUserPermissions($apiUserId);
+            $apiUser = \Mage::getModel('api/user')->load($apiUserId);
+            if (!$apiUser->getId() || !(int) $apiUser->getIsActive()) {
+                throw new CustomUserMessageAuthenticationException('API user account is inactive or not found');
+            }
+            $permissions = $this->jwtService->loadApiUserPermissions($apiUser);
         } elseif (isset($payload->permissions) && is_array($payload->permissions)) {
             $permissions = $payload->permissions;
         }
@@ -167,48 +171,6 @@ class OAuth2Authenticator extends AbstractAuthenticator
             permissions: $permissions,
             allowedStoreIds: $allowedStoreIds,
         );
-    }
-
-    /**
-     * Load fresh permissions from the database for an API user
-     *
-     * @return array<string>
-     */
-    private function loadFreshApiUserPermissions(int $apiUserId): array
-    {
-        $apiUser = \Mage::getModel('api/user')->load($apiUserId);
-        if (!$apiUser->getId() || !(int) $apiUser->getIsActive()) {
-            throw new CustomUserMessageAuthenticationException('API user account is inactive or not found');
-        }
-
-        $roleIds = $apiUser->getRoles();
-        if (empty($roleIds)) {
-            return [];
-        }
-
-        $resource = \Mage::getSingleton('core/resource');
-        $read = $resource->getConnection('core_read');
-        $ruleTable = $resource->getTableName('api/rule');
-
-        $permissions = [];
-        foreach ($roleIds as $roleId) {
-            $rules = $read->fetchCol(
-                $read->select()
-                    ->from($ruleTable, 'resource_id')
-                    ->where('role_id = ?', $roleId)
-                    ->where('role_type = ?', 'G')
-                    ->where('api_permission = ?', 'allow'),
-            );
-
-            foreach ($rules as $resourceId) {
-                if ($resourceId === 'all') {
-                    return ['all'];
-                }
-                $permissions[] = $resourceId;
-            }
-        }
-
-        return array_values(array_unique($permissions));
     }
 
     /**

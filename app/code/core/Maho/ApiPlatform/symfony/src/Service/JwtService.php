@@ -151,16 +151,15 @@ class JwtService
         $ruleTable = $resource->getTableName('api/rule');
 
         foreach ($roleIds as $roleId) {
-            $rules = $read->fetchAll(
+            $rules = $read->fetchCol(
                 $read->select()
-                    ->from($ruleTable, ['resource_id', 'api_permission'])
+                    ->from($ruleTable, 'resource_id')
                     ->where('role_id = ?', $roleId)
                     ->where('role_type = ?', 'G')
                     ->where('api_permission = ?', 'allow'),
             );
 
-            foreach ($rules as $rule) {
-                $resourceId = $rule['resource_id'];
+            foreach ($rules as $resourceId) {
                 if ($resourceId === 'all') {
                     return ['all'];
                 }
