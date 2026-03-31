@@ -71,7 +71,8 @@ class DefaultDenyListener
         }
 
         // Public operations — no auth needed
-        if ($security === 'true' || $security === '"true"') {
+        // API Platform may wrap the value in quotes, so strip them before comparing
+        if ($security !== null && trim($security, '" ') === 'true') {
             return;
         }
 
