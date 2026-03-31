@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform;
 
-use ApiPlatform\State\ProcessorInterface;
 use ApiPlatform\State\ProviderInterface;
 use Maho\ApiPlatform\Discovery\ModuleApiDiscovery;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
