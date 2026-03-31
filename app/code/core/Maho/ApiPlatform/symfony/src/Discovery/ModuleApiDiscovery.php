@@ -39,6 +39,7 @@ final class ModuleApiDiscovery
 
         // Scan all code pools for modules with Api/Resource directories
         $codePools = [
+            'core/Mage' => 'Mage',
             'core/Maho' => 'Maho',
             'community' => null,  // vendor prefix derived from directory structure
             'local' => null,
