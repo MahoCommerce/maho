@@ -176,6 +176,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             .cron-history-table tr:hover td { background: #fafafa; }
             .cron-history-table .messages-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: #888; }
             .cron-history-empty { text-align: center; padding: 30px; color: #999; }
+            .link-style-button { background: none; border: none; color: inherit; cursor: pointer; padding: 0; font: inherit; text-decoration: underline; }
         </style>
         <script>
         const CRON_ICON_SUCCESS = '{$this->jsQuoteEscape($iconSuccess)}';
@@ -239,12 +240,14 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
 
         async function cronPollStatus(scheduleId, startTime) {
             const url = '{$statusUrl}' + '?schedule_id=' + scheduleId;
+            let consecutiveErrors = 0;
 
             for (let i = 0; i < 360; i++) {
                 await new Promise(r => setTimeout(r, i < 6 ? 2000 : 5000));
 
                 try {
                     const data = await mahoFetch(url, { loaderArea: false });
+                    consecutiveErrors = 0;
 
                     if (data.finished) {
                         clearInterval(cronTimerInterval);
@@ -258,7 +261,12 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
                         return;
                     }
                 } catch (e) {
-                    // Polling failed, keep trying
+                    consecutiveErrors++;
+                    if (consecutiveErrors >= 5) {
+                        clearInterval(cronTimerInterval);
+                        cronShowResult('error', e.message || 'Connection lost');
+                        return;
+                    }
                 }
             }
 
@@ -338,11 +346,11 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
                     html += '<tr>'
                         + '<td>' + r.schedule_id + '</td>'
                         + '<td>' + cronStatusBadge(r.status) + '</td>'
-                        + '<td>' + (r.scheduled_at || '') + '</td>'
-                        + '<td>' + (r.executed_at || '') + '</td>'
-                        + '<td>' + (r.finished_at || '') + '</td>'
-                        + '<td>' + (r.duration || '') + '</td>'
-                        + '<td class="messages-cell" title="' + (r.messages || '').replace(/"/g, '&quot;') + '">' + (r.messages || '').replace(/</g, '&lt;') + '</td>'
+                        + '<td>' + cronEscapeHtml(r.scheduled_at || '') + '</td>'
+                        + '<td>' + cronEscapeHtml(r.executed_at || '') + '</td>'
+                        + '<td>' + cronEscapeHtml(r.finished_at || '') + '</td>'
+                        + '<td>' + cronEscapeHtml(r.duration || '') + '</td>'
+                        + '<td class="messages-cell" title="' + (r.messages || '').replace(/"/g, '&quot;') + '">' + cronEscapeHtml(r.messages || '') + '</td>'
                         + '</tr>';
                 }
 
@@ -423,13 +431,16 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             $class = 'notice';
         }
 
-        $toggleUrl = $this->getUrl('*/*/toggle', [
-            'job_code' => $row->getData('job_code'),
-            'form_key' => Mage::getSingleton('core/session')->getFormKey(),
-        ]);
+        $toggleUrl = $this->getUrl('*/*/toggle');
+        $jobCode = htmlspecialchars($row->getData('job_code'), ENT_QUOTES);
+        $formKey = htmlspecialchars(Mage::getSingleton('core/session')->getFormKey(), ENT_QUOTES);
 
         return '<span class="grid-severity-' . $class . '"><span>' . $label . '</span></span>'
-            . '<br><a href="' . $toggleUrl . '">[' . $toggleLabel . ']</a>';
+            . '<br><form method="POST" action="' . $toggleUrl . '" style="display:inline">'
+            . '<input type="hidden" name="job_code" value="' . $jobCode . '">'
+            . '<input type="hidden" name="form_key" value="' . $formKey . '">'
+            . '<button type="submit" class="link-style-button">[' . $toggleLabel . ']</button>'
+            . '</form>';
     }
 
     public function decorateActions(string $value, \Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
