@@ -86,10 +86,6 @@ final class ProductLinkWriter implements ProcessorInterface
     {
         $product = $this->loadProduct($productId);
 
-        if (!is_array($body)) {
-            throw new BadRequestHttpException('Request body must be an array of links');
-        }
-
         $linkData = [];
         foreach ($body as $link) {
             if (!is_array($link)) {

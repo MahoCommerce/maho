@@ -167,7 +167,9 @@ final class GroupedProductLinkWriter implements ProcessorInterface
      */
     private function getExistingLinkData(Mage_Catalog_Model_Product $product): array
     {
-        $associated = $product->getTypeInstance(true)->getAssociatedProducts($product);
+        /** @var \Mage_Catalog_Model_Product_Type_Grouped $typeInstance */
+        $typeInstance = $product->getTypeInstance(true);
+        $associated = $typeInstance->getAssociatedProducts($product);
         $links = [];
         foreach ($associated as $child) {
             $links[(int) $child->getId()] = [

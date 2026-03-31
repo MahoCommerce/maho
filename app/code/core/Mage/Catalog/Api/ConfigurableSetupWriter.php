@@ -87,6 +87,7 @@ final class ConfigurableSetupWriter implements ProcessorInterface
     private function handleSetup(int $productId, array $body): ConfigurableSetup
     {
         $product = $this->loadConfigurableProduct($productId);
+        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
 
         // Set super attributes if provided and none exist yet

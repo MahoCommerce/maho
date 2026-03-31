@@ -45,7 +45,9 @@ final class GroupedProductLinkReader implements ProviderInterface
      */
     public function getGroupedLinks(Mage_Catalog_Model_Product $product): array
     {
-        $associated = $product->getTypeInstance(true)->getAssociatedProducts($product);
+        /** @var \Mage_Catalog_Model_Product_Type_Grouped $typeInstance */
+        $typeInstance = $product->getTypeInstance(true);
+        $associated = $typeInstance->getAssociatedProducts($product);
         $result = [];
 
         foreach ($associated as $child) {

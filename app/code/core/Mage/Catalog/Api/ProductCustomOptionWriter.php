@@ -48,7 +48,7 @@ final class ProductCustomOptionWriter implements ProcessorInterface
     }
 
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductCustomOption|array|null
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductCustomOption|null
     {
         $user = $this->getAuthorizedUser();
         $productId = (int) ($uriVariables['productId'] ?? 0);
@@ -78,7 +78,7 @@ final class ProductCustomOptionWriter implements ProcessorInterface
         /** @var Mage_Catalog_Model_Product_Option $option */
         $option = Mage::getModel('catalog/product_option');
         $option->setProduct($product);
-        $option->setProductId($productId);
+        $option->setProductId((string) $productId);
         $option->setStoreId(0);
         $option->setTitle($body['title']);
         $option->setType($body['type']);
@@ -276,16 +276,13 @@ final class ProductCustomOptionWriter implements ProcessorInterface
             if (!is_array($value) || empty($value['title'])) {
                 throw new BadRequestHttpException("Value at index {$i} must have a title");
             }
-            $cleanValue = [
+            $cleanValues[] = [
                 'title' => $value['title'],
                 'price' => (float) ($value['price'] ?? 0),
                 'price_type' => $value['priceType'] ?? $value['price_type'] ?? 'fixed',
                 'sku' => $value['sku'] ?? '',
                 'sort_order' => (int) ($value['sortOrder'] ?? $value['sort_order'] ?? $i),
             ];
-            // Strip option_type_id to prevent FK constraint errors (DataSync pattern)
-            unset($cleanValue['option_type_id']);
-            $cleanValues[] = $cleanValue;
         }
         return $cleanValues;
     }

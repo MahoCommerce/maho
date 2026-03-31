@@ -28,7 +28,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 final class ConfigurableSetupReader implements ProviderInterface
 {
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|ConfigurableSetup
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $productId = (int) ($uriVariables['productId'] ?? 0);
         $product = $this->loadProduct($productId);
