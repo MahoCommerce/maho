@@ -342,10 +342,10 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
             return false;
         }
 
-        $image = Maho::getImageManager()->read($source);
+        $image = Maho::getImageManager()->decodePath($source);
 
         if ($width && $height) {
-            $image->pad($width, $height);
+            $image->containDown($width, $height);
         } else {
             $image->scale($width, $height);
         }

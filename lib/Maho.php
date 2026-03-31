@@ -221,7 +221,7 @@ final class Maho
         echo "<html><body><h1>There has been an error processing your request</h1>{$reportIdMessage}</body></html>";
     }
 
-    public static function getImageManager(array $customOptions = []): \Intervention\Image\ImageManager
+    public static function getImageManager(array $customOptions = []): \Intervention\Image\Interfaces\ImageManagerInterface
     {
         $defaultOptions = [
             'autoOrientation' => false,
@@ -231,6 +231,11 @@ final class Maho
             ...$defaultOptions,
             ...$customOptions,
         ];
+
+        if (isset($options['blendingColor'])) {
+            $options['backgroundColor'] = $options['blendingColor'];
+            unset($options['blendingColor']);
+        }
 
         $driverClasses = [
             \Intervention\Image\Drivers\Gd\Driver::class,
@@ -243,7 +248,7 @@ final class Maho
 
         foreach ($driverClasses as $driverClass) {
             try {
-                return \Intervention\Image\ImageManager::withDriver($driverClass, ...$options);
+                return \Intervention\Image\ImageManager::usingDriver($driverClass, ...$options);
             } catch (Intervention\Image\Exceptions\DriverException) {
             }
         }
@@ -278,15 +283,17 @@ final class Maho
      */
     public static function encodeImage(\Intervention\Image\Interfaces\ImageInterface $image, ?int $quality = null): \Intervention\Image\Interfaces\EncodedImageInterface
     {
-        $args = $quality !== null ? [$quality] : [];
-
-        return match (self::getConfiguredImageType()) {
-            IMAGETYPE_AVIF => $image->toAvif(...$args),
-            IMAGETYPE_GIF  => $image->toGif(),
-            IMAGETYPE_JPEG => $image->toJpeg(...$args),
-            IMAGETYPE_PNG  => $image->toPng(),
-            default        => $image->toWebp(...$args),
+        $format = match (self::getConfiguredImageType()) {
+            IMAGETYPE_AVIF => \Intervention\Image\Format::AVIF,
+            IMAGETYPE_GIF  => \Intervention\Image\Format::GIF,
+            IMAGETYPE_JPEG => \Intervention\Image\Format::JPEG,
+            IMAGETYPE_PNG  => \Intervention\Image\Format::PNG,
+            default        => \Intervention\Image\Format::WEBP,
         };
+
+        $args = $quality !== null ? ['quality' => $quality] : [];
+
+        return $image->encodeUsingFormat($format, ...$args);
     }
 
     /**
