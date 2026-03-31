@@ -13,7 +13,7 @@ declare(strict_types=1);
 /**
  * GraphQL Review Integration Tests (WRITE)
  *
- * Includes regression test for args vs args.input bug in ReviewProcessor.
+ * Includes regression test for args vs args.input bug in ReviewWriter.
  * Created reviews are cleaned up after tests complete.
  *
  * @group write

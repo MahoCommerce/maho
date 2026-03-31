@@ -14,9 +14,9 @@ declare(strict_types=1);
  * GraphQL Wishlist Integration Tests (WRITE)
  *
  * Regressions covered:
- * - args vs args.input bug in WishlistProcessor
+ * - args vs args.input bug in WishlistWriter
  * - null getItemCollection() on empty wishlists
- * - getItemCollection() vs getItemsCollection() typo in WishlistProvider
+ * - getItemCollection() vs getItemsCollection() typo in WishlistReader
  * - Add-then-list round-trip returning empty
  *
  * @group write
@@ -121,8 +121,8 @@ describe('GraphQL Wishlist - Add To Wishlist Mutation', function (): void {
 /**
  * Critical regression: items added via mutation must appear in query listing.
  *
- * This tests the full round-trip through both WishlistProcessor (write)
- * and WishlistProvider (read), catching:
+ * This tests the full round-trip through both WishlistWriter (write)
+ * and WishlistReader (read), catching:
  * - getItemCollection() vs getItemsCollection() typo
  * - totalItems hardcoded to 0
  */

@@ -13,11 +13,11 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
-use Mage\Checkout\Api\Resource\Cart;
-use Mage\Checkout\Api\Resource\CartItem;
+use Mage\Checkout\Api\Cart;
+use Mage\Checkout\Api\CartItem;
 
 /**
- * Shared cart-to-DTO mapping logic used by both CartProvider and CartProcessor
+ * Shared cart-to-DTO mapping logic used by both CartReader and CartWriter
  */
 class CartMapper
 {

@@ -1048,19 +1048,19 @@ Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho even
 
 | Event | Dispatched In | Observer Parameters |
 |-------|---------------|---------------------|
-| `api_product_dto_build` | ProductProvider | `product` (model), `for_listing` (bool), `dto` |
-| `api_category_dto_build` | CategoryProvider | `category` (model), `dto` |
-| `api_cms_page_dto_build` | CmsPageProvider | `cms_page` (model), `dto` |
-| `api_cms_block_dto_build` | CmsBlockProvider | `cms_block` (model), `dto` |
-| `api_blog_post_dto_build` | BlogPostProvider | `blog_post` (model), `dto` |
-| `api_store_config_dto_build` | StoreConfigProvider | `store` (model), `dto` |
-| `api_order_dto_build` | OrderProvider | `order` (model), `dto` |
-| `api_order_item_dto_build` | OrderProvider | `order_item` (model), `dto` |
-| `api_customer_dto_build` | CustomerProvider | `customer` (model), `dto` |
-| `api_cart_dto_build` | CartProvider | `quote` (model), `dto` |
-| `api_cart_item_dto_build` | CartProvider | `quote_item` (model), `dto` |
-| `api_review_dto_build` | ReviewProvider | `review` (model), `dto` |
-| `api_wishlist_item_dto_build` | WishlistProvider | `wishlist_item` (model), `dto` |
+| `api_product_dto_build` | ProductReader | `product` (model), `for_listing` (bool), `dto` |
+| `api_category_dto_build` | CategoryReader | `category` (model), `dto` |
+| `api_cms_page_dto_build` | CmsPageReader | `cms_page` (model), `dto` |
+| `api_cms_block_dto_build` | CmsBlockReader | `cms_block` (model), `dto` |
+| `api_blog_post_dto_build` | BlogPostReader | `blog_post` (model), `dto` |
+| `api_store_config_dto_build` | StoreConfigReader | `store` (model), `dto` |
+| `api_order_dto_build` | OrderReader | `order` (model), `dto` |
+| `api_order_item_dto_build` | OrderReader | `order_item` (model), `dto` |
+| `api_customer_dto_build` | CustomerReader | `customer` (model), `dto` |
+| `api_cart_dto_build` | CartReader | `quote` (model), `dto` |
+| `api_cart_item_dto_build` | CartReader | `quote_item` (model), `dto` |
+| `api_review_dto_build` | ReviewReader | `review` (model), `dto` |
+| `api_wishlist_item_dto_build` | WishlistReader | `wishlist_item` (model), `dto` |
 
 ### Quick Example: Simple Bundles Module
 

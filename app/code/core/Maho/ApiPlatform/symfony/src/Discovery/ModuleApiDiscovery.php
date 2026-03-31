@@ -16,7 +16,7 @@ namespace Maho\ApiPlatform\Discovery;
 /**
  * Discovers Maho modules that expose API resources via the Api/ convention.
  *
- * Scans each module's Api/Resource/ directory for ApiResource DTOs.
+ * Scans each module's Api/ directory for ApiResource DTOs.
  * Returns both paths (for API Platform mapping) and namespace mappings
  * (for autoloading).
  */
@@ -37,7 +37,7 @@ final class ModuleApiDiscovery
         $paths = [];
         $namespaces = [];
 
-        // Scan all code pools for modules with Api/Resource directories
+        // Scan all code pools for modules with Api/ directories
         $codePools = [
             'core/Mage' => 'Mage',
             'core/Maho' => 'Maho',
@@ -52,7 +52,7 @@ final class ModuleApiDiscovery
             }
 
             if ($vendorPrefix !== null) {
-                // Core pool: Maho/ModuleName/Api/Resource
+                // Core pool: Maho/ModuleName/Api/
                 foreach (new \DirectoryIterator($basePath) as $item) {
                     if ($item->isDot() || !$item->isDir()) {
                         continue;
@@ -66,15 +66,14 @@ final class ModuleApiDiscovery
                     }
 
                     $apiDir = $basePath . '/' . $moduleName . '/Api';
-                    $resourceDir = $apiDir . '/Resource';
 
-                    if (is_dir($resourceDir)) {
-                        $paths[] = $resourceDir;
+                    if (is_dir($apiDir)) {
+                        $paths[] = $apiDir;
                         $namespaces["{$vendorPrefix}\\{$moduleName}\\Api\\"] = $apiDir;
                     }
                 }
             } else {
-                // Community/local pools: Vendor/ModuleName/Api/Resource
+                // Community/local pools: Vendor/ModuleName/Api/
                 foreach (new \DirectoryIterator($basePath) as $vendor) {
                     if ($vendor->isDot() || !$vendor->isDir()) {
                         continue;
@@ -88,10 +87,9 @@ final class ModuleApiDiscovery
                         }
                         $moduleName = $module->getFilename();
                         $apiDir = $vendorPath . '/' . $moduleName . '/Api';
-                        $resourceDir = $apiDir . '/Resource';
 
-                        if (is_dir($resourceDir)) {
-                            $paths[] = $resourceDir;
+                        if (is_dir($apiDir)) {
+                            $paths[] = $apiDir;
                             $namespaces["{$vendorName}\\{$moduleName}\\Api\\"] = $apiDir;
                         }
                     }

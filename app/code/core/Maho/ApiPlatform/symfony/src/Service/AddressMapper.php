@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
-use Mage\Customer\Api\Resource\Address;
+use Mage\Customer\Api\Address;
 
 /**
  * Centralized address mapping service

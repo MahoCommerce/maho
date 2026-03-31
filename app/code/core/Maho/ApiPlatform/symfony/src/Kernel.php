@@ -121,15 +121,15 @@ class Kernel extends BaseKernel
             $files[$class] = $file->getPathname();
         }
 
-        // Phase 2: Load all files (Resource DTOs first, then others)
-        // Sort so Resource/ files load before State/ files to resolve dependencies
+        // Phase 2: Load all files
+        // Sort so DTO classes (no Reader/Writer suffix) load before Reader/Writer classes
         uksort($files, function ($a, $b) {
-            $aIsResource = str_contains($a, '\\Resource\\');
-            $bIsResource = str_contains($b, '\\Resource\\');
-            if ($aIsResource && !$bIsResource) {
+            $aIsHandler = str_ends_with($a, 'Reader') || str_ends_with($a, 'Writer');
+            $bIsHandler = str_ends_with($b, 'Reader') || str_ends_with($b, 'Writer');
+            if (!$aIsHandler && $bIsHandler) {
                 return -1;
             }
-            if (!$aIsResource && $bIsResource) {
+            if ($aIsHandler && !$bIsHandler) {
                 return 1;
             }
             return strcmp($a, $b);

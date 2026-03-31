@@ -921,7 +921,7 @@ class AuthController extends AbstractController
         ];
     }
 
-    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
+    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressWriter, AddressReader, CustomerReader, OrderReader
     /**
      * Map address to array
      */

@@ -155,7 +155,7 @@ class CartService
 
         // Add custom options, downloadable links, grouped, and bundle params if provided
         // Supports two formats:
-        //   Structured: ['options' => [...], 'links' => [...], 'super_group' => [...], 'bundle_option' => [...]] (from GraphQL CartProcessor)
+        //   Structured: ['options' => [...], 'links' => [...], 'super_group' => [...], 'bundle_option' => [...]] (from GraphQL CartWriter)
         //   Flat: [optionId => valueId, ...] (from REST GuestCartController)
         if (!empty($options)) {
             if (isset($options['options']) || isset($options['links']) || isset($options['super_group']) || isset($options['bundle_option'])) {
