@@ -16,8 +16,7 @@ namespace Maho\Checkout\Api\State\Processor;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Maho\Checkout\Api\Resource\Cart;
-use Maho\Checkout\Api\Resource\CartItem;
-use Maho\ApiPlatform\Service\AddressMapper;
+use Maho\ApiPlatform\Service\CartMapper;
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -32,13 +31,13 @@ final class CartProcessor implements ProcessorInterface
 {
     use AuthenticationTrait;
 
-    private AddressMapper $addressMapper;
+    private CartMapper $cartMapper;
     private CartService $cartService;
 
     public function __construct(Security $security)
     {
         $this->security = $security;
-        $this->addressMapper = new AddressMapper();
+        $this->cartMapper = new CartMapper();
         $this->cartService = new CartService();
     }
 
@@ -157,7 +156,7 @@ final class CartProcessor implements ProcessorInterface
             }
         }
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -188,7 +187,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->updateItem($quote, (int) $itemId, $qty);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -218,7 +217,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->removeItem($quote, (int) $itemId);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -268,7 +267,7 @@ final class CartProcessor implements ProcessorInterface
 
         $this->setItemFulfillmentType($targetItem, $fulfillmentType);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -287,23 +286,6 @@ final class CartProcessor implements ProcessorInterface
 
         $item->setAdditionalData(json_encode($data));
         $item->save();
-    }
-
-    /**
-     * Get fulfillment type from a quote item's additional_data
-     */
-    private function getItemFulfillmentType(\Mage_Sales_Model_Quote_Item $item): string
-    {
-        $additionalData = $item->getAdditionalData();
-
-        if ($additionalData) {
-            $data = json_decode($additionalData, true);
-            if (is_array($data) && isset($data['fulfillment_type'])) {
-                return strtoupper($data['fulfillment_type']);
-            }
-        }
-
-        return 'SHIP'; // Default
     }
 
     /**
@@ -333,7 +315,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->applyCoupon($quote, $couponCode);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -358,7 +340,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->removeCoupon($quote);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -384,7 +366,7 @@ final class CartProcessor implements ProcessorInterface
         $addressData = $this->mapInputToAddressData($args);
         $quote = $this->cartService->setShippingAddress($quote, $addressData);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -411,7 +393,7 @@ final class CartProcessor implements ProcessorInterface
         $addressData = $sameAsShipping ? [] : $this->mapInputToAddressData($args);
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -442,7 +424,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->setShippingMethod($quote, $carrierCode, $methodCode);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -473,7 +455,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->setPaymentMethod($quote, $methodCode, $additionalData);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -505,7 +487,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote = $this->cartService->mergeCarts($maskedId, $customerId);
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -581,7 +563,7 @@ final class CartProcessor implements ProcessorInterface
         $quote->setGiftcardCodes(json_encode($appliedCodes));
         $quote->collectTotals()->save();
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -635,7 +617,7 @@ final class CartProcessor implements ProcessorInterface
 
         $quote->collectTotals()->save();
 
-        return $this->mapQuoteToCart($quote);
+        return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
@@ -687,248 +669,4 @@ final class CartProcessor implements ProcessorInterface
         ];
     }
 
-    /**
-     * Map Maho quote model to Cart DTO
-     */
-    private function mapQuoteToCart(\Mage_Sales_Model_Quote $quote): Cart
-    {
-        $cart = new Cart();
-        $cart->id = (int) $quote->getId();
-        $cart->maskedId = $quote->getData('masked_quote_id');
-        $cart->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
-        $cart->storeId = (int) $quote->getStoreId();
-        $cart->isActive = (bool) $quote->getIsActive();
-        $cart->currency = $quote->getQuoteCurrencyCode() ?: 'AUD';
-        $cart->itemsCount = (int) $quote->getItemsCount();
-        $cart->itemsQty = (float) $quote->getItemsQty();
-        $cart->createdAt = $quote->getCreatedAt();
-        $cart->updatedAt = $quote->getUpdatedAt();
-
-        // Batch load product thumbnails and map items
-        $items = $quote->getAllVisibleItems();
-        $thumbnailsByProductId = $this->batchLoadCartItemThumbnails($items);
-        $cart->items = [];
-        foreach ($items as $item) {
-            $productId = $item->getProductId() ? (int) $item->getProductId() : null;
-            $thumbnailUrl = $productId ? ($thumbnailsByProductId[$productId] ?? null) : null;
-            $cart->items[] = $this->mapItemToDto($item, $thumbnailUrl);
-        }
-
-        // Map prices
-        $cart->prices = $this->mapPricesToArray($quote);
-
-        // Map billing address
-        $billingAddress = $quote->getBillingAddress();
-        if ($billingAddress && $billingAddress->getFirstname()) {
-            $cart->billingAddress = $this->addressMapper->fromQuoteAddress($billingAddress);
-        }
-
-        // Map shipping address
-        $shippingAddress = $quote->getShippingAddress();
-        if ($shippingAddress && $shippingAddress->getFirstname()) {
-            $cart->shippingAddress = $this->addressMapper->fromQuoteAddress($shippingAddress);
-
-            // Get available shipping methods
-            $cart->availableShippingMethods = $this->getAvailableShippingMethods($shippingAddress);
-
-            // Get selected shipping method
-            $selectedMethod = $shippingAddress->getShippingMethod();
-            if ($selectedMethod) {
-                $parts = explode('_', $selectedMethod, 2);
-                if (count($parts) >= 2) {
-                    $cart->selectedShippingMethod = [
-                        'carrierCode' => $parts[0],
-                        'methodCode' => $parts[1],
-                        'carrierTitle' => $shippingAddress->getShippingDescription() ?? '',
-                        'methodTitle' => $shippingAddress->getShippingDescription() ?? '',
-                        'price' => (float) $shippingAddress->getShippingAmount(),
-                    ];
-                }
-            }
-        }
-
-        // Get available payment methods
-        $cart->availablePaymentMethods = $this->getAvailablePaymentMethods($quote);
-
-        // Get selected payment method
-        $payment = $quote->getPayment();
-        if ($payment && $payment->getMethod()) {
-            try {
-                $cart->selectedPaymentMethod = [
-                    'code' => $payment->getMethod(),
-                    'title' => $payment->getMethodInstance()->getTitle(),
-                ];
-            } catch (\Exception $e) {
-                // Payment method may not be valid
-                $cart->selectedPaymentMethod = [
-                    'code' => $payment->getMethod(),
-                    'title' => $payment->getMethod(),
-                ];
-            }
-        }
-
-        // Get applied coupon
-        $couponCode = $quote->getCouponCode();
-        if ($couponCode) {
-            $cart->appliedCoupon = [
-                'code' => $couponCode,
-                'discountAmount' => (float) abs($shippingAddress ? $shippingAddress->getDiscountAmount() : 0),
-            ];
-        }
-
-        return $cart;
-    }
-
-    /**
-     * Map Maho quote item model to CartItem DTO
-     */
-    private function mapItemToDto(\Mage_Sales_Model_Quote_Item $item, ?string $preloadedThumbnailUrl = null): CartItem
-    {
-        $dto = new CartItem();
-        $dto->id = (int) $item->getId();
-        $dto->sku = $item->getSku();
-        $dto->name = $item->getName() ?? '';
-        $dto->qty = (float) $item->getQty();
-        $dto->price = (float) $item->getPrice();
-        $dto->priceInclTax = (float) $item->getPriceInclTax();
-        $dto->rowTotal = (float) $item->getRowTotal();
-        $dto->rowTotalInclTax = (float) $item->getRowTotalInclTax();
-        $dto->rowTotalWithDiscount = (float) ($item->getRowTotal() - $item->getDiscountAmount());
-        $dto->discountAmount = $item->getDiscountAmount() ? (float) $item->getDiscountAmount() : null;
-        $dto->discountPercent = $item->getDiscountPercent() ? (float) $item->getDiscountPercent() : null;
-        $dto->taxAmount = $item->getTaxAmount() ? (float) $item->getTaxAmount() : null;
-        $dto->productId = $item->getProductId() ? (int) $item->getProductId() : null;
-        $dto->productType = $item->getProductType();
-        $dto->thumbnailUrl = $preloadedThumbnailUrl;
-        $dto->fulfillmentType = $this->getItemFulfillmentType($item);
-
-        return $dto;
-    }
-
-    /**
-     * Batch load thumbnails for all cart items
-     *
-     * @param \Mage_Sales_Model_Quote_Item[] $items
-     * @return array<int, string> Map of product ID => thumbnail URL
-     */
-    private function batchLoadCartItemThumbnails(array $items): array
-    {
-        $productIds = [];
-        foreach ($items as $item) {
-            if ($item->getProductId()) {
-                $productIds[] = (int) $item->getProductId();
-            }
-        }
-
-        if (empty($productIds)) {
-            return [];
-        }
-
-        $collection = \Mage::getResourceModel('catalog/product_collection')
-            ->addIdFilter($productIds)
-            ->addAttributeToSelect(['small_image', 'thumbnail']);
-
-        $thumbnails = [];
-        $mediaConfig = \Mage::getModel('catalog/product_media_config');
-
-        foreach ($collection as $product) {
-            $image = $product->getSmallImage() ?: $product->getThumbnail();
-            if ($image && $image !== 'no_selection') {
-                $thumbnails[(int) $product->getId()] = $mediaConfig->getMediaUrl($image);
-            }
-        }
-
-        return $thumbnails;
-    }
-
-    /**
-     * Map Maho quote to prices array
-     */
-    private function mapPricesToArray(\Mage_Sales_Model_Quote $quote): array
-    {
-        $shippingAddress = $quote->getShippingAddress();
-
-        $prices = [
-            'subtotal' => (float) $quote->getSubtotal(),
-            'subtotalInclTax' => (float) array_reduce($quote->getAllVisibleItems(), fn(float $sum, $item) => $sum + (float) $item->getRowTotalInclTax(), 0.0),
-            'subtotalWithDiscount' => (float) $quote->getSubtotalWithDiscount(),
-            'discountAmount' => null,
-            'shippingAmount' => null,
-            'shippingAmountInclTax' => null,
-            'taxAmount' => 0.0,
-            'grandTotal' => (float) $quote->getGrandTotal(),
-            'giftcardAmount' => null,
-        ];
-
-        if ($shippingAddress) {
-            $prices['discountAmount'] = $shippingAddress->getDiscountAmount()
-                ? (float) abs($shippingAddress->getDiscountAmount())
-                : null;
-            $prices['shippingAmount'] = $shippingAddress->getShippingAmount()
-                ? (float) $shippingAddress->getShippingAmount()
-                : null;
-            $prices['shippingAmountInclTax'] = $shippingAddress->getShippingInclTax()
-                ? (float) $shippingAddress->getShippingInclTax()
-                : null;
-            $prices['taxAmount'] = (float) $shippingAddress->getTaxAmount();
-        }
-
-        return $prices;
-    }
-
-    /**
-     * Get available shipping methods for address
-     *
-     * @return array<array{carrierCode: string, methodCode: string, carrierTitle: string, methodTitle: string, price: float}>
-     */
-    private function getAvailableShippingMethods(\Mage_Sales_Model_Quote_Address $address): array
-    {
-        $methods = [];
-
-        try {
-            $address->collectShippingRates();
-
-            foreach ($address->getAllShippingRates() as $rate) {
-                $methods[] = [
-                    'carrierCode' => $rate->getCarrier(),
-                    'methodCode' => $rate->getMethod(),
-                    'carrierTitle' => $rate->getCarrierTitle(),
-                    'methodTitle' => $rate->getMethodTitle(),
-                    'price' => (float) $rate->getPrice(),
-                ];
-            }
-        } catch (\Exception $e) {
-            \Mage::log('Error getting shipping methods: ' . $e->getMessage());
-        }
-
-        return $methods;
-    }
-
-    /**
-     * Get available payment methods for quote
-     *
-     * @return array<array{code: string, title: string}>
-     */
-    private function getAvailablePaymentMethods(\Mage_Sales_Model_Quote $quote): array
-    {
-        $methods = [];
-
-        try {
-            $store = $quote->getStore();
-            $availableMethods = \Mage::helper('payment')->getStoreMethods($store, $quote);
-
-            foreach ($availableMethods as $method) {
-                if ($method->canUseForCountry($quote->getBillingAddress()->getCountry())) {
-                    $methods[] = [
-                        'code' => $method->getCode(),
-                        'title' => $method->getTitle(),
-                    ];
-                }
-            }
-        } catch (\Exception $e) {
-            \Mage::log('Error getting payment methods: ' . $e->getMessage());
-        }
-
-        return $methods;
-    }
 }
