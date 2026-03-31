@@ -756,6 +756,7 @@ export class MahoImageEditor {
         this._saveBtn.disabled = true;
         this._saveBtn.textContent = 'Saving…';
 
+        let exportCanvas = null;
         try {
             const state = {
                 adjustments: { ...this.adjustments },
@@ -766,7 +767,7 @@ export class MahoImageEditor {
 
             const targetW = this.baseCanvas.width;
             const targetH = this.baseCanvas.height;
-            const exportCanvas = renderToCanvas(this.baseCanvas, state, targetW, targetH);
+            exportCanvas = renderToCanvas(this.baseCanvas, state, targetW, targetH);
 
             const mimeType = this.options.saveFormat || 'image/webp';
             const quality = this.options.saveQuality ?? 0.85;
@@ -775,8 +776,9 @@ export class MahoImageEditor {
             await this.options.onSave?.(exportCanvas, blob, newName);
         } catch (err) {
             console.error('Save failed:', err);
-            alert('Error saving image: ' + err.message);
+            alert('Error saving image: ' + (err?.message || 'Unknown error'));
         } finally {
+            if (exportCanvas) exportCanvas.width = 0;
             this._saving = false;
             this._saveBtn.disabled = false;
             this._saveBtn.textContent = 'Save';
@@ -805,6 +807,7 @@ export class MahoImageEditor {
     }
 
     _restore(snapshot) {
+        if (this.baseCanvas) this.baseCanvas.width = 0;
         this.baseCanvas = snapshot.baseCanvas;
         this.adjustments = snapshot.adjustments;
         this.annotations = snapshot.annotations;

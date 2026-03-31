@@ -282,6 +282,11 @@ export class CropTool {
             rd => rd.x + rd.w > 0 && rd.y + rd.h > 0 && rd.x < canvas.width && rd.y < canvas.height
         );
 
+        // Remove annotations that are entirely outside the cropped area
+        this.editor.annotations = this.editor.annotations.filter(
+            a => annotationInBounds(a, canvas.width, canvas.height)
+        );
+
         this.editor.replaceBase(canvas);
 
         this.region = { x: 0, y: 0, w: canvas.width, h: canvas.height };
@@ -411,6 +416,25 @@ function offsetAnnotation(a, dx, dy) {
                 p.y += dy;
             }
             break;
+    }
+}
+
+function annotationInBounds(a, w, h) {
+    switch (a.type) {
+        case 'rect':
+        case 'text':
+        case 'image':
+            return a.x + (a.w || 0) > 0 && a.y + (a.h || 0) > 0 && a.x < w && a.y < h;
+        case 'ellipse':
+            return a.cx + a.rx > 0 && a.cy + a.ry > 0 && a.cx - a.rx < w && a.cy - a.ry < h;
+        case 'line':
+        case 'arrow':
+            return (a.x1 >= 0 && a.x1 <= w && a.y1 >= 0 && a.y1 <= h) ||
+                   (a.x2 >= 0 && a.x2 <= w && a.y2 >= 0 && a.y2 <= h);
+        case 'freehand':
+            return a.points.some(p => p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h);
+        default:
+            return true;
     }
 }
 

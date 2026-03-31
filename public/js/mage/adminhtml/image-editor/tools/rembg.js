@@ -22,7 +22,11 @@ async function hasWebGPU() {
     }
 }
 
+let latestProgressCallback = null;
+
 async function getSegmenter(onProgress) {
+    latestProgressCallback = onProgress;
+
     if (pipelinePromise) {
         return pipelinePromise;
     }
@@ -34,7 +38,7 @@ async function getSegmenter(onProgress) {
             return pipeline('background-removal', MODEL_ID, {
                 dtype: MODEL_DTYPE,
                 device,
-                progress_callback: onProgress,
+                progress_callback: (p) => latestProgressCallback?.(p),
             });
         } catch (e) {
             pipelinePromise = null;
@@ -311,6 +315,11 @@ export class RemoveBackgroundTool {
     }
 
     destroy() {
+        if (this._transparentCanvas) {
+            this._transparentCanvas.width = 0;
+            this._transparentCanvas = null;
+        }
+        latestProgressCallback = null;
         pipelinePromise = null;
     }
 }

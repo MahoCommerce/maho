@@ -669,6 +669,8 @@ export class AnnotateTool {
                         a.w = Math.sign(a.w || 1) * Math.abs(a.h) * aspect;
                     }
                 }
+                if (a.w < 0) { a.x += a.w; a.w = -a.w; }
+                if (a.h < 0) { a.y += a.h; a.h = -a.h; }
                 break;
             }
             case 'ellipse':

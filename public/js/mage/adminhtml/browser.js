@@ -65,6 +65,7 @@ class Mediabrowser {
         this.deleteFilesUrl = setup.deleteFilesUrl;
         this.editImageUrl = setup.editImageUrl;
         this.getImageUrlAction = setup.getImageUrl;
+        this.editorModuleUrl = setup.editorModuleUrl;
         this.headerText = setup.headerText;
         this.canInsertImage = setup.canInsertImage;
         this.imageFileType = setup.imageFileType;
@@ -465,8 +466,7 @@ class Mediabrowser {
             const editorContainer = this.createEditorContainer();
 
             // Load MahoImageEditor module
-            const editorUrl = SKIN_URL.replace(/skin\/.*$/, 'js/mage/adminhtml/image-editor/editor.js');
-            const editorModule = await import(editorUrl);
+            const editorModule = await import(this.editorModuleUrl);
 
             const editor = new editorModule.MahoImageEditor(editorContainer, {
                 source: imageUrl,
@@ -486,6 +486,7 @@ class Mediabrowser {
 
         } catch (error) {
             this.closeImageEditor();
+            this.showElement('button_edit_image');
             alert('Error loading image editor: ' + error.message);
         }
     }
@@ -535,7 +536,7 @@ class Mediabrowser {
             formData.append('file_id', fileId);
             formData.append('node', this.currentNode.id);
             formData.append('new_filename', originalFilename);
-            formData.append('edited_image', blob);
+            formData.append('edited_image', blob, originalFilename);
 
             await mahoFetch(this.editImageUrl, {
                 method: 'POST',
@@ -561,14 +562,8 @@ class Mediabrowser {
 
         const overlay = document.getElementById('image-editor-overlay');
         if (overlay) overlay.remove();
+
+        this.showElement('button_edit_image');
     }
 
-    preloadImage(url) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.onload = () => resolve(img);
-            img.onerror = () => reject(new Error('Failed to load image'));
-            img.src = url;
-        });
-    }
 };
