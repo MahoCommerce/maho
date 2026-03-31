@@ -31,7 +31,8 @@ class JwtService
 {
     private const CONFIG_PATH_SECRET = 'maho_apiplatform/oauth2/secret';
     private const CONFIG_PATH_LEGACY = 'maho_api/settings/jwt_secret';
-    private const TOKEN_EXPIRY_SECONDS = 86400; // 24 hours
+    private const CONFIG_PATH_TOKEN_LIFETIME = 'maho_apiplatform/oauth2/token_lifetime';
+    private const DEFAULT_TOKEN_EXPIRY_SECONDS = 86400; // 24 hours
     private const AUDIENCE = 'maho-api';
 
     private ?string $cachedSecret = null;
@@ -65,7 +66,7 @@ class JwtService
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->relatedTo('customer_' . $customer->getId())
             ->issuedAt($now)
-            ->expiresAt($now->modify('+' . self::TOKEN_EXPIRY_SECONDS . ' seconds'))
+            ->expiresAt($now->modify('+' . $this->getTokenExpiry() . ' seconds'))
             ->withClaim('customer_id', (int) $customer->getId())
             ->withClaim('email', $customer->getEmail())
             ->withClaim('type', 'customer')
@@ -92,7 +93,7 @@ class JwtService
             ->identifiedBy(bin2hex(random_bytes(16)))
             ->relatedTo('admin_' . $admin->getId())
             ->issuedAt($now)
-            ->expiresAt($now->modify('+' . self::TOKEN_EXPIRY_SECONDS . ' seconds'))
+            ->expiresAt($now->modify('+' . $this->getTokenExpiry() . ' seconds'))
             ->withClaim('admin_id', (int) $admin->getId())
             ->withClaim('email', $admin->getEmail())
             ->withClaim('type', 'admin')
@@ -312,7 +313,8 @@ class JwtService
      */
     public function getTokenExpiry(): int
     {
-        return self::TOKEN_EXPIRY_SECONDS;
+        $configured = (int) \Mage::getStoreConfig(self::CONFIG_PATH_TOKEN_LIFETIME);
+        return $configured > 0 ? $configured : self::DEFAULT_TOKEN_EXPIRY_SECONDS;
     }
 
     /**
