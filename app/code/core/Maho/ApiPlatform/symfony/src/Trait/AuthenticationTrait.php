@@ -212,4 +212,34 @@ trait AuthenticationTrait
         $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
         return $authenticatedCustomerId !== null && $authenticatedCustomerId === $customerId;
     }
+
+    /**
+     * Get the authenticated ApiUser or throw if not authenticated.
+     *
+     * Used by processors that require a valid ApiUser for permission checks.
+     *
+     * @throws AccessDeniedHttpException If not authenticated
+     */
+    protected function getAuthorizedUser(): ApiUser
+    {
+        $user = $this->security->getUser();
+
+        if (!$user instanceof ApiUser) {
+            throw new AccessDeniedHttpException('Authentication required');
+        }
+
+        return $user;
+    }
+
+    /**
+     * Require a specific resource permission on the ApiUser.
+     *
+     * @throws AccessDeniedHttpException If the user lacks the permission
+     */
+    protected function requirePermission(ApiUser $user, string $permission): void
+    {
+        if (!$user->hasPermission($permission)) {
+            throw new AccessDeniedHttpException("Missing permission: {$permission}");
+        }
+    }
 }

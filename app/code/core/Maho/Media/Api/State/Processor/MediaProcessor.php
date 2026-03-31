@@ -22,10 +22,10 @@ use Mage_Core_Model_File_Uploader;
 use Mage_Core_Model_Store;
 use Maho\Media\Api\Resource\Media;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\Io\File as IoFile;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -40,6 +40,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class MediaProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     private const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
     private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     private const WEBP_QUALITY = 85;
@@ -253,24 +255,6 @@ final class MediaProcessor implements ProcessorInterface
 
         imagedestroy($image);
         imagedestroy($cleanImage);
-    }
-
-    private function getAuthorizedUser(): ApiUser
-    {
-        $user = $this->security->getUser();
-
-        if (!$user instanceof ApiUser) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        return $user;
-    }
-
-    private function requirePermission(ApiUser $user, string $permission): void
-    {
-        if (!$user->hasPermission($permission)) {
-            throw new AccessDeniedHttpException("Missing permission: {$permission}");
-        }
     }
 
     private function sanitizeFolderPath(string $path): string

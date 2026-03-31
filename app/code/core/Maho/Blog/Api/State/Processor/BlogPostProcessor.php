@@ -20,6 +20,7 @@ use Mage;
 use Mage_Core_Model_Store;
 use Maho\Blog\Api\Resource\BlogPost;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Maho_Blog_Model_Post;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -37,6 +38,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class BlogPostProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     public function __construct(
         private readonly Security $security,
         private readonly ContentSanitizer $contentSanitizer,
@@ -206,24 +209,6 @@ final class BlogPostProcessor implements ProcessorInterface
         $this->logActivity('delete', $oldData, null, $user);
 
         return null;
-    }
-
-    private function getAuthorizedUser(): ApiUser
-    {
-        $user = $this->security->getUser();
-
-        if (!$user instanceof ApiUser) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        return $user;
-    }
-
-    private function requirePermission(ApiUser $user, string $permission): void
-    {
-        if (!$user->hasPermission($permission)) {
-            throw new AccessDeniedHttpException("Missing permission: {$permission}");
-        }
     }
 
     /**

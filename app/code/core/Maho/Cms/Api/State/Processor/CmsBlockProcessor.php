@@ -21,6 +21,7 @@ use Mage_Cms_Model_Block;
 use Mage_Core_Model_Store;
 use Maho\Cms\Api\Resource\CmsBlock;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -37,6 +38,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class CmsBlockProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     public function __construct(
         private readonly Security $security,
         private readonly ContentSanitizer $contentSanitizer,
@@ -150,24 +153,6 @@ final class CmsBlockProcessor implements ProcessorInterface
         $this->logActivity('delete', $oldData, null, $user);
 
         return null;
-    }
-
-    private function getAuthorizedUser(): ApiUser
-    {
-        $user = $this->security->getUser();
-
-        if (!$user instanceof ApiUser) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        return $user;
-    }
-
-    private function requirePermission(ApiUser $user, string $permission): void
-    {
-        if (!$user->hasPermission($permission)) {
-            throw new AccessDeniedHttpException("Missing permission: {$permission}");
-        }
     }
 
     /**

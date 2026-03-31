@@ -21,11 +21,10 @@ use Mage;
 use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Option;
 use Maho\Catalog\Api\Resource\ProductCustomOption;
-use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\Catalog\Api\State\Provider\ProductCustomOptionProvider;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -35,6 +34,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class ProductCustomOptionProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     private const SELECT_TYPES = ['drop_down', 'radio', 'checkbox', 'multiple'];
     private const VALID_TYPES = [
         'field', 'area', 'drop_down', 'radio', 'checkbox', 'multiple',
@@ -306,22 +307,6 @@ final class ProductCustomOptionProcessor implements ProcessorInterface
         }
 
         return $product;
-    }
-
-    private function getAuthorizedUser(): ApiUser
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof ApiUser) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-        return $user;
-    }
-
-    private function requirePermission(ApiUser $user, string $permission): void
-    {
-        if (!$user->hasPermission($permission)) {
-            throw new AccessDeniedHttpException("Missing permission: {$permission}");
-        }
     }
 
     /**

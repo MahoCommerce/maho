@@ -24,9 +24,9 @@ use Mage_Catalog_Model_Product_Visibility;
 use Mage_CatalogInventory_Model_Stock_Item;
 use Maho\Catalog\Api\Resource\Product;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -45,6 +45,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class ProductProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     private const VISIBILITY_MAP = [
         'not_visible' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE,
         'catalog' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
@@ -570,24 +572,6 @@ final class ProductProcessor implements ProcessorInterface
         $data->createdAt = $product->getCreatedAt();
         $data->updatedAt = $product->getUpdatedAt();
         return $data;
-    }
-
-    private function getAuthorizedUser(): ApiUser
-    {
-        $user = $this->security->getUser();
-
-        if (!$user instanceof ApiUser) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        return $user;
-    }
-
-    private function requirePermission(ApiUser $user, string $permission): void
-    {
-        if (!$user->hasPermission($permission)) {
-            throw new AccessDeniedHttpException("Missing permission: {$permission}");
-        }
     }
 
     private function logActivity(

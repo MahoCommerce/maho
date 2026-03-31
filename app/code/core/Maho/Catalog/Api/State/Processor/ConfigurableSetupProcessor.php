@@ -21,11 +21,10 @@ use Mage;
 use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Type;
 use Maho\Catalog\Api\Resource\ConfigurableSetup;
-use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\Catalog\Api\State\Provider\ConfigurableSetupProvider;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -35,6 +34,8 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class ConfigurableSetupProcessor implements ProcessorInterface
 {
+    use AuthenticationTrait;
+
     public function __construct(
         private readonly Security $security,
         private readonly ConfigurableSetupProvider $provider,
@@ -205,19 +206,4 @@ final class ConfigurableSetupProcessor implements ProcessorInterface
         return $product;
     }
 
-    private function getAuthorizedUser(): ApiUser
-    {
-        $user = $this->security->getUser();
-        if (!$user instanceof ApiUser) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-        return $user;
-    }
-
-    private function requirePermission(ApiUser $user, string $permission): void
-    {
-        if (!$user->hasPermission($permission)) {
-            throw new AccessDeniedHttpException("Missing permission: {$permission}");
-        }
-    }
 }
