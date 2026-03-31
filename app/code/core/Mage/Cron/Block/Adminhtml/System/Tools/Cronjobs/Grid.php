@@ -183,6 +183,12 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         let cronTimerInterval = null;
         let cronCurrentJob = '';
 
+        function cronEscapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
         async function cronRunJob(jobCode) {
             const loadingSvg = SKIN_URL + 'images/loading.svg';
             const startTime = Date.now();
@@ -190,7 +196,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
 
             Dialog.info(
                 '<div class="cron-run-body">'
-                + '<div class="cron-run-job-name">' + jobCode + '</div>'
+                + '<div class="cron-run-job-name">' + cronEscapeHtml(jobCode) + '</div>'
                 + '<div class="cron-run-timer" id="cronTimer">0s</div>'
                 + '<div class="cron-run-label"><img class="cron-run-spinner" src="' + loadingSvg + '" alt="">{$runningLabel}</div>'
                 + '</div>',
@@ -266,7 +272,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
 
             const icon = status === 'success' ? CRON_ICON_SUCCESS : CRON_ICON_ERROR;
             let html = '<div class="cron-run-body">'
-                + '<div class="cron-run-job-name">' + cronCurrentJob + '</div>'
+                + '<div class="cron-run-job-name">' + cronEscapeHtml(cronCurrentJob) + '</div>'
                 + '<div class="cron-run-timer">' + (elapsed || '') + '</div>'
                 + '<div class="cron-run-result ' + status + '">' + icon + ' ' + label + '</div>'
                 + '</div>';
@@ -417,7 +423,10 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             $class = 'notice';
         }
 
-        $toggleUrl = $this->getUrl('*/*/toggle', ['job_code' => $row->getData('job_code')]);
+        $toggleUrl = $this->getUrl('*/*/toggle', [
+            'job_code' => $row->getData('job_code'),
+            'form_key' => Mage::getSingleton('core/session')->getFormKey(),
+        ]);
 
         return '<span class="grid-severity-' . $class . '"><span>' . $label . '</span></span>'
             . '<br><a href="' . $toggleUrl . '">[' . $toggleLabel . ']</a>';

@@ -144,7 +144,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         }
 
         $schedule = Mage::getModel('cron/schedule');
-        $now = date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT);
+        $now = Mage_Core_Model_Locale::now();
         $schedule->setJobCode($jobCode)
             ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
             ->setCreatedAt($now)
@@ -183,12 +183,12 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             call_user_func([$model, $run[2]], $schedule);
 
             $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                ->setFinishedAt(Mage_Core_Model_Locale::now())
                 ->save();
         } catch (Exception $e) {
             $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
                 ->setMessages($e->getMessage())
-                ->setFinishedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                ->setFinishedAt(Mage_Core_Model_Locale::now())
                 ->save();
         }
 
@@ -279,15 +279,11 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         try {
             /** @var Mage_Cron_Helper_Data $helper */
             $helper = Mage::helper('cron');
-            $count = 0;
-            foreach ($jobCodes as $jobCode) {
-                if (!$helper->isJobDisabled($jobCode)) {
-                    $helper->setJobDisabled($jobCode, true);
-                    $count++;
-                }
-            }
+            $disabledJobs = $helper->getDisabledJobs();
+            $toDisable = array_filter($jobCodes, fn ($code) => !in_array($code, $disabledJobs, true));
+            $helper->setJobsDisabled($toDisable, true);
             Mage::getSingleton('adminhtml/session')->addSuccess(
-                $this->__('Total of %d cron job(s) were disabled.', $count),
+                $this->__('Total of %d cron job(s) were disabled.', count($toDisable)),
             );
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
@@ -308,15 +304,11 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         try {
             /** @var Mage_Cron_Helper_Data $helper */
             $helper = Mage::helper('cron');
-            $count = 0;
-            foreach ($jobCodes as $jobCode) {
-                if ($helper->isJobDisabled($jobCode)) {
-                    $helper->setJobDisabled($jobCode, false);
-                    $count++;
-                }
-            }
+            $disabledJobs = $helper->getDisabledJobs();
+            $toEnable = array_filter($jobCodes, fn ($code) => in_array($code, $disabledJobs, true));
+            $helper->setJobsDisabled($toEnable, false);
             Mage::getSingleton('adminhtml/session')->addSuccess(
-                $this->__('Total of %d cron job(s) were enabled.', $count),
+                $this->__('Total of %d cron job(s) were enabled.', count($toEnable)),
             );
         } catch (Exception $e) {
             Mage::getSingleton('adminhtml/session')->addError($e->getMessage());

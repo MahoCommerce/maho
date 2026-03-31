@@ -155,34 +155,54 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function getLastExecution(string $jobCode): ?array
     {
+        $all = $this->getAllLastExecutions();
+        return $all[$jobCode] ?? null;
+    }
+
+    public function getAllLastExecutions(): array
+    {
+        static $cache = null;
+        if ($cache !== null) {
+            return $cache;
+        }
+
         $resource = Mage::getSingleton('core/resource');
         $adapter = $resource->getConnection('core_read');
         $table = $resource->getTableName('cron/schedule');
 
-        $row = $adapter->fetchRow(
+        $subSelect = $adapter->select()
+            ->from($table, [
+                'job_code',
+                'max_executed' => new \Maho\Db\Expr('MAX(executed_at)'),
+            ])
+            ->where('executed_at IS NOT NULL')
+            ->group('job_code');
+
+        $rows = $adapter->fetchAll(
             $adapter->select()
-                ->from($table, ['executed_at', 'finished_at', 'status'])
-                ->where('job_code = ?', $jobCode)
-                ->where('executed_at IS NOT NULL')
-                ->order('executed_at DESC')
-                ->limit(1),
+                ->from(['s' => $table], ['job_code', 'executed_at', 'finished_at', 'status'])
+                ->join(
+                    ['latest' => $subSelect],
+                    's.job_code = latest.job_code AND s.executed_at = latest.max_executed',
+                    [],
+                ),
         );
 
-        if (!$row) {
-            return null;
+        $cache = [];
+        foreach ($rows as $row) {
+            $duration = null;
+            if ($row['executed_at'] && $row['finished_at']) {
+                $duration = strtotime($row['finished_at']) - strtotime($row['executed_at']);
+            }
+            $cache[$row['job_code']] = [
+                'executed_at' => $row['executed_at'],
+                'finished_at' => $row['finished_at'],
+                'status' => $row['status'],
+                'duration' => $duration,
+            ];
         }
 
-        $duration = null;
-        if ($row['executed_at'] && $row['finished_at']) {
-            $duration = strtotime($row['finished_at']) - strtotime($row['executed_at']);
-        }
-
-        return [
-            'executed_at' => $row['executed_at'],
-            'finished_at' => $row['finished_at'],
-            'status' => $row['status'],
-            'duration' => $duration,
-        ];
+        return $cache;
     }
 
     public function formatDuration(?int $seconds): string
@@ -220,18 +240,30 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function setJobDisabled(string $jobCode, bool $disabled): void
     {
-        $jobs = $this->getDisabledJobs();
-        $key = array_search($jobCode, $jobs, true);
+        $this->setJobsDisabled([$jobCode], $disabled);
+    }
 
-        if ($disabled && $key === false) {
-            $jobs[] = $jobCode;
-        } elseif (!$disabled && $key !== false) {
-            unset($jobs[$key]);
-            $jobs = array_values($jobs);
-        } else {
+    public function setJobsDisabled(array $jobCodes, bool $disabled): void
+    {
+        $jobs = $this->getDisabledJobs();
+        $changed = false;
+
+        foreach ($jobCodes as $jobCode) {
+            $key = array_search($jobCode, $jobs, true);
+            if ($disabled && $key === false) {
+                $jobs[] = $jobCode;
+                $changed = true;
+            } elseif (!$disabled && $key !== false) {
+                unset($jobs[$key]);
+                $changed = true;
+            }
+        }
+
+        if (!$changed) {
             return;
         }
 
+        $jobs = array_values($jobs);
         $value = empty($jobs) ? '' : json_encode($jobs);
         Mage::getConfig()->saveConfig(self::CONFIG_PATH_DISABLED_JOBS, $value);
         Mage::getConfig()->reinit();
