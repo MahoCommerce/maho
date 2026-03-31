@@ -13,10 +13,39 @@ declare(strict_types=1);
 
 /**
  * API Platform v2 Controller
- * Routes all /api/v2/* requests to Symfony/API Platform
+ * Routes all /api/v2/* requests to Symfony/API Platform.
+ * Legacy paths (soap, v2_soap, xmlrpc, jsonrpc) are forwarded to the original Mage_Api controllers.
  */
 class Maho_ApiPlatform_V2Controller extends Mage_Core_Controller_Front_Action
 {
+    private const LEGACY_CONTROLLERS = [
+        'soap'    => 'Mage_Api_SoapController',
+        'v2_soap' => 'Mage_Api_V2_SoapController',
+        'xmlrpc'  => 'Mage_Api_XmlrpcController',
+        'jsonrpc' => 'Mage_Api_JsonrpcController',
+    ];
+
+    #[\Override]
+    public function preDispatch(): static
+    {
+        parent::preDispatch();
+
+        $pathInfo = trim($this->getRequest()->getPathInfo(), '/');
+        $parts = explode('/', $pathInfo);
+        $controllerName = $parts[1] ?? '';
+
+        if (isset(self::LEGACY_CONTROLLERS[$controllerName])) {
+            $controllerClass = self::LEGACY_CONTROLLERS[$controllerName];
+            $controller = new $controllerClass($this->getRequest(), $this->getResponse());
+            $controller->dispatch('index');
+
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            $this->setFlag('', self::FLAG_NO_POST_DISPATCH, true);
+        }
+
+        return $this;
+    }
+
     /**
      * Catch-all action for API Platform
      */
