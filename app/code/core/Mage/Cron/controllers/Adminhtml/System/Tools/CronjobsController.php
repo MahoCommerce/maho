@@ -74,7 +74,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
     {
         $jobCode = $this->getRequest()->getParam('job_code');
         if (!$jobCode) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No job code specified.')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No job code specified.')]);
             return;
         }
 
@@ -112,14 +112,14 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             ];
         }
 
-        $this->_sendJsonResponse(['records' => $records]);
+        $this->getResponse()->setBodyJson(['records' => $records]);
     }
 
     public function runAction(): void
     {
         $jobCode = $this->getRequest()->getParam('job_code');
         if (!$jobCode) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No job code specified.')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No job code specified.')]);
             return;
         }
 
@@ -127,19 +127,19 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $helper = Mage::helper('cron');
         $jobs = $helper->getConfiguredJobs();
         if (!isset($jobs[$jobCode])) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Unknown cron job: %s', $jobCode)]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Unknown cron job: %s', $jobCode)]);
             return;
         }
 
         $modelMethod = $jobs[$jobCode]['model_method'];
         if (!preg_match(Mage_Cron_Model_Observer::REGEX_RUN_MODEL, $modelMethod, $run)) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Invalid model/method definition, expecting "model/class::method".')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Invalid model/method definition, expecting "model/class::method".')]);
             return;
         }
 
         $model = Mage::getModel($run[1]);
         if (!$model || !method_exists($model, $run[2])) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Invalid callback: %s::%s does not exist', $run[1], $run[2])]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Invalid callback: %s::%s does not exist', $run[1], $run[2])]);
             return;
         }
 
@@ -200,13 +200,13 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
     {
         $scheduleId = (int) $this->getRequest()->getParam('schedule_id');
         if (!$scheduleId) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('No schedule ID specified.')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('No schedule ID specified.')]);
             return;
         }
 
         $schedule = Mage::getModel('cron/schedule')->load($scheduleId);
         if (!$schedule->getId()) {
-            $this->_sendJsonResponse(['error' => true, 'message' => $this->__('Schedule not found.')]);
+            $this->getResponse()->setBodyJson(['error' => true, 'message' => $this->__('Schedule not found.')]);
             return;
         }
 
@@ -233,7 +233,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
             }
         }
 
-        $this->_sendJsonResponse($data);
+        $this->getResponse()->setBodyJson($data);
     }
 
     public function toggleAction(): void
@@ -323,10 +323,4 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         return Mage::getSingleton('admin/session')->isAllowed(self::ADMIN_RESOURCE);
     }
 
-    protected function _sendJsonResponse(array $data): void
-    {
-        $this->getResponse()
-            ->setHeader('Content-Type', 'application/json', true)
-            ->setBody(Mage::helper('core')->jsonEncode($data));
-    }
 }
