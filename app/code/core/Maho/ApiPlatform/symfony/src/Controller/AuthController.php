@@ -272,6 +272,8 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
+        $this->rateLimiter->check('auth_token:api_user:' . strtolower($username), 5, 60);
+
         try {
             $apiUser = \Mage::getModel('api/user')->loadByUsername($username);
 
