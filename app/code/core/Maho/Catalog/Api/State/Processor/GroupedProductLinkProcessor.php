@@ -38,9 +38,11 @@ final class GroupedProductLinkProcessor implements ProcessorInterface
     use AuthenticationTrait;
 
     public function __construct(
-        private readonly Security $security,
+        Security $security,
         private readonly GroupedProductLinkProvider $provider,
-    ) {}
+    ) {
+        $this->security = $security;
+    }
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?array

@@ -47,9 +47,11 @@ final class MediaProcessor implements ProcessorInterface
     private const WEBP_QUALITY = 85;
 
     public function __construct(
-        private readonly Security $security,
+        Security $security,
         private readonly RequestStack $requestStack,
-    ) {}
+    ) {
+        $this->security = $security;
+    }
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?Media

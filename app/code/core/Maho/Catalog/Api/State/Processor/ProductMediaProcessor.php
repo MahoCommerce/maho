@@ -36,9 +36,11 @@ final class ProductMediaProcessor implements ProcessorInterface
     use AuthenticationTrait;
 
     public function __construct(
-        private readonly Security $security,
+        Security $security,
         private readonly ProductMediaProvider $provider,
-    ) {}
+    ) {
+        $this->security = $security;
+    }
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductMedia|array|null

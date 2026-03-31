@@ -41,9 +41,11 @@ final class BlogPostProcessor implements ProcessorInterface
     use StoreAccessTrait;
 
     public function __construct(
-        private readonly Security $security,
+        Security $security,
         private readonly ContentSanitizer $contentSanitizer,
-    ) {}
+    ) {
+        $this->security = $security;
+    }
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?BlogPost

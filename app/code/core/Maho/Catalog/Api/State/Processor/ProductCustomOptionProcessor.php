@@ -43,9 +43,11 @@ final class ProductCustomOptionProcessor implements ProcessorInterface
     ];
 
     public function __construct(
-        private readonly Security $security,
+        Security $security,
         private readonly ProductCustomOptionProvider $provider,
-    ) {}
+    ) {
+        $this->security = $security;
+    }
 
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ProductCustomOption|array|null
