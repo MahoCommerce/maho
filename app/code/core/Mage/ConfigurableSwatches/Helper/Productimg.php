@@ -300,7 +300,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             $io->mkdir(dirname($fullDestPath), 0777, true);
         }
 
-        $image = Maho::getImageManager()->create($width, $height)->fill($optionSwatch->getValue());
+        $image = Maho::getImageManager()->createImage($width, $height)->fill($optionSwatch->getValue());
         Maho::encodeImage($image)->save($fullDestPath);
 
         return $destPath;
@@ -354,7 +354,7 @@ class Mage_ConfigurableSwatches_Helper_Productimg extends Mage_Core_Helper_Abstr
             }
 
             // Do resize and save
-            $image = Maho::getImageManager()->read($sourceFilePath);
+            $image = Maho::getImageManager()->decodePath($sourceFilePath);
             $image->resize($width, $height);
             $image->save($destPath);
         }

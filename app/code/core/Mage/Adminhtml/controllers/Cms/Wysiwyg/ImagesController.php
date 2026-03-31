@@ -207,7 +207,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
                 Mage::throwException('Thumbnail image could not be generated');
             }
 
-            $image = Maho::getImageManager()->read($thumb)->encode();
+            $image = Maho::getImageManager()->decodePath($thumb)->encodeUsingPath($thumb);
 
             $this->getResponse()
                 ->setHttpResponseCode(200)
