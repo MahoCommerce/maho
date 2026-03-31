@@ -18,7 +18,6 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\State\ProcessorInterface;
 use Maho\Customer\Api\Resource\Customer;
-use Maho\ApiPlatform\Service\RateLimiter;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -36,12 +35,19 @@ final class CustomerProcessor implements ProcessorInterface
 {
     use AuthenticationTrait;
 
-    private RateLimiter $rateLimiter;
-
     public function __construct(Security $security)
     {
         $this->security = $security;
-        $this->rateLimiter = new RateLimiter();
+    }
+
+    private function checkRateLimit(string $key, int $maxAttempts, int $windowSeconds): void
+    {
+        if (\Mage::helper('core')->isRateLimitExceeded(false, true, $key, $maxAttempts, $windowSeconds)) {
+            throw new \Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException(
+                (string) $windowSeconds,
+                'Too many requests. Please try again later.',
+            );
+        }
     }
 
     /**
@@ -177,7 +183,7 @@ final class CustomerProcessor implements ProcessorInterface
     private function createCustomer(Customer $data, array $context): Customer
     {
         StoreContext::ensureStore();
-        $this->rateLimiter->check('create_customer:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600);
+        $this->checkRateLimit('create_customer:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600);
         $storeId = StoreContext::getStoreId();
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
 
@@ -243,7 +249,7 @@ final class CustomerProcessor implements ProcessorInterface
         $args = $context['args']['input'] ?? [];
 
         StoreContext::ensureStore();
-        $this->rateLimiter->check('create_customer:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600);
+        $this->checkRateLimit('create_customer:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600);
         $storeId = StoreContext::getStoreId();
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
 
@@ -317,7 +323,7 @@ final class CustomerProcessor implements ProcessorInterface
             throw new BadRequestHttpException('Email and password are required');
         }
 
-        $this->rateLimiter->check('graphql_login:email:' . strtolower($email), 5, 60);
+        $this->checkRateLimit('graphql_login:email:' . strtolower($email), 5, 60);
 
         StoreContext::ensureStore();
         $storeId = StoreContext::getStoreId();

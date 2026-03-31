@@ -13,12 +13,13 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Controller;
 
+use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Routing\Attribute\Route;
-use Maho\ApiPlatform\Service\StoreContext;
 
 /**
  * Contact Controller
@@ -31,6 +32,7 @@ class ContactController extends AbstractController
     private const CONFIG_CAPTCHA_SECRET = 'maho_apiplatform/contact/captcha_secret_key';
     private const CONFIG_HONEYPOT = 'maho_apiplatform/contact/honeypot_enabled';
     private const CONFIG_RATE_LIMIT = 'maho_apiplatform/contact/rate_limit';
+
 
     private const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
     private const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
@@ -109,9 +111,9 @@ class ContactController extends AbstractController
         }
 
         // Rate limiting
-        $rateLimitError = $this->checkRateLimit($email, $storeId);
-        if ($rateLimitError !== null) {
-            return $rateLimitError;
+        $limit = (int) \Mage::getStoreConfig(self::CONFIG_RATE_LIMIT, $storeId);
+        if ($limit > 0 && \Mage::helper('core')->isRateLimitExceeded(false, true, "contact:{$storeId}:" . strtolower($email), $limit, 3600)) {
+            throw new TooManyRequestsHttpException('3600', 'Too many submissions. Please try again later.');
         }
 
         // Send email
@@ -156,9 +158,6 @@ class ContactController extends AbstractController
                         ['data' => $postObject],
                     );
             }
-
-            // Record for rate limiting
-            $this->recordSubmission($email, $storeId);
 
             return new JsonResponse([
                 'success' => true,
@@ -264,39 +263,4 @@ class ContactController extends AbstractController
         return null;
     }
 
-    private function checkRateLimit(#[\SensitiveParameter]
-        string $email, int $storeId): ?JsonResponse
-    {
-        $limit = (int) \Mage::getStoreConfig(self::CONFIG_RATE_LIMIT, $storeId);
-        if ($limit <= 0) {
-            return null;
-        }
-
-        $cacheKey = 'api_contact_rate_' . md5($email . '_' . $storeId);
-        $cache = \Mage::app()->getCache();
-        $count = (int) $cache->load($cacheKey);
-
-        if ($count >= $limit) {
-            return new JsonResponse([
-                'error' => 'rate_limited',
-                'message' => 'Too many submissions. Please try again later.',
-            ], Response::HTTP_TOO_MANY_REQUESTS);
-        }
-
-        return null;
-    }
-
-    private function recordSubmission(#[\SensitiveParameter]
-        string $email, int $storeId): void
-    {
-        $limit = (int) \Mage::getStoreConfig(self::CONFIG_RATE_LIMIT, $storeId);
-        if ($limit <= 0) {
-            return;
-        }
-
-        $cacheKey = 'api_contact_rate_' . md5($email . '_' . $storeId);
-        $cache = \Mage::app()->getCache();
-        $count = (int) $cache->load($cacheKey);
-        $cache->save((string) ($count + 1), $cacheKey, [], 3600); // 1 hour TTL
-    }
 }

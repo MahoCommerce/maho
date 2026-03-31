@@ -15,13 +15,13 @@ namespace Maho\ApiPlatform\Controller;
 
 use Maho\ApiPlatform\Service\CartService;
 use Maho\ApiPlatform\Service\JwtService;
-use Maho\ApiPlatform\Service\RateLimiter;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\TokenBlacklist;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 use Symfony\Component\Routing\Attribute\Route;
 
 /**
@@ -32,10 +32,19 @@ class AuthController extends AbstractController
 {
     public function __construct(
         private JwtService $jwtService,
-        private RateLimiter $rateLimiter,
         private TokenBlacklist $tokenBlacklist,
         private CartService $cartService,
     ) {}
+
+    /**
+     * @throws TooManyRequestsHttpException
+     */
+    private function checkRateLimit(string $key, int $maxAttempts, int $windowSeconds): void
+    {
+        if (\Mage::helper('core')->isRateLimitExceeded(false, true, $key, $maxAttempts, $windowSeconds)) {
+            throw new TooManyRequestsHttpException((string) $windowSeconds, 'Too many requests. Please try again later.');
+        }
+    }
     /**
      * Token endpoint - supports customer, client_credentials, and api_user grant types
      */
@@ -45,7 +54,7 @@ class AuthController extends AbstractController
         StoreContext::ensureStore();
 
         $ip = $request->getClientIp() ?? 'unknown';
-        $this->rateLimiter->check("auth_token:ip:{$ip}", 20, 60);
+        $this->checkRateLimit("auth_token:ip:{$ip}", 20, 60);
 
         $data = json_decode($request->getContent(), true) ?? [];
         $grantType = $data['grant_type'] ?? 'customer';
@@ -85,7 +94,7 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->rateLimiter->check('auth_token:email:' . strtolower($email), 5, 60);
+        $this->checkRateLimit('auth_token:email:' . strtolower($email), 5, 60);
 
         try {
             $websiteId = \Mage::app()->getStore()->getWebsiteId();
@@ -272,7 +281,7 @@ class AuthController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $this->rateLimiter->check('auth_token:api_user:' . strtolower($username), 5, 60);
+        $this->checkRateLimit('auth_token:api_user:' . strtolower($username), 5, 60);
 
         try {
             $apiUser = \Mage::getModel('api/user')->loadByUsername($username);
@@ -676,8 +685,8 @@ class AuthController extends AbstractController
         }
 
         $ip = $request->getClientIp() ?? 'unknown';
-        $this->rateLimiter->check('auth_forgot:email:' . strtolower($email), 3, 3600);
-        $this->rateLimiter->check("auth_forgot:ip:{$ip}", 10, 3600);
+        $this->checkRateLimit('auth_forgot:email:' . strtolower($email), 3, 3600);
+        $this->checkRateLimit("auth_forgot:ip:{$ip}", 10, 3600);
 
         try {
             $customer = \Mage::getModel('customer/customer')
@@ -739,8 +748,8 @@ class AuthController extends AbstractController
         }
 
         $ip = $request->getClientIp() ?? 'unknown';
-        $this->rateLimiter->check("auth_reset:ip:{$ip}", 5, 3600);
-        $this->rateLimiter->check('auth_reset:token:' . substr($token, 0, 16), 5, 3600);
+        $this->checkRateLimit("auth_reset:ip:{$ip}", 5, 3600);
+        $this->checkRateLimit('auth_reset:token:' . substr($token, 0, 16), 5, 3600);
 
         try {
             $customer = \Mage::getModel('customer/customer')
