@@ -50,14 +50,11 @@ class HttpCacheListener
             return;
         }
 
-        // Skip if Cache-Control already set (by another listener or the framework)
-        if ($response->headers->has('Cache-Control') && $response->headers->get('Cache-Control') !== 'no-cache, private') {
-            // API Platform sets a default 'no-cache, private' — we want to override that
-            // But if something else explicitly set a different value, respect it
-            $cacheControl = $response->headers->get('Cache-Control');
-            if ($cacheControl !== 'no-cache, private') {
-                return;
-            }
+        // If another listener explicitly set Cache-Control to something other than
+        // API Platform's default 'no-cache, private', respect that value
+        if ($response->headers->has('Cache-Control')
+            && $response->headers->get('Cache-Control') !== 'no-cache, private') {
+            return;
         }
 
         // Generate ETag from response content
