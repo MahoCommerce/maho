@@ -81,5 +81,4 @@ class CmsBlock
      */
     #[ApiProperty(description: 'Module-provided extension data')]
     public array $extensions = [];
-
 }

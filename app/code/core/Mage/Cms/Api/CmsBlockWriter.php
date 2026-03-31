@@ -159,5 +159,4 @@ final class CmsBlockWriter implements ProcessorInterface
 
         return null;
     }
-
 }

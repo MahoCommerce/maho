@@ -83,5 +83,4 @@ class CmsPage
      */
     #[ApiProperty(description: 'Module-provided extension data')]
     public array $extensions = [];
-
 }

@@ -177,5 +177,4 @@ final class CmsPageWriter implements ProcessorInterface
 
         return null;
     }
-
 }
