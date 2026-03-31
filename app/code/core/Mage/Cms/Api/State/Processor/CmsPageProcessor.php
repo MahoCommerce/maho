@@ -20,6 +20,7 @@ use Mage;
 use Mage_Cms_Model_Page;
 use Mage\Cms\Api\Resource\CmsPage;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
@@ -37,6 +38,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class CmsPageProcessor implements ProcessorInterface
 {
+    use ActivityLogTrait;
     use AuthenticationTrait;
     use StoreAccessTrait;
 
@@ -99,7 +101,7 @@ final class CmsPageProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to create page: ' . $e->getMessage());
         }
 
-        $this->logActivity('create', null, $page, $user);
+        $this->logApiActivity('cms/page', 'create', null, $page, $user);
 
         $data->id = (int) $page->getId();
         $data->content = $sanitizedContent;
@@ -144,7 +146,7 @@ final class CmsPageProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to update page: ' . $e->getMessage());
         }
 
-        $this->logActivity('update', $oldData, $page, $user);
+        $this->logApiActivity('cms/page', 'update', $oldData, $page, $user);
 
         $data->id = (int) $page->getId();
         $data->content = $sanitizedContent;
@@ -172,27 +174,9 @@ final class CmsPageProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to delete page: ' . $e->getMessage());
         }
 
-        $this->logActivity('delete', $oldData, null, $user);
+        $this->logApiActivity('cms/page', 'delete', $oldData, null, $user);
 
         return null;
     }
 
-    private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Page $page, ApiUser $user): void
-    {
-        try {
-            /** @var \Maho_AdminActivityLog_Model_Activity $activity */
-            $activity = Mage::getModel('adminactivitylog/activity');
-            $activity->logActivity([
-                'entity_type' => 'cms/page',
-                'action' => $action,
-                'entity_id' => $page ? (int) $page->getId() : ($oldData['page_id'] ?? 0),
-                'old_data' => $oldData,
-                'new_data' => $page?->getData(),
-                'api_user_id' => $user->getApiUserId(),
-                'username' => 'API: ' . $user->getUserIdentifier(),
-            ]);
-        } catch (\Exception $e) {
-            Mage::logException($e);
-        }
-    }
 }

@@ -24,6 +24,7 @@ use Mage_Catalog_Model_Product_Visibility;
 use Mage_CatalogInventory_Model_Stock_Item;
 use Mage\Catalog\Api\Resource\Product;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -45,6 +46,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class ProductProcessor implements ProcessorInterface
 {
+    use ActivityLogTrait;
     use AuthenticationTrait;
 
     private const VISIBILITY_MAP = [
@@ -131,7 +133,7 @@ final class ProductProcessor implements ProcessorInterface
 
         $this->updateStockData($product, $data);
         $this->invalidateCache((int) $product->getId());
-        $this->logActivity('create', null, $product, $user);
+        $this->logApiActivity('catalog/product', 'create', null, $product, $user);
 
         return $this->refreshDto($product, $data);
     }
@@ -193,7 +195,7 @@ final class ProductProcessor implements ProcessorInterface
 
         $this->updateStockData($product, $data);
         $this->invalidateCache((int) $product->getId());
-        $this->logActivity('update', $oldData, $product, $user);
+        $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
 
         return $this->refreshDto($product, $data);
     }
@@ -311,7 +313,7 @@ final class ProductProcessor implements ProcessorInterface
         }
 
         $this->invalidateCache($id);
-        $this->logActivity('update', $oldData, $product, $user);
+        $this->logApiActivity('catalog/product', 'update', $oldData, $product, $user);
 
         return $this->refreshDto($product, $data);
     }
@@ -344,7 +346,7 @@ final class ProductProcessor implements ProcessorInterface
         }
 
         $this->invalidateCache($id);
-        $this->logActivity('delete', $oldData, null, $user);
+        $this->logApiActivity('catalog/product', 'delete', $oldData, null, $user);
 
         return null;
     }
@@ -576,26 +578,4 @@ final class ProductProcessor implements ProcessorInterface
         return $data;
     }
 
-    private function logActivity(
-        string $action,
-        ?array $oldData,
-        ?Mage_Catalog_Model_Product $product,
-        ApiUser $user,
-    ): void {
-        try {
-            /** @var \Maho_AdminActivityLog_Model_Activity $activity */
-            $activity = Mage::getModel('adminactivitylog/activity');
-            $activity->logActivity([
-                'entity_type' => 'catalog/product',
-                'action' => $action,
-                'entity_id' => $product ? (int) $product->getId() : ($oldData['entity_id'] ?? 0),
-                'old_data' => $oldData,
-                'new_data' => $product?->getData(),
-                'api_user_id' => $user->getApiUserId(),
-                'username' => 'API: ' . $user->getUserIdentifier(),
-            ]);
-        } catch (\Exception $e) {
-            Mage::logException($e);
-        }
-    }
 }

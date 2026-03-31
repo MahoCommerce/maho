@@ -20,6 +20,7 @@ use Mage;
 use Mage_Catalog_Model_Category;
 use Mage\Catalog\Api\Resource\Category;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -37,6 +38,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class CategoryProcessor implements ProcessorInterface
 {
+    use ActivityLogTrait;
     use AuthenticationTrait;
 
     public function __construct(
@@ -110,7 +112,7 @@ final class CategoryProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to create category: ' . $e->getMessage());
         }
 
-        $this->logActivity('create', null, $category, $user);
+        $this->logApiActivity('catalog/category', 'create', null, $category, $user);
 
         return $this->refreshDto($category, $data);
     }
@@ -158,7 +160,7 @@ final class CategoryProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to update category: ' . $e->getMessage());
         }
 
-        $this->logActivity('update', $oldData, $category, $user);
+        $this->logApiActivity('catalog/category', 'update', $oldData, $category, $user);
 
         return $this->refreshDto($category, $data);
     }
@@ -195,7 +197,7 @@ final class CategoryProcessor implements ProcessorInterface
             }
         }
 
-        $this->logActivity('delete', $oldData, null, $user);
+        $this->logApiActivity('catalog/category', 'delete', $oldData, null, $user);
 
         return null;
     }
@@ -258,26 +260,4 @@ final class CategoryProcessor implements ProcessorInterface
         return $data;
     }
 
-    private function logActivity(
-        string $action,
-        ?array $oldData,
-        ?Mage_Catalog_Model_Category $category,
-        ApiUser $user,
-    ): void {
-        try {
-            /** @var \Maho_AdminActivityLog_Model_Activity $activity */
-            $activity = Mage::getModel('adminactivitylog/activity');
-            $activity->logActivity([
-                'entity_type' => 'catalog/category',
-                'action' => $action,
-                'entity_id' => $category ? (int) $category->getId() : ($oldData['entity_id'] ?? 0),
-                'old_data' => $oldData,
-                'new_data' => $category?->getData(),
-                'api_user_id' => $user->getApiUserId(),
-                'username' => 'API: ' . $user->getUserIdentifier(),
-            ]);
-        } catch (\Exception $e) {
-            Mage::logException($e);
-        }
-    }
 }

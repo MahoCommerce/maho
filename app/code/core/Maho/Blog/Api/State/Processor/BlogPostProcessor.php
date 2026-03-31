@@ -19,6 +19,7 @@ use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Maho\Blog\Api\Resource\BlogPost;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
@@ -37,6 +38,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class BlogPostProcessor implements ProcessorInterface
 {
+    use ActivityLogTrait;
     use AuthenticationTrait;
     use StoreAccessTrait;
 
@@ -121,7 +123,7 @@ final class BlogPostProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to create blog post: ' . $e->getMessage());
         }
 
-        $this->logActivity('create', null, $post, $user);
+        $this->logApiActivity('blog/post', 'create', null, $post, $user);
 
         $data->id = (int) $post->getId();
         $data->content = $sanitizedContent;
@@ -179,7 +181,7 @@ final class BlogPostProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to update blog post: ' . $e->getMessage());
         }
 
-        $this->logActivity('update', $oldData, $post, $user);
+        $this->logApiActivity('blog/post', 'update', $oldData, $post, $user);
 
         $data->id = (int) $post->getId();
         $data->content = $sanitizedContent;
@@ -208,7 +210,7 @@ final class BlogPostProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to delete blog post: ' . $e->getMessage());
         }
 
-        $this->logActivity('delete', $oldData, null, $user);
+        $this->logApiActivity('blog/post', 'delete', $oldData, null, $user);
 
         return null;
     }
@@ -286,26 +288,4 @@ final class BlogPostProcessor implements ProcessorInterface
         }
     }
 
-    private function logActivity(
-        string $action,
-        ?array $oldData,
-        ?Maho_Blog_Model_Post $post,
-        ApiUser $user,
-    ): void {
-        try {
-            /** @var \Maho_AdminActivityLog_Model_Activity $activity */
-            $activity = Mage::getModel('adminactivitylog/activity');
-            $activity->logActivity([
-                'entity_type' => 'blog/post',
-                'action' => $action,
-                'entity_id' => $post ? (int) $post->getId() : ($oldData['entity_id'] ?? 0),
-                'old_data' => $oldData,
-                'new_data' => $post?->getData(),
-                'api_user_id' => $user->getApiUserId(),
-                'username' => 'API: ' . $user->getUserIdentifier(),
-            ]);
-        } catch (\Exception $e) {
-            Mage::logException($e);
-        }
-    }
 }

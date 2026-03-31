@@ -20,6 +20,7 @@ use Mage;
 use Mage_Cms_Model_Block;
 use Mage\Cms\Api\Resource\CmsBlock;
 use Maho\ApiPlatform\Security\ApiUser;
+use Maho\ApiPlatform\Trait\ActivityLogTrait;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
@@ -37,6 +38,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class CmsBlockProcessor implements ProcessorInterface
 {
+    use ActivityLogTrait;
     use AuthenticationTrait;
     use StoreAccessTrait;
 
@@ -90,7 +92,7 @@ final class CmsBlockProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to create block: ' . $e->getMessage());
         }
 
-        $this->logActivity('create', null, $block, $user);
+        $this->logApiActivity('cms/block', 'create', null, $block, $user);
 
         $data->id = (int) $block->getId();
         $data->content = $sanitizedContent;
@@ -126,7 +128,7 @@ final class CmsBlockProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to update block: ' . $e->getMessage());
         }
 
-        $this->logActivity('update', $oldData, $block, $user);
+        $this->logApiActivity('cms/block', 'update', $oldData, $block, $user);
 
         $data->id = (int) $block->getId();
         $data->content = $sanitizedContent;
@@ -154,27 +156,9 @@ final class CmsBlockProcessor implements ProcessorInterface
             throw new UnprocessableEntityHttpException('Failed to delete block: ' . $e->getMessage());
         }
 
-        $this->logActivity('delete', $oldData, null, $user);
+        $this->logApiActivity('cms/block', 'delete', $oldData, null, $user);
 
         return null;
     }
 
-    private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Block $block, ApiUser $user): void
-    {
-        try {
-            /** @var \Maho_AdminActivityLog_Model_Activity $activity */
-            $activity = Mage::getModel('adminactivitylog/activity');
-            $activity->logActivity([
-                'entity_type' => 'cms/block',
-                'action' => $action,
-                'entity_id' => $block ? (int) $block->getId() : ($oldData['block_id'] ?? 0),
-                'old_data' => $oldData,
-                'new_data' => $block?->getData(),
-                'api_user_id' => $user->getApiUserId(),
-                'username' => 'API: ' . $user->getUserIdentifier(),
-            ]);
-        } catch (\Exception $e) {
-            Mage::logException($e);
-        }
-    }
 }
