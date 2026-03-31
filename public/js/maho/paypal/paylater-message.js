@@ -11,7 +11,8 @@ class MahoPaypalPayLaterMessage {
         this.el = el;
         this.sdkUrl = el.dataset.sdkUrl;
         this.clientTokenUrl = el.dataset.clientTokenUrl;
-        this.amount = el.dataset.amount || '0';
+        this.amount = el.dataset.amount;
+        this.currency = el.dataset.currency;
         this._mounted = false;
     }
 
@@ -35,13 +36,15 @@ class MahoPaypalPayLaterMessage {
         }
 
         const messagesInstance = sdk.createPayPalMessages({
-            amount: parseFloat(this.amount) || 0,
+            currencyCode: this.currency,
             placement: this.el.dataset.placement || 'product',
         });
         const messageEl = document.createElement('paypal-message');
         this.el.appendChild(messageEl);
 
         messagesInstance.fetchContent({
+            amount: this.amount,
+            currencyCode: this.currency,
             onContentReady: (content) => messageEl.setContent(content),
         });
     }

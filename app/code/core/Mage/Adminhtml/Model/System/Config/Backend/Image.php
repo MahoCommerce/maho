@@ -42,10 +42,12 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image extends Mage_Adminhtml_Mo
 
         $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Image::NAME, $validator, 'validate');
 
-        // Add SVG validator if SVG is allowed
+        // Add SVG validator only if SVG is allowed and the uploaded file is actually an SVG
         if (in_array('svg', $allowedExtensions)) {
-            $svgValidator = Mage::getModel('core/file_validator_svg');
-            $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Svg::NAME, $svgValidator, 'validate');
+            if (strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION)) === 'svg') {
+                $svgValidator = Mage::getModel('core/file_validator_svg');
+                $uploader->addValidateCallback(Mage_Core_Model_File_Validator_Svg::NAME, $svgValidator, 'validate');
+            }
         }
     }
 }

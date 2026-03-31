@@ -18,7 +18,7 @@
             <block type="core/template" name="top.search" as="topSearch" template="catalogsearch/form.mini.phtml"/>
         </reference>
         <reference name="footer_links">
-            <action method="addLink" translate="label title" module="catalogsearch">
+            <action method="addLink" translate="label title" module="catalogsearch" ifconfig="catalog/advanced_search/enabled">
                 <label>Advanced Search</label>
                 <url helper="catalogsearch/getAdvancedSearchUrl" />
                 <title>Advanced Search</title>

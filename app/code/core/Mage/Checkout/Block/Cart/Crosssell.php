@@ -35,6 +35,7 @@ class Mage_Checkout_Block_Cart_Crosssell extends Mage_Catalog_Block_Product_Abst
                     $collection = $this->_getCollection()
                         ->addProductFilter($lastAdded)
                         ->addExcludeProductFilter($ninProductIds)
+                        ->setGroupBy()
                         ->setPositionOrder()
                         ->load();
 

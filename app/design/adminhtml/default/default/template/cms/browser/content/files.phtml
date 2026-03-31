@@ -23,7 +23,7 @@ $_height = $this->getImagesHeight();
 ?>
 <?php if ($this->getFilesCount() > 0): ?>
     <?php foreach ($this->getFiles() as $file): ?>
-    <div class="filecnt" id="<?= $this->getFileId($file) ?>">
+    <div class="filecnt" id="<?= $this->getFileId($file) ?>" data-filename="<?= $this->escapeHtml($this->getFileName($file)) ?>">
         <p class="nm" style="height:<?= $_height ?>px;width:<?= $_width ?>px;">
         <?php if($this->getFileThumbUrl($file)):?>
             <img src="<?= $this->getFileThumbUrl($file) ?>" alt="<?= $this->escapeHtml($this->getFileName($file)) ?>"/>

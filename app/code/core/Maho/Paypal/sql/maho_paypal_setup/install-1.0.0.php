@@ -161,4 +161,15 @@ $connection->addColumn($orderPaymentTable, 'paypal_order_id', [
     'comment'  => 'PayPal Order ID',
 ]);
 
+$connection->addIndex(
+    $quotePaymentTable,
+    $installer->getIdxName('sales/quote_payment', ['paypal_order_id']),
+    ['paypal_order_id'],
+);
+$connection->addIndex(
+    $orderPaymentTable,
+    $installer->getIdxName('sales/order_payment', ['paypal_order_id']),
+    ['paypal_order_id'],
+);
+
 $installer->endSetup();

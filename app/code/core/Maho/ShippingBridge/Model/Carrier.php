@@ -78,8 +78,9 @@ class Maho_ShippingBridge_Model_Carrier extends Mage_Shipping_Model_Carrier_Abst
 
             $statusCode = $response->getStatusCode();
             if ($statusCode < 200 || $statusCode >= 300) {
+                $errorBody = $response->getContent(false);
                 Mage::log(
-                    "Shipping Bridge: API returned HTTP {$statusCode}",
+                    "Shipping Bridge: API returned HTTP {$statusCode}\n{$errorBody}",
                     Mage::LOG_ERROR,
                     'shipping_bridge.log',
                 );

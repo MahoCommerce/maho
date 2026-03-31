@@ -117,7 +117,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_File extends Mage_Core_Model_Co
             $uploadDir = $this->_appendScopeInfo($uploadDir);
         }
 
-        return $uploadDir;
+        return Mage::getBaseDir('media') . '/' . $uploadDir;
     }
 
     /**

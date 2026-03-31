@@ -521,6 +521,9 @@
     </frontend>
     <default>
         <customer>
+            <account>
+                <enabled_in_frontend>1</enabled_in_frontend>
+            </account>
             <account_share>
                 <scope>1</scope>
             </account_share>

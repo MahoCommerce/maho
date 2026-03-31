@@ -115,7 +115,7 @@ class Packaging
 
     updateMessage(message) {
         const block = this.window.querySelector('.messages');
-        block.innerHTML = message;
+        block.textContent = message;
         toggleVis(block, true);
     }
 

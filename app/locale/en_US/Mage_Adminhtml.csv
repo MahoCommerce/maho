@@ -413,6 +413,7 @@
 "Grid Only","Grid Only"
 "Group:","Group:"
 "Guest","Guest"
+"Health Check","Health Check"
 "Helper attributes should not be used in custom layout updates.","Helper attributes should not be used in custom layout updates."
 "Helper for options rendering doesn't implement required interface.","Helper for options rendering doesn't implement required interface."
 "Home","Home"

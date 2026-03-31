@@ -33,6 +33,11 @@ class Mage_Wishlist_IndexController extends Mage_Wishlist_Controller_Abstract
     {
         parent::preDispatch();
 
+        if (!Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')) {
+            $this->norouteAction();
+            $this->setFlag('', self::FLAG_NO_DISPATCH, true);
+            return $this;
+        }
         if (!$this->_skipAuthentication && !Mage::getSingleton('customer/session')->authenticate($this)) {
             $this->setFlag('', 'no-dispatch', true);
             if (!Mage::getSingleton('customer/session')->getBeforeWishlistUrl()) {

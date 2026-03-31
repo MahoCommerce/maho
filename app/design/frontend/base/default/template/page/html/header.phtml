@@ -30,12 +30,14 @@
             <?= $this->getChildHtml('store_language') ?>
             <?= $this->getChildHtml('currency_switcher') ?>
 
+            <?php if (Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')): ?>
             <a href="<?= $this->helper('customer')->getAccountUrl() ?>" class="skip-link skip-account" title="<?= $this->__('Account') ?>">
                 <?= $this->getIconSvg('user') ?>
                 <span class="label"><?= $this->__('Account') ?></span>
             </a>
+            <?php endif ?>
 
-            <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getStoreConfig('wishlist/general/active')): ?>
+            <?php if ($this->isModuleOutputEnabled('Mage_Wishlist') && Mage::getStoreConfig('wishlist/general/active') && Mage::getStoreConfigFlag('customer/account/enabled_in_frontend')): ?>
             <a href="<?= $this->helper('customer')->getWishlistUrl() ?>" class="skip-link skip-wishlist" title="<?= $this->__('Wishlist') ?>">
                 <?= $this->getIconSvg('heart') ?>
                 <span class="label"><?= $this->__('Wishlist') ?></span>

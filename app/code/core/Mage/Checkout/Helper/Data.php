@@ -233,7 +233,7 @@ class Mage_Checkout_Helper_Data extends Mage_Core_Helper_Abstract
                     [
                         'reason'          => $message,
                         'checkoutType'    => $checkoutType,
-                        'dateAndTime'     => Mage::app()->getLocale()->storeDate(null, null, true, 'html5'),
+                        'dateAndTime'     => Mage::app()->getLocale()->storeDate(null, new DateTime(), true, 'html5'),
                         'customer'        => Mage::helper('customer')->getFullCustomerName($checkout),
                         'customerEmail'   => $checkout->getCustomerEmail(),
                         'billingAddress'  => $checkout->getBillingAddress(),
