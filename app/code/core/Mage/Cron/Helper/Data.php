@@ -16,8 +16,6 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 {
     protected $_moduleName = 'Mage_Cron';
 
-    public const CONFIG_PATH_DISABLED_JOBS = 'cron/disabled_jobs';
-
     public function getConfiguredJobs(): array
     {
         $jobs = [];
@@ -49,6 +47,7 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
                 'model_method' => $jobConfig['run']['model'] ?? '',
                 'cron_expr' => $cronExpr,
                 'config_path' => $configPath,
+                'enabled' => !isset($jobConfig['schedule']['enabled']) || (string) $jobConfig['schedule']['enabled'] !== '0',
             ];
         }
 
@@ -223,49 +222,24 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
         return $mins > 0 ? $this->__('%dh %dm', $hours, $mins) : $this->__('%dh', $hours);
     }
 
-    public function getDisabledJobs(): array
+    public function isJobEnabled(string $jobCode): bool
     {
-        $value = Mage::getStoreConfig(self::CONFIG_PATH_DISABLED_JOBS);
-        if (empty($value)) {
-            return [];
-        }
-        $decoded = json_decode($value, true);
-        return is_array($decoded) ? $decoded : [];
+        $node = Mage::getConfig()->getNode("crontab/jobs/{$jobCode}/schedule/enabled")
+            ?? Mage::getConfig()->getNode("default/crontab/jobs/{$jobCode}/schedule/enabled");
+        return $node === null || (string) $node !== '0';
     }
 
-    public function isJobDisabled(string $jobCode): bool
+    public function setJobEnabled(string $jobCode, bool $enabled): void
     {
-        return in_array($jobCode, $this->getDisabledJobs(), true);
+        $this->setJobsEnabled([$jobCode], $enabled);
     }
 
-    public function setJobDisabled(string $jobCode, bool $disabled): void
+    public function setJobsEnabled(array $jobCodes, bool $enabled): void
     {
-        $this->setJobsDisabled([$jobCode], $disabled);
-    }
-
-    public function setJobsDisabled(array $jobCodes, bool $disabled): void
-    {
-        $jobs = $this->getDisabledJobs();
-        $changed = false;
-
         foreach ($jobCodes as $jobCode) {
-            $key = array_search($jobCode, $jobs, true);
-            if ($disabled && $key === false) {
-                $jobs[] = $jobCode;
-                $changed = true;
-            } elseif (!$disabled && $key !== false) {
-                unset($jobs[$key]);
-                $changed = true;
-            }
+            $path = "crontab/jobs/{$jobCode}/schedule/enabled";
+            Mage::getConfig()->saveConfig($path, $enabled ? '1' : '0');
         }
-
-        if (!$changed) {
-            return;
-        }
-
-        $jobs = array_values($jobs);
-        $value = empty($jobs) ? '' : json_encode($jobs);
-        Mage::getConfig()->saveConfig(self::CONFIG_PATH_DISABLED_JOBS, $value);
         Mage::getConfig()->reinit();
     }
 }

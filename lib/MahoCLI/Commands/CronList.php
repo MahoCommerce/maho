@@ -40,7 +40,7 @@ class CronList extends BaseMahoCommand
                 $jobCode,
                 $jobConfig['model_method'],
                 $jobConfig['cron_expr'],
-                $helper->isJobDisabled($jobCode) ? '<fg=red>disabled</>' : '<fg=green>enabled</>',
+                $jobConfig['enabled'] ? '<fg=green>enabled</>' : '<fg=red>disabled</>',
             ]);
         }
         $table->render();

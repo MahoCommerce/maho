@@ -27,12 +27,12 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
         /** @var Mage_Cron_Helper_Data $helper */
         $helper = Mage::helper('cron');
         $jobs = $helper->getConfiguredJobs();
-        $disabledJobs = $helper->getDisabledJobs();
 
         $collection = new Mage_Cron_Model_Resource_ConfiguredJobs_Collection();
 
         foreach ($jobs as $jobCode => $jobConfig) {
             $lastExec = $helper->getLastExecution($jobCode);
+            $isEnabled = $jobConfig['enabled'];
 
             $item = new \Maho\DataObject();
             $item->setId($jobCode);
@@ -43,9 +43,8 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             $item->setData('last_executed_at', $lastExec['executed_at'] ?? null);
             $item->setData('last_duration', $lastExec ? $helper->formatDuration($lastExec['duration']) : '');
             $item->setData('last_status', $lastExec['status'] ?? '');
-            $isDisabled = in_array($jobCode, $disabledJobs, true);
-            $item->setData('next_run_at', $isDisabled ? null : $helper->getNextRunTime($jobConfig['cron_expr']));
-            $item->setData('is_disabled', $isDisabled);
+            $item->setData('next_run_at', $isEnabled ? $helper->getNextRunTime($jobConfig['cron_expr']) : null);
+            $item->setData('is_enabled', $isEnabled);
 
             $collection->addItem($item);
         }
@@ -99,9 +98,9 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             'sortable' => false,
         ]);
 
-        $this->addColumn('is_disabled', [
+        $this->addColumn('is_enabled', [
             'header' => Mage::helper('cron')->__('Status'),
-            'index' => 'is_disabled',
+            'index' => 'is_enabled',
             'align' => 'center',
             'sortable' => false,
             'frame_callback' => [$this, 'decorateJobStatus'],
@@ -414,20 +413,20 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
 
     public function decorateJobStatus(string $value, \Maho\DataObject $row, Mage_Adminhtml_Block_Widget_Grid_Column $column, bool $isExport): string
     {
-        $isDisabled = $row->getData('is_disabled');
+        $isEnabled = $row->getData('is_enabled');
 
         if ($isExport) {
-            return $isDisabled ? 'Disabled' : 'Enabled';
+            return $isEnabled ? 'Enabled' : 'Disabled';
         }
 
-        if ($isDisabled) {
-            $label = Mage::helper('cron')->__('Disabled');
-            $toggleLabel = Mage::helper('cron')->__('Enable');
-            $class = 'critical';
-        } else {
+        if ($isEnabled) {
             $label = Mage::helper('cron')->__('Enabled');
             $toggleLabel = Mage::helper('cron')->__('Disable');
             $class = 'notice';
+        } else {
+            $label = Mage::helper('cron')->__('Disabled');
+            $toggleLabel = Mage::helper('cron')->__('Enable');
+            $class = 'critical';
         }
 
         $toggleUrl = $this->getUrl('*/*/toggle');
