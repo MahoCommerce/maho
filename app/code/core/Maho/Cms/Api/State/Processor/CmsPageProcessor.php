@@ -18,13 +18,12 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Mage;
 use Mage_Cms_Model_Page;
-use Mage_Core_Model_Store;
 use Maho\Cms\Api\Resource\CmsPage;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
+use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -39,6 +38,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class CmsPageProcessor implements ProcessorInterface
 {
     use AuthenticationTrait;
+    use StoreAccessTrait;
 
     public function __construct(
         private readonly Security $security,
@@ -114,7 +114,8 @@ final class CmsPageProcessor implements ProcessorInterface
             throw new NotFoundHttpException('CMS page not found');
         }
 
-        $this->validateStoreAccess($page, $user);
+        $pageStores = $page->getStoreId();
+        $this->validateEntityStoreAccess(is_array($pageStores) ? $pageStores : [$pageStores], $user, 'page');
 
         $oldData = $page->getData();
 
@@ -158,7 +159,8 @@ final class CmsPageProcessor implements ProcessorInterface
             throw new NotFoundHttpException('CMS page not found');
         }
 
-        $this->validateStoreAccess($page, $user);
+        $pageStores = $page->getStoreId();
+        $this->validateEntityStoreAccess(is_array($pageStores) ? $pageStores : [$pageStores], $user, 'page');
 
         $oldData = $page->getData();
 
@@ -171,59 +173,6 @@ final class CmsPageProcessor implements ProcessorInterface
         $this->logActivity('delete', $oldData, null, $user);
 
         return null;
-    }
-
-    /**
-     * @return array<int>
-     */
-    private function resolveStoreIds(array $stores, ApiUser $user): array
-    {
-        if (in_array('all', $stores, true)) {
-            $allowedStores = $user->getAllowedStoreIds();
-            if ($allowedStores === null) {
-                return [0]; // Admin store = all stores
-            }
-            return $allowedStores;
-        }
-
-        $storeIds = [];
-        foreach ($stores as $storeCode) {
-            /** @var Mage_Core_Model_Store $store */
-            $store = Mage::app()->getStore($storeCode);
-            $storeId = (int) $store->getId();
-
-            if (!$user->canAccessStore($storeId)) {
-                throw new AccessDeniedHttpException("Access denied for store: {$storeCode}");
-            }
-
-            $storeIds[] = $storeId;
-        }
-
-        return $storeIds;
-    }
-
-    private function validateStoreAccess(Mage_Cms_Model_Page $page, ApiUser $user): void
-    {
-        $pageStores = $page->getStoreId();
-        if (!is_array($pageStores)) {
-            $pageStores = [$pageStores];
-        }
-
-        if (in_array(0, $pageStores, true)) {
-            $allowedStores = $user->getAllowedStoreIds();
-            if ($allowedStores !== null) {
-                throw new AccessDeniedHttpException('Access denied for all-stores content');
-            }
-            return;
-        }
-
-        foreach ($pageStores as $storeId) {
-            if ($user->canAccessStore((int) $storeId)) {
-                return;
-            }
-        }
-
-        throw new AccessDeniedHttpException('Access denied for this page\'s stores');
     }
 
     private function logActivity(string $action, ?array $oldData, ?Mage_Cms_Model_Page $page, ApiUser $user): void

@@ -17,14 +17,13 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Mage;
-use Mage_Core_Model_Store;
 use Maho\Blog\Api\Resource\BlogPost;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
+use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Maho_Blog_Model_Post;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
@@ -39,6 +38,7 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class BlogPostProcessor implements ProcessorInterface
 {
     use AuthenticationTrait;
+    use StoreAccessTrait;
 
     public function __construct(
         private readonly Security $security,
@@ -143,7 +143,7 @@ final class BlogPostProcessor implements ProcessorInterface
             throw new NotFoundHttpException('Blog post not found');
         }
 
-        $this->validateStoreAccess($post, $user);
+        $this->validateEntityStoreAccess($post->getStores(), $user, 'post');
 
         $oldData = $post->getData();
 
@@ -195,7 +195,7 @@ final class BlogPostProcessor implements ProcessorInterface
             throw new NotFoundHttpException('Blog post not found');
         }
 
-        $this->validateStoreAccess($post, $user);
+        $this->validateEntityStoreAccess($post->getStores(), $user, 'post');
 
         $oldData = $post->getData();
 
@@ -209,56 +209,6 @@ final class BlogPostProcessor implements ProcessorInterface
         $this->logActivity('delete', $oldData, null, $user);
 
         return null;
-    }
-
-    /**
-     * @return array<int>
-     */
-    private function resolveStoreIds(array $stores, ApiUser $user): array
-    {
-        if (in_array('all', $stores, true)) {
-            $allowedStores = $user->getAllowedStoreIds();
-            if ($allowedStores === null) {
-                return [0];
-            }
-            return $allowedStores;
-        }
-
-        $storeIds = [];
-        foreach ($stores as $storeCode) {
-            /** @var Mage_Core_Model_Store $store */
-            $store = Mage::app()->getStore($storeCode);
-            $storeId = (int) $store->getId();
-
-            if (!$user->canAccessStore($storeId)) {
-                throw new AccessDeniedHttpException("Access denied for store: {$storeCode}");
-            }
-
-            $storeIds[] = $storeId;
-        }
-
-        return $storeIds;
-    }
-
-    private function validateStoreAccess(Maho_Blog_Model_Post $post, ApiUser $user): void
-    {
-        $postStores = $post->getStores();
-
-        if (in_array(0, $postStores, true)) {
-            $allowedStores = $user->getAllowedStoreIds();
-            if ($allowedStores !== null) {
-                throw new AccessDeniedHttpException('Access denied for all-stores content');
-            }
-            return;
-        }
-
-        foreach ($postStores as $storeId) {
-            if ($user->canAccessStore((int) $storeId)) {
-                return;
-            }
-        }
-
-        throw new AccessDeniedHttpException('Access denied for this post\'s stores');
     }
 
     /**
