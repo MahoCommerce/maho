@@ -13,13 +13,19 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service;
 
+use Symfony\Contracts\Service\ResetInterface;
+
 /**
  * Store Context Service
  *
  * Manages store context for API requests. Ensures a valid store is set
  * for multi-store configurations and provides store switching capability.
+ *
+ * Implements ResetInterface so the Symfony DI container clears static
+ * state between requests when the kernel runs in a long-lived process
+ * (tests, CLI commands, async workers).
  */
-final class StoreContext
+final class StoreContext implements ResetInterface
 {
     private static ?int $currentStoreId = null;
 
@@ -130,6 +136,15 @@ final class StoreContext
 
         // Last resort - store 1
         return 1;
+    }
+
+    /**
+     * Reset static state between requests in long-lived processes.
+     */
+    #[\Override]
+    public function reset(): void
+    {
+        self::$currentStoreId = null;
     }
 
     /**
