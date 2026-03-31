@@ -176,7 +176,6 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             .cron-history-table tr:hover td { background: #fafafa; }
             .cron-history-table .messages-cell { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; color: #888; }
             .cron-history-empty { text-align: center; padding: 30px; color: #999; }
-            .link-style-button { background: none; border: none; color: inherit; cursor: pointer; padding: 0; font: inherit; text-decoration: underline; }
         </style>
         <script>
         const CRON_ICON_SUCCESS = '{$this->jsQuoteEscape($iconSuccess)}';
@@ -439,7 +438,7 @@ class Mage_Cron_Block_Adminhtml_System_Tools_Cronjobs_Grid extends Mage_Adminhtm
             . '<br><form method="POST" action="' . $toggleUrl . '" style="display:inline">'
             . '<input type="hidden" name="job_code" value="' . $jobCode . '">'
             . '<input type="hidden" name="form_key" value="' . $formKey . '">'
-            . '<button type="submit" class="link-style-button">[' . $toggleLabel . ']</button>'
+            . '<a href="#" onclick="this.closest(\'form\').submit(); return false;">[' . $toggleLabel . ']</a>'
             . '</form>';
     }
 
