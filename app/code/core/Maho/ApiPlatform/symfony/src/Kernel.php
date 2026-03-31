@@ -141,6 +141,7 @@ class Kernel extends BaseKernel
                 try {
                     require_once $filePath;
                 } catch (\Throwable $e) {
+                    \Mage::log('ApiPlatform: failed to load ' . $filePath . ': ' . $e->getMessage(), \Mage::LOG_ERROR);
                     continue;
                 }
             }
