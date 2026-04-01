@@ -27,6 +27,11 @@ class DevLspStart extends BaseMahoCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (!class_exists(\React\Stream\ReadableResourceStream::class)) {
+            $output->writeln('<error>react/stream is not installed. Run: composer require react/stream</error>');
+            return Command::FAILURE;
+        }
+
         $this->initMaho();
 
         /** @var \Maho_Intelligence_Model_Lsp_Server $server */

@@ -14,11 +14,17 @@ class Maho_Intelligence_Model_Provider_Event
 {
     private const AREAS = ['global', 'frontend', 'adminhtml', 'crontab'];
 
+    private ?array $cachedEvents = null;
+
     /**
      * Get all events keyed by area, then event name, with observer details
      */
     public function getAllEvents(): array
     {
+        if ($this->cachedEvents !== null) {
+            return $this->cachedEvents;
+        }
+
         $config = Mage::getConfig();
         $result = [];
 
@@ -56,6 +62,8 @@ class Maho_Intelligence_Model_Provider_Event
         foreach ($result as &$areaEvents) {
             ksort($areaEvents);
         }
+
+        $this->cachedEvents = $result;
         return $result;
     }
 

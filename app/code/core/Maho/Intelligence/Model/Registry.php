@@ -25,7 +25,7 @@ class Maho_Intelligence_Model_Registry
 
     public function get(string $provider, string $method, array $args = []): mixed
     {
-        $key = $provider . '::' . $method . '::' . md5(serialize($args));
+        $key = $provider . '::' . $method . '::' . json_encode($args);
         if (!isset($this->cache[$key])) {
             $this->cache[$key] = $this->getProvider($provider)->$method(...$args);
         }

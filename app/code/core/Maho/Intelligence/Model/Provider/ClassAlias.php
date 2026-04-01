@@ -24,8 +24,11 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         $group = $classArr[0];
         $class = $classArr[1] ?? ($type === 'helper' ? 'data' : null);
 
-        $configType = $type === 'resource_model' ? 'model' : $type;
-        $groupNode = $config->getNode("global/{$configType}s/{$group}");
+        if ($type === 'resource_model') {
+            return $this->resolveResourceModelAlias($config, $alias, $group, $class);
+        }
+
+        $groupNode = $config->getNode("global/{$type}s/{$group}");
         if (!$groupNode) {
             return [
                 'alias' => $alias,
@@ -48,6 +51,61 @@ class Maho_Intelligence_Model_Provider_ClassAlias
             $classPrefix = $groupNode->getClassName();
             if (empty($classPrefix)) {
                 $classPrefix = 'mage_' . $group . '_' . $type;
+            }
+            if (!empty($class)) {
+                $classPrefix .= '_' . $class;
+            }
+            $className = uc_words($classPrefix);
+        }
+
+        return [
+            'alias' => $alias,
+            'class' => $className,
+            'file' => $this->findClassFile($className),
+            'rewritten_by' => $rewrittenBy,
+        ];
+    }
+
+    private function resolveResourceModelAlias(
+        Mage_Core_Model_Config $config,
+        string $alias,
+        string $group,
+        ?string $class,
+    ): array {
+        $groupNode = $config->getNode("global/models/{$group}");
+
+        // Follow the resourceModel indirection: catalog → catalog_resource
+        if ($groupNode && !empty($groupNode->resourceModel)) {
+            $resourceGroup = (string) $groupNode->resourceModel;
+            $resourceNode = $config->getNode("global/models/{$resourceGroup}");
+        } else {
+            // The group itself may already be a resource model group
+            $resourceGroup = $group;
+            $resourceNode = $groupNode;
+        }
+
+        if (!$resourceNode) {
+            return [
+                'alias' => $alias,
+                'class' => null,
+                'file' => null,
+                'rewritten_by' => null,
+                'error' => "Unknown resource model group: {$group}",
+            ];
+        }
+
+        $rewrittenBy = null;
+        $className = '';
+
+        if ($class && isset($resourceNode->rewrite->$class)) {
+            $className = (string) $resourceNode->rewrite->$class;
+            $rewrittenBy = $className;
+        }
+
+        if (empty($className)) {
+            $classPrefix = $resourceNode->getClassName();
+            if (empty($classPrefix)) {
+                $classPrefix = 'mage_' . $resourceGroup . '_model';
             }
             if (!empty($class)) {
                 $classPrefix .= '_' . $class;
@@ -209,6 +267,16 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         foreach ($paths as $path) {
             if (file_exists($path)) {
                 return $path;
+            }
+        }
+
+        foreach (spl_autoload_functions() as $autoloader) {
+            if (is_array($autoloader) && $autoloader[0] instanceof \Composer\Autoload\ClassLoader) {
+                $found = $autoloader[0]->findFile($className);
+                if ($found !== false) {
+                    return realpath($found) ?: $found;
+                }
+                break;
             }
         }
 

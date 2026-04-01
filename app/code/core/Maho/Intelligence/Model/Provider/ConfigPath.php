@@ -12,11 +12,17 @@ declare(strict_types=1);
 
 class Maho_Intelligence_Model_Provider_ConfigPath
 {
+    private ?array $cachedPaths = null;
+
     /**
      * Get all system.xml configuration paths with metadata
      */
     public function getAllPaths(): array
     {
+        if ($this->cachedPaths !== null) {
+            return $this->cachedPaths;
+        }
+
         $result = [];
         $systemXmlFiles = $this->findSystemXmlFiles();
 
@@ -61,6 +67,7 @@ class Maho_Intelligence_Model_Provider_ConfigPath
         }
 
         ksort($result);
+        $this->cachedPaths = $result;
         return $result;
     }
 

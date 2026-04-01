@@ -11,6 +11,8 @@
 declare(strict_types=1);
 
 use React\EventLoop\Loop;
+use React\EventLoop\LoopInterface;
+use React\EventLoop\TimerInterface;
 
 /**
  * LSP server for Maho Intelligence.
@@ -24,6 +26,9 @@ use React\EventLoop\Loop;
  */
 class Maho_Intelligence_Model_Lsp_Server
 {
+    private const DIAGNOSTICS_DEBOUNCE_SECONDS = 0.3;
+
+    private LoopInterface $loop;
     private Maho_Intelligence_Model_Lsp_Transport $transport;
     private Maho_Intelligence_Model_Lsp_DocumentStore $documents;
     private Maho_Intelligence_Model_Lsp_ContextDetector $detector;
@@ -34,11 +39,15 @@ class Maho_Intelligence_Model_Lsp_Server
     private Maho_Intelligence_Model_Lsp_Handler_Hover $hoverHandler;
     private Maho_Intelligence_Model_Lsp_Handler_Diagnostic $diagnosticHandler;
 
+    /** @var array<string, TimerInterface> Pending diagnostic timers keyed by URI */
+    private array $diagnosticTimers = [];
+
     private bool $shutdownRequested = false;
 
     public function run(): void
     {
-        $loop = Loop::get();
+        $this->loop = Loop::get();
+        $loop = $this->loop;
 
         $this->registry = Mage::getModel('intelligence/registry');
         $this->documents = new Maho_Intelligence_Model_Lsp_DocumentStore();
@@ -151,7 +160,7 @@ class Maho_Intelligence_Model_Lsp_Server
         $uri = $params['textDocument']['uri'];
         $text = $params['textDocument']['text'];
         $this->documents->open($uri, $text);
-        $this->publishDiagnostics($uri, $text);
+        $this->scheduleDiagnostics($uri, $text);
     }
 
     private function handleDidChange(array $params): void
@@ -163,7 +172,7 @@ class Maho_Intelligence_Model_Lsp_Server
             $lastChange = end($changes);
             $text = $lastChange['text'];
             $this->documents->change($uri, $text);
-            $this->publishDiagnostics($uri, $text);
+            $this->scheduleDiagnostics($uri, $text);
         }
     }
 
@@ -178,13 +187,23 @@ class Maho_Intelligence_Model_Lsp_Server
         ]);
     }
 
-    private function publishDiagnostics(string $uri, string $text): void
+    private function scheduleDiagnostics(string $uri, string $text): void
     {
-        $diagnostics = $this->diagnosticHandler->diagnose($uri, $text);
-        $this->sendNotification('textDocument/publishDiagnostics', [
-            'uri' => $uri,
-            'diagnostics' => $diagnostics,
-        ]);
+        if (isset($this->diagnosticTimers[$uri])) {
+            $this->loop->cancelTimer($this->diagnosticTimers[$uri]);
+        }
+
+        $this->diagnosticTimers[$uri] = $this->loop->addTimer(
+            self::DIAGNOSTICS_DEBOUNCE_SECONDS,
+            function () use ($uri, $text): void {
+                unset($this->diagnosticTimers[$uri]);
+                $diagnostics = $this->diagnosticHandler->diagnose($uri, $text);
+                $this->sendNotification('textDocument/publishDiagnostics', [
+                    'uri' => $uri,
+                    'diagnostics' => $diagnostics,
+                ]);
+            },
+        );
     }
 
     private function sendResult(int|string $id, mixed $result): void
