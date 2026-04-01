@@ -85,10 +85,8 @@ class Mage_Payment_Model_Info extends Mage_Core_Model_Abstract
                     return $instance;
                 }
             }
-            $methodCode = $this->getMethod() ?: 'unknown';
-            Mage::log("Payment method '{$methodCode}' is no longer available", Mage::LOG_WARNING);
             $unavailable = Mage::getModel('payment/method_unavailable');
-            $unavailable->setOriginalCode($methodCode);
+            $unavailable->setOriginalCode($this->getMethod() ?: 'unknown');
             $unavailable->setInfoInstance($this);
             $this->setMethodInstance($unavailable);
         }
