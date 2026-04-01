@@ -210,7 +210,7 @@ class Mage_Cron_Model_Observer
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_PENDING);
 
             for ($time = $now; $time < $timeAhead; $time += 60) {
-                $ts = Mage::getSingleton('core/date')->gmtDate('Y-m-d H:i:00', $time);
+                $ts = gmdate('Y-m-d H:i:00', $time);
                 if (!empty($exists[$jobCode . '/' . $ts])) {
                     // already scheduled
                     continue;

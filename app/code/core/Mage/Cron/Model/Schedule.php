@@ -100,7 +100,7 @@ class Mage_Cron_Model_Schedule extends Mage_Core_Model_Abstract
 
         if ($match) {
             $this->setCreatedAt(Mage::getSingleton('core/date')->gmtDate());
-            $this->setScheduledAt(Mage::getSingleton('core/date')->gmtDate('Y-m-d H:i:00', $time));
+            $this->setScheduledAt(gmdate('Y-m-d H:i:00', $time));
         }
         return $match;
     }
