@@ -48,6 +48,19 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
     protected $_hasLinkFilter  = false;
 
     /**
+     * Skip duplicate items when DISTINCT deduplication is active, which can happen
+     * when multiple parent products link to the same target (e.g. cart cross-sells)
+     */
+    #[\Override]
+    public function addItem(Maho\DataObject $item)
+    {
+        if ($this->getSelect()->getPart(Maho\Db\Select::DISTINCT) && $this->getItemById($item->getId())) {
+            return $this;
+        }
+        return parent::addItem($item);
+    }
+
+    /**
      * Declare link model and initialize type attributes join
      *
      * @return $this
@@ -163,11 +176,7 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
      */
     public function setGroupBy($groupBy = 'e.entity_id')
     {
-        // Use DISTINCT instead of GROUP BY for cross-database compatibility
-        // GROUP BY requires all selected columns in PostgreSQL, but DISTINCT
-        // achieves the same goal of eliminating duplicates without this restriction
         $this->getSelect()->distinct(true);
-
         return $this;
     }
 
