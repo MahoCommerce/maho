@@ -58,9 +58,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
 
     private function completeAliases(string $type, string $prefix): array
     {
-        /** @var Maho_Intelligence_Model_Provider_ClassAlias $provider */
-        $provider = $this->registry->getProvider('classAlias');
-        $aliases = $provider->getAllAliases($type);
+        $aliases = $this->registry->get('classAlias', 'getAllAliases', [$type]);
 
         $items = [];
         foreach ($aliases as $alias => $info) {
@@ -86,9 +84,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
 
     private function completeConfigPaths(string $prefix): array
     {
-        /** @var Maho_Intelligence_Model_Provider_ConfigPath $provider */
-        $provider = $this->registry->getProvider('configPath');
-        $paths = $provider->getAllPaths();
+        $paths = $this->registry->get('configPath', 'getAllPaths');
 
         $items = [];
         foreach ($paths as $path => $info) {
@@ -119,9 +115,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
 
     private function completeEventNames(string $prefix): array
     {
-        /** @var Maho_Intelligence_Model_Provider_Event $provider */
-        $provider = $this->registry->getProvider('event');
-        $allEvents = $provider->getAllEvents();
+        $allEvents = $this->registry->get('event', 'getAllEvents');
 
         $seen = [];
         $items = [];

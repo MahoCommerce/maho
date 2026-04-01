@@ -121,14 +121,16 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
         foreach ($contextPatterns as $context => $patterns) {
             foreach ($patterns as $pattern) {
-                if (preg_match($pattern, $lineText, $matches, PREG_OFFSET_CAPTURE)) {
-                    $aliasStart = $matches[1][1];
-                    $aliasEnd = $aliasStart + strlen($matches[1][0]);
-                    if ($character >= $aliasStart && $character <= $aliasEnd) {
-                        return [
-                            'context' => $context,
-                            'alias' => $matches[1][0],
-                        ];
+                if (preg_match_all($pattern, $lineText, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+                    foreach ($matches as $match) {
+                        $aliasStart = $match[1][1];
+                        $aliasEnd = $aliasStart + strlen($match[1][0]);
+                        if ($character >= $aliasStart && $character <= $aliasEnd) {
+                            return [
+                                'context' => $context,
+                                'alias' => $match[1][0],
+                            ];
+                        }
                     }
                 }
             }

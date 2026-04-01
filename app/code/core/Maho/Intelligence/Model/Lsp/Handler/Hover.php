@@ -70,9 +70,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
             return null;
         }
 
-        /** @var Maho_Intelligence_Model_Provider_ClassAlias $provider */
-        $provider = $this->registry->getProvider('classAlias');
-        $resolved = $provider->resolveAlias($type, $context['alias']);
+        $resolved = $this->registry->get('classAlias', 'resolveAlias', [$type, $context['alias']]);
 
         $markdown = "**{$type}**: `{$context['alias']}`\n\n";
         $markdown .= "**Class**: `{$resolved['class']}`\n\n";
@@ -96,9 +94,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
 
     private function hoverEvent(array $context): array
     {
-        /** @var Maho_Intelligence_Model_Provider_Event $provider */
-        $provider = $this->registry->getProvider('event');
-        $observers = $provider->getObserversForEvent($context['alias']);
+        $observers = $this->registry->get('event', 'getObserversForEvent', [$context['alias']]);
 
         if (empty($observers)) {
             return [
@@ -128,9 +124,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
 
     private function hoverConfigPath(array $context): array
     {
-        /** @var Maho_Intelligence_Model_Provider_ConfigPath $provider */
-        $provider = $this->registry->getProvider('configPath');
-        $info = $provider->getPathInfo($context['alias']);
+        $info = $this->registry->get('configPath', 'getPathInfo', [$context['alias']]);
 
         $markdown = "**Config path**: `{$context['alias']}`\n\n";
 

@@ -54,9 +54,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
             return null;
         }
 
-        /** @var Maho_Intelligence_Model_Provider_ClassAlias $provider */
-        $provider = $this->registry->getProvider('classAlias');
-        $resolved = $provider->resolveAlias($type, $context['alias']);
+        $resolved = $this->registry->get('classAlias', 'resolveAlias', [$type, $context['alias']]);
 
         if ($resolved['file'] === null) {
             return null;

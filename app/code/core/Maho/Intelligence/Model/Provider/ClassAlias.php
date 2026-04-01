@@ -24,7 +24,8 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         $group = $classArr[0];
         $class = $classArr[1] ?? ($type === 'helper' ? 'data' : null);
 
-        $groupNode = $config->getNode("global/{$type}s/{$group}");
+        $configType = $type === 'resource_model' ? 'model' : $type;
+        $groupNode = $config->getNode("global/{$configType}s/{$group}");
         if (!$groupNode) {
             return [
                 'alias' => $alias,
@@ -216,25 +217,30 @@ class Maho_Intelligence_Model_Provider_ClassAlias
 
     private function findClassesWithPrefix(string $prefix): array
     {
-        $dir = BP . '/app/code/core/' . str_replace('_', DIRECTORY_SEPARATOR, $prefix);
-        if (!is_dir($dir)) {
-            return [];
-        }
-
+        $relativePart = str_replace('_', DIRECTORY_SEPARATOR, $prefix);
         $classes = [];
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
-        );
 
-        foreach ($iterator as $file) {
-            if ($file->getExtension() !== 'php') {
+        foreach (['core', 'community', 'local'] as $pool) {
+            $dir = BP . "/app/code/{$pool}/" . $relativePart;
+            if (!is_dir($dir)) {
                 continue;
             }
-            $relativePath = substr($file->getPathname(), strlen($dir) + 1, -4);
-            $classSuffix = str_replace(DIRECTORY_SEPARATOR, '_', $relativePath);
-            $classes[] = $prefix . '_' . $classSuffix;
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+            );
+
+            foreach ($iterator as $file) {
+                if ($file->getExtension() !== 'php') {
+                    continue;
+                }
+                $relativePath = substr($file->getPathname(), strlen($dir) + 1, -4);
+                $classSuffix = str_replace(DIRECTORY_SEPARATOR, '_', $relativePath);
+                $className = $prefix . '_' . $classSuffix;
+                $classes[$className] = true;
+            }
         }
 
-        return $classes;
+        return array_keys($classes);
     }
 }

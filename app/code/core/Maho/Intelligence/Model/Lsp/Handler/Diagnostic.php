@@ -51,9 +51,6 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
         $diagnostics = [];
         $lines = explode("\n", $text);
 
-        /** @var Maho_Intelligence_Model_Provider_ClassAlias $provider */
-        $provider = $this->registry->getProvider('classAlias');
-
         foreach ($lines as $lineNum => $line) {
             foreach (self::ALIAS_PATTERNS as $type => $patterns) {
                 foreach ($patterns as $pattern) {
@@ -61,7 +58,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Diagnostic
                         foreach ($matches[1] as $match) {
                             $alias = $match[0];
                             $offset = $match[1];
-                            $resolved = $provider->resolveAlias($type, $alias);
+                            $resolved = $this->registry->get('classAlias', 'resolveAlias', [$type, $alias]);
 
                             if ($resolved['class'] === null || $resolved['file'] === null) {
                                 $diagnostics[] = [
