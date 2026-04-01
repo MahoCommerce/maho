@@ -34,7 +34,6 @@ class Maho_Intelligence_Model_Lsp_Server
     private Maho_Intelligence_Model_Lsp_Handler_Hover $hoverHandler;
     private Maho_Intelligence_Model_Lsp_Handler_Diagnostic $diagnosticHandler;
 
-    private bool $initialized = false;
     private bool $shutdownRequested = false;
 
     public function run(): void
@@ -98,7 +97,7 @@ class Maho_Intelligence_Model_Lsp_Server
     private function handleNotification(?string $method, array $params): void
     {
         match ($method) {
-            'initialized' => $this->initialized = true,
+            'initialized' => null,
             'textDocument/didOpen' => $this->handleDidOpen($params),
             'textDocument/didChange' => $this->handleDidChange($params),
             'textDocument/didClose' => $this->handleDidClose($params),

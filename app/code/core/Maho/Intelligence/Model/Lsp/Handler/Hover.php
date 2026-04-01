@@ -94,7 +94,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         ];
     }
 
-    private function hoverEvent(array $context): ?array
+    private function hoverEvent(array $context): array
     {
         /** @var Maho_Intelligence_Model_Provider_Event $provider */
         $provider = $this->registry->getProvider('event');
@@ -126,7 +126,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         ];
     }
 
-    private function hoverConfigPath(array $context): ?array
+    private function hoverConfigPath(array $context): array
     {
         /** @var Maho_Intelligence_Model_Provider_ConfigPath $provider */
         $provider = $this->registry->getProvider('configPath');
