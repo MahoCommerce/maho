@@ -30,28 +30,17 @@ class CronList extends BaseMahoCommand
     {
         $this->initMaho();
         $table = new Table($output);
-        $table->setHeaders(['event', 'model::method', 'schedule']);
+        $table->setHeaders(['event', 'model::method', 'schedule', 'status']);
 
-        $jobs = [];
-        $cronNode = Mage::getConfig()->getNode('crontab/jobs');
-        $defaultCronNode = Mage::getConfig()->getNode('default/crontab/jobs');
+        $helper = Mage::helper('cron');
+        $jobs = $helper->getConfiguredJobs();
 
-        if ($cronNode) {
-            $jobs = array_merge($jobs, $cronNode->asArray());
-        }
-        if ($defaultCronNode) {
-            $jobs = array_merge($jobs, $defaultCronNode->asArray());
-        }
-        ksort($jobs, SORT_NATURAL | SORT_FLAG_CASE);
-        foreach ($jobs as $jobName => $jobConfiguration) {
-            if (@$jobConfiguration['schedule']['config_path']) {
-                $jobConfiguration['schedule']['cron_expr'] = Mage::getStoreConfig($jobConfiguration['schedule']['config_path']);
-            }
-
+        foreach ($jobs as $jobCode => $jobConfig) {
             $table->addRow([
-                $jobName,
-                $jobConfiguration['run']['model'],
-                $jobConfiguration['schedule']['cron_expr'] ?? '',
+                $jobCode,
+                $jobConfig['model_method'],
+                $jobConfig['cron_expr'],
+                $jobConfig['enabled'] ? '<fg=green>enabled</>' : '<fg=red>disabled</>',
             ]);
         }
         $table->render();
