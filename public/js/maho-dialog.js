@@ -39,7 +39,6 @@
             max-width: 90vw;
             max-height: 90vh;
             width: 80vw;
-            height: 80vh;
             display: flex;
             flex-direction: column;
             overflow: visible;
