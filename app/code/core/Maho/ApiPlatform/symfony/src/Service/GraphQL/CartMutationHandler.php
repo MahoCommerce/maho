@@ -212,12 +212,11 @@ class CartMutationHandler
         }
 
         // First, check if this is a gift card code
-        /** @phpstan-ignore-next-line */
-        $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($couponCode);
+        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
+        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($couponCode);
         if ($giftcard->getId() && $giftcard->isValid()) {
-            // It's a valid gift card - apply it
-            /** @phpstan-ignore-next-line */
-            \Mage::helper('maho_giftcard')->applyGiftcardToQuote($quote, $giftcard, null);
+            // It's a valid gift card - apply it to quote via giftcard_codes field
+            $this->applyGiftcardToQuote($quote, $giftcard);
             $quote->collectTotals()->save();
             return ['applyCoupon' => $this->mapCart($quote)];
         }
@@ -287,8 +286,8 @@ class CartMutationHandler
         if (!$code) {
             throw ValidationException::requiredField('code');
         }
-        /** @phpstan-ignore-next-line */
-        $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
+        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
         if (!$giftcard->getId()) {
             throw NotFoundException::giftCard($code);
         }
@@ -325,14 +324,13 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
 
-        /** @phpstan-ignore-next-line */
-        $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+        /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
+        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
         if (!$giftcard->getId() || !$giftcard->isValid()) {
             throw ValidationException::invalidValue('code', 'invalid or expired gift card');
         }
 
-        /** @phpstan-ignore-next-line */
-        \Mage::helper('maho_giftcard')->applyGiftcardToQuote($quote, $giftcard, $amount);
+        $this->applyGiftcardToQuote($quote, $giftcard, $amount);
         $quote->collectTotals()->save();
 
         // Reload quote to get fresh totals
@@ -360,8 +358,7 @@ class CartMutationHandler
             throw NotFoundException::cart($cartId);
         }
 
-        /** @phpstan-ignore-next-line */
-        \Mage::helper('maho_giftcard')->removeGiftcardFromQuote($quote, $code);
+        $this->removeGiftcardFromQuote($quote, $code);
         $quote->collectTotals()->save();
 
         // Reload quote to get fresh totals
@@ -502,8 +499,8 @@ class CartMutationHandler
         }
 
         foreach ($codesData as $code => $appliedAmount) {
-            /** @phpstan-ignore-next-line */
-            $giftcard = \Mage::getModel('maho_giftcard/giftcard')->loadByCode($code);
+            /** @var \Maho_Giftcard_Model_Giftcard $giftcard */
+            $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode((string) $code);
             if ($giftcard->getId()) {
                 $giftcards[] = [
                     'code' => $code,
@@ -520,6 +517,33 @@ class CartMutationHandler
         }
 
         return $giftcards;
+    }
+
+    /**
+     * Apply a gift card to a quote by storing its code and amount in giftcard_codes
+     */
+    private function applyGiftcardToQuote(\Mage_Sales_Model_Quote $quote, \Maho_Giftcard_Model_Giftcard $giftcard, ?float $amount = null): void
+    {
+        $codesJson = $quote->getGiftcardCodes();
+        $codes = $codesJson ? (array) json_decode($codesJson, true) : [];
+
+        $applyAmount = $amount ?? $giftcard->getBalance();
+        $codes[$giftcard->getCode()] = $applyAmount;
+
+        $quote->setGiftcardCodes(json_encode($codes));
+    }
+
+    /**
+     * Remove a gift card from a quote by its code
+     */
+    private function removeGiftcardFromQuote(\Mage_Sales_Model_Quote $quote, string $code): void
+    {
+        $codesJson = $quote->getGiftcardCodes();
+        $codes = $codesJson ? (array) json_decode($codesJson, true) : [];
+
+        unset($codes[$code]);
+
+        $quote->setGiftcardCodes(empty($codes) ? null : json_encode($codes));
     }
 
     /**

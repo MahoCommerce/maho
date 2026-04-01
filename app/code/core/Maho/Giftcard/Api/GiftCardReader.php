@@ -26,7 +26,7 @@ use Maho\ApiPlatform\Pagination\ArrayPaginator;
 final class GiftCardReader implements ProviderInterface
 {
     /**
-     * Provide gift card data based on operation type
+     * @return GiftCard|ArrayPaginator<GiftCard>|null
      */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): GiftCard|ArrayPaginator|null
@@ -86,7 +86,7 @@ final class GiftCardReader implements ProviderInterface
     }
 
     /**
-     * Get gift card collection with pagination (admin/API user only)
+     * @return ArrayPaginator<GiftCard>
      */
     private function getGiftCardCollection(array $context): ArrayPaginator
     {

@@ -298,8 +298,7 @@ class ProductQueryHandler
             $attrCode = $productAttribute->getAttributeCode();
             $options = [];
 
-            /** @phpstan-ignore arguments.count */
-            foreach ($productAttribute->getSource()->getAllOptions(false) as $option) {
+            foreach ($productAttribute->getSource()->getAllOptions() as $option) {
                 // Only include options that are actually used by child products
                 if ($option['value'] && isset($usedValues[$attrCode][$option['value']])) {
                     $optionId = (int) $option['value'];

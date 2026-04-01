@@ -55,8 +55,7 @@ final class CartReader implements ProviderInterface
                 // Verify the authenticated user matches the requested customer
                 $this->authorizeCustomerAccess((int) $customerId);
                 $quote = $this->cartService->getCustomerCart((int) $customerId);
-                /** @phpstan-ignore ternary.alwaysTrue */
-                return $quote ? $this->cartMapper->mapQuoteToCart($quote) : null;
+                return $this->cartMapper->mapQuoteToCart($quote);
             }
             return null;
         }

@@ -132,43 +132,26 @@ final class PaymentWriter implements ProcessorInterface
     /**
      * Map payment model to DTO
      */
-    /** @phpstan-ignore-next-line */
     private function mapToDto(\Maho_Pos_Model_Payment $payment): PosPayment
     {
         $dto = new PosPayment();
-        /** @phpstan-ignore-next-line */
         $dto->id = (int) $payment->getId();
-        /** @phpstan-ignore-next-line */
         $dto->orderId = (int) $payment->getOrderId();
-        /** @phpstan-ignore-next-line */
         $dto->registerId = $payment->getRegisterId() ? (int) $payment->getRegisterId() : null;
-        /** @phpstan-ignore-next-line */
         $dto->methodCode = $payment->getMethodCode();
-        /** @phpstan-ignore-next-line */
         $dto->methodLabel = PaymentService::getMethodLabel($payment->getMethodCode());
-        /** @phpstan-ignore-next-line */
         $dto->amount = (float) $payment->getAmount();
-        /** @phpstan-ignore-next-line */
         $dto->baseAmount = (float) $payment->getBaseAmount();
-        /** @phpstan-ignore-next-line */
         $dto->currencyCode = $payment->getCurrencyCode();
-        /** @phpstan-ignore-next-line */
         $dto->terminalId = $payment->getTerminalId();
-        /** @phpstan-ignore-next-line */
         $dto->transactionId = $payment->getTransactionId();
-        /** @phpstan-ignore-next-line */
         $dto->cardType = $payment->getCardType();
-        /** @phpstan-ignore-next-line */
         $dto->cardLast4 = $payment->getCardLast4();
-        /** @phpstan-ignore-next-line */
         $dto->authCode = $payment->getAuthCode();
-        /** @phpstan-ignore-next-line */
         $dto->status = $payment->getStatus();
-        /** @phpstan-ignore-next-line */
         $dto->createdAt = $payment->getCreatedAt();
 
         // Get receipt data if available
-        /** @phpstan-ignore-next-line */
         $receiptData = $payment->getReceiptData();
         if ($receiptData) {
             $dto->receiptData = is_array($receiptData) ? $receiptData : json_decode($receiptData, true) ?? [];

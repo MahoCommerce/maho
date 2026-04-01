@@ -150,7 +150,7 @@ final class WishlistWriter implements ProcessorInterface
         // Check if already in wishlist — use a fresh unfiltered collection query
         // (the wishlist's own getItemsCollection() applies setVisibilityFilter() which can miss items)
         // Must use setWishlist() instead of addFieldToFilter('wishlist_id') to initialize the typed property
-        /** @var \Mage_Wishlist_Model_Item|null $existingItem */ /** @phpstan-ignore varTag.type */
+        /** @var \Mage_Wishlist_Model_Item $existingItem */
         $existingItem = \Mage::getModel('wishlist/item')->getCollection()
             ->setWishlist($wishlist)
             ->addFieldToFilter('product_id', $productId)
@@ -188,9 +188,8 @@ final class WishlistWriter implements ProcessorInterface
 
     /**
      * Remove item from wishlist
-     * @phpstan-ignore return.unusedType
      */
-    private function removeFromWishlist(int $itemId): ?WishlistItem
+    private function removeFromWishlist(int $itemId): null
     {
         $customerId = $this->requireAuthentication();
 

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<config>
+    <modules>
+        <Maho_Pos>
+            <version>1.0.0</version>
+        </Maho_Pos>
+    </modules>
+
+    <global>
+        <models>
+            <maho_pos>
+                <class>Maho_Pos_Model</class>
+                <resourceModel>maho_pos_resource</resourceModel>
+            </maho_pos>
+            <maho_pos_resource>
+                <class>Maho_Pos_Model_Resource</class>
+                <entities>
+                    <payment>
+                        <table>maho_pos_payment</table>
+                    </payment>
+                </entities>
+            </maho_pos_resource>
+        </models>
+    </global>
+</config>

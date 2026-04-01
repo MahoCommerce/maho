@@ -419,9 +419,8 @@ final class OrderWriter implements ProcessorInterface
 
         // Record payments to pos_payment table
         foreach ($payments as $paymentData) {
-            /** @phpstan-ignore-next-line */
+            /** @var \Maho_Pos_Model_Payment $posPayment */
             $posPayment = \Mage::getModel('maho_pos/payment');
-            /** @phpstan-ignore-next-line */
             $posPayment->setOrderId((int) $order->getId())
                 ->setRegisterId($registerId)
                 ->setMethodCode($paymentData['method'] ?? $paymentData['methodCode'] ?? 'cash')
@@ -431,29 +430,22 @@ final class OrderWriter implements ProcessorInterface
                 ->setStatus('captured');
 
             if (!empty($paymentData['cardType'])) {
-                /** @phpstan-ignore-next-line */
                 $posPayment->setCardType($paymentData['cardType']);
             }
             if (!empty($paymentData['cardLast4'])) {
-                /** @phpstan-ignore-next-line */
                 $posPayment->setCardLast4($paymentData['cardLast4']);
             }
             if (!empty($paymentData['authCode'])) {
-                /** @phpstan-ignore-next-line */
                 $posPayment->setAuthCode($paymentData['authCode']);
             }
             if (!empty($paymentData['transactionId'])) {
-                /** @phpstan-ignore-next-line */
                 $posPayment->setTransactionId($paymentData['transactionId']);
             }
             if (!empty($paymentData['terminalId'])) {
-                /** @phpstan-ignore-next-line */
                 $posPayment->setTerminalId($paymentData['terminalId']);
             }
 
-            /** @phpstan-ignore-next-line */
             $posPayment->save();
-            /** @phpstan-ignore-next-line */
             $savedPayments[] = $this->mapPosPaymentToDto($posPayment);
         }
 
@@ -573,39 +565,23 @@ final class OrderWriter implements ProcessorInterface
     /**
      * Map POS payment model to DTO
      */
-    /** @phpstan-ignore-next-line */
     private function mapPosPaymentToDto(\Maho_Pos_Model_Payment $payment): PosPayment
     {
         $dto = new PosPayment();
-        /** @phpstan-ignore-next-line */
         $dto->id = (int) $payment->getId();
-        /** @phpstan-ignore-next-line */
         $dto->orderId = (int) $payment->getOrderId();
-        /** @phpstan-ignore-next-line */
         $dto->registerId = (int) $payment->getRegisterId();
-        /** @phpstan-ignore-next-line */
         $dto->methodCode = $payment->getMethodCode();
-        /** @phpstan-ignore-next-line */
         $dto->methodLabel = PaymentService::getMethodLabel($payment->getMethodCode());
-        /** @phpstan-ignore-next-line */
         $dto->amount = (float) $payment->getAmount();
-        /** @phpstan-ignore-next-line */
         $dto->baseAmount = (float) $payment->getBaseAmount();
-        /** @phpstan-ignore-next-line */
         $dto->currencyCode = $payment->getCurrencyCode();
-        /** @phpstan-ignore-next-line */
         $dto->terminalId = $payment->getTerminalId();
-        /** @phpstan-ignore-next-line */
         $dto->transactionId = $payment->getTransactionId();
-        /** @phpstan-ignore-next-line */
         $dto->cardType = $payment->getCardType();
-        /** @phpstan-ignore-next-line */
         $dto->cardLast4 = $payment->getCardLast4();
-        /** @phpstan-ignore-next-line */
         $dto->authCode = $payment->getAuthCode();
-        /** @phpstan-ignore-next-line */
         $dto->status = $payment->getStatus();
-        /** @phpstan-ignore-next-line */
         $dto->createdAt = $payment->getCreatedAt();
 
         return $dto;

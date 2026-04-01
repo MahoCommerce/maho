@@ -208,9 +208,8 @@ class Cart
     #[ApiProperty(description: 'Cart line items', writable: false)]
     public array $items = [];
 
-    /** @var array{subtotal: float, subtotalInclTax: float, subtotalWithDiscount: float, discountAmount: ?float, shippingAmount: ?float, shippingAmountInclTax: ?float, taxAmount: float, grandTotal: float, giftcardAmount: ?float} */
+    /** @var array{subtotal: float, subtotalInclTax: float, subtotalWithDiscount: float, discountAmount: ?float, shippingAmount: ?float, shippingAmountInclTax: ?float, taxAmount: float, grandTotal: float, giftcardAmount: ?float}|array{} */
     #[ApiProperty(description: 'Cart price totals', writable: false)]
-    /** @phpstan-ignore property.defaultValue */
     public array $prices = [];
 
     #[ApiProperty(description: 'Billing address', writable: false)]

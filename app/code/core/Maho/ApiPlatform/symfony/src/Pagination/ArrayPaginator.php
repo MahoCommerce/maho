@@ -18,14 +18,14 @@ use ApiPlatform\State\Pagination\PaginatorInterface;
 /**
  * Simple array-based paginator for API Platform
  *
- * @implements PaginatorInterface<mixed>
- * @implements \IteratorAggregate<int, mixed>
- * @phpstan-ignore-next-line
+ * @template T of object
+ * @implements PaginatorInterface<T>
+ * @implements \IteratorAggregate<mixed, T>
  */
 final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
 {
     /**
-     * @param array<mixed> $items
+     * @param array<T> $items
      */
     public function __construct(
         private readonly array $items,
@@ -68,7 +68,7 @@ final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
     }
 
     /**
-     * @return \ArrayIterator<int, mixed>
+     * @return \ArrayIterator<int, T>
      */
     #[\Override]
     public function getIterator(): \ArrayIterator

@@ -30,6 +30,30 @@ final class ProductReader implements ProviderInterface
 {
     private ?ProductService $productService = null;
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
+    private ?string $barcodeAttributeCode = null;
+
+    /**
+     * Get the barcode attribute code (from POS module if available, or default)
+     */
+    private function getBarcodeAttributeCode(): string
+    {
+        if ($this->barcodeAttributeCode === null) {
+            $this->barcodeAttributeCode = 'barcode';
+            try {
+                $helperAlias = 'maho_pos';
+                $helperClass = \Mage::getConfig()->getHelperClassName($helperAlias);
+                if (class_exists($helperClass)) {
+                    $posHelper = new $helperClass();
+                    if (method_exists($posHelper, 'getBarcodeAttributeCode')) {
+                        $this->barcodeAttributeCode = $posHelper->getBarcodeAttributeCode();
+                    }
+                }
+            } catch (\Throwable) {
+                // Module not available
+            }
+        }
+        return $this->barcodeAttributeCode;
+    }
 
     /**
      * Get cached MediaConfig instance
@@ -58,22 +82,26 @@ final class ProductReader implements ProviderInterface
         try {
             // Check if Meilisearch module is installed and enabled
             if (\Mage::helper('core')->isModuleEnabled('Meilisearch_Search')) {
-                /** @var \Meilisearch_Search_Helper_Config $configHelper */
-                /** @phpstan-ignore-next-line */
-                $configHelper = \Mage::helper('meilisearch_search/config');
+                $helperAlias = 'meilisearch_search/config';
+                $helperClass = \Mage::getConfig()->getHelperClassName($helperAlias);
 
-                /** @phpstan-ignore-next-line */
-                $host = $configHelper->getServerUrl();
-                /** @phpstan-ignore-next-line */
-                $apiKey = $configHelper->getAPIKey();
-                /** @phpstan-ignore-next-line */
-                $indexPrefix = rtrim($configHelper->getIndexPrefix() ?: 'maho', '_');
+                if (class_exists($helperClass)) {
+                    $configHelper = new $helperClass();
 
-                if ($host && $apiKey) {
-                    /** @phpstan-ignore-next-line */
-                    $meilisearchClient = new \Meilisearch\Client($host, $apiKey);
-                    $storeCode = StoreContext::getStoreCode() ?: 'default';
-                    $indexBaseName = $indexPrefix . '_' . $storeCode;
+                    if (method_exists($configHelper, 'getServerUrl') && method_exists($configHelper, 'getAPIKey')) {
+                        $host = $configHelper->getServerUrl();
+                        $apiKey = $configHelper->getAPIKey();
+                        $indexPrefix = rtrim(
+                            (method_exists($configHelper, 'getIndexPrefix') ? $configHelper->getIndexPrefix() : null) ?: 'maho',
+                            '_',
+                        );
+
+                        if ($host && $apiKey && class_exists(\Meilisearch\Client::class)) {
+                            $meilisearchClient = new \Meilisearch\Client($host, $apiKey);
+                            $storeCode = StoreContext::getStoreCode() ?: 'default';
+                            $indexBaseName = $indexPrefix . '_' . $storeCode;
+                        }
+                    }
                 }
             }
         } catch (\Throwable $e) {
@@ -81,7 +109,6 @@ final class ProductReader implements ProviderInterface
             \Mage::log('Meilisearch init failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
         }
 
-        /** @phpstan-ignore-next-line */
         $this->productService = new ProductService($meilisearchClient, $indexBaseName);
         return $this->productService;
     }
@@ -591,12 +618,7 @@ final class ProductReader implements ProviderInterface
         $dto->weight = $product->getWeight() ? (float) $product->getWeight() : null;
 
         // Get barcode from configured attribute (if POS module available)
-        /** @phpstan-ignore-next-line */
-        $posHelper = \Mage::helper('maho_pos');
-        $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
-            ? $posHelper->getBarcodeAttributeCode()
-            : 'barcode';
-        $dto->barcode = $product->getData($barcodeAttr);
+        $dto->barcode = $product->getData($this->getBarcodeAttributeCode());
 
         // Use pre-loaded category IDs if available (batch loading), otherwise load individually
         $dto->categoryIds = $categoryIds ?? ($product->getCategoryIds() ?: []);
@@ -695,8 +717,8 @@ final class ProductReader implements ProviderInterface
     private function getConfigurableOptions(\Mage_Catalog_Model_Product $product): array
     {
         $options = [];
+        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
-        /** @phpstan-ignore-next-line */
         $configurableAttributes = $typeInstance->getConfigurableAttributes($product);
 
         foreach ($configurableAttributes as $attribute) {
@@ -704,7 +726,6 @@ final class ProductReader implements ProviderInterface
             $attributeCode = $productAttribute->getAttributeCode();
 
             // Collect which option IDs are used by child products
-            /** @phpstan-ignore-next-line */
             $childProducts = $typeInstance->getUsedProducts(null, $product);
             $usedValueIds = [];
             foreach ($childProducts as $child) {
@@ -717,8 +738,11 @@ final class ProductReader implements ProviderInterface
             // Get options from attribute source (already sorted by sort_order),
             // filtered to only those used by child products
             $values = [];
-            $allOptions = $productAttribute->getSource()->getAllOptions(false);
+            $allOptions = $productAttribute->getSource()->getAllOptions();
             foreach ($allOptions as $opt) {
+                if ($opt['value'] === '' || $opt['value'] === null) {
+                    continue;
+                }
                 if (isset($usedValueIds[$opt['value']])) {
                     $values[] = [
                         'id' => (int) $opt['value'],
@@ -744,17 +768,12 @@ final class ProductReader implements ProviderInterface
     private function getConfigurableVariants(\Mage_Catalog_Model_Product $product): array
     {
         $variants = [];
+        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
-        /** @phpstan-ignore-next-line */
         $configurableAttributes = $typeInstance->getConfigurableAttributes($product);
-        /** @phpstan-ignore-next-line */
         $childProducts = $typeInstance->getUsedProducts(null, $product);
         $mediaConfig = $this->getMediaConfig();
-        /** @phpstan-ignore-next-line */
-        $posHelper = \Mage::helper('maho_pos');
-        $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
-            ? $posHelper->getBarcodeAttributeCode()
-            : 'barcode';
+        $barcodeAttr = $this->getBarcodeAttributeCode();
 
         // Batch load all stock items at once to avoid N+1 queries
         $childIds = [];
@@ -1027,8 +1046,8 @@ final class ProductReader implements ProviderInterface
      */
     private function getGroupedProducts(\Mage_Catalog_Model_Product $product): array
     {
+        /** @var \Mage_Catalog_Model_Product_Type_Grouped $typeInstance */
         $typeInstance = $product->getTypeInstance(true);
-        /** @phpstan-ignore-next-line */
         $associatedProducts = $typeInstance->getAssociatedProducts($product);
 
         if (empty($associatedProducts)) {
@@ -1270,8 +1289,9 @@ final class ProductReader implements ProviderInterface
     private function getGroupedMinPrice(\Mage_Catalog_Model_Product $product): ?float
     {
         try {
-            /** @phpstan-ignore method.notFound */
-            $associated = $product->getTypeInstance(true)->getAssociatedProducts($product);
+            /** @var \Mage_Catalog_Model_Product_Type_Grouped $typeInstance */
+            $typeInstance = $product->getTypeInstance(true);
+            $associated = $typeInstance->getAssociatedProducts($product);
             $prices = [];
             foreach ($associated as $child) {
                 $price = (float) $child->getFinalPrice();
@@ -1302,11 +1322,7 @@ final class ProductReader implements ProviderInterface
         $dto->stockStatus = $data['stock_status'] ?? 'in_stock';
 
         // Get barcode from configured attribute (if POS module available)
-        /** @phpstan-ignore-next-line */
-        $posHelper = \Mage::helper('maho_pos');
-        $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
-            ? $posHelper->getBarcodeAttributeCode()
-            : 'barcode';
+        $barcodeAttr = $this->getBarcodeAttributeCode();
         $dto->barcode = isset($data[$barcodeAttr]) ? (string) $data[$barcodeAttr] : null;
 
         $dto->imageUrl = $data['image_url'] ?? null;

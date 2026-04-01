@@ -292,8 +292,7 @@ class ApiPermissionRegistry
     {
         $result = [];
         foreach (self::PUBLIC_READ_RESOURCES as $resourceId) {
-            /** @phpstan-ignore isset.offset */
-            if (isset(self::RESOURCES[$resourceId])) {
+            if (array_key_exists($resourceId, self::RESOURCES)) {
                 $result[$resourceId] = self::RESOURCES[$resourceId]['label'];
             }
         }
@@ -339,14 +338,14 @@ class ApiPermissionRegistry
         foreach (self::RESOURCES as $resourceId => $config) {
             $operations = $config['operations'];
 
-            // Skip resources that are entirely public read-only
-            /** @phpstan-ignore function.alreadyNarrowedType */
-            if ($this->isPublicRead($resourceId) && count($operations) === 1 && array_key_exists('read', $operations)) {
+            // Skip resources that are entirely public read-only (all resources have 'read')
+            $isPublicRead = in_array($resourceId, self::PUBLIC_READ_RESOURCES, true);
+            if ($isPublicRead && count($operations) === 1) {
                 continue;
             }
 
             // For public-read resources, exclude the read operation from the tree
-            if ($this->isPublicRead($resourceId)) {
+            if ($isPublicRead) {
                 unset($operations['read']);
             }
 
@@ -354,10 +353,8 @@ class ApiPermissionRegistry
                 continue;
             }
 
-            /** @phpstan-ignore nullCoalesce.offset */
-            $groupKey = $groupLabels[$config['group']] ?? $config['group'];
-            /** @phpstan-ignore nullCoalesce.offset */
-            $section = $config['section'] ?? $groupKey;
+            $groupKey = $groupLabels[$config['group']];
+            $section = $config['section'];
             $grouped[$groupKey][$section][$resourceId] = [
                 'label' => $config['label'],
                 'operations' => $operations,

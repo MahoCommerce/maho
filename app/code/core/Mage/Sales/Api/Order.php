@@ -180,9 +180,8 @@ class Order
     #[ApiProperty(readableLink: true, description: 'Shipping address', writable: false)]
     public ?Address $shippingAddress = null;
 
-    /** @var array{subtotal: float, subtotalInclTax: float, discountAmount: ?float, shippingAmount: ?float, shippingAmountInclTax: ?float, taxAmount: float, grandTotal: float, totalPaid: float, totalRefunded: float, totalDue: float, giftcardAmount: ?float} */
+    /** @var array<string, float|null> */
     #[ApiProperty(description: 'Order price totals', writable: false)]
-    /** @phpstan-ignore property.defaultValue */
     public array $prices = [];
 
     #[ApiProperty(description: 'Payment method code', writable: false)]

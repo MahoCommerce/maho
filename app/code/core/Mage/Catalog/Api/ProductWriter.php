@@ -48,6 +48,8 @@ final class ProductWriter implements ProcessorInterface
     use ActivityLogTrait;
     use AuthenticationTrait;
 
+    private ?string $barcodeAttributeCode = null;
+
     private const VISIBILITY_MAP = [
         'not_visible' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE,
         'catalog' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
@@ -263,12 +265,7 @@ final class ProductWriter implements ProcessorInterface
             : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
 
         if ($data->barcode !== null) {
-            /** @phpstan-ignore-next-line */
-            $posHelper = Mage::helper('maho_pos');
-            $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
-                ? $posHelper->getBarcodeAttributeCode()
-                : 'barcode';
-            $attrData[$barcodeAttr] = $data->barcode;
+            $attrData[$this->getBarcodeAttributeCode()] = $data->barcode;
         }
         if ($data->pageLayout !== null) {
             $attrData['page_layout'] = $data->pageLayout;
@@ -380,12 +377,7 @@ final class ProductWriter implements ProcessorInterface
             $product->setData('meta_keyword', $data->metaKeywords);
         }
         if ($data->barcode !== null) {
-            /** @phpstan-ignore-next-line */
-            $posHelper = Mage::helper('maho_pos');
-            $barcodeAttr = ($posHelper && method_exists($posHelper, 'getBarcodeAttributeCode'))
-                ? $posHelper->getBarcodeAttributeCode()
-                : 'barcode';
-            $product->setData($barcodeAttr, $data->barcode);
+            $product->setData($this->getBarcodeAttributeCode(), $data->barcode);
         }
         if ($data->pageLayout !== null) {
             $product->setData('page_layout', $data->pageLayout);
@@ -560,6 +552,26 @@ final class ProductWriter implements ProcessorInterface
     {
         $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
         return $websiteId ? [$websiteId] : [1];
+    }
+
+    private function getBarcodeAttributeCode(): string
+    {
+        if ($this->barcodeAttributeCode === null) {
+            $this->barcodeAttributeCode = 'barcode';
+            try {
+                $helperAlias = 'maho_pos';
+                $helperClass = Mage::getConfig()->getHelperClassName($helperAlias);
+                if (class_exists($helperClass)) {
+                    $posHelper = new $helperClass();
+                    if (method_exists($posHelper, 'getBarcodeAttributeCode')) {
+                        $this->barcodeAttributeCode = $posHelper->getBarcodeAttributeCode();
+                    }
+                }
+            } catch (\Throwable) {
+                // Module not available
+            }
+        }
+        return $this->barcodeAttributeCode;
     }
 
     private function invalidateCache(int $productId): void

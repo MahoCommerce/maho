@@ -270,8 +270,7 @@ final class BlogPostWriter implements ProcessorInterface
             $attributeId = $attribute->getId();
             $entityId = (int) $post->getId();
 
-            /** @var \Maho\Db\Adapter\AdapterInterface $adapter */
-            $adapter = $post->getResource()->getWriteConnection(); /** @phpstan-ignore method.notFound */
+            $adapter = Mage::getSingleton('core/resource')->getConnection('core_write');
 
             $data = [
                 'entity_type_id' => $entityTypeId,

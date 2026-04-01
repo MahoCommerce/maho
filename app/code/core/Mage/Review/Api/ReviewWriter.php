@@ -211,10 +211,9 @@ final class ReviewWriter implements ProcessorInterface
     private function getRatingOptionId(int $ratingId, int $starValue): ?int
     {
         /** @var \Mage_Rating_Model_Resource_Rating_Option_Collection $optionCollection */
-        $optionCollection = \Mage::getModel('rating/rating_option')->getCollection()
-            /** @phpstan-ignore method.nonObject */
-            ->addRatingFilter($ratingId)
-            ->setPositionOrder();
+        $optionCollection = \Mage::getModel('rating/rating_option')->getCollection();
+        $optionCollection->addRatingFilter($ratingId);
+        $optionCollection->setPositionOrder();
 
         $options = $optionCollection->getItems();
 

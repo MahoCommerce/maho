@@ -32,11 +32,13 @@ class ServiceFactory
 
         if (\Mage::getStoreConfigFlag('maho_api/meilisearch/enabled')) {
             try {
-                /** @phpstan-ignore-next-line */
-                $meilisearchClient = new \Meilisearch\Client(
-                    \Mage::getStoreConfig('maho_api/meilisearch/host'),
-                    \Mage::getStoreConfig('maho_api/meilisearch/api_key'),
-                );
+                $clientClass = 'Meilisearch\\Client';
+                if (class_exists($clientClass)) {
+                    $meilisearchClient = new $clientClass(
+                        \Mage::getStoreConfig('maho_api/meilisearch/host'),
+                        \Mage::getStoreConfig('maho_api/meilisearch/api_key'),
+                    );
+                }
             } catch (\Exception $e) {
                 \Mage::log('Meilisearch initialization failed: ' . $e->getMessage());
             }
@@ -44,7 +46,6 @@ class ServiceFactory
 
         $indexPrefix = \Mage::getStoreConfig('maho_api/meilisearch/index_prefix') ?: 'maho_';
 
-        /** @phpstan-ignore-next-line */
         return new ProductService($meilisearchClient, $indexPrefix);
     }
 }

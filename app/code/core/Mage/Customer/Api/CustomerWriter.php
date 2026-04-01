@@ -107,8 +107,7 @@ final class CustomerWriter implements ProcessorInterface
         if ($data->lastName !== null) {
             $customer->setLastname($data->lastName);
         }
-        /** @phpstan-ignore notIdentical.alwaysTrue */
-        if ($data->email !== null && $data->email !== $customer->getEmail()) {
+        if ($data->email !== '' && $data->email !== $customer->getEmail()) {
             // Check if new email is already in use
             $existingCustomer = \Mage::getModel('customer/customer')
                 ->setWebsiteId($customer->getWebsiteId())

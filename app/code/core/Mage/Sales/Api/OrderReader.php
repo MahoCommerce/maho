@@ -476,7 +476,6 @@ final class OrderReader implements ProviderInterface
         $collection = $this->paymentService->getOrderPayments($orderId);
         $payments = [];
 
-        /** @phpstan-ignore-next-line */
         foreach ($collection as $payment) {
             $dto = new PosPayment();
             $dto->id = (int) $payment->getId();
@@ -512,7 +511,6 @@ final class OrderReader implements ProviderInterface
 
         // Group payments by method
         $grouped = [];
-        /** @phpstan-ignore-next-line */
         foreach ($collection as $payment) {
             $method = $payment->getMethodCode();
             if (!isset($grouped[$method])) {

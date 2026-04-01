@@ -81,19 +81,21 @@ final class UrlResolverReader implements ProviderInterface
         }
 
         // Try with .html suffix (common in Magento)
-        $rewrite->loadByRequestPath($path . '.html');
-        /** @phpstan-ignore if.alwaysFalse */
-        if ($rewrite->getId()) {
-            return $this->processRewrite($rewrite, $result);
+        $rewriteHtml = \Mage::getModel('core/url_rewrite');
+        $rewriteHtml->setStoreId($storeId);
+        $rewriteHtml->loadByRequestPath($path . '.html');
+        if ($rewriteHtml->getId()) {
+            return $this->processRewrite($rewriteHtml, $result);
         }
 
         // Try without .html suffix (rewrites may be stored without it)
         if (str_ends_with($path, '.html')) {
             $pathWithoutHtml = substr($path, 0, -5);
-            $rewrite->loadByRequestPath($pathWithoutHtml);
-            /** @phpstan-ignore if.alwaysFalse */
-            if ($rewrite->getId()) {
-                return $this->processRewrite($rewrite, $result);
+            $rewriteNoHtml = \Mage::getModel('core/url_rewrite');
+            $rewriteNoHtml->setStoreId($storeId);
+            $rewriteNoHtml->loadByRequestPath($pathWithoutHtml);
+            if ($rewriteNoHtml->getId()) {
+                return $this->processRewrite($rewriteNoHtml, $result);
             }
         }
 
@@ -323,7 +325,9 @@ final class UrlResolverReader implements ProviderInterface
             }
             $collection->addFieldToFilter('url_key', $urlKey);
             $collection->addFieldToFilter('is_active', 1);
-            $collection->addStoreFilter($storeId); /** @phpstan-ignore method.notFound */
+            if (method_exists($collection, 'addStoreFilter')) {
+                $collection->addStoreFilter($storeId);
+            }
             $collection->setPageSize(1);
 
             /** @var \Mage_Core_Model_Abstract $post */
