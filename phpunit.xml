@@ -15,7 +15,7 @@
             <directory suffix="Test.php">./tests/Frontend</directory>
         </testsuite>
         <testsuite name="Api">
-            <directory suffix="Test.php">./tests/Feature</directory>
+            <directory suffix="Test.php">./tests/Api</directory>
         </testsuite>
     </testsuites>
     <source>

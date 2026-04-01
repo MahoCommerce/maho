@@ -26,7 +26,7 @@ use Tests\Helpers\ApiV2Helper;
 |--------------------------------------------------------------------------
 |
 | Global functions wrapping ApiV2Helper for concise test syntax.
-| Used by tests in tests/Feature/Api/V2/
+| Used by tests in tests/Api/V2/
 |
 */
 
@@ -137,7 +137,7 @@ function getItems(array $response): array
 | API v2 Test Availability Check
 |--------------------------------------------------------------------------
 |
-| Skip Feature/Api/V2 tests when no API server is reachable.
+| Skip Api/V2 tests when no API server is reachable.
 | CI environments install Maho but do not start a web server,
 | so these integration tests can only run locally or in environments
 | where the API is served.
@@ -168,7 +168,7 @@ uses()
             $this->markTestSkipped('API server not reachable - skipping API integration tests');
         }
     })
-    ->in('Feature/Api');
+    ->in('Api/V2');
 
 /*
 |--------------------------------------------------------------------------
