@@ -32,6 +32,7 @@ class Maho_Intelligence_Model_Lsp_Server
     private Maho_Intelligence_Model_Lsp_Handler_Completion $completionHandler;
     private Maho_Intelligence_Model_Lsp_Handler_Definition $definitionHandler;
     private Maho_Intelligence_Model_Lsp_Handler_Hover $hoverHandler;
+    private Maho_Intelligence_Model_Lsp_Handler_Diagnostic $diagnosticHandler;
 
     private bool $initialized = false;
     private bool $shutdownRequested = false;
@@ -59,6 +60,9 @@ class Maho_Intelligence_Model_Lsp_Server
             $this->registry,
             $this->detector,
             $this->documents,
+        );
+        $this->diagnosticHandler = new Maho_Intelligence_Model_Lsp_Handler_Diagnostic(
+            $this->registry,
         );
 
         $this->transport->listen(
@@ -95,14 +99,9 @@ class Maho_Intelligence_Model_Lsp_Server
     {
         match ($method) {
             'initialized' => $this->initialized = true,
-            'textDocument/didOpen' => $this->documents->open(
-                $params['textDocument']['uri'],
-                $params['textDocument']['text'],
-            ),
+            'textDocument/didOpen' => $this->handleDidOpen($params),
             'textDocument/didChange' => $this->handleDidChange($params),
-            'textDocument/didClose' => $this->documents->close(
-                $params['textDocument']['uri'],
-            ),
+            'textDocument/didClose' => $this->handleDidClose($params),
             'exit' => exit($this->shutdownRequested ? 0 : 1),
             default => null,
         };
@@ -148,16 +147,45 @@ class Maho_Intelligence_Model_Lsp_Server
         return [];
     }
 
+    private function handleDidOpen(array $params): void
+    {
+        $uri = $params['textDocument']['uri'];
+        $text = $params['textDocument']['text'];
+        $this->documents->open($uri, $text);
+        $this->publishDiagnostics($uri, $text);
+    }
+
     private function handleDidChange(array $params): void
     {
         $uri = $params['textDocument']['uri'] ?? '';
         $changes = $params['contentChanges'] ?? [];
 
-        // Full sync mode — last content change has the full text
         if (!empty($changes)) {
             $lastChange = end($changes);
-            $this->documents->change($uri, $lastChange['text']);
+            $text = $lastChange['text'];
+            $this->documents->change($uri, $text);
+            $this->publishDiagnostics($uri, $text);
         }
+    }
+
+    private function handleDidClose(array $params): void
+    {
+        $uri = $params['textDocument']['uri'];
+        $this->documents->close($uri);
+        // Clear diagnostics for closed document
+        $this->sendNotification('textDocument/publishDiagnostics', [
+            'uri' => $uri,
+            'diagnostics' => [],
+        ]);
+    }
+
+    private function publishDiagnostics(string $uri, string $text): void
+    {
+        $diagnostics = $this->diagnosticHandler->diagnose($uri, $text);
+        $this->sendNotification('textDocument/publishDiagnostics', [
+            'uri' => $uri,
+            'diagnostics' => $diagnostics,
+        ]);
     }
 
     private function sendResult(int|string $id, mixed $result): void
@@ -178,6 +206,15 @@ class Maho_Intelligence_Model_Lsp_Server
                 'code' => $code,
                 'message' => $message,
             ],
+        ]);
+    }
+
+    private function sendNotification(string $method, array $params): void
+    {
+        $this->transport->send([
+            'jsonrpc' => '2.0',
+            'method' => $method,
+            'params' => $params,
         ]);
     }
 }
