@@ -1,0 +1,183 @@
+<?php
+
+/**
+ * Maho
+ *
+ * @package    Maho_Intelligence
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
+ */
+
+declare(strict_types=1);
+
+use React\EventLoop\Loop;
+
+/**
+ * LSP server for Maho Intelligence.
+ *
+ * Implements a subset of the Language Server Protocol:
+ * - initialize / shutdown / exit
+ * - textDocument/completion
+ * - textDocument/definition
+ * - textDocument/hover
+ * - textDocument/didOpen, didChange, didClose
+ */
+class Maho_Intelligence_Model_Lsp_Server
+{
+    private Maho_Intelligence_Model_Lsp_Transport $transport;
+    private Maho_Intelligence_Model_Lsp_DocumentStore $documents;
+    private Maho_Intelligence_Model_Lsp_ContextDetector $detector;
+    private Maho_Intelligence_Model_Registry $registry;
+
+    private Maho_Intelligence_Model_Lsp_Handler_Completion $completionHandler;
+    private Maho_Intelligence_Model_Lsp_Handler_Definition $definitionHandler;
+    private Maho_Intelligence_Model_Lsp_Handler_Hover $hoverHandler;
+
+    private bool $initialized = false;
+    private bool $shutdownRequested = false;
+
+    public function run(): void
+    {
+        $loop = Loop::get();
+
+        $this->registry = Mage::getModel('intelligence/registry');
+        $this->documents = new Maho_Intelligence_Model_Lsp_DocumentStore();
+        $this->detector = new Maho_Intelligence_Model_Lsp_ContextDetector();
+        $this->transport = new Maho_Intelligence_Model_Lsp_Transport($loop);
+
+        $this->completionHandler = new Maho_Intelligence_Model_Lsp_Handler_Completion(
+            $this->registry,
+            $this->detector,
+            $this->documents,
+        );
+        $this->definitionHandler = new Maho_Intelligence_Model_Lsp_Handler_Definition(
+            $this->registry,
+            $this->detector,
+            $this->documents,
+        );
+        $this->hoverHandler = new Maho_Intelligence_Model_Lsp_Handler_Hover(
+            $this->registry,
+            $this->detector,
+            $this->documents,
+        );
+
+        $this->transport->listen(
+            onMessage: fn(array $msg) => $this->handleMessage($msg),
+            onClose: fn() => $loop->stop(),
+        );
+
+        $loop->run();
+    }
+
+    private function handleMessage(array $message): void
+    {
+        $method = $message['method'] ?? null;
+        $id = $message['id'] ?? null;
+        $params = $message['params'] ?? [];
+
+        // Notifications (no id) — don't send a response
+        if ($id === null) {
+            $this->handleNotification($method, $params);
+            return;
+        }
+
+        // Requests (have id) — must send a response
+        $result = $this->handleRequest($method, $params);
+
+        if ($result === null) {
+            $this->sendError($id, -32601, "Method not found: {$method}");
+        } else {
+            $this->sendResult($id, $result);
+        }
+    }
+
+    private function handleNotification(?string $method, array $params): void
+    {
+        match ($method) {
+            'initialized' => $this->initialized = true,
+            'textDocument/didOpen' => $this->documents->open(
+                $params['textDocument']['uri'],
+                $params['textDocument']['text'],
+            ),
+            'textDocument/didChange' => $this->handleDidChange($params),
+            'textDocument/didClose' => $this->documents->close(
+                $params['textDocument']['uri'],
+            ),
+            'exit' => exit($this->shutdownRequested ? 0 : 1),
+            default => null,
+        };
+    }
+
+    private function handleRequest(?string $method, array $params): ?array
+    {
+        return match ($method) {
+            'initialize' => $this->handleInitialize($params),
+            'shutdown' => $this->handleShutdown(),
+            'textDocument/completion' => $this->completionHandler->handle($params),
+            'textDocument/definition' => $this->definitionHandler->handle($params),
+            'textDocument/hover' => $this->hoverHandler->handle($params),
+            default => null,
+        };
+    }
+
+    private function handleInitialize(array $params): array
+    {
+        return [
+            'capabilities' => [
+                'textDocumentSync' => [
+                    'openClose' => true,
+                    'change' => 1, // Full sync
+                ],
+                'completionProvider' => [
+                    'triggerCharacters' => ["'", '"'],
+                    'resolveProvider' => false,
+                ],
+                'definitionProvider' => true,
+                'hoverProvider' => true,
+            ],
+            'serverInfo' => [
+                'name' => 'maho-intelligence-lsp',
+                'version' => Mage::getVersion(),
+            ],
+        ];
+    }
+
+    private function handleShutdown(): array
+    {
+        $this->shutdownRequested = true;
+        return [];
+    }
+
+    private function handleDidChange(array $params): void
+    {
+        $uri = $params['textDocument']['uri'] ?? '';
+        $changes = $params['contentChanges'] ?? [];
+
+        // Full sync mode — last content change has the full text
+        if (!empty($changes)) {
+            $lastChange = end($changes);
+            $this->documents->change($uri, $lastChange['text']);
+        }
+    }
+
+    private function sendResult(int|string $id, mixed $result): void
+    {
+        $this->transport->send([
+            'jsonrpc' => '2.0',
+            'id' => $id,
+            'result' => $result,
+        ]);
+    }
+
+    private function sendError(int|string $id, int $code, string $message): void
+    {
+        $this->transport->send([
+            'jsonrpc' => '2.0',
+            'id' => $id,
+            'error' => [
+                'code' => $code,
+                'message' => $message,
+            ],
+        ]);
+    }
+}

@@ -12,6 +12,7 @@ declare(strict_types=1);
 
 namespace MahoCLI\Commands;
 
+use Mage;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -28,7 +29,10 @@ class DevLspStart extends BaseMahoCommand
     {
         $this->initMaho();
 
-        $output->writeln('<comment>LSP server is not yet implemented. Coming in Phase 2.</comment>');
+        /** @var \Maho_Intelligence_Model_Lsp_Server $server */
+        $server = Mage::getModel('intelligence/lsp_server');
+        $server->run();
+
         return Command::SUCCESS;
     }
 }
