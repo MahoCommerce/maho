@@ -35,7 +35,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final class MediaProvider implements ProviderInterface
 {
-
     public function __construct(
         private readonly Security $security,
         private readonly RequestStack $requestStack,
@@ -64,7 +63,8 @@ final class MediaProvider implements ProviderInterface
         $request = $this->requestStack->getCurrentRequest();
 
         $folder = $request?->query->get('folder', 'wysiwyg') ?? 'wysiwyg';
-        $folder = $this->sanitizeFolderPath($folder);
+        $helper = Mage::helper('cms/wysiwyg_images');
+        $folder = $helper->correctPath($folder);
 
         $mediaDir = Mage::getConfig()->getOptions()->getMediaDir();
         $wysiwygDir = $mediaDir . DS . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY;
@@ -148,14 +148,4 @@ final class MediaProvider implements ProviderInterface
         return $files;
     }
 
-    private function sanitizeFolderPath(string $path): string
-    {
-        $path = str_replace(chr(0), '', $path);
-        $path = preg_replace('#(^|[\\\\/])\.\.($|[\\\\/])#', '', $path);
-        $path = str_replace('\\', '/', $path);
-        $path = trim($path, '/');
-        $path = preg_replace('#/+#', '/', $path);
-
-        return $path;
-    }
 }

@@ -31,7 +31,7 @@ use ApiPlatform\OpenApi\Model\RequestBody;
             security: "is_granted('ROLE_API_USER')",
             openapi: new Operation(
                 summary: 'Upload an image',
-                description: 'Uploads an image file, auto-converts to WebP. Max 10MB. Allowed types: jpg, jpeg, png, gif, webp.',
+                description: 'Uploads an image file, auto-converts to the configured image format.',
                 requestBody: new RequestBody(
                     content: new \ArrayObject([
                         'multipart/form-data' => [

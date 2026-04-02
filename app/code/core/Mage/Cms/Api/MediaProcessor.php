@@ -17,12 +17,10 @@ use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
 use Mage;
-use Mage_Cms_Model_Wysiwyg_Config;
 use Mage_Core_Model_File_Uploader;
 use Mage_Core_Model_Store;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
-use Maho\Io\File as IoFile;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -65,98 +63,82 @@ final class MediaProcessor implements ProcessorInterface
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        $uploadedFile = $request?->files->get('file');
-        if (!$uploadedFile || !$uploadedFile->isValid()) {
-            $error = $uploadedFile?->getErrorMessage() ?? 'No file uploaded';
-            throw new BadRequestHttpException('File upload failed: ' . $error);
+        if (!isset($_FILES['file']) || $_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+            throw new BadRequestHttpException('No valid file uploaded');
         }
 
-        $originalExtension = strtolower($uploadedFile->getClientOriginalExtension());
-        if (!in_array($originalExtension, IoFile::ALLOWED_IMAGES_EXTENSIONS, true)) {
-            throw new BadRequestHttpException(
-                'Invalid file type. Allowed types: ' . implode(', ', IoFile::ALLOWED_IMAGES_EXTENSIONS),
-            );
-        }
+        // Storage::uploadFile() expects $_FILES['image']
+        $_FILES['image'] = $_FILES['file'];
 
+        $helper = Mage::helper('cms/wysiwyg_images');
+        $storage = $helper->getStorage();
+
+        // Resolve target directory within wysiwyg storage root
         $folder = $request->request->get('folder', 'wysiwyg');
-        $folder = $this->sanitizeFolderPath($folder);
-
-        $mediaDir = Mage::getConfig()->getOptions()->getMediaDir();
-        $wysiwygDir = $mediaDir . DS . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY;
-        $targetDir = $wysiwygDir;
+        $folder = $helper->correctPath($folder);
+        $targetDir = $helper->getStorageRoot();
 
         if ($folder !== 'wysiwyg' && $folder !== '') {
             $subFolder = preg_replace('#^wysiwyg/?#', '', $folder);
             if ($subFolder) {
-                $targetDir = $wysiwygDir . DS . $subFolder;
+                $targetDir .= $subFolder;
             }
         }
 
-        $realWysiwygDir = realpath($wysiwygDir);
-        if (!$realWysiwygDir) {
-            $io = new IoFile();
-            $io->checkAndCreateFolder($wysiwygDir);
-            $realWysiwygDir = realpath($wysiwygDir);
-        }
+        $io = new \Maho\Io\File();
+        $io->checkAndCreateFolder($targetDir);
 
-        if (!is_dir($targetDir)) {
-            $io = new IoFile();
-            $io->checkAndCreateFolder($targetDir);
-        }
-
+        $realStorageRoot = realpath($helper->getStorageRoot());
         $realTargetDir = realpath($targetDir);
-        if (!$realTargetDir || !str_starts_with($realTargetDir, $realWysiwygDir)) {
-            throw new BadRequestHttpException('Invalid folder path. Must be within wysiwyg/');
+        if (!$realTargetDir || !str_starts_with($realTargetDir, $realStorageRoot)) {
+            throw new BadRequestHttpException('Invalid folder path');
         }
+
+        $result = $storage->uploadFile($realTargetDir, 'image');
+        if (!$result) {
+            throw new UnprocessableEntityHttpException('Failed to upload file');
+        }
+
+        $uploadedPath = $result['path'] . DS . $result['file'];
+
+        // Convert to configured image format using Intervention Image
+        $targetType = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_file_type') ?: IMAGETYPE_WEBP;
+        $targetExt = image_type_to_extension($targetType, false);
+        $quality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
 
         $customFilename = $request->request->get('filename');
-        if ($customFilename) {
-            $customFilename = pathinfo($customFilename, PATHINFO_FILENAME);
-            $baseFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($customFilename . '.webp');
-            $baseFilename = pathinfo($baseFilename, PATHINFO_FILENAME);
-        } else {
-            $originalName = pathinfo($uploadedFile->getClientOriginalName(), PATHINFO_FILENAME);
-            $baseFilename = Mage_Core_Model_File_Uploader::getCorrectFileName($originalName . '.tmp');
-            $baseFilename = pathinfo($baseFilename, PATHINFO_FILENAME);
-        }
+        $baseName = $customFilename
+            ? pathinfo(Mage_Core_Model_File_Uploader::getCorrectFileName($customFilename . '.' . $targetExt), PATHINFO_FILENAME)
+            : pathinfo($result['file'], PATHINFO_FILENAME);
 
-        $finalFilename = $baseFilename . '.webp';
-        $destPath = $realTargetDir . DS . $finalFilename;
+        $targetFilename = $baseName . '.' . $targetExt;
+        $targetPath = $result['path'] . DS . $targetFilename;
         $counter = 1;
-        while (file_exists($destPath)) {
-            $finalFilename = $baseFilename . '_' . $counter . '.webp';
-            $destPath = $realTargetDir . DS . $finalFilename;
+        while (file_exists($targetPath) && $targetPath !== $uploadedPath) {
+            $targetFilename = $baseName . '_' . $counter . '.' . $targetExt;
+            $targetPath = $result['path'] . DS . $targetFilename;
             $counter++;
         }
 
-        $tmpPath = $uploadedFile->getPathname();
-        $this->convertToWebp($tmpPath, $destPath);
+        \Maho::getImageManager()->decodePath($uploadedPath)->save($targetPath, quality: $quality);
 
-        $imageSize = \Maho\Io::getImageSize($destPath);
-        $dimensions = null;
-        if ($imageSize) {
-            $dimensions = [
-                'width' => $imageSize[0],
-                'height' => $imageSize[1],
-            ];
+        if ($uploadedPath !== $targetPath && file_exists($uploadedPath)) {
+            unlink($uploadedPath);
         }
 
-        $relativePath = str_replace($mediaDir . DS, '', $destPath);
-        $relativePath = str_replace(DS, '/', $relativePath);
-
-        $mediaUrl = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA);
-        $fileUrl = $mediaUrl . $relativePath;
-
-        $directive = sprintf('{{media url="%s"}}', $relativePath);
+        // Build response
+        $mediaDir = Mage::getConfig()->getOptions()->getMediaDir();
+        $relativePath = str_replace(DS, '/', str_replace($mediaDir . DS, '', $targetPath));
+        $imageSize = \Maho\Io::getImageSize($targetPath);
 
         $this->logActivity('upload', $relativePath, $user);
 
         $media = new Media();
-        $media->url = $fileUrl;
-        $media->directive = $directive;
-        $media->size = filesize($destPath);
-        $media->dimensions = $dimensions;
-        $media->filename = $finalFilename;
+        $media->url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_MEDIA) . $relativePath;
+        $media->directive = sprintf('{{media url="%s"}}', $relativePath);
+        $media->size = filesize($targetPath);
+        $media->dimensions = $imageSize ? ['width' => $imageSize[0], 'height' => $imageSize[1]] : null;
+        $media->filename = $targetFilename;
         $media->path = $relativePath;
 
         return $media;
@@ -164,99 +146,19 @@ final class MediaProcessor implements ProcessorInterface
 
     private function handleDelete(string $path, ApiUser $user): null
     {
-        $path = $this->sanitizeFolderPath($path);
+        $helper = Mage::helper('cms/wysiwyg_images');
+        $storageRoot = realpath($helper->getStorageRoot());
+        $fullPath = realpath($storageRoot . DS . $helper->correctPath($path));
 
-        if (!str_starts_with($path, 'wysiwyg/')) {
-            throw new BadRequestHttpException('Path must be within wysiwyg/');
-        }
-
-        $mediaDir = Mage::getConfig()->getOptions()->getMediaDir();
-        $fullPath = $mediaDir . DS . str_replace('/', DS, $path);
-
-        $wysiwygDir = $mediaDir . DS . Mage_Cms_Model_Wysiwyg_Config::IMAGE_DIRECTORY;
-        $realWysiwygDir = realpath($wysiwygDir);
-        $realFullPath = realpath($fullPath);
-
-        if (!$realFullPath) {
+        if (!$fullPath || !is_file($fullPath) || !str_starts_with($fullPath, $storageRoot)) {
             throw new NotFoundHttpException('File not found');
         }
 
-        if (!str_starts_with($realFullPath, $realWysiwygDir)) {
-            throw new BadRequestHttpException('Path must be within wysiwyg/');
-        }
-
-        if (!is_file($realFullPath)) {
-            throw new NotFoundHttpException('File not found');
-        }
-
-        $io = new IoFile();
-        if (!$io->rm($realFullPath)) {
-            throw new UnprocessableEntityHttpException('Failed to delete file');
-        }
-
-        $thumbsDir = $wysiwygDir . DS . '.thumbs';
-        $relativePath = str_replace($realWysiwygDir, '', $realFullPath);
-        $thumbPath = $thumbsDir . $relativePath;
-        if (file_exists($thumbPath)) {
-            $io->rm($thumbPath);
-        }
+        $helper->getStorage()->deleteFile($fullPath);
 
         $this->logActivity('delete', $path, $user);
 
         return null;
-    }
-
-    private function convertToWebp(string $sourcePath, string $destPath): void
-    {
-        $imageData = file_get_contents($sourcePath);
-        if ($imageData === false) {
-            throw new UnprocessableEntityHttpException('Failed to read uploaded file');
-        }
-
-        $image = imagecreatefromstring($imageData);
-        if ($image === false) {
-            throw new UnprocessableEntityHttpException('Invalid image file');
-        }
-
-        imagealphablending($image, true);
-        imagesavealpha($image, true);
-
-        $width = imagesx($image);
-        $height = imagesy($image);
-
-        $cleanImage = imagecreatetruecolor($width, $height);
-        if ($cleanImage === false) {
-            imagedestroy($image);
-            throw new UnprocessableEntityHttpException('Failed to process image');
-        }
-
-        imagealphablending($cleanImage, false);
-        imagesavealpha($cleanImage, true);
-        $transparent = imagecolorallocatealpha($cleanImage, 0, 0, 0, 127);
-        imagefill($cleanImage, 0, 0, $transparent);
-
-        imagecopyresampled($cleanImage, $image, 0, 0, 0, 0, $width, $height, $width, $height);
-
-        $quality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
-        if (!imagewebp($cleanImage, $destPath, $quality)) {
-            imagedestroy($image);
-            imagedestroy($cleanImage);
-            throw new UnprocessableEntityHttpException('Failed to save image as WebP');
-        }
-
-        imagedestroy($image);
-        imagedestroy($cleanImage);
-    }
-
-    private function sanitizeFolderPath(string $path): string
-    {
-        $path = str_replace(chr(0), '', $path);
-        $path = preg_replace('#(^|[\\\\/])\.\.($|[\\\\/])#', '', $path);
-        $path = str_replace('\\', '/', $path);
-        $path = trim($path, '/');
-        $path = preg_replace('#/+#', '/', $path);
-
-        return $path;
     }
 
     private function logActivity(string $action, string $path, ApiUser $user): void
