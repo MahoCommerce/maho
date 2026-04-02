@@ -73,7 +73,7 @@ function mageCoreErrorHandler($errno, $errstr, $errfile, $errline)
         && str_contains($errstr, 'symlink(): File exists')
         && str_contains($errfile, 'FilesystemTagAwareAdapter.php')
     ) {
-        return false;
+        return true;
     }
 
     $errno = $errno & error_reporting();
