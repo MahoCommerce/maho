@@ -15,9 +15,7 @@ namespace Mage\Customer\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Service\CustomerService;
 use ApiPlatform\State\Pagination\TraversablePaginator;
-use Maho\ApiPlatform\Service\AddressMapper;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**

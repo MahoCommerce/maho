@@ -17,9 +17,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Mage\Customer\Api\Address;
-use Maho\ApiPlatform\Service\AddressMapper;
-use Maho\ApiPlatform\Service\OrderService;
-use Maho\ApiPlatform\Service\PaymentService;
+use Mage\Customer\Api\AddressMapper;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**

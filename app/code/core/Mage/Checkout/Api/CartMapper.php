@@ -6,15 +6,14 @@ declare(strict_types=1);
  * Maho
  *
  * @category   Maho
- * @package    Maho_ApiPlatform
+ * @package    Mage_Checkout
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\Service;
+namespace Mage\Checkout\Api;
 
-use Mage\Checkout\Api\Cart;
-use Mage\Checkout\Api\CartItem;
+use Mage\Customer\Api\AddressMapper;
 
 /**
  * Shared cart-to-DTO mapping logic used by both CartProvider and CartProcessor

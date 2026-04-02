@@ -13,10 +13,10 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Controller;
 
-use Maho\ApiPlatform\Service\GraphQL\CartMutationHandler;
-use Maho\ApiPlatform\Service\GraphQL\CustomerQueryHandler;
-use Maho\ApiPlatform\Service\GraphQL\OrderMutationHandler;
-use Maho\ApiPlatform\Service\GraphQL\ProductQueryHandler;
+use Mage\Checkout\Api\GraphQL\CartMutationHandler;
+use Mage\Customer\Api\GraphQL\CustomerQueryHandler;
+use Mage\Sales\Api\GraphQL\OrderMutationHandler;
+use Mage\Catalog\Api\GraphQL\ProductQueryHandler;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

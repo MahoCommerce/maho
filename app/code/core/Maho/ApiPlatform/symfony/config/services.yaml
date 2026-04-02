@@ -25,7 +25,7 @@ services:
             - { name: 'api_platform.graphql.query_resolver' }
 
     # ProductService needs a factory because of optional Meilisearch dependency
-    Maho\ApiPlatform\Service\ProductService:
+    Mage\Catalog\Api\ProductService:
         factory: ['@Maho\ApiPlatform\Factory\ServiceFactory', 'createProductService']
 
     Maho\ApiPlatform\EventListener\DefaultDenyListener:

@@ -76,7 +76,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
     private function validateFromGraphQl(array $context): Coupon
     {
-        // Validate allows authenticated customers too
         $args = $context['args']['input'] ?? [];
         return $this->doValidate(
             $args['code'] ?? '',
@@ -108,7 +107,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Discount amount must be greater than 0');
         }
 
-        // Check for duplicate code
         /** @var \Mage_SalesRule_Model_Coupon $existingCoupon */
         $existingCoupon = \Mage::getModel('salesrule/coupon');
         $existingCoupon->loadByCode($code);
@@ -116,7 +114,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException("Coupon code '{$code}' already exists");
         }
 
-        // Build the sales rule
         /** @var \Mage_SalesRule_Model_Rule $rule */
         $rule = \Mage::getModel('salesrule/rule');
         $rule->setName($data['description'] ?? "Coupon: {$code}");
@@ -128,7 +125,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule->setDiscountStep(0);
         $rule->setStopRulesProcessing(0);
 
-        // Set dates
         if (!empty($data['fromDate'])) {
             $rule->setFromDate($data['fromDate']);
         }
@@ -136,7 +132,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $rule->setToDate($data['toDate']);
         }
 
-        // Usage limits
         if (isset($data['usageLimit'])) {
             $rule->setUsesPerCoupon((int) $data['usageLimit']);
         }
@@ -144,20 +139,16 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $rule->setUsesPerCustomer((int) $data['usagePerCustomer']);
         }
 
-        // Set for all customer groups and all websites
         $rule->setCustomerGroupIds(array_keys(\Mage::getModel('customer/group')->getCollection()->toOptionHash()));
         $rule->setWebsiteIds(array_keys(\Mage::app()->getWebsites()));
 
-        // Minimum subtotal condition
         if (isset($data['minimumSubtotal']) && (float) $data['minimumSubtotal'] > 0) {
             $this->setMinimumSubtotalCondition($rule, (float) $data['minimumSubtotal']);
         }
 
-        // Set coupon code — rule's _afterSave will create the primary coupon
         $rule->setCouponCode($code);
         $rule->save();
 
-        // Load the auto-created coupon
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon');
         $coupon->loadByCode($code);
@@ -185,10 +176,8 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Associated price rule not found');
         }
 
-        // Update code if provided
         if (isset($data['code'])) {
             $this->validateCouponCode($data['code']);
-            // Check uniqueness (excluding current)
             /** @var \Mage_SalesRule_Model_Coupon $existingCoupon */
             $existingCoupon = \Mage::getModel('salesrule/coupon');
             $existingCoupon->loadByCode($data['code']);
@@ -199,7 +188,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             $coupon->save();
         }
 
-        // Update rule fields
         if (isset($data['discountType'])) {
             if (!in_array($data['discountType'], self::VALID_DISCOUNT_TYPES, true)) {
                 throw new BadRequestHttpException('Invalid discount type');
@@ -246,7 +234,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         $rule->save();
 
-        // Reload coupon in case code changed
         $coupon->load($id);
 
         return $this->mapToDto($coupon, $rule);
@@ -273,7 +260,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $rule->load($coupon->getRuleId());
 
         if ($rule->getId()) {
-            $rule->delete(); // Cascades to coupon
+            $rule->delete();
         } else {
             $coupon->delete();
         }
@@ -288,7 +275,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         }
 
         $dto = new Coupon();
-        $dto->id = 0; // Required by API Platform for IRI generation
+        $dto->id = 0;
         $dto->code = $code;
 
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
@@ -311,7 +298,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         }
 
-        // Check dates
         $now = \Mage::getModel('core/date')->gmtDate('Y-m-d');
         if ($rule->getFromDate() && $now < $rule->getFromDate()) {
             $dto->isValid = false;
@@ -324,14 +310,12 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
             return $dto;
         }
 
-        // Check usage limits
         if ($rule->getUsesPerCoupon() && $coupon->getTimesUsed() >= $rule->getUsesPerCoupon()) {
             $dto->isValid = false;
             $dto->validationMessage = 'Coupon usage limit reached';
             return $dto;
         }
 
-        // Try to apply to cart for discount preview
         if ($cartId) {
             /** @var \Mage_Sales_Model_Quote $quote */
             $quote = \Mage::getModel('sales/quote');
@@ -341,7 +325,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
                 $quote->collectTotals();
                 $discount = abs((float) $quote->getShippingAddress()->getDiscountAmount());
                 $dto->discountPreview = $discount;
-                // Reset the coupon on the quote
                 $quote->setCouponCode('');
                 $quote->collectTotals();
                 $quote->save();
@@ -353,7 +336,6 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $dto->id = (int) $coupon->getId();
         $dto->ruleId = (int) $coupon->getRuleId();
 
-        // Map discount info
         $discountTypeMap = [
             'by_percent' => 'percent',
             'by_fixed' => 'fixed',

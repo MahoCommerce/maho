@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Service\PaymentService;
-use Maho\ApiPlatform\Service\PosPaymentMapper;
 
 /**
  * Payment State Processor - Handles payment mutations for API Platform

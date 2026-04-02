@@ -5,18 +5,17 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @category   Maho
- * @package    Maho_ApiPlatform
+ * @package    Mage_Customer
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\Service\GraphQL;
+namespace Mage\Customer\Api\GraphQL;
 
 use Mage\Customer\Api\CustomerProvider;
+use Mage\Customer\Api\CustomerService;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
-use Maho\ApiPlatform\Service\CustomerService;
 
 /**
  * Customer Query Handler

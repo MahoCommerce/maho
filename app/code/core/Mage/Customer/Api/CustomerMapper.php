@@ -5,14 +5,12 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @package    Maho_ApiPlatform
+ * @package    Mage_Customer
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\Service;
-
-use Mage\Customer\Api\Customer;
+namespace Mage\Customer\Api;
 
 /**
  * Centralized customer mapping service

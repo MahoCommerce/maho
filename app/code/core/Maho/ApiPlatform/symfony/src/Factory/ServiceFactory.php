@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Factory;
 
-use Maho\ApiPlatform\Service\ProductService;
+use Mage\Catalog\Api\ProductService;
 
 /**
  * Service Factory

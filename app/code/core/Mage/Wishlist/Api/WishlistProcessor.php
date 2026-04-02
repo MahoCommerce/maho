@@ -16,7 +16,7 @@ namespace Mage\Wishlist\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Delete;
 use Maho\ApiPlatform\Service\StoreContext;
-use Maho\ApiPlatform\Service\CartService;
+use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

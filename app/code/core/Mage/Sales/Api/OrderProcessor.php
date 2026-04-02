@@ -14,11 +14,8 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Service\AddressMapper;
-use Maho\ApiPlatform\Service\CartService;
-use Maho\ApiPlatform\Service\OrderService;
-use Maho\ApiPlatform\Service\PaymentService;
-use Maho\ApiPlatform\Service\PosPaymentMapper;
+use Mage\Customer\Api\AddressMapper;
+use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;

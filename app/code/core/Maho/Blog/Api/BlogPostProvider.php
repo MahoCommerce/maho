@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
-use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -24,8 +24,14 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class BlogPostProvider extends \Maho\ApiPlatform\Provider
 {
+    protected ?string $modelAlias = 'blog/post';
+    protected int $defaultPageSize = 10;
+    protected int $maxPageSize = 50;
+    protected array $defaultSort = ['publish_date' => 'DESC'];
+
     /**
-     * @return BlogPost|TraversablePaginator<BlogPost>|null
+     * Override provide() because BlogPost has a special urlKey-based collection filter
+     * that returns a single-item paginator rather than using handleOperation().
      */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|TraversablePaginator|null
@@ -33,20 +39,20 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
         StoreContext::ensureStore();
 
         if ($operation instanceof CollectionOperationInterface) {
-            // Handle urlKey filter for GraphQL blogPosts(urlKey: "...") query
             $urlKey = $context['args']['urlKey'] ?? $context['filters']['urlKey'] ?? null;
             if ($urlKey) {
                 $post = $this->getPostByUrlKey($urlKey);
                 $items = $post ? [$post] : [];
                 return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
             }
-            return $this->getCollection($context);
+            return $this->provideCollection($context);
         }
 
-        return $this->getItem((int) $uriVariables['id']);
+        return $this->provideItem((int) $uriVariables['id']);
     }
 
-    private function getItem(int $id): ?BlogPost
+    #[\Override]
+    protected function provideItem(int|string $id): ?BlogPost
     {
         $post = \Mage::getModel('blog/post')->load($id);
 
@@ -54,43 +60,20 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // Check store availability
         $storeId = StoreContext::getStoreId();
         $stores = $post->getStores();
         if (!StoreContext::isAvailableForStore($stores, $storeId)) {
             return null;
         }
 
-        return $this->mapToDto($post);
+        return $this->toDto($post);
     }
 
-    private function getPostByUrlKey(string $urlKey): ?BlogPost
-    {
-        $storeId = StoreContext::getStoreId();
-        $post = \Mage::getModel('blog/post');
-        $postId = $post->getPostIdByUrlKey($urlKey, $storeId);
-
-        if (!$postId) {
-            return null;
-        }
-
-        $post->load($postId);
-
-        if (!$post->getId() || !$post->getIsActive()) {
-            return null;
-        }
-
-        return $this->mapToDto($post);
-    }
-
-    /**
-     * @return TraversablePaginator<BlogPost>
-     */
-    private function getCollection(array $context): TraversablePaginator
+    #[\Override]
+    protected function applyCollectionFilters(object $collection, array $filters): void
     {
         $storeId = StoreContext::getStoreId();
 
-        $collection = \Mage::getResourceModel('blog/post_collection');
         $collection->addAttributeToSelect('image');
         $collection->addStoreFilter($storeId);
         $collection->addFieldToFilter('is_active', 1);
@@ -102,25 +85,10 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
                 ['lteq' => \Mage_Core_Model_Locale::now()],
             ],
         ]);
-
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 50);
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($page);
-
-        // Sort by publish date descending (newest first)
-        $collection->setOrder('publish_date', 'DESC');
-
-        $posts = [];
-        foreach ($collection as $post) {
-            $posts[] = $this->mapToDto($post);
-        }
-
-        $total = (int) $collection->getSize();
-
-        return new TraversablePaginator(new \ArrayIterator($posts), $page, $pageSize, $total);
     }
 
-    public function mapToDto(\Maho_Blog_Model_Post $post): BlogPost
+    #[\Override]
+    protected function toDto(object $post): BlogPost
     {
         $dto = new BlogPost();
         $dto->id = (int) $post->getId();
@@ -153,5 +121,24 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
         \Mage::dispatchEvent('api_blog_post_dto_build', ['post' => $post, 'dto' => $dto]);
 
         return $dto;
+    }
+
+    private function getPostByUrlKey(string $urlKey): ?BlogPost
+    {
+        $storeId = StoreContext::getStoreId();
+        $post = \Mage::getModel('blog/post');
+        $postId = $post->getPostIdByUrlKey($urlKey, $storeId);
+
+        if (!$postId) {
+            return null;
+        }
+
+        $post->load($postId);
+
+        if (!$post->getId() || !$post->getIsActive()) {
+            return null;
+        }
+
+        return $this->toDto($post);
     }
 }

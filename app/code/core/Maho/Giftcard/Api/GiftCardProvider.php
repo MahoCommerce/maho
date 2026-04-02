@@ -13,25 +13,20 @@ declare(strict_types=1);
 
 namespace Maho\Giftcard\Api;
 
-use ApiPlatform\Metadata\CollectionOperationInterface;
-use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Resource;
 
 /**
  * Gift Card State Provider - Fetches gift card data for API Platform
  */
 final class GiftCardProvider extends \Maho\ApiPlatform\Provider
 {
-    /**
-     * @return GiftCard|TraversablePaginator<GiftCard>|null
-     */
-    #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): GiftCard|TraversablePaginator|null
-    {
-        $operationName = $operation->getName();
+    protected ?string $modelAlias = 'giftcard/giftcard';
+    protected array $defaultSort = ['created_at' => 'DESC'];
 
-        // Handle checkGiftcardBalance query
-        if ($operationName === 'checkGiftcardBalance') {
+    #[\Override]
+    protected function handleOperation(string $name, array $context, array $uriVariables): mixed
+    {
+        if ($name === 'checkGiftcardBalance') {
             $code = $context['args']['code'] ?? null;
             if (!$code) {
                 throw new \RuntimeException('Gift card code is required');
@@ -40,38 +35,13 @@ final class GiftCardProvider extends \Maho\ApiPlatform\Provider
             return $this->getGiftCardByCode(trim($code));
         }
 
-        // Handle collection query (list gift cards)
-        if ($operation instanceof CollectionOperationInterface) {
-            return $this->getGiftCardCollection($context);
-        }
-
-        // Handle REST GET or item_query by ID
-        $id = $uriVariables['id'] ?? null;
-        if ($id) {
-            return $this->getGiftCardById((int) $id);
-        }
-
         return null;
-    }
-
-    /**
-     * Get gift card by ID
-     */
-    private function getGiftCardById(int $id): GiftCard
-    {
-        $giftcard = \Mage::getModel('giftcard/giftcard')->load($id);
-
-        if (!$giftcard->getId()) {
-            throw new \RuntimeException('Gift card not found');
-        }
-
-        return $this->mapToDto($giftcard);
     }
 
     /**
      * Get gift card by code
      */
-    private function getGiftCardByCode(string $code): GiftCard
+    private function getGiftCardByCode(string $code): Resource
     {
         $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
 
@@ -79,51 +49,26 @@ final class GiftCardProvider extends \Maho\ApiPlatform\Provider
             throw new \RuntimeException('Gift card "' . $code . '" not found');
         }
 
-        return $this->mapToDto($giftcard);
+        return $this->toDto($giftcard);
     }
 
-    /**
-     * @return TraversablePaginator<GiftCard>
-     */
-    private function getGiftCardCollection(array $context): TraversablePaginator
-    {
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
-
-        $collection = \Mage::getResourceModel('giftcard/giftcard_collection');
-        $collection->setOrder('created_at', 'DESC');
-
-        $total = $collection->getSize();
-
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($page);
-
-        $items = [];
-        foreach ($collection as $giftcard) {
-            $items[] = $this->mapToDto($giftcard);
-        }
-
-        return new TraversablePaginator(new \ArrayIterator($items), $page, $pageSize, $total);
-    }
-
-    /**
-     * Map Maho gift card model to GiftCard DTO
-     */
-    public function mapToDto(\Maho_Giftcard_Model_Giftcard $giftcard): GiftCard
+    #[\Override]
+    protected function toDto(object $model): Resource
     {
         $dto = new GiftCard();
-        $dto->id = (int) $giftcard->getId();
-        $dto->code = $giftcard->getCode();
-        $dto->balance = (float) $giftcard->getBalance();
-        $dto->initialBalance = (float) $giftcard->getInitialBalance();
-        $dto->status = $giftcard->getStatus();
-        $dto->expirationDate = $giftcard->getExpiresAt();
-        $dto->currencyCode = $giftcard->getCurrencyCode();
-        $dto->createdAt = $giftcard->getCreatedAt();
-        $dto->recipientName = $giftcard->getData('recipient_name');
-        $dto->recipientEmail = $giftcard->getData('recipient_email');
-        $dto->senderName = $giftcard->getData('sender_name');
-        $dto->senderEmail = $giftcard->getData('sender_email');
-        $dto->message = $giftcard->getData('message');
+        $dto->id = (int) $model->getId();
+        $dto->code = $model->getCode();
+        $dto->balance = (float) $model->getBalance();
+        $dto->initialBalance = (float) $model->getInitialBalance();
+        $dto->status = $model->getStatus();
+        $dto->expirationDate = $model->getExpiresAt();
+        $dto->currencyCode = $model->getCurrencyCode();
+        $dto->createdAt = $model->getCreatedAt();
+        $dto->recipientName = $model->getData('recipient_name');
+        $dto->recipientEmail = $model->getData('recipient_email');
+        $dto->senderName = $model->getData('sender_name');
+        $dto->senderEmail = $model->getData('sender_email');
+        $dto->message = $model->getData('message');
 
         return $dto;
     }

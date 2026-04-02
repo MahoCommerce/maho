@@ -13,17 +13,11 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
-use ApiPlatform\Metadata\DeleteOperationInterface;
-use ApiPlatform\Metadata\Operation;
 use Mage;
 use Maho\ApiPlatform\Security\ApiUser;
-use Maho\ApiPlatform\Trait\ActivityLogTrait;
-use Maho\ApiPlatform\Trait\StoreAccessTrait;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Maho_Blog_Model_Post;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Blog Post State Processor
@@ -33,8 +27,11 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
  */
 final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
 {
-    use ActivityLogTrait;
-    use StoreAccessTrait;
+    protected ?string $modelAlias = 'blog/post';
+    protected ?string $writePermission = 'blog-posts/write';
+    protected ?string $deletePermission = 'blog-posts/delete';
+    protected ?string $entityType = 'blog/post';
+    protected ?string $entityLabel = 'blog post';
 
     public function __construct(
         Security $security,
@@ -44,48 +41,10 @@ final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
     }
 
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): ?BlogPost
+    protected function applyData(object $model, mixed $data, ApiUser $user): void
     {
-        $user = $this->getAuthorizedUser();
-
-        if ($operation instanceof DeleteOperationInterface) {
-            $this->requirePermission($user, 'blog-posts/delete');
-            return $this->handleDelete((int) $uriVariables['id'], $user);
-        }
-
-        $this->requirePermission($user, 'blog-posts/write');
-
-        assert($data instanceof BlogPost);
-
         $storeIds = $this->resolveStoreIds($data->stores, $user);
         $sanitizedContent = $this->contentSanitizer->sanitize($data->content ?? '');
-        $sanitizedShortContent = $data->shortContent !== null
-            ? $this->contentSanitizer->sanitize($data->shortContent)
-            : null;
-
-        if (isset($uriVariables['id'])) {
-            return $this->handleUpdate(
-                (int) $uriVariables['id'],
-                $data,
-                $storeIds,
-                $sanitizedContent,
-                $sanitizedShortContent,
-                $user,
-            );
-        }
-
-        return $this->handleCreate($data, $storeIds, $sanitizedContent, $sanitizedShortContent, $user);
-    }
-
-    private function handleCreate(
-        BlogPost $data,
-        array $storeIds,
-        string $sanitizedContent,
-        ?string $sanitizedShortContent,
-        ApiUser $user,
-    ): BlogPost {
-        /** @var Maho_Blog_Model_Post $post */
-        $post = Mage::getModel('blog/post');
 
         $postData = [
             'url_key' => $data->urlKey,
@@ -104,108 +63,68 @@ final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
             $postData['publish_date'] = $data->publishDate;
         }
 
-        $post->setData($postData);
-
-        try {
-            $post->save();
-
-            if ($data->image !== null) {
-                $this->saveImageAttribute($post, $this->processImage($data->image));
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to create blog post: ' . $e->getMessage());
-        }
-
-        $this->logApiActivity('blog/post', 'create', null, $post, $user);
-
-        $data->id = (int) $post->getId();
-        $data->content = $sanitizedContent;
-        $data->shortContent = $sanitizedShortContent;
-        $data->status = $data->isActive ? 'enabled' : 'disabled';
-        return $data;
+        $model->addData($postData);
     }
 
-    private function handleUpdate(
-        int $id,
-        BlogPost $data,
-        array $storeIds,
-        string $sanitizedContent,
-        ?string $sanitizedShortContent,
-        ApiUser $user,
-    ): BlogPost {
-        /** @var Maho_Blog_Model_Post $post */
-        $post = Mage::getModel('blog/post')->load($id);
-
-        if (!$post->getId()) {
-            throw new NotFoundHttpException('Blog post not found');
-        }
-
-        $this->validateEntityStoreAccess($post->getStores(), $user, 'post');
-
-        $oldData = $post->getData();
-
-        $updateData = [
-            'url_key' => $data->urlKey,
-            'title' => $data->title,
-            'content' => $sanitizedContent,
-            'is_active' => $data->isActive ? 1 : 0,
-            'stores' => $storeIds,
-            'meta_title' => $data->metaTitle,
-            'meta_keywords' => $data->metaKeywords,
-            'meta_description' => $data->metaDescription,
-        ];
-
-        if ($data->publishedAt !== null) {
-            $updateData['publish_date'] = $data->publishedAt;
-        } elseif ($data->publishDate !== null) {
-            $updateData['publish_date'] = $data->publishDate;
-        }
-
-        $post->addData($updateData);
-
-        try {
-            $post->save();
-
-            if ($data->image !== null) {
-                $this->saveImageAttribute($post, $this->processImage($data->image));
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to update blog post: ' . $e->getMessage());
-        }
-
-        $this->logApiActivity('blog/post', 'update', $oldData, $post, $user);
-
-        $data->id = (int) $post->getId();
-        $data->content = $sanitizedContent;
-        $data->shortContent = $sanitizedShortContent;
-        $data->status = $data->isActive ? 'enabled' : 'disabled';
-        return $data;
-    }
-
-    private function handleDelete(int $id, ApiUser $user): null
+    #[\Override]
+    protected function buildResponse(object $model, mixed $data): BlogPost
     {
-        /** @var Maho_Blog_Model_Post $post */
-        $post = Mage::getModel('blog/post')->load($id);
+        $sanitizedContent = $this->contentSanitizer->sanitize($data->content ?? '');
+        $sanitizedShortContent = $data->shortContent !== null
+            ? $this->contentSanitizer->sanitize($data->shortContent)
+            : null;
 
-        if (!$post->getId()) {
-            throw new NotFoundHttpException('Blog post not found');
+        $data->id = (int) $model->getId();
+        $data->content = $sanitizedContent;
+        $data->shortContent = $sanitizedShortContent;
+        $data->status = $data->isActive ? 'enabled' : 'disabled';
+        return $data;
+    }
+
+    #[\Override]
+    protected function processCreate(mixed $data, ApiUser $user): mixed
+    {
+        /** @var Maho_Blog_Model_Post $model */
+        $model = Mage::getModel($this->modelAlias);
+        $this->applyData($model, $data, $user);
+        $this->safeSave($model, "create {$this->entityLabel}");
+
+        if ($data->image !== null) {
+            $this->saveImageAttribute($model, $this->processImage($data->image));
         }
 
-        $this->validateEntityStoreAccess($post->getStores(), $user, 'post');
+        $this->logApiActivity($this->entityType, 'create', null, $model, $user);
+        return $this->buildResponse($model, $data);
+    }
 
-        $oldData = $post->getData();
+    #[\Override]
+    protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
+    {
+        /** @var Maho_Blog_Model_Post $model */
+        $model = $this->loadOrFail($this->modelAlias, $id, 'Blog post not found');
+        $this->validateEntityStoreAccess($model->getStores(), $user, 'post');
 
-        try {
-            $post->delete();
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new UnprocessableEntityHttpException('Failed to delete blog post: ' . $e->getMessage());
+        $oldData = $model->getData();
+        $this->applyData($model, $data, $user);
+        $this->safeSave($model, "update {$this->entityLabel}");
+
+        if ($data->image !== null) {
+            $this->saveImageAttribute($model, $this->processImage($data->image));
         }
 
-        $this->logApiActivity('blog/post', 'delete', $oldData, null, $user);
+        $this->logApiActivity($this->entityType, 'update', $oldData, $model, $user);
+        return $this->buildResponse($model, $data);
+    }
 
+    #[\Override]
+    protected function processDelete(int $id, ApiUser $user): null
+    {
+        $model = $this->loadOrFail($this->modelAlias, $id, 'Blog post not found');
+        $this->validateEntityStoreAccess($model->getStores(), $user, 'post');
+
+        $oldData = $model->getData();
+        $this->safeDelete($model, "delete {$this->entityLabel}");
+        $this->logApiActivity($this->entityType, 'delete', $oldData, null, $user);
         return null;
     }
 
@@ -280,5 +199,4 @@ final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
             Mage::logException($e);
         }
     }
-
 }

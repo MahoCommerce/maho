@@ -13,23 +13,15 @@ declare(strict_types=1);
 
 namespace Mage\Newsletter\Api;
 
-use ApiPlatform\Metadata\Operation;
-
 /**
  * Newsletter State Provider - Fetches newsletter subscription status
  */
 final class NewsletterProvider extends \Maho\ApiPlatform\Provider
 {
-    /**
-     * Provide newsletter subscription data
-     */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?NewsletterSubscription
+    protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {
-        $operationName = $operation->getName();
-
-        // Handle GraphQL query
-        if ($operationName === 'newsletterStatus' || $operationName === 'status') {
+        if ($name === 'newsletterStatus' || $name === 'status') {
             return $this->getSubscriptionStatus();
         }
 

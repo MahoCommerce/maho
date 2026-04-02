@@ -14,8 +14,6 @@ declare(strict_types=1);
 namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Service\CartMapper;
-use Maho\ApiPlatform\Service\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 

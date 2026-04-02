@@ -13,9 +13,9 @@ declare(strict_types=1);
 
 namespace Mage\SalesRule\Api;
 
-use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\Resource;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -23,26 +23,18 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class CouponProvider extends \Maho\ApiPlatform\Provider
 {
+    protected ?string $modelAlias = 'salesrule/coupon';
+    protected array $defaultSort = ['coupon_id' => 'DESC'];
+
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Coupon|ArrayPaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         $this->requireAdminOrApiUser('Coupon access requires admin or API access');
-
-        // Collection
-        if ($operation instanceof CollectionOperationInterface) {
-            return $this->getCollection($context);
-        }
-
-        // Single item
-        $id = (int) ($uriVariables['id'] ?? 0);
-        if ($id) {
-            return $this->getCouponById($id);
-        }
-
-        return null;
+        return parent::provide($operation, $uriVariables, $context);
     }
 
-    private function getCouponById(int $id): Coupon
+    #[\Override]
+    protected function provideItem(int|string $id): Resource
     {
         /** @var \Mage_SalesRule_Model_Coupon $coupon */
         $coupon = \Mage::getModel('salesrule/coupon');
@@ -59,29 +51,23 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
         return $this->mapToDto($coupon, $rule);
     }
 
-    private function getCollection(array $context): ArrayPaginator
+    #[\Override]
+    protected function provideCollection(array $context): TraversablePaginator
     {
-        ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
-
         /** @var \Mage_SalesRule_Model_Resource_Coupon_Collection $collection */
         $collection = \Mage::getResourceModel('salesrule/coupon_collection');
 
-        // Filter by code (LIKE search)
-        if (!empty($context['filters']['code'])) {
-            $collection->addFieldToFilter('code', ['like' => '%' . $context['filters']['code'] . '%']);
+        $this->applyCollectionFilters($collection, $context['filters'] ?? []);
+
+        foreach ($this->defaultSort as $field => $dir) {
+            $collection->setOrder($field, $dir);
         }
 
-        // Filter by is_active via the rule table
-        if (isset($context['filters']['is_active'])) {
-            $collection->getSelect()->joinInner(
-                ['rule' => $collection->getResource()->getTable('salesrule/rule')],
-                'main_table.rule_id = rule.rule_id',
-                [],
-            );
-            $collection->getSelect()->where('rule.is_active = ?', (int) $context['filters']['is_active']);
-        }
+        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
 
-        $collection->setOrder('coupon_id', 'DESC');
+        $total = (int) $collection->getSize();
 
         $coupons = [];
         foreach ($collection as $coupon) {
@@ -91,9 +77,24 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
             $coupons[] = $this->mapToDto($coupon, $rule);
         }
 
-        $offset = ($page - 1) * $perPage;
+        return new TraversablePaginator(new \ArrayIterator($coupons), $page, $pageSize, $total);
+    }
 
-        return new ArrayPaginator($coupons, $offset, $perPage);
+    #[\Override]
+    protected function applyCollectionFilters(object $collection, array $filters): void
+    {
+        if (!empty($filters['code'])) {
+            $collection->addFieldToFilter('code', ['like' => '%' . $filters['code'] . '%']);
+        }
+
+        if (isset($filters['is_active'])) {
+            $collection->getSelect()->joinInner(
+                ['rule' => $collection->getResource()->getTable('salesrule/rule')],
+                'main_table.rule_id = rule.rule_id',
+                [],
+            );
+            $collection->getSelect()->where('rule.is_active = ?', (int) $filters['is_active']);
+        }
     }
 
     public function mapToDto(\Mage_SalesRule_Model_Coupon $coupon, \Mage_SalesRule_Model_Rule $rule): Coupon
@@ -105,7 +106,6 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
         $dto->ruleName = $rule->getName();
         $dto->timesUsed = (int) $coupon->getTimesUsed();
 
-        // Map discount type from internal to API format
         $discountTypeMap = [
             'by_percent' => 'percent',
             'by_fixed' => 'fixed',
@@ -121,7 +121,6 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
         $dto->fromDate = $rule->getFromDate();
         $dto->toDate = $rule->getToDate();
 
-        // Get minimum subtotal from conditions if set
         $conditions = $rule->getConditions();
         if ($conditions) {
             $dto->minimumSubtotal = $this->extractMinimumSubtotal($conditions);

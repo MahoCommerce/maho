@@ -23,6 +23,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
 {
+    protected ?string $modelAlias = 'giftcard/giftcard';
+
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): GiftCard
     {

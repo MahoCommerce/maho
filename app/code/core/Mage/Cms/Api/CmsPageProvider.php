@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace Mage\Cms\Api;
 
-use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -24,8 +24,14 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class CmsPageProvider extends \Maho\ApiPlatform\Provider
 {
+    protected ?string $modelAlias = 'cms/page';
+    protected int $defaultPageSize = 100;
+    protected int $maxPageSize = 100;
+    protected array $defaultSort = ['title' => 'ASC'];
+
     /**
-     * @return CmsPage|TraversablePaginator<CmsPage>|null
+     * Override provide() because CmsPage has a special identifier-based collection filter
+     * that returns a single-item paginator rather than using handleOperation().
      */
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsPage|TraversablePaginator|null
@@ -33,20 +39,20 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
         StoreContext::ensureStore();
 
         if ($operation instanceof CollectionOperationInterface) {
-            // Handle identifier filter for GraphQL cmsPages(identifier: "...") query
             $identifier = $context['args']['identifier'] ?? $context['filters']['identifier'] ?? null;
             if ($identifier) {
                 $page = $this->getPageByIdentifier($identifier);
                 $items = $page ? [$page] : [];
                 return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
             }
-            return $this->getCollection($context);
+            return $this->provideCollection($context);
         }
 
-        return $this->getItem((int) $uriVariables['id']);
+        return $this->provideItem((int) $uriVariables['id']);
     }
 
-    private function getItem(int $id): ?CmsPage
+    #[\Override]
+    protected function provideItem(int|string $id): ?CmsPage
     {
         $page = \Mage::getModel('cms/page')->load($id);
 
@@ -54,7 +60,6 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // Check if page is available for current store
         $storeId = StoreContext::getStoreId();
         $storeIds = $page->getResource()->lookupStoreIds($page->getId());
 
@@ -62,7 +67,56 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->mapToDto($page);
+        return $this->toDto($page);
+    }
+
+    #[\Override]
+    protected function applyCollectionFilters(object $collection, array $filters): void
+    {
+        $collection->addStoreFilter(StoreContext::getStoreId());
+        $collection->addFieldToFilter('is_active', 1);
+
+        if (!empty($filters['identifier'])) {
+            $collection->addFieldToFilter('identifier', $filters['identifier']);
+        }
+
+        $search = $filters['search'] ?? $filters['q'] ?? null;
+        if ($search && mb_strlen($search) >= 3) {
+            $collection->addFieldToFilter(
+                ['title', 'content', 'identifier'],
+                [
+                    ['like' => "%{$search}%"],
+                    ['like' => "%{$search}%"],
+                    ['like' => "%{$search}%"],
+                ],
+            );
+        }
+    }
+
+    #[\Override]
+    protected function toDto(object $page): CmsPage
+    {
+        $dto = new CmsPage();
+        $dto->id = (int) $page->getId();
+        $dto->identifier = $page->getIdentifier() ?? '';
+        $dto->title = $page->getTitle() ?? '';
+        $dto->contentHeading = $page->getContentHeading();
+        $dto->content = ContentDirectiveProcessor::process($page->getContent() ?? '');
+        $dto->metaKeywords = $page->getMetaKeywords();
+        $dto->metaDescription = $page->getMetaDescription();
+        $dto->pageLayout = $page->getRootTemplate() ?? 'one_column';
+        $dto->status = $page->getIsActive() ? 'enabled' : 'disabled';
+        $dto->isActive = (bool) $page->getIsActive();
+
+        $storeIds = $page->getResource()->lookupStoreIds($page->getId());
+        $dto->stores = StoreContext::storeIdsToStoreCodes($storeIds);
+
+        $dto->createdAt = $page->getCreationTime();
+        $dto->updatedAt = $page->getUpdateTime();
+
+        \Mage::dispatchEvent('api_cms_page_dto_build', ['page' => $page, 'dto' => $dto]);
+
+        return $dto;
     }
 
     private function getPageByIdentifier(string $identifier): ?CmsPage
@@ -70,7 +124,6 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
         $storeId = StoreContext::getStoreId();
         $page = \Mage::getModel('cms/page');
 
-        // Check if page exists for this identifier and store
         $pageId = $page->checkIdentifier($identifier, $storeId);
 
         if (!$pageId) {
@@ -83,82 +136,6 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->mapToDto($page);
-    }
-
-    /**
-     * @return TraversablePaginator<CmsPage>
-     */
-    private function getCollection(array $context): TraversablePaginator
-    {
-        $storeId = StoreContext::getStoreId();
-        $filters = $context['filters'] ?? [];
-        $search = $filters['search'] ?? $filters['q'] ?? null;
-
-        $collection = \Mage::getModel('cms/page')->getCollection();
-        $collection->addStoreFilter($storeId);
-        $collection->addFieldToFilter('is_active', 1);
-
-        // Apply identifier filter if provided
-        if (!empty($filters['identifier'])) {
-            $collection->addFieldToFilter('identifier', $filters['identifier']);
-        }
-
-        // Apply search filter on title and content (min 3 chars to avoid slow full-table LIKE scans)
-        if ($search && mb_strlen($search) >= 3) {
-            $collection->addFieldToFilter(
-                ['title', 'content', 'identifier'],
-                [
-                    ['like' => "%{$search}%"],
-                    ['like' => "%{$search}%"],
-                    ['like' => "%{$search}%"],
-                ],
-            );
-        }
-
-        $collection->setOrder('title', 'ASC');
-
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 100, 100);
-
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($page);
-
-        $total = (int) $collection->getSize();
-
-        $pages = [];
-        foreach ($collection as $cmsPage) {
-            $pages[] = $this->mapToDto($cmsPage);
-        }
-
-        return new TraversablePaginator(new \ArrayIterator($pages), $page, $pageSize, $total);
-    }
-
-    public function mapToDto(\Mage_Cms_Model_Page $page): CmsPage
-    {
-        $dto = new CmsPage();
-        $dto->id = (int) $page->getId();
-        $dto->identifier = $page->getIdentifier() ?? '';
-        $dto->title = $page->getTitle() ?? '';
-        $dto->contentHeading = $page->getContentHeading();
-
-        // Process directives for API output
-        $dto->content = ContentDirectiveProcessor::process($page->getContent() ?? '');
-
-        $dto->metaKeywords = $page->getMetaKeywords();
-        $dto->metaDescription = $page->getMetaDescription();
-        $dto->pageLayout = $page->getRootTemplate() ?? 'one_column';
-        $dto->status = $page->getIsActive() ? 'enabled' : 'disabled';
-        $dto->isActive = (bool) $page->getIsActive();
-
-        // Map store IDs for admin consumers
-        $storeIds = $page->getResource()->lookupStoreIds($page->getId());
-        $dto->stores = StoreContext::storeIdsToStoreCodes($storeIds);
-
-        $dto->createdAt = $page->getCreationTime();
-        $dto->updatedAt = $page->getUpdateTime();
-
-        \Mage::dispatchEvent('api_cms_page_dto_build', ['page' => $page, 'dto' => $dto]);
-
-        return $dto;
+        return $this->toDto($page);
     }
 }

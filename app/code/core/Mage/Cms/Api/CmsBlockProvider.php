@@ -13,9 +13,6 @@ declare(strict_types=1);
 
 namespace Mage\Cms\Api;
 
-use ApiPlatform\Metadata\Operation;
-use ApiPlatform\Metadata\CollectionOperationInterface;
-use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -24,30 +21,23 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class CmsBlockProvider extends \Maho\ApiPlatform\Provider
 {
-    /**
-     * @return CmsBlock|TraversablePaginator<CmsBlock>|null
-     */
+    protected ?string $modelAlias = 'cms/block';
+    protected int $defaultPageSize = 100;
+    protected int $maxPageSize = 100;
+    protected array $defaultSort = ['title' => 'ASC'];
+
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsBlock|TraversablePaginator|null
+    protected function handleOperation(string $name, array $context, array $uriVariables): mixed
     {
-        StoreContext::ensureStore();
-
-        $operationName = $operation->getName();
-
-        // Handle GraphQL query by identifier
-        if ($operationName === 'cmsBlockByIdentifier') {
+        if ($name === 'cmsBlockByIdentifier') {
             $identifier = $context['args']['identifier'] ?? null;
             return $identifier ? $this->getBlockByIdentifier($identifier) : null;
         }
-
-        if ($operation instanceof CollectionOperationInterface) {
-            return $this->getCollection($context);
-        }
-
-        return $this->getItem((int) $uriVariables['id']);
+        return null;
     }
 
-    private function getItem(int $id): ?CmsBlock
+    #[\Override]
+    protected function provideItem(int|string $id): ?CmsBlock
     {
         $block = \Mage::getModel('cms/block')->load($id);
 
@@ -55,15 +45,56 @@ final class CmsBlockProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        // Check if block is available for current store
-        $storeId = StoreContext::getStoreId();
         $storeIds = $block->getResource()->lookupStoreIds($block->getId());
-
-        if (!StoreContext::isAvailableForStore($storeIds, $storeId)) {
+        if (!StoreContext::isAvailableForStore($storeIds, StoreContext::getStoreId())) {
             return null;
         }
 
-        return $this->mapToDto($block);
+        return $this->toDto($block);
+    }
+
+    #[\Override]
+    protected function applyCollectionFilters(object $collection, array $filters): void
+    {
+        $collection->addStoreFilter(StoreContext::getStoreId());
+        $collection->addFieldToFilter('is_active', 1);
+
+        if (!empty($filters['identifier'])) {
+            $collection->addFieldToFilter('identifier', ['like' => '%' . $filters['identifier'] . '%']);
+        }
+
+        $search = $filters['search'] ?? $filters['q'] ?? null;
+        if ($search) {
+            $collection->addFieldToFilter(
+                ['title', 'content', 'identifier'],
+                [
+                    ['like' => "%{$search}%"],
+                    ['like' => "%{$search}%"],
+                    ['like' => "%{$search}%"],
+                ],
+            );
+        }
+    }
+
+    #[\Override]
+    protected function toDto(object $block): CmsBlock
+    {
+        $dto = new CmsBlock();
+        $dto->id = (int) $block->getId();
+        $dto->identifier = $block->getIdentifier() ?? '';
+        $dto->title = $block->getTitle() ?? '';
+        $dto->content = ContentDirectiveProcessor::process($block->getContent() ?? '');
+        $dto->status = $block->getIsActive() ? 'enabled' : 'disabled';
+        $dto->isActive = (bool) $block->getIsActive();
+
+        $storeIds = $block->getResource()->lookupStoreIds($block->getId());
+        $dto->stores = StoreContext::storeIdsToStoreCodes($storeIds);
+        $dto->createdAt = $block->getCreationTime();
+        $dto->updatedAt = $block->getUpdateTime();
+
+        \Mage::dispatchEvent('api_cms_block_dto_build', ['block' => $block, 'dto' => $dto]);
+
+        return $dto;
     }
 
     private function getBlockByIdentifier(string $identifier): ?CmsBlock
@@ -83,77 +114,6 @@ final class CmsBlockProvider extends \Maho\ApiPlatform\Provider
         }
 
         /** @var \Mage_Cms_Model_Block $block */
-        return $this->mapToDto($block);
-    }
-
-    /**
-     * @return TraversablePaginator<CmsBlock>
-     */
-    private function getCollection(array $context): TraversablePaginator
-    {
-        $storeId = StoreContext::getStoreId();
-        $filters = $context['filters'] ?? [];
-        $search = $filters['search'] ?? $filters['q'] ?? null;
-
-        $collection = \Mage::getModel('cms/block')->getCollection();
-        $collection->addStoreFilter($storeId);
-        $collection->addFieldToFilter('is_active', 1);
-
-        // Apply identifier filter if provided
-        if (!empty($filters['identifier'])) {
-            $collection->addFieldToFilter('identifier', ['like' => '%' . $filters['identifier'] . '%']);
-        }
-
-        // Apply search filter on title and content
-        if ($search) {
-            $collection->addFieldToFilter(
-                ['title', 'content', 'identifier'],
-                [
-                    ['like' => "%{$search}%"],
-                    ['like' => "%{$search}%"],
-                    ['like' => "%{$search}%"],
-                ],
-            );
-        }
-
-        $collection->setOrder('title', 'ASC');
-
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 100, 100);
-
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($page);
-
-        $total = (int) $collection->getSize();
-
-        $blocks = [];
-        foreach ($collection as $block) {
-            $blocks[] = $this->mapToDto($block);
-        }
-
-        return new TraversablePaginator(new \ArrayIterator($blocks), $page, $pageSize, $total);
-    }
-
-    public function mapToDto(\Mage_Cms_Model_Block $block): CmsBlock
-    {
-        $dto = new CmsBlock();
-        $dto->id = (int) $block->getId();
-        $dto->identifier = $block->getIdentifier() ?? '';
-        $dto->title = $block->getTitle() ?? '';
-
-        // Process directives for API output
-        $dto->content = ContentDirectiveProcessor::process($block->getContent() ?? '');
-
-        $dto->status = $block->getIsActive() ? 'enabled' : 'disabled';
-        $dto->isActive = (bool) $block->getIsActive();
-
-        // Map store IDs for admin consumers
-        $storeIds = $block->getResource()->lookupStoreIds($block->getId());
-        $dto->stores = StoreContext::storeIdsToStoreCodes($storeIds);
-        $dto->createdAt = $block->getCreationTime();
-        $dto->updatedAt = $block->getUpdateTime();
-
-        \Mage::dispatchEvent('api_cms_block_dto_build', ['block' => $block, 'dto' => $dto]);
-
-        return $dto;
+        return $this->toDto($block);
     }
 }

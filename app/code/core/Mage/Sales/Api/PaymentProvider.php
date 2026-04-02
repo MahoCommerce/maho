@@ -15,7 +15,6 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Service\PaymentService;
 
 /**
  * Payment State Provider - Fetches payment data for API Platform

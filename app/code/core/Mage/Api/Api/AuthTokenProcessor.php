@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace Mage\Api\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Service\CartService;
+use Mage\Checkout\Api\CartService;
 use Maho\ApiPlatform\Service\JwtService;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Service\TokenBlacklist;
