@@ -15,7 +15,7 @@ namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -25,10 +25,10 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class CmsBlockProvider extends \Maho\ApiPlatform\Provider
 {
     /**
-     * @return CmsBlock|ArrayPaginator<CmsBlock>|null
+     * @return CmsBlock|TraversablePaginator<CmsBlock>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsBlock|ArrayPaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsBlock|TraversablePaginator|null
     {
         StoreContext::ensureStore();
 
@@ -87,9 +87,9 @@ final class CmsBlockProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * @return ArrayPaginator<CmsBlock>
+     * @return TraversablePaginator<CmsBlock>
      */
-    private function getCollection(array $context): ArrayPaginator
+    private function getCollection(array $context): TraversablePaginator
     {
         $storeId = StoreContext::getStoreId();
         $filters = $context['filters'] ?? [];
@@ -130,15 +130,10 @@ final class CmsBlockProvider extends \Maho\ApiPlatform\Provider
             $blocks[] = $this->mapToDto($block);
         }
 
-        return new ArrayPaginator(
-            items: $blocks,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($blocks), $page, $pageSize, $total);
     }
 
-    private function mapToDto(\Mage_Cms_Model_Block $block): CmsBlock
+    public function mapToDto(\Mage_Cms_Model_Block $block): CmsBlock
     {
         $dto = new CmsBlock();
         $dto->id = (int) $block->getId();

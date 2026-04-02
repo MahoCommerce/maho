@@ -15,7 +15,7 @@ namespace Mage\Wishlist\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -34,24 +34,24 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * @return ArrayPaginator<WishlistItem>|WishlistItem|null
+     * @return TraversablePaginator<WishlistItem>|WishlistItem|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|WishlistItem|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|WishlistItem|null
     {
         StoreContext::ensureStore();
         $operationName = $operation->getName();
 
-        // GraphQL collection operations need ArrayPaginator
+        // GraphQL collection operations need TraversablePaginator
         if ($operationName === 'myWishlist' || $operationName === 'collection_query') {
             $items = $this->getWishlistItems();
-            return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: max(count($items), 50), totalItems: count($items));
+            return new TraversablePaginator(new \ArrayIterator($items), 1, max(count($items), 50), count($items));
         }
 
         // REST collection - get wishlist items
         if ($operation instanceof CollectionOperationInterface) {
             $items = $this->getWishlistItems();
-            return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: 50, totalItems: count($items));
+            return new TraversablePaginator(new \ArrayIterator($items), 1, 50, count($items));
         }
 
         // Single item lookup

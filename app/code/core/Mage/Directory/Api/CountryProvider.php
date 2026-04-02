@@ -15,7 +15,7 @@ namespace Mage\Directory\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -26,10 +26,10 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
     /**
      * Provide country data based on operation type
      *
-     * @return ArrayPaginator<Country>|Country|null
+     * @return TraversablePaginator<Country>|Country|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Country|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Country|null
     {
         // Ensure valid store context (bootstraps Maho)
         StoreContext::ensureStore();
@@ -61,9 +61,9 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get all available countries (cached for 1 hour)
      *
-     * @return ArrayPaginator<Country>
+     * @return TraversablePaginator<Country>
      */
-    private function getCollection(): ArrayPaginator
+    private function getCollection(): TraversablePaginator
     {
         $storeId = StoreContext::getStoreId();
         $cacheKey = 'api_countries_' . $storeId;
@@ -75,7 +75,7 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
             if (is_array($data)) {
                 $countries = array_map(fn(array $c) => $this->arrayToDto($c), $data);
                 $total = count($countries);
-                return new ArrayPaginator(items: $countries, currentPage: 1, itemsPerPage: max($total, 300), totalItems: $total);
+                return new TraversablePaginator(new \ArrayIterator($countries), 1, max($total, 300), $total);
             }
         }
 
@@ -112,18 +112,13 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
 
         $total = count($countries);
 
-        return new ArrayPaginator(
-            items: $countries,
-            currentPage: 1,
-            itemsPerPage: max($total, 300),
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($countries), 1, max($total, 300), $total);
     }
 
     /**
      * Map Maho country model to Country DTO
      */
-    private function mapToDto(\Mage_Directory_Model_Country $country): Country
+    public function mapToDto(\Mage_Directory_Model_Country $country): Country
     {
         $dto = new Country();
         $dto->id = $country->getCountryId();

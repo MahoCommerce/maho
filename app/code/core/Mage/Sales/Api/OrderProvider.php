@@ -15,7 +15,7 @@ namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Mage\Customer\Api\Address;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Maho\ApiPlatform\Service\OrderService;
@@ -42,10 +42,10 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     /**
      * Provide order data based on operation type
      *
-     * @return Order|ArrayPaginator<Order>|PosPayment[]|PaymentSummary[]|null
+     * @return Order|TraversablePaginator<Order>|PosPayment[]|PaymentSummary[]|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Order|ArrayPaginator|array|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Order|TraversablePaginator|array|null
     {
         $operationName = $operation->getName();
 
@@ -96,7 +96,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         if ($operationName === 'customerOrders') {
             $customerId = $context['customer_id'] ?? null;
             if (!$customerId) {
-                return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 20, totalItems: 0);
+                return new TraversablePaginator(new \ArrayIterator([]), 1, 20, 0);
             }
 
             $page = $context['args']['page'] ?? 1;
@@ -110,12 +110,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
                 $orders[] = $this->mapToDto($order);
             }
 
-            return new ArrayPaginator(
-                items: $orders,
-                currentPage: $page,
-                itemsPerPage: $pageSize,
-                totalItems: (int) ($result['total'] ?? count($orders)),
-            );
+            return new TraversablePaginator(new \ArrayIterator($orders), $page, $pageSize, (int) ($result['total'] ?? count($orders)));
         }
 
         // Handle single order query by ID
@@ -177,13 +172,13 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get current customer's orders (REST /customers/me/orders)
      *
-     * @return ArrayPaginator<Order>
+     * @return TraversablePaginator<Order>
      */
-    private function getMyOrders(array $context): ArrayPaginator
+    private function getMyOrders(array $context): TraversablePaginator
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
-            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 10, totalItems: 0);
+            return new TraversablePaginator(new \ArrayIterator([]), 1, 10, 0);
         }
 
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
@@ -197,20 +192,15 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $orders[] = $this->mapToDto($order);
         }
 
-        return new ArrayPaginator(
-            items: $orders,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: (int) ($result['total'] ?? count($orders)),
-        );
+        return new TraversablePaginator(new \ArrayIterator($orders), $page, $pageSize, (int) ($result['total'] ?? count($orders)));
     }
 
     /**
      * Get order collection with pagination
      *
-     * @return ArrayPaginator<Order>
+     * @return TraversablePaginator<Order>
      */
-    private function getCollection(array $context): ArrayPaginator
+    private function getCollection(array $context): TraversablePaginator
     {
         $this->requireAdminOrApiUser('Order listing requires admin or API access');
 
@@ -229,18 +219,13 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             $orders[] = $this->mapToDto($order);
         }
 
-        return new ArrayPaginator(
-            items: $orders,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: (int) ($result['total'] ?? count($orders)),
-        );
+        return new TraversablePaginator(new \ArrayIterator($orders), $page, $pageSize, (int) ($result['total'] ?? count($orders)));
     }
 
     /**
      * Map Maho order model to Order DTO
      */
-    private function mapToDto(\Mage_Sales_Model_Order $order, ?string $accessToken = null): Order
+    public function mapToDto(\Mage_Sales_Model_Order $order, ?string $accessToken = null): Order
     {
         $dto = new Order();
         $dto->id = (int) $order->getId();
@@ -352,7 +337,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     /**
      * Map Maho order item model to OrderItem DTO
      */
-    private function mapItemToDto(\Mage_Sales_Model_Order_Item $item): OrderItem
+    public function mapItemToDto(\Mage_Sales_Model_Order_Item $item): OrderItem
     {
         $dto = new OrderItem();
         $dto->id = (int) $item->getId();

@@ -15,7 +15,7 @@ namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\CacheTrait;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -36,10 +36,10 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * @return ArrayPaginator<Review>|Review|null
+     * @return TraversablePaginator<Review>|Review|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Review|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Review|null
     {
         StoreContext::ensureStore();
         $operationName = $operation->getName();
@@ -71,7 +71,7 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
                 ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
                 return $this->getProductReviews($productId, $page, $pageSize);
             }
-            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 10, totalItems: 0);
+            return new TraversablePaginator(new \ArrayIterator([]), 1, 10, 0);
         }
 
         // Single review by ID
@@ -86,9 +86,9 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get reviews for a product (only approved reviews)
      *
-     * @return ArrayPaginator<Review>
+     * @return TraversablePaginator<Review>
      */
-    private function getProductReviews(int $productId, int $page = 1, int $pageSize = 10): ArrayPaginator
+    private function getProductReviews(int $productId, int $page = 1, int $pageSize = 10): TraversablePaginator
     {
         $storeId = StoreContext::getStoreId();
         $cacheKey = "api_reviews_{$productId}_{$page}_{$pageSize}_{$storeId}";
@@ -97,7 +97,7 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
             $cacheKey,
             ['API_REVIEWS'],
             $this->getCacheTtl(),
-            compute: function () use ($storeId, $productId, $page, $pageSize): ArrayPaginator {
+            compute: function () use ($storeId, $productId, $page, $pageSize): TraversablePaginator {
                 /** @var \Mage_Review_Model_Resource_Review_Collection $collection */
                 $collection = \Mage::getModel('review/review')->getCollection();
                 $collection->addStoreFilter($storeId);
@@ -122,24 +122,19 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
                     $reviews[] = $this->buildReview($review, $productNames);
                 }
 
-                return new ArrayPaginator(
-                    items: $reviews,
-                    currentPage: $page,
-                    itemsPerPage: $pageSize,
-                    totalItems: $total,
-                );
+                return new TraversablePaginator(new \ArrayIterator($reviews), $page, $pageSize, $total);
             },
-            serialize: fn(ArrayPaginator $result): array => [
+            serialize: fn(TraversablePaginator $result): array => [
                 'reviews' => array_map(fn(Review $r) => $this->reviewDtoToArray($r), iterator_to_array($result)),
                 'page' => (int) $result->getCurrentPage(),
                 'pageSize' => (int) $result->getItemsPerPage(),
                 'total' => (int) $result->getTotalItems(),
             ],
-            deserialize: fn(array $data): ArrayPaginator => new ArrayPaginator(
-                items: array_map(fn(array $r) => $this->arrayToReviewDto($r), $data['reviews']),
-                currentPage: $data['page'],
-                itemsPerPage: $data['pageSize'],
-                totalItems: $data['total'],
+            deserialize: fn(array $data): TraversablePaginator => new TraversablePaginator(
+                new \ArrayIterator(array_map(fn(array $r) => $this->arrayToReviewDto($r), $data['reviews'])),
+                $data['page'],
+                $data['pageSize'],
+                $data['total'],
             ),
         );
     }
@@ -147,13 +142,13 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get current customer's submitted reviews
      *
-     * @return ArrayPaginator<Review>
+     * @return TraversablePaginator<Review>
      */
-    private function getCustomerReviews(): ArrayPaginator
+    private function getCustomerReviews(): TraversablePaginator
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
-            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 10, totalItems: 0);
+            return new TraversablePaginator(new \ArrayIterator([]), 1, 10, 0);
         }
 
         $storeId = StoreContext::getStoreId();
@@ -180,12 +175,7 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
 
         $total = count($reviews);
 
-        return new ArrayPaginator(
-            items: $reviews,
-            currentPage: 1,
-            itemsPerPage: max($total, 100),
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($reviews), 1, max($total, 100), $total);
     }
 
     /**

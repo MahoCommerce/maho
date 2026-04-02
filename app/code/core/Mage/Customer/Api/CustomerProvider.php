@@ -16,7 +16,7 @@ namespace Mage\Customer\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use Maho\ApiPlatform\Service\CustomerService;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\AddressMapper;
 use Symfony\Bundle\SecurityBundle\Security;
 
@@ -41,10 +41,10 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
     /**
      * Provide customer data based on operation type
      *
-     * @return ArrayPaginator<Customer>|Customer|null
+     * @return TraversablePaginator<Customer>|Customer|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Customer|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Customer|null
     {
         $operationName = $operation->getName();
 
@@ -85,9 +85,9 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get customer collection with pagination and search
      *
-     * @return ArrayPaginator<Customer>
+     * @return TraversablePaginator<Customer>
      */
-    private function getCollection(array $context): ArrayPaginator
+    private function getCollection(array $context): TraversablePaginator
     {
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 15, 100);
         $filters = $context['args'] ?? $context['filters'] ?? [];
@@ -104,7 +104,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         );
 
         if (empty($result['customers'])) {
-            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: $pageSize, totalItems: 0);
+            return new TraversablePaginator(new \ArrayIterator([]), 1, $pageSize, 0);
         }
 
         // Pre-load default billing addresses for all customers in a single query
@@ -137,19 +137,14 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             $customers[] = $this->mapToDtoForSearch($mahoCustomer, $defaultBillingIds, $addressMap);
         }
 
-        return new ArrayPaginator(
-            items: $customers,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: (int) ($result['total'] ?? count($customers)),
-        );
+        return new TraversablePaginator(new \ArrayIterator($customers), $page, $pageSize, (int) ($result['total'] ?? count($customers)));
     }
 
     // TODO: Extract customer mapping to a shared CustomerMapper service to eliminate duplication with CustomerProcessor/CustomerProvider
     /**
      * Map Maho customer model to Customer DTO (full version with all addresses)
      */
-    private function mapToDto(\Mage_Customer_Model_Customer $customer): Customer
+    public function mapToDto(\Mage_Customer_Model_Customer $customer): Customer
     {
         $dto = new Customer();
         $dto->id = (int) $customer->getId();
@@ -189,7 +184,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      * @param array<int, int> $defaultBillingIds Map of customer_id => address_id
      * @param array<int, \Mage_Customer_Model_Address> $addressMap Map of address_id => address
      */
-    private function mapToDtoForSearch(
+    public function mapToDtoForSearch(
         \Mage_Customer_Model_Customer $customer,
         array $defaultBillingIds,
         array $addressMap,

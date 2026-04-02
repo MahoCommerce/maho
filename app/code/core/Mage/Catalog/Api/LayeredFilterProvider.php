@@ -13,7 +13,7 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -22,10 +22,10 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
 {
     /**
-     * @return ArrayPaginator<LayeredFilter>
+     * @return TraversablePaginator<LayeredFilter>
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator
     {
         StoreContext::ensureStore();
 
@@ -33,7 +33,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
         $categoryId = (int) ($args['categoryId'] ?? 0);
 
         if ($categoryId === 0) {
-            return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 100, totalItems: 0);
+            return new TraversablePaginator(new \ArrayIterator([]), 1, 100, 0);
         }
 
         $storeId = StoreContext::getStoreId();
@@ -44,7 +44,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
             $data = json_decode($cached, true);
             if (is_array($data)) {
                 $filters = array_map(fn(array $f) => $this->arrayToDto($f), $data);
-                return new ArrayPaginator(items: $filters, currentPage: 1, itemsPerPage: 100, totalItems: count($filters));
+                return new TraversablePaginator(new \ArrayIterator($filters), 1, 100, count($filters));
             }
         }
 
@@ -60,12 +60,7 @@ final class LayeredFilterProvider extends \Maho\ApiPlatform\Provider
             );
         }
 
-        return new ArrayPaginator(
-            items: $filters,
-            currentPage: 1,
-            itemsPerPage: 100,
-            totalItems: count($filters),
-        );
+        return new TraversablePaginator(new \ArrayIterator($filters), 1, 100, count($filters));
     }
 
     /**

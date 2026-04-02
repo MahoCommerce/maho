@@ -15,7 +15,7 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ProductService;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
@@ -113,10 +113,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     /**
      * Provide product data based on operation type
      *
-     * @return ArrayPaginator<Product>|Product|null
+     * @return TraversablePaginator<Product>|Product|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Product|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Product|null
     {
         // Ensure valid store context (MUST happen before getProductService)
         StoreContext::ensureStore();
@@ -137,7 +137,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($operationName === 'categoryProducts') {
             $categoryId = $context['args']['categoryId'] ?? null;
             if ($categoryId === null) {
-                return new ArrayPaginator(items: [], currentPage: 1, itemsPerPage: 20, totalItems: 0);
+                return new TraversablePaginator(new \ArrayIterator([]), 1, 20, 0);
             }
             // Inject categoryId into filters and delegate to getCollection
             $context['args'] = array_merge($context['args'] ?? [], ['categoryId' => (int) $categoryId]);
@@ -223,9 +223,9 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get products by urlKey — direct DB lookup
      *
-     * @return ArrayPaginator<Product>
+     * @return TraversablePaginator<Product>
      */
-    private function getByUrlKey(string $urlKey, int $page, int $pageSize): ArrayPaginator
+    private function getByUrlKey(string $urlKey, int $page, int $pageSize): TraversablePaginator
     {
         $collection = \Mage::getResourceModel('catalog/product_collection')
             ->addAttributeToSelect('*')
@@ -249,20 +249,15 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             $products[] = $this->mapToDto($product);
         }
 
-        return new ArrayPaginator(
-            items: $products,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: (int) $collection->getSize(),
-        );
+        return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $collection->getSize());
     }
 
     /**
      * Get product collection with pagination and search
      *
-     * @return ArrayPaginator<Product>
+     * @return TraversablePaginator<Product>
      */
-    private function getCollection(array $context): ArrayPaginator
+    private function getCollection(array $context): TraversablePaginator
     {
         // Merge REST filters and GraphQL args (GraphQL args take precedence)
         $requestFilters = array_merge($context['filters'] ?? [], $context['args'] ?? []);
@@ -281,12 +276,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 if ($cachedData !== null) {
                     // Reconstruct Product DTOs from cached data
                     $products = array_map(fn($data) => $this->arrayToProductDto($data), $cachedData['products']);
-                    return new ArrayPaginator(
-                        items: $products,
-                        currentPage: $cachedData['page'],
-                        itemsPerPage: $cachedData['pageSize'],
-                        totalItems: $cachedData['total'],
-                    );
+                    return new TraversablePaginator(new \ArrayIterator($products), $cachedData['page'], $cachedData['pageSize'], $cachedData['total']);
                 }
             }
         }
@@ -398,12 +388,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Return paginator with total count for proper pagination
-        return new ArrayPaginator(
-            items: $products,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: (int) $result['total'],
-        );
+        return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $result['total']);
     }
 
     /**
@@ -536,7 +521,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      * @param int[]|null $categoryIds Pre-loaded category IDs (for batch loading)
      * @param \Mage_CatalogInventory_Model_Stock_Item|null $stockItem Pre-loaded stock item (for batch loading)
      */
-    private function mapToDto(
+    public function mapToDto(
         \Mage_Catalog_Model_Product $product,
         bool $forListing = false,
         ?array $reviewSummary = null,

@@ -15,7 +15,7 @@ namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -25,10 +25,10 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class CmsPageProvider extends \Maho\ApiPlatform\Provider
 {
     /**
-     * @return CmsPage|ArrayPaginator<CmsPage>|null
+     * @return CmsPage|TraversablePaginator<CmsPage>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsPage|ArrayPaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): CmsPage|TraversablePaginator|null
     {
         StoreContext::ensureStore();
 
@@ -38,7 +38,7 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
             if ($identifier) {
                 $page = $this->getPageByIdentifier($identifier);
                 $items = $page ? [$page] : [];
-                return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: 1, totalItems: count($items));
+                return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
             }
             return $this->getCollection($context);
         }
@@ -87,9 +87,9 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * @return ArrayPaginator<CmsPage>
+     * @return TraversablePaginator<CmsPage>
      */
-    private function getCollection(array $context): ArrayPaginator
+    private function getCollection(array $context): TraversablePaginator
     {
         $storeId = StoreContext::getStoreId();
         $filters = $context['filters'] ?? [];
@@ -130,15 +130,10 @@ final class CmsPageProvider extends \Maho\ApiPlatform\Provider
             $pages[] = $this->mapToDto($cmsPage);
         }
 
-        return new ArrayPaginator(
-            items: $pages,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($pages), $page, $pageSize, $total);
     }
 
-    private function mapToDto(\Mage_Cms_Model_Page $page): CmsPage
+    public function mapToDto(\Mage_Cms_Model_Page $page): CmsPage
     {
         $dto = new CmsPage();
         $dto->id = (int) $page->getId();

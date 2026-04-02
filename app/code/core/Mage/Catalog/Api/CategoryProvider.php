@@ -15,7 +15,7 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -27,10 +27,10 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     /**
      * Provide category data based on operation type
      *
-     * @return ArrayPaginator<Category>|Category|null
+     * @return TraversablePaginator<Category>|Category|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Category|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Category|null
     {
         // Ensure valid store context
         StoreContext::ensureStore();
@@ -89,9 +89,9 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get category collection (tree)
      *
-     * @return ArrayPaginator<Category>
+     * @return TraversablePaginator<Category>
      */
-    private function getCollection(array $context): ArrayPaginator
+    private function getCollection(array $context): TraversablePaginator
     {
         $filters = $context['args'] ?? $context['filters'] ?? [];
         $parentId = $filters['parentId'] ?? null;
@@ -136,18 +136,13 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             $categories[] = $this->mapToDto($mahoCategory, false);
         }
 
-        return new ArrayPaginator(
-            items: $categories,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($categories), $page, $pageSize, $total);
     }
 
     /**
      * Map Maho category model to Category DTO
      */
-    private function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false): Category
+    public function mapToDto(\Mage_Catalog_Model_Category $category, bool $includeChildren = false): Category
     {
         $dto = new Category();
         $dto->id = (int) $category->getId();

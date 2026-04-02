@@ -15,7 +15,7 @@ namespace Maho\Blog\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
@@ -25,10 +25,10 @@ use Maho\ApiPlatform\Service\StoreContext;
 final class BlogPostProvider extends \Maho\ApiPlatform\Provider
 {
     /**
-     * @return BlogPost|ArrayPaginator<BlogPost>|null
+     * @return BlogPost|TraversablePaginator<BlogPost>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|ArrayPaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|TraversablePaginator|null
     {
         StoreContext::ensureStore();
 
@@ -38,7 +38,7 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
             if ($urlKey) {
                 $post = $this->getPostByUrlKey($urlKey);
                 $items = $post ? [$post] : [];
-                return new ArrayPaginator(items: $items, currentPage: 1, itemsPerPage: 1, totalItems: count($items));
+                return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
             }
             return $this->getCollection($context);
         }
@@ -84,9 +84,9 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * @return ArrayPaginator<BlogPost>
+     * @return TraversablePaginator<BlogPost>
      */
-    private function getCollection(array $context): ArrayPaginator
+    private function getCollection(array $context): TraversablePaginator
     {
         $storeId = StoreContext::getStoreId();
 
@@ -117,15 +117,10 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
 
         $total = (int) $collection->getSize();
 
-        return new ArrayPaginator(
-            items: $posts,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($posts), $page, $pageSize, $total);
     }
 
-    private function mapToDto(\Maho_Blog_Model_Post $post): BlogPost
+    public function mapToDto(\Maho_Blog_Model_Post $post): BlogPost
     {
         $dto = new BlogPost();
         $dto->id = (int) $post->getId();

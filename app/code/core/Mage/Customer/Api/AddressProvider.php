@@ -15,7 +15,7 @@ namespace Mage\Customer\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -31,10 +31,10 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
     /**
      * Provide address data based on operation type
      *
-     * @return ArrayPaginator<Address>|Address|null
+     * @return TraversablePaginator<Address>|Address|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): ArrayPaginator|Address|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Address|null
     {
         StoreContext::ensureStore();
 
@@ -131,9 +131,9 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
     /**
      * Get all addresses for a customer
      *
-     * @return ArrayPaginator<Address>
+     * @return TraversablePaginator<Address>
      */
-    private function getCollection(\Mage_Customer_Model_Customer $customer): ArrayPaginator
+    private function getCollection(\Mage_Customer_Model_Customer $customer): TraversablePaginator
     {
         $addresses = [];
 
@@ -143,19 +143,14 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
 
         $total = count($addresses);
 
-        return new ArrayPaginator(
-            items: $addresses,
-            currentPage: 1,
-            itemsPerPage: max($total, 50),
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($addresses), 1, max($total, 50), $total);
     }
 
     // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
     /**
      * Map Maho address model to Address DTO
      */
-    private function mapToDto(\Mage_Customer_Model_Address $address, \Mage_Customer_Model_Customer $customer): Address
+    public function mapToDto(\Mage_Customer_Model_Address $address, \Mage_Customer_Model_Customer $customer): Address
     {
         $dto = new Address();
         $dto->id = (int) $address->getId();

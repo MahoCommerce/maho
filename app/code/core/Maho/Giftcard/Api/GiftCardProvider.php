@@ -15,7 +15,7 @@ namespace Maho\Giftcard\Api;
 
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
-use Maho\ApiPlatform\Pagination\ArrayPaginator;
+use ApiPlatform\State\Pagination\TraversablePaginator;
 
 /**
  * Gift Card State Provider - Fetches gift card data for API Platform
@@ -23,10 +23,10 @@ use Maho\ApiPlatform\Pagination\ArrayPaginator;
 final class GiftCardProvider extends \Maho\ApiPlatform\Provider
 {
     /**
-     * @return GiftCard|ArrayPaginator<GiftCard>|null
+     * @return GiftCard|TraversablePaginator<GiftCard>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): GiftCard|ArrayPaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): GiftCard|TraversablePaginator|null
     {
         $operationName = $operation->getName();
 
@@ -83,9 +83,9 @@ final class GiftCardProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * @return ArrayPaginator<GiftCard>
+     * @return TraversablePaginator<GiftCard>
      */
-    private function getGiftCardCollection(array $context): ArrayPaginator
+    private function getGiftCardCollection(array $context): TraversablePaginator
     {
         ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
 
@@ -102,18 +102,13 @@ final class GiftCardProvider extends \Maho\ApiPlatform\Provider
             $items[] = $this->mapToDto($giftcard);
         }
 
-        return new ArrayPaginator(
-            items: $items,
-            currentPage: $page,
-            itemsPerPage: $pageSize,
-            totalItems: $total,
-        );
+        return new TraversablePaginator(new \ArrayIterator($items), $page, $pageSize, $total);
     }
 
     /**
      * Map Maho gift card model to GiftCard DTO
      */
-    private function mapToDto(\Maho_Giftcard_Model_Giftcard $giftcard): GiftCard
+    public function mapToDto(\Maho_Giftcard_Model_Giftcard $giftcard): GiftCard
     {
         $dto = new GiftCard();
         $dto->id = (int) $giftcard->getId();
