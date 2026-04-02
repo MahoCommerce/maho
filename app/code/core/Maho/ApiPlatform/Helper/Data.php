@@ -105,7 +105,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
         ]);
 
         if (!$result->getVerified()) {
-            return $result->getError() ?: $this->__('CAPTCHA verification failed. Please try again.');
+            return $result->getError() ?: Mage::helper('captcha')->__('Incorrect CAPTCHA.');
         }
 
         return null;
