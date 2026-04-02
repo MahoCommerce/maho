@@ -180,45 +180,14 @@ class OAuth2Authenticator extends AbstractAuthenticator
      */
     private function extractRoles(object $payload): array
     {
-        $roles = [];
-
-        // Check for explicit roles in payload
-        if (isset($payload->roles) && is_array($payload->roles)) {
-            $roles = $payload->roles;
-        }
-
-        // Check for type-based roles
-        if (isset($payload->type)) {
-            switch ($payload->type) {
-                case 'admin':
-                    if (!in_array('ROLE_ADMIN', $roles, true)) {
-                        $roles[] = 'ROLE_ADMIN';
-                    }
-                    break;
-                case 'pos':
-                    if (!in_array('ROLE_POS', $roles, true)) {
-                        $roles[] = 'ROLE_POS';
-                    }
-                    break;
-                case 'api_user':
-                    if (!in_array('ROLE_API_USER', $roles, true)) {
-                        $roles[] = 'ROLE_API_USER';
-                    }
-                    break;
-                case 'customer':
-                default:
-                    if (!in_array('ROLE_USER', $roles, true)) {
-                        $roles[] = 'ROLE_USER';
-                    }
-                    break;
-            }
-        }
-
-        // Ensure at least ROLE_USER is present
-        if (empty($roles)) {
-            $roles[] = 'ROLE_USER';
-        }
-
-        return $roles;
+        // Derive roles exclusively from the validated type claim.
+        // Never trust a roles array from the JWT payload — a tampered
+        // or mis-issued token could escalate privileges.
+        return match ($payload->type ?? 'customer') {
+            'admin' => ['ROLE_ADMIN'],
+            'pos' => ['ROLE_POS'],
+            'api_user' => ['ROLE_API_USER'],
+            default => ['ROLE_USER'],
+        };
     }
 }

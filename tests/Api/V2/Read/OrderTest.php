@@ -151,18 +151,18 @@ describe('GET /api/customers/me/orders', function (): void {
         it('returns orders with expected fields', function (): void {
             $response = apiGet('/api/customers/me/orders', customerToken());
 
-            if ($response['status'] === 200) {
-                $orders = $response['json']['member'] ?? $response['json']['hydra:member'] ?? $response['json'] ?? [];
+            expect($response['status'])->toBeSuccessful();
 
-                if (!empty($orders) && isset($orders[0])) {
-                    $order = $orders[0];
-                    expect($order)->toHaveKey('id');
-                    expect($order)->toHaveKey('incrementId');
-                    expect($order)->toHaveKey('status');
-                }
+            $orders = $response['json']['member'] ?? $response['json']['hydra:member'] ?? $response['json'] ?? [];
+
+            if (empty($orders) || !isset($orders[0])) {
+                $this->markTestSkipped('No orders available to verify field structure');
             }
 
-            expect(true)->toBeTrue();
+            $order = $orders[0];
+            expect($order)->toHaveKey('id');
+            expect($order)->toHaveKey('incrementId');
+            expect($order)->toHaveKey('status');
         });
 
         it('only returns orders belonging to authenticated customer', function (): void {

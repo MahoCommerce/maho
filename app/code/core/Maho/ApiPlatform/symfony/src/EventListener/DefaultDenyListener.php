@@ -17,6 +17,7 @@ use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
  * Pre-provider authentication enforcement for API Platform operations.
@@ -36,6 +37,7 @@ class DefaultDenyListener
 {
     public function __construct(
         private readonly ResourceMetadataCollectionFactoryInterface $resourceMetadataFactory,
+        private readonly TokenStorageInterface $tokenStorage,
     ) {}
 
     public function __invoke(RequestEvent $event): void
@@ -49,14 +51,16 @@ class DefaultDenyListener
             return;
         }
 
-        // Check if user has a Bearer token (Basic auth is site-level, not API auth)
-        $hasBearerToken = str_starts_with(
-            $request->headers->get('Authorization', ''),
-            'Bearer ',
-        );
+        // If user is already authenticated (valid token in security context),
+        // let API Platform handle authorization normally
+        $token = $this->tokenStorage->getToken();
+        if ($token !== null && $token->getUser() !== null) {
+            return;
+        }
 
-        // If user has a Bearer token, let API Platform handle auth normally
-        if ($hasBearerToken) {
+        // Also check for Bearer header presence — the authenticator may not have
+        // run yet at this priority, so let Symfony's firewall handle validation
+        if (str_starts_with($request->headers->get('Authorization', ''), 'Bearer ')) {
             return;
         }
 

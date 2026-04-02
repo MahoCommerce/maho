@@ -56,6 +56,12 @@ class IdempotencyListener
             return;
         }
 
+        // Reject idempotency keys on auth endpoints to prevent response replay attacks
+        $path = $request->getPathInfo();
+        if (str_contains($path, '/auth/token') || str_contains($path, '/auth/login')) {
+            return;
+        }
+
         // Validate key format
         if (strlen($idempotencyKey) < 1 || strlen($idempotencyKey) > self::MAX_KEY_LENGTH) {
             throw new BadRequestHttpException('X-Idempotency-Key must be between 1 and 255 characters');
@@ -129,6 +135,11 @@ class IdempotencyListener
 
         $scope = $request->attributes->get('_idempotency_scope', 'anonymous');
         $response = $event->getResponse();
+
+        // Do not store server errors — transient failures should be retryable
+        if ($response->getStatusCode() >= 500) {
+            return;
+        }
 
         $resource = \Mage::getSingleton('core/resource');
         $write = $resource->getConnection('core_write');

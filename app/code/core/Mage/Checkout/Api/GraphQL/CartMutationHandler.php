@@ -229,6 +229,7 @@ class CartMutationHandler
         try {
             $this->cartService->applyCoupon($quote, $couponCode);
         } catch (\Exception $e) {
+            \Mage::logException($e);
             throw ValidationException::invalidValue('couponCode', 'invalid or expired coupon');
         }
 
@@ -454,12 +455,18 @@ class CartMutationHandler
         // Add GraphQL-specific fields
         $data['maskedId'] = base64_encode('cart_' . $quote->getId() . '_' . substr(md5($quote->getId() . $quote->getCreatedAt()), 0, 8));
 
-        // Enrich items with fulfillment type (GraphQL-specific)
-        foreach ($quote->getAllVisibleItems() as $i => $item) {
-            if (isset($data['items'][$i])) {
-                $data['items'][$i]['fulfillmentType'] = $this->getItemFulfillmentType($item);
+        // Enrich items with fulfillment type (GraphQL-specific) — align by item ID
+        $quoteItemsById = [];
+        foreach ($quote->getAllVisibleItems() as $item) {
+            $quoteItemsById[(int) $item->getId()] = $item;
+        }
+        foreach ($data['items'] as &$itemData) {
+            $itemId = (int) ($itemData['id'] ?? 0);
+            if (isset($quoteItemsById[$itemId])) {
+                $itemData['fulfillmentType'] = $this->getItemFulfillmentType($quoteItemsById[$itemId]);
             }
         }
+        unset($itemData);
 
         // Add giftcard data (GraphQL-specific)
         $data['appliedGiftcards'] = $this->mapAppliedGiftcards($quote);

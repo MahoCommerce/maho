@@ -48,11 +48,7 @@ final class BundleOptionProcessor extends \Maho\ApiPlatform\Processor
 
         if ($operation instanceof DeleteOperationInterface) {
             $this->requirePermission($user, 'products/delete');
-            $optionId = (int) ($body['optionId'] ?? $body['option_id'] ?? 0);
-            if ($optionId <= 0) {
-                // Try extracting from query
-                $optionId = (int) ($request?->query->get('optionId') ?? 0);
-            }
+            $optionId = (int) ($uriVariables['id'] ?? $body['optionId'] ?? $body['option_id'] ?? 0);
             return $this->handleDelete($productId, $optionId);
         }
 

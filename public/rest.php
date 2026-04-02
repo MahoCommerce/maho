@@ -26,7 +26,7 @@ if (!Mage::isInstalled()) {
 
 // Initialize Maho (required for API Platform to access models/config)
 Mage::$headersSentThrowsException = false;
-Mage::setIsDeveloperMode(false); // Disable dev mode for clean error responses
+Mage::setIsDeveloperMode(false); // Prevent PHP warnings/errors from corrupting JSON responses
 Mage::init('admin');
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_API, Mage_Core_Model_App_Area::PART_EVENTS);
@@ -53,15 +53,6 @@ if (str_contains($requestUri, '/api/admin/')) {
     // Read request body
     $input = json_decode(file_get_contents('php://input'), true) ?? [];
     $formKey = $input['form_key'] ?? null;
-
-    // Find admin session cookie (might have different name prefix)
-    $adminCookieName = null;
-    foreach (array_keys($_COOKIE) as $name) {
-        if (str_contains($name, 'admin') || $name === 'adminhtml' || $name === 'backend') {
-            $adminCookieName = $name;
-            break;
-        }
-    }
 
     // Try to restore admin session using Mage session handling
     $adminSession = Mage::getSingleton('admin/session');
@@ -95,6 +86,10 @@ if (str_contains($requestUri, '/api/admin/')) {
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminUser->getId();
         $_SERVER['MAHO_ADMIN_USERNAME'] = $adminUser->getUsername();
         $_SERVER['MAHO_STORE_ID'] = (int) ($input['variables']['storeId'] ?? 1);
+        $_SERVER['MAHO_IS_ADMIN'] = '1';
+        $_SERVER['MAHO_API_BRIDGE_TOKEN'] = \Maho\ApiPlatform\Security\AdminSessionAuthenticator::generateBridgeToken(
+            (string) $adminUser->getId(),
+        );
     }
 }
 

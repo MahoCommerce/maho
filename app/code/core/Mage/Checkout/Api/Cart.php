@@ -317,7 +317,7 @@ class Cart extends \Maho\ApiPlatform\Resource
     public array $appliedGiftcards = [];
 
     #[ApiProperty(description: 'Cart currency code', writable: false)]
-    public string $currency = 'AUD';
+    public string $currency = 'USD';
 
     #[ApiProperty(description: 'Number of distinct items', writable: false)]
     public int $itemsCount = 0;

@@ -212,57 +212,6 @@ class CustomerQueryHandler
     }
 
     /**
-     * Handle getCategories query
-     */
-    public function handleGetCategories(array $variables, array $context): array
-    {
-        $storeId = $context['store_id'] ?? 1;
-        \Mage::app()->setCurrentStore($storeId);
-
-        $parentId = $variables['parentId'] ?? null;
-        $maxDepth = $variables['maxDepth'] ?? 3;
-        $includeInactive = $variables['includeInactive'] ?? false;
-
-        // Get root category for the store if no parent specified
-        if ($parentId === null) {
-            $rootCategoryId = \Mage::app()->getStore($storeId)->getRootCategoryId();
-            $parentId = $rootCategoryId;
-        }
-
-        $collection = \Mage::getModel('catalog/category')->getCollection()
-            ->addAttributeToSelect(['name', 'is_active', 'position', 'level', 'children_count', 'image'])
-            ->addFieldToFilter('path', ['like' => "%/{$parentId}/%"])
-            ->addFieldToFilter('level', ['lteq' => $maxDepth + 1])
-            ->setOrder('position', 'ASC');
-
-        if (!$includeInactive) {
-            $collection->addFieldToFilter('is_active', 1);
-        }
-
-        $categories = [];
-        foreach ($collection as $category) {
-            // Skip root category itself
-            if ($category->getId() == $parentId) {
-                continue;
-            }
-
-            $categories[] = [
-                'id' => (int) $category->getId(),
-                'name' => $category->getName(),
-                'parentId' => (int) $category->getParentId(),
-                'level' => (int) $category->getLevel(),
-                'position' => (int) $category->getPosition(),
-                'isActive' => (bool) $category->getIsActive(),
-                'childrenCount' => (int) $category->getChildrenCount(),
-                'path' => $category->getPath(),
-                'image' => $category->getImageUrl() ?: null,
-            ];
-        }
-
-        return ['categories' => $categories];
-    }
-
-    /**
      * Map customer model to array using the Provider DTO.
      * Fires api_customer_dto_build and includes extensions.
      */

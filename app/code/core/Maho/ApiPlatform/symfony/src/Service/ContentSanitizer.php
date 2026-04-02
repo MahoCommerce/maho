@@ -51,7 +51,7 @@ final class ContentSanitizer
         $config->set('HTML.Trusted', true);
         $config->set('CSS.Trusted', true);
         $config->set('Attr.AllowedFrameTargets', ['_blank', '_self', '_parent', '_top']);
-        $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true, 'data' => true]);
+        $config->set('URI.AllowedSchemes', ['http' => true, 'https' => true, 'mailto' => true]);
 
         // Remove dangerous elements (scripts, objects, etc.)
         $config->set('HTML.ForbiddenElements', ['script', 'object', 'embed', 'applet', 'iframe', 'frame', 'frameset', 'base', 'meta', 'link']);
@@ -90,40 +90,15 @@ final class ContentSanitizer
         // Process (validate) directives that remain in the content
         $content = $this->processDirectives($content);
 
-        // Protect <style> tags from HTMLPurifier (it doesn't handle them well)
-        $styles = [];
-        $content = $this->extractStyles($content, $styles);
+        // Strip <style> tags entirely — HTMLPurifier cannot sanitize them,
+        // and restoring them verbatim would bypass all purification.
+        $content = preg_replace('/<style[^>]*>.*?<\/style>/is', '', $content);
 
         // Sanitize HTML
         $content = $this->purifier->purify($content);
 
         // Restore protected elements
-        $content = $this->restoreDirectives($content, $directives);
-        return $this->restoreStyles($content, $styles);
-    }
-
-    /**
-     * Extract <style> tags before HTMLPurifier processes them
-     */
-    private function extractStyles(string $content, array &$styles): string
-    {
-        return preg_replace_callback(
-            '/<style[^>]*>.*?<\/style>/is',
-            function ($matches) use (&$styles) {
-                $placeholder = '___MAHO_STYLE_' . count($styles) . '___';
-                $styles[$placeholder] = $matches[0];
-                return $placeholder;
-            },
-            $content,
-        );
-    }
-
-    /**
-     * Restore <style> tags after HTMLPurifier has processed the content
-     */
-    private function restoreStyles(string $content, array $styles): string
-    {
-        return str_replace(array_keys($styles), array_values($styles), $content);
+        return $this->restoreDirectives($content, $directives);
     }
 
     /**

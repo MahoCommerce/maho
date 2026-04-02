@@ -304,7 +304,9 @@ class ProductService
         // Attribute filters (e.g., brand_id=10, series=1877)
         foreach ($attributeFilters as $code => $value) {
             if (preg_match('/^[a-z][a-z0-9_]*$/', $code)) {
-                $filterStrings[] = "{$code} = {$value}";
+                // Escape the value to prevent filter injection
+                $escapedValue = str_replace("'", "\\'", (string) $value);
+                $filterStrings[] = "{$code} = '{$escapedValue}'";
             }
         }
 

@@ -44,7 +44,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Add a bundle option with selections',
         ),
         new Put(
-            uriTemplate: '/products/{productId}/bundle-options',
+            uriTemplate: '/products/{productId}/bundle-options/{id}',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
@@ -53,7 +53,7 @@ use ApiPlatform\Metadata\Put;
             description: 'Update a bundle option',
         ),
         new Delete(
-            uriTemplate: '/products/{productId}/bundle-options',
+            uriTemplate: '/products/{productId}/bundle-options/{id}',
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],

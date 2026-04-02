@@ -263,15 +263,9 @@ class OrderMutationHandler
         $quote->collectTotals();
         $quote->save();
 
-        $result = $this->orderService->placeAdminOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
-
-        $order = $result['order'];
-        $grandTotal = (float) $order->getGrandTotal();
-        $invoice = null;
-        $shipment = null;
-        $savedPayments = [];
-
-        // Validate individual payment amounts and total
+        // Validate payment amounts before placing the order to avoid
+        // leaving an order in an inconsistent state if validation fails
+        $grandTotal = (float) $quote->getGrandTotal();
         $totalPayment = 0.0;
         foreach ($payments as $paymentData) {
             $amount = (float) ($paymentData['amount'] ?? 0);
@@ -287,6 +281,13 @@ class OrderMutationHandler
                 sprintf('Total payment (%.2f) is less than order total (%.2f)', $totalPayment, $grandTotal),
             );
         }
+
+        $result = $this->orderService->placeAdminOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
+
+        $order = $result['order'];
+        $invoice = null;
+        $shipment = null;
+        $savedPayments = [];
 
         foreach ($payments as $paymentData) {
             /** @var \Maho_Pos_Model_Payment $posPayment */
@@ -706,14 +707,20 @@ class OrderMutationHandler
         // Add GraphQL-specific computed fields
         $data['canRefund'] = $order->canCreditmemo();
 
-        // Enrich items with returnable qty
-        foreach ($order->getAllVisibleItems() as $i => $item) {
-            $qtyRefunded = (float) $item->getQtyRefunded();
-            $qtyOrdered = (float) $item->getQtyOrdered();
-            if (isset($data['items'][$i])) {
-                $data['items'][$i]['qtyReturnable'] = max(0, $qtyOrdered - $qtyRefunded);
+        // Enrich items with returnable qty — align by item ID
+        $orderItemsById = [];
+        foreach ($order->getAllVisibleItems() as $item) {
+            $orderItemsById[(int) $item->getId()] = $item;
+        }
+        foreach ($data['items'] as &$itemData) {
+            $itemId = (int) ($itemData['id'] ?? 0);
+            if (isset($orderItemsById[$itemId])) {
+                $qtyRefunded = (float) $orderItemsById[$itemId]->getQtyRefunded();
+                $qtyOrdered = (float) $orderItemsById[$itemId]->getQtyOrdered();
+                $itemData['qtyReturnable'] = max(0, $qtyOrdered - $qtyRefunded);
             }
         }
+        unset($itemData);
 
         return $data;
     }

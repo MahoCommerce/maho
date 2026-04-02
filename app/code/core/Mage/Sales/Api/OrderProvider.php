@@ -235,7 +235,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $dto->status = $order->getStatus();
         $dto->state = $order->getState();
         $dto->storeId = (int) $order->getStoreId();
-        $dto->currency = $order->getOrderCurrencyCode() ?: 'AUD';
+        $dto->currency = $order->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
         $dto->totalItemCount = (int) $order->getTotalItemCount();
         $dto->totalQtyOrdered = (float) $order->getTotalQtyOrdered();
         $dto->createdAt = $order->getCreatedAt();

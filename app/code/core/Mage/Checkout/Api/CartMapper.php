@@ -42,7 +42,7 @@ class CartMapper
         $cart->customerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
         $cart->storeId = (int) $quote->getStoreId();
         $cart->isActive = (bool) $quote->getIsActive();
-        $cart->currency = $quote->getQuoteCurrencyCode() ?: 'AUD';
+        $cart->currency = $quote->getQuoteCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
         $cart->itemsCount = (int) $quote->getItemsCount();
         $cart->itemsQty = (float) $quote->getItemsQty();
         $cart->createdAt = $quote->getCreatedAt();

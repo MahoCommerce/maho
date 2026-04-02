@@ -77,7 +77,8 @@ class AdminGraphQlController
                 'customer_id' => $customerId,
             ];
 
-            $result = $this->executeQuery($query, $variables, $context);
+            $operationName = $input['operationName'] ?? null;
+            $result = $this->executeQuery($query, $variables, $context, $operationName);
 
             // Admin API always uses camelCase (GraphQL standard)
             // The naming convention setting only applies to storefront API
@@ -103,9 +104,8 @@ class AdminGraphQlController
     /** Maximum query length in bytes */
     private const MAX_QUERY_LENGTH = 10000;
 
-    private function executeQuery(string $query, ?array $variables, array $context): array
+    private function executeQuery(string $query, ?array $variables, array $context, ?string $operationName = null): array
     {
-
         // Parse and execute
         $query = trim($query);
 
@@ -125,13 +125,17 @@ class AdminGraphQlController
             return ['data' => $this->getIntrospectionSchema()];
         }
 
-        // Parse operation name from the query
-        if (preg_match('/(?:query|mutation)\s+(\w+)/', $query, $matches)) {
-            $operation = $matches[1];
-        } elseif (preg_match('/^\{\s*(\w+)/', $query, $matches)) {
-            $operation = $matches[1];
-        } else {
-            return ['errors' => [['message' => 'Could not parse GraphQL operation name']]];
+        // Use operationName from request if available (standard GraphQL protocol),
+        // fall back to regex parsing for anonymous single-operation queries
+        $operation = $operationName;
+        if (!$operation) {
+            if (preg_match('/(?:query|mutation)\s+(\w+)/', $query, $matches)) {
+                $operation = $matches[1];
+            } elseif (preg_match('/^\{\s*(\w+)/', $query, $matches)) {
+                $operation = $matches[1];
+            } else {
+                return ['errors' => [['message' => 'Could not parse GraphQL operation name']]];
+            }
         }
 
         try {
@@ -266,7 +270,7 @@ class AdminGraphQlController
 
             // Category operations (camelCase)
             'categories', 'getCategories', 'GetCategories'
-                => $this->customerHandler->handleGetCategories($variables, $context),
+                => $this->productHandler->handleGetCategories($variables, $context),
 
             default => throw new BadRequestHttpException("Unknown operation: {$operation}"),
         };

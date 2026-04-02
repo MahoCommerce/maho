@@ -117,7 +117,8 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         // Apply search filter on category name
         if ($search) {
-            $collection->addAttributeToFilter('name', ['like' => "%{$search}%"]);
+            $escapedSearch = addcslashes($search, '%_');
+            $collection->addAttributeToFilter('name', ['like' => "%{$escapedSearch}%"]);
         }
 
         if ($includeInMenu !== null) {

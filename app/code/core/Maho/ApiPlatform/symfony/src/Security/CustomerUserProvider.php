@@ -130,6 +130,14 @@ class CustomerUserProvider implements UserProviderInterface
                 return null;
             }
 
+            if (!$customer->getIsActive()) {
+                return null;
+            }
+
+            if ($customer->getConfirmation() && $customer->isConfirmationRequired()) {
+                return null;
+            }
+
             return $customer;
         } catch (\Exception $e) {
             \Mage::logException($e);
