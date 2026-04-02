@@ -116,7 +116,7 @@ class Maho_CustomerSegmentation_Model_Cron
             return;
         }
 
-        $daysOld = (int) Mage::getStoreConfig('customer_segmentation/email_automation/coupon_cleanup_days', 30);
+        $daysOld = (int) (Mage::getStoreConfig('customer_segmentation/email_automation/coupon_cleanup_days') ?? 30);
 
         try {
             $helper = Mage::helper('customersegmentation/coupon');
