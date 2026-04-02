@@ -20,7 +20,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Maho\Db\Adapter\Pdo\Mysql;
 
 #[AsCommand(
     name: 'cron:run',
@@ -90,11 +89,9 @@ class CronRun extends BaseMahoCommand
             ->addFieldToFilter('job_code', $jobCode)
             ->orderByScheduledAt()
             ->getFirstItem();
-        if (!$schedule->getId()) {
-            $schedule = false;
-        }
+        $hasPersistentSchedule = (bool) $schedule->getId();
 
-        if ($schedule) {
+        if ($hasPersistentSchedule) {
             if (!$schedule->tryLockJob()) {
                 $output->writeln("<error>{$jobCode} is already running</error>");
                 return Command::INVALID;
@@ -102,17 +99,20 @@ class CronRun extends BaseMahoCommand
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING)
-                ->setExecutedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                ->setExecutedAt(\Mage_Core_Model_Locale::now())
                 ->save();
+        } else {
+            $schedule = Mage::getModel('cron/schedule');
+            $schedule->setJobCode($jobCode);
         }
 
         try {
             $callback = [$model, $run[2]];
             call_user_func($callback, $schedule);
         } catch (\Exception $e) {
-            if ($schedule) {
+            if ($hasPersistentSchedule) {
                 $schedule
-                    ->setFinishedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                    ->setFinishedAt(\Mage_Core_Model_Locale::now())
                     ->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
                     ->setMessages($e->__toString())
                     ->save();
@@ -122,10 +122,10 @@ class CronRun extends BaseMahoCommand
             return Command::FAILURE;
         }
 
-        if ($schedule) {
+        if ($hasPersistentSchedule) {
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(date(\Maho\Db\Adapter\Pdo\Mysql::TIMESTAMP_FORMAT))
+                ->setFinishedAt(\Mage_Core_Model_Locale::now())
                 ->save();
         }
 
