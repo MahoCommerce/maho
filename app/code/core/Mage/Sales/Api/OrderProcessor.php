@@ -22,6 +22,7 @@ use Maho\ApiPlatform\Service\PosPaymentMapper;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -53,11 +54,17 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     {
         $operationName = $operation->getName();
 
+        // Pass incrementId from URI for verify_order
+        if (isset($uriVariables['incrementId'])) {
+            $context['args']['input']['incrementId'] = (string) $uriVariables['incrementId'];
+        }
+
         return match ($operationName) {
-            'placeOrder', '_api_/orders_post' => $this->placeOrder($context),
+            'placeOrder', '_api_/orders_post', 'place_guest_order' => $this->placeOrder($context),
             'cancelOrder' => $this->cancelOrder($context),
             'placeOrderWithSplitPayments' => $this->placeOrderWithSplitPayments($context),
             'recordPayment' => $this->recordPayment($context),
+            'verify_order' => $this->verifyOrder($context),
             default => $data instanceof Order ? $data : new Order(),
         };
     }
@@ -467,7 +474,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 $invoiceDto->incrementId = $invoice->getIncrementId();
                 $invoiceDto->orderId = (int) $order->getId();
                 $invoiceDto->grandTotal = (float) $invoice->getGrandTotal();
-                $invoiceDto->state = (string) $invoice->getState();
+                $invoiceDto->state = (int) $invoice->getState();
                 $invoiceDto->createdAt = $invoice->getCreatedAt();
             }
 
@@ -578,5 +585,84 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         } elseif (!$accessedByMaskedId) {
             throw new AccessDeniedHttpException('Guest carts must be accessed via masked ID');
         }
+    }
+
+    /**
+     * Verify a placed order by one-time storefront token
+     */
+    private function verifyOrder(array $context): Order
+    {
+        $request = $context['request'] ?? null;
+        $body = $request ? (json_decode($request->getContent(), true) ?? []) : [];
+        $args = $context['args']['input'] ?? $body;
+
+        $incrementId = $args['incrementId'] ?? '';
+        $token = $args['orderToken'] ?? $body['orderToken'] ?? '';
+
+        if (!$token || !$incrementId) {
+            throw new BadRequestHttpException('Order increment ID and order token are required');
+        }
+
+        $order = \Mage::getModel('sales/order')->loadByIncrementId($incrementId);
+        if (!$order || !$order->getId()) {
+            throw new NotFoundHttpException('Order not found');
+        }
+
+        $storedToken = $order->getData('storefront_order_token');
+        if (!$storedToken || !hash_equals($storedToken, $token)) {
+            throw new HttpException(403, 'Invalid order token');
+        }
+
+        // Clear the token after successful verification (one-time use)
+        $resource = \Mage::getSingleton('core/resource');
+        $resource->getConnection('core_write')->update(
+            $resource->getTableName('sales/order'),
+            ['storefront_order_token' => null],
+            ['entity_id = ?' => $order->getId()],
+        );
+
+        $dto = new Order();
+        $dto->id = (int) $order->getId();
+        $dto->incrementId = $order->getIncrementId();
+        $dto->status = $order->getStatus();
+        $dto->state = $order->getState();
+        $dto->customerEmail = $order->getCustomerEmail();
+        $dto->currency = $order->getOrderCurrencyCode();
+
+        // Build items
+        $items = [];
+        foreach ($order->getAllVisibleItems() as $item) {
+            $orderItem = new OrderItem();
+            $orderItem->sku = $item->getSku();
+            $orderItem->name = $item->getName();
+            $orderItem->price = (float) $item->getPriceInclTax();
+            $orderItem->qtyOrdered = (float) $item->getQtyOrdered();
+            $items[] = $orderItem;
+        }
+        $dto->items = $items;
+
+        $dto->prices = [
+            'grandTotal' => (float) $order->getGrandTotal(),
+            'subtotal' => (float) $order->getSubtotalInclTax(),
+            'taxAmount' => (float) $order->getTaxAmount(),
+            'shippingAmount' => (float) $order->getShippingInclTax(),
+        ];
+
+        // Generate account creation token for guest orders without existing account
+        $orderEmail = $order->getCustomerEmail();
+        $existingCustomer = \Mage::getModel('customer/customer')
+            ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
+            ->loadByEmail($orderEmail);
+
+        if (!$existingCustomer->getId()) {
+            $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
+            $timestamp = time();
+            $payload = $order->getId() . '|' . $orderEmail . '|' . $timestamp . '|action=create_account';
+            $payloadBase64 = base64_encode($payload);
+            $signature = hash_hmac('sha256', $payloadBase64, $cryptKey);
+            $dto->accessToken = $payloadBase64 . '.' . $signature;
+        }
+
+        return $dto;
     }
 }

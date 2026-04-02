@@ -54,6 +54,8 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
             return $customerId ? $this->getItem($customerId) : null;
         }
 
+
+
         if ($operation instanceof CollectionOperationInterface) {
             // SECURITY: Only admins and API users with customers/read can list customers
             if (!$this->isAdmin() && !$this->isApiUser()) {

@@ -29,6 +29,12 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             security: 'true',
             description: 'Get current store configuration',
         ),
+        new Get(
+            uriTemplate: '/{storeCode}/config',
+            name: 'store_config_by_code',
+            security: 'true',
+            description: 'Get store configuration by store code',
+        ),
     ],
     graphQlOperations: [
         new Query(

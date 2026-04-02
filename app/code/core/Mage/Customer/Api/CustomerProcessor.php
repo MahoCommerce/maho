@@ -22,6 +22,8 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
@@ -65,8 +67,19 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             return $this->changePassword($data);
         }
 
+        // Handle REST POST aliases for auth routes
+        if ($operationName === 'forgot_password_rest') {
+            return $this->forgotPassword($context);
+        }
+        if ($operationName === 'reset_password_rest') {
+            return $this->resetPassword($context);
+        }
+        if ($operationName === 'create_from_order') {
+            return $this->createAccountFromOrder($context);
+        }
+
         // Handle REST POST /customers (create customer / registration)
-        if ($operation instanceof Post && $operationName !== 'change_password') {
+        if ($operation instanceof Post && !in_array($operationName, ['change_password', 'forgot_password_rest', 'reset_password_rest', 'create_from_order'])) {
             return $this->createCustomer($data, $context);
         }
 
@@ -547,4 +560,112 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         return $dto;
     }
 
+    /**
+     * Create customer account from a placed guest order using HMAC-signed accountToken
+     */
+    private function createAccountFromOrder(array $context): Customer
+    {
+        $request = $context['request'] ?? null;
+        $body = $request ? (json_decode($request->getContent(), true) ?? []) : [];
+        $args = $context['args']['input'] ?? $body;
+
+        $accountToken = $args['accountToken'] ?? '';
+        $password = $args['password'] ?? '';
+
+        if (!$accountToken || !$password) {
+            throw new BadRequestHttpException('Account token and password are required.');
+        }
+
+        if (strlen($password) < 6) {
+            throw new BadRequestHttpException('Password must be at least 6 characters.');
+        }
+
+        $parts = explode('.', $accountToken, 2);
+        if (count($parts) !== 2) {
+            throw new BadRequestHttpException('Invalid account token format.');
+        }
+
+        [$payloadBase64, $signature] = $parts;
+        $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
+        $expectedSignature = hash_hmac('sha256', $payloadBase64, $cryptKey);
+
+        if (!hash_equals($expectedSignature, $signature)) {
+            throw new HttpException(403, 'Invalid or expired account token.');
+        }
+
+        $payload = base64_decode($payloadBase64, true);
+        if ($payload === false) {
+            throw new BadRequestHttpException('Invalid token payload.');
+        }
+
+        $payloadParts = explode('|', $payload);
+        if (count($payloadParts) < 4 || $payloadParts[3] !== 'action=create_account') {
+            throw new BadRequestHttpException('Invalid token action.');
+        }
+
+        $orderId = (int) $payloadParts[0];
+        $email = $payloadParts[1];
+        $timestamp = (int) $payloadParts[2];
+
+        if (time() - $timestamp > 3600) {
+            throw new BadRequestHttpException('Account creation token has expired. Please contact support.');
+        }
+
+        $order = \Mage::getModel('sales/order')->load($orderId);
+        if (!$order->getId() || $order->getCustomerEmail() !== $email) {
+            throw new NotFoundHttpException('Order not found.');
+        }
+
+        $websiteId = (int) \Mage::app()->getStore($order->getStoreId())->getWebsiteId();
+        $existingCustomer = \Mage::getModel('customer/customer')
+            ->setWebsiteId($websiteId)
+            ->loadByEmail($email);
+
+        if ($existingCustomer->getId()) {
+            throw new HttpException(409, 'An account with this email already exists. Please log in.');
+        }
+
+        $billingAddress = $order->getBillingAddress();
+
+        $customer = \Mage::getModel('customer/customer');
+        $customer->setWebsiteId($websiteId);
+        $customer->setStoreId($order->getStoreId());
+        $customer->setEmail($email);
+        $customer->setFirstname($billingAddress->getFirstname());
+        $customer->setLastname($billingAddress->getLastname());
+        $customer->setPassword($password);
+        $customer->save();
+
+        if ($billingAddress) {
+            $customerAddress = \Mage::getModel('customer/address');
+            $customerAddress->setCustomerId($customer->getId());
+            $customerAddress->setFirstname($billingAddress->getFirstname());
+            $customerAddress->setLastname($billingAddress->getLastname());
+            $customerAddress->setCompany($billingAddress->getCompany());
+            $customerAddress->setStreet($billingAddress->getStreet());
+            $customerAddress->setCity($billingAddress->getCity());
+            $customerAddress->setRegionId($billingAddress->getRegionId());
+            $customerAddress->setRegion($billingAddress->getRegion());
+            $customerAddress->setPostcode($billingAddress->getPostcode());
+            $customerAddress->setCountryId($billingAddress->getCountryId());
+            $customerAddress->setTelephone($billingAddress->getTelephone());
+            $customerAddress->setIsDefaultBilling(true);
+            $customerAddress->setIsDefaultShipping(true);
+            $customerAddress->save();
+        }
+
+        $order->setCustomerId($customer->getId());
+        $order->setCustomerIsGuest(0);
+        $order->setCustomerFirstname($customer->getFirstname());
+        $order->setCustomerLastname($customer->getLastname());
+        $order->save();
+
+        $dto = new Customer();
+        $dto->id = (int) $customer->getId();
+        $dto->email = $customer->getEmail();
+        $dto->firstName = $customer->getFirstname();
+        $dto->lastName = $customer->getLastname();
+
+        return $dto;
+    }
 }

@@ -27,7 +27,21 @@ final class StoreConfigProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): StoreConfig
     {
-        StoreContext::ensureStore();
+        $storeCode = $uriVariables['storeCode'] ?? null;
+        if ($storeCode) {
+            try {
+                $store = \Mage::app()->getStore($storeCode);
+                if ($store && $store->getId() && $store->getIsActive()) {
+                    StoreContext::setStore((int) $store->getId());
+                } else {
+                    throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Store with code '$storeCode' not found");
+                }
+            } catch (\Mage_Core_Model_Store_Exception $e) {
+                throw new \Symfony\Component\HttpKernel\Exception\NotFoundHttpException("Store with code '$storeCode' not found");
+            }
+        } else {
+            StoreContext::ensureStore();
+        }
 
         $storeId = StoreContext::getStoreId();
         $cacheKey = 'api_store_config_' . $storeId;

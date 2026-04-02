@@ -15,8 +15,10 @@ namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
@@ -38,6 +40,78 @@ use Mage\Customer\Api\Address;
             uriTemplate: '/carts',
             security: 'true',
             description: 'Create a new cart',
+        ),
+        new Post(
+            uriTemplate: '/guest-carts',
+            name: 'create_guest_cart',
+            security: 'true',
+            description: 'Create a new guest cart',
+        ),
+        new Get(
+            uriTemplate: '/guest-carts/{id}',
+            name: 'get_guest_cart',
+            security: 'true',
+            description: 'Get a guest cart by masked ID',
+        ),
+        new Post(
+            uriTemplate: '/guest-carts/{id}/items',
+            name: 'add_guest_item',
+            security: 'true',
+            description: 'Add item to guest cart',
+        ),
+        new Put(
+            uriTemplate: '/guest-carts/{id}/items/{itemId}',
+            name: 'update_guest_item',
+            security: 'true',
+            description: 'Update item quantity in guest cart',
+        ),
+        new Delete(
+            uriTemplate: '/guest-carts/{id}/items/{itemId}',
+            name: 'remove_guest_item',
+            security: 'true',
+            description: 'Remove item from guest cart',
+        ),
+        new Post(
+            uriTemplate: '/guest-carts/{id}/coupon',
+            name: 'apply_guest_coupon',
+            security: 'true',
+            description: 'Apply coupon to guest cart',
+        ),
+        new Delete(
+            uriTemplate: '/guest-carts/{id}/coupon',
+            name: 'remove_guest_coupon',
+            security: 'true',
+            description: 'Remove coupon from guest cart',
+        ),
+        new Post(
+            uriTemplate: '/guest-carts/{id}/giftcard',
+            name: 'apply_guest_giftcard',
+            security: 'true',
+            description: 'Apply gift card to guest cart',
+        ),
+        new Delete(
+            uriTemplate: '/guest-carts/{id}/giftcard/{code}',
+            name: 'remove_guest_giftcard',
+            security: 'true',
+            description: 'Remove gift card from guest cart',
+        ),
+        new Get(
+            uriTemplate: '/guest-carts/{id}/totals',
+            name: 'get_guest_totals',
+            security: 'true',
+            description: 'Get guest cart totals',
+        ),
+        new Post(
+            uriTemplate: '/guest-carts/{id}/shipping-methods',
+            name: 'get_guest_shipping',
+            security: 'true',
+            description: 'Get available shipping methods for guest cart',
+        ),
+        new Get(
+            uriTemplate: '/guest-carts/{id}/payment-methods',
+            name: 'get_guest_payments',
+            security: 'true',
+            description: 'Get available payment methods for guest cart',
         ),
     ],
     graphQlOperations: [

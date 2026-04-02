@@ -18,6 +18,8 @@ use Mage;
 use Mage_Catalog_Model_Product;
 use Mage_Catalog_Model_Product_Option;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
@@ -25,8 +27,14 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
     use ProductLoaderTrait;
 
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|ProductCustomOption
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array|ProductCustomOption|Response
     {
+        $operationName = $operation->getName();
+
+        if ($operationName === 'download_option_file') {
+            return $this->downloadOptionFile($uriVariables);
+        }
+
         $productId = (int) ($uriVariables['productId'] ?? 0);
         $product = $this->loadProduct($productId);
 
@@ -36,6 +44,51 @@ final class ProductCustomOptionProvider extends \Maho\ApiPlatform\Provider
         }
 
         return $this->getAllOptions($product);
+    }
+
+    private function downloadOptionFile(array $uriVariables): Response
+    {
+        $optionId = (int) ($uriVariables['optionId'] ?? 0);
+        $key = (string) ($uriVariables['key'] ?? '');
+
+        $option = Mage::getModel('sales/quote_item_option')->load($optionId);
+        if (!$option->getId()) {
+            throw new NotFoundHttpException('File not found');
+        }
+
+        $value = Mage::helper('core/unserializeArray')->unserialize($option->getValue());
+        if (!isset($value['secret_key']) || !hash_equals($value['secret_key'], $key)) {
+            throw new HttpException(403, 'Invalid key');
+        }
+
+        $filePath = null;
+        foreach (['order_path', 'quote_path'] as $pathKey) {
+            if (!empty($value[$pathKey])) {
+                $fullPath = Mage::getBaseDir() . $value[$pathKey];
+                if (is_file($fullPath) && is_readable($fullPath)) {
+                    $filePath = $fullPath;
+                    break;
+                }
+            }
+        }
+
+        if (!$filePath) {
+            throw new NotFoundHttpException('File not found on disk');
+        }
+
+        $mimeType = $value['type'] ?? 'application/octet-stream';
+        $fileName = $value['title'] ?? basename($filePath);
+
+        return new Response(
+            file_get_contents($filePath),
+            Response::HTTP_OK,
+            [
+                'Content-Type' => $mimeType,
+                'Content-Disposition' => 'attachment; filename="' . addslashes($fileName) . '"',
+                'Content-Length' => (string) filesize($filePath),
+                'Cache-Control' => 'private, max-age=3600',
+            ],
+        );
     }
 
     /**

@@ -42,21 +42,32 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     {
         $operationName = $operation->getName();
 
+        // Map REST uriVariables into context args for guest-cart operations
+        if (isset($uriVariables['id']) && !isset($context['args']['input']['maskedId'])) {
+            $context['args']['input']['maskedId'] = (string) $uriVariables['id'];
+        }
+        if (isset($uriVariables['itemId']) && !isset($context['args']['input']['itemId'])) {
+            $context['args']['input']['itemId'] = $uriVariables['itemId'];
+        }
+        if (isset($uriVariables['code']) && !isset($context['args']['input']['giftcardCode'])) {
+            $context['args']['input']['giftcardCode'] = (string) $uriVariables['code'];
+        }
+
         return match ($operationName) {
-            'createCart' => $this->createEmptyCart($context),
-            'addToCart' => $this->addItemToCart($context),
-            'updateCartItemQty' => $this->updateCartItem($context),
-            'removeCartItem' => $this->removeItemFromCart($context),
+            'createCart', 'create_guest_cart' => $this->createEmptyCart($context),
+            'addToCart', 'add_guest_item' => $this->addItemToCart($context),
+            'updateCartItemQty', 'update_guest_item' => $this->updateCartItem($context),
+            'removeCartItem', 'remove_guest_item' => $this->removeItemFromCart($context),
             'setCartItemFulfillment' => $this->setCartItemFulfillment($context),
-            'applyCouponToCart' => $this->applyCouponToCart($context),
-            'removeCouponFromCart' => $this->removeCouponFromCart($context),
+            'applyCouponToCart', 'apply_guest_coupon' => $this->applyCouponToCart($context),
+            'removeCouponFromCart', 'remove_guest_coupon' => $this->removeCouponFromCart($context),
             'setShippingAddressOnCart' => $this->setShippingAddressOnCart($context),
             'setBillingAddressOnCart' => $this->setBillingAddressOnCart($context),
             'setShippingMethodOnCart' => $this->setShippingMethodOnCart($context),
             'setPaymentMethodOnCart' => $this->setPaymentMethodOnCart($context),
             'assignCustomerToCart' => $this->assignCustomerToCart($context),
-            'applyGiftcardToCart' => $this->applyGiftcardToCart($context),
-            'removeGiftcardFromCart' => $this->removeGiftcardFromCart($context),
+            'applyGiftcardToCart', 'apply_guest_giftcard' => $this->applyGiftcardToCart($context),
+            'removeGiftcardFromCart', 'remove_guest_giftcard' => $this->removeGiftcardFromCart($context),
             default => $data instanceof Cart ? $data : new Cart(),
         };
     }

@@ -56,6 +56,27 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Change current customer password',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
+        new Get(
+            uriTemplate: '/customers/me',
+            name: 'me',
+            description: 'Get current authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+        ),
+        new Post(
+            uriTemplate: '/customers/forgot-password',
+            name: 'forgot_password_rest',
+            description: 'Request password reset email',
+        ),
+        new Post(
+            uriTemplate: '/customers/reset-password',
+            name: 'reset_password_rest',
+            description: 'Reset password with token',
+        ),
+        new Post(
+            uriTemplate: '/customers/create-from-order',
+            name: 'create_from_order',
+            description: 'Create customer account from a placed guest order',
+        ),
     ],
     graphQlOperations: [
         new Query(name: 'item_query', description: 'Get a customer by ID', security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')"),

@@ -51,6 +51,18 @@ use Mage\Customer\Api\Address;
             security: 'true',
             description: 'Place a new order from cart',
         ),
+        new Post(
+            uriTemplate: '/guest-carts/{id}/place-order',
+            name: 'place_guest_order',
+            security: 'true',
+            description: 'Place order from guest cart',
+        ),
+        new Post(
+            uriTemplate: '/orders/{incrementId}/verify',
+            name: 'verify_order',
+            security: 'true',
+            description: 'Verify a placed order by one-time token',
+        ),
     ],
     graphQlOperations: [
         new Query(
