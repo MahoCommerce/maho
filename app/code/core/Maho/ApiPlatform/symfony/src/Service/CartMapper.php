@@ -17,7 +17,7 @@ use Mage\Checkout\Api\Cart;
 use Mage\Checkout\Api\CartItem;
 
 /**
- * Shared cart-to-DTO mapping logic used by both CartReader and CartWriter
+ * Shared cart-to-DTO mapping logic used by both CartProvider and CartProcessor
  */
 class CartMapper
 {

@@ -16,7 +16,7 @@ namespace Mage\Sales\Api;
 /**
  * Invoice DTO
  */
-class Invoice
+class Invoice extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public ?string $incrementId = null;

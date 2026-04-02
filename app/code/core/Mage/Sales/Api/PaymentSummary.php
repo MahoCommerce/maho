@@ -16,7 +16,7 @@ namespace Mage\Sales\Api;
 /**
  * Payment Summary DTO for grouped payment totals
  */
-class PaymentSummary
+class PaymentSummary extends \Maho\ApiPlatform\Resource
 {
     public ?string $method = null;
     public ?string $methodTitle = null;

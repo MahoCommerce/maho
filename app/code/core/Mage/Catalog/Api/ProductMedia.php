@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'ProductMedia',
     description: 'Product media gallery images',
-    provider: ProductMediaReader::class,
+    provider: ProductMediaProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/products/{productId}/media',
@@ -39,7 +39,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductMediaWriter::class,
+            processor: ProductMediaProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Upload an image (JSON with base64 or URL)',
         ),
@@ -48,7 +48,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductMediaWriter::class,
+            processor: ProductMediaProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Update image label, position, types, or disabled status',
         ),
@@ -57,13 +57,13 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductMediaWriter::class,
+            processor: ProductMediaProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Remove an image from the gallery',
         ),
     ],
 )]
-class ProductMedia
+class ProductMedia extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Gallery value ID')]
     public ?int $id = null;

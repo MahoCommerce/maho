@@ -13,13 +13,11 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
-use ApiPlatform\Metadata\ApiProperty;
-
 /**
  * CartItem DTO - Data transfer object for cart line items
  */
 
-class CartItem
+class CartItem extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public string $sku = '';
@@ -55,14 +53,5 @@ class CartItem
      * Stock status: 'in_stock' or 'out_of_stock'
      */
     public string $stockStatus = 'in_stock';
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

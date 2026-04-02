@@ -18,12 +18,11 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
-use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'BlogCategory',
     description: 'Blog category resource',
-    provider: BlogCategoryReader::class,
+    provider: BlogCategoryProvider::class,
     operations: [
         new Get(
             uriTemplate: '/blog-categories/{id}',
@@ -46,7 +45,7 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
     ],
 )]
-class BlogCategory
+class BlogCategory extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public string $name = '';
@@ -59,11 +58,4 @@ class BlogCategory
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;
-
-    /**
-     * Module-provided extension data.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 }

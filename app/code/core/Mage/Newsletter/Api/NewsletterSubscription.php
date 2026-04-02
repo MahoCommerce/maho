@@ -24,8 +24,8 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 #[ApiResource(
     shortName: 'NewsletterSubscription',
     description: 'Newsletter subscription management',
-    provider: NewsletterReader::class,
-    processor: NewsletterWriter::class,
+    provider: NewsletterProvider::class,
+    processor: NewsletterProcessor::class,
     operations: [
         // Get current user's subscription status (requires authentication)
         new Get(
@@ -71,7 +71,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
 )]
-class NewsletterSubscription
+class NewsletterSubscription extends \Maho\ApiPlatform\Resource
 {
     /**
      * Subscriber email address

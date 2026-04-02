@@ -29,8 +29,8 @@ use ApiPlatform\Metadata\GraphQl\DeleteMutation;
 #[ApiResource(
     shortName: 'Address',
     description: 'Customer address resource',
-    provider: AddressReader::class,
-    processor: AddressWriter::class,
+    provider: AddressProvider::class,
+    processor: AddressProcessor::class,
     operations: [
         // Simple routes using only address ID (globally unique)
         new Get(
@@ -174,7 +174,7 @@ use ApiPlatform\Metadata\GraphQl\DeleteMutation;
         ),
     ],
 )]
-class Address
+class Address extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true)]
     public ?int $id = null;

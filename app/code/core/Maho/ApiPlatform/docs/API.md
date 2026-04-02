@@ -36,6 +36,9 @@
   - [Wishlist](#wishlist)
   - [URL Resolver](#url-resolver)
   - [POS Payments](#pos-payments)
+- [Base Classes](#base-classes)
+- [Opt-in Traits](#opt-in-traits)
+- [Shared Services](#shared-services)
 - [Web Server Configuration](#web-server-configuration)
 - [Extending the API (Third-Party Modules)](#extending-the-api-third-party-modules)
 
@@ -835,31 +838,109 @@ All errors return JSON with an appropriate HTTP status code:
 The API is built on [API Platform](https://api-platform.com/) (Symfony) integrated with Maho Commerce (PHP 8.3+, fork of OpenMage/Magento 1).
 
 - **Entry point:** `public/rest.php` — bootstraps Maho, then hands off to Symfony
-- **Resources:** PHP 8 `#[ApiResource]` attributes define REST + GraphQL operations
-- **Providers:** `ProviderInterface` implementations fetch data from Maho models
-- **Processors:** `ProcessorInterface` implementations handle mutations
+- **Resources:** PHP 8 `#[ApiResource]` DTOs — all extend `\Maho\ApiPlatform\Resource`
+- **Providers:** State providers (read operations) — all extend `\Maho\ApiPlatform\Provider`
+- **Processors:** State processors (write operations) — all extend `\Maho\ApiPlatform\Processor`
 - **Event listeners:** Symfony listeners for cross-cutting concerns (caching, idempotency)
 - **Authentication:** JWT (HS256) via Firebase JWT library
 
 **Module structure:**
 ```
-app/code/core/Maho/
-├── ApiPlatform/           # Core API Platform integration
-│   ├── symfony/           # Symfony app (kernel, controllers, services)
-│   ├── docs/              # This documentation
-│   ├── etc/config.xml     # Module config (version: 1.1.0)
-│   └── sql/               # DB migration scripts
-├── Catalog/Api/           # Products, categories, media
-├── CatalogInventory/Api/  # Stock/inventory updates
-├── Checkout/Api/          # Cart management
-├── Cms/Api/               # CMS pages & blocks
-├── Core/Api/              # Store config, URL resolver
-├── Customer/Api/          # Customer management
-├── Directory/Api/         # Countries & regions
-├── Sales/Api/             # Orders, shipments, credit memos, invoices
-├── SalesRule/Api/         # Coupons & price rules
-└── ...                    # Other modules
+app/code/core/Maho/ApiPlatform/
+├── symfony/src/
+│   ├── Resource.php         # Base class for all DTOs ($extensions)
+│   ├── Provider.php         # Base class for all providers (auth + pagination)
+│   ├── Processor.php        # Base class for all processors (auth + persistence)
+│   ├── Trait/               # Opt-in traits (ProductLoader, Cache, ActivityLog, StoreAccess)
+│   ├── Service/             # Shared services (StoreContext, mappers, etc.)
+│   ├── Security/            # Authentication (JWT, OAuth2, user providers)
+│   ├── EventListener/       # Cross-cutting concerns
+│   └── ...
+├── docs/                    # This documentation
+├── etc/config.xml           # Module config
+└── sql/                     # DB migration scripts
+
+app/code/core/Mage|Maho/*/Api/  # Per-module API resources
+├── {Entity}.php             # DTO (extends \Maho\ApiPlatform\Resource)
+├── {Entity}Provider.php     # State provider (extends \Maho\ApiPlatform\Provider)
+└── {Entity}Processor.php    # State processor (extends \Maho\ApiPlatform\Processor)
 ```
+
+### Base Classes
+
+All API classes extend one of three base classes in `Maho\ApiPlatform`:
+
+#### Resource
+
+Base class for all DTOs. Provides the `$extensions` property for the event-based extension system.
+
+```php
+#[ApiResource(...)]
+class MyResource extends \Maho\ApiPlatform\Resource
+{
+    public ?int $id = null;
+    public string $name = '';
+    // $extensions is inherited from the base class
+}
+```
+
+#### Provider
+
+Base class for all state providers. Bundles authentication (via `AuthenticationTrait`) and pagination (via `PaginationTrait`). Provides a Security constructor that subclasses can call via `parent::__construct($security)`.
+
+```php
+final class MyProvider extends \Maho\ApiPlatform\Provider
+{
+    #[\Override]
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): mixed
+    {
+        // Authentication methods available: isAdmin(), requireAuthentication(), etc.
+        // Pagination available: $this->extractPagination($context)
+    }
+}
+```
+
+#### Processor
+
+Base class for all state processors. Bundles authentication (via `AuthenticationTrait`) and model persistence (via `ModelPersistenceTrait`). Provides `safeSave()`, `safeDelete()`, `secureAreaDelete()`, and `loadOrFail()`.
+
+```php
+final class MyProcessor extends \Maho\ApiPlatform\Processor
+{
+    #[\Override]
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
+    {
+        $user = $this->getAuthorizedUser();
+        $this->requirePermission($user, 'myresource/write');
+
+        $model = Mage::getModel('mymodule/entity');
+        $model->setData([...]);
+        $this->safeSave($model, 'create entity');
+    }
+}
+```
+
+### Opt-in Traits
+
+Domain-specific traits that can be added to providers or processors as needed:
+
+| Trait | Purpose | Used by |
+|---|---|---|
+| `ProductLoaderTrait` | Loads a product by ID with store context and optional type constraint | Catalog sub-resource providers/processors |
+| `CacheTrait` | Cache-aside `remember()` helper for provider responses | ReviewProvider |
+| `ActivityLogTrait` | Logs write operations to the admin activity log | Product, Category, CMS, Blog processors |
+| `StoreAccessTrait` | Resolves store codes to IDs and validates store-level access | CMS and Blog processors |
+
+### Shared Services
+
+| Service | Purpose |
+|---|---|
+| `StoreContext` | Store scope management, `storeIdsToStoreCodes()`, `isAvailableForStore()` |
+| `AddressMapper` | Maps order/quote/customer address models to the Address DTO |
+| `CustomerMapper` | Maps customer models to the Customer DTO |
+| `PosPaymentMapper` | Maps POS payment models to the PosPayment DTO |
+| `ContentSanitizer` | Sanitizes HTML content for CMS/blog resources |
+| `ArrayPaginator` | Paginated collection wrapper for API Platform, with `::empty()` factory |
 
 ---
 
@@ -1038,7 +1119,7 @@ maho.example.com {
 
 ## Extending the API (Third-Party Modules)
 
-All primary API resources include an `extensions` field — an open array where modules can inject additional data without modifying core API files.
+All API resources extend `\Maho\ApiPlatform\Resource`, which provides an `extensions` field — an open array where modules can inject additional data without modifying core API files.
 
 ### How It Works
 
@@ -1048,19 +1129,19 @@ Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho even
 
 | Event | Dispatched In | Observer Parameters |
 |-------|---------------|---------------------|
-| `api_product_dto_build` | ProductReader | `product` (model), `for_listing` (bool), `dto` |
-| `api_category_dto_build` | CategoryReader | `category` (model), `dto` |
-| `api_cms_page_dto_build` | CmsPageReader | `cms_page` (model), `dto` |
-| `api_cms_block_dto_build` | CmsBlockReader | `cms_block` (model), `dto` |
-| `api_blog_post_dto_build` | BlogPostReader | `blog_post` (model), `dto` |
-| `api_store_config_dto_build` | StoreConfigReader | `store` (model), `dto` |
-| `api_order_dto_build` | OrderReader | `order` (model), `dto` |
-| `api_order_item_dto_build` | OrderReader | `order_item` (model), `dto` |
-| `api_customer_dto_build` | CustomerReader | `customer` (model), `dto` |
-| `api_cart_dto_build` | CartReader | `quote` (model), `dto` |
-| `api_cart_item_dto_build` | CartReader | `quote_item` (model), `dto` |
-| `api_review_dto_build` | ReviewReader | `review` (model), `dto` |
-| `api_wishlist_item_dto_build` | WishlistReader | `wishlist_item` (model), `dto` |
+| `api_product_dto_build` | ProductProvider | `product` (model), `for_listing` (bool), `dto` |
+| `api_category_dto_build` | CategoryProvider | `category` (model), `dto` |
+| `api_cms_page_dto_build` | CmsPageProvider | `cms_page` (model), `dto` |
+| `api_cms_block_dto_build` | CmsBlockProvider | `cms_block` (model), `dto` |
+| `api_blog_post_dto_build` | BlogPostProvider | `blog_post` (model), `dto` |
+| `api_store_config_dto_build` | StoreConfigProvider | `store` (model), `dto` |
+| `api_order_dto_build` | OrderProvider | `order` (model), `dto` |
+| `api_order_item_dto_build` | OrderProvider | `order_item` (model), `dto` |
+| `api_customer_dto_build` | CustomerProvider | `customer` (model), `dto` |
+| `api_cart_dto_build` | CartProvider | `quote` (model), `dto` |
+| `api_cart_item_dto_build` | CartProvider | `quote_item` (model), `dto` |
+| `api_review_dto_build` | ReviewProvider | `review` (model), `dto` |
+| `api_wishlist_item_dto_build` | WishlistProvider | `wishlist_item` (model), `dto` |
 
 ### Quick Example: Simple Bundles Module
 

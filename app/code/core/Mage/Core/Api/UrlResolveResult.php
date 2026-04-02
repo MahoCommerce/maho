@@ -21,7 +21,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 #[ApiResource(
     shortName: 'UrlResolveResult',
     description: 'URL resolution result - maps URLs to their targets',
-    provider: UrlResolverReader::class,
+    provider: UrlResolverProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/url-resolver',
@@ -38,7 +38,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
 )]
-class UrlResolveResult
+class UrlResolveResult extends \Maho\ApiPlatform\Resource
 {
     /** @var string The resolved entity type: 'cms_page', 'category', 'product', or 'not_found' */
     public string $type = 'not_found';

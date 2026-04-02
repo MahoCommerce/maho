@@ -16,7 +16,7 @@ namespace Mage\Directory\Api;
 /**
  * Region/State within a country (not a standalone API resource)
  */
-class Region
+class Region extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public string $code = '';

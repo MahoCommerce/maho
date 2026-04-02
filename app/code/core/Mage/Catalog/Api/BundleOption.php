@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'BundleOption',
     description: 'Bundle product options and selections',
-    provider: BundleOptionReader::class,
+    provider: BundleOptionProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/products/{productId}/bundle-options',
@@ -39,7 +39,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: BundleOptionWriter::class,
+            processor: BundleOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Add a bundle option with selections',
         ),
@@ -48,7 +48,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: BundleOptionWriter::class,
+            processor: BundleOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Update a bundle option',
         ),
@@ -57,13 +57,13 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: BundleOptionWriter::class,
+            processor: BundleOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Remove a bundle option',
         ),
     ],
 )]
-class BundleOption
+class BundleOption extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Option ID')]
     public ?int $id = null;

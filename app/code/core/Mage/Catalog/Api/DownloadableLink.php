@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'DownloadableLink',
     description: 'Downloadable product links',
-    provider: DownloadableLinkReader::class,
+    provider: DownloadableLinkProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/products/{productId}/downloadable-links',
@@ -39,7 +39,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: DownloadableLinkWriter::class,
+            processor: DownloadableLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Add a downloadable link',
         ),
@@ -48,7 +48,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: DownloadableLinkWriter::class,
+            processor: DownloadableLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Update a downloadable link',
         ),
@@ -57,13 +57,13 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: DownloadableLinkWriter::class,
+            processor: DownloadableLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Remove a downloadable link',
         ),
     ],
 )]
-class DownloadableLink
+class DownloadableLink extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Link ID')]
     public ?int $id = null;

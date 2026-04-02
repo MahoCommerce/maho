@@ -16,7 +16,7 @@ namespace Mage\Sales\Api;
 /**
  * Shipment Item DTO
  */
-class ShipmentItem
+class ShipmentItem extends \Maho\ApiPlatform\Resource
 {
     public ?string $sku = null;
     public ?string $name = null;

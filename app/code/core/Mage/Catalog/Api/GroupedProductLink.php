@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'GroupedProductLink',
     description: 'Grouped product child associations',
-    provider: GroupedProductLinkReader::class,
+    provider: GroupedProductLinkProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/products/{productId}/grouped',
@@ -39,7 +39,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: GroupedProductLinkWriter::class,
+            processor: GroupedProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Replace all grouped associations',
         ),
@@ -48,7 +48,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: GroupedProductLinkWriter::class,
+            processor: GroupedProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Add a grouped association',
         ),
@@ -57,13 +57,13 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: GroupedProductLinkWriter::class,
+            processor: GroupedProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Remove a grouped association',
         ),
     ],
 )]
-class GroupedProductLink
+class GroupedProductLink extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Composite identifier')]
     public ?string $id = null;

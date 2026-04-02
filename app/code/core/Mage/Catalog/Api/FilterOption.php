@@ -15,7 +15,7 @@ namespace Mage\Catalog\Api;
 /**
  * Filter option DTO — embedded in LayeredFilter, not a separate API resource
  */
-class FilterOption
+class FilterOption extends \Maho\ApiPlatform\Resource
 {
     public string $value = '';
 

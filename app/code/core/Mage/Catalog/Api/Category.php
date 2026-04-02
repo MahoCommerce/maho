@@ -22,12 +22,11 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'Category',
     description: 'Product category resource',
-    provider: CategoryReader::class,
+    provider: CategoryProvider::class,
     operations: [
         new Get(
             uriTemplate: '/categories/{id}',
@@ -41,19 +40,19 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
         new Post(
             uriTemplate: '/categories',
-            processor: CategoryWriter::class,
+            processor: CategoryProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Creates a new category',
         ),
         new Put(
             uriTemplate: '/categories/{id}',
-            processor: CategoryWriter::class,
+            processor: CategoryProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Updates a category',
         ),
         new Delete(
             uriTemplate: '/categories/{id}',
-            processor: CategoryWriter::class,
+            processor: CategoryProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Deletes a category',
         ),
@@ -76,7 +75,7 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
     ],
 )]
-class Category
+class Category extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public ?int $parentId = null;
@@ -103,14 +102,5 @@ class Category
     public ?string $pageLayout = null;
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

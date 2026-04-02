@@ -19,31 +19,16 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
 /**
- * Authentication Trait - Shared authentication logic for providers and processors
+ * Shared authentication and authorization logic for API providers and processors.
  *
- * This trait provides consistent authentication checks across all API endpoints.
- * Classes using this trait must have a $security property of type Security.
- *
- * Usage:
- *   use AuthenticationTrait;
- *
- *   public function __construct(Security $security)
- *   {
- *       $this->security = $security;
- *   }
+ * Provides customer/admin identity checks, role enforcement, permission validation,
+ * and customer data access control. Classes using this trait must have a $security
+ * property of type Security.
  */
 trait AuthenticationTrait
 {
-    /**
-     * @var Security|null Security service (must be set by using class)
-     */
     protected ?Security $security = null;
 
-    /**
-     * Get the authenticated customer ID from the security token
-     *
-     * @return int|null Customer ID or null if not authenticated as customer
-     */
     protected function getAuthenticatedCustomerId(): ?int
     {
         if ($this->security === null) {
@@ -58,11 +43,6 @@ trait AuthenticationTrait
         return null;
     }
 
-    /**
-     * Get the authenticated admin ID from the security token
-     *
-     * @return int|null Admin ID or null if not authenticated as admin
-     */
     protected function getAuthenticatedAdminId(): ?int
     {
         if ($this->security === null) {
@@ -77,33 +57,16 @@ trait AuthenticationTrait
         return null;
     }
 
-    /**
-     * Check if the current user has admin role
-     *
-     * @return bool True if user is admin
-     */
     protected function isAdmin(): bool
     {
         return $this->security !== null && $this->security->isGranted('ROLE_ADMIN');
     }
 
-    /**
-     * Check if the current user has POS role
-     *
-     * @return bool True if user has POS access
-     */
     protected function isPosUser(): bool
     {
         return $this->security !== null && $this->security->isGranted('ROLE_POS');
     }
 
-    /**
-     * Check if the current user is a dedicated API user
-     *
-     * API users have resource-level permissions enforced by ApiUserVoter.
-     *
-     * @return bool True if user is a dedicated API user
-     */
     protected function isApiUser(): bool
     {
         if ($this->security === null) {
@@ -114,12 +77,6 @@ trait AuthenticationTrait
         return $user instanceof ApiUser && $user->isApiUser();
     }
 
-    /**
-     * Require authentication - throw exception if not authenticated
-     *
-     * @return int The authenticated customer ID
-     * @throws UnauthorizedHttpException If not authenticated
-     */
     protected function requireAuthentication(): int
     {
         $customerId = $this->getAuthenticatedCustomerId();
@@ -131,12 +88,6 @@ trait AuthenticationTrait
         return $customerId;
     }
 
-    /**
-     * Require admin role - throw exception if not admin
-     *
-     * @param string $message Custom error message
-     * @throws AccessDeniedHttpException If not admin
-     */
     protected function requireAdmin(string $message = 'Admin access required'): void
     {
         if (!$this->isAdmin()) {
@@ -144,12 +95,6 @@ trait AuthenticationTrait
         }
     }
 
-    /**
-     * Require POS role - throw exception if not POS user
-     *
-     * @param string $message Custom error message
-     * @throws AccessDeniedHttpException If not POS user
-     */
     protected function requirePosAccess(string $message = 'POS access required'): void
     {
         if (!$this->isPosUser() && !$this->isAdmin()) {
@@ -157,39 +102,18 @@ trait AuthenticationTrait
         }
     }
 
-    /**
-     * Authorize access to a specific customer's data
-     *
-     * Customers can only view their own data. Admins can view any.
-     *
-     * @param int $customerId The customer ID to check access for
-     * @param string $message Custom error message
-     * @throws AccessDeniedHttpException If access denied
-     */
     protected function authorizeCustomerAccess(int $customerId, string $message = 'You can only access your own data'): void
     {
-        // Admins can access any customer
         if ($this->isAdmin()) {
             return;
         }
 
-        // Customers can only access their own data
         $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
         if ($authenticatedCustomerId === null || $authenticatedCustomerId !== $customerId) {
             throw new AccessDeniedHttpException($message);
         }
     }
 
-    /**
-     * Require admin or dedicated API user role
-     *
-     * Throws AccessDeniedHttpException if user is not an admin or API user.
-     * Regular customers are denied — use this for administrative operations
-     * like creating shipments, gift cards, managing orders, etc.
-     *
-     * @param string $message Custom error message
-     * @throws AccessDeniedHttpException If not admin or API user
-     */
     protected function requireAdminOrApiUser(string $message = 'Admin or API access required'): void
     {
         if (!$this->isAdmin() && !$this->isApiUser()) {
@@ -197,12 +121,6 @@ trait AuthenticationTrait
         }
     }
 
-    /**
-     * Check if user can access specific customer data
-     *
-     * @param int $customerId The customer ID to check
-     * @return bool True if access is allowed
-     */
     protected function canAccessCustomer(int $customerId): bool
     {
         if ($this->isAdmin()) {
@@ -213,15 +131,12 @@ trait AuthenticationTrait
         return $authenticatedCustomerId !== null && $authenticatedCustomerId === $customerId;
     }
 
-    /**
-     * Get the authenticated ApiUser or throw if not authenticated.
-     *
-     * Used by processors that require a valid ApiUser for permission checks.
-     *
-     * @throws AccessDeniedHttpException If not authenticated
-     */
     protected function getAuthorizedUser(): ApiUser
     {
+        if ($this->security === null) {
+            throw new AccessDeniedHttpException('Authentication required');
+        }
+
         $user = $this->security->getUser();
 
         if (!$user instanceof ApiUser) {
@@ -231,11 +146,6 @@ trait AuthenticationTrait
         return $user;
     }
 
-    /**
-     * Require a specific resource permission on the ApiUser.
-     *
-     * @throws AccessDeniedHttpException If the user lacks the permission
-     */
     protected function requirePermission(ApiUser $user, string $permission): void
     {
         if (!$user->hasPermission($permission)) {

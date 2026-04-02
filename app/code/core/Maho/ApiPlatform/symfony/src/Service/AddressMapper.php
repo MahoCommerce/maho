@@ -23,54 +23,42 @@ class AddressMapper
 {
     public function fromOrderAddress(\Mage_Sales_Model_Order_Address $address): Address
     {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
-
-        return $dto;
+        return $this->mapCommonFields(new Address(), $address);
     }
 
     public function fromQuoteAddress(\Mage_Sales_Model_Quote_Address $address): Address
     {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
+        return $this->mapCommonFields(new Address(), $address);
+    }
+
+    public function fromCustomerAddress(
+        \Mage_Customer_Model_Address $address,
+        ?\Mage_Customer_Model_Customer $customer = null,
+    ): Address {
+        $dto = $this->mapCommonFields(new Address(), $address);
+        $dto->customerId = (int) $address->getCustomerId();
+
+        if ($customer !== null) {
+            $dto->isDefaultBilling = $address->getId() == $customer->getDefaultBilling();
+            $dto->isDefaultShipping = $address->getId() == $customer->getDefaultShipping();
+        }
 
         return $dto;
     }
 
-    public function fromCustomerAddress(\Mage_Customer_Model_Address $address): Address
+    private function mapCommonFields(Address $dto, \Maho\DataObject $address): Address
     {
-        $dto = new Address();
         $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
+        $dto->firstName = $address->getData('firstname') ?? '';
+        $dto->lastName = $address->getData('lastname') ?? '';
+        $dto->company = $address->getData('company');
         $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
+        $dto->city = $address->getData('city') ?? '';
+        $dto->region = $address->getData('region');
+        $dto->regionId = $address->getData('region_id') ? (int) $address->getData('region_id') : null;
+        $dto->postcode = $address->getData('postcode') ?? '';
+        $dto->countryId = $address->getData('country_id') ?? '';
+        $dto->telephone = $address->getData('telephone') ?? '';
 
         return $dto;
     }

@@ -24,8 +24,8 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 #[ApiResource(
     shortName: 'PosPayment',
     description: 'Payment resource for POS and headless checkout',
-    provider: PaymentReader::class,
-    processor: PaymentWriter::class,
+    provider: PaymentProvider::class,
+    processor: PaymentProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/pos-payments/{id}',
@@ -53,7 +53,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
         ),
     ],
 )]
-class PosPayment
+class PosPayment extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public ?int $orderId = null;

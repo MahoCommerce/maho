@@ -22,7 +22,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 #[ApiResource(
     shortName: 'Country',
     description: 'Country and region resource for addresses',
-    provider: CountryReader::class,
+    provider: CountryProvider::class,
     operations: [
         new Get(
             uriTemplate: '/countries/{id}',
@@ -44,7 +44,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
         ),
     ],
 )]
-class Country
+class Country extends \Maho\ApiPlatform\Resource
 {
     public ?string $id = null;  // ISO country code (AU, US, etc.)
     public string $name = '';

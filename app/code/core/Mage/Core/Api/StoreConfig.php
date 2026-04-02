@@ -22,7 +22,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 #[ApiResource(
     shortName: 'StoreConfig',
     description: 'Store configuration for frontend initialization',
-    provider: StoreConfigReader::class,
+    provider: StoreConfigProvider::class,
     operations: [
         new Get(
             uriTemplate: '/store-config',
@@ -39,7 +39,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
 )]
-class StoreConfig
+class StoreConfig extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Store code')]
     public string $id = 'default';
@@ -101,14 +101,5 @@ class StoreConfig
 
     #[ApiProperty(description: 'CMS page identifier for the homepage')]
     public string $cmsHomePage = 'home';
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

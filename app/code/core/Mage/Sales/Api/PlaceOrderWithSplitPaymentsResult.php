@@ -16,7 +16,7 @@ namespace Mage\Sales\Api;
 /**
  * Result DTO for placeOrderWithSplitPayments mutation
  */
-class PlaceOrderWithSplitPaymentsResult
+class PlaceOrderWithSplitPaymentsResult extends \Maho\ApiPlatform\Resource
 {
     public ?Order $order = null;
 

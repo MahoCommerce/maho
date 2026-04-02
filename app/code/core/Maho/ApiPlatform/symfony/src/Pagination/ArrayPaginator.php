@@ -68,6 +68,14 @@ final class ArrayPaginator implements PaginatorInterface, \IteratorAggregate
     }
 
     /**
+     * @return self<T>
+     */
+    public static function empty(int $pageSize = 20): self
+    {
+        return new self(items: [], currentPage: 1, itemsPerPage: $pageSize, totalItems: 0);
+    }
+
+    /**
      * @return \ArrayIterator<int, T>
      */
     #[\Override]

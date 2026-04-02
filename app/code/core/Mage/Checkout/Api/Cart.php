@@ -26,8 +26,8 @@ use Mage\Customer\Api\Address;
 #[ApiResource(
     shortName: 'Cart',
     description: 'Shopping cart resource',
-    provider: CartReader::class,
-    processor: CartWriter::class,
+    provider: CartProvider::class,
+    processor: CartProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/carts/{id}',
@@ -187,7 +187,7 @@ use Mage\Customer\Api\Address;
         ),
     ],
 )]
-class Cart
+class Cart extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(description: 'Cart/quote entity ID', writable: false)]
     public ?int $id = null;
@@ -258,14 +258,5 @@ class Cart
     public ?string $updatedAt = null;
 
     public function __construct() {}
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

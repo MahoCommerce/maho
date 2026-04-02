@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'ConfigurableSetup',
     description: 'Configurable product super attributes and child assignments',
-    provider: ConfigurableSetupReader::class,
+    provider: ConfigurableSetupProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/products/{productId}/configurable',
@@ -39,7 +39,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ConfigurableSetupWriter::class,
+            processor: ConfigurableSetupProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Set super attributes and assign all children',
         ),
@@ -48,7 +48,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ConfigurableSetupWriter::class,
+            processor: ConfigurableSetupProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Add a child product',
         ),
@@ -57,13 +57,13 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ConfigurableSetupWriter::class,
+            processor: ConfigurableSetupProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Remove a child product',
         ),
     ],
 )]
-class ConfigurableSetup
+class ConfigurableSetup extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Product ID')]
     public ?int $id = null;

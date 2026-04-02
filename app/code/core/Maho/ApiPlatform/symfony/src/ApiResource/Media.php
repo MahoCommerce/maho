@@ -76,7 +76,7 @@ use Maho\ApiPlatform\State\Provider\MediaProvider;
         ),
     ],
 )]
-class Media
+class Media extends \Maho\ApiPlatform\Resource
 {
     /** @var string|null URL to access the uploaded file */
     public ?string $url = null;

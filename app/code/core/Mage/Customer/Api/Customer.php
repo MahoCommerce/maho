@@ -27,8 +27,8 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 #[ApiResource(
     shortName: 'Customer',
     description: 'Customer resource',
-    provider: CustomerReader::class,
-    processor: CustomerWriter::class,
+    provider: CustomerProvider::class,
+    processor: CustomerProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/customers/{id}',
@@ -131,7 +131,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
 )]
-class Customer
+class Customer extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public string $email = '';
@@ -160,14 +160,5 @@ class Customer
     /** @var string|null New password for password change */
     #[ApiProperty(writable: true, readable: false)]
     public ?string $newPassword = null;
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

@@ -122,10 +122,10 @@ class Kernel extends BaseKernel
         }
 
         // Phase 2: Load all files
-        // Sort so DTO classes (no Reader/Writer suffix) load before Reader/Writer classes
+        // Sort so DTO classes (no Provider/Processor suffix) load before Provider/Processor classes
         uksort($files, function ($a, $b) {
-            $aIsHandler = str_ends_with($a, 'Reader') || str_ends_with($a, 'Writer');
-            $bIsHandler = str_ends_with($b, 'Reader') || str_ends_with($b, 'Writer');
+            $aIsHandler = str_ends_with($a, 'Provider') || str_ends_with($a, 'Processor');
+            $bIsHandler = str_ends_with($b, 'Provider') || str_ends_with($b, 'Processor');
             if (!$aIsHandler && $bIsHandler) {
                 return -1;
             }

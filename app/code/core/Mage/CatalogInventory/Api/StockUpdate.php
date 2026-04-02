@@ -21,7 +21,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 #[ApiResource(
     shortName: 'StockUpdate',
     description: 'Fast inventory / stock update resource',
-    processor: StockUpdateWriter::class,
+    processor: StockUpdateProcessor::class,
     operations: [
         new Put(
             uriTemplate: '/inventory',
@@ -56,7 +56,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
         ),
     ],
 )]
-class StockUpdate
+class StockUpdate extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true)]
     public string $sku = '';

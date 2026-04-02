@@ -16,7 +16,7 @@ namespace Mage\Checkout\Api;
 /**
  * CartPrices DTO - Data transfer object for cart totals and pricing
  */
-class CartPrices
+class CartPrices extends \Maho\ApiPlatform\Resource
 {
     public float $subtotal = 0;
     public float $subtotalInclTax = 0;

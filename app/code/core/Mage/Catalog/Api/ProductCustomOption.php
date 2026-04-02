@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'ProductCustomOption',
     description: 'Product custom options (personalization, add-ons)',
-    provider: ProductCustomOptionReader::class,
+    provider: ProductCustomOptionProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/products/{productId}/custom-options',
@@ -39,7 +39,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductCustomOptionWriter::class,
+            processor: ProductCustomOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Add a custom option to a product',
         ),
@@ -49,7 +49,7 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
                 'optionId' => new Link(fromClass: self::class, identifiers: ['id']),
             ],
-            processor: ProductCustomOptionWriter::class,
+            processor: ProductCustomOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Update a custom option',
         ),
@@ -59,13 +59,13 @@ use ApiPlatform\Metadata\Put;
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
                 'optionId' => new Link(fromClass: self::class, identifiers: ['id']),
             ],
-            processor: ProductCustomOptionWriter::class,
+            processor: ProductCustomOptionProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Remove a custom option',
         ),
     ],
 )]
-class ProductCustomOption
+class ProductCustomOption extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Option ID')]
     public ?int $id = null;

@@ -23,7 +23,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'ProductTierPrice',
     description: 'Product tier prices (quantity-based pricing)',
-    provider: ProductTierPriceReader::class,
+    provider: ProductTierPriceProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/products/{productId}/tier-prices',
@@ -38,7 +38,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductTierPriceWriter::class,
+            processor: ProductTierPriceProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Replace all tier prices for a product',
         ),
@@ -47,13 +47,13 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductTierPriceWriter::class,
+            processor: ProductTierPriceProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Remove all tier prices from a product',
         ),
     ],
 )]
-class ProductTierPrice
+class ProductTierPrice extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Composite identifier (productId_index)')]
     public ?string $id = null;

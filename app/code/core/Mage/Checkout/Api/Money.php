@@ -21,7 +21,7 @@ namespace Mage\Checkout\Api;
  * - formatted: human-readable string (e.g., "$29.99")
  * - currency: the currency code (e.g., "AUD")
  */
-class Money
+class Money extends \Maho\ApiPlatform\Resource
 {
     public ?float $value = null;
     public ?string $formatted = null;

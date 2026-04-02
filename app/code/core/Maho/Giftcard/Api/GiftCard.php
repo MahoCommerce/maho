@@ -25,8 +25,8 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 #[ApiResource(
     shortName: 'GiftCard',
     description: 'Gift Card resource',
-    provider: GiftCardReader::class,
-    processor: GiftCardWriter::class,
+    provider: GiftCardProvider::class,
+    processor: GiftCardProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/giftcards/{id}',
@@ -83,7 +83,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
 )]
-class GiftCard
+class GiftCard extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;

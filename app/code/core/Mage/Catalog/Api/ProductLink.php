@@ -24,7 +24,7 @@ use ApiPlatform\Metadata\Put;
 #[ApiResource(
     shortName: 'ProductLink',
     description: 'Product links (related, cross-sell, up-sell)',
-    provider: ProductLinkReader::class,
+    provider: ProductLinkProvider::class,
     operations: [
         // --- Related ---
         new GetCollection(
@@ -41,7 +41,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'replace_related_links',
             description: 'Replace all related links',
@@ -51,7 +51,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'add_related_link',
             description: 'Add a related link',
@@ -61,7 +61,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'delete_related_link',
             description: 'Remove a related link',
@@ -81,7 +81,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'replace_cross_sell_links',
             description: 'Replace all cross-sell links',
@@ -91,7 +91,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'add_cross_sell_link',
             description: 'Add a cross-sell link',
@@ -101,7 +101,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'delete_cross_sell_link',
             description: 'Remove a cross-sell link',
@@ -121,7 +121,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'replace_up_sell_links',
             description: 'Replace all up-sell links',
@@ -131,7 +131,7 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'add_up_sell_link',
             description: 'Add an up-sell link',
@@ -141,14 +141,14 @@ use ApiPlatform\Metadata\Put;
             uriVariables: [
                 'productId' => new Link(fromClass: Product::class, identifiers: ['id']),
             ],
-            processor: ProductLinkWriter::class,
+            processor: ProductLinkProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             name: 'delete_up_sell_link',
             description: 'Remove an up-sell link',
         ),
     ],
 )]
-class ProductLink
+class ProductLink extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Composite identifier')]
     public ?string $id = null;

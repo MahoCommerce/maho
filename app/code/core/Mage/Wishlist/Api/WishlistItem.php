@@ -21,13 +21,12 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
-use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'WishlistItem',
     description: 'Customer wishlist item',
-    provider: WishlistReader::class,
-    processor: WishlistWriter::class,
+    provider: WishlistProvider::class,
+    processor: WishlistProcessor::class,
     operations: [
         new GetCollection(
             uriTemplate: '/customers/me/wishlist',
@@ -102,7 +101,7 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
     ],
 )]
-class WishlistItem
+class WishlistItem extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public ?int $productId = null;
@@ -116,14 +115,5 @@ class WishlistItem
     public ?string $description = null;
     public ?string $addedAt = null;
     public bool $inStock = true;
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

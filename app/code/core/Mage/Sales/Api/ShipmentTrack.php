@@ -16,7 +16,7 @@ namespace Mage\Sales\Api;
 /**
  * Shipment Track DTO
  */
-class ShipmentTrack
+class ShipmentTrack extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public ?string $carrier = null;

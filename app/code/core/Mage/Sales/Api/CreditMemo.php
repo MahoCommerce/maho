@@ -26,8 +26,8 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
 #[ApiResource(
     shortName: 'CreditMemo',
     description: 'Order credit memo / refund resource',
-    provider: CreditMemoReader::class,
-    processor: CreditMemoWriter::class,
+    provider: CreditMemoProvider::class,
+    processor: CreditMemoProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/credit-memos/{id}',
@@ -79,7 +79,7 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
         ),
     ],
 )]
-class CreditMemo
+class CreditMemo extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true)]
     public ?int $id = null;

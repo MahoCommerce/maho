@@ -28,8 +28,8 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 #[ApiResource(
     shortName: 'Coupon',
     description: 'Coupon / price rule management resource',
-    provider: CouponReader::class,
-    processor: CouponWriter::class,
+    provider: CouponProvider::class,
+    processor: CouponProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/coupons/{id}',
@@ -124,7 +124,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
         ),
     ],
 )]
-class Coupon
+class Coupon extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true)]
     public ?int $id = null;

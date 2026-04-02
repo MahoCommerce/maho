@@ -20,7 +20,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 #[ApiResource(
     shortName: 'LayeredFilter',
     description: 'Layered navigation filters (facets) for a category',
-    provider: LayeredFilterReader::class,
+    provider: LayeredFilterProvider::class,
     operations: [
         new GetCollection(
             uriTemplate: '/layered-filters',
@@ -38,7 +38,7 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
         ),
     ],
 )]
-class LayeredFilter
+class LayeredFilter extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true, description: 'Attribute code')]
     public string $code = '';

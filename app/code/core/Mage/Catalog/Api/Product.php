@@ -27,7 +27,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 #[ApiResource(
     shortName: 'Product',
     description: 'Product catalog resource',
-    provider: ProductReader::class,
+    provider: ProductProvider::class,
     operations: [
         new Get(
             uriTemplate: '/products/{id}',
@@ -41,19 +41,19 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
         new Post(
             uriTemplate: '/products',
-            processor: ProductWriter::class,
+            processor: ProductProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Creates a new product',
         ),
         new Put(
             uriTemplate: '/products/{id}',
-            processor: ProductWriter::class,
+            processor: ProductProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Updates a product',
         ),
         new Delete(
             uriTemplate: '/products/{id}',
-            processor: ProductWriter::class,
+            processor: ProductProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Deletes a product',
         ),
@@ -100,7 +100,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
 )]
-class Product
+class Product extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(description: 'Product entity ID')]
     public ?int $id = null;
@@ -282,14 +282,5 @@ class Product
     /** @var array|null Stock data: {qty: float, is_in_stock: bool} */
     #[ApiProperty(description: 'Stock data for write operations')]
     public ?array $stockData = null;
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

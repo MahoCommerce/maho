@@ -16,7 +16,7 @@ namespace Mage\Sales\Api;
 /**
  * OrderPrices DTO - Data transfer object for order totals and pricing
  */
-class OrderPrices
+class OrderPrices extends \Maho\ApiPlatform\Resource
 {
     public float $subtotal = 0;
     public float $subtotalInclTax = 0;

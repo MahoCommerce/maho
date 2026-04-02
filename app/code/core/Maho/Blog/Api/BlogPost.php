@@ -21,12 +21,11 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'BlogPost',
     description: 'Blog post resource',
-    provider: BlogPostReader::class,
+    provider: BlogPostProvider::class,
     operations: [
         new Get(
             uriTemplate: '/blog-posts/{id}',
@@ -40,19 +39,19 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
         new Post(
             uriTemplate: '/blog-posts',
-            processor: BlogPostWriter::class,
+            processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Creates a new blog post',
         ),
         new Put(
             uriTemplate: '/blog-posts/{id}',
-            processor: BlogPostWriter::class,
+            processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Updates a blog post',
         ),
         new Delete(
             uriTemplate: '/blog-posts/{id}',
-            processor: BlogPostWriter::class,
+            processor: BlogPostProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Deletes a blog post',
         ),
@@ -67,7 +66,7 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
     ],
 )]
-class BlogPost
+class BlogPost extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public string $title = '';
@@ -90,14 +89,5 @@ class BlogPost
     public array $categoryIds = [];
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

@@ -148,6 +148,37 @@ final class StoreContext implements ResetInterface
     }
 
     /**
+     * Convert store IDs to store codes, with 'all' shortcut for global scope (store 0).
+     *
+     * @param array<int|string> $storeIds
+     * @return array<string>
+     */
+    public static function storeIdsToStoreCodes(array $storeIds): array
+    {
+        if (in_array(0, $storeIds)) {
+            return ['all'];
+        }
+
+        return array_map(function ($id) {
+            try {
+                return \Mage::app()->getStore($id)->getCode();
+            } catch (\Exception) {
+                return (string) $id;
+            }
+        }, $storeIds);
+    }
+
+    /**
+     * Check if an entity is available for a given store.
+     *
+     * @param array<int|string> $entityStoreIds Store IDs assigned to the entity
+     */
+    public static function isAvailableForStore(array $entityStoreIds, int $storeId): bool
+    {
+        return in_array(0, $entityStoreIds) || in_array($storeId, $entityStoreIds);
+    }
+
+    /**
      * Get all available stores
      *
      * @return array<int, array{id: int, code: string, name: string, website_id: int}>

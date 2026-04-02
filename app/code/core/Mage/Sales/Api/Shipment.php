@@ -27,8 +27,8 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 #[ApiResource(
     shortName: 'Shipment',
     description: 'Order shipment resource',
-    provider: ShipmentReader::class,
-    processor: ShipmentWriter::class,
+    provider: ShipmentProvider::class,
+    processor: ShipmentProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/shipments/{id}',
@@ -83,7 +83,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         ),
     ],
 )]
-class Shipment
+class Shipment extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(identifier: true)]
     public ?int $id = null;

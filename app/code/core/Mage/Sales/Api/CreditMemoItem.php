@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 namespace Mage\Sales\Api;
 
-class CreditMemoItem
+class CreditMemoItem extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public ?int $orderItemId = null;

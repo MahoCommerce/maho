@@ -27,8 +27,8 @@ use Mage\Customer\Api\Address;
 #[ApiResource(
     shortName: 'Order',
     description: 'Order resource',
-    provider: OrderReader::class,
-    processor: OrderWriter::class,
+    provider: OrderProvider::class,
+    processor: OrderProcessor::class,
     operations: [
         new Get(
             uriTemplate: '/orders/{id}',
@@ -144,7 +144,7 @@ use Mage\Customer\Api\Address;
         ),
     ],
 )]
-class Order
+class Order extends \Maho\ApiPlatform\Resource
 {
     #[ApiProperty(description: 'Order entity ID', writable: false)]
     public ?int $id = null;
@@ -232,14 +232,5 @@ class Order
     public array $shipments = [];
 
     public function __construct() {}
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 
 }

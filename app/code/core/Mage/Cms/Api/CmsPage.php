@@ -21,30 +21,29 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'CmsPage',
     description: 'CMS Page resource',
-    provider: CmsPageReader::class,
+    provider: CmsPageProvider::class,
     operations: [
         new Get(uriTemplate: '/cms-pages/{id}', security: 'true'),
         new GetCollection(uriTemplate: '/cms-pages', security: 'true'),
         new Post(
             uriTemplate: '/cms-pages',
-            processor: CmsPageWriter::class,
+            processor: CmsPageProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Creates a new CMS page',
         ),
         new Put(
             uriTemplate: '/cms-pages/{id}',
-            processor: CmsPageWriter::class,
+            processor: CmsPageProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Updates a CMS page',
         ),
         new Delete(
             uriTemplate: '/cms-pages/{id}',
-            processor: CmsPageWriter::class,
+            processor: CmsPageProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Deletes a CMS page',
         ),
@@ -58,7 +57,7 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
     ],
 )]
-class CmsPage
+class CmsPage extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public string $identifier = '';
@@ -74,13 +73,4 @@ class CmsPage
     public array $stores = ['all'];
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 }

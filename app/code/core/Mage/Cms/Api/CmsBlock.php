@@ -22,30 +22,29 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use ApiPlatform\Metadata\ApiProperty;
 
 #[ApiResource(
     shortName: 'CmsBlock',
     description: 'CMS Block resource',
-    provider: CmsBlockReader::class,
+    provider: CmsBlockProvider::class,
     operations: [
         new Get(uriTemplate: '/cms-blocks/{id}', security: 'true'),
         new GetCollection(uriTemplate: '/cms-blocks', security: 'true'),
         new Post(
             uriTemplate: '/cms-blocks',
-            processor: CmsBlockWriter::class,
+            processor: CmsBlockProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Creates a new CMS block',
         ),
         new Put(
             uriTemplate: '/cms-blocks/{id}',
-            processor: CmsBlockWriter::class,
+            processor: CmsBlockProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Updates a CMS block',
         ),
         new Delete(
             uriTemplate: '/cms-blocks/{id}',
-            processor: CmsBlockWriter::class,
+            processor: CmsBlockProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Deletes a CMS block',
         ),
@@ -60,7 +59,7 @@ use ApiPlatform\Metadata\ApiProperty;
         ),
     ],
 )]
-class CmsBlock
+class CmsBlock extends \Maho\ApiPlatform\Resource
 {
     public ?int $id = null;
     public string $identifier = '';
@@ -72,13 +71,4 @@ class CmsBlock
     public array $stores = ['all'];
     public ?string $createdAt = null;
     public ?string $updatedAt = null;
-
-    /**
-     * Module-provided extension data.
-     * Populated via api_{resource}_dto_build event. Modules can append
-     * arbitrary keyed data here without modifying core API resources.
-     * @var array<string, mixed>
-     */
-    #[ApiProperty(description: 'Module-provided extension data')]
-    public array $extensions = [];
 }

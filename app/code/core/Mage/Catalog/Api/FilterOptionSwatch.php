@@ -20,7 +20,7 @@ namespace Mage\Catalog\Api;
  *   "image" — value is a full image URL
  *   "text"  — value is a short text label (e.g. "S", "M", "XL")
  */
-class FilterOptionSwatch
+class FilterOptionSwatch extends \Maho\ApiPlatform\Resource
 {
     public function __construct(
         public string $type = 'color',
