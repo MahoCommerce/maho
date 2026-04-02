@@ -91,7 +91,7 @@ final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
         return new ArrayPaginator($creditmemos, $offset, $perPage);
     }
 
-    private function mapToDto(\Mage_Sales_Model_Order_Creditmemo $creditmemo): CreditMemo
+    public function mapToDto(\Mage_Sales_Model_Order_Creditmemo $creditmemo): CreditMemo
     {
         $dto = new CreditMemo();
         $dto->id = (int) $creditmemo->getId();
@@ -134,7 +134,7 @@ final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
         return $dto;
     }
 
-    private function mapItemToDto(\Mage_Sales_Model_Order_Creditmemo_Item $item): CreditMemoItem
+    public function mapItemToDto(\Mage_Sales_Model_Order_Creditmemo_Item $item): CreditMemoItem
     {
         $dto = new CreditMemoItem();
         $dto->id = (int) $item->getId();

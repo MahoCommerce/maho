@@ -155,7 +155,7 @@ final class PaymentProvider extends \Maho\ApiPlatform\Provider
     /**
      * Map payment model to DTO
      */
-    private function mapToDto(\Maho_Pos_Model_Payment $payment): PosPayment
+    public function mapToDto(\Maho_Pos_Model_Payment $payment): PosPayment
     {
         $dto = new PosPayment();
         $dto->id = (int) $payment->getId();

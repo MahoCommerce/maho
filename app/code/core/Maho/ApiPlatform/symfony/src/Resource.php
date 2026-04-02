@@ -35,4 +35,28 @@ abstract class Resource
      */
     #[ApiProperty(description: 'Module-provided extension data')]
     public array $extensions = [];
+
+    /**
+     * Convert this DTO to an associative array.
+     * Nested DTOs and arrays of DTOs are recursively converted.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(): array
+    {
+        $data = [];
+        foreach (get_object_vars($this) as $key => $value) {
+            if ($value instanceof self) {
+                $data[$key] = $value->toArray();
+            } elseif (is_array($value)) {
+                $data[$key] = array_map(
+                    fn($v) => $v instanceof self ? $v->toArray() : $v,
+                    $value,
+                );
+            } else {
+                $data[$key] = $value;
+            }
+        }
+        return $data;
+    }
 }

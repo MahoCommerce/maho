@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service\GraphQL;
 
+use Mage\Customer\Api\CustomerProvider;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Service\CustomerService;
@@ -21,15 +22,18 @@ use Maho\ApiPlatform\Service\CustomerService;
  * Customer Query Handler
  *
  * Handles all customer-related GraphQL operations for admin API.
- * Extracted from AdminGraphQlController for better code organization.
+ * Uses CustomerProvider::mapToDto() for model-based mapping to ensure
+ * events (api_customer_dto_build) and extensions fire consistently.
  */
 class CustomerQueryHandler
 {
     private CustomerService $customerService;
+    private CustomerProvider $customerProvider;
 
-    public function __construct(CustomerService $customerService)
+    public function __construct(CustomerService $customerService, CustomerProvider $customerProvider)
     {
         $this->customerService = $customerService;
+        $this->customerProvider = $customerProvider;
     }
 
     /**
@@ -260,44 +264,11 @@ class CustomerQueryHandler
     }
 
     /**
-     * Map customer to response array
-     *
-     * @param \Mage_Customer_Model_Customer $customer
+     * Map customer model to array using the Provider DTO.
+     * Fires api_customer_dto_build and includes extensions.
      */
-    public function mapCustomer($customer): array
+    private function mapCustomer(\Mage_Customer_Model_Customer $customer): array
     {
-        $address = null;
-        $telephone = null;
-        $billingAddressId = $customer->getDefaultBilling();
-
-        if ($billingAddressId) {
-            $addressModel = \Mage::getModel('customer/address')->load($billingAddressId);
-            if ($addressModel->getId()) {
-                $telephone = $addressModel->getTelephone();
-                $address = [
-                    'id' => (int) $addressModel->getId(),
-                    'street' => $addressModel->getStreet(),
-                    'city' => $addressModel->getCity(),
-                    'postcode' => $addressModel->getPostcode(),
-                    'region' => $addressModel->getRegion(),
-                    'regionId' => $addressModel->getRegionId() ? (int) $addressModel->getRegionId() : null,
-                    'countryId' => $addressModel->getCountryId(),
-                    'telephone' => $telephone,
-                ];
-            }
-        }
-
-        return [
-            'id' => (int) $customer->getId(),
-            'email' => $customer->getEmail(),
-            'firstName' => $customer->getFirstname(),
-            'lastName' => $customer->getLastname(),
-            'fullName' => trim($customer->getFirstname() . ' ' . $customer->getLastname()),
-            'groupId' => (int) $customer->getGroupId(),
-            'telephone' => $telephone,
-            'defaultBillingAddress' => $address,
-            'createdAt' => $customer->getCreatedAt(),
-            'updatedAt' => $customer->getUpdatedAt(),
-        ];
+        return $this->customerProvider->mapToDto($customer)->toArray();
     }
 }

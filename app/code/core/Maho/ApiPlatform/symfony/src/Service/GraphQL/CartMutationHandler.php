@@ -15,21 +15,25 @@ namespace Maho\ApiPlatform\Service\GraphQL;
 
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
+use Maho\ApiPlatform\Service\CartMapper;
 use Maho\ApiPlatform\Service\CartService;
 
 /**
  * Cart Mutation Handler
  *
  * Handles all cart-related GraphQL operations for admin API.
- * Extracted from AdminGraphQlController for better code organization.
+ * Uses CartMapper::mapQuoteToCart() for DTO building to ensure
+ * events (api_cart_dto_build) and extensions fire consistently.
  */
 class CartMutationHandler
 {
     private CartService $cartService;
+    private CartMapper $cartMapper;
 
-    public function __construct(CartService $cartService)
+    public function __construct(CartService $cartService, CartMapper $cartMapper)
     {
         $this->cartService = $cartService;
+        $this->cartMapper = $cartMapper;
     }
 
     /**
@@ -443,41 +447,24 @@ class CartMutationHandler
             return $quote;
         }
 
-        $items = [];
-        foreach ($quote->getAllVisibleItems() as $item) {
-            $items[] = [
-                'id' => (int) $item->getId(),
-                'sku' => $item->getSku(),
-                'name' => $item->getName(),
-                'qty' => (float) $item->getQty(),
-                'price' => (float) $item->getPrice(),
-                'rowTotal' => (float) $item->getRowTotal(),
-                'discountAmount' => (float) $item->getDiscountAmount(),
-                'fulfillmentType' => $this->getItemFulfillmentType($item),
-            ];
+        // Use CartMapper for consistent DTO building (fires api_cart_dto_build + api_cart_item_dto_build)
+        $dto = $this->cartMapper->mapQuoteToCart($quote);
+        $data = $dto->toArray();
+
+        // Add GraphQL-specific fields
+        $data['maskedId'] = base64_encode('cart_' . $quote->getId() . '_' . substr(md5($quote->getId() . $quote->getCreatedAt()), 0, 8));
+
+        // Enrich items with fulfillment type (GraphQL-specific)
+        foreach ($quote->getAllVisibleItems() as $i => $item) {
+            if (isset($data['items'][$i])) {
+                $data['items'][$i]['fulfillmentType'] = $this->getItemFulfillmentType($item);
+            }
         }
 
-        return [
-            'id' => (int) $quote->getId(),
-            'maskedId' => base64_encode('cart_' . $quote->getId() . '_' . substr(md5($quote->getId() . $quote->getCreatedAt()), 0, 8)),
-            'customerId' => $quote->getCustomerId() ? (int) $quote->getCustomerId() : null,
-            'storeId' => (int) $quote->getStoreId(),
-            'isActive' => (bool) $quote->getIsActive(),
-            'items' => $items,
-            'itemsCount' => (int) $quote->getItemsCount(),
-            'itemsQty' => (float) $quote->getItemsQty(),
-            'prices' => [
-                'subtotal' => (float) $quote->getSubtotal(),
-                'grandTotal' => (float) $quote->getGrandTotal(),
-                'discountAmount' => abs((float) ($quote->getShippingAddress()->getDiscountAmount() ?: 0)),
-                'taxAmount' => (float) $quote->getShippingAddress()->getTaxAmount(),
-                'shippingAmount' => (float) $quote->getShippingAddress()->getShippingAmount(),
-                'giftcardAmount' => abs((float) ($quote->getGiftcardAmount() ?: 0)),
-            ],
-            'appliedCoupon' => $quote->getCouponCode() ? ['code' => $quote->getCouponCode()] : null,
-            'appliedGiftcards' => $this->mapAppliedGiftcards($quote),
-            'currency' => $quote->getQuoteCurrencyCode() ?: \Maho\ApiPlatform\Service\StoreDefaults::getCurrencyCode($quote->getStoreId() ? (int) $quote->getStoreId() : null),
-        ];
+        // Add giftcard data (GraphQL-specific)
+        $data['appliedGiftcards'] = $this->mapAppliedGiftcards($quote);
+
+        return $data;
     }
 
     /**

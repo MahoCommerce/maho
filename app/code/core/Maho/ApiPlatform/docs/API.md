@@ -1244,11 +1244,13 @@ maho.example.com {
 
 ## Extending the API (Third-Party Modules)
 
-All API resources extend `\Maho\ApiPlatform\Resource`, which provides an `extensions` field — an open array where modules can inject additional data without modifying core API files.
+All API resources extend `\Maho\ApiPlatform\Resource`, which provides an `extensions` field — an open array where modules can inject additional data without modifying core API files. The base class also provides a `toArray()` method for serializing DTOs (used by GraphQL handlers).
+
+Each Provider exposes a public `mapToDto()` method that builds the DTO from a Mage model and dispatches the corresponding event. This method can be called from any context (REST, GraphQL, custom code) to get a consistent representation with extensions.
 
 ### How It Works
 
-Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho event after building the response object. Your module observes the event and appends data to `$dto->extensions`.
+Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho event after building the response object. Your module observes the event and appends data to `$dto->extensions`. These events fire for both **REST and GraphQL** — the GraphQL handlers use the same Provider/Mapper DTO-building methods as REST, ensuring consistent behavior across both APIs.
 
 ### Event area: `api`
 

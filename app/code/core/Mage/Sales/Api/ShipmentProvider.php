@@ -85,7 +85,7 @@ final class ShipmentProvider extends \Maho\ApiPlatform\Provider
         return new ArrayPaginator($shipments, 0, count($shipments));
     }
 
-    private function mapToDto(\Mage_Sales_Model_Order_Shipment $shipment): Shipment
+    public function mapToDto(\Mage_Sales_Model_Order_Shipment $shipment): Shipment
     {
         $dto = new Shipment();
         $dto->id = (int) $shipment->getId();

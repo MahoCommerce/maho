@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Service\GraphQL;
 
+use Mage\Sales\Api\OrderProvider;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 use Maho\ApiPlatform\Service\OrderService;
@@ -26,6 +27,7 @@ use Maho\ApiPlatform\Service\OrderService;
 class OrderMutationHandler
 {
     private OrderService $orderService;
+    private OrderProvider $orderProvider;
 
     /**
      * Fallback payment method labels (used when model title unavailable)
@@ -78,9 +80,10 @@ class OrderMutationHandler
         'afterpay' => 'purchaseorder',
     ];
 
-    public function __construct(OrderService $orderService)
+    public function __construct(OrderService $orderService, OrderProvider $orderProvider)
     {
         $this->orderService = $orderService;
+        $this->orderProvider = $orderProvider;
     }
 
     /**
@@ -683,77 +686,44 @@ class OrderMutationHandler
     }
 
     /**
-     * Map order to full response array
+     * Map order to full response array.
+     * Uses the Provider DTO to ensure api_order_dto_build fires, then reshapes
+     * for GraphQL-specific format (nested money objects, computed fields).
      */
     public function mapOrder(\Mage_Sales_Model_Order $order): array
     {
-        $items = [];
-        foreach ($order->getAllVisibleItems() as $item) {
+        $dto = $this->orderProvider->mapToDto($order);
+        $data = $dto->toArray();
+
+        // Reshape money fields into {value, formatted} for GraphQL
+        $data['grandTotal'] = $this->formatMoney($order->getGrandTotal());
+        $data['subtotal'] = $this->formatMoney($order->getSubtotal());
+        $data['taxAmount'] = $this->formatMoney($order->getTaxAmount());
+        $data['shippingAmount'] = $this->formatMoney($order->getShippingAmount());
+        $data['discountAmount'] = $this->formatMoney(abs((float) $order->getDiscountAmount()));
+        $data['totalRefunded'] = $this->formatMoney($order->getTotalRefunded() ?? 0);
+
+        // Add GraphQL-specific computed fields
+        $data['canRefund'] = $order->canCreditmemo();
+
+        // Enrich items with returnable qty
+        foreach ($order->getAllVisibleItems() as $i => $item) {
             $qtyRefunded = (float) $item->getQtyRefunded();
             $qtyOrdered = (float) $item->getQtyOrdered();
-            $qtyReturnable = $qtyOrdered - $qtyRefunded;
-
-            $items[] = [
-                'id' => (int) $item->getId(),
-                'sku' => $item->getSku(),
-                'name' => $item->getName(),
-                'price' => (float) $item->getPrice(),
-                'priceInclTax' => (float) $item->getPriceInclTax(),
-                'qtyOrdered' => $qtyOrdered,
-                'qtyRefunded' => $qtyRefunded,
-                'qtyReturnable' => max(0, $qtyReturnable),
-                'rowTotal' => (float) $item->getRowTotal(),
-                'rowTotalInclTax' => (float) $item->getRowTotalInclTax(),
-                'discountAmount' => (float) $item->getDiscountAmount(),
-                'taxAmount' => (float) $item->getTaxAmount(),
-            ];
+            if (isset($data['items'][$i])) {
+                $data['items'][$i]['qtyReturnable'] = max(0, $qtyOrdered - $qtyRefunded);
+            }
         }
 
-        // Get customer info
-        $customerName = $order->getCustomerFirstname() . ' ' . $order->getCustomerLastname();
-        if (!trim($customerName)) {
-            $customerName = $order->getBillingAddress() ? $order->getBillingAddress()->getName() : 'Guest';
-        }
+        return $data;
+    }
 
+    private function formatMoney(float|string|null $amount): array
+    {
+        $value = (float) ($amount ?? 0);
         return [
-            'id' => (int) $order->getId(),
-            'incrementId' => $order->getIncrementId(),
-            'status' => $order->getStatus(),
-            'state' => $order->getState(),
-            'customerId' => $order->getCustomerId() ? (int) $order->getCustomerId() : null,
-            'customerName' => trim($customerName),
-            'customerEmail' => $order->getCustomerEmail(),
-            'grandTotal' => [
-                'value' => (float) $order->getGrandTotal(),
-                'formatted' => \Mage::helper('core')->currency($order->getGrandTotal(), true, false),
-            ],
-            'subtotal' => [
-                'value' => (float) $order->getSubtotal(),
-                'formatted' => \Mage::helper('core')->currency($order->getSubtotal(), true, false),
-            ],
-            'taxAmount' => [
-                'value' => (float) $order->getTaxAmount(),
-                'formatted' => \Mage::helper('core')->currency($order->getTaxAmount(), true, false),
-            ],
-            'shippingAmount' => [
-                'value' => (float) $order->getShippingAmount(),
-                'formatted' => \Mage::helper('core')->currency($order->getShippingAmount(), true, false),
-            ],
-            'discountAmount' => [
-                'value' => abs((float) $order->getDiscountAmount()),
-                'formatted' => \Mage::helper('core')->currency(abs((float) $order->getDiscountAmount()), true, false),
-            ],
-            'totalRefunded' => [
-                'value' => (float) ($order->getTotalRefunded() ?? 0),
-                'formatted' => \Mage::helper('core')->currency($order->getTotalRefunded() ?? 0, true, false),
-            ],
-            'items' => $items,
-            'canRefund' => $order->canCreditmemo(),
-            'paymentMethod' => $order->getPayment() ? $order->getPayment()->getMethod() : null,
-            'shippingMethod' => $order->getShippingMethod(),
-            'shippingDescription' => $order->getShippingDescription(),
-            'createdAt' => $order->getCreatedAt(),
-            'updatedAt' => $order->getUpdatedAt(),
+            'value' => $value,
+            'formatted' => \Mage::helper('core')->currency($value, true, false),
         ];
     }
 }

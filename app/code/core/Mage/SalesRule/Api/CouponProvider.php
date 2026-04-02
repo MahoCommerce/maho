@@ -96,7 +96,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
         return new ArrayPaginator($coupons, $offset, $perPage);
     }
 
-    private function mapToDto(\Mage_SalesRule_Model_Coupon $coupon, \Mage_SalesRule_Model_Rule $rule): Coupon
+    public function mapToDto(\Mage_SalesRule_Model_Coupon $coupon, \Mage_SalesRule_Model_Rule $rule): Coupon
     {
         $dto = new Coupon();
         $dto->id = (int) $coupon->getId();
