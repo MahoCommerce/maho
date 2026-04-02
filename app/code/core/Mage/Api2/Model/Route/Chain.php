@@ -14,6 +14,9 @@
  * Allows chaining routes like: api/:api_type + products/:id = api/:api_type/products/:id
  * Used by API2 to build compound routes.
  */
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Model_Route_Chain extends Mage_Api2_Model_Route_Base
 {
     /**
