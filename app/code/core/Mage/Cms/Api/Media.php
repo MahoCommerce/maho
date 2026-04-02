@@ -5,13 +5,13 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @category   Maho
- * @package    Maho_ApiPlatform
+ * @category   Mage
+ * @package    Mage_Cms
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\ApiResource;
+namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
@@ -19,8 +19,6 @@ use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\OpenApi\Model\Operation;
 use ApiPlatform\OpenApi\Model\RequestBody;
-use Maho\ApiPlatform\State\Processor\MediaProcessor;
-use Maho\ApiPlatform\State\Provider\MediaProvider;
 
 #[ApiResource(
     uriTemplate: '/media',

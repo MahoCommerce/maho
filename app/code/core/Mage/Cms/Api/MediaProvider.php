@@ -5,23 +5,23 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @category   Maho
- * @package    Maho_ApiPlatform
+ * @category   Mage
+ * @package    Mage_Cms
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Provider;
+namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use Mage;
 use Mage_Cms_Model_Wysiwyg_Config;
 use Mage_Core_Model_Store;
-use Maho\ApiPlatform\ApiResource\Media;
 use Maho\ApiPlatform\Security\ApiUser;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
+use Maho\Io\File as IoFile;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
@@ -35,7 +35,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final class MediaProvider implements ProviderInterface
 {
-    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'bmp'];
 
     public function __construct(
         private readonly Security $security,
@@ -114,7 +113,7 @@ final class MediaProvider implements ProviderInterface
 
             $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
 
-            if (!in_array($extension, self::ALLOWED_EXTENSIONS, true)) {
+            if (!in_array($extension, IoFile::ALLOWED_IMAGES_EXTENSIONS, true)) {
                 continue;
             }
 

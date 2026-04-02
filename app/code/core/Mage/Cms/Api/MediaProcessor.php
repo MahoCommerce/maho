@@ -5,13 +5,13 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @category   Maho
- * @package    Maho_ApiPlatform
+ * @category   Mage
+ * @package    Mage_Cms
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\ApiPlatform\State\Processor;
+namespace Mage\Cms\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
@@ -20,7 +20,6 @@ use Mage;
 use Mage_Cms_Model_Wysiwyg_Config;
 use Mage_Core_Model_File_Uploader;
 use Mage_Core_Model_Store;
-use Maho\ApiPlatform\ApiResource\Media;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Trait\AuthenticationTrait;
 use Maho\Io\File as IoFile;
@@ -41,10 +40,6 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class MediaProcessor implements ProcessorInterface
 {
     use AuthenticationTrait;
-
-    private const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-    private const ALLOWED_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    private const WEBP_QUALITY = 85;
 
     public function __construct(
         Security $security,
@@ -76,16 +71,10 @@ final class MediaProcessor implements ProcessorInterface
             throw new BadRequestHttpException('File upload failed: ' . $error);
         }
 
-        if ($uploadedFile->getSize() > self::MAX_FILE_SIZE) {
-            throw new BadRequestHttpException(
-                sprintf('File size exceeds maximum allowed size of %d MB', self::MAX_FILE_SIZE / 1024 / 1024),
-            );
-        }
-
         $originalExtension = strtolower($uploadedFile->getClientOriginalExtension());
-        if (!in_array($originalExtension, self::ALLOWED_EXTENSIONS, true)) {
+        if (!in_array($originalExtension, IoFile::ALLOWED_IMAGES_EXTENSIONS, true)) {
             throw new BadRequestHttpException(
-                'Invalid file type. Allowed types: ' . implode(', ', self::ALLOWED_EXTENSIONS),
+                'Invalid file type. Allowed types: ' . implode(', ', IoFile::ALLOWED_IMAGES_EXTENSIONS),
             );
         }
 
@@ -248,7 +237,7 @@ final class MediaProcessor implements ProcessorInterface
 
         imagecopyresampled($cleanImage, $image, 0, 0, 0, 0, $width, $height, $width, $height);
 
-        $quality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality') ?: self::WEBP_QUALITY;
+        $quality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
         if (!imagewebp($cleanImage, $destPath, $quality)) {
             imagedestroy($image);
             imagedestroy($cleanImage);
