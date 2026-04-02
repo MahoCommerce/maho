@@ -27,7 +27,6 @@ trait CacheTrait
      * Get or compute a cached value.
      *
      * @template T
-     * @param string $cacheKey
      * @param array<string> $cacheTags
      * @param int $ttl TTL in seconds
      * @param \Closure(): T $compute Builds the result if cache misses
