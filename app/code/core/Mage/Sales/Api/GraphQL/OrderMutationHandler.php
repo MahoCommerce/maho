@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Mage\Sales\Api\GraphQL;
 
+use Mage\Checkout\Api\CartService;
 use Mage\Sales\Api\OrderProvider;
 use Mage\Sales\Api\OrderService;
 use Maho\ApiPlatform\Exception\NotFoundException;
@@ -28,6 +29,7 @@ class OrderMutationHandler
 {
     private OrderService $orderService;
     private OrderProvider $orderProvider;
+    private CartService $cartService;
 
     /**
      * Fallback payment method labels (used when model title unavailable)
@@ -80,10 +82,11 @@ class OrderMutationHandler
         'afterpay' => 'purchaseorder',
     ];
 
-    public function __construct(OrderService $orderService, OrderProvider $orderProvider)
+    public function __construct(OrderService $orderService, OrderProvider $orderProvider, ?CartService $cartService = null)
     {
         $this->orderService = $orderService;
         $this->orderProvider = $orderProvider;
+        $this->cartService = $cartService ?? new CartService();
     }
 
     /**
@@ -102,48 +105,17 @@ class OrderMutationHandler
             throw NotFoundException::cart();
         }
 
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-        }
-
-        // POS default address
-        $posAddress = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
-
-
-        if (!$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            if (!$shippingAddress->getFirstname()) {
-                $shippingAddress->addData($posAddress);
-            }
-            $shippingMethod = $variables['shippingMethod'] ?? null;
-            if (!$shippingAddress->getShippingMethod() || $shippingMethod) {
-                $method = $shippingMethod ?: 'freeshipping_freeshipping';
-                $shippingAddress->setShippingMethod($method);
-                if ($method === 'freeshipping_freeshipping') {
-                    $shippingAddress->setShippingDescription('Free Shipping - POS Pickup');
-                    $shippingAddress->setShippingAmount(0);
-                    $shippingAddress->setBaseShippingAmount(0);
-                }
-            }
-        }
-
-        $billingAddress = $quote->getBillingAddress();
-        if (!$billingAddress->getFirstname()) {
-            $billingAddress->addData($posAddress);
-        }
-
-        $payment = $quote->getPayment();
         $paymentMethod = $variables['paymentMethod'] ?? null;
-        if (!$payment->getMethod() || $paymentMethod) {
-            $method = $paymentMethod ?: 'cashondelivery';
-            $method = self::POS_PAYMENT_MAP[$method] ?? $method;
-            $payment->setMethod($method);
+        if ($paymentMethod) {
+            $paymentMethod = self::POS_PAYMENT_MAP[$paymentMethod] ?? $paymentMethod;
         }
 
-        if (!$quote->getCustomerEmail()) {
-            $quote->setCustomerEmail($variables['guestEmail'] ?? 'pos@store.local');
-        }
+        $this->cartService->preparePosQuote(
+            $quote,
+            $variables['shippingMethod'] ?? null,
+            $paymentMethod,
+            $variables['guestEmail'] ?? null,
+        );
 
         $quote->collectTotals();
         $quote->save();
@@ -161,25 +133,8 @@ class OrderMutationHandler
         $shipment = null;
 
         try {
-            if ($order->canInvoice()) {
-                $invoice = \Mage::getModel('sales/service_order', $order)
-                    ->prepareInvoice()
-                    ->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)
-                    ->register();
-                $invoice->getOrder()->setIsInProcess(true);
-                \Mage::getModel('core/resource_transaction')
-                    ->addObject($invoice)
-                    ->addObject($invoice->getOrder())
-                    ->save();
-            }
-            if ($order->canShip()) {
-                $shipment = \Mage::getModel('sales/service_order', $order)->prepareShipment();
-                $shipment->register();
-                \Mage::getModel('core/resource_transaction')
-                    ->addObject($shipment)
-                    ->addObject($shipment->getOrder())
-                    ->save();
-            }
+            $invoice = $this->orderService->createInvoiceForOrder($order);
+            $shipment = $this->orderService->createShipmentForOrder($order);
             $order->load($order->getId());
         } catch (\Exception $e) {
             \Mage::logException($e);
@@ -223,42 +178,11 @@ class OrderMutationHandler
             throw NotFoundException::cart();
         }
 
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-        }
-
-        $posAddress = \Maho\ApiPlatform\Service\StoreDefaults::getPosAddress($quote->getStoreId() ? (int) $quote->getStoreId() : null);
-
-
-        if (!$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            if (!$shippingAddress->getFirstname()) {
-                $shippingAddress->addData($posAddress);
-            }
-            $shippingMethod = $variables['shippingMethod'] ?? null;
-            if (!$shippingAddress->getShippingMethod() || $shippingMethod) {
-                $method = $shippingMethod ?: 'freeshipping_freeshipping';
-                $shippingAddress->setShippingMethod($method);
-                if ($method === 'freeshipping_freeshipping') {
-                    $shippingAddress->setShippingDescription('Free Shipping - POS Pickup');
-                    $shippingAddress->setShippingAmount(0);
-                    $shippingAddress->setBaseShippingAmount(0);
-                }
-            }
-        }
-
-        $billingAddress = $quote->getBillingAddress();
-        if (!$billingAddress->getFirstname()) {
-            $billingAddress->addData($posAddress);
-        }
-
-        $payment = $quote->getPayment();
-        $payment->setMethod('maho_pos_split');
-
-        if (!$quote->getCustomerEmail()) {
-            $quote->setCustomerEmail('pos@store.local');
-        }
+        $this->cartService->preparePosQuote(
+            $quote,
+            $variables['shippingMethod'] ?? null,
+            'maho_pos_split',
+        );
 
         $quote->collectTotals();
         $quote->save();
@@ -331,25 +255,8 @@ class OrderMutationHandler
         }
 
         try {
-            if ($order->canInvoice()) {
-                $invoice = \Mage::getModel('sales/service_order', $order)
-                    ->prepareInvoice()
-                    ->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)
-                    ->register();
-                $invoice->getOrder()->setIsInProcess(true);
-                \Mage::getModel('core/resource_transaction')
-                    ->addObject($invoice)
-                    ->addObject($invoice->getOrder())
-                    ->save();
-            }
-            if ($order->canShip()) {
-                $shipment = \Mage::getModel('sales/service_order', $order)->prepareShipment();
-                $shipment->register();
-                \Mage::getModel('core/resource_transaction')
-                    ->addObject($shipment)
-                    ->addObject($shipment->getOrder())
-                    ->save();
-            }
+            $invoice = $this->orderService->createInvoiceForOrder($order);
+            $shipment = $this->orderService->createShipmentForOrder($order);
             $order->load($order->getId());
         } catch (\Exception $e) {
             \Mage::logException($e);

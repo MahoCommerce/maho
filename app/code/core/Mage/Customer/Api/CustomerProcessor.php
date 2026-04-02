@@ -5,7 +5,6 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @category   Maho
  * @package    Mage_Customer
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
@@ -15,7 +14,6 @@ namespace Mage\Customer\Api;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -23,7 +21,6 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
  * Customer State Processor - Handles customer mutations for API Platform
@@ -31,11 +28,13 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 {
     private readonly CustomerMapper $customerMapper;
+    private readonly CustomerService $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
         $this->customerMapper = new CustomerMapper();
+        $this->customerService = new CustomerService();
     }
 
     private function checkRateLimit(string $key, int $maxAttempts, int $windowSeconds): void
@@ -96,93 +95,26 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Update current customer profile
+     * Update current customer profile (REST entry point)
      */
     private function updateProfile(Customer $data): Customer
     {
-        $customerId = $this->getAuthenticatedCustomerId();
-        if (!$customerId) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw new AccessDeniedHttpException('Customer not found');
-        }
-
-        // Update allowed fields
-        if ($data->firstName !== null) {
-            $customer->setFirstname($data->firstName);
-        }
-        if ($data->lastName !== null) {
-            $customer->setLastname($data->lastName);
-        }
-        if ($data->email !== '' && $data->email !== $customer->getEmail()) {
-            // Check if new email is already in use
-            $existingCustomer = \Mage::getModel('customer/customer')
-                ->setWebsiteId($customer->getWebsiteId())
-                ->loadByEmail($data->email);
-            if ($existingCustomer->getId() && $existingCustomer->getId() != $customerId) {
-                throw new BadRequestHttpException('Email is already in use');
-            }
-            $customer->setEmail($data->email);
-        }
-
-        try {
-            $customer->save();
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to update profile');
-        }
-
-        return $this->customerMapper->mapToDto($customer);
+        return $this->doUpdateProfile(
+            firstName: $data->firstName,
+            lastName: $data->lastName,
+            email: $data->email !== '' ? $data->email : null,
+        );
     }
 
     /**
-     * Change current customer password
+     * Change current customer password (REST entry point)
      */
     private function changePassword(Customer $data): Customer
     {
-        $customerId = $this->getAuthenticatedCustomerId();
-        if (!$customerId) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        $coreHelper = \Mage::helper('core');
-
-        if (!$coreHelper->isValidNotBlank($data->currentPassword ?? '')) {
-            throw new BadRequestHttpException('Current password is required');
-        }
-        if (!$coreHelper->isValidNotBlank($data->newPassword ?? '')) {
-            throw new BadRequestHttpException('New password is required');
-        }
-
-        $minPasswordLength = (int) \Mage::getStoreConfig('customer/password/minimum_password_length') ?: 8;
-        if (!$coreHelper->isValidLength($data->newPassword, $minPasswordLength)) {
-            throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
-        }
-
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw new AccessDeniedHttpException('Customer not found');
-        }
-
-        // Verify current password
-        if (!$customer->validatePassword($data->currentPassword)) {
-            throw new BadRequestHttpException('Current password is incorrect');
-        }
-
-        // Set new password
-        $customer->setPassword($data->newPassword);
-
-        try {
-            $customer->save();
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to change password');
-        }
-
-        return $this->customerMapper->mapToDto($customer);
+        return $this->doChangePassword(
+            currentPassword: $data->currentPassword ?? '',
+            newPassword: $data->newPassword ?? '',
+        );
     }
 
     /**
@@ -372,40 +304,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? [];
 
-        $customerId = $this->getAuthenticatedCustomerId();
-        if (!$customerId) {
-            throw new AccessDeniedHttpException('Authentication required');
-        }
-
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
-            throw new AccessDeniedHttpException('Customer not found');
-        }
-
-        if (isset($args['firstName'])) {
-            $customer->setFirstname($args['firstName']);
-        }
-        if (isset($args['lastName'])) {
-            $customer->setLastname($args['lastName']);
-        }
-        if (isset($args['email']) && $args['email'] !== $customer->getEmail()) {
-            $existingCustomer = \Mage::getModel('customer/customer')
-                ->setWebsiteId($customer->getWebsiteId())
-                ->loadByEmail($args['email']);
-            if ($existingCustomer->getId() && $existingCustomer->getId() != $customerId) {
-                throw new BadRequestHttpException('Email is already in use');
-            }
-            $customer->setEmail($args['email']);
-        }
-
-        try {
-            $customer->save();
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to update profile');
-        }
-
-        return $this->customerMapper->mapToDto($customer);
+        return $this->doUpdateProfile(
+            firstName: $args['firstName'] ?? null,
+            lastName: $args['lastName'] ?? null,
+            email: $args['email'] ?? null,
+        );
     }
 
     /**
@@ -415,13 +318,51 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     {
         $args = $context['args']['input'] ?? [];
 
+        return $this->doChangePassword(
+            currentPassword: $args['currentPassword'] ?? '',
+            newPassword: $args['newPassword'] ?? '',
+        );
+    }
+
+    /**
+     * Shared logic for updating customer profile (used by both REST and GraphQL)
+     */
+    private function doUpdateProfile(?string $firstName, ?string $lastName, ?string $email): Customer
+    {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
             throw new AccessDeniedHttpException('Authentication required');
         }
 
-        $currentPassword = $args['currentPassword'] ?? '';
-        $newPassword = $args['newPassword'] ?? '';
+        $customer = $this->customerService->getCustomerById($customerId);
+        if (!$customer) {
+            throw new AccessDeniedHttpException('Customer not found');
+        }
+
+        $data = array_filter([
+            'firstName' => $firstName,
+            'lastName' => $lastName,
+            'email' => $email,
+        ], fn($v) => $v !== null);
+
+        try {
+            $customer = $this->customerService->updateCustomer($customer, $data);
+        } catch (\Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
+        }
+
+        return $this->customerMapper->mapToDto($customer);
+    }
+
+    /**
+     * Shared logic for changing customer password (used by both REST and GraphQL)
+     */
+    private function doChangePassword(string $currentPassword, string $newPassword): Customer
+    {
+        $customerId = $this->getAuthenticatedCustomerId();
+        if (!$customerId) {
+            throw new AccessDeniedHttpException('Authentication required');
+        }
 
         $coreHelper = \Mage::helper('core');
 
@@ -437,29 +378,22 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
         }
 
-        $customer = \Mage::getModel('customer/customer')->load($customerId);
-        if (!$customer->getId()) {
+        $customer = $this->customerService->getCustomerById($customerId);
+        if (!$customer) {
             throw new AccessDeniedHttpException('Customer not found');
         }
 
-        if (!$customer->validatePassword($currentPassword)) {
-            throw new BadRequestHttpException('Current password is incorrect');
-        }
-
-        $customer->setPassword($newPassword);
-
         try {
-            $customer->save();
+            $this->customerService->changePassword($customer, $currentPassword, $newPassword);
         } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to change password');
+            throw new BadRequestHttpException($e->getMessage());
         }
 
         return $this->customerMapper->mapToDto($customer);
     }
 
     /**
-     * Send forgot password email via GraphQL mutation
+     * Send forgot password email
      */
     private function forgotPassword(array $context): Customer
     {
@@ -494,7 +428,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Reset password with token via GraphQL mutation
+     * Reset password with token
      */
     private function resetPassword(array $context): Customer
     {
@@ -508,52 +442,17 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Email, reset token, and new password are required');
         }
 
-        $coreHelper = \Mage::helper('core');
         $minPasswordLength = (int) \Mage::getStoreConfig('customer/password/minimum_password_length') ?: 8;
-        if (!$coreHelper->isValidLength($newPassword, $minPasswordLength)) {
+        if (!\Mage::helper('core')->isValidLength($newPassword, $minPasswordLength)) {
             throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
         }
 
-        $storeId = StoreContext::getStoreId();
-        $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
-
-        $customer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId)
-            ->loadByEmail($email);
-
-        if (!$customer->getId()) {
-            throw new BadRequestHttpException('Invalid email or reset token');
-        }
-
-        // Validate reset token
-        $customerToken = $customer->getRpToken();
-        if (!$customerToken || !hash_equals($customerToken, $resetToken)) {
-            throw new BadRequestHttpException('Invalid email or reset token');
-        }
-
-        // Check token expiry
-        $tokenCreatedAt = $customer->getRpTokenCreatedAt();
-        if ($tokenCreatedAt) {
-            $expirationPeriod = (int) \Mage::getStoreConfig('customer/password/reset_link_expiration_period') ?: 2;
-            $tokenAge = (time() - strtotime($tokenCreatedAt)) / 3600;
-            if ($tokenAge > $expirationPeriod) {
-                throw new BadRequestHttpException('Reset token has expired');
-            }
-        }
-
-        // Set new password and clear token
-        $customer->setPassword($newPassword);
-        $customer->setRpToken('');
-        $customer->setRpTokenCreatedAt('');
-
         try {
-            $customer->save();
+            $this->customerService->resetPassword($email, $resetToken, $newPassword);
         } catch (\Exception $e) {
-            \Mage::logException($e);
-            throw new BadRequestHttpException('Failed to reset password');
+            throw new BadRequestHttpException($e->getMessage());
         }
 
-        // Return minimal DTO — don't expose full customer data after password reset
         $dto = new Customer();
         $dto->email = $email;
         return $dto;

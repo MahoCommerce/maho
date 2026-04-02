@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Mage\Sales\Api;
 
 use ApiPlatform\Metadata\Operation;
-use Mage\Customer\Api\AddressMapper;
 use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -27,8 +26,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class OrderProcessor extends \Maho\ApiPlatform\Processor
 {
-    private AddressMapper $addressMapper;
     private CartService $cartService;
+    private OrderProvider $orderProvider;
     private OrderService $orderService;
     private PaymentService $paymentService;
     private readonly PosPaymentMapper $posPaymentMapper;
@@ -36,8 +35,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->addressMapper = new AddressMapper();
         $this->cartService = new CartService();
+        $this->orderProvider = new OrderProvider($security);
         $this->orderService = new OrderService();
         $this->paymentService = new PaymentService();
         $this->posPaymentMapper = new PosPaymentMapper();
@@ -123,7 +122,11 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $accessToken = $result['accessToken'];
         $changeAmount = $result['changeAmount'];
 
-        return $this->mapOrderToDto($order, $accessToken, $changeAmount);
+        $dto = $this->orderProvider->mapToDto($order, $accessToken);
+        if ($changeAmount !== null) {
+            $dto->changeAmount = $changeAmount;
+        }
+        return $dto;
     }
 
     /**
@@ -160,146 +163,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Cancel order
         $order = $this->orderService->cancelOrder($order, $reason);
 
-        return $this->mapOrderToDto($order);
-    }
-
-    /**
-     * Map Maho order model to Order DTO
-     */
-    private function mapOrderToDto(
-        \Mage_Sales_Model_Order $order,
-        ?string $accessToken = null,
-        ?float $changeAmount = null,
-    ): Order {
-        $dto = new Order();
-        $dto->id = (int) $order->getId();
-        $dto->incrementId = $order->getIncrementId();
-        $dto->customerId = $order->getCustomerId() ? (int) $order->getCustomerId() : null;
-        $dto->customerEmail = $order->getCustomerEmail();
-        $dto->customerFirstname = $order->getCustomerFirstname();
-        $dto->customerLastname = $order->getCustomerLastname();
-        $dto->status = $order->getStatus();
-        $dto->state = $order->getState();
-        $dto->storeId = (int) $order->getStoreId();
-        $dto->currency = $order->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
-        $dto->totalItemCount = (int) $order->getTotalItemCount();
-        $dto->totalQtyOrdered = (float) $order->getTotalQtyOrdered();
-        $dto->createdAt = $order->getCreatedAt();
-        $dto->updatedAt = $order->getUpdatedAt();
-        $dto->couponCode = $order->getCouponCode();
-
-        // Set access token for guest orders
-        if ($accessToken) {
-            $dto->accessToken = $accessToken;
-        }
-
-        // Set change amount for cash payments
-        if ($changeAmount !== null) {
-            $dto->changeAmount = $changeAmount;
-        }
-
-        // Map items
-        $dto->items = [];
-        foreach ($order->getAllVisibleItems() as $item) {
-            $dto->items[] = $this->mapItemToDto($item);
-        }
-
-        // Map prices
-        $dto->prices = $this->mapPricesToArray($order);
-
-        // Map billing address
-        $billingAddress = $order->getBillingAddress();
-        if ($billingAddress && $billingAddress->getId()) {
-            $dto->billingAddress = $this->addressMapper->fromOrderAddress($billingAddress);
-        }
-
-        // Map shipping address
-        $shippingAddress = $order->getShippingAddress();
-        if ($shippingAddress && $shippingAddress->getId()) {
-            $dto->shippingAddress = $this->addressMapper->fromOrderAddress($shippingAddress);
-        }
-
-        // Map shipping method
-        $dto->shippingMethod = $order->getShippingMethod();
-        $dto->shippingDescription = $order->getShippingDescription();
-
-        // Map payment method
-        $payment = $order->getPayment();
-        if ($payment) {
-            $dto->paymentMethod = $payment->getMethod();
-            try {
-                $dto->paymentMethodTitle = $payment->getMethodInstance()->getTitle();
-            } catch (\Exception $e) {
-                $dto->paymentMethodTitle = $payment->getMethod();
-            }
-        }
-
-        // Map status history
-        $dto->statusHistory = $this->orderService->getOrderNotes($order);
-
-        return $dto;
-    }
-
-    /**
-     * Map Maho order item model to OrderItem DTO
-     */
-    private function mapItemToDto(\Mage_Sales_Model_Order_Item $item): OrderItem
-    {
-        $dto = new OrderItem();
-        $dto->id = (int) $item->getId();
-        $dto->sku = $item->getSku();
-        $dto->name = $item->getName() ?? '';
-        $dto->qty = (float) $item->getQtyOrdered();
-        $dto->qtyOrdered = (float) $item->getQtyOrdered();
-        $dto->qtyShipped = (float) $item->getQtyShipped();
-        $dto->qtyRefunded = (float) $item->getQtyRefunded();
-        $dto->qtyCanceled = (float) $item->getQtyCanceled();
-        $dto->price = (float) $item->getPrice();
-        $dto->priceInclTax = (float) $item->getPriceInclTax();
-        $dto->rowTotal = (float) $item->getRowTotal();
-        $dto->rowTotalInclTax = (float) $item->getRowTotalInclTax();
-        $dto->discountAmount = $item->getDiscountAmount() ? (float) $item->getDiscountAmount() : null;
-        $dto->discountPercent = $item->getDiscountPercent() ? (float) $item->getDiscountPercent() : null;
-        $dto->taxAmount = $item->getTaxAmount() ? (float) $item->getTaxAmount() : null;
-        $dto->taxPercent = $item->getTaxPercent() ? (float) $item->getTaxPercent() : null;
-        $dto->productId = $item->getProductId() ? (int) $item->getProductId() : null;
-        $dto->productType = $item->getProductType();
-        $dto->parentItemId = $item->getParentItemId() ? (int) $item->getParentItemId() : null;
-
-        return $dto;
-    }
-
-    /**
-     * Map Maho order to prices array
-     */
-    private function mapPricesToArray(\Mage_Sales_Model_Order $order): array
-    {
-        $prices = [
-            'subtotal' => (float) $order->getSubtotal(),
-            'subtotalInclTax' => (float) $order->getSubtotalInclTax(),
-            'discountAmount' => $order->getDiscountAmount()
-                ? (float) abs($order->getDiscountAmount())
-                : null,
-            'shippingAmount' => $order->getShippingAmount()
-                ? (float) $order->getShippingAmount()
-                : null,
-            'shippingAmountInclTax' => $order->getShippingInclTax()
-                ? (float) $order->getShippingInclTax()
-                : null,
-            'taxAmount' => (float) $order->getTaxAmount(),
-            'grandTotal' => (float) $order->getGrandTotal(),
-            'totalPaid' => (float) $order->getTotalPaid(),
-            'totalRefunded' => (float) $order->getTotalRefunded(),
-            'totalDue' => (float) $order->getTotalDue(),
-            'giftcardAmount' => null,
-        ];
-
-        $giftcardAmount = $order->getData('giftcard_amount');
-        if ($giftcardAmount) {
-            $prices['giftcardAmount'] = (float) abs($giftcardAmount);
-        }
-
-        return $prices;
+        return $this->orderProvider->mapToDto($order);
     }
 
     /**
@@ -338,58 +202,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             throw new NotFoundHttpException('Cart not found');
         }
 
-        // Set store context
-        if ($quote->getStoreId()) {
-            \Mage::app()->setCurrentStore($quote->getStoreId());
-            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
-        }
+        // Apply POS defaults (address, shipping, payment, email)
+        $this->cartService->preparePosQuote(
+            $quote,
+            $shippingMethod,
+            'maho_pos_split',
+        );
 
-        // POS default address — all values from store config, nothing hardcoded
-        $sid = $quote->getStoreId();
-        $posAddress = [
-            'firstname' => 'POS',
-            'lastname' => 'Customer',
-            'street' => \Mage::getStoreConfig('general/store_information/address', $sid) ?: 'In-Store Pickup',
-            'city' => \Mage::getStoreConfig('general/store_information/city', $sid) ?: 'Store',
-            'region' => \Mage::getStoreConfig('general/store_information/region', $sid) ?: '',
-            'postcode' => \Mage::getStoreConfig('general/store_information/postcode', $sid) ?: '0000',
-            'country_id' => \Mage::getStoreConfig('general/country/default', $sid) ?: 'US',
-            'telephone' => \Mage::getStoreConfig('general/store_information/phone', $sid) ?: '0000000000',
-        ];
-
-        // Set shipping address and method
-        if (!$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            if (!$shippingAddress->getFirstname()) {
-                $shippingAddress->addData($posAddress);
-            }
-            if (!$shippingAddress->getShippingMethod() || $shippingMethod) {
-                $method = $shippingMethod ?: 'freeshipping_freeshipping';
-                $shippingAddress->setShippingMethod($method);
-                if ($method === 'freeshipping_freeshipping') {
-                    $shippingAddress->setShippingDescription('Free Shipping - POS Pickup');
-                    $shippingAddress->setShippingAmount(0);
-                    $shippingAddress->setBaseShippingAmount(0);
-                }
-            }
-        }
-
-        // Set billing address
-        $billingAddress = $quote->getBillingAddress();
-        if (!$billingAddress->getFirstname()) {
-            $billingAddress->addData($posAddress);
-        }
-
-        // Set payment method to split payment
-        $payment = $quote->getPayment();
-        $payment->setMethod('maho_pos_split');
-
-        // Set email if not present
-        if (!$quote->getCustomerEmail()) {
-            $quote->setCustomerEmail('pos@store.local');
-        }
-
-        // Collect totals
         $quote->collectTotals();
         $quote->save();
 
@@ -455,17 +274,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $shipmentDto = null;
 
         try {
-            if ($order->canInvoice()) {
-                $invoice = \Mage::getModel('sales/service_order', $order)
-                    ->prepareInvoice()
-                    ->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE)
-                    ->register();
-                $invoice->getOrder()->setIsInProcess(true);
-                \Mage::getModel('core/resource_transaction')
-                    ->addObject($invoice)
-                    ->addObject($invoice->getOrder())
-                    ->save();
-
+            $invoice = $this->orderService->createInvoiceForOrder($order);
+            if ($invoice) {
                 $invoiceDto = new Invoice();
                 $invoiceDto->id = (int) $invoice->getId();
                 $invoiceDto->incrementId = $invoice->getIncrementId();
@@ -475,15 +285,8 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
                 $invoiceDto->createdAt = $invoice->getCreatedAt();
             }
 
-            if ($order->canShip()) {
-                $shipment = \Mage::getModel('sales/service_order', $order)
-                    ->prepareShipment();
-                $shipment->register();
-                \Mage::getModel('core/resource_transaction')
-                    ->addObject($shipment)
-                    ->addObject($shipment->getOrder())
-                    ->save();
-
+            $shipment = $this->orderService->createShipmentForOrder($order);
+            if ($shipment) {
                 $shipmentDto = new Shipment();
                 $shipmentDto->id = (int) $shipment->getId();
                 $shipmentDto->incrementId = $shipment->getIncrementId();
@@ -503,7 +306,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
 
         // Build result
         $resultDto = new PlaceOrderWithSplitPaymentsResult();
-        $resultDto->order = $this->mapOrderToDto($order);
+        $resultDto->order = $this->orderProvider->mapToDto($order);
         $resultDto->payments = $savedPayments;
         $resultDto->changeAmount = $changeAmount > 0 ? round($changeAmount, 2) : null;
         $resultDto->invoice = $invoiceDto;

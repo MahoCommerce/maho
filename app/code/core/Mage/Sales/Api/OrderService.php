@@ -439,6 +439,53 @@ class OrderService
     }
 
     /**
+     * Create invoice for an order
+     *
+     * @param \Mage_Sales_Model_Order $order Order to invoice
+     * @param bool $capture Whether to capture payment (CAPTURE_OFFLINE) or not (NOT_CAPTURE)
+     * @return \Mage_Sales_Model_Order_Invoice|null Null if order cannot be invoiced
+     */
+    public function createInvoiceForOrder(\Mage_Sales_Model_Order $order, bool $capture = true): ?\Mage_Sales_Model_Order_Invoice
+    {
+        if (!$order->canInvoice()) {
+            return null;
+        }
+
+        $invoice = $order->prepareInvoice();
+        $invoice->setRequestedCaptureCase(
+            $capture ? \Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE : \Mage_Sales_Model_Order_Invoice::NOT_CAPTURE,
+        );
+        $invoice->register();
+
+        $transactionSave = \Mage::getModel('core/resource_transaction');
+        $transactionSave->addObject($invoice)->addObject($order)->save();
+
+        return $invoice;
+    }
+
+    /**
+     * Create shipment for an order
+     *
+     * @param \Mage_Sales_Model_Order $order Order to ship
+     * @return \Mage_Sales_Model_Order_Shipment|null Null if order cannot be shipped
+     */
+    public function createShipmentForOrder(\Mage_Sales_Model_Order $order): ?\Mage_Sales_Model_Order_Shipment
+    {
+        if (!$order->canShip()) {
+            return null;
+        }
+
+        $shipment = $order->prepareShipment();
+        $shipment->register();
+        $order->setIsInProcess(true);
+
+        $transactionSave = \Mage::getModel('core/resource_transaction');
+        $transactionSave->addObject($shipment)->addObject($order)->save();
+
+        return $shipment;
+    }
+
+    /**
      * Generate secure access token for guest orders
      *
      * @return string Cryptographically secure random token

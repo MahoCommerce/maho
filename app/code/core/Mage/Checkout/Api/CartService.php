@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
+use Mage\Sales\Api\OrderService;
 use Maho\ApiPlatform\Service\StoreDefaults;
 
 /**
@@ -21,6 +22,13 @@ use Maho\ApiPlatform\Service\StoreDefaults;
 class CartService
 {
     private const MAX_ITEM_QTY = 10000;
+
+    private OrderService $orderService;
+
+    public function __construct()
+    {
+        $this->orderService = new OrderService();
+    }
     /**
      * Create empty cart
      *
@@ -621,35 +629,9 @@ class CartService
         try {
             \Mage::log("PlaceOrder START - Quote ID: {$quote->getId()}, Customer ID: {$quote->getCustomerId()}");
 
-            // Always set/override the payment method
-            $quote->getPayment()->setMethod($paymentMethod);
+            // Apply POS defaults (address, shipping, payment, email)
+            $this->preparePosQuote($quote, $shippingMethod, $paymentMethod);
             \Mage::log("PlaceOrder - Payment method set: {$paymentMethod}");
-
-            // Set billing/shipping addresses if not set (for guest/walk-in checkout)
-            // Derive defaults from store config — nothing hardcoded
-            if (!$quote->getBillingAddress()->getFirstname()) {
-                $quote->getBillingAddress()->setData($this->getStoreDefaultAddress($quote->getStoreId()));
-            }
-
-            if (!$quote->getShippingAddress()->getFirstname()) {
-                $quote->getShippingAddress()->setData($this->getStoreDefaultAddress($quote->getStoreId()));
-            }
-
-            // Set shipping method if not already set
-            if (!$quote->getShippingAddress()->getShippingMethod()) {
-                // Use provided shipping method, or default from config, or freeshipping as fallback
-                if ($shippingMethod) {
-                    $defaultMethod = $shippingMethod;
-                } else {
-                    $defaultMethod = \Mage::getStoreConfig('maho_pos/general/default_shipping_method', $quote->getStoreId());
-                    if (!$defaultMethod) {
-                        $defaultMethod = 'freeshipping_freeshipping';
-                    }
-                }
-
-                $quote->getShippingAddress()->setShippingMethod($defaultMethod);
-                // Description will be set by collectTotals based on the method
-            }
 
             // Collect totals before order creation
             $quote->setTotalsCollectedFlag(false);
@@ -952,50 +934,22 @@ class CartService
     }
 
     /**
-     * Create invoice for order (MDN PointOfSales approach)
-     * Uses pay() instead of capture() for offline POS payments
+     * Create invoice for order (POS approach)
+     * Uses pay() after creation for offline POS payments
      *
      * @param string $comments Optional invoice comments
      */
     protected function createInvoice(\Mage_Sales_Model_Order $order, string $comments = ''): \Mage_Sales_Model_Order_Invoice
     {
-        $convertor = \Mage::getModel('sales/convert_order');
-        $invoice = $convertor->toInvoice($order);
+        $invoice = $this->orderService->createInvoiceForOrder($order);
 
-        // Index parent item quantities to avoid N+1 queries
-        $parentQtys = [];
-        foreach ($order->getAllItems() as $item) {
-            $parentQtys[$item->getId()] = $item->getQtyOrdered();
+        if (!$invoice) {
+            throw new \RuntimeException('Order cannot be invoiced');
         }
 
-        // Browse order items and add to invoice
-        foreach ($order->getAllItems() as $orderItem) {
-            $invoiceItem = $convertor->itemToInvoiceItem($orderItem);
-            $qty = $orderItem->getQtyOrdered();
-
-            // Handle child items with parent
-            if ($qty <= 0 && $orderItem->getParentItemId() > 0) {
-                $qty = $parentQtys[$orderItem->getParentItemId()] ?? 0;
-            }
-
-            $invoiceItem->setQty($qty);
-            $invoice->addItem($invoiceItem);
-        }
-
-        // Add comments if provided
         if ($comments !== '') {
             $invoice->addComment($comments, false);
         }
-
-        // Save invoice
-        $invoice->collectTotals();
-        $invoice->register();
-
-        // Use transaction to save invoice and order together
-        $transactionSave = \Mage::getModel('core/resource_transaction')
-            ->addObject($invoice)
-            ->addObject($invoice->getOrder());
-        $transactionSave->save();
 
         // Mark invoice as paid (offline payment - use pay() not capture())
         $invoice->pay();
@@ -1007,50 +961,15 @@ class CartService
     }
 
     /**
-     * Create shipment for order (MDN PointOfSales approach)
+     * Create shipment for order (POS approach)
      */
     protected function createShipment(\Mage_Sales_Model_Order $order): \Mage_Sales_Model_Order_Shipment
     {
-        $convertor = \Mage::getModel('sales/convert_order');
-        $shipment = $convertor->toShipment($order);
+        $shipment = $this->orderService->createShipmentForOrder($order);
 
-        // Index parent item quantities to avoid N+1 queries
-        $parentQtys = [];
-        foreach ($order->getAllItems() as $item) {
-            $parentQtys[$item->getId()] = $item->getQtyOrdered();
+        if (!$shipment) {
+            throw new \RuntimeException('Order cannot be shipped');
         }
-
-        foreach ($order->getAllItems() as $orderItem) {
-            // Skip dummy items and items with no qty to ship
-            if ($orderItem->isDummy(true) || !$orderItem->getQtyToShip()) {
-                continue;
-            }
-
-            // Skip virtual items
-            if ($orderItem->getIsVirtual()) {
-                continue;
-            }
-
-            $shipmentItem = $convertor->itemToShipmentItem($orderItem);
-
-            $qty = $orderItem->getQtyOrdered();
-
-            // Handle child items with parent
-            if ($qty == 0 && $orderItem->getParentItemId() > 0) {
-                $qty = $parentQtys[$orderItem->getParentItemId()] ?? 0;
-            }
-
-            $shipmentItem->setQty($qty);
-            $shipment->addItem($shipmentItem);
-        }
-
-        $shipment->register();
-
-        // Use transaction to save shipment and order together
-        $transactionSave = \Mage::getModel('core/resource_transaction')
-            ->addObject($shipment)
-            ->addObject($shipment->getOrder());
-        $transactionSave->save();
 
         \Mage::log("Shipment created: {$shipment->getIncrementId()} (ID: {$shipment->getId()})");
 
@@ -1243,20 +1162,52 @@ class CartService
     }
 
     /**
-     * Get default POS/walk-in address from store config
+     * Prepare a quote for POS checkout by applying default address, shipping,
+     * payment, and email when not already set.
      */
-    private function getStoreDefaultAddress(?int $storeId = null): array
-    {
-        return [
-            'firstname' => 'Walk-in',
-            'lastname' => 'Customer',
-            'street' => \Mage::getStoreConfig('general/store_information/address', $storeId) ?: 'Store Pickup',
-            'city' => \Mage::getStoreConfig('general/store_information/city', $storeId) ?: 'Store',
-            'region' => \Mage::getStoreConfig('general/store_information/region', $storeId) ?: '',
-            'postcode' => \Mage::getStoreConfig('general/store_information/postcode', $storeId) ?: '0000',
-            'country_id' => \Mage::getStoreConfig('general/country/default', $storeId) ?: 'US',
-            'telephone' => \Mage::getStoreConfig('general/store_information/phone', $storeId) ?: '0000000000',
-        ];
+    public function preparePosQuote(
+        \Mage_Sales_Model_Quote $quote,
+        ?string $shippingMethod = null,
+        ?string $paymentMethod = null,
+        ?string $customerEmail = null,
+    ): void {
+        if ($quote->getStoreId()) {
+            \Mage::app()->setCurrentStore($quote->getStoreId());
+            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
+        }
+
+        $storeId = $quote->getStoreId() ? (int) $quote->getStoreId() : null;
+        $posAddress = StoreDefaults::getPosAddress($storeId);
+
+        if (!$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+            if (!$shippingAddress->getFirstname()) {
+                $shippingAddress->addData($posAddress);
+            }
+            if (!$shippingAddress->getShippingMethod() || $shippingMethod) {
+                $method = $shippingMethod ?: 'freeshipping_freeshipping';
+                $shippingAddress->setShippingMethod($method);
+                if ($method === 'freeshipping_freeshipping') {
+                    $shippingAddress->setShippingDescription('Free Shipping - POS Pickup');
+                    $shippingAddress->setShippingAmount(0);
+                    $shippingAddress->setBaseShippingAmount(0);
+                }
+            }
+        }
+
+        $billingAddress = $quote->getBillingAddress();
+        if (!$billingAddress->getFirstname()) {
+            $billingAddress->addData($posAddress);
+        }
+
+        $payment = $quote->getPayment();
+        if (!$payment->getMethod() || $paymentMethod) {
+            $payment->setMethod($paymentMethod ?: 'cashondelivery');
+        }
+
+        if (!$quote->getCustomerEmail()) {
+            $quote->setCustomerEmail($customerEmail ?: 'pos@store.local');
+        }
     }
 
 }
