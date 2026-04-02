@@ -28,14 +28,8 @@ use Symfony\Component\Routing\Attribute\Route;
 class ContactController extends AbstractController
 {
     private const CONFIG_ENABLED = 'maho_apiplatform/contact/enabled';
-    private const CONFIG_CAPTCHA_PROVIDER = 'maho_apiplatform/contact/captcha_provider';
-    private const CONFIG_CAPTCHA_SECRET = 'maho_apiplatform/contact/captcha_secret_key';
     private const CONFIG_HONEYPOT = 'maho_apiplatform/contact/honeypot_enabled';
     private const CONFIG_RATE_LIMIT = 'maho_apiplatform/contact/rate_limit';
-
-
-    private const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
-    private const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';
 
     private const EMAIL_TEMPLATE = 'contacts/email/email_template';
     private const EMAIL_SENDER = 'contacts/email/sender_email_identity';
@@ -105,9 +99,14 @@ class ContactController extends AbstractController
         $phone = strip_tags(mb_substr($phone, 0, 50));
 
         // CAPTCHA verification
-        $captchaError = $this->verifyCaptcha($data, $storeId, $request);
+        /** @var \Maho_ApiPlatform_Helper_Data $apiHelper */
+        $apiHelper = \Mage::helper('maho_apiplatform');
+        $captchaError = $apiHelper->verifyCaptcha($data);
         if ($captchaError !== null) {
-            return $captchaError;
+            return new JsonResponse([
+                'error' => 'captcha_failed',
+                'message' => $captchaError,
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         // Rate limiting
@@ -173,7 +172,7 @@ class ContactController extends AbstractController
     }
 
     /**
-     * Get contact form configuration (site key for CAPTCHA widget, honeypot field name)
+     * Get contact form configuration (captcha info, honeypot field name)
      */
     #[Route('/api/contact/config', name: 'api_contact_config', methods: ['GET'])]
     public function config(): JsonResponse
@@ -181,86 +180,13 @@ class ContactController extends AbstractController
         StoreContext::ensureStore();
         $storeId = StoreContext::getStoreId();
 
-        $provider = \Mage::getStoreConfig(self::CONFIG_CAPTCHA_PROVIDER, $storeId) ?: 'none';
-        $siteKey = null;
-
-        if ($provider !== 'none') {
-            $siteKey = \Mage::getStoreConfig('maho_apiplatform/contact/captcha_site_key', $storeId);
-        }
+        /** @var \Maho_ApiPlatform_Helper_Data $apiHelper */
+        $apiHelper = \Mage::helper('maho_apiplatform');
 
         return new JsonResponse([
             'enabled' => (bool) \Mage::getStoreConfigFlag(self::CONFIG_ENABLED, $storeId),
-            'captchaProvider' => $provider,
-            'captchaSiteKey' => $siteKey,
+            'captcha' => $apiHelper->getCaptchaConfig(),
             'honeypotField' => \Mage::getStoreConfigFlag(self::CONFIG_HONEYPOT, $storeId) ? 'company' : null,
         ]);
     }
-
-    private function verifyCaptcha(array $data, int $storeId, Request $request): ?JsonResponse
-    {
-        $provider = \Mage::getStoreConfig(self::CONFIG_CAPTCHA_PROVIDER, $storeId) ?: 'none';
-
-        if ($provider === 'none') {
-            return null;
-        }
-
-        $token = $data['captchaToken'] ?? '';
-        if (empty($token)) {
-            return new JsonResponse([
-                'error' => 'captcha_required',
-                'message' => 'CAPTCHA verification is required',
-            ], Response::HTTP_UNPROCESSABLE_ENTITY);
-        }
-
-        $secret = \Mage::getStoreConfig(self::CONFIG_CAPTCHA_SECRET, $storeId);
-        if (empty($secret)) {
-            \Mage::log('Contact form: CAPTCHA secret key not configured', \Mage::LOG_WARNING);
-            return null; // Don't block if misconfigured
-        }
-
-        $verifyUrl = match ($provider) {
-            'turnstile' => self::TURNSTILE_VERIFY_URL,
-            'recaptcha_v3' => self::RECAPTCHA_VERIFY_URL,
-            default => null,
-        };
-
-        if ($verifyUrl === null) {
-            return null;
-        }
-
-        try {
-            $client = \Symfony\Component\HttpClient\HttpClient::create(['timeout' => 5]);
-            $response = $client->request('POST', $verifyUrl, [
-                'body' => [
-                    'secret' => $secret,
-                    'response' => $token,
-                    'remoteip' => $request->getClientIp(),
-                ],
-            ]);
-
-            $result = $response->toArray(false);
-
-            if (empty($result['success'])) {
-                return new JsonResponse([
-                    'error' => 'captcha_failed',
-                    'message' => 'CAPTCHA verification failed. Please try again.',
-                ], Response::HTTP_UNPROCESSABLE_ENTITY);
-            }
-
-            // For reCAPTCHA v3, check score (0.0 = bot, 1.0 = human)
-            if ($provider === 'recaptcha_v3' && isset($result['score']) && $result['score'] < 0.5) {
-                return new JsonResponse([
-                    'error' => 'captcha_failed',
-                    'message' => 'CAPTCHA verification failed. Please try again.',
-                ], Response::HTTP_UNPROCESSABLE_ENTITY);
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            // Don't block on verification service failure
-            return null;
-        }
-
-        return null;
-    }
-
 }

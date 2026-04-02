@@ -36,6 +36,7 @@
   - [Wishlist](#wishlist)
   - [URL Resolver](#url-resolver)
   - [POS Payments](#pos-payments)
+- [CAPTCHA](#captcha)
 - [Base Classes](#base-classes)
 - [Opt-in Traits](#opt-in-traits)
 - [Shared Services](#shared-services)
@@ -766,6 +767,22 @@ mutation {
 | POST | `/contact` | None | Submit contact form |
 | GET | `/contact/config` | None | Get contact form config |
 
+`GET /contact/config` response example:
+
+```json
+{
+  "enabled": true,
+  "captcha": {
+    "enabled": true,
+    "provider": "altcha",
+    "challengeUrl": "https://example.com/captcha/index/challenge"
+  },
+  "honeypotField": "company"
+}
+```
+
+The `captcha` object is populated by the active captcha module (see [CAPTCHA](#captcha) below). When no module is active, it returns `{"enabled": false}`.
+
 ---
 
 ### Directory
@@ -830,6 +847,114 @@ All errors return JSON with an appropriate HTTP status code:
 | 405 | Method not allowed |
 | 409 | Conflict (e.g. duplicate idempotency key race condition) |
 | 500 | Internal server error |
+
+---
+
+## CAPTCHA
+
+The API Platform does not bundle any CAPTCHA provider. Instead, it exposes two events that any captcha module can observe — making the system completely provider-agnostic.
+
+### How it works
+
+**Configuration** — frontends call `GET /contact/config` (or any endpoint that returns captcha config) to discover which provider is active and what client-side parameters it needs:
+
+```json
+{
+  "captcha": {
+    "enabled": true,
+    "provider": "altcha",
+    "challengeUrl": "https://example.com/captcha/index/challenge"
+  }
+}
+```
+
+The frontend uses this to load the right widget (Altcha, Turnstile, reCAPTCHA, etc.) and obtain a token.
+
+**Verification** — on form submission, include the solved token as `captchaToken` in the request body. The API dispatches `api_verify_captcha` and the active module verifies it.
+
+### Events
+
+| Event | Purpose | Observer parameters |
+|-------|---------|---------------------|
+| `api_captcha_config` | Describe the active provider to the frontend | `config` (DataObject — set `enabled`, `provider`, and any provider-specific fields like `challengeUrl` or `siteKey`) |
+| `api_verify_captcha` | Verify a submitted token | `result` (DataObject — set `verified` to `false` and `error` to a message string to reject), `data` (array — the full request body, token is in `captchaToken`) |
+
+### Helper methods
+
+Any API controller or processor can verify captcha tokens via the ApiPlatform helper:
+
+```php
+/** @var Maho_ApiPlatform_Helper_Data $helper */
+$helper = Mage::helper('maho_apiplatform');
+
+// Get config for the frontend
+$captchaConfig = $helper->getCaptchaConfig();
+
+// Verify a token — returns null on success, error message on failure
+$error = $helper->verifyCaptcha($requestData);
+if ($error !== null) {
+    // reject the request
+}
+```
+
+### Built-in: Altcha (Maho_Captcha)
+
+The native `Maho_Captcha` module observes both events out of the box using [Altcha](https://altcha.org/) — a self-hosted, privacy-friendly proof-of-work challenge that requires no third-party API calls.
+
+### Third-party providers
+
+A Turnstile or reCAPTCHA module just needs to observe the same two events. For example:
+
+```xml
+<config>
+    <api>
+        <events>
+            <api_captcha_config>
+                <observers>
+                    <my_turnstile>
+                        <class>my_turnstile/observer</class>
+                        <method>getCaptchaConfig</method>
+                    </my_turnstile>
+                </observers>
+            </api_captcha_config>
+            <api_verify_captcha>
+                <observers>
+                    <my_turnstile>
+                        <class>my_turnstile/observer</class>
+                        <method>verifyCaptcha</method>
+                    </my_turnstile>
+                </observers>
+            </api_verify_captcha>
+        </events>
+    </api>
+</config>
+```
+
+```php
+class My_Turnstile_Model_Observer
+{
+    public function getCaptchaConfig(\Maho\Event\Observer $observer): void
+    {
+        $config = $observer->getEvent()->getConfig();
+        $config->setEnabled(true);
+        $config->setProvider('turnstile');
+        $config->setSiteKey(Mage::getStoreConfig('my_turnstile/general/site_key'));
+    }
+
+    public function verifyCaptcha(\Maho\Event\Observer $observer): void
+    {
+        $data = $observer->getEvent()->getData('data');
+        $token = $data['captchaToken'] ?? '';
+        $result = $observer->getEvent()->getResult();
+
+        // Call Turnstile verify API...
+        if (!$this->verifyToken($token)) {
+            $result->setVerified(false);
+            $result->setError('CAPTCHA verification failed.');
+        }
+    }
+}
+```
 
 ---
 
@@ -1125,6 +1250,10 @@ All API resources extend `\Maho\ApiPlatform\Resource`, which provides an `extens
 
 Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho event after building the response object. Your module observes the event and appends data to `$dto->extensions`.
 
+### Event area: `api`
+
+The API Platform loads a dedicated `api` event area (`Mage_Core_Model_App_Area::AREA_API`), similar to `frontend` and `adminhtml`. Observers registered under `<api><events>` in `config.xml` only load when the API is running — they won't fire on regular frontend, admin, or cron requests.
+
 ### Available Events
 
 | Event | Dispatched In | Observer Parameters |
@@ -1142,6 +1271,8 @@ Every resource DTO (Product, Category, Cart, Order, etc.) dispatches a Maho even
 | `api_cart_item_dto_build` | CartProvider | `quote_item` (model), `dto` |
 | `api_review_dto_build` | ReviewProvider | `review` (model), `dto` |
 | `api_wishlist_item_dto_build` | WishlistProvider | `wishlist_item` (model), `dto` |
+| `api_captcha_config` | ApiPlatform Helper | `config` (DataObject) |
+| `api_verify_captcha` | ApiPlatform Helper | `result` (DataObject), `data` (array) |
 
 ### Quick Example: Simple Bundles Module
 
@@ -1151,7 +1282,7 @@ A module that adds bundle component data to products and cart items.
 
 ```xml
 <config>
-    <global>
+    <api>
         <events>
             <api_product_dto_build>
                 <observers>
@@ -1170,7 +1301,7 @@ A module that adds bundle component data to products and cart items.
                 </observers>
             </api_cart_item_dto_build>
         </events>
-    </global>
+    </api>
 </config>
 ```
 

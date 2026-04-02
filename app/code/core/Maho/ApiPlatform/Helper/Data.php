@@ -80,6 +80,38 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
+     * Get captcha configuration for the frontend.
+     * Dispatches api_captcha_config so any captcha module can describe itself.
+     */
+    public function getCaptchaConfig(): array
+    {
+        $config = new \Maho\DataObject(['enabled' => false]);
+        Mage::dispatchEvent('api_captcha_config', [
+            'config' => $config,
+        ]);
+        return $config->getData();
+    }
+
+    /**
+     * Verify a captcha token submitted via the API.
+     * Returns null on success, or an error message string on failure.
+     */
+    public function verifyCaptcha(array $data): ?string
+    {
+        $result = new \Maho\DataObject(['verified' => true, 'error' => '']);
+        Mage::dispatchEvent('api_verify_captcha', [
+            'result' => $result,
+            'data' => $data,
+        ]);
+
+        if (!$result->getVerified()) {
+            return $result->getError() ?: $this->__('CAPTCHA verification failed. Please try again.');
+        }
+
+        return null;
+    }
+
+    /**
      * Transform GraphQL response based on naming convention setting
      *
      * @param array $data Response data

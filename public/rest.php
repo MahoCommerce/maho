@@ -29,6 +29,7 @@ Mage::$headersSentThrowsException = false;
 Mage::setIsDeveloperMode(false); // Disable dev mode for clean error responses
 Mage::init('admin');
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
+Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_API, Mage_Core_Model_App_Area::PART_EVENTS);
 
 // Handle store context from query parameter or X-Store-Code header
 $storeCode = $_GET['store'] ?? $_SERVER['HTTP_X_STORE_CODE'] ?? null;

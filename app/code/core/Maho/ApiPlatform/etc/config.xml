@@ -175,7 +175,6 @@
             </oauth2>
             <contact>
                 <enabled>1</enabled>
-                <captcha_provider>none</captcha_provider>
                 <honeypot_enabled>1</honeypot_enabled>
                 <rate_limit>3</rate_limit>
             </contact>
