@@ -867,9 +867,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             ];
         }
 
-        // Sort by sort_order
-        usort($result, fn($a, $b) => $a['sortOrder'] <=> $b['sortOrder']);
-
         return $result;
     }
 
