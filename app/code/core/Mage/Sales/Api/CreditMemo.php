@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @category   Maho
- * @package    Maho_Sales
+ * @package    Mage_Sales
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'CreditMemo',
@@ -78,22 +79,25 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'sales/order_creditmemo',
+    ],
 )]
-class CreditMemo extends \Maho\ApiPlatform\Resource
+class CreditMemo extends CrudResource
 {
-    #[ApiProperty(identifier: true)]
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    #[ApiProperty(identifier: false)]
+    #[ApiProperty(writable: false)]
     public ?int $orderId = null;
 
     #[ApiProperty(writable: false)]
     public ?string $incrementId = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $orderIncrementId = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $state = null;
 
     #[ApiProperty(writable: false)]
@@ -124,9 +128,44 @@ class CreditMemo extends \Maho\ApiPlatform\Resource
     public ?string $createdAt = null;
 
     /** @var CreditMemoItem[] */
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $items = [];
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $comment = null;
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $stateMap = [
+            \Mage_Sales_Model_Order_Creditmemo::STATE_OPEN => 'open',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED => 'refunded',
+            \Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED => 'canceled',
+        ];
+        $dto->state = $stateMap[(int) $model->getState()] ?? 'unknown';
+
+        $order = $model->getOrder();
+        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+
+        $dto->items = [];
+        foreach ($model->getAllItems() as $item) {
+            $itemDto = new CreditMemoItem();
+            $itemDto->id = (int) $item->getId();
+            $itemDto->orderItemId = (int) $item->getOrderItemId();
+            $itemDto->sku = $item->getSku() ?? '';
+            $itemDto->name = $item->getName() ?? '';
+            $itemDto->qty = (float) $item->getQty();
+            $itemDto->price = (float) $item->getPrice();
+            $itemDto->rowTotal = (float) $item->getRowTotal();
+            $itemDto->taxAmount = (float) $item->getTaxAmount();
+            $itemDto->discountAmount = (float) $item->getDiscountAmount();
+            $itemDto->backToStock = (bool) $item->getBackToStock();
+            $dto->items[] = $itemDto;
+        }
+
+        $comments = $model->getCommentsCollection();
+        if ($comments && $comments->getSize() > 0) {
+            $firstComment = $comments->getFirstItem();
+            $dto->comment = $firstComment->getComment();
+        }
+    }
 }

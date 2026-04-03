@@ -164,6 +164,6 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             $creditmemo->save();
         }
 
-        return CreditMemoMapper::mapToDto($creditmemo);
+        return CreditMemo::fromModel($creditmemo);
     }
 }

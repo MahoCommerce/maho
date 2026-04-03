@@ -6,7 +6,7 @@ declare(strict_types=1);
  * Maho
  *
  * @category   Maho
- * @package    Maho_Sales
+ * @package    Mage_Sales
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -16,33 +16,30 @@ namespace Mage\Sales\Api;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\ArrayPaginator;
+use Maho\ApiPlatform\CrudProvider;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * Credit Memo State Provider
- */
-final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
+final class CreditMemoProvider extends CrudProvider
 {
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): CreditMemo|ArrayPaginator|null
     {
         $this->requireAdminOrApiUser('Credit memo access requires admin or API access');
+        $this->resourceClass = $operation->getClass();
+        $this->modelAlias = 'sales/order_creditmemo';
 
         $operationName = $operation->getName();
 
-        // GraphQL named collection query
         if ($operationName === 'orderCreditMemos') {
             $orderId = (int) ($context['args']['orderId'] ?? 0);
             return $this->getCreditMemosForOrder($orderId, $context);
         }
 
-        // REST collection
         if ($operation instanceof CollectionOperationInterface) {
             $orderId = (int) ($uriVariables['orderId'] ?? 0);
             return $this->getCreditMemosForOrder($orderId, $context);
         }
 
-        // Single item
         $id = (int) ($uriVariables['id'] ?? 0);
         if ($id) {
             return $this->getCreditMemoById($id);
@@ -53,7 +50,6 @@ final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
 
     private function getCreditMemoById(int $id): CreditMemo
     {
-        /** @var \Mage_Sales_Model_Order_Creditmemo $creditmemo */
         $creditmemo = \Mage::getModel('sales/order_creditmemo');
         $creditmemo->load($id);
 
@@ -61,12 +57,11 @@ final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
             throw new NotFoundHttpException('Credit memo not found');
         }
 
-        return CreditMemoMapper::mapToDto($creditmemo);
+        return CreditMemo::fromModel($creditmemo);
     }
 
     private function getCreditMemosForOrder(int $orderId, array $context): ArrayPaginator
     {
-        /** @var \Mage_Sales_Model_Order $order */
         $order = \Mage::getModel('sales/order');
         $order->load($orderId);
 
@@ -76,14 +71,13 @@ final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
 
         ['page' => $page, 'pageSize' => $perPage] = $this->extractPagination($context);
 
-        /** @var \Mage_Sales_Model_Resource_Order_Creditmemo_Collection $collection */
         $collection = \Mage::getResourceModel('sales/order_creditmemo_collection');
         $collection->addFieldToFilter('order_id', $orderId);
         $collection->setOrder('created_at', 'DESC');
 
         $creditmemos = [];
         foreach ($collection as $creditmemo) {
-            $creditmemos[] = CreditMemoMapper::mapToDto($creditmemo);
+            $creditmemos[] = CreditMemo::fromModel($creditmemo);
         }
 
         $offset = ($page - 1) * $perPage;
