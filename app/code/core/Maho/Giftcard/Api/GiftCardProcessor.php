@@ -50,7 +50,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             $data->senderEmail,
             $data->message,
             null,
-            $data->expirationDate,
+            $data->expiresAt,
         );
     }
 

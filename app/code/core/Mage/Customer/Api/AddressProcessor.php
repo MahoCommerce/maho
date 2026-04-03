@@ -272,10 +272,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
 
         $errors = [];
 
-        if (empty($data->firstName)) {
+        if (empty($data->firstname)) {
             $errors[] = 'First name is required';
         }
-        if (empty($data->lastName)) {
+        if (empty($data->lastname)) {
             $errors[] = 'Last name is required';
         }
         if (empty($data->street) || (is_array($data->street) && empty(array_filter($data->street)))) {
@@ -304,8 +304,8 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
      */
     private function populateAddressFromDto(\Mage_Customer_Model_Address $address, Address $data): void
     {
-        $address->setFirstname($data->firstName);
-        $address->setLastname($data->lastName);
+        $address->setFirstname($data->firstname);
+        $address->setLastname($data->lastname);
         $address->setCompany($data->company);
         $address->setStreet($data->street);
         $address->setCity($data->city);
@@ -334,8 +334,8 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         // Build Address DTO from GraphQL args
         $args = $context['args']['input'] ?? [];
         $addressDto = new Address();
-        $addressDto->firstName = $args['firstName'] ?? '';
-        $addressDto->lastName = $args['lastName'] ?? '';
+        $addressDto->firstname = $args['firstName'] ?? '';
+        $addressDto->lastname = $args['lastName'] ?? '';
         $addressDto->street = $args['street'] ?? [];
         $addressDto->city = $args['city'] ?? '';
         $addressDto->region = $args['region'] ?? null;
@@ -378,10 +378,10 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         // Build Address DTO from existing data + GraphQL args (partial update)
         $addressDto = Address::fromCustomerAddress($existingAddress, $customer);
         if (isset($args['firstName'])) {
-            $addressDto->firstName = $args['firstName'];
+            $addressDto->firstname = $args['firstName'];
         }
         if (isset($args['lastName'])) {
-            $addressDto->lastName = $args['lastName'];
+            $addressDto->lastname = $args['lastName'];
         }
         if (isset($args['street'])) {
             $addressDto->street = $args['street'];

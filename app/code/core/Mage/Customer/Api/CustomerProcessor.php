@@ -116,8 +116,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     private function updateProfile(Customer $data): Customer
     {
         return $this->doUpdateProfile(
-            firstName: $data->firstName,
-            lastName: $data->lastName,
+            firstName: $data->firstname,
+            lastName: $data->lastname,
             email: $data->email !== '' ? $data->email : null,
         );
     }
@@ -168,8 +168,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $customer->setWebsiteId($websiteId);
         $customer->setStoreId($storeId);
         $customer->setEmail($data->email);
-        $customer->setFirstname($data->firstName ?? '');
-        $customer->setLastname($data->lastName ?? '');
+        $customer->setFirstname($data->firstname ?? '');
+        $customer->setLastname($data->lastname ?? '');
         $customer->setPassword($data->password);
         $customer->setGroupId((int) (\Mage::getStoreConfig('customer/create_account/default_group') ?: 1));
 

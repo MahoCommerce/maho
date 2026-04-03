@@ -264,8 +264,8 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         if ($order->getData('billing_telephone') !== null) {
             $dto->billingAddress = new Address();
             $dto->billingAddress->id = (int) ($order->getData('billing_addr_id') ?: 0);
-            $dto->billingAddress->firstName = $order->getData('billing_firstname') ?? '';
-            $dto->billingAddress->lastName = $order->getData('billing_lastname') ?? '';
+            $dto->billingAddress->firstname = $order->getData('billing_firstname') ?? '';
+            $dto->billingAddress->lastname = $order->getData('billing_lastname') ?? '';
             $dto->billingAddress->company = $order->getData('billing_company');
             $street = $order->getData('billing_street') ?? '';
             $dto->billingAddress->street = $street ? explode("\n", $street) : [];

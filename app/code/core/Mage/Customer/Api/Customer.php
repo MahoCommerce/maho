@@ -162,11 +162,9 @@ class Customer extends CrudResource
 
     public string $email = '';
 
-    #[ApiProperty(extraProperties: ['modelField' => 'firstname'])]
-    public ?string $firstName = null;
+    public ?string $firstname = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'lastname'])]
-    public ?string $lastName = null;
+    public ?string $lastname = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $fullName = null;
@@ -207,7 +205,7 @@ class Customer extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->fullName = trim(($dto->firstName ?? '') . ' ' . ($dto->lastName ?? ''));
+        $dto->fullName = trim(($dto->firstname ?? '') . ' ' . ($dto->lastname ?? ''));
         $dto->password = null;
     }
 }

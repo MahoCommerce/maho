@@ -181,11 +181,9 @@ class Address extends CrudResource
     #[ApiProperty(identifier: false, extraProperties: ['modelField' => 'parent_id'])]
     public ?int $customerId = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'firstname'])]
-    public string $firstName = '';
+    public string $firstname = '';
 
-    #[ApiProperty(extraProperties: ['modelField' => 'lastname'])]
-    public string $lastName = '';
+    public string $lastname = '';
 
     public ?string $company = null;
 
@@ -261,8 +259,8 @@ class Address extends CrudResource
     {
         $dto = new self();
         $dto->id = (int) $address->getId();
-        $dto->firstName = $address->getData('firstname') ?? '';
-        $dto->lastName = $address->getData('lastname') ?? '';
+        $dto->firstname = $address->getData('firstname') ?? '';
+        $dto->lastname = $address->getData('lastname') ?? '';
         $dto->company = $address->getData('company');
         $dto->street = $address->getStreet();
         $dto->city = $address->getData('city') ?? '';

@@ -101,8 +101,8 @@ class GiftCard extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $status = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'expires_at'])]
-    public ?string $expirationDate = null;
+    #[ApiProperty(writable: false)]
+    public ?string $expiresAt = null;
 
     #[ApiProperty(writable: false)]
     public ?string $currencyCode = null;
