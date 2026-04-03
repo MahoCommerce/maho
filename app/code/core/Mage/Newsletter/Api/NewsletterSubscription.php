@@ -13,12 +13,14 @@ declare(strict_types=1);
 
 namespace Mage\Newsletter\Api;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
-use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use ApiPlatform\Metadata\Post;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 
 #[ApiResource(
@@ -27,21 +29,18 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     provider: NewsletterProvider::class,
     processor: NewsletterProcessor::class,
     operations: [
-        // Get current user's subscription status (requires authentication)
         new Get(
             uriTemplate: '/newsletter/status',
             name: 'status',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
             description: 'Get subscription status for authenticated customer',
         ),
-        // Subscribe to newsletter (guest or authenticated)
         new Post(
             uriTemplate: '/newsletter/subscribe',
             name: 'subscribe',
             security: 'true',
             description: 'Subscribe to newsletter',
         ),
-        // Unsubscribe from newsletter
         new Post(
             uriTemplate: '/newsletter/unsubscribe',
             name: 'unsubscribe',
@@ -70,42 +69,30 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Unsubscribe from newsletter',
         ),
     ],
+    extraProperties: [
+        'model' => 'newsletter/subscriber',
+    ],
 )]
-class NewsletterSubscription extends \Maho\ApiPlatform\Resource
+class NewsletterSubscription extends CrudResource
 {
-    /**
-     * Subscriber email address
-     */
+    #[ApiProperty(extraProperties: ['modelField' => 'subscriber_email'])]
     public ?string $email = null;
 
-    /**
-     * Associated customer ID (null for guest subscriptions)
-     */
+    #[ApiProperty(extraProperties: ['modelField' => 'customer_id'])]
     public ?int $customerId = null;
 
-    /**
-     * Subscription status: subscribed, unsubscribed, unconfirmed, not_active
-     */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = '';
 
-    /**
-     * Whether the user is currently subscribed
-     */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isSubscribed = false;
 
-    /**
-     * Human-readable message about the operation result
-     */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $message = null;
 
-    /**
-     * Whether confirmation email is required
-     */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $confirmationRequired = false;
 
-    /**
-     * Map numeric subscriber status to string
-     */
     public static function mapStatus(int $status): string
     {
         return match ($status) {
@@ -115,5 +102,11 @@ class NewsletterSubscription extends \Maho\ApiPlatform\Resource
             \Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED => 'unconfirmed',
             default => 'unknown',
         };
+    }
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->isSubscribed = (bool) $model->isSubscribed();
+        $dto->status = self::mapStatus((int) $model->getSubscriberStatus());
     }
 }

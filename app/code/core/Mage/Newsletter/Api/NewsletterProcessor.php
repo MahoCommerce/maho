@@ -18,13 +18,14 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
- * Newsletter State Processor - Handles subscribe/unsubscribe operations
+ * Newsletter Processor — handles subscribe/unsubscribe operations.
+ *
+ * Newsletter has custom subscribe/unsubscribe flows that don't map to standard CRUD,
+ * so this extends the base Processor. It uses CrudResource::fromModel() for responses
+ * where a subscriber model is available.
  */
 final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
 {
-    /**
-     * Process newsletter subscription operations
-     */
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): NewsletterSubscription
     {
@@ -34,7 +35,6 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
 
         $operationName = $operation->getName();
 
-        // Handle GraphQL mutations
         if ($operationName === 'subscribeNewsletter' || $operationName === 'subscribe') {
             return $this->subscribe($data, $context);
         }
@@ -46,25 +46,17 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         throw new BadRequestHttpException('Invalid newsletter operation');
     }
 
-    /**
-     * Subscribe to newsletter
-     *
-     * - Authenticated users: uses their account email and associates subscription
-     * - Guests: requires email in request body
-     */
     private function subscribe(NewsletterSubscription $data, array $context): NewsletterSubscription
     {
         $customerId = $this->getAuthenticatedCustomerId();
         $email = $data->email;
 
-        // For authenticated users, use their email if not provided
         if ($customerId !== null) {
             $customer = \Mage::getModel('customer/customer')->load($customerId);
             if (!$customer->getId()) {
                 throw new BadRequestHttpException('Customer not found');
             }
 
-            // Use customer email if not explicitly provided
             if (empty($email)) {
                 $email = $customer->getEmail();
             }
@@ -72,12 +64,10 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             $data->customerId = $customerId;
         }
 
-        // For GraphQL, email might be in mutation input args
         if (empty($email) && isset($context['args']['input']['email'])) {
             $email = $context['args']['input']['email'];
         }
 
-        // Validate email
         if (empty($email)) {
             throw new BadRequestHttpException('Email address is required');
         }
@@ -87,7 +77,6 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Invalid email address');
         }
 
-        // Check if guest subscription is allowed
         if ($customerId === null) {
             $allowGuest = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_ALLOW_GUEST_SUBSCRIBE_FLAG);
             if (!$allowGuest) {
@@ -101,33 +90,28 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
             $subscriber = \Mage::getModel('newsletter/subscriber');
 
-            // Check if already subscribed
             $subscriber->loadByEmail($email);
             if ($subscriber->getId() && $subscriber->getSubscriberStatus() == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED) {
-                $data->status = 'subscribed';
-                $data->isSubscribed = true;
-                $data->message = 'You are already subscribed to the newsletter.';
-                return $data;
+                $dto = NewsletterSubscription::fromModel($subscriber);
+                $dto->message = 'You are already subscribed to the newsletter.';
+                return $dto;
             }
 
-            // Subscribe
             $status = $subscriber->subscribe($email);
 
-            // Map status
-            $data->status = NewsletterSubscription::mapStatus($status);
-            $data->isSubscribed = ($status == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
+            $subscriber->loadByEmail($email);
+            $dto = NewsletterSubscription::fromModel($subscriber);
 
-            // Check if confirmation is required
             $confirmRequired = \Mage::getStoreConfigFlag(\Mage_Newsletter_Model_Subscriber::XML_PATH_CONFIRMATION_FLAG);
-            $data->confirmationRequired = $confirmRequired && !$data->isSubscribed;
+            $dto->confirmationRequired = $confirmRequired && !$dto->isSubscribed;
 
-            if ($data->confirmationRequired) {
-                $data->message = 'A confirmation email has been sent. Please check your inbox.';
+            if ($dto->confirmationRequired) {
+                $dto->message = 'A confirmation email has been sent. Please check your inbox.';
             } else {
-                $data->message = 'You have been successfully subscribed to the newsletter.';
+                $dto->message = 'You have been successfully subscribed to the newsletter.';
             }
 
-            return $data;
+            return $dto;
         } catch (\Mage_Core_Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         } catch (\Exception $e) {
@@ -136,11 +120,6 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    /**
-     * Unsubscribe from newsletter
-     *
-     * Requires authentication — guests should use the unsubscribe link in their email.
-     */
     private function unsubscribe(NewsletterSubscription $data): NewsletterSubscription
     {
         $customerId = $this->getAuthenticatedCustomerId();
@@ -156,10 +135,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Customer not found');
         }
 
-        // Always use authenticated customer's email — prevent unsubscribing others
         $email = $customer->getEmail();
-        $data->customerId = $customerId;
-        $data->email = $email;
 
         try {
             /** @var \Mage_Newsletter_Model_Subscriber $subscriber */
@@ -167,21 +143,22 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             $subscriber->loadByEmail($email);
 
             if (!$subscriber->getId()) {
-                $data->status = 'unsubscribed';
-                $data->isSubscribed = false;
-                $data->message = 'This email address is not subscribed to the newsletter.';
-                return $data;
+                $dto = new NewsletterSubscription();
+                $dto->email = $email;
+                $dto->customerId = $customerId;
+                $dto->status = 'unsubscribed';
+                $dto->isSubscribed = false;
+                $dto->message = 'This email address is not subscribed to the newsletter.';
+                return $dto;
             }
 
-            // Skip code check for authenticated users unsubscribing their own email
             $subscriber->setCheckCode($subscriber->getCode());
             $subscriber->unsubscribe();
 
-            $data->status = 'unsubscribed';
-            $data->isSubscribed = false;
-            $data->message = 'You have been successfully unsubscribed from the newsletter.';
+            $dto = NewsletterSubscription::fromModel($subscriber);
+            $dto->message = 'You have been successfully unsubscribed from the newsletter.';
 
-            return $data;
+            return $dto;
         } catch (\Mage_Core_Exception $e) {
             throw new BadRequestHttpException($e->getMessage());
         } catch (\Exception $e) {
@@ -189,5 +166,4 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('An error occurred while processing your request.');
         }
     }
-
 }

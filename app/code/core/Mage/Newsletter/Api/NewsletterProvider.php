@@ -13,10 +13,14 @@ declare(strict_types=1);
 
 namespace Mage\Newsletter\Api;
 
+use Maho\ApiPlatform\CrudProvider;
+
 /**
- * Newsletter State Provider - Fetches newsletter subscription status
+ * Newsletter Provider — extends CrudProvider with subscription status lookup.
+ *
+ * Handles the newsletterStatus and status named operations.
  */
-final class NewsletterProvider extends \Maho\ApiPlatform\Provider
+final class NewsletterProvider extends CrudProvider
 {
     #[\Override]
     protected function handleOperation(string $name, array $context, array $uriVariables): mixed
@@ -28,38 +32,33 @@ final class NewsletterProvider extends \Maho\ApiPlatform\Provider
         return null;
     }
 
-    /**
-     * Get subscription status for authenticated customer
-     */
     private function getSubscriptionStatus(): NewsletterSubscription
     {
         $customerId = $this->requireAuthentication();
 
-        $dto = new NewsletterSubscription();
-
-        // Load customer to get email
         $customer = \Mage::getModel('customer/customer')->load($customerId);
         if (!$customer->getId()) {
+            $dto = new NewsletterSubscription();
             $dto->status = 'error';
             $dto->message = 'Customer not found';
             return $dto;
         }
 
-        $dto->email = $customer->getEmail();
-        $dto->customerId = $customerId;
-
-        // Load subscriber by customer
         $subscriber = \Mage::getModel('newsletter/subscriber')->loadByCustomer($customer);
 
         if ($subscriber->getId()) {
-            $dto->isSubscribed = $subscriber->isSubscribed();
-            $dto->status = NewsletterSubscription::mapStatus($subscriber->getSubscriberStatus());
-        } else {
-            $dto->isSubscribed = false;
-            $dto->status = 'unsubscribed';
+            $dto = NewsletterSubscription::fromModel($subscriber);
+            $dto->email = $customer->getEmail();
+            $dto->customerId = $customerId;
+            return $dto;
         }
+
+        $dto = new NewsletterSubscription();
+        $dto->email = $customer->getEmail();
+        $dto->customerId = $customerId;
+        $dto->isSubscribed = false;
+        $dto->status = 'unsubscribed';
 
         return $dto;
     }
-
 }
