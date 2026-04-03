@@ -283,4 +283,18 @@ class Product extends \Maho\ApiPlatform\Resource
     #[ApiProperty(description: 'Stock data for write operations')]
     public ?array $stockData = null;
 
+    /**
+     * Create a Product DTO from an associative array (e.g. cached data).
+     * Only sets properties that exist on the class; unknown keys are ignored.
+     */
+    public static function fromArray(array $data): self
+    {
+        $dto = new self();
+        foreach ($data as $key => $value) {
+            if (property_exists($dto, $key)) {
+                $dto->$key = $value;
+            }
+        }
+        return $dto;
+    }
 }

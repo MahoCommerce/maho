@@ -99,11 +99,7 @@ class OrderMutationHandler
             throw ValidationException::requiredField('cartId');
         }
 
-        // Load quote without store filtering for admin/POS context
-        $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
-        if (!$quote || !$quote->getId()) {
-            throw NotFoundException::cart();
-        }
+        $quote = $this->loadPosQuote((int) $cartId);
 
         $paymentMethod = $variables['paymentMethod'] ?? null;
         if ($paymentMethod) {
@@ -129,16 +125,7 @@ class OrderMutationHandler
         );
 
         $order = $result['order'];
-        $invoice = null;
-        $shipment = null;
-
-        try {
-            $invoice = $this->orderService->createInvoiceForOrder($order);
-            $shipment = $this->orderService->createShipmentForOrder($order);
-            $order->load($order->getId());
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
+        $invoiceAndShipment = $this->createInvoiceAndShipment($order);
 
         return ['placeOrder' => [
             'order' => [
@@ -150,8 +137,8 @@ class OrderMutationHandler
                     'formatted' => \Mage::helper('core')->currency($order->getGrandTotal(), true, false),
                 ],
             ],
-            'invoice' => $invoice ? ['invoiceId' => (int) $invoice->getId(), 'incrementId' => $invoice->getIncrementId()] : null,
-            'shipment' => $shipment ? ['shipmentId' => (int) $shipment->getId(), 'incrementId' => $shipment->getIncrementId()] : null,
+            'invoice' => $invoiceAndShipment['invoice'],
+            'shipment' => $invoiceAndShipment['shipment'],
             'changeAmount' => $result['changeAmount'] ?? null,
         ]];
     }
@@ -172,11 +159,7 @@ class OrderMutationHandler
             throw ValidationException::requiredField('payments');
         }
 
-        // Load quote without store filtering for admin/POS context
-        $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
-        if (!$quote || !$quote->getId()) {
-            throw NotFoundException::cart();
-        }
+        $quote = $this->loadPosQuote((int) $cartId);
 
         $this->cartService->preparePosQuote(
             $quote,
@@ -209,8 +192,6 @@ class OrderMutationHandler
         $result = $this->orderService->placeAdminOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
 
         $order = $result['order'];
-        $invoice = null;
-        $shipment = null;
         $savedPayments = [];
 
         foreach ($payments as $paymentData) {
@@ -254,13 +235,7 @@ class OrderMutationHandler
             ];
         }
 
-        try {
-            $invoice = $this->orderService->createInvoiceForOrder($order);
-            $shipment = $this->orderService->createShipmentForOrder($order);
-            $order->load($order->getId());
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
+        $invoiceAndShipment = $this->createInvoiceAndShipment($order);
 
         return ['placeOrderWithSplitPayments' => [
             'order' => [
@@ -272,8 +247,8 @@ class OrderMutationHandler
                     'formatted' => \Mage::helper('core')->currency($order->getGrandTotal(), true, false),
                 ],
             ],
-            'invoice' => $invoice ? ['invoiceId' => (int) $invoice->getId(), 'incrementId' => $invoice->getIncrementId()] : null,
-            'shipment' => $shipment ? ['shipmentId' => (int) $shipment->getId(), 'incrementId' => $shipment->getIncrementId()] : null,
+            'invoice' => $invoiceAndShipment['invoice'],
+            'shipment' => $invoiceAndShipment['shipment'],
             'payments' => $savedPayments,
         ]];
     }
@@ -540,6 +515,42 @@ class OrderMutationHandler
             \Mage::logException($e);
             throw ValidationException::invalidValue('return', 'failed to process: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Load a quote by ID without store filtering, for admin/POS context
+     */
+    private function loadPosQuote(int $cartId): \Mage_Sales_Model_Quote
+    {
+        $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
+        if (!$quote || !$quote->getId()) {
+            throw NotFoundException::cart();
+        }
+        return $quote;
+    }
+
+    /**
+     * Create invoice and shipment for an order, logging any failures
+     *
+     * @return array{invoice: ?array, shipment: ?array}
+     */
+    private function createInvoiceAndShipment(\Mage_Sales_Model_Order $order): array
+    {
+        $invoice = null;
+        $shipment = null;
+
+        try {
+            $invoice = $this->orderService->createInvoiceForOrder($order);
+            $shipment = $this->orderService->createShipmentForOrder($order);
+            $order->load($order->getId());
+        } catch (\Exception $e) {
+            \Mage::logException($e);
+        }
+
+        return [
+            'invoice' => $invoice ? ['invoiceId' => (int) $invoice->getId(), 'incrementId' => $invoice->getIncrementId()] : null,
+            'shipment' => $shipment ? ['shipmentId' => (int) $shipment->getId(), 'incrementId' => $shipment->getIncrementId()] : null,
+        ];
     }
 
     /**

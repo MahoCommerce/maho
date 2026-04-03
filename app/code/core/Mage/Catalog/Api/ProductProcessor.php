@@ -42,8 +42,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 {
     use ActivityLogTrait;
 
-    private ?string $barcodeAttributeCode = null;
-
     private const VISIBILITY_MAP = [
         'not_visible' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE,
         'catalog' => Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG,
@@ -245,7 +243,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
 
         if ($data->barcode !== null) {
-            $attrData[$this->getBarcodeAttributeCode()] = $data->barcode;
+            $attrData[ProductService::getBarcodeAttributeCode()] = $data->barcode;
         }
         if ($data->pageLayout !== null) {
             $attrData['page_layout'] = $data->pageLayout;
@@ -343,7 +341,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setData('meta_keyword', $data->metaKeywords);
         }
         if ($data->barcode !== null) {
-            $product->setData($this->getBarcodeAttributeCode(), $data->barcode);
+            $product->setData(ProductService::getBarcodeAttributeCode(), $data->barcode);
         }
         if ($data->pageLayout !== null) {
             $product->setData('page_layout', $data->pageLayout);
@@ -518,26 +516,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
     {
         $websiteId = (int) Mage::app()->getStore()->getWebsiteId();
         return $websiteId ? [$websiteId] : [1];
-    }
-
-    private function getBarcodeAttributeCode(): string
-    {
-        if ($this->barcodeAttributeCode === null) {
-            $this->barcodeAttributeCode = 'barcode';
-            try {
-                $helperAlias = 'maho_pos';
-                $helperClass = Mage::getConfig()->getHelperClassName($helperAlias);
-                if (class_exists($helperClass)) {
-                    $posHelper = new $helperClass();
-                    if (method_exists($posHelper, 'getBarcodeAttributeCode')) {
-                        $this->barcodeAttributeCode = $posHelper->getBarcodeAttributeCode();
-                    }
-                }
-            } catch (\Throwable) {
-                // Module not available
-            }
-        }
-        return $this->barcodeAttributeCode;
     }
 
     private function invalidateCache(int $productId): void

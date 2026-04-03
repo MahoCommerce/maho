@@ -157,7 +157,6 @@ abstract class CrudResource extends Resource
     public static function fromModel(object $model): static
     {
         $class = static::class;
-        /** @var static $dto */
         $dto = new $class();
         foreach (static::metadata()->fields as $field) {
             $value = $model->getData($field->modelField);

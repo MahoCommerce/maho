@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
+use Mage\Sales\Api\AccountTokenService;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
@@ -327,7 +328,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Shared logic for updating customer profile (used by both REST and GraphQL)
      */
-    private function doUpdateProfile(?string $firstName, ?string $lastName, ?string $email): Customer
+    private function doUpdateProfile(?string $firstName, ?string $lastName, #[\SensitiveParameter]
+        ?string $email): Customer
     {
         $customerId = $this->getAuthenticatedCustomerId();
         if (!$customerId) {
@@ -478,36 +480,18 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Password must be at least 6 characters.');
         }
 
-        $parts = explode('.', $accountToken, 2);
-        if (count($parts) !== 2) {
-            throw new BadRequestHttpException('Invalid account token format.');
+        try {
+            $tokenData = AccountTokenService::verify($accountToken, 3600);
+        } catch (\Mage_Core_Exception $e) {
+            throw new BadRequestHttpException($e->getMessage());
         }
 
-        [$payloadBase64, $signature] = $parts;
-        $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
-        $expectedSignature = hash_hmac('sha256', $payloadBase64, $cryptKey);
-
-        if (!hash_equals($expectedSignature, $signature)) {
-            throw new HttpException(403, 'Invalid or expired account token.');
-        }
-
-        $payload = base64_decode($payloadBase64, true);
-        if ($payload === false) {
-            throw new BadRequestHttpException('Invalid token payload.');
-        }
-
-        $payloadParts = explode('|', $payload);
-        if (count($payloadParts) < 4 || $payloadParts[3] !== 'action=create_account') {
+        if ($tokenData['action'] !== 'create_account') {
             throw new BadRequestHttpException('Invalid token action.');
         }
 
-        $orderId = (int) $payloadParts[0];
-        $email = $payloadParts[1];
-        $timestamp = (int) $payloadParts[2];
-
-        if (time() - $timestamp > 3600) {
-            throw new BadRequestHttpException('Account creation token has expired. Please contact support.');
-        }
+        $orderId = $tokenData['orderId'];
+        $email = $tokenData['email'];
 
         $order = \Mage::getModel('sales/order')->load($orderId);
         if (!$order->getId() || $order->getCustomerEmail() !== $email) {

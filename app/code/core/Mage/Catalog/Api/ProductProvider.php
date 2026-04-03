@@ -26,31 +26,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
     private ?ProductService $productService = null;
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
-    private ?string $barcodeAttributeCode = null;
-
-    /**
-     * Get the barcode attribute code (from POS module if available, or default)
-     */
-    private function getBarcodeAttributeCode(): string
-    {
-        if ($this->barcodeAttributeCode === null) {
-            $this->barcodeAttributeCode = 'barcode';
-            try {
-                $helperAlias = 'maho_pos';
-                $helperClass = \Mage::getConfig()->getHelperClassName($helperAlias);
-                if (class_exists($helperClass)) {
-                    $posHelper = new $helperClass();
-                    if (method_exists($posHelper, 'getBarcodeAttributeCode')) {
-                        $this->barcodeAttributeCode = $posHelper->getBarcodeAttributeCode();
-                    }
-                }
-            } catch (\Throwable) {
-                // Module not available
-            }
-        }
-        return $this->barcodeAttributeCode;
-    }
-
     /**
      * Get cached MediaConfig instance
      */
@@ -162,7 +137,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         if ($cached !== false) {
             $data = json_decode($cached, true);
             if ($data !== null) {
-                return $this->arrayToFullProductDto($data);
+                return Product::fromArray($data);
             }
         }
 
@@ -174,7 +149,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $dto = $this->mapToDto($mahoProduct);
 
         \Mage::app()->getCache()->save(
-            (string) json_encode($this->fullProductDtoToArray($dto)),
+            (string) json_encode($dto->toArray()),
             $cacheKey,
             ['API_PRODUCTS', "API_PRODUCT_{$id}"],
             $this->getCacheTtl(),
@@ -274,7 +249,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $cachedData = json_decode($cached, true);
                 if ($cachedData !== null) {
                     // Reconstruct Product DTOs from cached data
-                    $products = array_map(fn($data) => $this->arrayToProductDto($data), $cachedData['products']);
+                    $products = array_map(fn($data) => Product::fromArray($data), $cachedData['products']);
                     return new TraversablePaginator(new \ArrayIterator($products), $cachedData['page'], $cachedData['pageSize'], $cachedData['total']);
                 }
             }
@@ -373,7 +348,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Cache the results for non-search queries
         if ($cacheKey !== null && !empty($products)) {
             $cacheData = [
-                'products' => array_map(fn($dto) => $this->productDtoToArray($dto), $products),
+                'products' => array_map(fn($dto) => $dto->toArray(), $products),
                 'page' => $page,
                 'pageSize' => $pageSize,
                 'total' => (int) $result['total'],
@@ -388,128 +363,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         // Return paginator with total count for proper pagination
         return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $result['total']);
-    }
-
-    /**
-     * Convert Product DTO to array for caching
-     */
-    private function productDtoToArray(Product $dto): array
-    {
-        return [
-            'id' => $dto->id,
-            'sku' => $dto->sku,
-            'urlKey' => $dto->urlKey,
-            'metaTitle' => $dto->metaTitle,
-            'metaDescription' => $dto->metaDescription,
-            'metaKeywords' => $dto->metaKeywords,
-            'name' => $dto->name,
-            'description' => $dto->description,
-            'shortDescription' => $dto->shortDescription,
-            'type' => $dto->type,
-            'status' => $dto->status,
-            'visibility' => $dto->visibility,
-            'stockStatus' => $dto->stockStatus,
-            'price' => $dto->price,
-            'specialPrice' => $dto->specialPrice,
-            'finalPrice' => $dto->finalPrice,
-            'stockQty' => $dto->stockQty,
-            'weight' => $dto->weight,
-            'barcode' => $dto->barcode,
-            'imageUrl' => $dto->imageUrl,
-            'smallImageUrl' => $dto->smallImageUrl,
-            'thumbnailUrl' => $dto->thumbnailUrl,
-            'categoryIds' => $dto->categoryIds,
-            'createdAt' => $dto->createdAt,
-            'updatedAt' => $dto->updatedAt,
-            'hasRequiredOptions' => $dto->hasRequiredOptions,
-            'reviewCount' => $dto->reviewCount,
-            'averageRating' => $dto->averageRating,
-        ];
-    }
-
-    /**
-     * Convert full Product DTO (with detail fields) to array for caching
-     */
-    private function fullProductDtoToArray(Product $dto): array
-    {
-        $data = $this->productDtoToArray($dto);
-        $data['configurableOptions'] = $dto->configurableOptions;
-        $data['variants'] = $dto->variants;
-        $data['customOptions'] = $dto->customOptions;
-        $data['mediaGallery'] = $dto->mediaGallery;
-        $data['relatedProducts'] = $dto->relatedProducts ? array_map(fn($p) => $this->productDtoToArray($p), $dto->relatedProducts) : null;
-        $data['crosssellProducts'] = $dto->crosssellProducts ? array_map(fn($p) => $this->productDtoToArray($p), $dto->crosssellProducts) : null;
-        $data['upsellProducts'] = $dto->upsellProducts ? array_map(fn($p) => $this->productDtoToArray($p), $dto->upsellProducts) : null;
-        $data['groupedProducts'] = $dto->groupedProducts;
-        $data['bundleOptions'] = $dto->bundleOptions;
-        $data['downloadableLinks'] = $dto->downloadableLinks;
-        $data['additionalAttributes'] = $dto->additionalAttributes;
-        $data['extensions'] = $dto->extensions;
-        $data['linksTitle'] = $dto->linksTitle;
-        $data['pageLayout'] = $dto->pageLayout;
-        $data['linksPurchasedSeparately'] = $dto->linksPurchasedSeparately;
-        return $data;
-    }
-
-    /**
-     * Reconstruct full Product DTO (with detail fields) from cached array
-     */
-    private function arrayToFullProductDto(array $data): Product
-    {
-        $dto = $this->arrayToProductDto($data);
-        $dto->configurableOptions = $data['configurableOptions'] ?? null;
-        $dto->variants = $data['variants'] ?? null;
-        $dto->customOptions = $data['customOptions'] ?? null;
-        $dto->mediaGallery = $data['mediaGallery'] ?? null;
-        $dto->relatedProducts = isset($data['relatedProducts']) ? array_map(fn($p) => $this->arrayToProductDto($p), $data['relatedProducts']) : null;
-        $dto->crosssellProducts = isset($data['crosssellProducts']) ? array_map(fn($p) => $this->arrayToProductDto($p), $data['crosssellProducts']) : null;
-        $dto->upsellProducts = isset($data['upsellProducts']) ? array_map(fn($p) => $this->arrayToProductDto($p), $data['upsellProducts']) : null;
-        $dto->groupedProducts = $data['groupedProducts'] ?? null;
-        $dto->bundleOptions = $data['bundleOptions'] ?? null;
-        $dto->downloadableLinks = $data['downloadableLinks'] ?? null;
-        $dto->additionalAttributes = $data['additionalAttributes'] ?? [];
-        $dto->extensions = $data['extensions'] ?? [];
-        $dto->linksTitle = $data['linksTitle'] ?? null;
-        $dto->pageLayout = $data['pageLayout'] ?? null;
-        $dto->linksPurchasedSeparately = $data['linksPurchasedSeparately'] ?? null;
-        return $dto;
-    }
-
-    /**
-     * Reconstruct Product DTO from cached array
-     */
-    private function arrayToProductDto(array $data): Product
-    {
-        $dto = new Product();
-        $dto->id = $data['id'] ?? null;
-        $dto->sku = $data['sku'] ?? '';
-        $dto->urlKey = $data['urlKey'] ?? null;
-        $dto->metaTitle = $data['metaTitle'] ?? null;
-        $dto->metaDescription = $data['metaDescription'] ?? null;
-        $dto->metaKeywords = $data['metaKeywords'] ?? null;
-        $dto->name = $data['name'] ?? '';
-        $dto->description = $data['description'] ?? null;
-        $dto->shortDescription = $data['shortDescription'] ?? null;
-        $dto->type = $data['type'] ?? 'simple';
-        $dto->status = $data['status'] ?? 'enabled';
-        $dto->visibility = $data['visibility'] ?? 'catalog_search';
-        $dto->stockStatus = $data['stockStatus'] ?? 'in_stock';
-        $dto->price = $data['price'] ?? null;
-        $dto->specialPrice = $data['specialPrice'] ?? null;
-        $dto->finalPrice = $data['finalPrice'] ?? null;
-        $dto->stockQty = $data['stockQty'] ?? null;
-        $dto->weight = $data['weight'] ?? null;
-        $dto->barcode = $data['barcode'] ?? null;
-        $dto->imageUrl = $data['imageUrl'] ?? null;
-        $dto->smallImageUrl = $data['smallImageUrl'] ?? null;
-        $dto->thumbnailUrl = $data['thumbnailUrl'] ?? null;
-        $dto->categoryIds = $data['categoryIds'] ?? [];
-        $dto->createdAt = $data['createdAt'] ?? null;
-        $dto->updatedAt = $data['updatedAt'] ?? null;
-        $dto->hasRequiredOptions = $data['hasRequiredOptions'] ?? false;
-        $dto->reviewCount = $data['reviewCount'] ?? 0;
-        $dto->averageRating = $data['averageRating'] ?? null;
-        return $dto;
     }
 
     /**
@@ -599,7 +452,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $dto->weight = $product->getWeight() ? (float) $product->getWeight() : null;
 
         // Get barcode from configured attribute (if POS module available)
-        $dto->barcode = $product->getData($this->getBarcodeAttributeCode());
+        $dto->barcode = $product->getData(ProductService::getBarcodeAttributeCode());
 
         // Use pre-loaded category IDs if available (batch loading), otherwise load individually
         $dto->categoryIds = $categoryIds ?? ($product->getCategoryIds() ?: []);
@@ -754,7 +607,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $configurableAttributes = $typeInstance->getConfigurableAttributes($product);
         $childProducts = $typeInstance->getUsedProducts(null, $product);
         $mediaConfig = $this->getMediaConfig();
-        $barcodeAttr = $this->getBarcodeAttributeCode();
+        $barcodeAttr = ProductService::getBarcodeAttributeCode();
 
         // Batch load all stock items at once to avoid N+1 queries
         $childIds = [];
@@ -1303,7 +1156,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $dto->stockStatus = $data['stock_status'] ?? 'in_stock';
 
         // Get barcode from configured attribute (if POS module available)
-        $barcodeAttr = $this->getBarcodeAttributeCode();
+        $barcodeAttr = ProductService::getBarcodeAttributeCode();
         $dto->barcode = isset($data[$barcodeAttr]) ? (string) $data[$barcodeAttr] : null;
 
         $dto->imageUrl = $data['image_url'] ?? null;

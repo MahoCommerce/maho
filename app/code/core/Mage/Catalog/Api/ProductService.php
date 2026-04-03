@@ -48,16 +48,28 @@ class ProductService
     /**
      * Get the barcode attribute code (from POS module if available, or default)
      */
-    private function getBarcodeAttributeCode(): string
+    public static function getBarcodeAttributeCode(): string
     {
-        $helperClass = \Mage::getConfig()->getHelperClassName('maho_pos');
-        if (class_exists($helperClass)) {
-            $posHelper = new $helperClass();
-            if (method_exists($posHelper, 'getBarcodeAttributeCode')) {
-                return $posHelper->getBarcodeAttributeCode();
-            }
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
         }
-        return 'barcode'; // Default fallback
+
+        try {
+            $helperClass = \Mage::getConfig()->getHelperClassName('maho_pos');
+            if (class_exists($helperClass)) {
+                $posHelper = new $helperClass();
+                if (method_exists($posHelper, 'getBarcodeAttributeCode')) {
+                    $cached = $posHelper->getBarcodeAttributeCode();
+                    return $cached;
+                }
+            }
+        } catch (\Throwable) {
+            // POS module not available
+        }
+
+        $cached = 'barcode';
+        return $cached;
     }
 
     /**
@@ -160,7 +172,7 @@ class ProductService
     public function getProductByBarcode(string $barcode): ?\Mage_Catalog_Model_Product
     {
         // Get configured barcode attribute code
-        $barcodeAttributeCode = $this->getBarcodeAttributeCode();
+        $barcodeAttributeCode = self::getBarcodeAttributeCode();
 
         $product = \Mage::getModel('catalog/product')
             ->getCollection()
@@ -381,7 +393,7 @@ class ProductService
         }
 
         // Get configured barcode attribute code
-        $barcodeAttributeCode = $this->getBarcodeAttributeCode();
+        $barcodeAttributeCode = self::getBarcodeAttributeCode();
 
         return [
             'id' => $hit['objectID'] ?? $hit['id'] ?? null,
@@ -446,7 +458,7 @@ class ProductService
         array $attributeFilters = [],
     ): array {
         // Get barcode attribute to include in selection
-        $barcodeAttr = $this->getBarcodeAttributeCode();
+        $barcodeAttr = self::getBarcodeAttributeCode();
         $attributes = self::LISTING_ATTRIBUTES;
         if ($barcodeAttr && $barcodeAttr !== 'sku') {
             $attributes[] = $barcodeAttr;
@@ -655,7 +667,7 @@ class ProductService
             ->addAttributeToSelect([
                 'name', 'sku', 'price', 'special_price', 'status',
                 'image', 'thumbnail', 'description', 'type_id',
-                $this->getBarcodeAttributeCode(),
+                self::getBarcodeAttributeCode(),
             ]);
 
         // For non-POS index, filter to enabled and in-stock products only
@@ -731,7 +743,7 @@ class ProductService
         }
 
         // Get configured barcode attribute
-        $barcodeAttributeCode = $this->getBarcodeAttributeCode();
+        $barcodeAttributeCode = self::getBarcodeAttributeCode();
         $barcodeValue = $product->getData($barcodeAttributeCode);
 
         return [

@@ -455,12 +455,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             ->loadByEmail($orderEmail);
 
         if (!$existingCustomer->getId()) {
-            $cryptKey = (string) \Mage::app()->getConfig()->getNode('global/crypt/key');
-            $timestamp = time();
-            $payload = $order->getId() . '|' . $orderEmail . '|' . $timestamp . '|action=create_account';
-            $payloadBase64 = base64_encode($payload);
-            $signature = hash_hmac('sha256', $payloadBase64, $cryptKey);
-            $dto->accessToken = $payloadBase64 . '.' . $signature;
+            $dto->accessToken = AccountTokenService::generate((int) $order->getId(), $orderEmail);
         }
 
         return $dto;
