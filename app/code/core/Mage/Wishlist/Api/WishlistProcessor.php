@@ -177,7 +177,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         WishlistProvider::invalidateCache($customerId);
 
         // Return the wishlist item
-        return $this->buildWishlistItem($item, $product);
+        return WishlistItemMapper::mapToDto($item, $product);
     }
 
     /**
@@ -269,7 +269,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Build response before deleting (we need the item data)
-        $wishlistItem = $this->buildWishlistItem($item, $product);
+        $wishlistItem = WishlistItemMapper::mapToDto($item, $product);
 
         // Remove from wishlist
         $item->delete();
@@ -314,7 +314,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $item = $wishlist->addNewItem($product);
             if ($item instanceof \Mage_Wishlist_Model_Item) {
                 $item->save();
-                $addedItems[] = $this->buildWishlistItem($item, $product);
+                $addedItems[] = WishlistItemMapper::mapToDto($item, $product);
             }
         }
 
@@ -339,7 +339,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         foreach ($itemCollection as $item) {
             $product = $item->getProduct();
             if ($product && $product->getId()) {
-                return $this->buildWishlistItem($item, $product);
+                return WishlistItemMapper::mapToDto($item, $product);
             }
         }
 
@@ -347,42 +347,5 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         $placeholder = new WishlistItem();
         $placeholder->id = (int) $wishlist->getId();
         return $placeholder;
-    }
-
-    /**
-     * Build WishlistItem from model
-     */
-    private function buildWishlistItem(\Mage_Wishlist_Model_Item $item, \Mage_Catalog_Model_Product $product): WishlistItem
-    {
-        $wishlistItem = new WishlistItem();
-        $wishlistItem->id = (int) $item->getId();
-        $wishlistItem->productId = (int) $product->getId();
-        $wishlistItem->productName = $product->getName();
-        $wishlistItem->productSku = $product->getSku();
-        $wishlistItem->productPrice = (float) $product->getFinalPrice();
-        $wishlistItem->productImageUrl = $this->getProductImageUrl($product);
-        $wishlistItem->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
-        $wishlistItem->productType = $product->getTypeId();
-        $wishlistItem->qty = (int) ($item->getQty() ?: 1);
-        $wishlistItem->description = $item->getDescription();
-        $wishlistItem->addedAt = $item->getAddedAt();
-        $wishlistItem->inStock = (bool) $product->isInStock();
-
-        return $wishlistItem;
-    }
-
-    // TODO: Extract getProductImageUrl() to a shared trait or service to eliminate duplication with WishlistProvider/WishlistProcessor
-    /**
-     * Get product thumbnail URL
-     */
-    private function getProductImageUrl(\Mage_Catalog_Model_Product $product): string
-    {
-        try {
-            return (string) \Mage::helper('catalog/image')
-                ->init($product, 'small_image')
-                ->resize(300);
-        } catch (\Exception $e) {
-            return '';
-        }
     }
 }

@@ -100,21 +100,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
                 continue;
             }
 
-            $wishlistItem = new WishlistItem();
-            $wishlistItem->id = (int) $item->getId();
-            $wishlistItem->productId = (int) $product->getId();
-            $wishlistItem->productName = $product->getName();
-            $wishlistItem->productSku = $product->getSku();
-            $wishlistItem->productPrice = (float) $product->getFinalPrice();
-            $wishlistItem->productImageUrl = $this->getProductImageUrl($product);
-            $wishlistItem->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
-            $wishlistItem->productType = $product->getTypeId();
-            $wishlistItem->qty = (int) ($item->getQty() ?: 1);
-            $wishlistItem->description = $item->getDescription();
-            $wishlistItem->addedAt = $item->getAddedAt();
-            $wishlistItem->inStock = (bool) $product->isInStock();
-
-            $items[] = $wishlistItem;
+            $items[] = WishlistItemMapper::mapToDto($item, $product);
         }
 
         \Mage::app()->getCache()->save(
@@ -149,38 +135,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
             throw new AccessDeniedHttpException('Access denied to this wishlist item');
         }
 
-        $product = $item->getProduct();
-
-        $wishlistItem = new WishlistItem();
-        $wishlistItem->id = (int) $item->getId();
-        $wishlistItem->productId = (int) $product->getId();
-        $wishlistItem->productName = $product->getName();
-        $wishlistItem->productSku = $product->getSku();
-        $wishlistItem->productPrice = (float) $product->getFinalPrice();
-        $wishlistItem->productImageUrl = $this->getProductImageUrl($product);
-        $wishlistItem->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
-        $wishlistItem->productType = $product->getTypeId();
-        $wishlistItem->qty = (int) ($item->getQty() ?: 1);
-        $wishlistItem->description = $item->getDescription();
-        $wishlistItem->addedAt = $item->getAddedAt();
-        $wishlistItem->inStock = (bool) $product->isInStock();
-
-        return $wishlistItem;
-    }
-
-    // TODO: Extract getProductImageUrl() to a shared trait or service to eliminate duplication with WishlistProvider/WishlistProcessor
-    /**
-     * Get product thumbnail URL
-     */
-    private function getProductImageUrl(\Mage_Catalog_Model_Product $product): string
-    {
-        try {
-            return (string) \Mage::helper('catalog/image')
-                ->init($product, 'small_image')
-                ->resize(300);
-        } catch (\Exception $e) {
-            return '';
-        }
+        return WishlistItemMapper::mapToDto($item, $item->getProduct());
     }
 
     /**
