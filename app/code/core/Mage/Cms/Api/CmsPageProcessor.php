@@ -13,23 +13,22 @@ declare(strict_types=1);
 
 namespace Mage\Cms\Api;
 
+use Maho\ApiPlatform\CrudProcessor;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * CMS Page State Processor
+ * CMS Page Processor — extends CrudProcessor with content sanitization and store access checks.
  *
- * Handles create, update, and delete operations for CMS pages.
- * Requires JWT authentication with cms-pages/write permission.
+ * All field mapping and CRUD routing is handled by CrudResource/CrudProcessor.
+ * This class only adds content sanitization and store-level authorization.
  */
-final class CmsPageProcessor extends \Maho\ApiPlatform\Processor
+final class CmsPageProcessor extends CrudProcessor
 {
-    protected ?string $modelAlias = 'cms/page';
     protected ?string $writePermission = 'cms-pages/write';
     protected ?string $deletePermission = 'cms-pages/delete';
-    protected ?string $entityType = 'cms/page';
-    protected ?string $entityLabel = 'page';
 
     public function __construct(
         Security $security,
@@ -39,35 +38,19 @@ final class CmsPageProcessor extends \Maho\ApiPlatform\Processor
     }
 
     #[\Override]
-    protected function applyData(object $model, mixed $data, ApiUser $user): void
+    protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        $storeIds = $this->resolveStoreIds($data->stores, $user);
-
-        $pageData = [
-            'identifier' => $data->identifier,
-            'title' => $data->title,
-            'content_heading' => $data->contentHeading,
-            'content' => $this->contentSanitizer->sanitize($data->content ?? ''),
-            'meta_keywords' => $data->metaKeywords,
-            'meta_description' => $data->metaDescription,
-            'is_active' => $data->isActive ? 1 : 0,
-            'stores' => $storeIds,
-        ];
-
-        if ($data->pageLayout !== null) {
-            $pageData['root_template'] = $data->pageLayout;
+        // Sanitize content
+        $content = $model->getData('content');
+        if ($content !== null) {
+            $model->setData('content', $this->contentSanitizer->sanitize($content));
         }
 
-        $model->addData($pageData);
-    }
-
-    #[\Override]
-    protected function buildResponse(object $model, mixed $data): CmsPage
-    {
-        $data->id = (int) $model->getId();
-        $data->content = $model->getData('content');
-        $data->status = $data->isActive ? 'enabled' : 'disabled';
-        return $data;
+        // Resolve store IDs from store codes
+        if ($data instanceof CmsPage) {
+            $storeIds = $this->resolveStoreIds($data->stores, $user);
+            $model->setData('stores', $storeIds);
+        }
     }
 
     #[\Override]
@@ -78,11 +61,7 @@ final class CmsPageProcessor extends \Maho\ApiPlatform\Processor
         $pageStores = $model->getStoreId();
         $this->validateEntityStoreAccess(is_array($pageStores) ? $pageStores : [$pageStores], $user, 'page');
 
-        $oldData = $model->getData();
-        $this->applyData($model, $data, $user);
-        $this->safeSave($model, 'update page');
-        $this->logApiActivity('cms/page', 'update', $oldData, $model, $user);
-        return $this->buildResponse($model, $data);
+        return parent::processUpdate($id, $data, $user);
     }
 
     #[\Override]
@@ -93,9 +72,6 @@ final class CmsPageProcessor extends \Maho\ApiPlatform\Processor
         $pageStores = $model->getStoreId();
         $this->validateEntityStoreAccess(is_array($pageStores) ? $pageStores : [$pageStores], $user, 'page');
 
-        $oldData = $model->getData();
-        $this->safeDelete($model, 'delete page');
-        $this->logApiActivity('cms/page', 'delete', $oldData, null, $user);
-        return null;
+        return parent::processDelete($id, $user);
     }
 }
