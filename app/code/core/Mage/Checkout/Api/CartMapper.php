@@ -20,7 +20,6 @@ use Mage\Customer\Api\Address;
  */
 class CartMapper
 {
-
     /**
      * Map Maho quote model to Cart DTO
      */
