@@ -120,14 +120,16 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
                 false,
             );
 
-            // Set label if provided
+            // Set label if provided via the gallery backend API
             if ($label !== null) {
                 $gallery = $product->getData('media_gallery');
                 if (!empty($gallery['images'])) {
                     $lastImage = end($gallery['images']);
-                    $lastImage['label'] = $label;
-                    $gallery['images'][key($gallery['images'])] = $lastImage;
-                    $product->setData('media_gallery', $gallery);
+                    $file = $lastImage['file'] ?? null;
+                    if ($file) {
+                        $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
+                        $backend->updateImage($product, $file, ['label' => $label]);
+                    }
                 }
             }
 
@@ -162,36 +164,37 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('valueId is required');
         }
 
-        // Find the image in gallery
+        // Find the image file path by value_id
         $gallery = $product->getData('media_gallery');
         $images = $gallery['images'] ?? [];
-        $found = false;
         $file = null;
 
-        foreach ($images as &$image) {
+        foreach ($images as $image) {
             if ((int) ($image['value_id'] ?? 0) === $valueId) {
-                $found = true;
                 $file = $image['file'] ?? null;
-                if (isset($body['label'])) {
-                    $image['label'] = $body['label'];
-                }
-                if (isset($body['position'])) {
-                    $image['position'] = (int) $body['position'];
-                }
-                if (isset($body['disabled'])) {
-                    $image['disabled'] = $body['disabled'] ? 1 : 0;
-                }
                 break;
             }
         }
-        unset($image);
 
-        if (!$found) {
+        if ($file === null) {
             throw new NotFoundHttpException('Gallery image not found');
         }
 
-        $gallery['images'] = $images;
-        $product->setData('media_gallery', $gallery);
+        // Use the gallery backend API to update image attributes
+        $updateData = [];
+        if (isset($body['label'])) {
+            $updateData['label'] = $body['label'];
+        }
+        if (isset($body['position'])) {
+            $updateData['position'] = (int) $body['position'];
+        }
+        if (isset($body['disabled'])) {
+            $updateData['disabled'] = $body['disabled'] ? 1 : 0;
+        }
+        if (!empty($updateData)) {
+            $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
+            $backend->updateImage($product, $file, $updateData);
+        }
 
         // Update role assignments
         $types = $body['types'] ?? null;
