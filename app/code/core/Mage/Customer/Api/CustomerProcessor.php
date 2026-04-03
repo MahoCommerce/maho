@@ -141,7 +141,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Password is required');
         }
 
-        $minPasswordLength = (int) \Mage::getStoreConfig('customer/password/minimum_password_length') ?: 8;
+        $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
         if (!$coreHelper->isValidLength($data->password, $minPasswordLength)) {
             throw new BadRequestHttpException("Password must be at least {$minPasswordLength} characters");
         }
@@ -375,7 +375,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('New password is required');
         }
 
-        $minPasswordLength = (int) \Mage::getStoreConfig('customer/password/minimum_password_length') ?: 8;
+        $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
         if (!$coreHelper->isValidLength($newPassword, $minPasswordLength)) {
             throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
         }
@@ -444,7 +444,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Email, reset token, and new password are required');
         }
 
-        $minPasswordLength = (int) \Mage::getStoreConfig('customer/password/minimum_password_length') ?: 8;
+        $minPasswordLength = \Mage::getModel('customer/customer')->getMinPasswordLength();
         if (!\Mage::helper('core')->isValidLength($newPassword, $minPasswordLength)) {
             throw new BadRequestHttpException("New password must be at least {$minPasswordLength} characters");
         }
