@@ -198,7 +198,7 @@ class IdempotencyListener
         try {
             $write = $resource->getConnection('core_write');
             $table = $resource->getTableName(self::TABLE);
-            $cutoff = date('Y-m-d H:i:s', time() - (self::TTL_HOURS * 3600));
+            $cutoff = gmdate('Y-m-d H:i:s', time() - (self::TTL_HOURS * 3600));
             $write->delete($table, $write->quoteInto('created_at < ?', $cutoff));
         } catch (\Exception $e) {
             // Cleanup failure is non-critical
