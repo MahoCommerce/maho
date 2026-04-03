@@ -51,8 +51,8 @@ class CrudProcessor extends Processor
                 $this->entityLabel = $short;
             }
 
-            if (!$this->writePermission) {
-                $base = trim(preg_replace('#/\{[^}]+\}#', '', $operation->getUriTemplate()), '/');
+            if (!$this->writePermission && $operation instanceof \ApiPlatform\Metadata\HttpOperation) {
+                $base = trim(preg_replace('#/\{[^}]+\}#', '', $operation->getUriTemplate() ?? ''), '/');
                 $this->writePermission = $base . '/write';
                 $this->deletePermission = $base . '/delete';
             }
@@ -126,7 +126,9 @@ class CrudProcessor extends Processor
     private function validateStoreAccess(CrudResource $data, ApiUser $user): void
     {
         if ($this->isStoreScoped()) {
-            $this->validateEntityStoreAccess($data->stores, $user, $this->entityLabel);
+            /** @var array<int> $stores */
+            $stores = $data->stores; // @phpstan-ignore property.notFound
+            $this->validateEntityStoreAccess($stores, $user, $this->entityLabel);
         }
     }
 
