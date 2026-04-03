@@ -164,7 +164,6 @@
             </general>
             <cache>
                 <ttl>300</ttl>
-                <auto_clean>all</auto_clean>
             </cache>
             <oauth2>
                 <token_lifetime>3600</token_lifetime>

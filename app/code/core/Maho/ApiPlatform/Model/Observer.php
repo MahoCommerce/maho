@@ -127,18 +127,11 @@ class Maho_ApiPlatform_Model_Observer
      */
     public function invalidateProductCache(\Maho\Event\Observer $observer): void
     {
-        $mode = $this->getAutoCleanMode();
-        if ($mode === 'disabled') {
-            return;
-        }
-        // 'all' and 'product' both trigger on product saves
-        if ($mode === 'all' || $mode === 'product') {
-            $this->cleanApiCache(['API_PRODUCTS']);
+        $this->cleanApiCache(['API_PRODUCTS']);
 
-            $product = $observer->getEvent()->getProduct();
-            if ($product && $product->getId()) {
-                $this->cleanApiCache(["API_PRODUCT_{$product->getId()}"]);
-            }
+        $product = $observer->getEvent()->getProduct();
+        if ($product && $product->getId()) {
+            $this->cleanApiCache(["API_PRODUCT_{$product->getId()}"]);
         }
     }
 
@@ -147,10 +140,7 @@ class Maho_ApiPlatform_Model_Observer
      */
     public function invalidateCategoryCache(\Maho\Event\Observer $_observer): void
     {
-        $mode = $this->getAutoCleanMode();
-        if ($mode === 'all' || $mode === 'product') {
-            $this->cleanApiCache(['API_PRODUCTS']);
-        }
+        $this->cleanApiCache(['API_PRODUCTS']);
     }
 
     /**
@@ -158,10 +148,7 @@ class Maho_ApiPlatform_Model_Observer
      */
     public function invalidateStockCache(\Maho\Event\Observer $_observer): void
     {
-        $mode = $this->getAutoCleanMode();
-        if ($mode === 'all' || $mode === 'inventory') {
-            $this->cleanApiCache(['API_PRODUCTS']);
-        }
+        $this->cleanApiCache(['API_PRODUCTS']);
     }
 
     /**
@@ -169,10 +156,7 @@ class Maho_ApiPlatform_Model_Observer
      */
     public function invalidatePriceCache(\Maho\Event\Observer $_observer): void
     {
-        $mode = $this->getAutoCleanMode();
-        if ($mode === 'all' || $mode === 'product') {
-            $this->cleanApiCache(['API_PRODUCTS']);
-        }
+        $this->cleanApiCache(['API_PRODUCTS']);
     }
 
     /**
@@ -180,18 +164,7 @@ class Maho_ApiPlatform_Model_Observer
      */
     public function invalidateReviewCache(\Maho\Event\Observer $_observer): void
     {
-        $mode = $this->getAutoCleanMode();
-        if ($mode === 'all') {
-            $this->cleanApiCache(['API_REVIEWS']);
-        }
-    }
-
-    /**
-     * Get the configured auto-clean mode
-     */
-    private function getAutoCleanMode(): string
-    {
-        return Mage::getStoreConfig('maho_apiplatform/cache/auto_clean') ?: 'all';
+        $this->cleanApiCache(['API_REVIEWS']);
     }
 
     /**
