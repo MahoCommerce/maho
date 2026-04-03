@@ -30,10 +30,7 @@ class StoreProcessor extends \Maho\ApiPlatform\Processor
 
         StoreContext::setStore((int) $store->getId());
 
-        $dto = new Store();
-        $dto->id = (int) $store->getId();
-        $dto->code = $store->getCode();
-        $dto->name = $store->getName();
+        $dto = Store::fromModel($store);
         $dto->success = true;
 
         return $dto;
