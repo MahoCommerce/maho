@@ -14,63 +14,42 @@ declare(strict_types=1);
 namespace Maho\ApiPlatform\Service;
 
 /**
- * Filesystem-based JWT token blacklist for logout/revocation.
+ * JWT token blacklist for logout/revocation using the Mage cache backend.
  *
- * IMPORTANT: This implementation uses local filesystem storage. In multi-server
- * deployments (load-balanced web tier, Kubernetes pods), a token revoked on one
- * server will NOT be recognized by other servers until the token's natural expiry.
- * For multi-server setups, replace this with a shared store (Redis, database).
+ * This automatically benefits from whatever cache backend is configured
+ * (file, Redis, memcached), including multi-server deployments.
  */
 class TokenBlacklist
 {
-    private string $dir;
-
-    public function __construct(?string $dir = null)
-    {
-        $this->dir = $dir ?? \Mage::getBaseDir('var') . '/cache/token_blacklist';
-    }
+    private const CACHE_PREFIX = 'API_TOKEN_BLACKLIST_';
+    private const CACHE_TAG = 'API_TOKEN_BLACKLIST';
 
     public function revoke(string $jti, int $expiresAt): void
     {
-        if (!is_dir($this->dir)) {
-            @mkdir($this->dir, 0755, true);
+        $ttl = $expiresAt - time();
+        if ($ttl <= 0) {
+            return;
         }
 
-        $file = $this->dir . '/' . preg_replace('/[^a-f0-9]/', '', $jti);
-        $tmpFile = $file . '.' . getmypid() . '.tmp';
-        file_put_contents($tmpFile, (string) $expiresAt);
-        rename($tmpFile, $file);
+        \Mage::app()->getCache()->save(
+            (string) $expiresAt,
+            self::CACHE_PREFIX . preg_replace('/[^a-f0-9]/', '', $jti),
+            [self::CACHE_TAG],
+            $ttl,
+        );
     }
 
     public function isRevoked(string $jti): bool
     {
-        $file = $this->dir . '/' . preg_replace('/[^a-f0-9]/', '', $jti);
-        if (!file_exists($file)) {
-            return false;
-        }
+        $data = \Mage::app()->getCache()->load(
+            self::CACHE_PREFIX . preg_replace('/[^a-f0-9]/', '', $jti),
+        );
 
-        $expiresAt = (int) @file_get_contents($file);
-        if ($expiresAt > 0 && $expiresAt < time()) {
-            @unlink($file);
-            return false;
-        }
-
-        return true;
+        return $data !== false;
     }
 
     public function cleanup(): void
     {
-        if (!is_dir($this->dir)) {
-            return;
-        }
-        $now = time();
-        foreach (glob($this->dir . '/*') as $file) {
-            if (is_file($file)) {
-                $expiresAt = (int) @file_get_contents($file);
-                if ($expiresAt > 0 && $expiresAt < $now) {
-                    @unlink($file);
-                }
-            }
-        }
+        \Mage::app()->getCache()->clean([self::CACHE_TAG]);
     }
 }
