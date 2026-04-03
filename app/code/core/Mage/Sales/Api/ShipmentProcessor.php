@@ -151,6 +151,6 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             $shipment->sendEmail(true, $comment ?? '');
         }
 
-        return ShipmentMapper::mapToDto($shipment);
+        return Shipment::fromModel($shipment);
     }
 }

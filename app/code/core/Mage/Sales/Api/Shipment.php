@@ -22,7 +22,7 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
-use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'Shipment',
@@ -82,19 +82,22 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'sales/order_shipment',
+    ],
 )]
-class Shipment extends \Maho\ApiPlatform\Resource
+class Shipment extends CrudResource
 {
-    #[ApiProperty(identifier: true)]
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    #[ApiProperty(identifier: false)]
+    #[ApiProperty(writable: false)]
     public ?int $orderId = null;
 
     #[ApiProperty(writable: false)]
     public ?string $incrementId = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $orderIncrementId = null;
 
     #[ApiProperty(writable: false)]
@@ -104,10 +107,35 @@ class Shipment extends \Maho\ApiPlatform\Resource
     public ?string $createdAt = null;
 
     /** @var ShipmentTrack[] */
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $tracks = [];
 
     /** @var ShipmentItem[] */
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $items = [];
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $order = $model->getOrder();
+        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
+
+        $dto->tracks = [];
+        foreach ($model->getAllTracks() as $track) {
+            $trackDto = new ShipmentTrack();
+            $trackDto->id = (int) $track->getId();
+            $trackDto->carrier = $track->getCarrierCode();
+            $trackDto->title = $track->getTitle();
+            $trackDto->trackNumber = $track->getTrackNumber();
+            $dto->tracks[] = $trackDto;
+        }
+
+        $dto->items = [];
+        foreach ($model->getAllItems() as $item) {
+            $itemDto = new ShipmentItem();
+            $itemDto->sku = $item->getSku();
+            $itemDto->name = $item->getName();
+            $itemDto->qty = (float) $item->getQty();
+            $dto->items[] = $itemDto;
+        }
+    }
 }
