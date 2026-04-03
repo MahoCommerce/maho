@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Maho\Db;
 
-class Select
+class Select implements \Stringable
 {
     // Query part constants
     public const DISTINCT       = 'distinct';

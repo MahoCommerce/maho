@@ -52,6 +52,7 @@ return RectorConfig::configure()
         Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector::class,
         TypeDeclaration\ClassMethod\ReturnNeverTypeRector::class,
         TypeDeclaration\StmtsAwareInterface\SafeDeclareStrictTypesRector::class,
+        Rector\Php80\Rector\Class_\StringableForToStringRector::class,
     ])
     ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
         'sensitive_parameters' => [
