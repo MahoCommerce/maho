@@ -69,7 +69,7 @@ abstract class CrudResource extends Resource
             if (!empty($attrs)) {
                 $extra = $attrs[0]->getArguments()['extraProperties'] ?? [];
                 $model = $extra['model'] ?? null;
-                $primaryKey = $primaryKey ?? ($extra['primaryKey'] ?? null);
+                $primaryKey ??= $extra['primaryKey'] ?? null;
             }
         }
 
