@@ -142,43 +142,13 @@ final class PaymentProvider extends \Maho\ApiPlatform\Provider
     private function getOrderPayments(int $orderId): array
     {
         $collection = $this->paymentService->getOrderPayments($orderId);
+        $mapper = new PosPaymentMapper();
         $payments = [];
 
         foreach ($collection as $payment) {
-            $payments[] = $this->mapToDto($payment);
+            $payments[] = $mapper->mapToDto($payment);
         }
 
         return $payments;
-    }
-
-    /**
-     * Map payment model to DTO
-     */
-    public function mapToDto(\Maho_Pos_Model_Payment $payment): PosPayment
-    {
-        $dto = new PosPayment();
-        $dto->id = (int) $payment->getId();
-        $dto->orderId = (int) $payment->getOrderId();
-        $dto->registerId = $payment->getRegisterId() ? (int) $payment->getRegisterId() : null;
-        $dto->methodCode = $payment->getMethodCode();
-        $dto->methodLabel = PaymentService::getMethodLabel($payment->getMethodCode());
-        $dto->amount = (float) $payment->getAmount();
-        $dto->baseAmount = (float) $payment->getBaseAmount();
-        $dto->currencyCode = $payment->getCurrencyCode();
-        $dto->terminalId = $payment->getTerminalId();
-        $dto->transactionId = $payment->getTransactionId();
-        $dto->cardType = $payment->getCardType();
-        $dto->cardLast4 = $payment->getCardLast4();
-        $dto->authCode = $payment->getAuthCode();
-        $dto->status = $payment->getStatus();
-        $dto->createdAt = $payment->getCreatedAt();
-
-        // Get receipt data if available
-        $receiptData = $payment->getReceiptData();
-        if ($receiptData) {
-            $dto->receiptData = is_array($receiptData) ? $receiptData : json_decode($receiptData, true) ?? [];
-        }
-
-        return $dto;
     }
 }
