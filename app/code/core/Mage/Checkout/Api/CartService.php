@@ -673,31 +673,17 @@ class CartService
      * @param string $methodCode Method code
      * @param array|null $additionalData Additional payment data
      */
-    public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null, bool $skipValidation = false): \Mage_Sales_Model_Quote
+    public function setPaymentMethod(\Mage_Sales_Model_Quote $quote, string $methodCode, ?array $additionalData = null): \Mage_Sales_Model_Quote
     {
-        // Validate the payment method is enabled and available for this quote
-        if (!$skipValidation) {
-            $store = $quote->getStoreId() ? \Mage::app()->getStore($quote->getStoreId()) : \Mage::app()->getStore();
-            $availableMethods = \Mage::helper('payment')->getStoreMethods($store, $quote);
-
-            $isAvailable = false;
-            foreach ($availableMethods as $method) {
-                if ($method->getCode() === $methodCode) {
-                    $isAvailable = true;
-                    break;
-                }
-            }
-
-            if (!$isAvailable) {
-                throw new \RuntimeException('Payment method is not available');
-            }
+        $paymentData = ['method' => $methodCode];
+        if ($additionalData) {
+            $paymentData['additional_data'] = $additionalData;
         }
 
-        $payment = $quote->getPayment();
-        $payment->setMethod($methodCode);
-
-        if ($additionalData) {
-            $payment->setAdditionalData(json_encode($additionalData));
+        try {
+            $quote->getPayment()->importData($paymentData);
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Payment method is not available: ' . $e->getMessage());
         }
 
         $quote->setTotalsCollectedFlag(false);
