@@ -500,13 +500,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
 
     private function resolveAttributeSetId(Product $data): int
     {
-        $entityTypeId = Mage::getModel('eav/entity')->setType('catalog_product')->getTypeId();
-        return (int) Mage::getModel('eav/entity_attribute_set')
-            ->getCollection()
-            ->setEntityTypeFilter($entityTypeId)
-            ->setOrder('attribute_set_id', 'ASC')
-            ->getFirstItem()
-            ->getId();
+        return (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId();
     }
 
     /**
