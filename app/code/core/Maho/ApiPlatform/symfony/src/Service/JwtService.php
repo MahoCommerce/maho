@@ -142,31 +142,35 @@ class JwtService
      */
     public function loadApiUserPermissions(\Mage_Api_Model_User $apiUser): array
     {
-        $permissions = [];
         $roleIds = $apiUser->getRoles();
 
         if (empty($roleIds)) {
-            return $permissions;
+            return [];
         }
 
-        $resource = \Mage::getSingleton('core/resource');
-        $read = $resource->getConnection('core_read');
-        $ruleTable = $resource->getTableName('api/rule');
+        /** @var \Mage_Api_Model_Acl $acl */
+        $acl = \Mage::getResourceModel('api/acl')->loadAcl();
+        $userRoleId = \Mage_Api_Model_Acl::ROLE_TYPE_USER . $apiUser->getId();
 
-        foreach ($roleIds as $roleId) {
-            $rules = $read->fetchCol(
-                $read->select()
-                    ->from($ruleTable, 'resource_id')
-                    ->where('role_id = ?', $roleId)
-                    ->where('role_type = ?', 'G')
-                    ->where('api_permission = ?', 'allow'),
-            );
+        if (!$acl->hasRole($userRoleId)) {
+            return [];
+        }
 
-            foreach ($rules as $resourceId) {
-                if ($resourceId === 'all') {
-                    return ['all'];
+        // Check if user has 'all' access
+        if ($acl->isAllowed($userRoleId, 'all')) {
+            return ['all'];
+        }
+
+        // Iterate known API resources and check each
+        $permissions = [];
+        $resources = \Mage::getSingleton('api/config')->getResources();
+        foreach ($resources->children() as $resourceName => $resource) {
+            try {
+                if ($acl->isAllowed($userRoleId, $resourceName)) {
+                    $permissions[] = $resourceName;
                 }
-                $permissions[] = $resourceId;
+            } catch (\Exception) {
+                // Resource not in ACL tree, skip
             }
         }
 
