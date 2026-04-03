@@ -48,7 +48,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
         $rule = \Mage::getModel('salesrule/rule');
         $rule->load($coupon->getRuleId());
 
-        return $this->mapToDto($coupon, $rule);
+        return CouponMapper::mapToDto($coupon, $rule);
     }
 
     #[\Override]
@@ -74,7 +74,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
             /** @var \Mage_SalesRule_Model_Rule $rule */
             $rule = \Mage::getModel('salesrule/rule');
             $rule->load($coupon->getRuleId());
-            $coupons[] = $this->mapToDto($coupon, $rule);
+            $coupons[] = CouponMapper::mapToDto($coupon, $rule);
         }
 
         return new TraversablePaginator(new \ArrayIterator($coupons), $page, $pageSize, $total);
@@ -95,47 +95,5 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
             );
             $collection->getSelect()->where('rule.is_active = ?', (int) $filters['is_active']);
         }
-    }
-
-    public function mapToDto(\Mage_SalesRule_Model_Coupon $coupon, \Mage_SalesRule_Model_Rule $rule): Coupon
-    {
-        $dto = new Coupon();
-        $dto->id = (int) $coupon->getId();
-        $dto->code = $coupon->getCode();
-        $dto->ruleId = (int) $coupon->getRuleId();
-        $dto->ruleName = $rule->getName();
-        $dto->timesUsed = (int) $coupon->getTimesUsed();
-
-        $discountTypeMap = [
-            'by_percent' => 'percent',
-            'by_fixed' => 'fixed',
-            'cart_fixed' => 'cart_fixed',
-            'buy_x_get_y' => 'buy_x_get_y',
-        ];
-        $dto->discountType = $discountTypeMap[$rule->getSimpleAction()] ?? $rule->getSimpleAction();
-        $dto->discountAmount = (float) $rule->getDiscountAmount();
-        $dto->description = $rule->getDescription();
-        $dto->isActive = (bool) $rule->getIsActive();
-        $dto->usageLimit = $rule->getUsesPerCoupon() ? (int) $rule->getUsesPerCoupon() : null;
-        $dto->usagePerCustomer = $rule->getUsesPerCustomer() ? (int) $rule->getUsesPerCustomer() : null;
-        $dto->fromDate = $rule->getFromDate();
-        $dto->toDate = $rule->getToDate();
-
-        $conditions = $rule->getConditions();
-        if ($conditions) {
-            $dto->minimumSubtotal = $this->extractMinimumSubtotal($conditions);
-        }
-
-        return $dto;
-    }
-
-    private function extractMinimumSubtotal(\Mage_Rule_Model_Condition_Abstract $conditions): ?float
-    {
-        foreach ($conditions->getConditions() as $condition) {
-            if ($condition->getAttribute() === 'base_subtotal' && $condition->getOperator() === '>=') {
-                return (float) $condition->getValue();
-            }
-        }
-        return null;
     }
 }
