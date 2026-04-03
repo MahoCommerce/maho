@@ -181,7 +181,7 @@ abstract class CrudResource extends Resource
         }
     }
 
-    private static function camelToSnake(string $name): string
+    public static function camelToSnake(string $name): string
     {
         return strtolower((string) preg_replace('/[A-Z]/', '_$0', lcfirst($name)));
     }

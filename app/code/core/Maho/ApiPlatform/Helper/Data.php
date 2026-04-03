@@ -133,7 +133,7 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
     {
         $result = [];
         foreach ($data as $key => $value) {
-            $snakeKey = $this->camelToSnake($key);
+            $snakeKey = \Maho\ApiPlatform\CrudResource::camelToSnake($key);
 
             if (is_array($value)) {
                 $result[$snakeKey] = $this->toSnakeCase($value);
@@ -142,18 +142,5 @@ class Maho_ApiPlatform_Helper_Data extends Mage_Core_Helper_Abstract
             }
         }
         return $result;
-    }
-
-    /**
-     * Convert a camelCase string to snake_case
-     */
-    private function camelToSnake(string $input): string
-    {
-        // Don't convert if it's already snake_case or all uppercase
-        if (str_contains($input, '_') || strtoupper($input) === $input) {
-            return $input;
-        }
-
-        return strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $input));
     }
 }
