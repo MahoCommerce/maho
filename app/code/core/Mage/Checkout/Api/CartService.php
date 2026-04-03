@@ -645,15 +645,14 @@ class CartService
 
         // Validate the shipping method is available for this address
         if (!$skipValidation) {
-            $address->setCollectShippingRates(1);
-            $address->collectShippingRates();
+            $mapper = new CartMapper();
+            $available = $mapper->getAvailableShippingMethods($address);
+            $availableCodes = array_map(
+                fn($m) => $m['carrierCode'] . '_' . $m['methodCode'],
+                $available,
+            );
 
-            $availableMethods = [];
-            foreach ($address->getAllShippingRates() as $rate) {
-                $availableMethods[] = $rate->getCarrier() . '_' . $rate->getMethod();
-            }
-
-            if (!in_array($shippingMethod, $availableMethods, true)) {
+            if (!in_array($shippingMethod, $availableCodes, true)) {
                 throw new \RuntimeException('Shipping method is not available for this address');
             }
         }
