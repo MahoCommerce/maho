@@ -413,32 +413,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             ['entity_id = ?' => $order->getId()],
         );
 
-        $dto = new Order();
-        $dto->id = (int) $order->getId();
-        $dto->incrementId = $order->getIncrementId();
-        $dto->status = $order->getStatus();
-        $dto->state = $order->getState();
-        $dto->customerEmail = $order->getCustomerEmail();
-        $dto->currency = $order->getOrderCurrencyCode();
-
-        // Build items
-        $items = [];
-        foreach ($order->getAllVisibleItems() as $item) {
-            $orderItem = new OrderItem();
-            $orderItem->sku = $item->getSku();
-            $orderItem->name = $item->getName();
-            $orderItem->price = (float) $item->getPriceInclTax();
-            $orderItem->qtyOrdered = (float) $item->getQtyOrdered();
-            $items[] = $orderItem;
-        }
-        $dto->items = $items;
-
-        $dto->prices = [
-            'grandTotal' => (float) $order->getGrandTotal(),
-            'subtotal' => (float) $order->getSubtotalInclTax(),
-            'taxAmount' => (float) $order->getTaxAmount(),
-            'shippingAmount' => (float) $order->getShippingInclTax(),
-        ];
+        $dto = $this->orderProvider->mapToDto($order);
 
         // Generate account creation token for guest orders without existing account
         $orderEmail = $order->getCustomerEmail();
