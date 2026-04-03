@@ -15,159 +15,53 @@ namespace Maho\Giftcard\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-/**
- * Gift Card Processor — custom operations (create, adjust balance) that go beyond basic CRUD.
- *
- * Standard CRUD create uses CrudProcessor base. The createGiftcard and adjustBalance
- * mutations require custom business logic (code generation, balance validation, email).
- */
 final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 {
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): GiftCard
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
-        $this->requireAdminOrApiUser('Gift card management requires admin or API access');
-        $operationName = $operation->getName();
-
-        return match ($operationName) {
-            'createGiftcard' => $this->createGiftcard($context),
+        return match ($operation->getName()) {
+            'createGiftcard' => $this->createGiftcardFromGraphQl($context),
             'adjustGiftcardBalance' => $this->adjustBalance($context),
-            default => $this->createGiftcardFromRest($data),
+            default => parent::process($data, $operation, $uriVariables, $context),
         };
     }
 
-    private function createGiftcardFromRest(GiftCard $data): GiftCard
+    private function createGiftcardFromGraphQl(array $context): GiftCard
     {
-        return $this->doCreateGiftcard(
-            $data->initialBalance,
-            $data->code,
-            $data->recipientName,
-            $data->recipientEmail,
-            $data->senderName,
-            $data->senderEmail,
-            $data->message,
-            null,
-            $data->expiresAt,
-        );
-    }
-
-    private function createGiftcard(array $context): GiftCard
-    {
+        $this->requireAdminOrApiUser('Gift card management requires admin or API access');
         $args = $context['args']['input'] ?? [];
-
-        return $this->doCreateGiftcard(
-            (float) ($args['initialBalance'] ?? 0),
-            $args['code'] ?? null,
-            $args['recipientName'] ?? null,
-            $args['recipientEmail'] ?? null,
-            $args['senderName'] ?? null,
-            $args['senderEmail'] ?? null,
-            $args['message'] ?? null,
-            isset($args['websiteId']) ? (int) $args['websiteId'] : null,
-            $args['expiresAt'] ?? null,
-        );
-    }
-
-    private function doCreateGiftcard(
-        float $initialBalance,
-        ?string $code,
-        ?string $recipientName,
-        ?string $recipientEmail,
-        ?string $senderName,
-        ?string $senderEmail,
-        ?string $message,
-        ?int $websiteId,
-        ?string $expiresAt,
-    ): GiftCard {
-        if ($initialBalance <= 0) {
-            throw new BadRequestHttpException('Initial balance must be greater than 0');
-        }
-
-        if ($initialBalance > 10000) {
-            throw new BadRequestHttpException('Initial balance cannot exceed 10,000');
-        }
-
-        $helper = \Mage::helper('giftcard');
-
-        if ($code !== null) {
-            $code = trim($code);
-            if (strlen($code) < 4 || strlen($code) > 64) {
-                throw new BadRequestHttpException('Gift card code must be between 4 and 64 characters');
-            }
-
-            $existing = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
-            if ($existing->getId()) {
-                throw new ConflictHttpException('A gift card with this code already exists');
-            }
-        } else {
-            $code = $helper->generateCode();
-        }
-
-        $websiteId = $websiteId ?: (int) \Mage::app()->getStore()->getWebsiteId();
-
-        if ($expiresAt !== null) {
-            $expiresAt = trim($expiresAt);
-            if (!preg_match('/^\d{4}-\d{2}-\d{2}/', $expiresAt)) {
-                throw new BadRequestHttpException('Expiration date must be in YYYY-MM-DD format');
-            }
-            if (strlen($expiresAt) === 10) {
-                $expiresAt .= ' 23:59:59';
-            }
-        } else {
-            $expiresAt = $helper->calculateExpirationDate();
-        }
-
-        $now = \Mage_Core_Model_Locale::now();
 
         $giftcard = \Mage::getModel('giftcard/giftcard');
         $giftcard->setData([
-            'code' => $code,
-            'status' => \Maho_Giftcard_Model_Giftcard::STATUS_ACTIVE,
-            'website_id' => $websiteId,
-            'balance' => $initialBalance,
-            'initial_balance' => $initialBalance,
-            'recipient_name' => $recipientName,
-            'recipient_email' => $recipientEmail,
-            'sender_name' => $senderName,
-            'sender_email' => $senderEmail,
-            'message' => $message,
-            'expires_at' => $expiresAt,
-            'created_at' => $now,
-            'updated_at' => $now,
+            'balance' => (float) ($args['initialBalance'] ?? 0),
+            'initial_balance' => (float) ($args['initialBalance'] ?? 0),
+            'code' => $args['code'] ?? null,
+            'recipient_name' => $args['recipientName'] ?? null,
+            'recipient_email' => $args['recipientEmail'] ?? null,
+            'sender_name' => $args['senderName'] ?? null,
+            'sender_email' => $args['senderEmail'] ?? null,
+            'message' => $args['message'] ?? null,
+            'website_id' => isset($args['websiteId']) ? (int) $args['websiteId'] : null,
+            'expires_at' => $args['expiresAt'] ?? null,
         ]);
         $giftcard->save();
-
-        if ($recipientEmail) {
-            try {
-                $helper->sendGiftcardEmail($giftcard);
-            } catch (\Exception $e) {
-                \Mage::logException($e);
-            }
-        }
 
         return GiftCard::fromModel($giftcard);
     }
 
     private function adjustBalance(array $context): GiftCard
     {
+        $this->requireAdminOrApiUser('Gift card management requires admin or API access');
         $args = $context['args']['input'] ?? [];
+
         $code = trim((string) ($args['code'] ?? ''));
         $newBalance = (float) ($args['newBalance'] ?? 0);
-        $comment = $args['comment'] ?? null;
 
         if ($code === '') {
             throw new BadRequestHttpException('Gift card code is required');
-        }
-
-        if ($newBalance < 0) {
-            throw new BadRequestHttpException('Balance cannot be negative');
-        }
-
-        if ($newBalance > 10000) {
-            throw new BadRequestHttpException('Balance cannot exceed 10,000');
         }
 
         $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
@@ -175,7 +69,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
             throw new NotFoundHttpException('Gift card not found');
         }
 
-        $giftcard->adjustBalance($newBalance, $comment);
+        $giftcard->adjustBalance($newBalance, $args['comment'] ?? null);
 
         return GiftCard::fromModel($giftcard);
     }

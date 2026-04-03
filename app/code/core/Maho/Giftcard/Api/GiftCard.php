@@ -101,7 +101,6 @@ class GiftCard extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $status = null;
 
-    #[ApiProperty(writable: false)]
     public ?string $expiresAt = null;
 
     #[ApiProperty(writable: false)]
