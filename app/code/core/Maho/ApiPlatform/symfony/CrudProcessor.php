@@ -92,6 +92,24 @@ class CrudProcessor extends Processor
         return $data;
     }
 
+    /**
+     * Return the model's store IDs for access validation, or null to skip the check.
+     * Override in subclasses for store-scoped entities.
+     */
+    protected function getEntityStoreIds(object $model): ?array
+    {
+        return null;
+    }
+
+    #[\Override]
+    protected function authorizeEntity(object $model, ApiUser $user): void
+    {
+        $storeIds = $this->getEntityStoreIds($model);
+        if ($storeIds !== null) {
+            $this->validateEntityStoreAccess($storeIds, $user, $this->entityLabel);
+        }
+    }
+
     /** Hook: validate incoming data before save. Throw BadRequestHttpException on errors. */
     protected function validate(CrudResource $data, object $model, bool $isNew): void {}
 

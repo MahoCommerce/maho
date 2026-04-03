@@ -17,16 +17,17 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 
-/**
- * CMS Page Processor — extends CrudProcessor with content sanitization and store access checks.
- *
- * All field mapping and CRUD routing is handled by CrudResource/CrudProcessor.
- * This class only adds content sanitization and store-level authorization.
- */
 final class CmsPageProcessor extends CrudProcessor
 {
     protected ?string $writePermission = 'cms-pages/write';
     protected ?string $deletePermission = 'cms-pages/delete';
+
+    #[\Override]
+    protected function getEntityStoreIds(object $model): ?array
+    {
+        $stores = $model->getStoreId();
+        return is_array($stores) ? $stores : [$stores];
+    }
 
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
@@ -36,32 +37,9 @@ final class CmsPageProcessor extends CrudProcessor
             $model->setData('content', \Mage::getSingleton('core/input_filter_maliciousCode')->filter($content));
         }
 
-        // Resolve store IDs from store codes
         if ($data instanceof CmsPage) {
             $storeIds = $this->resolveStoreIds($data->stores, $user);
             $model->setData('stores', $storeIds);
         }
-    }
-
-    #[\Override]
-    protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
-    {
-        $model = $this->loadOrFail($this->modelAlias, $id, 'CMS page not found');
-
-        $pageStores = $model->getStoreId();
-        $this->validateEntityStoreAccess(is_array($pageStores) ? $pageStores : [$pageStores], $user, 'page');
-
-        return parent::processUpdate($id, $data, $user);
-    }
-
-    #[\Override]
-    protected function processDelete(int $id, ApiUser $user): null
-    {
-        $model = $this->loadOrFail($this->modelAlias, $id, 'CMS page not found');
-
-        $pageStores = $model->getStoreId();
-        $this->validateEntityStoreAccess(is_array($pageStores) ? $pageStores : [$pageStores], $user, 'page');
-
-        return parent::processDelete($id, $user);
     }
 }

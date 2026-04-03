@@ -17,16 +17,17 @@ use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 
-/**
- * CMS Block Processor — extends CrudProcessor with content sanitization and store access checks.
- *
- * All field mapping and CRUD routing is handled by CrudResource/CrudProcessor.
- * This class only adds content sanitization and store-level authorization.
- */
 final class CmsBlockProcessor extends CrudProcessor
 {
     protected ?string $writePermission = 'cms-blocks/write';
     protected ?string $deletePermission = 'cms-blocks/delete';
+
+    #[\Override]
+    protected function getEntityStoreIds(object $model): ?array
+    {
+        $stores = $model->getStoreId();
+        return is_array($stores) ? $stores : [$stores];
+    }
 
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
@@ -40,27 +41,5 @@ final class CmsBlockProcessor extends CrudProcessor
             $storeIds = $this->resolveStoreIds($data->stores, $user);
             $model->setData('stores', $storeIds);
         }
-    }
-
-    #[\Override]
-    protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
-    {
-        $model = $this->loadOrFail($this->modelAlias, $id, 'CMS block not found');
-
-        $blockStores = $model->getStoreId();
-        $this->validateEntityStoreAccess(is_array($blockStores) ? $blockStores : [$blockStores], $user, 'block');
-
-        return parent::processUpdate($id, $data, $user);
-    }
-
-    #[\Override]
-    protected function processDelete(int $id, ApiUser $user): null
-    {
-        $model = $this->loadOrFail($this->modelAlias, $id, 'CMS block not found');
-
-        $blockStores = $model->getStoreId();
-        $this->validateEntityStoreAccess(is_array($blockStores) ? $blockStores : [$blockStores], $user, 'block');
-
-        return parent::processDelete($id, $user);
     }
 }

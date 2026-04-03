@@ -86,7 +86,6 @@ class BlogPost extends CrudResource
     public ?string $imageUrl = null;
 
     public ?string $publishDate = null;
-    public ?string $publishedAt = null;
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;

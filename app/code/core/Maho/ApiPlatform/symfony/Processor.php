@@ -112,6 +112,7 @@ abstract class Processor implements ProcessorInterface
     protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
     {
         $model = $this->loadOrFail($this->modelAlias, $id, ucfirst($this->entityLabel) . ' not found');
+        $this->authorizeEntity($model, $user);
         $oldData = $model->getData();
         $this->applyData($model, $data, $user);
         $this->safeSave($model, "update {$this->entityLabel}");
@@ -122,9 +123,13 @@ abstract class Processor implements ProcessorInterface
     protected function processDelete(int $id, ApiUser $user): null
     {
         $model = $this->loadOrFail($this->modelAlias, $id, ucfirst($this->entityLabel) . ' not found');
+        $this->authorizeEntity($model, $user);
         $oldData = $model->getData();
         $this->safeDelete($model, "delete {$this->entityLabel}");
         $this->logApiActivity($this->entityType, 'delete', $oldData, null, $user);
         return null;
     }
+
+    /** Hook: entity-level authorization after load (e.g. store access checks). */
+    protected function authorizeEntity(object $model, ApiUser $user): void {}
 }
