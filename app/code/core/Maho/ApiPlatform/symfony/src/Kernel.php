@@ -18,7 +18,12 @@ use Maho\ApiPlatform\Discovery\ModuleApiDiscovery;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\Kernel as BaseKernel;
+use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
+
+use function Symfony\Component\DependencyInjection\Loader\Configurator\tagged_locator;
 
 class Kernel extends BaseKernel
 {
@@ -47,6 +52,190 @@ class Kernel extends BaseKernel
     public function getLogDir(): string
     {
         return BP . '/var/log';
+    }
+
+    #[\Override]
+    public function registerBundles(): iterable
+    {
+        return [
+            new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
+            new \Symfony\Bundle\SecurityBundle\SecurityBundle(),
+            new \Symfony\Bundle\TwigBundle\TwigBundle(),
+            new \ApiPlatform\Symfony\Bundle\ApiPlatformBundle(),
+            new \Nelmio\CorsBundle\NelmioCorsBundle(),
+        ];
+    }
+
+    protected function configureContainer(ContainerConfigurator $container): void
+    {
+        $container->extension('framework', [
+            'secret' => '%env(APP_SECRET)%',
+            'http_method_override' => false,
+            'handle_all_throwables' => true,
+            'php_errors' => ['log' => true],
+            'serializer' => ['enabled' => true],
+            'property_access' => ['enabled' => true],
+            'property_info' => ['enabled' => true],
+            'validation' => ['enabled' => true],
+        ]);
+
+        $container->extension('api_platform', [
+            'title' => 'Maho Commerce API',
+            'version' => '2.0.0',
+            'description' => 'Modern REST and GraphQL API for Maho Commerce',
+            'enable_swagger_ui' => true,
+            'enable_re_doc' => true,
+            'enable_entrypoint' => true,
+            'enable_docs' => true,
+            'formats' => [
+                'jsonld' => ['application/ld+json'],
+                'json' => ['application/json'],
+            ],
+            'docs_formats' => [
+                'jsonld' => ['application/ld+json'],
+                'json' => ['application/json'],
+                'html' => ['text/html'],
+            ],
+            'defaults' => [
+                'pagination_enabled' => true,
+                'pagination_items_per_page' => 20,
+                'pagination_maximum_items_per_page' => 100,
+                'cache_headers' => [
+                    'vary' => ['Accept', 'Authorization'],
+                ],
+            ],
+            'graphql' => [
+                'enabled' => true,
+                'graphiql' => ['enabled' => true],
+                'introspection' => ['enabled' => true],
+                'max_query_depth' => 12,
+                'max_query_complexity' => 500,
+            ],
+            'swagger' => [
+                'versions' => [3],
+                'api_keys' => [
+                    'Bearer' => [
+                        'name' => 'Authorization',
+                        'type' => 'header',
+                    ],
+                ],
+            ],
+            'mapping' => [
+                'paths' => ['%kernel.project_dir%/src/ApiResource'],
+            ],
+            'patch_formats' => [
+                'json' => ['application/merge-patch+json'],
+            ],
+        ]);
+
+        $container->extension('nelmio_cors', [
+            'defaults' => [
+                'origin_regex' => false,
+                'allow_origin' => ['%env(CORS_ALLOW_ORIGIN)%'],
+                'allow_methods' => ['GET', 'OPTIONS', 'POST', 'PUT', 'PATCH', 'DELETE'],
+                'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With'],
+                'expose_headers' => ['Link', 'Deprecation', 'Sunset'],
+                'max_age' => 3600,
+            ],
+            'paths' => [
+                '^/api/' => [
+                    'allow_origin' => ['%env(CORS_ALLOW_ORIGIN)%'],
+                    'allow_headers' => ['Content-Type', 'Authorization', 'X-Requested-With', 'X-Store-Code'],
+                    'allow_methods' => ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+                    'max_age' => 3600,
+                ],
+            ],
+        ]);
+
+        $container->extension('security', [
+            'password_hashers' => [
+                'Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface' => 'auto',
+            ],
+            'providers' => [
+                'maho_customer' => [
+                    'id' => 'Maho\ApiPlatform\Security\CustomerUserProvider',
+                ],
+                'maho_admin' => [
+                    'id' => 'Maho\ApiPlatform\Security\AdminUserProvider',
+                ],
+                'maho_chain' => [
+                    'chain' => [
+                        'providers' => ['maho_admin', 'maho_customer'],
+                    ],
+                ],
+            ],
+            'firewalls' => [
+                'dev' => [
+                    'pattern' => '^/(_(profiler|wdt)|css|images|js)/',
+                    'security' => false,
+                ],
+                'api_docs' => [
+                    'pattern' => '^/api/docs',
+                    'security' => false,
+                ],
+                'api_admin_graphql' => [
+                    'pattern' => '^/api/admin/graphql',
+                    'stateless' => true,
+                    'provider' => 'maho_admin',
+                    'custom_authenticators' => [
+                        'Maho\ApiPlatform\Security\AdminSessionAuthenticator',
+                    ],
+                ],
+                'api_graphql' => [
+                    'pattern' => '^/api/graphql',
+                    'stateless' => true,
+                    'provider' => 'maho_customer',
+                    'custom_authenticators' => [
+                        'Maho\ApiPlatform\Security\OAuth2Authenticator',
+                    ],
+                ],
+                'api' => [
+                    'pattern' => '^/api',
+                    'stateless' => true,
+                    'provider' => 'maho_chain',
+                    'custom_authenticators' => [
+                        'Maho\ApiPlatform\Security\OAuth2Authenticator',
+                    ],
+                ],
+            ],
+            'access_control' => [
+                ['path' => '^/api/docs', 'roles' => 'PUBLIC_ACCESS'],
+                ['path' => '^/api/graphql', 'roles' => 'PUBLIC_ACCESS'],
+                ['path' => '^/api/admin/graphql', 'roles' => 'IS_AUTHENTICATED_FULLY'],
+                ['path' => '^/api', 'roles' => 'PUBLIC_ACCESS'],
+            ],
+        ]);
+
+        $services = $container->services();
+
+        $services->defaults()
+            ->autowire()
+            ->autoconfigure()
+            ->private();
+
+        $services->load('Maho\\ApiPlatform\\', '../src/')
+            ->exclude(['../src/Kernel.php']);
+
+        $services->set(EventListener\ApiExceptionListener::class)
+            ->arg('$debug', '%kernel.debug%')
+            ->tag('kernel.event_subscriber');
+
+        $services->set(GraphQl\CustomQueryResolver::class)
+            ->arg('$providerLocator', tagged_locator('maho.api.state_provider'))
+            ->tag('api_platform.graphql.query_resolver');
+
+        $services->set(\Mage\Catalog\Api\ProductService::class)
+            ->factory([new Reference(Factory\ServiceFactory::class), 'createProductService']);
+
+        $services->set(EventListener\DefaultDenyListener::class)
+            ->arg('$resourceMetadataFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory'))
+            ->tag('kernel.event_listener', ['event' => 'kernel.request', 'priority' => 28]);
+    }
+
+    protected function configureRoutes(RoutingConfigurator $routes): void
+    {
+        $routes->import('.', 'api_platform')->prefix('/api');
+        $routes->import('../src/Controller/', 'attribute');
     }
 
     /**
