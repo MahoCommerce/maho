@@ -31,6 +31,12 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
     processor: CustomerProcessor::class,
     operations: [
         new Get(
+            uriTemplate: '/customers/me',
+            name: 'me',
+            description: 'Get current authenticated customer',
+            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
+        ),
+        new Get(
             uriTemplate: '/customers/{id}',
             description: 'Get a customer by ID',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
@@ -54,12 +60,6 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             uriTemplate: '/customers/me/password',
             name: 'change_password',
             description: 'Change current customer password',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
-        ),
-        new Get(
-            uriTemplate: '/customers/me',
-            name: 'me',
-            description: 'Get current authenticated customer',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
         new Post(
