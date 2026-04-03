@@ -17,6 +17,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'StockUpdate',
@@ -55,25 +56,30 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'cataloginventory/stock_item',
+    ],
 )]
-class StockUpdate extends \Maho\ApiPlatform\Resource
+class StockUpdate extends CrudResource
 {
     #[ApiProperty(identifier: true)]
     public string $sku = '';
 
     public float $qty = 0;
 
+    #[ApiProperty(extraProperties: ['modelField' => 'is_in_stock'])]
     public ?bool $isInStock = null;
 
+    #[ApiProperty(extraProperties: ['modelField' => 'manage_stock'])]
     public ?bool $manageStock = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?float $previousQty = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $success = false;
 
     /** @var StockUpdate[]|null Bulk results (null for single updates) */
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?array $results = null;
 }
