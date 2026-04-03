@@ -5,7 +5,7 @@
  *
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2019-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2019-2026 The OpenMage Contributors (https://openmage.org)
  * @copyright  Copyright (c) 2024-2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
@@ -1229,9 +1229,9 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     /**
      * Escape html entities
      *
-     * @param string|string[] $data
-     * @param array|null $allowedTags
-     * @return null|string|string[]
+     * @param null|string|string[] $data
+     * @param null|string[] $allowedTags
+     * @return ($data is array ? array<?string> : ?string)
      */
     public function escapeHtml($data, $allowedTags = null)
     {
