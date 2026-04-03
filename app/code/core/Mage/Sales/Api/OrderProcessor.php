@@ -235,39 +235,28 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         );
 
         $order = $result['order'];
-        $savedPayments = [];
 
-        // Record payments to pos_payment table
-        foreach ($payments as $paymentData) {
-            /** @var \Maho_Pos_Model_Payment $posPayment */
-            $posPayment = \Mage::getModel('maho_pos/payment');
-            $posPayment->setOrderId((int) $order->getId())
-                ->setRegisterId($registerId)
-                ->setMethodCode($paymentData['method'] ?? $paymentData['methodCode'] ?? 'cash')
-                ->setAmount((float) $paymentData['amount'])
-                ->setBaseAmount((float) $paymentData['amount'])
-                ->setCurrencyCode($order->getOrderCurrencyCode())
-                ->setStatus('captured');
+        // Normalize payment data keys for PaymentService
+        $normalizedPayments = array_map(fn($p) => [
+            'methodCode' => $p['method'] ?? $p['methodCode'] ?? 'cash',
+            'amount' => (float) $p['amount'],
+            'cardType' => $p['cardType'] ?? null,
+            'cardLast4' => $p['cardLast4'] ?? null,
+            'authCode' => $p['authCode'] ?? null,
+            'transactionId' => $p['transactionId'] ?? null,
+            'terminalId' => $p['terminalId'] ?? null,
+        ], $payments);
 
-            if (!empty($paymentData['cardType'])) {
-                $posPayment->setCardType($paymentData['cardType']);
-            }
-            if (!empty($paymentData['cardLast4'])) {
-                $posPayment->setCardLast4($paymentData['cardLast4']);
-            }
-            if (!empty($paymentData['authCode'])) {
-                $posPayment->setAuthCode($paymentData['authCode']);
-            }
-            if (!empty($paymentData['transactionId'])) {
-                $posPayment->setTransactionId($paymentData['transactionId']);
-            }
-            if (!empty($paymentData['terminalId'])) {
-                $posPayment->setTerminalId($paymentData['terminalId']);
-            }
+        $createdPayments = $this->paymentService->recordMultiplePayments(
+            (int) $order->getId(),
+            $registerId,
+            $normalizedPayments,
+        );
 
-            $posPayment->save();
-            $savedPayments[] = $this->posPaymentMapper->mapToDto($posPayment);
-        }
+        $savedPayments = array_map(
+            fn($p) => $this->posPaymentMapper->mapToDto($p),
+            $createdPayments,
+        );
 
         // Create invoice and shipment
         $invoiceDto = null;

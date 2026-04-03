@@ -166,37 +166,15 @@ class OrderMutationHandler
         $result = $this->orderService->placeAdminOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
 
         $order = $result['order'];
+
+        $createdPayments = $this->paymentService->recordMultiplePayments(
+            (int) $order->getId(),
+            (int) $registerId,
+            $payments,
+        );
+
         $savedPayments = [];
-
-        foreach ($payments as $paymentData) {
-            /** @var \Maho_Pos_Model_Payment $posPayment */
-            $posPayment = \Mage::getModel('maho_pos/payment');
-            $posPayment->setOrderId((int) $order->getId())
-                ->setRegisterId((int) $registerId)
-                ->setMethodCode($paymentData['methodCode'])
-                ->setAmount((float) $paymentData['amount'])
-                ->setBaseAmount((float) $paymentData['amount'])
-                ->setCurrencyCode($order->getOrderCurrencyCode())
-                ->setStatus('captured');
-
-            if (!empty($paymentData['cardType'])) {
-                $posPayment->setCardType($paymentData['cardType']);
-            }
-            if (!empty($paymentData['cardLast4'])) {
-                $posPayment->setCardLast4($paymentData['cardLast4']);
-            }
-            if (!empty($paymentData['authCode'])) {
-                $posPayment->setAuthCode($paymentData['authCode']);
-            }
-            if (!empty($paymentData['transactionId'])) {
-                $posPayment->setTransactionId($paymentData['transactionId']);
-            }
-            if (!empty($paymentData['terminalId'])) {
-                $posPayment->setTerminalId($paymentData['terminalId']);
-            }
-
-            $posPayment->save();
-
+        foreach ($createdPayments as $posPayment) {
             $savedPayments[] = [
                 'paymentId' => (int) $posPayment->getId(),
                 'methodCode' => $posPayment->getMethodCode(),
