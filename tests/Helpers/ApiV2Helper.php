@@ -12,7 +12,9 @@ declare(strict_types=1);
 
 namespace Tests\Helpers;
 
-use Firebase\JWT\JWT;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Signer\Key\InMemory;
 use Maho\ApiPlatform\Service\JwtService;
 
 /**
@@ -25,6 +27,7 @@ class ApiV2Helper
 {
     private static ?string $baseUrl = null;
     private static ?string $jwtSecret = null;
+    private static ?Configuration $jwtConfig = null;
 
     /** @var array<string, list<int>> Entity IDs created during tests, keyed by type */
     private static array $createdEntities = [];
@@ -152,13 +155,10 @@ class ApiV2Helper
             }
         }
 
-
         // Delete products (EAV entity, must use model delete for proper cleanup)
         if (!empty(self::$createdEntities['product'])) {
             $ids = self::$createdEntities['product'];
-            $idList = implode(',', array_map('intval', $ids));
             try {
-                // Use admin store emulation for catalog delete
                 $appEmulation = \Mage::getSingleton('core/app_emulation');
                 $initialEnv = $appEmulation->startEnvironmentEmulation(0, 'admin');
                 foreach ($ids as $id) {
@@ -168,7 +168,6 @@ class ApiV2Helper
                             $product->delete();
                         }
                     } catch (\Exception $e) {
-                        // Fallback: direct SQL
                         $write->query('DELETE FROM catalog_product_entity WHERE entity_id = ' . (int) $id);
                     }
                 }
@@ -244,28 +243,71 @@ class ApiV2Helper
         return self::request('POST', '/api/graphql', $data, $token);
     }
 
+    // ── JWT Token Generation (lcobucci/jwt) ──────────────────────────
+
+    private static function getJwtConfig(): Configuration
+    {
+        if (self::$jwtConfig === null) {
+            self::$jwtConfig = Configuration::forSymmetricSigner(
+                new Sha256(),
+                InMemory::plainText(self::getJwtSecret()),
+            );
+        }
+        return self::$jwtConfig;
+    }
+
+    /**
+     * Build a JWT token from a claims array using lcobucci/jwt.
+     */
+    private static function buildToken(array $claims, ?string $secret = null): string
+    {
+        if ($secret !== null) {
+            // Custom secret (e.g. for invalid token tests)
+            $config = Configuration::forSymmetricSigner(
+                new Sha256(),
+                InMemory::plainText($secret),
+            );
+        } else {
+            $config = self::getJwtConfig();
+        }
+
+        $now = new \DateTimeImmutable();
+        $builder = $config->builder()
+            ->issuedBy($claims['iss'] ?? self::getBaseUrl() . '/')
+            ->permittedFor($claims['aud'] ?? 'maho-api')
+            ->identifiedBy($claims['jti'] ?? bin2hex(random_bytes(16)))
+            ->issuedAt($now)
+            ->expiresAt($now->modify('+' . (($claims['exp'] ?? time() + 86400) - time()) . ' seconds'));
+
+        if (isset($claims['sub'])) {
+            $builder = $builder->relatedTo($claims['sub']);
+        }
+
+        // Add custom claims (skip standard JWT fields handled above)
+        $standardFields = ['iss', 'aud', 'jti', 'iat', 'exp', 'sub'];
+        foreach ($claims as $key => $value) {
+            if (!in_array($key, $standardFields, true)) {
+                $builder = $builder->withClaim($key, $value);
+            }
+        }
+
+        return $builder->getToken($config->signer(), $config->signingKey())->toString();
+    }
+
     /**
      * Generate a valid customer JWT token
      */
     public static function generateCustomerToken(?int $customerId = null): string
     {
         $customerId ??= self::fixtures('customer_id');
-        $secret = self::getJwtSecret();
-        $now = time();
 
-        $payload = [
-            'iss' => self::getBaseUrl() . '/',
-            'aud' => 'maho-api',
+        return self::buildToken([
             'sub' => 'customer_' . $customerId,
-            'iat' => $now,
-            'exp' => $now + 86400,
             'customer_id' => $customerId,
             'email' => self::fixtures('customer_email'),
             'type' => 'customer',
             'roles' => ['ROLE_USER'],
-        ];
-
-        return JWT::encode($payload, $secret, 'HS256');
+        ]);
     }
 
     /**
@@ -273,22 +315,13 @@ class ApiV2Helper
      */
     public static function generateAdminToken(): string
     {
-        $secret = self::getJwtSecret();
-        $now = time();
-
-        $payload = [
-            'iss' => self::getBaseUrl() . '/',
-            'aud' => 'maho-api',
+        return self::buildToken([
             'sub' => 'admin_1',
-            'iat' => $now,
-            'exp' => $now + 86400,
             'admin_id' => 1,
             'email' => 'admin@example.com',
             'type' => 'admin',
             'roles' => ['ROLE_ADMIN'],
-        ];
-
-        return JWT::encode($payload, $secret, 'HS256');
+        ]);
     }
 
     /**
@@ -296,21 +329,22 @@ class ApiV2Helper
      */
     public static function generateExpiredToken(): string
     {
-        $secret = self::getJwtSecret();
-        $now = time();
+        $config = self::getJwtConfig();
+        $past = new \DateTimeImmutable('-2 days');
 
-        $payload = [
-            'iss' => self::getBaseUrl() . '/',
-            'aud' => 'maho-api',
-            'sub' => 'customer_1',
-            'iat' => $now - 172800, // 2 days ago
-            'exp' => $now - 86400,  // expired 1 day ago
-            'customer_id' => 1,
-            'type' => 'customer',
-            'roles' => ['ROLE_USER'],
-        ];
+        $token = $config->builder()
+            ->issuedBy(self::getBaseUrl() . '/')
+            ->permittedFor('maho-api')
+            ->identifiedBy(bin2hex(random_bytes(16)))
+            ->relatedTo('customer_1')
+            ->issuedAt($past)
+            ->expiresAt($past->modify('+1 day')) // expired 1 day ago
+            ->withClaim('customer_id', 1)
+            ->withClaim('type', 'customer')
+            ->withClaim('roles', ['ROLE_USER'])
+            ->getToken($config->signer(), $config->signingKey());
 
-        return JWT::encode($payload, $secret, 'HS256');
+        return $token->toString();
     }
 
     /**
@@ -318,20 +352,12 @@ class ApiV2Helper
      */
     public static function generateInvalidToken(): string
     {
-        $now = time();
-
-        $payload = [
-            'iss' => self::getBaseUrl() . '/',
-            'aud' => 'maho-api',
+        return self::buildToken([
             'sub' => 'customer_1',
-            'iat' => $now,
-            'exp' => $now + 86400,
             'customer_id' => 1,
             'type' => 'customer',
             'roles' => ['ROLE_USER'],
-        ];
-
-        return JWT::encode($payload, 'wrong-secret-key-that-does-not-match', 'HS256');
+        ], 'wrong-secret-key-that-does-not-match');
     }
 
     /**
@@ -339,22 +365,17 @@ class ApiV2Helper
      */
     public static function generateToken(array $payload): string
     {
-        $secret = self::getJwtSecret();
-        $now = time();
+        // Remove null values
+        $payload = array_filter($payload, fn($v) => $v !== null);
 
-        $defaults = [
-            'iss' => self::getBaseUrl() . '/',
-            'aud' => 'maho-api',
-            'iat' => $now,
-            'exp' => $now + 86400,
-        ];
+        // Check if a custom secret is needed
+        $secret = null;
+        if (isset($payload['_secret'])) {
+            $secret = $payload['_secret'];
+            unset($payload['_secret']);
+        }
 
-        $merged = array_merge($defaults, $payload);
-
-        // Remove null values from payload
-        $merged = array_filter($merged, fn($v) => $v !== null);
-
-        return JWT::encode($merged, $secret, 'HS256');
+        return self::buildToken($payload, $secret);
     }
 
     /**
@@ -408,7 +429,6 @@ class ApiV2Helper
             ],
         ];
 
-        // For Bearer token auth, embed nginx basic auth in URL
         $requestUrl = $url;
         if ($token !== null) {
             $parsed = parse_url($url);
@@ -510,17 +530,12 @@ class ApiV2Helper
         $headers = [
             'Accept: application/ld+json, application/json',
             'Content-Type: application/json',
-            // Basic auth for nginx
             'Authorization: Basic ' . base64_encode(getenv('API_TEST_BASIC_AUTH') ?: 'user:pass'),
         ];
 
-        // JWT Bearer token overrides basic auth
         if ($token !== null) {
-            // Replace basic auth with bearer token, but add basic auth as X-Nginx-Auth
             $headers = array_filter($headers, fn($h) => !str_starts_with($h, 'Authorization:'));
             $headers[] = 'Authorization: Bearer ' . $token;
-            // Send nginx basic auth as a separate custom header won't work;
-            // use URL-embedded credentials instead
         }
 
         $options = [
@@ -537,7 +552,6 @@ class ApiV2Helper
             $options['http']['content'] = json_encode($data);
         }
 
-        // For Bearer token auth, embed nginx basic auth in URL
         $requestUrl = $url;
         if ($token !== null) {
             $parsed = parse_url($url);
@@ -551,7 +565,6 @@ class ApiV2Helper
         $context = stream_context_create($options);
         $raw = @file_get_contents($requestUrl, false, $context);
 
-        // Extract status code from response headers
         $status = 500;
         $responseHeaders = $http_response_header ?? [];
         if (!empty($responseHeaders)) {
@@ -560,7 +573,6 @@ class ApiV2Helper
             }
         }
 
-        // Handle connection failures
         if ($raw === false) {
             return [
                 'status' => $status,
@@ -581,9 +593,6 @@ class ApiV2Helper
     }
 
     /**
-     * Get API base URL
-     */
-    /**
      * Public accessor for getBaseUrl (used by Pest.php availability check)
      */
     public static function getBaseUrlPublic(): string
@@ -597,13 +606,11 @@ class ApiV2Helper
             return self::$baseUrl;
         }
 
-        // Check environment variable first
         if (!empty($_ENV['API_BASE_URL'])) {
             self::$baseUrl = rtrim($_ENV['API_BASE_URL'], '/');
             return self::$baseUrl;
         }
 
-        // Try Maho config
         try {
             self::ensureMahoBootstrapped();
             $baseUrl = \Mage::getBaseUrl(\Mage_Core_Model_Store::URL_TYPE_WEB);
@@ -639,9 +646,6 @@ class ApiV2Helper
         return self::$jwtSecret;
     }
 
-    /**
-     * Look up the first active customer ID from DB
-     */
     private static function lookupCustomerId(): ?int
     {
         try {
@@ -656,8 +660,6 @@ class ApiV2Helper
     }
 
     /**
-     * Look up a simple product from DB (for testing)
-     *
      * @return array{id: int|null, sku: string|null}
      */
     private static function lookupProduct(): array
@@ -676,9 +678,6 @@ class ApiV2Helper
         return ['id' => null, 'sku' => null];
     }
 
-    /**
-     * Look up a configurable product SKU from DB
-     */
     private static function lookupConfigurableSku(): ?string
     {
         try {
@@ -693,9 +692,6 @@ class ApiV2Helper
         }
     }
 
-    /**
-     * Look up a category ID from DB
-     */
     private static function lookupCategoryId(): ?int
     {
         try {
@@ -710,9 +706,6 @@ class ApiV2Helper
         }
     }
 
-    /**
-     * Look up a valid order ID from DB
-     */
     private static function lookupOrderId(): ?int
     {
         try {
@@ -725,9 +718,6 @@ class ApiV2Helper
         }
     }
 
-    /**
-     * Look up customer email from DB
-     */
     private static function lookupCustomerEmail(int $customerId): string
     {
         try {
