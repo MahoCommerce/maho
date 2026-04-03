@@ -16,7 +16,6 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
-use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -389,8 +388,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $dto->metaKeywords = $product->getMetaKeyword();
         $dto->pageLayout = $product->getPageLayout() ?: null;
         $dto->name = $product->getName() ?? '';
-        $dto->description = ContentDirectiveProcessor::process($product->getDescription() ?? '');
-        $dto->shortDescription = ContentDirectiveProcessor::process($product->getShortDescription() ?? '');
+        $dto->description = \Maho\ApiPlatform\CrudResource::filterContent($product->getDescription() ?? '');
+        $dto->shortDescription = \Maho\ApiPlatform\CrudResource::filterContent($product->getShortDescription() ?? '');
         $dto->type = $product->getTypeId();
         $dto->status = (int) $product->getStatus() === \Mage_Catalog_Model_Product_Status::STATUS_ENABLED ? 'enabled' : 'disabled';
         $dto->visibility = match ((int) $product->getVisibility()) {

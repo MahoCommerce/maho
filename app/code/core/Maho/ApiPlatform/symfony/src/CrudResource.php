@@ -184,6 +184,22 @@ abstract class CrudResource extends Resource
     }
 
     /**
+     * Filter CMS content directives ({{media}}, {{block}}, {{config}}, etc.)
+     * using the core CMS template filter.
+     */
+    public static function filterContent(string $content): string
+    {
+        if ($content === '') {
+            return '';
+        }
+
+        $filter = \Mage::helper('cms')->getPageTemplateProcessor();
+        $filter->setStoreId(Service\StoreContext::getStoreId());
+
+        return $filter->filter($content);
+    }
+
+    /**
      * Apply writable DTO properties onto a Mage model.
      */
     public function applyToModel(object $model): void

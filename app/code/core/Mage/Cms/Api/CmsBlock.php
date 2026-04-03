@@ -26,7 +26,6 @@ use Maho\ApiPlatform\CrudProvider;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
 #[ApiResource(
@@ -98,7 +97,7 @@ class CmsBlock extends CrudResource
      */
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->content = ContentDirectiveProcessor::process($dto->content ?? '');
+        $dto->content = self::filterContent($dto->content ?? '');
         $dto->status = $dto->isActive ? 'enabled' : 'disabled';
 
         if (method_exists($model->getResource(), 'lookupStoreIds')) {

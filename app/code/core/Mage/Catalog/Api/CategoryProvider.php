@@ -16,7 +16,6 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
-use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
@@ -215,7 +214,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
             if (!$cmsBlock->getIsActive() || !$cmsBlock->getContent()) {
                 return null;
             }
-            return ContentDirectiveProcessor::process($cmsBlock->getContent());
+            return \Maho\ApiPlatform\CrudResource::filterContent($cmsBlock->getContent());
         } catch (\Throwable) {
             return null;
         }

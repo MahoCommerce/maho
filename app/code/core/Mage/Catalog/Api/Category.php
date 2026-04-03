@@ -24,7 +24,6 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
-use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 
 #[ApiResource(
     shortName: 'Category',
@@ -183,7 +182,7 @@ class Category extends CrudResource
             if (!$cmsBlock->getIsActive() || !$cmsBlock->getContent()) {
                 return null;
             }
-            return ContentDirectiveProcessor::process($cmsBlock->getContent());
+            return \Maho\ApiPlatform\CrudResource::filterContent($cmsBlock->getContent());
         } catch (\Throwable) {
             return null;
         }

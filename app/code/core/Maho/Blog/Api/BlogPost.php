@@ -23,7 +23,6 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
 use Maho\ApiPlatform\Service\StoreContext;
 
 #[ApiResource(
@@ -119,7 +118,7 @@ class BlogPost extends CrudResource
 
     public static function afterLoad(self $dto, object $model): void
     {
-        $dto->content = ContentDirectiveProcessor::process($dto->content ?? '');
+        $dto->content = self::filterContent($dto->content ?? '');
         $dto->status = $dto->isActive ? 'enabled' : 'disabled';
         $dto->imageUrl = $model->getImageUrl();
 
