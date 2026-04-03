@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Mage\Wishlist\Api;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -21,6 +22,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'WishlistItem',
@@ -100,20 +102,70 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'wishlist/item',
+    ],
 )]
-class WishlistItem extends \Maho\ApiPlatform\Resource
+class WishlistItem extends CrudResource
 {
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
+
+    #[ApiProperty(extraProperties: ['modelField' => 'product_id'])]
     public ?int $productId = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $productName = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $productSku = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?float $productPrice = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $productImageUrl = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $productUrl = null;
-    public ?string $productType = null;  // simple, configurable, etc.
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $productType = null;
+
     public int $qty = 1;
+
     public ?string $description = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'added_at'])]
     public ?string $addedAt = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $inStock = true;
 
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $product = $model->getProduct();
+        if (!$product || !$product->getId()) {
+            return;
+        }
+
+        $dto->productName = $product->getName();
+        $dto->productSku = $product->getSku();
+        $dto->productPrice = (float) $product->getFinalPrice();
+        $dto->productImageUrl = self::getProductImageUrl($product);
+        $dto->productUrl = '/' . ($product->getUrlKey() ?: $product->formatUrlKey($product->getName()));
+        $dto->productType = $product->getTypeId();
+        $dto->inStock = (bool) $product->isInStock();
+    }
+
+    public static function getProductImageUrl(\Mage_Catalog_Model_Product $product): string
+    {
+        try {
+            return (string) \Mage::helper('catalog/image')
+                ->init($product, 'small_image')
+                ->resize(300);
+        } catch (\Exception $e) {
+            return '';
+        }
+    }
 }

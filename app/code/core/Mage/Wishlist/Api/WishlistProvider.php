@@ -100,7 +100,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
                 continue;
             }
 
-            $items[] = WishlistItemMapper::mapToDto($item, $product);
+            $items[] = WishlistItem::fromModel($item);
         }
 
         \Mage::app()->getCache()->save(
@@ -135,7 +135,7 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
             throw new AccessDeniedHttpException('Access denied to this wishlist item');
         }
 
-        return WishlistItemMapper::mapToDto($item, $item->getProduct());
+        return WishlistItem::fromModel($item);
     }
 
     /**
@@ -176,7 +176,6 @@ final class WishlistProvider extends \Maho\ApiPlatform\Provider
         $item->inStock = (bool) ($data['inStock'] ?? true);
 
         \Mage::dispatchEvent('api_wishlist_item_dto_build', ['dto' => $item]);
-
 
         return $item;
     }
