@@ -127,7 +127,7 @@ class CrudProcessor extends Processor
     {
         if ($this->isStoreScoped()) {
             /** @var array<int> $stores */
-            $stores = $data->stores; // @phpstan-ignore property.notFound
+            $stores = (new \ReflectionProperty($data, 'stores'))->getValue($data);
             $this->validateEntityStoreAccess($stores, $user, $this->entityLabel);
         }
     }
