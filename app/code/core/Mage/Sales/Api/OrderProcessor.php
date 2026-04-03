@@ -371,20 +371,12 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
      */
     private function verifyCartOwnership(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId): void
     {
-        if ($this->isAdmin() || $this->isPosUser() || $this->isApiUser()) {
-            return;
-        }
-
-        $cartCustomerId = $quote->getCustomerId();
-        $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
-
-        if ($cartCustomerId) {
-            if ($authenticatedCustomerId === null || (int) $cartCustomerId !== $authenticatedCustomerId) {
-                throw new AccessDeniedHttpException('You can only place orders for your own cart');
-            }
-        } elseif (!$accessedByMaskedId) {
-            throw new AccessDeniedHttpException('Guest carts must be accessed via masked ID');
-        }
+        $this->cartService->verifyCartAccess(
+            $quote,
+            $accessedByMaskedId,
+            $this->getAuthenticatedCustomerId(),
+            $this->isAdmin() || $this->isPosUser() || $this->isApiUser(),
+        );
     }
 
     /**
