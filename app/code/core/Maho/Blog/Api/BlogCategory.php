@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'BlogCategory',
@@ -44,17 +46,25 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
             description: 'Get blog categories, optionally filter by URL key',
         ),
     ],
+    extraProperties: [
+        'model' => 'blog/category',
+    ],
 )]
-class BlogCategory extends \Maho\ApiPlatform\Resource
+class BlogCategory extends CrudResource
 {
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
+
     public string $name = '';
     public string $urlKey = '';
     public ?int $parentId = null;
     public ?string $path = null;
     public int $level = 0;
     public int $position = 0;
+
+    #[ApiProperty(extraProperties: ['modelField' => 'is_active'])]
     public bool $isActive = true;
+
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;

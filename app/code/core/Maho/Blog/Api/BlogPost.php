@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -21,6 +22,9 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
+use Maho\ApiPlatform\Service\StoreContext;
 
 #[ApiResource(
     shortName: 'BlogPost',
@@ -65,29 +69,70 @@ use ApiPlatform\Metadata\Put;
             description: 'Get blog posts, optionally filter by URL key',
         ),
     ],
+    extraProperties: [
+        'model' => 'blog/post',
+    ],
 )]
-class BlogPost extends \Maho\ApiPlatform\Resource
+class BlogPost extends CrudResource
 {
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
+
     public string $title = '';
     public string $urlKey = '';
     public ?string $content = null;
     public ?string $shortContent = null;
-    public ?string $excerpt = null;
     public ?string $image = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $imageUrl = null;
+
+    #[ApiProperty(extraProperties: ['modelField' => 'publish_date'])]
     public ?string $publishDate = null;
+
     public ?string $publishedAt = null;
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
+
+    #[ApiProperty(extraProperties: ['modelField' => 'is_active'])]
     public bool $isActive = true;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     /** @var string[] */
     public array $stores = ['all'];
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     /** @var int[] */
     public array $categoryIds = [];
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
+    public ?string $excerpt = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'created_at'])]
     public ?string $createdAt = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'updated_at'])]
     public ?string $updatedAt = null;
 
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->content = ContentDirectiveProcessor::process($dto->content ?? '');
+        $dto->status = $dto->isActive ? 'enabled' : 'disabled';
+        $dto->imageUrl = $model->getImageUrl();
+
+        $postStores = $model->getStores();
+        $dto->stores = StoreContext::storeIdsToStoreCodes($postStores);
+        $dto->categoryIds = array_map('intval', $model->getCategories());
+
+        if ($model->getContent()) {
+            $text = strip_tags($model->getContent());
+            $dto->excerpt = mb_strlen($text) > 200
+                ? mb_substr($text, 0, 200) . '...'
+                : $text;
+        }
+    }
 }

@@ -13,23 +13,34 @@ declare(strict_types=1);
 
 namespace Maho\Blog\Api;
 
-use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\Resource;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * Blog Category State Provider
+ * Blog Category Provider — extends CrudProvider with category-specific filters and named queries.
+ *
+ * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
+ * This class adds store/active filters and the urlKey-based lookup.
  */
-final class BlogCategoryProvider extends \Maho\ApiPlatform\Provider
+final class BlogCategoryProvider extends CrudProvider
 {
-    /**
-     * @return BlogCategory|TraversablePaginator<BlogCategory>|null
-     */
+    protected int $defaultPageSize = 50;
+    protected int $maxPageSize = 100;
+    protected array $defaultSort = ['position' => 'ASC'];
+
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogCategory|TraversablePaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         StoreContext::ensureStore();
+
+        $this->resourceClass = $operation->getClass();
+        if (is_subclass_of($this->resourceClass, \Maho\ApiPlatform\CrudResource::class)) {
+            $this->modelAlias = $this->resourceClass::metadata()->model;
+        }
 
         if ($operation instanceof CollectionOperationInterface) {
             $urlKey = $context['args']['urlKey'] ?? $context['filters']['urlKey'] ?? null;
@@ -38,13 +49,14 @@ final class BlogCategoryProvider extends \Maho\ApiPlatform\Provider
                 $items = $category ? [$category] : [];
                 return new TraversablePaginator(new \ArrayIterator($items), 1, 1, count($items));
             }
-            return $this->getCollection($context);
+            return $this->provideCollection($context);
         }
 
-        return $this->getItem((int) $uriVariables['id']);
+        return $this->provideItem((int) $uriVariables['id']);
     }
 
-    private function getItem(int $id): ?BlogCategory
+    #[\Override]
+    protected function provideItem(int|string $id): ?Resource
     {
         $category = \Mage::getModel('blog/category')->load($id);
 
@@ -58,10 +70,18 @@ final class BlogCategoryProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->mapToDto($category);
+        return $this->toDto($category);
     }
 
-    private function getCategoryByUrlKey(string $urlKey): ?BlogCategory
+    #[\Override]
+    protected function applyCollectionFilters(object $collection, array $filters): void
+    {
+        parent::applyCollectionFilters($collection, $filters);
+
+        $collection->addActiveFilter();
+    }
+
+    private function getCategoryByUrlKey(string $urlKey): ?Resource
     {
         $storeId = StoreContext::getStoreId();
         $model = \Mage::getModel('blog/category');
@@ -71,51 +91,6 @@ final class BlogCategoryProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->getItem($categoryId);
-    }
-
-    /**
-     * @return TraversablePaginator<BlogCategory>
-     */
-    private function getCollection(array $context): TraversablePaginator
-    {
-        $storeId = StoreContext::getStoreId();
-        $collection = \Mage::getResourceModel('blog/category_collection');
-        $collection->addStoreFilter($storeId);
-        $collection->addActiveFilter();
-        $collection->setOrder('position', 'ASC');
-
-        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 50, 100);
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($page);
-
-        $categories = [];
-        foreach ($collection as $category) {
-            $categories[] = $this->mapToDto($category);
-        }
-
-        $total = (int) $collection->getSize();
-
-        return new TraversablePaginator(new \ArrayIterator($categories), $page, $pageSize, $total);
-    }
-
-    public function mapToDto(\Maho_Blog_Model_Category $category): BlogCategory
-    {
-        $dto = new BlogCategory();
-        $dto->id = (int) $category->getId();
-        $dto->name = (string) $category->getName();
-        $dto->urlKey = (string) $category->getUrlKey();
-        $dto->parentId = $category->getParentId() ? (int) $category->getParentId() : null;
-        $dto->path = $category->getPath();
-        $dto->level = (int) $category->getLevel();
-        $dto->position = (int) $category->getPosition();
-        $dto->isActive = (bool) $category->getIsActive();
-        $dto->metaTitle = $category->getMetaTitle();
-        $dto->metaDescription = $category->getMetaDescription();
-        $dto->metaKeywords = $category->getMetaKeywords();
-
-        \Mage::dispatchEvent('api_blog_category_dto_build', ['category' => $category, 'dto' => $dto]);
-
-        return $dto;
+        return $this->provideItem($categoryId);
     }
 }

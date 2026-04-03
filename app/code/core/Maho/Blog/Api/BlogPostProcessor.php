@@ -14,24 +14,24 @@ declare(strict_types=1);
 namespace Maho\Blog\Api;
 
 use Mage;
+use Maho\ApiPlatform\CrudProcessor;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Maho_Blog_Model_Post;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * Blog Post State Processor
+ * Blog Post Processor — extends CrudProcessor with content sanitization,
+ * store access checks, and image handling.
  *
- * Handles create, update, and delete operations for blog posts.
- * Requires JWT authentication with blog-posts/write permission.
+ * All field mapping and CRUD routing is handled by CrudResource/CrudProcessor.
+ * This class adds content sanitization, store-level authorization, and image processing.
  */
-final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
+final class BlogPostProcessor extends CrudProcessor
 {
-    protected ?string $modelAlias = 'blog/post';
     protected ?string $writePermission = 'blog-posts/write';
     protected ?string $deletePermission = 'blog-posts/delete';
-    protected ?string $entityType = 'blog/post';
-    protected ?string $entityLabel = 'blog post';
 
     public function __construct(
         Security $security,
@@ -41,79 +41,38 @@ final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
     }
 
     #[\Override]
-    protected function applyData(object $model, mixed $data, ApiUser $user): void
+    protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        $storeIds = $this->resolveStoreIds($data->stores, $user);
-        $sanitizedContent = $this->contentSanitizer->sanitize($data->content ?? '');
-
-        $postData = [
-            'url_key' => $data->urlKey,
-            'title' => $data->title,
-            'content' => $sanitizedContent,
-            'is_active' => $data->isActive ? 1 : 0,
-            'stores' => $storeIds,
-            'meta_title' => $data->metaTitle,
-            'meta_keywords' => $data->metaKeywords,
-            'meta_description' => $data->metaDescription,
-        ];
-
-        if ($data->publishedAt !== null) {
-            $postData['publish_date'] = $data->publishedAt;
-        } elseif ($data->publishDate !== null) {
-            $postData['publish_date'] = $data->publishDate;
+        $content = $model->getData('content');
+        if ($content !== null) {
+            $model->setData('content', $this->contentSanitizer->sanitize($content));
         }
 
-        $model->addData($postData);
+        if ($data instanceof BlogPost) {
+            $storeIds = $this->resolveStoreIds($data->stores, $user);
+            $model->setData('stores', $storeIds);
+
+            if ($data->publishedAt !== null) {
+                $model->setData('publish_date', $data->publishedAt);
+            }
+        }
     }
 
     #[\Override]
-    protected function buildResponse(object $model, mixed $data): BlogPost
+    protected function afterSave(object $model, CrudResource $data): void
     {
-        $sanitizedContent = $this->contentSanitizer->sanitize($data->content ?? '');
-        $sanitizedShortContent = $data->shortContent !== null
-            ? $this->contentSanitizer->sanitize($data->shortContent)
-            : null;
-
-        $data->id = (int) $model->getId();
-        $data->content = $sanitizedContent;
-        $data->shortContent = $sanitizedShortContent;
-        $data->status = $data->isActive ? 'enabled' : 'disabled';
-        return $data;
-    }
-
-    #[\Override]
-    protected function processCreate(mixed $data, ApiUser $user): mixed
-    {
-        /** @var Maho_Blog_Model_Post $model */
-        $model = Mage::getModel($this->modelAlias);
-        $this->applyData($model, $data, $user);
-        $this->safeSave($model, "create {$this->entityLabel}");
-
-        if ($data->image !== null) {
+        if ($data instanceof BlogPost && $data->image !== null) {
             $this->saveImageAttribute($model, $this->processImage($data->image));
         }
-
-        $this->logApiActivity($this->entityType, 'create', null, $model, $user);
-        return $this->buildResponse($model, $data);
     }
 
     #[\Override]
     protected function processUpdate(int $id, mixed $data, ApiUser $user): mixed
     {
-        /** @var Maho_Blog_Model_Post $model */
         $model = $this->loadOrFail($this->modelAlias, $id, 'Blog post not found');
         $this->validateEntityStoreAccess($model->getStores(), $user, 'post');
 
-        $oldData = $model->getData();
-        $this->applyData($model, $data, $user);
-        $this->safeSave($model, "update {$this->entityLabel}");
-
-        if ($data->image !== null) {
-            $this->saveImageAttribute($model, $this->processImage($data->image));
-        }
-
-        $this->logApiActivity($this->entityType, 'update', $oldData, $model, $user);
-        return $this->buildResponse($model, $data);
+        return parent::processUpdate($id, $data, $user);
     }
 
     #[\Override]
@@ -122,16 +81,9 @@ final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
         $model = $this->loadOrFail($this->modelAlias, $id, 'Blog post not found');
         $this->validateEntityStoreAccess($model->getStores(), $user, 'post');
 
-        $oldData = $model->getData();
-        $this->safeDelete($model, "delete {$this->entityLabel}");
-        $this->logApiActivity($this->entityType, 'delete', $oldData, null, $user);
-        return null;
+        return parent::processDelete($id, $user);
     }
 
-    /**
-     * Process image field - handles URLs and relative paths
-     * If URL points to media/wysiwyg, copies file to media/blog/
-     */
     private function processImage(string $image): string
     {
         if (!str_starts_with($image, 'http://') && !str_starts_with($image, 'https://')) {
@@ -147,7 +99,6 @@ final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
                 $mediaDir = realpath(Mage::getBaseDir('media') . '/wysiwyg');
                 $realSource = realpath($sourceFile);
 
-                // Validate path doesn't escape media directory (path traversal protection)
                 if ($realSource === false || $mediaDir === false || !str_starts_with($realSource, $mediaDir)) {
                     return basename($urlPath);
                 }
@@ -168,10 +119,7 @@ final class BlogPostProcessor extends \Maho\ApiPlatform\Processor
         return $filename;
     }
 
-    /**
-     * Save image value directly to EAV table since backend model only handles file uploads
-     */
-    private function saveImageAttribute(Maho_Blog_Model_Post $post, string $imageValue): void
+    private function saveImageAttribute(object $post, string $imageValue): void
     {
         try {
             $attribute = Mage::getSingleton('eav/config')->getAttribute('blog_post', 'image');

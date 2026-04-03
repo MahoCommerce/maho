@@ -16,27 +16,31 @@ namespace Maho\Blog\Api;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
-use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
+use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\Resource;
 use Maho\ApiPlatform\Service\StoreContext;
 
 /**
- * Blog Post State Provider
+ * Blog Post Provider — extends CrudProvider with blog-specific filters and named queries.
+ *
+ * All field mapping and DTO construction is handled by CrudResource/CrudProvider.
+ * This class adds collection filters and the urlKey-based lookup.
  */
-final class BlogPostProvider extends \Maho\ApiPlatform\Provider
+final class BlogPostProvider extends CrudProvider
 {
-    protected ?string $modelAlias = 'blog/post';
     protected int $defaultPageSize = 10;
     protected int $maxPageSize = 50;
     protected array $defaultSort = ['publish_date' => 'DESC'];
 
-    /**
-     * Override provide() because BlogPost has a special urlKey-based collection filter
-     * that returns a single-item paginator rather than using handleOperation().
-     */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): BlogPost|TraversablePaginator|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         StoreContext::ensureStore();
+
+        $this->resourceClass = $operation->getClass();
+        if (is_subclass_of($this->resourceClass, \Maho\ApiPlatform\CrudResource::class)) {
+            $this->modelAlias = $this->resourceClass::metadata()->model;
+        }
 
         if ($operation instanceof CollectionOperationInterface) {
             $urlKey = $context['args']['urlKey'] ?? $context['filters']['urlKey'] ?? null;
@@ -52,7 +56,7 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
     }
 
     #[\Override]
-    protected function provideItem(int|string $id): ?BlogPost
+    protected function provideItem(int|string $id): ?Resource
     {
         $post = \Mage::getModel('blog/post')->load($id);
 
@@ -72,13 +76,10 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     protected function applyCollectionFilters(object $collection, array $filters): void
     {
-        $storeId = StoreContext::getStoreId();
+        parent::applyCollectionFilters($collection, $filters);
 
-        $collection->addAttributeToSelect('image');
-        $collection->addStoreFilter($storeId);
         $collection->addFieldToFilter('is_active', 1);
 
-        // Only show published posts (publish_date <= now)
         $collection->addFieldToFilter('publish_date', [
             'or' => [
                 ['null' => true],
@@ -87,43 +88,7 @@ final class BlogPostProvider extends \Maho\ApiPlatform\Provider
         ]);
     }
 
-    #[\Override]
-    protected function toDto(object $post): BlogPost
-    {
-        $dto = new BlogPost();
-        $dto->id = (int) $post->getId();
-        $dto->title = $post->getTitle() ?? '';
-        $dto->urlKey = $post->getUrlKey() ?? '';
-        $dto->content = ContentDirectiveProcessor::process($post->getContent() ?? '');
-        $dto->imageUrl = $post->getImageUrl();
-        $dto->publishDate = $post->getPublishDate();
-        $dto->metaTitle = $post->getMetaTitle();
-        $dto->metaDescription = $post->getMetaDescription();
-        $dto->metaKeywords = $post->getMetaKeywords();
-        $dto->status = $post->getIsActive() ? 'enabled' : 'disabled';
-        $dto->isActive = (bool) $post->getIsActive();
-
-        // Map store IDs for admin consumers
-        $postStores = $post->getStores();
-        $dto->stores = StoreContext::storeIdsToStoreCodes($postStores);
-        $dto->createdAt = $post->getCreatedAt();
-        $dto->updatedAt = $post->getUpdatedAt();
-        $dto->categoryIds = array_map('intval', $post->getCategories());
-
-        // Create excerpt from content (first 200 chars, strip HTML)
-        if ($post->getContent()) {
-            $text = strip_tags($post->getContent());
-            $dto->excerpt = mb_strlen($text) > 200
-                ? mb_substr($text, 0, 200) . '...'
-                : $text;
-        }
-
-        \Mage::dispatchEvent('api_blog_post_dto_build', ['post' => $post, 'dto' => $dto]);
-
-        return $dto;
-    }
-
-    private function getPostByUrlKey(string $urlKey): ?BlogPost
+    private function getPostByUrlKey(string $urlKey): ?Resource
     {
         $storeId = StoreContext::getStoreId();
         $post = \Mage::getModel('blog/post');
