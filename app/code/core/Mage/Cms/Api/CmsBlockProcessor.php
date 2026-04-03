@@ -13,23 +13,22 @@ declare(strict_types=1);
 
 namespace Mage\Cms\Api;
 
+use Maho\ApiPlatform\CrudProcessor;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
 use Maho\ApiPlatform\Service\ContentSanitizer;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
- * CMS Block State Processor
+ * CMS Block Processor — extends CrudProcessor with content sanitization and store access checks.
  *
- * Handles create, update, and delete operations for CMS blocks.
- * Requires JWT authentication with cms-blocks/write permission.
+ * All field mapping and CRUD routing is handled by CrudResource/CrudProcessor.
+ * This class only adds content sanitization and store-level authorization.
  */
-final class CmsBlockProcessor extends \Maho\ApiPlatform\Processor
+final class CmsBlockProcessor extends CrudProcessor
 {
-    protected ?string $modelAlias = 'cms/block';
     protected ?string $writePermission = 'cms-blocks/write';
     protected ?string $deletePermission = 'cms-blocks/delete';
-    protected ?string $entityType = 'cms/block';
-    protected ?string $entityLabel = 'block';
 
     public function __construct(
         Security $security,
@@ -39,26 +38,19 @@ final class CmsBlockProcessor extends \Maho\ApiPlatform\Processor
     }
 
     #[\Override]
-    protected function applyData(object $model, mixed $data, ApiUser $user): void
+    protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        $storeIds = $this->resolveStoreIds($data->stores, $user);
+        // Sanitize content
+        $content = $model->getData('content');
+        if ($content !== null) {
+            $model->setData('content', $this->contentSanitizer->sanitize($content));
+        }
 
-        $model->addData([
-            'identifier' => $data->identifier,
-            'title' => $data->title,
-            'content' => $this->contentSanitizer->sanitize($data->content ?? ''),
-            'is_active' => $data->isActive ? 1 : 0,
-            'stores' => $storeIds,
-        ]);
-    }
-
-    #[\Override]
-    protected function buildResponse(object $model, mixed $data): CmsBlock
-    {
-        $data->id = (int) $model->getId();
-        $data->content = $model->getData('content');
-        $data->status = $data->isActive ? 'enabled' : 'disabled';
-        return $data;
+        // Resolve store IDs from store codes
+        if ($data instanceof CmsBlock) {
+            $storeIds = $this->resolveStoreIds($data->stores, $user);
+            $model->setData('stores', $storeIds);
+        }
     }
 
     #[\Override]
@@ -69,11 +61,7 @@ final class CmsBlockProcessor extends \Maho\ApiPlatform\Processor
         $blockStores = $model->getStoreId();
         $this->validateEntityStoreAccess(is_array($blockStores) ? $blockStores : [$blockStores], $user, 'block');
 
-        $oldData = $model->getData();
-        $this->applyData($model, $data, $user);
-        $this->safeSave($model, 'update block');
-        $this->logApiActivity('cms/block', 'update', $oldData, $model, $user);
-        return $this->buildResponse($model, $data);
+        return parent::processUpdate($id, $data, $user);
     }
 
     #[\Override]
@@ -84,9 +72,6 @@ final class CmsBlockProcessor extends \Maho\ApiPlatform\Processor
         $blockStores = $model->getStoreId();
         $this->validateEntityStoreAccess(is_array($blockStores) ? $blockStores : [$blockStores], $user, 'block');
 
-        $oldData = $model->getData();
-        $this->safeDelete($model, 'delete block');
-        $this->logApiActivity('cms/block', 'delete', $oldData, null, $user);
-        return null;
+        return parent::processDelete($id, $user);
     }
 }

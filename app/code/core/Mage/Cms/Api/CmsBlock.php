@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace Mage\Cms\Api;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\Get;
@@ -21,12 +22,18 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\CrudProcessor;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
+use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
+use Maho\ApiPlatform\Service\StoreContext;
 
 #[ApiResource(
     shortName: 'CmsBlock',
     description: 'CMS Block resource',
     provider: CmsBlockProvider::class,
+    processor: CmsBlockProcessor::class,
     operations: [
         new Get(uriTemplate: '/cms-blocks/{id}', security: 'true'),
         new GetCollection(uriTemplate: '/cms-blocks', security: 'true'),
@@ -58,17 +65,46 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             resolver: CustomQueryResolver::class,
         ),
     ],
+    extraProperties: [
+        'model' => 'cms/block',
+    ],
 )]
-class CmsBlock extends \Maho\ApiPlatform\Resource
+class CmsBlock extends CrudResource
 {
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
+
     public string $identifier = '';
     public string $title = '';
     public ?string $content = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
+
+    #[ApiProperty(extraProperties: ['modelField' => 'is_active'])]
     public bool $isActive = true;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     /** @var string[] */
     public array $stores = ['all'];
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]
     public ?string $createdAt = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'update_time'])]
     public ?string $updatedAt = null;
+
+    /**
+     * Enrich DTO with computed fields after model data is mapped.
+     */
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->content = ContentDirectiveProcessor::process($dto->content ?? '');
+        $dto->status = $dto->isActive ? 'enabled' : 'disabled';
+
+        if (method_exists($model->getResource(), 'lookupStoreIds')) {
+            $storeIds = $model->getResource()->lookupStoreIds($model->getId());
+            $dto->stores = StoreContext::storeIdsToStoreCodes($storeIds);
+        }
+    }
 }

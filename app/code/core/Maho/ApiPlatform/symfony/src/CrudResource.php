@@ -92,6 +92,8 @@ abstract class CrudResource extends Resource
 
             $isIdentifier = false;
             $writable = true;
+            $computed = false;
+            $customModelField = null;
             $apiPropAttrs = $prop->getAttributes(ApiProperty::class);
             if (!empty($apiPropAttrs)) {
                 $apiPropArgs = $apiPropAttrs[0]->getArguments();
@@ -99,6 +101,9 @@ abstract class CrudResource extends Resource
                 if (isset($apiPropArgs['writable'])) {
                     $writable = $apiPropArgs['writable'];
                 }
+                $extraProps = $apiPropArgs['extraProperties'] ?? [];
+                $computed = $extraProps['computed'] ?? false;
+                $customModelField = $extraProps['modelField'] ?? null;
             }
 
             if ($isIdentifier) {
@@ -108,11 +113,12 @@ abstract class CrudResource extends Resource
 
             $fields[] = new FieldMapping(
                 property: $name,
-                modelField: self::camelToSnake($name),
+                modelField: $customModelField ?? self::camelToSnake($name),
                 type: $type,
                 nullable: $nullable,
                 writable: $writable,
                 isIdentifier: $isIdentifier,
+                computed: $computed,
             );
         }
 
@@ -159,9 +165,18 @@ abstract class CrudResource extends Resource
         $class = static::class;
         $dto = new $class();
         foreach (static::metadata()->fields as $field) {
+            if ($field->computed) {
+                continue;
+            }
             $value = $model->getData($field->modelField);
             $dto->{$field->property} = self::castValue($value, $field->type, $field->nullable);
         }
+
+        // Call afterLoad() if the DTO defines it
+        if (method_exists($class, 'afterLoad')) {
+            $class::afterLoad($dto, $model);
+        }
+
         return $dto;
     }
 
@@ -237,5 +252,6 @@ final class FieldMapping
         public readonly bool $nullable,
         public readonly bool $writable,
         public readonly bool $isIdentifier,
+        public readonly bool $computed = false,
     ) {}
 }
