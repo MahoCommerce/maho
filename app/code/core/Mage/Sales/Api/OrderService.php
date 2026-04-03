@@ -202,12 +202,7 @@ class OrderService
         ?string $emailLike = null,
         ?string $since = null,
     ): array {
-        $collection = \Mage::getModel('sales/order')->getCollection()
-            ->setOrder('created_at', 'DESC');
-
-        if ($status) {
-            $collection->addFieldToFilter('status', $status);
-        }
+        $collection = $this->buildOrderCollection(null, $status, $since);
 
         if ($email) {
             $collection->addFieldToFilter('customer_email', $email);
@@ -219,64 +214,7 @@ class OrderService
             $collection->addFieldToFilter('increment_id', $incrementId);
         }
 
-        if ($since) {
-            $collection->addFieldToFilter('updated_at', ['gteq' => $since]);
-        }
-
-        $total = $collection->getSize();
-
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($page);
-
-        // Join billing address directly to avoid N+1 loads per order.
-        $resource = \Mage::getSingleton('core/resource');
-        $collection->getSelect()->joinLeft(
-            ['billing_addr' => $resource->getTableName('sales/order_address')],
-            "billing_addr.parent_id = main_table.entity_id AND billing_addr.address_type = 'billing'",
-            [
-                'billing_addr_id' => 'billing_addr.entity_id',
-                'billing_telephone' => 'billing_addr.telephone',
-                'billing_firstname' => 'billing_addr.firstname',
-                'billing_lastname' => 'billing_addr.lastname',
-                'billing_company' => 'billing_addr.company',
-                'billing_street' => 'billing_addr.street',
-                'billing_city' => 'billing_addr.city',
-                'billing_region' => 'billing_addr.region',
-                'billing_postcode' => 'billing_addr.postcode',
-                'billing_country_id' => 'billing_addr.country_id',
-            ],
-        );
-
-        // Materialize and batch-load order items for all orders on this page.
-        $orders = [];
-        $orderIds = [];
-        foreach ($collection as $order) {
-            $orders[] = $order;
-            $orderIds[] = $order->getId();
-        }
-
-        if (!empty($orderIds)) {
-            $itemCollection = \Mage::getModel('sales/order_item')->getCollection()
-                ->addFieldToFilter('order_id', ['in' => $orderIds])
-                ->addFieldToFilter('parent_item_id', ['null' => true]);
-
-            $itemsByOrder = [];
-            foreach ($itemCollection as $item) {
-                $itemsByOrder[$item->getOrderId()][] = $item;
-            }
-
-            foreach ($orders as $order) {
-                $oid = $order->getId();
-                if (isset($itemsByOrder[$oid])) {
-                    $order->setData('_preloaded_items', $itemsByOrder[$oid]);
-                }
-            }
-        }
-
-        return [
-            'orders' => $orders,
-            'total' => $total,
-        ];
+        return $this->paginateAndPreload($collection, $page, $pageSize);
     }
 
     /**
@@ -296,9 +234,29 @@ class OrderService
         ?string $status = null,
         ?string $since = null,
     ): array {
+        $collection = $this->buildOrderCollection($customerId, $status, $since);
+
+        return $this->paginateAndPreload($collection, $page, $pageSize);
+    }
+
+    /**
+     * Build an order collection with billing address joined and common filters applied.
+     *
+     * @param int|null $customerId When set, restrict to this customer's orders
+     * @param string|null $status Filter by order status
+     * @param string|null $since Filter by updated_at >= value (ISO datetime)
+     */
+    private function buildOrderCollection(
+        ?int $customerId = null,
+        ?string $status = null,
+        ?string $since = null,
+    ): \Mage_Sales_Model_Resource_Order_Collection {
         $collection = \Mage::getModel('sales/order')->getCollection()
-            ->addFieldToFilter('customer_id', $customerId)
             ->setOrder('created_at', 'DESC');
+
+        if ($customerId !== null) {
+            $collection->addFieldToFilter('customer_id', $customerId);
+        }
 
         if ($status) {
             $collection->addFieldToFilter('status', $status);
@@ -308,12 +266,6 @@ class OrderService
             $collection->addFieldToFilter('updated_at', ['gteq' => $since]);
         }
 
-        $total = $collection->getSize();
-
-        $collection->setPageSize($pageSize);
-        $collection->setCurPage($page);
-
-        // Join billing address directly to avoid N+1 loads per order.
         $resource = \Mage::getSingleton('core/resource');
         $collection->getSelect()->joinLeft(
             ['billing_addr' => $resource->getTableName('sales/order_address')],
@@ -332,7 +284,24 @@ class OrderService
             ],
         );
 
-        // Materialize and batch-load order items.
+        return $collection;
+    }
+
+    /**
+     * Paginate an order collection and batch-preload visible items for the page.
+     *
+     * @return array{orders: array, total: int}
+     */
+    private function paginateAndPreload(
+        \Mage_Sales_Model_Resource_Order_Collection $collection,
+        int $page,
+        int $pageSize,
+    ): array {
+        $total = $collection->getSize();
+
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+
         $orders = [];
         $orderIds = [];
         foreach ($collection as $order) {
