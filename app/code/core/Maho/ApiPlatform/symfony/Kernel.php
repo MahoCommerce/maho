@@ -39,7 +39,7 @@ class Kernel extends BaseKernel
     #[\Override]
     public function getProjectDir(): string
     {
-        return dirname(__DIR__);
+        return __DIR__;
     }
 
     #[\Override]
@@ -121,7 +121,7 @@ class Kernel extends BaseKernel
                 ],
             ],
             'mapping' => [
-                'paths' => ['%kernel.project_dir%/src/ApiResource'],
+                'paths' => ['%kernel.project_dir%/ApiResource'],
             ],
             'patch_formats' => [
                 'json' => ['application/merge-patch+json'],
@@ -213,8 +213,8 @@ class Kernel extends BaseKernel
             ->autoconfigure()
             ->private();
 
-        $services->load('Maho\\ApiPlatform\\', '../src/')
-            ->exclude(['../src/Kernel.php']);
+        $services->load('Maho\\ApiPlatform\\', '%kernel.project_dir%/')
+            ->exclude(['%kernel.project_dir%/Kernel.php']);
 
         $services->set(EventListener\ApiExceptionListener::class)
             ->arg('$debug', '%kernel.debug%')
@@ -235,7 +235,7 @@ class Kernel extends BaseKernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('.', 'api_platform')->prefix('/api');
-        $routes->import('../src/Controller/', 'attribute');
+        $routes->import('%kernel.project_dir%/Controller/', 'attribute');
     }
 
     /**
