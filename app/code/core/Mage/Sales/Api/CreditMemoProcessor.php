@@ -164,58 +164,6 @@ final class CreditMemoProcessor extends \Maho\ApiPlatform\Processor
             $creditmemo->save();
         }
 
-        return $this->mapToDto($creditmemo);
-    }
-
-    private function mapToDto(\Mage_Sales_Model_Order_Creditmemo $creditmemo): CreditMemo
-    {
-        $dto = new CreditMemo();
-        $dto->id = (int) $creditmemo->getId();
-        $dto->orderId = (int) $creditmemo->getOrderId();
-        $dto->incrementId = $creditmemo->getIncrementId();
-        $dto->createdAt = $creditmemo->getCreatedAt();
-
-        $stateMap = [
-            \Mage_Sales_Model_Order_Creditmemo::STATE_OPEN => 'open',
-            \Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED => 'refunded',
-            \Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED => 'canceled',
-        ];
-        $dto->state = $stateMap[(int) $creditmemo->getState()] ?? 'unknown';
-
-        $dto->grandTotal = (float) $creditmemo->getGrandTotal();
-        $dto->baseGrandTotal = (float) $creditmemo->getBaseGrandTotal();
-        $dto->subtotal = (float) $creditmemo->getSubtotal();
-        $dto->taxAmount = (float) $creditmemo->getTaxAmount();
-        $dto->shippingAmount = (float) $creditmemo->getShippingAmount();
-        $dto->discountAmount = (float) $creditmemo->getDiscountAmount();
-        $dto->adjustmentPositive = (float) $creditmemo->getAdjustmentPositive();
-        $dto->adjustmentNegative = (float) $creditmemo->getAdjustmentNegative();
-
-        $order = $creditmemo->getOrder();
-        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
-
-        $dto->items = [];
-        foreach ($creditmemo->getAllItems() as $item) {
-            $itemDto = new CreditMemoItem();
-            $itemDto->id = (int) $item->getId();
-            $itemDto->orderItemId = (int) $item->getOrderItemId();
-            $itemDto->sku = $item->getSku() ?? '';
-            $itemDto->name = $item->getName() ?? '';
-            $itemDto->qty = (float) $item->getQty();
-            $itemDto->price = (float) $item->getPrice();
-            $itemDto->rowTotal = (float) $item->getRowTotal();
-            $itemDto->taxAmount = (float) $item->getTaxAmount();
-            $itemDto->discountAmount = (float) $item->getDiscountAmount();
-            $itemDto->backToStock = (bool) $item->getBackToStock();
-            $dto->items[] = $itemDto;
-        }
-
-        $comments = $creditmemo->getCommentsCollection();
-        if ($comments && $comments->getSize() > 0) {
-            $firstComment = $comments->getFirstItem();
-            $dto->comment = $firstComment->getComment();
-        }
-
-        return $dto;
+        return CreditMemoMapper::mapToDto($creditmemo);
     }
 }

@@ -61,7 +61,7 @@ final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
             throw new NotFoundHttpException('Credit memo not found');
         }
 
-        return $this->mapToDto($creditmemo);
+        return CreditMemoMapper::mapToDto($creditmemo);
     }
 
     private function getCreditMemosForOrder(int $orderId, array $context): ArrayPaginator
@@ -83,71 +83,11 @@ final class CreditMemoProvider extends \Maho\ApiPlatform\Provider
 
         $creditmemos = [];
         foreach ($collection as $creditmemo) {
-            $creditmemos[] = $this->mapToDto($creditmemo);
+            $creditmemos[] = CreditMemoMapper::mapToDto($creditmemo);
         }
 
         $offset = ($page - 1) * $perPage;
 
         return new ArrayPaginator($creditmemos, $offset, $perPage);
-    }
-
-    public function mapToDto(\Mage_Sales_Model_Order_Creditmemo $creditmemo): CreditMemo
-    {
-        $dto = new CreditMemo();
-        $dto->id = (int) $creditmemo->getId();
-        $dto->orderId = (int) $creditmemo->getOrderId();
-        $dto->incrementId = $creditmemo->getIncrementId();
-        $dto->createdAt = $creditmemo->getCreatedAt();
-
-        $stateMap = [
-            \Mage_Sales_Model_Order_Creditmemo::STATE_OPEN => 'open',
-            \Mage_Sales_Model_Order_Creditmemo::STATE_REFUNDED => 'refunded',
-            \Mage_Sales_Model_Order_Creditmemo::STATE_CANCELED => 'canceled',
-        ];
-        $dto->state = $stateMap[(int) $creditmemo->getState()] ?? 'unknown';
-
-        $dto->grandTotal = (float) $creditmemo->getGrandTotal();
-        $dto->baseGrandTotal = (float) $creditmemo->getBaseGrandTotal();
-        $dto->subtotal = (float) $creditmemo->getSubtotal();
-        $dto->taxAmount = (float) $creditmemo->getTaxAmount();
-        $dto->shippingAmount = (float) $creditmemo->getShippingAmount();
-        $dto->discountAmount = (float) $creditmemo->getDiscountAmount();
-        $dto->adjustmentPositive = (float) $creditmemo->getAdjustmentPositive();
-        $dto->adjustmentNegative = (float) $creditmemo->getAdjustmentNegative();
-
-        $order = $creditmemo->getOrder();
-        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
-
-        // Map items
-        $dto->items = [];
-        foreach ($creditmemo->getAllItems() as $item) {
-            $dto->items[] = $this->mapItemToDto($item);
-        }
-
-        // Get first comment if any
-        $comments = $creditmemo->getCommentsCollection();
-        if ($comments && $comments->getSize() > 0) {
-            $firstComment = $comments->getFirstItem();
-            $dto->comment = $firstComment->getComment();
-        }
-
-        return $dto;
-    }
-
-    public function mapItemToDto(\Mage_Sales_Model_Order_Creditmemo_Item $item): CreditMemoItem
-    {
-        $dto = new CreditMemoItem();
-        $dto->id = (int) $item->getId();
-        $dto->orderItemId = (int) $item->getOrderItemId();
-        $dto->sku = $item->getSku() ?? '';
-        $dto->name = $item->getName() ?? '';
-        $dto->qty = (float) $item->getQty();
-        $dto->price = (float) $item->getPrice();
-        $dto->rowTotal = (float) $item->getRowTotal();
-        $dto->taxAmount = (float) $item->getTaxAmount();
-        $dto->discountAmount = (float) $item->getDiscountAmount();
-        $dto->backToStock = (bool) $item->getBackToStock();
-
-        return $dto;
     }
 }
