@@ -13,13 +13,13 @@ declare(strict_types=1);
 
 namespace Mage\Sales\Api;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
-use ApiPlatform\Metadata\GraphQl\Mutation;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'PosPayment',
@@ -52,14 +52,22 @@ use ApiPlatform\Metadata\GraphQl\Mutation;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'maho_pos/payment',
+    ],
 )]
-class PosPayment extends \Maho\ApiPlatform\Resource
+class PosPayment extends CrudResource
 {
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
+
     public ?int $orderId = null;
     public ?int $registerId = null;
     public ?string $methodCode = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $methodLabel = null;
+
     public float $amount = 0.0;
     public float $baseAmount = 0.0;
     public ?string $currencyCode = null;
@@ -69,8 +77,21 @@ class PosPayment extends \Maho\ApiPlatform\Resource
     public ?string $cardLast4 = null;
     public ?string $authCode = null;
     public ?string $status = null;
+
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
     /** @var array<string, mixed> */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $receiptData = [];
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->methodLabel = PaymentService::getMethodLabel($dto->methodCode ?? '');
+
+        $receiptData = $model->getReceiptData();
+        if ($receiptData) {
+            $dto->receiptData = is_array($receiptData) ? $receiptData : json_decode($receiptData, true) ?? [];
+        }
+    }
 }
