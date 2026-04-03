@@ -25,15 +25,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
     private ?ProductService $productService = null;
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
-    /**
-     * Get cached MediaConfig instance
-     */
+
     private function getMediaConfig(): \Mage_Catalog_Model_Product_Media_Config
     {
-        if ($this->mediaConfig === null) {
-            $this->mediaConfig = \Mage::getModel('catalog/product_media_config');
-        }
-        return $this->mediaConfig;
+        return $this->mediaConfig ??= \Mage::getModel('catalog/product_media_config');
     }
 
     /**
@@ -145,7 +140,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        $dto = $this->mapToDto($mahoProduct);
+        $dto = $this->toDto($mahoProduct);
 
         \Mage::app()->getCache()->save(
             (string) json_encode($dto->toArray()),
@@ -163,7 +158,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     private function getProductBySku(string $sku): ?Product
     {
         $mahoProduct = $this->getProductService()->getProductBySku($sku);
-        return $mahoProduct ? $this->mapToDto($mahoProduct) : null;
+        return $mahoProduct ? $this->toDto($mahoProduct) : null;
     }
 
     /**
@@ -172,7 +167,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     private function getProductByBarcode(string $barcode): ?Product
     {
         $mahoProduct = $this->getProductService()->getProductByBarcode($barcode);
-        return $mahoProduct ? $this->mapToDto($mahoProduct) : null;
+        return $mahoProduct ? $this->toDto($mahoProduct) : null;
     }
 
     /**
@@ -219,7 +214,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
         $products = [];
         foreach ($collection as $product) {
-            $products[] = $this->mapToDto($product);
+            $products[] = $this->toDto($product, forListing: true);
         }
 
         return new TraversablePaginator(new \ArrayIterator($products), $page, $pageSize, (int) $collection->getSize());
@@ -332,15 +327,18 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         foreach ($result['products'] as $product) {
             if ($product instanceof \Mage_Catalog_Model_Product) {
                 $productId = (int) $product->getId();
-                $products[] = $this->mapToDto(
+                $dto = Product::fromModel($product);
+                $this->enrichProduct(
+                    $dto,
                     $product,
                     forListing: $forListing,
                     reviewSummary: $reviewSummaries[$productId] ?? null,
                     categoryIds: $categoryIdsByProduct[$productId] ?? [],
                     stockItem: $stockItemsByProduct[$productId] ?? null,
                 );
+                $products[] = $dto;
             } elseif (is_array($product)) {
-                $products[] = $this->mapArrayToDto($product);
+                $products[] = Product::fromArray($product);
             }
         }
 
@@ -365,291 +363,275 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Map Maho product model to Product DTO
-     *
-     * @param bool $forListing Skip expensive operations for listings (custom options, variants)
-     * @param array|null $reviewSummary Pre-loaded review summary data (for batch loading)
-     * @param int[]|null $categoryIds Pre-loaded category IDs (for batch loading)
-     * @param \Mage_CatalogInventory_Model_Stock_Item|null $stockItem Pre-loaded stock item (for batch loading)
+     * Build a complete Product DTO from a Mage product model.
      */
-    public function mapToDto(
+    #[\Override]
+    protected function toDto(object $product, bool $forListing = false): Product
+    {
+        $dto = Product::fromModel($product);
+        $this->enrichProduct($dto, $product, forListing: $forListing);
+        return $dto;
+    }
+
+    /**
+     * Enrich a Product DTO with external data (stock, reviews, categories)
+     * and optionally detail-only sub-resources.
+     *
+     * Called after Product::fromModel() which handles basic field mapping and
+     * computed fields (status/visibility enums, prices, image URLs, barcode).
+     */
+    private function enrichProduct(
+        Product $dto,
         \Mage_Catalog_Model_Product $product,
         bool $forListing = false,
         ?array $reviewSummary = null,
         ?array $categoryIds = null,
         ?\Mage_CatalogInventory_Model_Stock_Item $stockItem = null,
-    ): Product {
-        $dto = new Product();
-        $dto->id = (int) $product->getId();
-        $dto->sku = $product->getSku() ?? '';
-        $dto->urlKey = $product->getUrlKey();
-        $dto->metaTitle = $product->getMetaTitle();
-        $dto->metaDescription = $product->getMetaDescription();
-        $dto->metaKeywords = $product->getMetaKeyword();
-        $dto->pageLayout = $product->getPageLayout() ?: null;
-        $dto->name = $product->getName() ?? '';
-        $dto->description = \Maho\ApiPlatform\CrudResource::filterContent($product->getDescription() ?? '');
-        $dto->shortDescription = \Maho\ApiPlatform\CrudResource::filterContent($product->getShortDescription() ?? '');
-        $dto->type = $product->getTypeId();
-        $dto->status = (int) $product->getStatus() === \Mage_Catalog_Model_Product_Status::STATUS_ENABLED ? 'enabled' : 'disabled';
-        $dto->visibility = match ((int) $product->getVisibility()) {
-            \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE => 'not_visible',
-            \Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_CATALOG => 'catalog',
-            \Mage_Catalog_Model_Product_Visibility::VISIBILITY_IN_SEARCH => 'search',
-            default => 'catalog_search',
-        };
-        $dto->price = $product->getPrice() ? (float) $product->getPrice() : null;
-        $dto->specialPrice = $product->getSpecialPrice() ? (float) $product->getSpecialPrice() : null;
-
-        // getFinalPrice() can fail for configurable products without quote context
-        try {
-            $dto->finalPrice = $product->getFinalPrice() ? (float) $product->getFinalPrice() : null;
-        } catch (\Throwable $e) {
-            // Fallback: use special price if set, otherwise base price
-            $dto->finalPrice = $dto->specialPrice ?? $dto->price;
-        }
-
-        // Grouped/bundle products have null base price — use min_price from price index
-        // or calculate from associated products
-        if ($dto->price === null || $dto->price === 0.0) {
-            $minPrice = $product->getMinimalPrice() ?: $product->getData('min_price');
-            if (!$minPrice && in_array($dto->type, [\Mage_Catalog_Model_Product_Type::TYPE_GROUPED, \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE])) {
-                $minPrice = $this->getGroupedMinPrice($product);
-            }
-            if ($minPrice) {
-                $dto->price = (float) $minPrice;
-                if ($dto->finalPrice === null || $dto->finalPrice === 0.0) {
-                    $dto->finalPrice = (float) $minPrice;
-                }
-            }
-        }
-
-        // Minimal price for bundles/grouped ("From $X")
-        $minimalPrice = $product->getMinimalPrice() ?: $product->getData('min_price');
-        if (!$minimalPrice && in_array($dto->type, ['bundle', 'grouped'])) {
-            $minimalPrice = $this->getGroupedMinPrice($product);
-        }
-        if ($minimalPrice) {
-            $dto->minimalPrice = (float) $minimalPrice;
-        }
-
-        // Get stock information - use pre-loaded stock item if available (batch loading)
+    ): void {
         $stockData = $stockItem ?? $product->getStockItem();
         if ($stockData) {
             $dto->stockQty = (float) $stockData->getQty();
             $dto->stockStatus = $stockData->getIsInStock() ? 'in_stock' : 'out_of_stock';
         }
 
-        $dto->weight = $product->getWeight() ? (float) $product->getWeight() : null;
-
-        // Get barcode from configured attribute (if POS module available)
-        $dto->barcode = $product->getData(ProductService::getBarcodeAttributeCode());
-
-        // Use pre-loaded category IDs if available (batch loading), otherwise load individually
         $dto->categoryIds = $categoryIds ?? ($product->getCategoryIds() ?: []);
-        $dto->createdAt = $product->getCreatedAt();
-        $dto->updatedAt = $product->getUpdatedAt();
 
-        // Get image URLs (use cached MediaConfig)
-        $mediaConfig = $this->getMediaConfig();
-        if ($product->getImage() && $product->getImage() !== 'no_selection') {
-            $dto->imageUrl = $mediaConfig->getMediaUrl($product->getImage());
-        }
-        if ($product->getSmallImage() && $product->getSmallImage() !== 'no_selection') {
-            $dto->smallImageUrl = $mediaConfig->getMediaUrl($product->getSmallImage());
-        }
-        if ($product->getThumbnail() && $product->getThumbnail() !== 'no_selection') {
-            $dto->thumbnailUrl = $mediaConfig->getMediaUrl($product->getThumbnail());
-        }
-
-        // Get review summary - use pre-loaded data if available (batch loading)
         if ($reviewSummary !== null) {
             if ($reviewSummary['reviews_count'] > 0) {
                 $dto->reviewCount = $reviewSummary['reviews_count'];
                 $dto->averageRating = $reviewSummary['rating_summary']
-                    ? round((float) $reviewSummary['rating_summary'] / 20, 1) // Convert 0-100 to 0-5 scale
+                    ? round((float) $reviewSummary['rating_summary'] / 20, 1)
                     : null;
             }
         } else {
-            // Fallback for single product loads (not batch)
-            $reviewSummaryModel = \Mage::getModel('review/review_summary')
+            $reviewModel = \Mage::getModel('review/review_summary')
                 ->setStoreId(StoreContext::getStoreId())
                 ->load($product->getId());
-            if ($reviewSummaryModel->getReviewsCount()) {
-                $dto->reviewCount = (int) $reviewSummaryModel->getReviewsCount();
-                $dto->averageRating = $reviewSummaryModel->getRatingSummary()
-                    ? round((float) $reviewSummaryModel->getRatingSummary() / 20, 1)
+            if ($reviewModel->getReviewsCount()) {
+                $dto->reviewCount = (int) $reviewModel->getReviewsCount();
+                $dto->averageRating = $reviewModel->getRatingSummary()
+                    ? round((float) $reviewModel->getRatingSummary() / 20, 1)
                     : null;
             }
         }
 
-        // For listings, we only need basic info + flags for the grid
-        // hasRequiredOptions flag is cheap to get from product attribute
-        $dto->hasRequiredOptions = (bool) $product->getRequiredOptions();
-
-        // Expensive operations: only load for single product detail views
-        if (!$forListing) {
-            // Get configurable product options and variants
-            if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-                $dto->configurableOptions = $this->getConfigurableOptions($product);
-                $dto->variants = $this->getConfigurableVariants($product);
-            }
-
-            // Get custom options (e.g., String, Tension, Cover for tennis racquets)
-            $dto->customOptions = $this->getCustomOptions($product);
-
-            // Media gallery images
-            $dto->mediaGallery = $this->getMediaGallery($product);
-
-            // Linked products (related, cross-sell, up-sell)
-            $dto->relatedProducts = $this->getLinkedProducts($product->getRelatedProductCollection());
-            $dto->crosssellProducts = $this->getLinkedProducts($product->getCrossSellProductCollection());
-            $dto->upsellProducts = $this->getLinkedProducts($product->getUpSellProductCollection());
-
-            // Grouped product children
-            if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_GROUPED) {
-                $dto->groupedProducts = $this->getGroupedProducts($product);
-            }
-
-            // Bundle product options with selections
-            if ($product->getTypeId() === \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
-                $dto->bundleOptions = $this->getBundleOptions($product);
-            }
-
-            // Downloadable links
-            if ($product->getTypeId() === \Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
-                $dto->downloadableLinks = $this->getDownloadableLinks($product);
-                $dto->linksTitle = $product->getData('links_title')
-                    ?: \Mage::getStoreConfig('catalog/downloadable/links_title')
-                    ?: 'Links';
-                $dto->linksPurchasedSeparately = (bool) $product->getData('links_purchased_separately');
-            }
-
-
-            // Additional attributes ("Specifications" tab)
-            $dto->additionalAttributes = $this->getAdditionalAttributes($product);
-            // Tier pricing
-            $dto->tierPrices = $this->getTierPrices($product);
+        if ($forListing) {
+            \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => true, 'dto' => $dto]);
+            return;
         }
 
-        \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => $forListing, 'dto' => $dto]);
-        return $dto;
-    }
-
-    /**
-     * Get configurable attributes with their available values
-     */
-    private function getConfigurableOptions(\Mage_Catalog_Model_Product $product): array
-    {
-        $options = [];
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
+        $typeId = $product->getTypeId();
         $typeInstance = $product->getTypeInstance(true);
-        $configurableAttributes = $typeInstance->getConfigurableAttributes($product);
+        $mediaConfig = $this->getMediaConfig();
 
-        foreach ($configurableAttributes as $attribute) {
-            $productAttribute = $attribute->getProductAttribute();
-            $attributeCode = $productAttribute->getAttributeCode();
-
-            // Collect which option IDs are used by child products
+        // Configurable: options + variants
+        if ($typeId === \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
+            /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
             $childProducts = $typeInstance->getUsedProducts(null, $product);
-            $usedValueIds = [];
+            $configAttributes = $typeInstance->getConfigurableAttributes($product);
+
+            // Build used-value map once
+            $usedValues = [];
             foreach ($childProducts as $child) {
-                $valueId = $child->getData($attributeCode);
-                if ($valueId) {
-                    $usedValueIds[$valueId] = true;
+                foreach ($configAttributes as $attr) {
+                    $code = $attr->getProductAttribute()->getAttributeCode();
+                    $val = $child->getData($code);
+                    if ($val) {
+                        $usedValues[$code][$val] = true;
+                    }
                 }
             }
 
-            // Get options from attribute source (already sorted by sort_order),
-            // filtered to only those used by child products
-            $values = [];
-            $allOptions = $productAttribute->getSource()->getAllOptions();
-            foreach ($allOptions as $opt) {
-                if ($opt['value'] === '' || $opt['value'] === null) {
-                    continue;
+            $dto->configurableOptions = [];
+            foreach ($configAttributes as $attr) {
+                $prodAttr = $attr->getProductAttribute();
+                $code = $prodAttr->getAttributeCode();
+                $values = [];
+                foreach ($prodAttr->getSource()->getAllOptions() as $opt) {
+                    if (($opt['value'] ?? '') !== '' && isset($usedValues[$code][$opt['value']])) {
+                        $values[] = ['id' => (int) $opt['value'], 'label' => $opt['label'] ?: $opt['value']];
+                    }
                 }
-                if (isset($usedValueIds[$opt['value']])) {
-                    $values[] = [
-                        'id' => (int) $opt['value'],
-                        'label' => $opt['label'] ?: $opt['value'],
+                $dto->configurableOptions[] = [
+                    'id' => (int) $attr->getAttributeId(),
+                    'code' => $code,
+                    'label' => $prodAttr->getStoreLabel() ?: $prodAttr->getFrontendLabel(),
+                    'values' => $values,
+                ];
+            }
+
+            $childIds = array_map(fn($c) => $c->getId(), $childProducts);
+            $stockByChild = $this->batchLoadStockItems($childIds);
+            $barcodeAttr = ProductService::getBarcodeAttributeCode();
+
+            $dto->variants = [];
+            foreach ($childProducts as $child) {
+                $attrs = [];
+                foreach ($configAttributes as $attr) {
+                    $attrs[$attr->getProductAttribute()->getAttributeCode()] = (int) $child->getData($attr->getProductAttribute()->getAttributeCode());
+                }
+                $si = $stockByChild[$child->getId()] ?? null;
+                $variant = [
+                    'id' => (int) $child->getId(),
+                    'sku' => $child->getSku(),
+                    'price' => (float) $child->getPrice(),
+                    'finalPrice' => (float) $child->getFinalPrice(),
+                    'stockQty' => $si ? (float) $si->getQty() : 0,
+                    'inStock' => $si ? (bool) $si->getIsInStock() : false,
+                    'attributes' => $attrs,
+                ];
+                if ($barcodeAttr && $child->getData($barcodeAttr)) {
+                    $variant['barcode'] = (string) $child->getData($barcodeAttr);
+                }
+                if ($child->getImage() && $child->getImage() !== 'no_selection') {
+                    $variant['imageUrl'] = $mediaConfig->getMediaUrl($child->getImage());
+                }
+                $dto->variants[] = $variant;
+            }
+        }
+
+        // Custom options
+        $dto->customOptions = array_map(fn($opt) => [
+            'id' => (int) $opt->getId(),
+            'title' => $opt->getTitle(),
+            'type' => $opt->getType(),
+            'required' => (bool) $opt->getIsRequire(),
+            'sortOrder' => (int) $opt->getSortOrder(),
+            'values' => $opt->getValues() ? array_map(fn($v) => [
+                'id' => (int) $v->getId(),
+                'title' => $v->getTitle(),
+                'price' => (float) $v->getPrice(),
+                'priceType' => $v->getPriceType(),
+                'sortOrder' => (int) $v->getSortOrder(),
+            ], $opt->getValues()) : [],
+        ], $product->getOptions());
+
+        // Media gallery
+        $images = $product->getMediaGalleryImages();
+        $dto->mediaGallery = $images ? array_map(fn($img) => [
+            'url' => $mediaConfig->getMediaUrl($img->getFile()),
+            'label' => $img->getLabel() ?: null,
+            'position' => (int) $img->getPosition(),
+        ], iterator_to_array($images)) : [];
+
+        // Linked products
+        $dto->relatedProducts = $this->getLinkedProducts($product->getRelatedProductCollection());
+        $dto->crosssellProducts = $this->getLinkedProducts($product->getCrossSellProductCollection());
+        $dto->upsellProducts = $this->getLinkedProducts($product->getUpSellProductCollection());
+
+        // Grouped children
+        if ($typeId === \Mage_Catalog_Model_Product_Type::TYPE_GROUPED) {
+            /** @var \Mage_Catalog_Model_Product_Type_Grouped $typeInstance */
+            $associated = $typeInstance->getAssociatedProducts($product);
+            if (!empty($associated)) {
+                $childIds = array_map(fn($c) => (int) $c->getId(), $associated);
+                $stockByChild = $this->batchLoadStockItems($childIds);
+                $dto->groupedProducts = [];
+                foreach ($associated as $child) {
+                    $si = $stockByChild[(int) $child->getId()] ?? null;
+                    $imgUrl = null;
+                    foreach (['getThumbnail', 'getSmallImage'] as $method) {
+                        $img = $child->$method();
+                        if ($img && $img !== 'no_selection') {
+                            $imgUrl = $mediaConfig->getMediaUrl($img);
+                            break;
+                        }
+                    }
+                    $dto->groupedProducts[] = [
+                        'id' => (int) $child->getId(),
+                        'sku' => $child->getSku(),
+                        'name' => $child->getName(),
+                        'price' => (float) $child->getPrice(),
+                        'finalPrice' => (float) $child->getFinalPrice(),
+                        'imageUrl' => $imgUrl,
+                        'inStock' => $si ? (bool) $si->getIsInStock() : false,
+                        'stockQty' => $si ? (float) $si->getQty() : 0,
+                        'defaultQty' => (float) ($child->getQty() ?: 0),
+                        'position' => (int) ($child->getPosition() ?: 0),
+                    ];
+                }
+                usort($dto->groupedProducts, fn($a, $b) => $a['position'] <=> $b['position']);
+            }
+        }
+
+        // Bundle options
+        if ($typeId === \Mage_Catalog_Model_Product_Type::TYPE_BUNDLE) {
+            $dto->bundleOptions = $this->getBundleOptions($product);
+        }
+
+        // Downloadable links
+        if ($typeId === \Mage_Downloadable_Model_Product_Type::TYPE_DOWNLOADABLE) {
+            /** @var \Mage_Downloadable_Model_Product_Type $typeInstance */
+            $links = $typeInstance->getLinks($product);
+            $store = \Mage::app()->getStore();
+            $dto->downloadableLinks = $links ? array_map(function ($link) use ($store) {
+                $sampleUrl = $link->getSampleFile()
+                    ? \Mage::getUrl('downloadable/download/linkSample', ['link_id' => $link->getId()])
+                    : ($link->getSampleUrl() ?: null);
+                return [
+                    'id' => (int) $link->getId(),
+                    'title' => $link->getStoreTitle() ?: $link->getTitle(),
+                    'price' => (float) $store->convertPrice($link->getPrice(), false),
+                    'sortOrder' => (int) $link->getSortOrder(),
+                    'numberOfDownloads' => (int) $link->getNumberOfDownloads(),
+                    'sampleUrl' => $sampleUrl,
+                ];
+            }, $links) : [];
+            $dto->linksTitle = $product->getData('links_title')
+                ?: \Mage::getStoreConfig('catalog/downloadable/links_title')
+                ?: 'Links';
+            $dto->linksPurchasedSeparately = (bool) $product->getData('links_purchased_separately');
+        }
+
+        // Tier prices
+        $rawTiers = $product->getTierPrice();
+        if (is_array($rawTiers) && !empty($rawTiers)) {
+            $basePrice = (float) $product->getPrice();
+            $dto->tierPrices = [];
+            foreach ($rawTiers as $tp) {
+                $price = (float) ($tp['price'] ?? 0);
+                if ($price > 0) {
+                    $dto->tierPrices[] = [
+                        'qty' => (float) ($tp['price_qty'] ?? 1),
+                        'price' => $price,
+                        'savePercent' => $basePrice > 0 ? (int) round((1 - $price / $basePrice) * 100) : 0,
                     ];
                 }
             }
+            usort($dto->tierPrices, fn($a, $b) => $a['qty'] <=> $b['qty']);
+        }
 
-            $options[] = [
-                'id' => (int) $attribute->getAttributeId(),
-                'code' => $attributeCode,
-                'label' => $productAttribute->getStoreLabel() ?: $productAttribute->getFrontendLabel(),
-                'values' => $values,
+        // Additional visible attributes (specifications tab)
+        $excludeCodes = [
+            'sku', 'name', 'description', 'short_description', 'price', 'special_price',
+            'weight', 'status', 'visibility', 'url_key', 'meta_title', 'meta_description',
+            'meta_keyword', 'image', 'small_image', 'thumbnail', 'page_layout',
+            'tax_class_id', 'country_of_manufacture',
+        ];
+        $dto->additionalAttributes = [];
+        foreach ($product->getAttributes() as $attribute) {
+            if (!$attribute->getIsVisibleOnFront()) {
+                continue;
+            }
+            $code = $attribute->getAttributeCode();
+            if (in_array($code, $excludeCodes, true)) {
+                continue;
+            }
+            $value = $attribute->getFrontend()->getValue($product);
+            if ($value === null || $value === '' || $value === false || $value === 'N/A' || $value === 'No') {
+                continue;
+            }
+            $dto->additionalAttributes[] = [
+                'label' => $attribute->getStoreLabel() ?: $attribute->getFrontendLabel() ?: $code,
+                'value' => (string) (is_array($value) ? implode(', ', $value) : $value),
+                'code' => $code,
             ];
         }
 
-        return $options;
+        \Mage::dispatchEvent('api_product_dto_build', ['product' => $product, 'for_listing' => false, 'dto' => $dto]);
     }
 
     /**
-     * Get configurable child products with their attribute values
-     */
-    private function getConfigurableVariants(\Mage_Catalog_Model_Product $product): array
-    {
-        $variants = [];
-        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
-        $typeInstance = $product->getTypeInstance(true);
-        $configurableAttributes = $typeInstance->getConfigurableAttributes($product);
-        $childProducts = $typeInstance->getUsedProducts(null, $product);
-        $mediaConfig = $this->getMediaConfig();
-        $barcodeAttr = ProductService::getBarcodeAttributeCode();
-
-        // Batch load all stock items at once to avoid N+1 queries
-        $childIds = [];
-        foreach ($childProducts as $child) {
-            $childIds[] = $child->getId();
-        }
-        $stockByProduct = $this->batchLoadStockItems($childIds);
-
-        foreach ($childProducts as $child) {
-            // Get attribute values for this variant
-            $attributes = [];
-            foreach ($configurableAttributes as $attribute) {
-                $attributeCode = $attribute->getProductAttribute()->getAttributeCode();
-                $attributes[$attributeCode] = (int) $child->getData($attributeCode);
-            }
-
-            // Get stock info from batch-loaded data
-            $productId = $child->getId();
-            $stockItem = $stockByProduct[$productId] ?? null;
-            $stockQty = $stockItem ? (float) $stockItem->getQty() : 0;
-            $inStock = $stockItem ? (bool) $stockItem->getIsInStock() : false;
-
-            $variant = [
-                'id' => (int) $child->getId(),
-                'sku' => $child->getSku(),
-                'price' => (float) $child->getPrice(),
-                'finalPrice' => (float) $child->getFinalPrice(),
-                'stockQty' => $stockQty,
-                'inStock' => $inStock,
-                'attributes' => $attributes,
-            ];
-
-            // Add barcode if available
-            if ($barcodeAttr && $child->getData($barcodeAttr)) {
-                $variant['barcode'] = (string) $child->getData($barcodeAttr);
-            }
-
-            // Add image if different from parent
-            if ($child->getImage() && $child->getImage() !== 'no_selection') {
-                $variant['imageUrl'] = $mediaConfig->getMediaUrl($child->getImage());
-            }
-
-            $variants[] = $variant;
-        }
-
-        return $variants;
-    }
-
-    /**
-     * Batch load stock items for multiple product IDs
-     *
      * @param int[] $productIds
      * @return array<int, \Mage_CatalogInventory_Model_Stock_Item>
      */
@@ -662,17 +644,14 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $collection = \Mage::getResourceModel('cataloginventory/stock_item_collection');
         $collection->addFieldToFilter('product_id', ['in' => $productIds]);
 
-        $stockByProduct = [];
+        $result = [];
         foreach ($collection as $stockItem) {
-            $stockByProduct[$stockItem->getProductId()] = $stockItem;
+            $result[$stockItem->getProductId()] = $stockItem;
         }
-
-        return $stockByProduct;
+        return $result;
     }
 
     /**
-     * Batch load review summaries for multiple product IDs
-     *
      * @param int[] $productIds
      * @return array<int, array{reviews_count: int, rating_summary: float|null}>
      */
@@ -682,14 +661,11 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             return [];
         }
 
-        $storeId = StoreContext::getStoreId();
         $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
-        $tableName = \Mage::getSingleton('core/resource')->getTableName('review/review_aggregate');
-
         $select = $adapter->select()
-            ->from($tableName, ['entity_pk_value', 'reviews_count', 'rating_summary'])
+            ->from(\Mage::getSingleton('core/resource')->getTableName('review/review_aggregate'), ['entity_pk_value', 'reviews_count', 'rating_summary'])
             ->where('entity_pk_value IN (?)', $productIds)
-            ->where('store_id = ?', $storeId);
+            ->where('store_id = ?', StoreContext::getStoreId());
 
         $result = [];
         foreach ($adapter->fetchAll($select) as $row) {
@@ -698,13 +674,10 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 'rating_summary' => $row['rating_summary'] ? (float) $row['rating_summary'] : null,
             ];
         }
-
         return $result;
     }
 
     /**
-     * Batch load category IDs for multiple product IDs
-     *
      * @param int[] $productIds
      * @return array<int, int[]>
      */
@@ -715,51 +688,18 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         $adapter = \Mage::getSingleton('core/resource')->getConnection('core_read');
-        $tableName = \Mage::getSingleton('core/resource')->getTableName('catalog/category_product');
-
         $select = $adapter->select()
-            ->from($tableName, ['product_id', 'category_id'])
+            ->from(\Mage::getSingleton('core/resource')->getTableName('catalog/category_product'), ['product_id', 'category_id'])
             ->where('product_id IN (?)', $productIds);
 
         $result = [];
         foreach ($adapter->fetchAll($select) as $row) {
-            $productId = (int) $row['product_id'];
-            if (!isset($result[$productId])) {
-                $result[$productId] = [];
-            }
-            $result[$productId][] = (int) $row['category_id'];
+            $result[(int) $row['product_id']][] = (int) $row['category_id'];
         }
-
         return $result;
     }
 
     /**
-     * Get media gallery images for a product
-     *
-     * @return array<array{url: string, label: string|null, position: int}>
-     */
-    private function getMediaGallery(\Mage_Catalog_Model_Product $product): array
-    {
-        $gallery = [];
-        $mediaConfig = $this->getMediaConfig();
-
-        $images = $product->getMediaGalleryImages();
-        if ($images) {
-            foreach ($images as $image) {
-                $gallery[] = [
-                    'url' => $mediaConfig->getMediaUrl($image->getFile()),
-                    'label' => $image->getLabel() ?: null,
-                    'position' => (int) $image->getPosition(),
-                ];
-            }
-        }
-
-        return $gallery;
-    }
-
-    /**
-     * Get linked products (related, cross-sell, up-sell) as lightweight DTOs
-     *
      * @return Product[]
      */
     private function getLinkedProducts(\Mage_Catalog_Model_Resource_Product_Collection $collection): array
@@ -767,156 +707,21 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $collection->addAttributeToSelect(['name', 'price', 'special_price', 'image', 'small_image', 'thumbnail', 'url_key', 'status', 'visibility'])
             ->addFieldToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED)
             ->setPageSize(20);
-
-        // Filter by visibility (catalog or both)
         $collection->setVisibility(\Mage::getSingleton('catalog/product_visibility')->getVisibleInCatalogIds());
-
-        // Filter out-of-stock products using the stock STATUS index (not the stock item's
-        // is_in_stock field which can be stale). Respects "Display Out of Stock Products" config.
         if (!\Mage::getStoreConfigFlag('cataloginventory/options/show_out_of_stock')) {
             \Mage::getModel('cataloginventory/stock_status')->addIsInStockFilterToCollection($collection);
         }
 
         $products = [];
         foreach ($collection as $product) {
-            $products[] = $this->mapToDto($product, forListing: true);
+            $products[] = $this->toDto($product, forListing: true);
         }
-
         return $products;
     }
 
     /**
-     * Get custom product options (e.g., String, Tension, Cover)
-     */
-    private function getCustomOptions(\Mage_Catalog_Model_Product $product): array
-    {
-        $customOptions = [];
-
-        foreach ($product->getOptions() as $option) {
-            $optionData = [
-                'id' => (int) $option->getId(),
-                'title' => $option->getTitle(),
-                'type' => $option->getType(),
-                'required' => (bool) $option->getIsRequire(),
-                'sortOrder' => (int) $option->getSortOrder(),
-                'values' => [],
-            ];
-
-            // Get values for select/dropdown/radio/checkbox types
-            if ($option->getValues()) {
-                foreach ($option->getValues() as $value) {
-                    $optionData['values'][] = [
-                        'id' => (int) $value->getId(),
-                        'title' => $value->getTitle(),
-                        'price' => (float) $value->getPrice(),
-                        'priceType' => $value->getPriceType(),
-                        'sortOrder' => (int) $value->getSortOrder(),
-                    ];
-                }
-            }
-
-            $customOptions[] = $optionData;
-        }
-
-        return $customOptions;
-    }
-
-    /**
-     * Get downloadable product links
-     *
-     * @return array<array{id: int, title: string, price: float, sortOrder: int, numberOfDownloads: int, sampleUrl: string|null}>
-     */
-    private function getDownloadableLinks(\Mage_Catalog_Model_Product $product): array
-    {
-        /** @var \Mage_Downloadable_Model_Product_Type $typeInstance */
-        $typeInstance = $product->getTypeInstance(true);
-        $links = $typeInstance->getLinks($product);
-
-        if (!$links) {
-            return [];
-        }
-
-        $result = [];
-        $store = \Mage::app()->getStore();
-
-        foreach ($links as $link) {
-            /** @var \Mage_Downloadable_Model_Link $link */
-            $sampleUrl = null;
-            if ($link->getSampleFile()) {
-                $sampleUrl = \Mage::getUrl('downloadable/download/linkSample', ['link_id' => $link->getId()]);
-            } elseif ($link->getSampleUrl()) {
-                $sampleUrl = $link->getSampleUrl();
-            }
-
-            $result[] = [
-                'id' => (int) $link->getId(),
-                'title' => $link->getStoreTitle() ?: $link->getTitle(),
-                'price' => (float) $store->convertPrice($link->getPrice(), false),
-                'sortOrder' => (int) $link->getSortOrder(),
-                'numberOfDownloads' => (int) $link->getNumberOfDownloads(),
-                'sampleUrl' => $sampleUrl,
-            ];
-        }
-
-        return $result;
-    }
-
-    /**
-     * Get grouped product associated items
-     *
-     * @return array<array{id: int, sku: string, name: string, price: float, finalPrice: float, imageUrl: string|null, inStock: bool, stockQty: float, defaultQty: float, position: int}>
-     */
-    private function getGroupedProducts(\Mage_Catalog_Model_Product $product): array
-    {
-        /** @var \Mage_Catalog_Model_Product_Type_Grouped $typeInstance */
-        $typeInstance = $product->getTypeInstance(true);
-        $associatedProducts = $typeInstance->getAssociatedProducts($product);
-
-        if (empty($associatedProducts)) {
-            return [];
-        }
-
-        // Batch load stock items
-        $childIds = array_map(fn($child) => (int) $child->getId(), $associatedProducts);
-        $stockByProduct = $this->batchLoadStockItems($childIds);
-        $mediaConfig = $this->getMediaConfig();
-
-        $result = [];
-        foreach ($associatedProducts as $child) {
-            $childId = (int) $child->getId();
-            $stockItem = $stockByProduct[$childId] ?? null;
-
-            $imageUrl = null;
-            if ($child->getThumbnail() && $child->getThumbnail() !== 'no_selection') {
-                $imageUrl = $mediaConfig->getMediaUrl($child->getThumbnail());
-            } elseif ($child->getSmallImage() && $child->getSmallImage() !== 'no_selection') {
-                $imageUrl = $mediaConfig->getMediaUrl($child->getSmallImage());
-            }
-
-            $result[] = [
-                'id' => $childId,
-                'sku' => $child->getSku(),
-                'name' => $child->getName(),
-                'price' => (float) $child->getPrice(),
-                'finalPrice' => (float) $child->getFinalPrice(),
-                'imageUrl' => $imageUrl,
-                'inStock' => $stockItem ? (bool) $stockItem->getIsInStock() : false,
-                'stockQty' => $stockItem ? (float) $stockItem->getQty() : 0,
-                'defaultQty' => (float) ($child->getQty() ?: 0),
-                'position' => (int) ($child->getPosition() ?: 0),
-            ];
-        }
-
-        // Sort by position
-        usort($result, fn($a, $b) => $a['position'] <=> $b['position']);
-
-        return $result;
-    }
-
-    /**
-     * Get bundle product options with their selections
-     *
-     * @return array<array{id: int, title: string, type: string, required: bool, position: int, selections: array}>
+     * Bundle options with selections — kept as helper due to complexity
+     * (dynamic vs fixed pricing, batch stock + price loading).
      */
     private function getBundleOptions(\Mage_Catalog_Model_Product $product): array
     {
@@ -935,19 +740,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         $selectionsCollection = $typeInstance->getSelectionsCollection($optionIds, $product);
-
         $selectionsByOption = [];
         $selectionProductIds = [];
         foreach ($selectionsCollection as $selection) {
-            $optId = (int) $selection->getOptionId();
-            $selectionsByOption[$optId][] = $selection;
+            $selectionsByOption[(int) $selection->getOptionId()][] = $selection;
             $selectionProductIds[] = (int) $selection->getProductId();
         }
 
         $uniqueProductIds = array_unique($selectionProductIds);
         $stockByProduct = $this->batchLoadStockItems($uniqueProductIds);
 
-        // For dynamic pricing, batch-load child products to get actual prices and tier prices
         $childProducts = [];
         if ($isDynamic && !empty($uniqueProductIds)) {
             $collection = \Mage::getResourceModel('catalog/product_collection')
@@ -963,21 +765,16 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         $result = [];
         foreach ($optionsCollection as $option) {
             $optionId = (int) $option->getId();
-
             $selections = [];
+
             foreach ($selectionsByOption[$optionId] ?? [] as $selection) {
                 $selProductId = (int) $selection->getProductId();
-                $stockItem = $stockByProduct[$selProductId] ?? null;
+                $si = $stockByProduct[$selProductId] ?? null;
 
-                // For dynamic bundles, use child product's final price
                 if ($isDynamic && isset($childProducts[$selProductId])) {
-                    $child = $childProducts[$selProductId];
-                    $selPrice = (float) $child->getFinalPrice();
+                    $selPrice = (float) $childProducts[$selProductId]->getFinalPrice();
                 } else {
-                    $selPrice = (float) $selection->getSelectionPriceValue();
-                    if ($selPrice === 0.0) {
-                        $selPrice = (float) $selection->getPrice();
-                    }
+                    $selPrice = (float) $selection->getSelectionPriceValue() ?: (float) $selection->getPrice();
                 }
 
                 $selData = [
@@ -987,23 +784,35 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                     'name' => $selection->getName(),
                     'price' => $selPrice,
                     'priceType' => (int) $selection->getSelectionPriceType() === 1 ? 'percent' : 'fixed',
-                    'inStock' => $stockItem ? (bool) $stockItem->getIsInStock() : false,
+                    'inStock' => $si ? (bool) $si->getIsInStock() : false,
                     'isDefault' => (bool) $selection->getIsDefault(),
                     'canChangeQty' => (bool) $selection->getSelectionCanChangeQty(),
                     'defaultQty' => (float) ($selection->getSelectionQty() ?: 1),
                     'position' => (int) ($selection->getPosition() ?: 0),
                 ];
 
-                // Include tier prices for dynamic bundle selections
                 if ($isDynamic && isset($childProducts[$selProductId])) {
-                    $selData['tierPrices'] = $this->getTierPrices($childProducts[$selProductId]);
+                    $basePrice = (float) $childProducts[$selProductId]->getPrice();
+                    $rawTiers = $childProducts[$selProductId]->getTierPrice();
+                    if (is_array($rawTiers)) {
+                        $selData['tierPrices'] = [];
+                        foreach ($rawTiers as $tp) {
+                            $p = (float) ($tp['price'] ?? 0);
+                            if ($p > 0) {
+                                $selData['tierPrices'][] = [
+                                    'qty' => (float) ($tp['price_qty'] ?? 1),
+                                    'price' => $p,
+                                    'savePercent' => $basePrice > 0 ? (int) round((1 - $p / $basePrice) * 100) : 0,
+                                ];
+                            }
+                        }
+                    }
                 }
 
                 $selections[] = $selData;
             }
 
             usort($selections, fn($a, $b) => $a['position'] <=> $b['position']);
-
             $result[] = [
                 'id' => $optionId,
                 'title' => $option->getDefaultTitle() ?: $option->getTitle(),
@@ -1015,156 +824,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         }
 
         usort($result, fn($a, $b) => $a['position'] <=> $b['position']);
-
         return $result;
-    }
-
-
-    /**
-     * Get tier prices for a product
-     * @return array<array{qty: float, price: float, savePercent: int}>
-     */
-    private function getTierPrices(\Mage_Catalog_Model_Product $product): array
-    {
-        $tierPrices = $product->getTierPrice();
-        if (!is_array($tierPrices) || empty($tierPrices)) {
-            return [];
-        }
-
-        $basePrice = (float) $product->getPrice();
-        $result = [];
-        foreach ($tierPrices as $tp) {
-            $tierPrice = (float) ($tp['price'] ?? 0);
-            if ($tierPrice <= 0) {
-                continue;
-            }
-            $savePercent = $basePrice > 0
-                ? (int) round((1 - $tierPrice / $basePrice) * 100)
-                : 0;
-
-            $result[] = [
-                'qty' => (float) ($tp['price_qty'] ?? 1),
-                'price' => $tierPrice,
-                'savePercent' => $savePercent,
-            ];
-        }
-
-        usort($result, fn($a, $b) => $a['qty'] <=> $b['qty']);
-
-        return $result;
-    }
-
-
-    /**
-     * Get additional visible attributes for the specifications tab.
-     *
-     * Returns attributes that are marked "Visible on Product View Page" in admin,
-     * excluding core attributes already exposed as dedicated DTO properties.
-     *
-     * @return array<array{label: string, value: string, code: string}>
-     */
-    private function getAdditionalAttributes(\Mage_Catalog_Model_Product $product): array
-    {
-        $attributes = [];
-        $excludeCodes = [
-            'sku', 'name', 'description', 'short_description', 'price', 'special_price',
-            'weight', 'status', 'visibility', 'url_key', 'meta_title', 'meta_description',
-            'meta_keyword', 'image', 'small_image', 'thumbnail', 'page_layout',
-            'tax_class_id', 'country_of_manufacture',
-        ];
-
-        /** @var \Mage_Catalog_Model_Resource_Eav_Attribute[] $productAttributes */
-        $productAttributes = $product->getAttributes();
-
-        foreach ($productAttributes as $attribute) {
-            if (!$attribute->getIsVisibleOnFront()) {
-                continue;
-            }
-            $code = $attribute->getAttributeCode();
-            if (in_array($code, $excludeCodes, true)) {
-                continue;
-            }
-
-            $value = $attribute->getFrontend()->getValue($product);
-            if ($value === null || $value === '' || $value === false || $value === 'N/A' || $value === 'No') {
-                continue;
-            }
-
-            // For multiselect attributes, value may already be comma-separated string
-            if (is_array($value)) {
-                $value = implode(', ', $value);
-            }
-
-            $attributes[] = [
-                'label' => $attribute->getStoreLabel() ?: $attribute->getFrontendLabel() ?: $code,
-                'value' => (string) $value,
-                'code' => $code,
-            ];
-        }
-
-        return $attributes;
-    }
-
-    /**
-     * Get minimum price from grouped product's associated products
-     */
-    private function getGroupedMinPrice(\Mage_Catalog_Model_Product $product): ?float
-    {
-        try {
-            /** @var \Mage_Catalog_Model_Product_Type_Grouped $typeInstance */
-            $typeInstance = $product->getTypeInstance(true);
-            $associated = $typeInstance->getAssociatedProducts($product);
-            $prices = [];
-            foreach ($associated as $child) {
-                $price = (float) $child->getFinalPrice();
-                if ($price > 0) {
-                    $prices[] = $price;
-                }
-            }
-            return empty($prices) ? null : min($prices);
-        } catch (\Throwable $e) {
-            return null;
-        }
-    }
-
-    private function mapArrayToDto(array $data): Product
-    {
-        $dto = new Product();
-        $dto->id = isset($data['id']) ? (int) $data['id'] : null;
-        $dto->sku = $data['sku'] ?? '';
-        $dto->urlKey = $data['url_key'] ?? null;
-        $dto->name = $data['name'] ?? '';
-        $dto->description = $data['description'] ?? null;
-        $dto->type = $data['type'] ?? \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE;
-        $dto->status = $data['status'] ?? 'enabled';
-        $dto->price = isset($data['price']) ? (float) $data['price'] : null;
-        $dto->specialPrice = isset($data['special_price']) ? (float) $data['special_price'] : null;
-        $dto->finalPrice = isset($data['final_price']) ? (float) $data['final_price'] : null;
-        $dto->stockQty = isset($data['stock_qty']) ? (float) $data['stock_qty'] : null;
-        $dto->stockStatus = $data['stock_status'] ?? 'in_stock';
-
-        // Get barcode from configured attribute (if POS module available)
-        $barcodeAttr = ProductService::getBarcodeAttributeCode();
-        $dto->barcode = isset($data[$barcodeAttr]) ? (string) $data[$barcodeAttr] : null;
-
-        $dto->imageUrl = $data['image_url'] ?? null;
-        $dto->smallImageUrl = $data['small_image_url'] ?? null;
-        $dto->thumbnailUrl = $data['thumbnail_url'] ?? null;
-        $dto->categoryIds = $data['categories'] ?? [];
-        $dto->createdAt = $data['created_at'] ?? null;
-        $dto->updatedAt = $data['updated_at'] ?? null;
-
-        // Check if product needs options selection
-        // For configurable products or products with required_options flag
-        $dto->hasRequiredOptions = (bool) ($data['has_required_options'] ?? $data['required_options'] ?? false);
-
-        // If type is configurable, always requires options
-        if ($dto->type === \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-            $dto->hasRequiredOptions = true;
-        }
-
-
-
-        return $dto;
     }
 }

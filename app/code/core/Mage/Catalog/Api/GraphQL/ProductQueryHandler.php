@@ -21,7 +21,7 @@ use Maho\ApiPlatform\Exception\ValidationException;
  * Product Query Handler
  *
  * Handles all product-related GraphQL operations for admin API.
- * Uses ProductProvider::mapToDto() for model-based mapping to ensure
+ * Uses ProductProvider::toDto() for model-based mapping to ensure
  * events (api_product_dto_build) and extensions fire consistently.
  */
 class ProductQueryHandler
@@ -45,7 +45,7 @@ class ProductQueryHandler
             throw ValidationException::requiredField('id');
         }
         $product = $this->productService->getProductById((int) $id);
-        return ['product' => $product ? $this->productProvider->mapToDto($product)->toArray() : null];
+        return ['product' => $product ? $this->productProvider->toDto($product)->toArray() : null];
     }
 
     /**
@@ -58,7 +58,7 @@ class ProductQueryHandler
             throw ValidationException::requiredField('sku');
         }
         $product = $this->productService->getProductBySku($sku);
-        return ['productBySku' => $product ? $this->productProvider->mapToDto($product)->toArray() : null];
+        return ['productBySku' => $product ? $this->productProvider->toDto($product)->toArray() : null];
     }
 
     /**
@@ -71,7 +71,7 @@ class ProductQueryHandler
             throw ValidationException::requiredField('barcode');
         }
         $product = $this->productService->getProductByBarcode($barcode);
-        return ['productByBarcode' => $product ? $this->productProvider->mapToDto($product)->toArray() : null];
+        return ['productByBarcode' => $product ? $this->productProvider->toDto($product)->toArray() : null];
     }
 
     /**
@@ -118,8 +118,8 @@ class ProductQueryHandler
             return ['getConfigurableProduct' => null];
         }
 
-        // mapToDto with forListing: false loads configurable options, variants, etc.
-        return ['getConfigurableProduct' => $this->productProvider->mapToDto($product)->toArray()];
+        // toDto with forListing: false loads configurable options, variants, etc.
+        return ['getConfigurableProduct' => $this->productProvider->toDto($product)->toArray()];
     }
 
     /**
@@ -137,7 +137,7 @@ class ProductQueryHandler
             return $this->mapSearchResultForRelay($product, $includeConfigurableData);
         }
 
-        $dto = $this->productProvider->mapToDto($product, forListing: true);
+        $dto = $this->productProvider->toDto($product, forListing: true);
         $typeName = $this->getProductTypeName($product->getTypeId());
 
         $result = [
@@ -190,7 +190,7 @@ class ProductQueryHandler
         if ($includeConfigurableData && $type === \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
             $fullProduct = \Mage::getModel('catalog/product')->load($result['id']);
             if ($fullProduct->getId()) {
-                $dto = $this->productProvider->mapToDto($fullProduct);
+                $dto = $this->productProvider->toDto($fullProduct);
                 $result['configurableOptions'] = $dto->configurableOptions;
                 $result['variants'] = $dto->variants;
             }
