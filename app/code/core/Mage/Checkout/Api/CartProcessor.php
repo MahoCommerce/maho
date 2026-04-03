@@ -15,6 +15,7 @@ namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
+use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
@@ -38,6 +39,8 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Cart
     {
+        StoreContext::ensureStore();
+
         $operationName = $operation->getName();
 
         // Bridge REST request body into context args (GraphQL populates args natively)

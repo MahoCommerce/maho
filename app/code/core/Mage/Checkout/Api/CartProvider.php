@@ -14,10 +14,15 @@ declare(strict_types=1);
 namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * Cart State Provider - Fetches cart data for API Platform
+ *
+ * Overrides provide() because Cart has non-standard routing:
+ * guest carts (masked ID), customer carts, and numeric ID carts
+ * all require unified resolution via CartService.
  */
 final class CartProvider extends \Maho\ApiPlatform\Provider
 {
@@ -37,6 +42,8 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ?Cart
     {
+        StoreContext::ensureStore();
+
         $operationName = $operation->getName();
 
         // customerCart query — get authenticated user's active cart
