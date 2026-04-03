@@ -592,7 +592,7 @@ class Select implements \Stringable
      * @param string $correlationName Correlation name or table alias
      * @return $this
      */
-    public function columns(array|string $cols = '*', ?string $correlationName = null): self
+    public function columns(array|string|Expr $cols = '*', ?string $correlationName = null): self
     {
         if ($correlationName === null && count($this->_parts[self::FROM])) {
             $correlationNameKeys = array_keys($this->_parts[self::FROM]);
