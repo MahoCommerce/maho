@@ -32,8 +32,8 @@ return RectorConfig::configure()
         CodeQuality\Identical\SimplifyArraySearchRector::class,
         CodeQuality\Identical\SimplifyConditionsRector::class,
         CodeQuality\Identical\StrlenZeroToIdenticalEmptyStringRector::class,
-        CodeQuality\NotEqual\CommonNotEqualRector::class,
         CodeQuality\LogicalAnd\LogicalToBooleanRector::class,
+        CodeQuality\NotEqual\CommonNotEqualRector::class,
         CodeQuality\Ternary\SimplifyTautologyTernaryRector::class,
         CodeQuality\Ternary\SwitchNegatedTernaryRector::class,
         CodingStyle\ClassMethod\MakeInheritedMethodVisibilitySameAsParentRector::class,
@@ -46,13 +46,13 @@ return RectorConfig::configure()
         Rector\CodingStyle\Rector\FuncCall\ConsistentImplodeRector::class,
         Rector\Php71\Rector\List_\ListToArrayDestructRector::class,
         Rector\Php74\Rector\Assign\NullCoalescingOperatorRector::class,
+        Rector\Php80\Rector\Class_\StringableForToStringRector::class,
         Rector\Php80\Rector\ClassConstFetch\ClassOnThisVariableObjectRector::class,
         Rector\Php80\Rector\FuncCall\ClassOnObjectRector::class,
         Rector\Php80\Rector\Switch_\ChangeSwitchToMatchRector::class,
         Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector::class,
         TypeDeclaration\ClassMethod\ReturnNeverTypeRector::class,
         TypeDeclaration\StmtsAwareInterface\SafeDeclareStrictTypesRector::class,
-        Rector\Php80\Rector\Class_\StringableForToStringRector::class,
     ])
     ->withConfiguredRule(Rector\Php82\Rector\Param\AddSensitiveParameterAttributeRector::class, [
         'sensitive_parameters' => [
