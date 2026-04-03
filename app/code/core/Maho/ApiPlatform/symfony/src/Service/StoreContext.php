@@ -112,29 +112,11 @@ final class StoreContext implements ResetInterface
      */
     public static function getDefaultStoreId(): int
     {
-        // Try to get from the default website's default store group's default store
-        try {
-            $website = \Mage::app()->getWebsite(1);
-            $storeGroup = $website->getDefaultGroup();
-            if ($storeGroup) {
-                $store = $storeGroup->getDefaultStore();
-                if ($store && $store->getId()) {
-                    return (int) $store->getId();
-                }
-            }
-        } catch (\Exception $e) {
-            // Fall through to fallback
+        $defaultStore = \Mage::app()->getDefaultStoreView();
+        if ($defaultStore && $defaultStore->getId()) {
+            return (int) $defaultStore->getId();
         }
 
-        // Fallback: find first active store
-        $stores = \Mage::app()->getStores(true);
-        foreach ($stores as $store) {
-            if ($store->getIsActive() && $store->getId() > 0) {
-                return (int) $store->getId();
-            }
-        }
-
-        // Last resort - store 1
         return 1;
     }
 
