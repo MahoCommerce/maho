@@ -428,15 +428,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
         // Minimal price for bundles/grouped ("From $X")
         $minimalPrice = $product->getMinimalPrice() ?: $product->getData('min_price');
         if (!$minimalPrice && in_array($dto->type, ['bundle', 'grouped'])) {
-            // load() doesn't join price index — query it directly
-            $resource = \Mage::getSingleton('core/resource');
-            $read = $resource->getConnection('core_read');
-            $table = $resource->getTableName('catalog/product_index_price');
-            $row = $read->fetchRow(
-                "SELECT min_price, max_price FROM {$table} WHERE entity_id = ? LIMIT 1",
-                [(int) $product->getId()],
-            );
-            $minimalPrice = $row['min_price'] ?? null;
+            $minimalPrice = $this->getGroupedMinPrice($product);
         }
         if ($minimalPrice) {
             $dto->minimalPrice = (float) $minimalPrice;
