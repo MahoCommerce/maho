@@ -58,7 +58,7 @@ class AdminUserProvider implements UserProviderInterface
         }
 
         // Get admin roles from Maho
-        $roles = $this->getAdminRoles($admin);
+        $roles = static::getAdminRoles($admin);
 
         return new ApiUser(
             identifier: $identifier,

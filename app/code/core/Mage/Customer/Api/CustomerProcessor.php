@@ -43,7 +43,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      *
      * @throws ConflictHttpException if a customer with this email already exists
      */
-    private function ensureEmailUnique(string $email, int $websiteId): void
+    private function ensureEmailUnique(#[\SensitiveParameter]
+    string $email, int $websiteId): void
     {
         $existingCustomer = \Mage::getModel('customer/customer')
             ->setWebsiteId($websiteId)

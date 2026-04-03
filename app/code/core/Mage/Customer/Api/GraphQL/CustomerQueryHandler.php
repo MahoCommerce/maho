@@ -209,7 +209,8 @@ class CustomerQueryHandler
      *
      * @throws ValidationException if a customer with this email already exists
      */
-    private function ensureEmailUnique(string $email): void
+    private function ensureEmailUnique(#[\SensitiveParameter]
+    string $email): void
     {
         $existing = $this->customerService->getCustomerByEmail($email);
         if ($existing) {
