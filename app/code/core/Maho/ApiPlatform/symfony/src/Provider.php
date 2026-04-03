@@ -88,7 +88,7 @@ abstract class Provider implements ProviderInterface
      * Subclasses that use the default provide() must override this.
      * Subclasses that override provide() entirely can skip this.
      */
-    protected function toDto(object $model): Resource
+    public function toDto(object $model): Resource
     {
         throw new \LogicException(static::class . ' must implement toDto() or override provide()');
     }

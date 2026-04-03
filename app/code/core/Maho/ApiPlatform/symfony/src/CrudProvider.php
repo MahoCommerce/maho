@@ -74,7 +74,7 @@ class CrudProvider extends Provider
      * Parent's provideCollection() calls this for each item — no need to override provideCollection().
      */
     #[\Override]
-    protected function toDto(object $model): Resource
+    public function toDto(object $model): Resource
     {
         $dto = $this->resourceClass::fromModel($model);
         $this->afterMap($dto, $model);

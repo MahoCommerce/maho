@@ -366,7 +366,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      * Build a complete Product DTO from a Mage product model.
      */
     #[\Override]
-    protected function toDto(object $product, bool $forListing = false): Product
+    public function toDto(object $product, bool $forListing = false): Product
     {
         $dto = Product::fromModel($product);
         $this->enrichProduct($dto, $product, forListing: $forListing);
