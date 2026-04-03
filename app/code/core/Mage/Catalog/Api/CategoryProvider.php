@@ -172,7 +172,7 @@ final class CategoryProvider extends \Maho\ApiPlatform\Provider
 
         // Get image URL
         if ($category->getImage()) {
-            $dto->image = \Mage::getBaseUrl('media') . 'catalog/category/' . $category->getImage();
+            $dto->image = $category->getImageUrl();
         }
 
         // Get product count
