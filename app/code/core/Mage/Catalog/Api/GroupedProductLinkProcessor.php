@@ -16,9 +16,7 @@ namespace Mage\Catalog\Api;
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\Post;
-use Mage;
 use Mage_Catalog_Model_Product;
-use Mage_Catalog_Model_Product_Link;
 use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -131,20 +129,12 @@ final class GroupedProductLinkProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleRemove(int $productId, int $childProductId): null
     {
-        $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
+        $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_GROUPED);
 
-        // Use direct SQL to remove the link — setGroupedLinkData + save
-        // doesn't reliably delete entries
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('catalog/product_link');
-
-        // Grouped link type ID = Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED (3)
-        $write->delete($table, [
-            'product_id = ?' => $productId,
-            'linked_product_id = ?' => $childProductId,
-            'link_type_id = ?' => Mage_Catalog_Model_Product_Link::LINK_TYPE_GROUPED,
-        ]);
+        $existing = $this->getExistingLinkData($product);
+        unset($existing[$childProductId]);
+        $product->setGroupedLinkData($existing);
+        $this->safeSave($product, 'remove grouped link');
 
         return null;
     }
