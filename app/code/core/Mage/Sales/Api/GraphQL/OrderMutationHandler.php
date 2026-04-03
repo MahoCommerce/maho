@@ -31,36 +31,7 @@ class OrderMutationHandler
     private OrderProvider $orderProvider;
     private CartService $cartService;
 
-    /**
-     * Fallback payment method labels (used when model title unavailable)
-     */
-    private const PAYMENT_METHOD_LABELS = [
-        'cashondelivery' => 'Cash',
-        'cash' => 'Cash',
-        'purchaseorder' => 'EFTPOS/Card',
-        'gene_braintree_creditcard' => 'Credit Card',
-        'checkmo' => 'Check/Money Order',
-        'banktransfer' => 'Bank Transfer',
-    ];
 
-    /**
-     * Get payment method display label, preferring store-configured title
-     */
-    private function getPaymentMethodLabel(string $code): string
-    {
-        try {
-            $method = \Mage::helper('payment')->getMethodInstance($code);
-            if ($method) {
-                $title = $method->getTitle();
-                if ($title) {
-                    return $title;
-                }
-            }
-        } catch (\Exception $e) {
-            // Method not available, fall through to hardcoded labels
-        }
-        return self::PAYMENT_METHOD_LABELS[$code] ?? ucfirst(str_replace('_', ' ', $code));
-    }
 
     /**
      * POS payment method mapping
@@ -226,7 +197,7 @@ class OrderMutationHandler
             $savedPayments[] = [
                 'paymentId' => (int) $posPayment->getId(),
                 'methodCode' => $posPayment->getMethodCode(),
-                'methodLabel' => $this->getPaymentMethodLabel($posPayment->getMethodCode()),
+                'methodLabel' => PaymentService::getMethodLabel($posPayment->getMethodCode()),
                 'amount' => [
                     'value' => (float) $posPayment->getAmount(),
                     'formatted' => \Mage::helper('core')->currency($posPayment->getAmount(), true, false),
@@ -277,7 +248,7 @@ class OrderMutationHandler
                 'orderId' => (int) $payment->getOrderId(),
                 'registerId' => (int) $payment->getRegisterId(),
                 'methodCode' => $payment->getMethodCode(),
-                'methodLabel' => $this->getPaymentMethodLabel($payment->getMethodCode()),
+                'methodLabel' => PaymentService::getMethodLabel($payment->getMethodCode()),
                 'amount' => [
                     'value' => (float) $payment->getAmount(),
                     'formatted' => \Mage::helper('core')->currency($payment->getAmount(), true, false),
