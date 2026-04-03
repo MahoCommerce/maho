@@ -13,38 +13,46 @@ declare(strict_types=1);
 
 namespace Mage\Review\Api;
 
-use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
+use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\Pagination\TraversablePaginator;
+use Maho\ApiPlatform\CrudProvider;
+use Maho\ApiPlatform\CrudResource;
+use Maho\ApiPlatform\Resource;
 use Maho\ApiPlatform\Service\StoreContext;
 use Maho\ApiPlatform\Trait\CacheTrait;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Review State Provider
+ * Review Provider — extends CrudProvider with review-specific operations.
+ *
+ * Handles product reviews, customer reviews, and caching.
+ * DTO construction uses CrudResource::fromModel() via afterLoad for computed fields.
  */
-final class ReviewProvider extends \Maho\ApiPlatform\Provider
+final class ReviewProvider extends CrudProvider
 {
     use CacheTrait;
 
-    /**
-     * Reviews change less frequently, use 3x the base TTL
-     */
+    protected int $defaultPageSize = 10;
+    protected int $maxPageSize = 100;
+
     private function getCacheTtl(): int
     {
         return \Maho_ApiPlatform_Model_Observer::getCacheTtl() * 3;
     }
 
-    /**
-     * @return TraversablePaginator<Review>|Review|null
-     */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Review|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): object|array|null
     {
         StoreContext::ensureStore();
+
+        $this->resourceClass = $operation->getClass();
+        if (is_subclass_of($this->resourceClass, CrudResource::class)) {
+            $this->modelAlias = $this->resourceClass::metadata()->model;
+        }
+
         $operationName = $operation->getName();
 
-        // GraphQL: Get reviews for a product
         if ($operationName === 'productReviews') {
             ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context, 10, 100);
             return $this->getProductReviews(
@@ -54,17 +62,10 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
             );
         }
 
-        // GraphQL: Get current customer's reviews
-        if ($operationName === 'myReviews') {
+        if ($operationName === 'myReviews' || $operationName === 'my_reviews') {
             return $this->getCustomerReviews();
         }
 
-        // REST: /customers/me/reviews
-        if ($operationName === 'my_reviews') {
-            return $this->getCustomerReviews();
-        }
-
-        // REST Collection: /products/{productId}/reviews
         if ($operation instanceof CollectionOperationInterface) {
             $productId = (int) ($uriVariables['productId'] ?? 0);
             if ($productId) {
@@ -74,7 +75,6 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
             return new TraversablePaginator(new \ArrayIterator([]), 1, 10, 0);
         }
 
-        // Single review by ID
         $reviewId = (int) ($uriVariables['id'] ?? 0);
         if ($reviewId) {
             return $this->getReview($reviewId);
@@ -84,8 +84,6 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Get reviews for a product (only approved reviews)
-     *
      * @return TraversablePaginator<Review>
      */
     private function getProductReviews(int $productId, int $page = 1, int $pageSize = 10): TraversablePaginator
@@ -119,7 +117,9 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
 
                 $reviews = [];
                 foreach ($collection as $review) {
-                    $reviews[] = $this->buildReview($review, $productNames);
+                    $dto = $this->toDto($review);
+                    $dto->productName = $productNames[$dto->productId] ?? null;
+                    $reviews[] = $dto;
                 }
 
                 return new TraversablePaginator(new \ArrayIterator($reviews), $page, $pageSize, $total);
@@ -140,8 +140,6 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
     }
 
     /**
-     * Get current customer's submitted reviews
-     *
      * @return TraversablePaginator<Review>
      */
     private function getCustomerReviews(): TraversablePaginator
@@ -160,9 +158,7 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
         $collection->setDateOrder();
         $collection->addRateVotes();
 
-        // Batch load product names
         $productIds = [];
-        /** @var \Mage_Review_Model_Review $review */
         foreach ($collection as $review) {
             $productIds[] = (int) $review->getEntityPkValue();
         }
@@ -170,7 +166,9 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
 
         $reviews = [];
         foreach ($collection as $review) {
-            $reviews[] = $this->buildReview($review, $productNames);
+            $dto = $this->toDto($review);
+            $dto->productName = $productNames[$dto->productId] ?? null;
+            $reviews[] = $dto;
         }
 
         $total = count($reviews);
@@ -178,9 +176,6 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
         return new TraversablePaginator(new \ArrayIterator($reviews), 1, max($total, 100), $total);
     }
 
-    /**
-     * Get single review by ID
-     */
     private function getReview(int $reviewId): Review
     {
         /** @var \Mage_Review_Model_Review $review */
@@ -190,64 +185,23 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
             throw new NotFoundHttpException('Review not found');
         }
 
-        // Only show approved reviews to public
         $customerId = $this->getAuthenticatedCustomerId();
         if ((int) $review->getStatusId() !== \Mage_Review_Model_Review::STATUS_APPROVED) {
-            // Allow customer to see their own pending reviews
             if (!$customerId || (int) $review->getCustomerId() !== $customerId) {
                 throw new NotFoundHttpException('Review not found');
             }
         }
 
-        return $this->buildReview($review);
+        /** @var Review $dto */
+        $dto = $this->toDto($review);
+
+        $productNames = $this->batchLoadProductNames([$dto->productId]);
+        $dto->productName = $productNames[$dto->productId] ?? null;
+
+        return $dto;
     }
 
     /**
-     * Build Review resource from model
-     *
-     * @param array<int, string> $productNames Pre-loaded product names keyed by product ID
-     */
-    private function buildReview(\Mage_Review_Model_Review $review, array $productNames = []): Review
-    {
-        $resource = new Review();
-        $resource->id = (int) $review->getId();
-        $resource->productId = (int) $review->getEntityPkValue();
-        $resource->title = $review->getTitle();
-        $resource->detail = $review->getDetail();
-        $resource->nickname = $review->getNickname();
-        $resource->createdAt = $review->getCreatedAt();
-        $resource->customerId = $review->getCustomerId() ? (int) $review->getCustomerId() : null;
-
-        // Get status
-        $statusId = (int) $review->getStatusId();
-        $resource->status = match ($statusId) {
-            \Mage_Review_Model_Review::STATUS_APPROVED => 'approved',
-            \Mage_Review_Model_Review::STATUS_PENDING => 'pending',
-            \Mage_Review_Model_Review::STATUS_NOT_APPROVED => 'not_approved',
-            default => 'pending',
-        };
-
-        // Get rating (average of all rating votes)
-        $rating = 0;
-        $ratingVotes = $review->getRatingVotes();
-        if ($ratingVotes && count($ratingVotes) > 0) {
-            $totalPercent = 0;
-            foreach ($ratingVotes as $vote) {
-                $totalPercent += (float) $vote->getPercent();
-            }
-            // Convert percent (0-100) to 1-5 star rating
-            $rating = (int) round(($totalPercent / count($ratingVotes)) / 20);
-        }
-        $resource->rating = max(1, min(5, $rating));
-
-        $resource->productName = $productNames[$resource->productId] ?? null;
-
-        return $resource;
-    }
-
-    /**
-     * Batch load product names by IDs (single query instead of N+1)
-     *
      * @param array<int> $productIds
      * @return array<int, string>
      */
@@ -262,7 +216,6 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
             ->addIdFilter($productIds);
 
         $names = [];
-        /** @var \Mage_Catalog_Model_Product $product */
         foreach ($collection as $product) {
             $names[(int) $product->getId()] = $product->getName();
         }
@@ -302,9 +255,6 @@ final class ReviewProvider extends \Maho\ApiPlatform\Provider
         $review->status = $data['status'];
         $review->createdAt = $data['createdAt'];
         $review->customerId = isset($data['customerId']) ? (int) $data['customerId'] : null;
-
-        \Mage::dispatchEvent('api_review_dto_build', ['review_model' => $review, 'dto' => $review]);
-
 
         return $review;
     }

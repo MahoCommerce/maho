@@ -14,12 +14,17 @@ declare(strict_types=1);
 namespace Mage\Review\Api;
 
 use ApiPlatform\Metadata\Operation;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Service\StoreContext;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Review State Processor
+ * Review Processor — handles review submission with custom logic.
+ *
+ * Reviews have a non-standard write flow (submit only, no generic CRUD update/delete),
+ * so this extends the base Processor rather than CrudProcessor. It uses
+ * CrudResource::fromModel() for building responses.
  */
 final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 {
@@ -33,7 +38,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         StoreContext::ensureStore();
         $operationName = $operation->getName();
 
-        // GraphQL mutation
         if ($operationName === 'submitReview') {
             $args = $context['args']['input'] ?? [];
             return $this->submitReview(
@@ -45,7 +49,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
             );
         }
 
-        // REST POST - /products/{productId}/reviews
         $productId = (int) ($uriVariables['productId'] ?? 0);
         if ($productId && $data instanceof Review) {
             return $this->submitReview(
@@ -60,9 +63,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         throw new BadRequestHttpException('Invalid review operation');
     }
 
-    /**
-     * Submit a product review
-     */
     private function submitReview(
         int $productId,
         string $title,
@@ -72,14 +72,12 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
     ): Review {
         $customerId = $this->requireAuthentication();
 
-        // Validate product exists
         /** @var \Mage_Catalog_Model_Product $product */
         $product = \Mage::getModel('catalog/product')->load($productId);
         if (!$product->getId()) {
             throw new NotFoundHttpException('Product not found');
         }
 
-        // Validate inputs
         $title = trim($title);
         $detail = trim($detail);
         $nickname = trim($nickname);
@@ -117,14 +115,9 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         $review->setCustomerId($customerId);
         $review->setStoreId($storeId);
         $review->setStores([$storeId]);
-
-        // Set to pending status (requires admin approval)
         $review->setStatusId(\Mage_Review_Model_Review::STATUS_PENDING);
-
-        // Set entity type to product
         $review->setEntityId($review->getEntityIdByCode(\Mage_Review_Model_Review::ENTITY_PRODUCT_CODE));
 
-        // Validate the review
         $validate = $review->validate();
         if ($validate !== true && is_array($validate)) {
             throw new BadRequestHttpException(implode(', ', $validate));
@@ -132,31 +125,17 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $review->save();
 
-        // Add rating vote
         $this->addRatingVote($review, $rating, $productId, $customerId, $storeId);
-
-        // Aggregate ratings
         $review->aggregate();
 
-        // Build response
-        $resource = new Review();
-        $resource->id = (int) $review->getId();
-        $resource->productId = $productId;
-        $resource->productName = $product->getName();
-        $resource->title = $title;
-        $resource->detail = $detail;
-        $resource->nickname = $nickname;
-        $resource->rating = $rating;
-        $resource->status = 'pending';
-        $resource->createdAt = $review->getCreatedAt();
-        $resource->customerId = $customerId;
+        $dto = Review::fromModel($review);
+        $dto->productName = $product->getName();
+        $dto->rating = $rating;
+        $dto->status = 'pending';
 
-        return $resource;
+        return $dto;
     }
 
-    /**
-     * Add rating vote to review
-     */
     private function addRatingVote(
         \Mage_Review_Model_Review $review,
         int $rating,
@@ -164,22 +143,17 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         int $customerId,
         int $storeId,
     ): void {
-        // Get the default rating entity (usually "Quality" or "Rating")
         /** @var \Mage_Rating_Model_Resource_Rating_Collection $ratingCollection */
         $ratingCollection = \Mage::getModel('rating/rating')->getCollection()
             ->addEntityFilter('product');
 
-        // Use the first available rating, or create one if none exist
         $ratingModel = $ratingCollection->getFirstItem();
 
         if (!$ratingModel->getId()) {
-            // Fallback: try to get rating by ID 1 (default)
             $ratingModel = \Mage::getModel('rating/rating')->load(1);
         }
 
         if ($ratingModel->getId()) {
-            // Convert 1-5 star to option ID
-            // Rating options are typically: 1=20%, 2=40%, 3=60%, 4=80%, 5=100%
             $optionId = $this->getRatingOptionId($ratingModel->getId(), $rating);
 
             if ($optionId) {
@@ -193,9 +167,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    /**
-     * Get rating option ID for a star value
-     */
     private function getRatingOptionId(int $ratingId, int $starValue): ?int
     {
         /** @var \Mage_Rating_Model_Resource_Rating_Option_Collection $optionCollection */
@@ -205,7 +176,6 @@ final class ReviewProcessor extends \Maho\ApiPlatform\Processor
 
         $options = $optionCollection->getItems();
 
-        // Options are ordered by position (1, 2, 3, 4, 5)
         $index = 0;
         foreach ($options as $option) {
             $index++;

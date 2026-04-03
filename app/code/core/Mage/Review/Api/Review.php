@@ -13,15 +13,16 @@ declare(strict_types=1);
 
 namespace Mage\Review\Api;
 
-use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\ApiProperty;
+use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
-use ApiPlatform\Metadata\Post;
-use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Post;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'Review',
@@ -91,21 +92,56 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
             ],
         ),
     ],
+    extraProperties: [
+        'model' => 'review/review',
+    ],
 )]
-class Review extends \Maho\ApiPlatform\Resource
+class Review extends CrudResource
 {
-    #[ApiProperty(identifier: true)]
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    #[ApiProperty(identifier: false)]
+    #[ApiProperty(identifier: false, extraProperties: ['modelField' => 'entity_pk_value'])]
     public ?int $productId = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $productName = null;
+
     public string $title = '';
     public string $detail = '';
     public string $nickname = '';
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public int $rating = 5;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'pending';
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'created_at'])]
     public ?string $createdAt = null;
+
+    #[ApiProperty(extraProperties: ['modelField' => 'customer_id'])]
     public ?int $customerId = null;
 
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $statusId = (int) $model->getStatusId();
+        $dto->status = match ($statusId) {
+            \Mage_Review_Model_Review::STATUS_APPROVED => 'approved',
+            \Mage_Review_Model_Review::STATUS_PENDING => 'pending',
+            \Mage_Review_Model_Review::STATUS_NOT_APPROVED => 'not_approved',
+            default => 'pending',
+        };
+
+        $rating = 0;
+        $ratingVotes = $model->getRatingVotes();
+        if ($ratingVotes && count($ratingVotes) > 0) {
+            $totalPercent = 0;
+            foreach ($ratingVotes as $vote) {
+                $totalPercent += (float) $vote->getPercent();
+            }
+            $rating = (int) round(($totalPercent / count($ratingVotes)) / 20);
+        }
+        $dto->rating = max(1, min(5, $rating));
+    }
 }
