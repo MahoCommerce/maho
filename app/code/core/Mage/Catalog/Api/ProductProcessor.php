@@ -95,7 +95,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             'sku' => $data->sku,
             'name' => $data->name,
             'type_id' => $data->type ?: Mage_Catalog_Model_Product_Type::TYPE_SIMPLE,
-            'attribute_set_id' => $this->resolveAttributeSetId($data),
+            'attribute_set_id' => (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId(),
             'status' => $data->isActive
                 ? Mage_Catalog_Model_Product_Status::STATUS_ENABLED
                 : Mage_Catalog_Model_Product_Status::STATUS_DISABLED,
@@ -498,10 +498,6 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function resolveAttributeSetId(Product $data): int
-    {
-        return (int) Mage::getModel('catalog/product')->getDefaultAttributeSetId();
-    }
 
     /**
      * @return int[]
