@@ -48,14 +48,7 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
             : '/api/orders/' . $orderId . '/invoices/';
 
         foreach ($order->getInvoiceCollection() as $invoice) {
-            $dto = new Invoice();
-            $dto->id = (int) $invoice->getId();
-            $dto->incrementId = $invoice->getIncrementId();
-            $dto->orderId = (int) $invoice->getOrderId();
-            $dto->grandTotal = (float) $invoice->getGrandTotal();
-            $dto->state = (int) $invoice->getState();
-            $dto->stateName = $this->getStateName((int) $invoice->getState());
-            $dto->createdAt = $invoice->getCreatedAt();
+            $dto = Invoice::fromModel($invoice);
             $dto->pdfUrl = $basePath . $invoice->getId() . '/pdf';
             $invoices[] = $dto;
         }
@@ -114,13 +107,4 @@ class InvoiceProvider extends \Maho\ApiPlatform\Provider
         return $order;
     }
 
-    private function getStateName(int $state): string
-    {
-        return match ($state) {
-            \Mage_Sales_Model_Order_Invoice::STATE_OPEN => 'open',
-            \Mage_Sales_Model_Order_Invoice::STATE_PAID => 'paid',
-            \Mage_Sales_Model_Order_Invoice::STATE_CANCELED => 'canceled',
-            default => 'unknown',
-        };
-    }
 }

@@ -16,6 +16,7 @@ use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'Invoice',
@@ -47,23 +48,43 @@ use ApiPlatform\Metadata\GetCollection;
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'sales/order_invoice',
+    ],
 )]
-class Invoice extends \Maho\ApiPlatform\Resource
+class Invoice extends CrudResource
 {
-    #[ApiProperty(identifier: true)]
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
+    #[ApiProperty(writable: false)]
     public ?string $incrementId = null;
 
+    #[ApiProperty(writable: false)]
     public ?int $orderId = null;
 
+    #[ApiProperty(writable: false)]
     public float $grandTotal = 0.0;
 
+    #[ApiProperty(writable: false)]
     public ?int $state = null;
 
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $stateName = null;
 
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $pdfUrl = null;
 
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->stateName = match ($dto->state) {
+            \Mage_Sales_Model_Order_Invoice::STATE_OPEN => 'open',
+            \Mage_Sales_Model_Order_Invoice::STATE_PAID => 'paid',
+            \Mage_Sales_Model_Order_Invoice::STATE_CANCELED => 'canceled',
+            default => 'unknown',
+        };
+    }
 }
