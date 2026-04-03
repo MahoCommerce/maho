@@ -40,9 +40,29 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     {
         $operationName = $operation->getName();
 
+        // Bridge REST request body into context args (GraphQL populates args natively)
+        if (empty($context['args']['input'])) {
+            $context['args']['input'] = [];
+            $request = $context['request'] ?? null;
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                $body = json_decode($request->getContent(), true);
+                if (is_array($body)) {
+                    $context['args']['input'] = $body;
+                }
+            }
+        }
+
         // Map REST uriVariables into context args for guest-cart operations
+        // uriVariables[id] is cast to int by API Platform. Extract full masked ID from URI.
         if (isset($uriVariables['id']) && !isset($context['args']['input']['maskedId'])) {
-            $context['args']['input']['maskedId'] = (string) $uriVariables['id'];
+            $req = $context['request'] ?? null;
+            $maskedFromUri = null;
+            if ($req instanceof \Symfony\Component\HttpFoundation\Request) {
+                if (preg_match('#/guest-carts/([a-f0-9]{32})#i', $req->getPathInfo(), $m)) {
+                    $maskedFromUri = $m[1];
+                }
+            }
+            $context['args']['input']['maskedId'] = $maskedFromUri ?? (string) $uriVariables['id'];
         }
         if (isset($uriVariables['itemId']) && !isset($context['args']['input']['itemId'])) {
             $context['args']['input']['itemId'] = $uriVariables['itemId'];
