@@ -488,17 +488,12 @@ class CustomerService
             throw new \Exception('Invalid or expired reset token.');
         }
 
-        // Check token expiration using configurable duration (default 24 hours)
-        $expiryHours = (int) \Mage::getStoreConfig('customer/password/reset_link_expiration_period') ?: 24;
-        $tokenCreatedAt = strtotime($customer->getRpTokenCreatedAt());
-        if ((time() - $tokenCreatedAt) > ($expiryHours * 3600)) {
+        if ($customer->isResetPasswordLinkTokenExpired()) {
             throw new \Exception('Reset token has expired.');
         }
 
-        // Set new password and clear token
         $customer->setPassword($newPassword);
-        $customer->setRpToken('');
-        $customer->setRpTokenCreatedAt('');
+        $customer->clearMagicLinkToken();
         $customer->save();
 
         return true;
