@@ -27,12 +27,14 @@ use Symfony\Bundle\SecurityBundle\Security;
 final class CustomerProvider extends \Maho\ApiPlatform\Provider
 {
     private AddressMapper $addressMapper;
+    private CustomerMapper $customerMapper;
     private CustomerService $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
         $this->addressMapper = new AddressMapper();
+        $this->customerMapper = new CustomerMapper();
         $this->customerService = new CustomerService();
     }
 
@@ -138,29 +140,20 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         return new TraversablePaginator(new \ArrayIterator($customers), $page, $pageSize, (int) ($result['total'] ?? count($customers)));
     }
 
-    // TODO: Extract customer mapping to a shared CustomerMapper service to eliminate duplication with CustomerProcessor/CustomerProvider
     /**
      * Map Maho customer model to Customer DTO (full version with all addresses)
      */
     public function mapToDto(\Mage_Customer_Model_Customer $customer): Customer
     {
-        $dto = new Customer();
-        $dto->id = (int) $customer->getId();
-        $dto->email = $customer->getEmail();
-        $dto->firstName = $customer->getFirstname();
-        $dto->lastName = $customer->getLastname();
-        $dto->fullName = trim(($customer->getFirstname() ?? '') . ' ' . ($customer->getLastname() ?? ''));
+        $dto = $this->customerMapper->mapToDto($customer);
+
         $subscriber = \Mage::getModel('newsletter/subscriber')->loadByCustomer($customer);
         $dto->isSubscribed = $subscriber->isSubscribed();
-        $dto->groupId = (int) $customer->getGroupId();
-        $dto->createdAt = $customer->getCreatedAt();
-        $dto->updatedAt = $customer->getUpdatedAt();
 
         $dto->addresses = [];
         foreach ($customer->getAddresses() as $address) {
             $addressDto = $this->addressMapper->fromCustomerAddress($address);
 
-            // Track default billing/shipping on the address DTO
             if ($address->getId() == $customer->getDefaultBilling()) {
                 $addressDto->isDefaultBilling = true;
                 $dto->defaultBillingAddress = $addressDto;
@@ -187,13 +180,7 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         array $defaultBillingIds,
         array $addressMap,
     ): Customer {
-        $dto = new Customer();
-        $dto->id = (int) $customer->getId();
-        $dto->email = $customer->getEmail();
-        $dto->firstName = $customer->getFirstname();
-        $dto->lastName = $customer->getLastname();
-        $dto->fullName = trim(($customer->getFirstname() ?? '') . ' ' . ($customer->getLastname() ?? ''));
-        $dto->groupId = (int) $customer->getGroupId();
+        $dto = $this->customerMapper->mapToDto($customer);
 
         // Only include default billing address from pre-loaded map
         $customerId = (int) $customer->getId();
@@ -207,7 +194,6 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         }
 
         \Mage::dispatchEvent('api_customer_dto_build', ['customer' => $customer, 'dto' => $dto]);
-
 
         return $dto;
     }

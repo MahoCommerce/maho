@@ -28,6 +28,14 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 final class AddressProvider extends \Maho\ApiPlatform\Provider
 {
+    private AddressMapper $addressMapper;
+
+    public function __construct(\Symfony\Bundle\SecurityBundle\Security $security)
+    {
+        parent::__construct($security);
+        $this->addressMapper = new AddressMapper();
+    }
+
     /**
      * Provide address data based on operation type
      *
@@ -146,28 +154,11 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
         return new TraversablePaginator(new \ArrayIterator($addresses), 1, max($total, 50), $total);
     }
 
-    // TODO: Extract address mapping to a shared AddressMapper service to eliminate duplication across AuthController, AddressProcessor, AddressProvider, CustomerProvider, OrderProvider
     /**
      * Map Maho address model to Address DTO
      */
     public function mapToDto(\Mage_Customer_Model_Address $address, \Mage_Customer_Model_Customer $customer): Address
     {
-        $dto = new Address();
-        $dto->id = (int) $address->getId();
-        $dto->customerId = (int) $address->getCustomerId();
-        $dto->firstName = $address->getFirstname() ?? '';
-        $dto->lastName = $address->getLastname() ?? '';
-        $dto->company = $address->getCompany();
-        $dto->street = $address->getStreet();
-        $dto->city = $address->getCity() ?? '';
-        $dto->region = $address->getRegion();
-        $dto->regionId = $address->getRegionId() ? (int) $address->getRegionId() : null;
-        $dto->postcode = $address->getPostcode() ?? '';
-        $dto->countryId = $address->getCountryId() ?? '';
-        $dto->telephone = $address->getTelephone() ?? '';
-        $dto->isDefaultBilling = $address->getId() == $customer->getDefaultBilling();
-        $dto->isDefaultShipping = $address->getId() == $customer->getDefaultShipping();
-
-        return $dto;
+        return $this->addressMapper->fromCustomerAddress($address, $customer);
     }
 }
