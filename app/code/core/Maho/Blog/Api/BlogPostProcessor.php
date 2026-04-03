@@ -23,7 +23,7 @@ final class BlogPostProcessor extends CrudProcessor
     protected ?string $deletePermission = 'blog-posts/delete';
 
     #[\Override]
-    protected function getEntityStoreIds(object $model): ?array
+    protected function getEntityStoreIds(object $model): array
     {
         return $model->getStores();
     }

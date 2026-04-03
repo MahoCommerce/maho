@@ -23,7 +23,7 @@ final class CmsBlockProcessor extends CrudProcessor
     protected ?string $deletePermission = 'cms-blocks/delete';
 
     #[\Override]
-    protected function getEntityStoreIds(object $model): ?array
+    protected function getEntityStoreIds(object $model): array
     {
         $stores = $model->getStoreId();
         return is_array($stores) ? $stores : [$stores];

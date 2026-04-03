@@ -23,7 +23,7 @@ final class CmsPageProcessor extends CrudProcessor
     protected ?string $deletePermission = 'cms-pages/delete';
 
     #[\Override]
-    protected function getEntityStoreIds(object $model): ?array
+    protected function getEntityStoreIds(object $model): array
     {
         $stores = $model->getStoreId();
         return is_array($stores) ? $stores : [$stores];
