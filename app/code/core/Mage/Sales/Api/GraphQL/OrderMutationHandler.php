@@ -31,8 +31,8 @@ class OrderMutationHandler
     private OrderService $orderService;
     private OrderProvider $orderProvider;
     private CartService $cartService;
-
-
+    private PaymentService $paymentService;
+    private \Mage\Sales\Api\PosPaymentMapper $posPaymentMapper;
 
     /**
      * POS payment method mapping
@@ -59,6 +59,8 @@ class OrderMutationHandler
         $this->orderService = $orderService;
         $this->orderProvider = $orderProvider;
         $this->cartService = $cartService ?? new CartService();
+        $this->paymentService = new PaymentService();
+        $this->posPaymentMapper = new \Mage\Sales\Api\PosPaymentMapper();
     }
 
     /**
@@ -235,31 +237,27 @@ class OrderMutationHandler
             throw ValidationException::requiredField('orderId');
         }
 
-        /** @var \Maho_Pos_Model_Payment $paymentModel */
-        $paymentModel = \Mage::getModel('maho_pos/payment');
-        /** @var \Maho_Pos_Model_Resource_Payment_Collection $payments */
-        $payments = $paymentModel->getCollection()
-            ->addFieldToFilter('order_id', (int) $orderId)
-            ->setOrder('created_at', 'ASC');
+        $collection = $this->paymentService->getOrderPayments((int) $orderId);
 
         $result = [];
-        foreach ($payments as $payment) {
+        foreach ($collection as $payment) {
+            $dto = $this->posPaymentMapper->mapToDto($payment);
             $result[] = [
-                'paymentId' => (int) $payment->getId(),
-                'orderId' => (int) $payment->getOrderId(),
-                'registerId' => (int) $payment->getRegisterId(),
-                'methodCode' => $payment->getMethodCode(),
-                'methodLabel' => PaymentService::getMethodLabel($payment->getMethodCode()),
+                'paymentId' => $dto->id,
+                'orderId' => $dto->orderId,
+                'registerId' => $dto->registerId,
+                'methodCode' => $dto->methodCode,
+                'methodLabel' => $dto->methodLabel,
                 'amount' => [
-                    'value' => (float) $payment->getAmount(),
-                    'formatted' => \Mage::helper('core')->currency($payment->getAmount(), true, false),
+                    'value' => $dto->amount,
+                    'formatted' => \Mage::helper('core')->currency($dto->amount, true, false),
                 ],
-                'cardType' => $payment->getCardType(),
-                'cardLast4' => $payment->getCardLast4(),
-                'authCode' => $payment->getAuthCode(),
-                'transactionId' => $payment->getTransactionId(),
-                'status' => $payment->getStatus(),
-                'createdAt' => $payment->getCreatedAt(),
+                'cardType' => $dto->cardType,
+                'cardLast4' => $dto->cardLast4,
+                'authCode' => $dto->authCode,
+                'transactionId' => $dto->transactionId,
+                'status' => $dto->status,
+                'createdAt' => $dto->createdAt,
             ];
         }
 

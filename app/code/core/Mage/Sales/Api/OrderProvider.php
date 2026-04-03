@@ -28,6 +28,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
     private AddressMapper $addressMapper;
     private OrderService $orderService;
     private PaymentService $paymentService;
+    private readonly PosPaymentMapper $posPaymentMapper;
 
     public function __construct(Security $security)
     {
@@ -35,6 +36,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $this->addressMapper = new AddressMapper();
         $this->orderService = new OrderService();
         $this->paymentService = new PaymentService();
+        $this->posPaymentMapper = new PosPaymentMapper();
     }
 
     /**
@@ -427,24 +429,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $payments = [];
 
         foreach ($collection as $payment) {
-            $dto = new PosPayment();
-            $dto->id = (int) $payment->getId();
-            $dto->orderId = (int) $payment->getOrderId();
-            $dto->registerId = (int) $payment->getRegisterId();
-            $dto->methodCode = $payment->getMethodCode();
-            $dto->methodLabel = PaymentService::getMethodLabel($payment->getMethodCode());
-            $dto->amount = (float) $payment->getAmount();
-            $dto->baseAmount = (float) $payment->getBaseAmount();
-            $dto->currencyCode = $payment->getCurrencyCode();
-            $dto->terminalId = $payment->getTerminalId();
-            $dto->transactionId = $payment->getTransactionId();
-            $dto->cardType = $payment->getCardType();
-            $dto->cardLast4 = $payment->getCardLast4();
-            $dto->authCode = $payment->getAuthCode();
-            $dto->status = $payment->getStatus();
-            $dto->createdAt = $payment->getCreatedAt();
-
-            $payments[] = $dto;
+            $payments[] = $this->posPaymentMapper->mapToDto($payment);
         }
 
         return $payments;
