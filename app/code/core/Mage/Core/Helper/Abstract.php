@@ -5,7 +5,7 @@
  *
  * @package    Mage_Core
  * @copyright  Copyright (c) 2006-2020 Magento, Inc. (https://magento.com)
- * @copyright  Copyright (c) 2020-2025 The OpenMage Contributors (https://openmage.org)
+ * @copyright  Copyright (c) 2020-2026 The OpenMage Contributors (https://openmage.org)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -173,9 +173,9 @@ abstract class Mage_Core_Helper_Abstract
     /**
      * Escape html entities
      *
-     * @param string|string[] $data
-     * @param array|null $allowedTags
-     * @return null|string|string[]
+     * @param null|string|string[] $data
+     * @param null|string[] $allowedTags
+     * @return ($data is array ? array<?string> : ?string)
      */
     public function escapeHtml($data, $allowedTags = null)
     {
@@ -292,7 +292,7 @@ abstract class Mage_Core_Helper_Abstract
      *
      * @param string|string[] $data
      * @param string $quote
-     * @return string|string[]
+     * @return ($data is array ? string[] : string)
      */
     public function jsQuoteEscape($data, $quote = '\'')
     {
