@@ -31,8 +31,7 @@ class CurrencyProvider extends \Maho\ApiPlatform\Provider
         foreach ($allowedCurrencies as $currencyCode) {
             $currency = \Mage::getModel('directory/currency')->load($currencyCode);
 
-            $dto = new Currency();
-            $dto->code = $currencyCode;
+            $dto = Currency::fromModel($currency);
             $dto->symbol = $currency->getCurrencySymbol();
             $dto->exchangeRate = $rates[$currencyCode] ?? null;
             $currencies[] = $dto;

@@ -13,11 +13,13 @@ declare(strict_types=1);
 
 namespace Mage\Directory\Api;
 
+use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\GetCollection;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'Country',
@@ -43,13 +45,46 @@ use ApiPlatform\Metadata\GraphQl\QueryCollection;
             description: 'Get a country by ISO code',
         ),
     ],
+    extraProperties: [
+        'model' => 'directory/country',
+    ],
 )]
-class Country extends \Maho\ApiPlatform\Resource
+class Country extends CrudResource
 {
-    public ?string $id = null;  // ISO country code (AU, US, etc.)
+    #[ApiProperty(identifier: true, writable: false, extraProperties: ['modelField' => 'country_id'])]
+    public ?string $id = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $name = '';
+
+    #[ApiProperty(writable: false)]
     public ?string $iso2Code = null;
+
+    #[ApiProperty(writable: false)]
     public ?string $iso3Code = null;
+
     /** @var Region[] */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $availableRegions = [];
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->name = $model->getName() ?? $model->getCountryId() ?? '';
+
+        $regions = [];
+        /** @var \Mage_Directory_Model_Resource_Region_Collection $collection */
+        $collection = \Mage::getModel('directory/region')->getCollection();
+        $collection->addCountryFilter($model->getCountryId());
+
+        foreach ($collection as $mahoRegion) {
+            $region = new Region();
+            $region->id = (int) $mahoRegion->getRegionId();
+            $region->code = $mahoRegion->getCode() ?? '';
+            $region->name = $mahoRegion->getDefaultName() ?? $mahoRegion->getName() ?? '';
+            $regions[] = $region;
+        }
+
+        usort($regions, fn($a, $b) => strcmp($a->name, $b->name));
+        $dto->availableRegions = $regions;
+    }
 }

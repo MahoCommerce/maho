@@ -31,7 +31,6 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Country|null
     {
-        // Ensure valid store context (bootstraps Maho)
         StoreContext::ensureStore();
 
         if ($operation instanceof CollectionOperationInterface) {
@@ -55,7 +54,7 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->mapToDto($mahoCountry);
+        return Country::fromModel($mahoCountry);
     }
 
     /**
@@ -81,24 +80,20 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
 
         $countries = [];
 
-        // Get allowed countries from config
         /** @var \Mage_Directory_Model_Resource_Country_Collection $collection */
         $collection = \Mage::getModel('directory/country')->getCollection();
 
-        // Filter to only allowed countries for the current store
         $allowedCountries = explode(',', \Mage::getStoreConfig('general/country/allow') ?? '');
         if (!empty($allowedCountries) && $allowedCountries[0] !== '') {
-            // Use main_table prefix to avoid ambiguity when loadByStore() joins with name table
             $collection->addFieldToFilter('main_table.country_id', ['in' => $allowedCountries]);
         }
 
         $collection->loadByStore();
 
         foreach ($collection as $mahoCountry) {
-            $countries[] = $this->mapToDto($mahoCountry);
+            $countries[] = Country::fromModel($mahoCountry);
         }
 
-        // Sort by name
         usort($countries, fn($a, $b) => strcmp($a->name, $b->name));
 
         // Cache for 1 hour
@@ -113,23 +108,6 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
         $total = count($countries);
 
         return new TraversablePaginator(new \ArrayIterator($countries), 1, max($total, 300), $total);
-    }
-
-    /**
-     * Map Maho country model to Country DTO
-     */
-    public function mapToDto(\Mage_Directory_Model_Country $country): Country
-    {
-        $dto = new Country();
-        $dto->id = $country->getCountryId();
-        $dto->name = $country->getName() ?? $country->getCountryId();
-        $dto->iso2Code = $country->getIso2Code();
-        $dto->iso3Code = $country->getIso3Code();
-
-        // Get regions for this country
-        $dto->availableRegions = $this->getRegions($country->getCountryId());
-
-        return $dto;
     }
 
     /**
@@ -168,32 +146,5 @@ final class CountryProvider extends \Maho\ApiPlatform\Provider
             return $region;
         }, $data['availableRegions'] ?? []);
         return $dto;
-    }
-
-    /**
-     * Get regions for a country
-     *
-     * @return Region[]
-     */
-    private function getRegions(string $countryCode): array
-    {
-        $regions = [];
-
-        /** @var \Mage_Directory_Model_Resource_Region_Collection $collection */
-        $collection = \Mage::getModel('directory/region')->getCollection();
-        $collection->addCountryFilter($countryCode);
-
-        foreach ($collection as $mahoRegion) {
-            $region = new Region();
-            $region->id = (int) $mahoRegion->getRegionId();
-            $region->code = $mahoRegion->getCode() ?? '';
-            $region->name = $mahoRegion->getDefaultName() ?? $mahoRegion->getName() ?? '';
-            $regions[] = $region;
-        }
-
-        // Sort by name
-        usort($regions, fn($a, $b) => strcmp($a->name, $b->name));
-
-        return $regions;
     }
 }

@@ -15,6 +15,7 @@ namespace Mage\Directory\Api;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'Currency',
@@ -28,12 +29,18 @@ use ApiPlatform\Metadata\GetCollection;
             description: 'Get available currencies with exchange rates',
         ),
     ],
+    extraProperties: [
+        'model' => 'directory/currency',
+    ],
 )]
-class Currency extends \Maho\ApiPlatform\Resource
+class Currency extends CrudResource
 {
-    #[ApiProperty(identifier: true)]
+    #[ApiProperty(identifier: true, writable: false, extraProperties: ['modelField' => 'currency_code'])]
     public string $code = '';
 
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $symbol = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?float $exchangeRate = null;
 }
