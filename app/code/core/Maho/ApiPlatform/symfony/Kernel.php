@@ -149,14 +149,14 @@ class Kernel extends BaseKernel
 
         $container->extension('security', [
             'password_hashers' => [
-                'Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface' => 'auto',
+                \Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface::class => 'auto',
             ],
             'providers' => [
                 'maho_customer' => [
-                    'id' => 'Maho\ApiPlatform\Security\CustomerUserProvider',
+                    'id' => \Maho\ApiPlatform\Security\CustomerUserProvider::class,
                 ],
                 'maho_admin' => [
-                    'id' => 'Maho\ApiPlatform\Security\AdminUserProvider',
+                    'id' => \Maho\ApiPlatform\Security\AdminUserProvider::class,
                 ],
                 'maho_chain' => [
                     'chain' => [
@@ -178,7 +178,7 @@ class Kernel extends BaseKernel
                     'stateless' => true,
                     'provider' => 'maho_admin',
                     'custom_authenticators' => [
-                        'Maho\ApiPlatform\Security\AdminSessionAuthenticator',
+                        \Maho\ApiPlatform\Security\AdminSessionAuthenticator::class,
                     ],
                 ],
                 'api_graphql' => [
@@ -186,7 +186,7 @@ class Kernel extends BaseKernel
                     'stateless' => true,
                     'provider' => 'maho_customer',
                     'custom_authenticators' => [
-                        'Maho\ApiPlatform\Security\OAuth2Authenticator',
+                        \Maho\ApiPlatform\Security\OAuth2Authenticator::class,
                     ],
                 ],
                 'api' => [
@@ -194,7 +194,7 @@ class Kernel extends BaseKernel
                     'stateless' => true,
                     'provider' => 'maho_chain',
                     'custom_authenticators' => [
-                        'Maho\ApiPlatform\Security\OAuth2Authenticator',
+                        \Maho\ApiPlatform\Security\OAuth2Authenticator::class,
                     ],
                 ],
             ],
