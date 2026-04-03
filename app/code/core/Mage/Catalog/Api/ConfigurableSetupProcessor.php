@@ -22,7 +22,6 @@ use Mage_Catalog_Model_Product_Type;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 /**
@@ -117,10 +116,15 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Assign children via direct SQL (DataSync pattern)
+        // Assign children via model save
         $childProductIds = $body['childProductIds'] ?? $body['child_product_ids'] ?? [];
         if (!empty($childProductIds)) {
-            $this->replaceChildLinks($productId, array_map('intval', $childProductIds));
+            $childData = [];
+            foreach (array_map('intval', $childProductIds) as $childId) {
+                $childData[$childId] = [];
+            }
+            $product->setConfigurableProductsData($childData);
+            $this->safeSave($product, 'assign configurable children');
         }
 
         return $this->provider->getSetup($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE));
@@ -128,57 +132,47 @@ final class ConfigurableSetupProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleAddChild(int $productId, array $body): ConfigurableSetup
     {
-        $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
 
         $childId = (int) ($body['childProductId'] ?? $body['child_product_id'] ?? $body['childId'] ?? 0);
         if ($childId <= 0) {
             throw new BadRequestHttpException('childProductId is required and must be positive');
         }
 
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('catalog/product_super_link');
-
-        $write->insertOnDuplicate($table, [
-            'product_id' => $childId,
-            'parent_id' => $productId,
-        ], ['product_id']);
+        // Build data array with existing children + new one
+        $existingChildren = $this->getExistingChildIds($product);
+        $existingChildren[$childId] = [];
+        $product->setConfigurableProductsData($existingChildren);
+        $this->safeSave($product, 'add configurable child');
 
         return $this->provider->getSetup($this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE));
     }
 
     private function handleRemoveChild(int $productId, int $childId): null
     {
-        $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
+        $product = $this->loadProduct($productId, Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE);
 
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('catalog/product_super_link');
-
-        $write->delete($table, [
-            'product_id = ?' => $childId,
-            'parent_id = ?' => $productId,
-        ]);
+        $existingChildren = $this->getExistingChildIds($product);
+        unset($existingChildren[$childId]);
+        $product->setConfigurableProductsData($existingChildren);
+        $this->safeSave($product, 'remove configurable child');
 
         return null;
     }
 
-    private function replaceChildLinks(int $parentId, array $childIds): void
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    private function getExistingChildIds(Mage_Catalog_Model_Product $product): array
     {
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('catalog/product_super_link');
-
-        // Delete existing
-        $write->delete($table, ['parent_id = ?' => $parentId]);
-
-        // Insert new
-        foreach ($childIds as $childId) {
-            $write->insertOnDuplicate($table, [
-                'product_id' => $childId,
-                'parent_id' => $parentId,
-            ], ['product_id']);
+        /** @var \Mage_Catalog_Model_Product_Type_Configurable $typeInstance */
+        $typeInstance = $product->getTypeInstance(true);
+        $children = $typeInstance->getUsedProducts(null, $product);
+        $data = [];
+        foreach ($children as $child) {
+            $data[(int) $child->getId()] = [];
         }
+        return $data;
     }
 
 }
