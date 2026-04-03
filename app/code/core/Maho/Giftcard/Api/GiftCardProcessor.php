@@ -19,12 +19,13 @@ use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
- * Gift Card State Processor - Handles gift card creation and balance adjustment
+ * Gift Card Processor — custom operations (create, adjust balance) that go beyond basic CRUD.
+ *
+ * Standard CRUD create uses CrudProcessor base. The createGiftcard and adjustBalance
+ * mutations require custom business logic (code generation, balance validation, email).
  */
-final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
+final class GiftCardProcessor extends \Maho\ApiPlatform\CrudProcessor
 {
-    protected ?string $modelAlias = 'giftcard/giftcard';
-
     #[\Override]
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): GiftCard
     {
@@ -34,11 +35,11 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
         return match ($operationName) {
             'createGiftcard' => $this->createGiftcard($context),
             'adjustGiftcardBalance' => $this->adjustBalance($context),
-            default => $this->createGiftcardFromRest($data, $context),
+            default => $this->createGiftcardFromRest($data),
         };
     }
 
-    private function createGiftcardFromRest(GiftCard $data, array $context): GiftCard
+    private function createGiftcardFromRest(GiftCard $data): GiftCard
     {
         return $this->doCreateGiftcard(
             $data->initialBalance,
@@ -91,14 +92,12 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
 
         $helper = \Mage::helper('giftcard');
 
-        // Generate or validate code
         if ($code !== null) {
             $code = trim($code);
             if (strlen($code) < 4 || strlen($code) > 64) {
                 throw new BadRequestHttpException('Gift card code must be between 4 and 64 characters');
             }
 
-            // Check uniqueness
             $existing = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
             if ($existing->getId()) {
                 throw new ConflictHttpException('A gift card with this code already exists');
@@ -109,13 +108,11 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
 
         $websiteId = $websiteId ?: (int) \Mage::app()->getStore()->getWebsiteId();
 
-        // Calculate expiration
         if ($expiresAt !== null) {
             $expiresAt = trim($expiresAt);
             if (!preg_match('/^\d{4}-\d{2}-\d{2}/', $expiresAt)) {
                 throw new BadRequestHttpException('Expiration date must be in YYYY-MM-DD format');
             }
-            // Ensure it includes time component for DB storage
             if (strlen($expiresAt) === 10) {
                 $expiresAt .= ' 23:59:59';
             }
@@ -143,7 +140,6 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
         ]);
         $giftcard->save();
 
-        // Send notification email if recipient email is provided
         if ($recipientEmail) {
             try {
                 $helper->sendGiftcardEmail($giftcard);
@@ -152,7 +148,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        return GiftCardMapper::mapToDto($giftcard);
+        return GiftCard::fromModel($giftcard);
     }
 
     private function adjustBalance(array $context): GiftCard
@@ -181,6 +177,6 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
 
         $giftcard->adjustBalance($newBalance, $comment);
 
-        return GiftCardMapper::mapToDto($giftcard);
+        return GiftCard::fromModel($giftcard);
     }
 }

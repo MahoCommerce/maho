@@ -13,14 +13,15 @@ declare(strict_types=1);
 
 namespace Maho\Giftcard\Api;
 
-use Maho\ApiPlatform\Resource;
+use Maho\ApiPlatform\CrudProvider;
 
 /**
- * Gift Card State Provider - Fetches gift card data for API Platform
+ * Gift Card Provider — only needs the checkGiftcardBalance named query.
+ *
+ * All standard CRUD (get, list) is handled by CrudProvider + CrudResource.
  */
-final class GiftCardProvider extends \Maho\ApiPlatform\Provider
+final class GiftCardProvider extends CrudProvider
 {
-    protected ?string $modelAlias = 'giftcard/giftcard';
     protected array $defaultSort = ['created_at' => 'DESC'];
 
     #[\Override]
@@ -32,29 +33,14 @@ final class GiftCardProvider extends \Maho\ApiPlatform\Provider
                 throw new \RuntimeException('Gift card code is required');
             }
 
-            return $this->getGiftCardByCode(trim($code));
+            $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode(trim($code));
+            if (!$giftcard->getId()) {
+                throw new \RuntimeException('Gift card "' . $code . '" not found');
+            }
+
+            return $this->toDto($giftcard);
         }
 
         return null;
-    }
-
-    /**
-     * Get gift card by code
-     */
-    private function getGiftCardByCode(string $code): Resource
-    {
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($code);
-
-        if (!$giftcard->getId()) {
-            throw new \RuntimeException('Gift card "' . $code . '" not found');
-        }
-
-        return $this->toDto($giftcard);
-    }
-
-    #[\Override]
-    protected function toDto(object $model): Resource
-    {
-        return GiftCardMapper::mapToDto($model);
     }
 }

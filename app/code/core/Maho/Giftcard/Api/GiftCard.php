@@ -20,6 +20,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 
 #[ApiResource(
@@ -82,8 +83,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'giftcard/giftcard',
+    ],
 )]
-class GiftCard extends \Maho\ApiPlatform\Resource
+class GiftCard extends CrudResource
 {
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
@@ -93,14 +97,16 @@ class GiftCard extends \Maho\ApiPlatform\Resource
     #[ApiProperty(writable: false)]
     public float $balance = 0.0;
 
+    #[ApiProperty(extraProperties: ['modelField' => 'initial_balance'])]
     public float $initialBalance = 0.0;
 
     #[ApiProperty(writable: false)]
     public ?string $status = null;
 
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'expires_at'])]
     public ?string $expirationDate = null;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'currency_code'])]
     public ?string $currencyCode = null;
 
     #[ApiProperty(writable: false)]
