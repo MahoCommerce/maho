@@ -153,7 +153,7 @@ class AdminUserProvider implements UserProviderInterface
      *
      * @return array<string>
      */
-    private function getAdminRoles(\Mage_Admin_Model_User $admin): array
+    public static function getAdminRoles(\Mage_Admin_Model_User $admin): array
     {
         $roles = ['ROLE_ADMIN'];
 

@@ -173,23 +173,7 @@ class AdminSessionAuthenticator extends AbstractAuthenticator
             throw new AuthenticationException('Admin user is not active.');
         }
 
-        // Get admin roles
-        $roles = ['ROLE_ADMIN'];
-
-        try {
-            $aclRole = $admin->getRole();
-            if ($aclRole) {
-                $roleName = strtolower($aclRole->getRoleName() ?? '');
-                if (str_contains($roleName, 'pos')) {
-                    $roles[] = 'ROLE_POS';
-                }
-                if (str_contains($roleName, 'administrator') || $roleName === 'administrators') {
-                    $roles[] = 'ROLE_SUPER_ADMIN';
-                }
-            }
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
+        $roles = AdminUserProvider::getAdminRoles($admin);
 
         // Set context for services with HMAC bridge token for verification
         $_SERVER['MAHO_ADMIN_USER_ID'] = $adminId;
