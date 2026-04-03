@@ -55,21 +55,6 @@ final class GiftCardProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     protected function toDto(object $model): Resource
     {
-        $dto = new GiftCard();
-        $dto->id = (int) $model->getId();
-        $dto->code = $model->getCode();
-        $dto->balance = (float) $model->getBalance();
-        $dto->initialBalance = (float) $model->getInitialBalance();
-        $dto->status = $model->getStatus();
-        $dto->expirationDate = $model->getExpiresAt();
-        $dto->currencyCode = $model->getCurrencyCode();
-        $dto->createdAt = $model->getCreatedAt();
-        $dto->recipientName = $model->getData('recipient_name');
-        $dto->recipientEmail = $model->getData('recipient_email');
-        $dto->senderName = $model->getData('sender_name');
-        $dto->senderEmail = $model->getData('sender_email');
-        $dto->message = $model->getData('message');
-
-        return $dto;
+        return GiftCardMapper::mapToDto($model);
     }
 }

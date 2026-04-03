@@ -152,7 +152,7 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        return $this->mapToDto($giftcard);
+        return GiftCardMapper::mapToDto($giftcard);
     }
 
     private function adjustBalance(array $context): GiftCard
@@ -181,26 +181,6 @@ final class GiftCardProcessor extends \Maho\ApiPlatform\Processor
 
         $giftcard->adjustBalance($newBalance, $comment);
 
-        return $this->mapToDto($giftcard);
-    }
-
-    private function mapToDto(\Maho_Giftcard_Model_Giftcard $giftcard): GiftCard
-    {
-        $dto = new GiftCard();
-        $dto->id = (int) $giftcard->getId();
-        $dto->code = $giftcard->getCode();
-        $dto->balance = (float) $giftcard->getBalance();
-        $dto->initialBalance = (float) $giftcard->getInitialBalance();
-        $dto->status = $giftcard->getStatus();
-        $dto->expirationDate = $giftcard->getExpiresAt();
-        $dto->currencyCode = $giftcard->getCurrencyCode();
-        $dto->createdAt = $giftcard->getCreatedAt();
-        $dto->recipientName = $giftcard->getData('recipient_name');
-        $dto->recipientEmail = $giftcard->getData('recipient_email');
-        $dto->senderName = $giftcard->getData('sender_name');
-        $dto->senderEmail = $giftcard->getData('sender_email');
-        $dto->message = $giftcard->getData('message');
-
-        return $dto;
+        return GiftCardMapper::mapToDto($giftcard);
     }
 }
