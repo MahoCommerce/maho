@@ -33,6 +33,9 @@ declare(strict_types=1);
  * @method $this setAllowedAttributes(string $allowedAttributes)
  */
 
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Model_Acl_Global_Rule extends Mage_Core_Model_Abstract
 {
     /**

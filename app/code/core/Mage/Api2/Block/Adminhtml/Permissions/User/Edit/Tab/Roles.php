@@ -10,6 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Block_Adminhtml_Permissions_User_Edit_Tab_Roles extends Mage_Adminhtml_Block_Widget_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     /**

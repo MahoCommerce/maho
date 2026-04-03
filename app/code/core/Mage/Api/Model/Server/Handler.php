@@ -11,4 +11,7 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Server_Handler extends Mage_Api_Model_Server_Handler_Abstract {}

@@ -18,6 +18,9 @@
  * @method $this setRole(Mage_Api2_Model_Acl_Global_Role $role)
  * @method $this setUsers(array $users)
  */
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api2_Block_Adminhtml_Roles_Tab_Users extends Mage_Adminhtml_Block_Widget_Grid implements Mage_Adminhtml_Block_Widget_Tab_Interface
 {
     public function __construct()
