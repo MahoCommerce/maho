@@ -542,12 +542,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $order->setCustomerLastname($customer->getLastname());
         $order->save();
 
-        $dto = new Customer();
-        $dto->id = (int) $customer->getId();
-        $dto->email = $customer->getEmail();
-        $dto->firstName = $customer->getFirstname();
-        $dto->lastName = $customer->getLastname();
-
-        return $dto;
+        return (new CustomerMapper())->mapToDto($customer);
     }
 }
