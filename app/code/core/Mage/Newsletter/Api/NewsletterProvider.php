@@ -53,7 +53,7 @@ final class NewsletterProvider extends \Maho\ApiPlatform\Provider
 
         if ($subscriber->getId()) {
             $dto->isSubscribed = $subscriber->isSubscribed();
-            $dto->status = $this->mapSubscriberStatus($subscriber->getSubscriberStatus());
+            $dto->status = NewsletterSubscription::mapStatus($subscriber->getSubscriberStatus());
         } else {
             $dto->isSubscribed = false;
             $dto->status = 'unsubscribed';
@@ -62,17 +62,4 @@ final class NewsletterProvider extends \Maho\ApiPlatform\Provider
         return $dto;
     }
 
-    /**
-     * Map numeric subscriber status to string
-     */
-    private function mapSubscriberStatus(int $status): string
-    {
-        return match ($status) {
-            \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED => 'subscribed',
-            \Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE => 'not_active',
-            \Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED => 'unsubscribed',
-            \Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED => 'unconfirmed',
-            default => 'unknown',
-        };
-    }
 }

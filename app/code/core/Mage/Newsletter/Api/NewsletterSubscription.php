@@ -102,4 +102,18 @@ class NewsletterSubscription extends \Maho\ApiPlatform\Resource
      * Whether confirmation email is required
      */
     public bool $confirmationRequired = false;
+
+    /**
+     * Map numeric subscriber status to string
+     */
+    public static function mapStatus(int $status): string
+    {
+        return match ($status) {
+            \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED => 'subscribed',
+            \Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE => 'not_active',
+            \Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED => 'unsubscribed',
+            \Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED => 'unconfirmed',
+            default => 'unknown',
+        };
+    }
 }

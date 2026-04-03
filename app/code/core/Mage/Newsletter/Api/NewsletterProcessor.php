@@ -114,7 +114,7 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
             $status = $subscriber->subscribe($email);
 
             // Map status
-            $data->status = $this->mapSubscriberStatus($status);
+            $data->status = NewsletterSubscription::mapStatus($status);
             $data->isSubscribed = ($status == \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED);
 
             // Check if confirmation is required
@@ -190,17 +190,4 @@ final class NewsletterProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    /**
-     * Map numeric subscriber status to string
-     */
-    private function mapSubscriberStatus(int $status): string
-    {
-        return match ($status) {
-            \Mage_Newsletter_Model_Subscriber::STATUS_SUBSCRIBED => 'subscribed',
-            \Mage_Newsletter_Model_Subscriber::STATUS_NOT_ACTIVE => 'not_active',
-            \Mage_Newsletter_Model_Subscriber::STATUS_UNSUBSCRIBED => 'unsubscribed',
-            \Mage_Newsletter_Model_Subscriber::STATUS_UNCONFIRMED => 'unconfirmed',
-            default => 'unknown',
-        };
-    }
 }
