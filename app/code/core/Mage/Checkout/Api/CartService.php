@@ -15,6 +15,7 @@ namespace Mage\Checkout\Api;
 
 use Mage\Sales\Api\OrderService;
 use Maho\ApiPlatform\Service\StoreDefaults;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * Cart Service - Business logic for cart operations
@@ -121,6 +122,84 @@ class CartService
         }
 
         return $quote;
+    }
+
+    /**
+     * Resolve a cart from API request context.
+     * Handles both /carts/{id} (numeric) and /guest-carts/{maskedId} (hex) patterns.
+     *
+     * @return array{quote: \Mage_Sales_Model_Quote|null, accessedByMaskedId: bool}
+     */
+    public function resolveCartFromRequest(
+        array $uriVariables,
+        array $context,
+    ): array {
+        $request = $context['request'] ?? null;
+        $args = $context['args']['input'] ?? $context['args'] ?? [];
+
+        // Bridge REST request body for Provider context (Processor does this later, but Provider runs first)
+        if (empty($args) && $request instanceof \Symfony\Component\HttpFoundation\Request) {
+            $body = json_decode((string) $request->getContent(), true);
+            if (is_array($body)) {
+                $args = $body;
+            }
+        }
+
+        // Priority 1: maskedId from GraphQL args or REST body
+        $maskedId = $args['maskedId'] ?? null;
+
+        // Priority 2: maskedId from REST guest-cart URI (regex to bypass int cast)
+        if (!$maskedId && $request instanceof \Symfony\Component\HttpFoundation\Request) {
+            if (preg_match('#/guest-carts/([a-f0-9]{32})#i', $request->getPathInfo(), $m)) {
+                $maskedId = $m[1];
+            }
+        }
+
+        // Priority 3: cartId from GraphQL args or uriVariables
+        $cartId = isset($args['cartId']) ? (int) $args['cartId'] : null;
+        if (!$cartId && !$maskedId && isset($uriVariables['id'])) {
+            $cartId = (int) $uriVariables['id'];
+        }
+
+        if (!$maskedId && !$cartId) {
+            return ['quote' => null, 'accessedByMaskedId' => false];
+        }
+
+        $quote = $this->getCart($cartId, $maskedId);
+        return ['quote' => $quote, 'accessedByMaskedId' => $maskedId !== null];
+    }
+
+    /**
+     * Verify the caller has access to this cart.
+     *
+     * @throws AccessDeniedHttpException
+     */
+    public function verifyCartAccess(
+        \Mage_Sales_Model_Quote $quote,
+        bool $accessedByMaskedId,
+        ?int $authenticatedCustomerId,
+        bool $isPrivileged = false,
+    ): void {
+        // Admins, POS users, API users can access any cart
+        if ($isPrivileged) {
+            return;
+        }
+
+        $cartCustomerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
+
+        // Customer-owned cart: verify ownership
+        if ($cartCustomerId !== null) {
+            if ($authenticatedCustomerId === null || $cartCustomerId !== $authenticatedCustomerId) {
+                throw new AccessDeniedHttpException('You can only access your own cart');
+            }
+            return;
+        }
+
+        // Guest cart: allow if accessed by masked ID OR if caller is authenticated
+        // (authenticated users get guest carts assigned during login)
+        if (!$accessedByMaskedId && $authenticatedCustomerId === null) {
+            throw new AccessDeniedHttpException('Guest carts require authentication or masked ID');
+        }
     }
 
     /**
@@ -370,6 +449,137 @@ class CartService
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
         $quote->save();
+
+        return $quote;
+    }
+
+    /**
+     * Apply gift card to cart
+     *
+     * @throws \RuntimeException
+     */
+    public function applyGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
+    {
+        if (!$giftcardCode) {
+            throw new \RuntimeException('Gift card code is required');
+        }
+
+        // Check if cart has gift card products
+        foreach ($quote->getAllItems() as $item) {
+            if ($item->getProductType() === 'giftcard') {
+                throw new \RuntimeException('Gift cards cannot be used to purchase gift card products');
+            }
+        }
+
+        // Load gift card by code
+        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($giftcardCode);
+
+        if (!$giftcard->getId()) {
+            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not valid');
+        }
+
+        if (!$giftcard->isValid()) {
+            $status = $giftcard->getStatus();
+            if ($status === 'pending') {
+                throw new \RuntimeException('Gift card "' . $giftcardCode . '" is pending activation');
+            }
+            if ($status === 'expired') {
+                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has expired');
+            }
+            if ($status === 'used') {
+                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has been fully used');
+            }
+            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not active');
+        }
+
+        // Get currently applied codes
+        $appliedCodes = $quote->getGiftcardCodes();
+        $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
+
+        // Check if already applied
+        if (isset($appliedCodes[$giftcardCode])) {
+            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is already applied');
+        }
+
+        // Apply gift card - store max amount available (in quote currency)
+        $quoteCurrency = $quote->getQuoteCurrencyCode();
+        $appliedCodes[$giftcardCode] = $giftcard->getBalance($quoteCurrency);
+
+        $quote->setGiftcardCodes(json_encode($appliedCodes));
+        $quote->collectTotals()->save();
+
+        return $quote;
+    }
+
+    /**
+     * Remove gift card from cart
+     *
+     * @throws \RuntimeException
+     */
+    public function removeGiftcard(\Mage_Sales_Model_Quote $quote, string $giftcardCode): \Mage_Sales_Model_Quote
+    {
+        if (!$giftcardCode) {
+            throw new \RuntimeException('Gift card code is required');
+        }
+
+        // Get currently applied codes
+        $appliedCodes = $quote->getGiftcardCodes();
+        $appliedCodes = $appliedCodes ? json_decode($appliedCodes, true) : [];
+
+        // Check if gift card is applied
+        if (!isset($appliedCodes[$giftcardCode])) {
+            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not applied to this cart');
+        }
+
+        // Remove the code
+        unset($appliedCodes[$giftcardCode]);
+
+        if (empty($appliedCodes)) {
+            $quote->setGiftcardCodes(null);
+            $quote->setGiftcardAmount(0);
+            $quote->setBaseGiftcardAmount(0);
+        } else {
+            $quote->setGiftcardCodes(json_encode($appliedCodes));
+        }
+
+        $quote->collectTotals()->save();
+
+        return $quote;
+    }
+
+    /**
+     * Set fulfillment type on a cart item (SHIP or PICKUP for BOPIS)
+     *
+     * @throws \RuntimeException
+     */
+    public function setItemFulfillmentType(\Mage_Sales_Model_Quote $quote, int $itemId, string $fulfillmentType): \Mage_Sales_Model_Quote
+    {
+        $fulfillmentType = strtoupper($fulfillmentType);
+        if (!in_array($fulfillmentType, ['SHIP', 'PICKUP'], true)) {
+            throw new \RuntimeException('Invalid fulfillment type. Must be SHIP or PICKUP');
+        }
+
+        $targetItem = null;
+        foreach ($quote->getAllVisibleItems() as $item) {
+            if ((int) $item->getId() === $itemId) {
+                $targetItem = $item;
+                break;
+            }
+        }
+
+        if (!$targetItem) {
+            throw new \RuntimeException('Cart item not found');
+        }
+
+        $additionalData = $targetItem->getAdditionalData();
+        $data = $additionalData ? json_decode($additionalData, true) : [];
+        if (!is_array($data)) {
+            $data = [];
+        }
+        $data['fulfillment_type'] = $fulfillmentType;
+
+        $targetItem->setAdditionalData(json_encode($data));
+        $targetItem->save();
 
         return $quote;
     }

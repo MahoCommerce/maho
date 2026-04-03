@@ -43,6 +43,24 @@ use Mage\Customer\Api\Address;
             description: 'Create a new cart',
         ),
         new Post(
+            uriTemplate: '/carts/{id}/items',
+            name: 'add_cart_item',
+            security: 'true',
+            description: 'Add item to cart by numeric ID',
+        ),
+        new Put(
+            uriTemplate: '/carts/{id}/items/{itemId}',
+            name: 'update_cart_item',
+            security: 'true',
+            description: 'Update item quantity in cart',
+        ),
+        new Delete(
+            uriTemplate: '/carts/{id}/items/{itemId}',
+            name: 'remove_cart_item',
+            security: 'true',
+            description: 'Remove item from cart',
+        ),
+        new Post(
             uriTemplate: '/guest-carts',
             name: 'create_guest_cart',
             security: 'true',

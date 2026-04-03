@@ -15,7 +15,7 @@ namespace Mage\Checkout\Api;
 
 use ApiPlatform\Metadata\Operation;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Cart State Processor - Handles cart mutations for API Platform
@@ -52,18 +52,7 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             }
         }
 
-        // Map REST uriVariables into context args for guest-cart operations
-        // uriVariables[id] is cast to int by API Platform. Extract full masked ID from URI.
-        if (isset($uriVariables['id']) && !isset($context['args']['input']['maskedId'])) {
-            $req = $context['request'] ?? null;
-            $maskedFromUri = null;
-            if ($req instanceof \Symfony\Component\HttpFoundation\Request) {
-                if (preg_match('#/guest-carts/([a-f0-9]{32})#i', $req->getPathInfo(), $m)) {
-                    $maskedFromUri = $m[1];
-                }
-            }
-            $context['args']['input']['maskedId'] = $maskedFromUri ?? (string) $uriVariables['id'];
-        }
+        // Map uriVariables for sub-resource params
         if (isset($uriVariables['itemId']) && !isset($context['args']['input']['itemId'])) {
             $context['args']['input']['itemId'] = $uriVariables['itemId'];
         }
@@ -73,21 +62,43 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
         return match ($operationName) {
             'createCart', 'create_guest_cart' => $this->createEmptyCart($context),
-            'addToCart', 'add_guest_item' => $this->addItemToCart($context),
-            'updateCartItemQty', 'update_guest_item' => $this->updateCartItem($context),
-            'removeCartItem', 'remove_guest_item' => $this->removeItemFromCart($context),
-            'setCartItemFulfillment' => $this->setCartItemFulfillment($context),
-            'applyCouponToCart', 'apply_guest_coupon' => $this->applyCouponToCart($context),
-            'removeCouponFromCart', 'remove_guest_coupon' => $this->removeCouponFromCart($context),
-            'setShippingAddressOnCart' => $this->setShippingAddressOnCart($context),
-            'setBillingAddressOnCart' => $this->setBillingAddressOnCart($context),
-            'setShippingMethodOnCart' => $this->setShippingMethodOnCart($context),
-            'setPaymentMethodOnCart' => $this->setPaymentMethodOnCart($context),
+            'addToCart', 'add_guest_item', 'add_cart_item' => $this->addItemToCart($context, $uriVariables),
+            'updateCartItemQty', 'update_guest_item', 'update_cart_item' => $this->updateCartItem($context, $uriVariables),
+            'removeCartItem', 'remove_guest_item', 'remove_cart_item' => $this->removeItemFromCart($context, $uriVariables),
+            'setCartItemFulfillment' => $this->setCartItemFulfillment($context, $uriVariables),
+            'applyCouponToCart', 'apply_guest_coupon' => $this->applyCouponToCart($context, $uriVariables),
+            'removeCouponFromCart', 'remove_guest_coupon' => $this->removeCouponFromCart($context, $uriVariables),
+            'setShippingAddressOnCart' => $this->setShippingAddressOnCart($context, $uriVariables),
+            'setBillingAddressOnCart' => $this->setBillingAddressOnCart($context, $uriVariables),
+            'setShippingMethodOnCart' => $this->setShippingMethodOnCart($context, $uriVariables),
+            'setPaymentMethodOnCart' => $this->setPaymentMethodOnCart($context, $uriVariables),
             'assignCustomerToCart' => $this->assignCustomerToCart($context),
-            'applyGiftcardToCart', 'apply_guest_giftcard' => $this->applyGiftcardToCart($context),
-            'removeGiftcardFromCart', 'remove_guest_giftcard' => $this->removeGiftcardFromCart($context),
+            'applyGiftcardToCart', 'apply_guest_giftcard' => $this->applyGiftcardToCart($context, $uriVariables),
+            'removeGiftcardFromCart', 'remove_guest_giftcard' => $this->removeGiftcardFromCart($context, $uriVariables),
             default => $data instanceof Cart ? $data : new Cart(),
         };
+    }
+
+    /**
+     * Resolve cart and verify access — shared by all operation methods
+     */
+    private function resolveAndVerify(array $context, array $uriVariables): \Mage_Sales_Model_Quote
+    {
+        ['quote' => $quote, 'accessedByMaskedId' => $byMasked] =
+            $this->cartService->resolveCartFromRequest($uriVariables, $context);
+
+        if (!$quote) {
+            throw new NotFoundHttpException('Cart not found');
+        }
+
+        $this->cartService->verifyCartAccess(
+            $quote,
+            $byMasked,
+            $this->getAuthenticatedCustomerId(),
+            $this->isAdmin() || $this->isPosUser() || $this->isApiUser(),
+        );
+
+        return $quote;
     }
 
     /**
@@ -99,38 +110,19 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         $storeId = $context['args']['input']['storeId'] ?? null;
 
         $result = $this->cartService->createEmptyCart($customerId, $storeId);
-        $quote = $result['quote'];
-        $maskedId = $result['maskedId'];
 
-        $cart = new Cart();
-        $cart->id = (int) $quote->getId();
-        $cart->maskedId = $maskedId;
-        $cart->customerId = $customerId ? (int) $customerId : null;
-        $cart->storeId = (int) $quote->getStoreId();
-        $cart->isActive = true;
-        $cart->itemsCount = 0;
-        $cart->itemsQty = 0;
-        $cart->createdAt = $quote->getCreatedAt();
-
-        return $cart;
+        return $this->cartMapper->mapQuoteToCart($result['quote'], false);
     }
 
     /**
      * Add item to cart
      */
-    private function addItemToCart(array $context): Cart
+    private function addItemToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $sku = $args['sku'] ?? '';
         $qty = (float) ($args['qty'] ?? 1);
         $fulfillmentType = strtoupper($args['fulfillmentType'] ?? 'SHIP');
-
-        // Validate fulfillment type
-        if (!in_array($fulfillmentType, ['SHIP', 'PICKUP'], true)) {
-            $fulfillmentType = 'SHIP';
-        }
 
         // Build buy request options
         $buyOptions = [];
@@ -150,31 +142,19 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
             $buyOptions['bundle_option_qty'] = $args['bundleOptionQty'];
         }
 
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
-
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->addItem($quote, $sku, $qty, $buyOptions);
 
         // Set fulfillment type on the newly added item
         if ($fulfillmentType !== 'SHIP') {
-            // Find the item we just added (by SKU, get the last one in case of duplicates)
             $addedItem = null;
             foreach ($quote->getAllVisibleItems() as $item) {
                 if ($item->getSku() === $sku) {
                     $addedItem = $item;
                 }
             }
-
             if ($addedItem) {
-                $this->setItemFulfillmentType($addedItem, $fulfillmentType);
+                $this->cartService->setItemFulfillmentType($quote, (int) $addedItem->getId(), $fulfillmentType);
             }
         }
 
@@ -184,29 +164,17 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Update cart item quantity
      */
-    private function updateCartItem(array $context): Cart
+    private function updateCartItem(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $itemId = $args['itemId'] ?? null;
         $qty = (float) ($args['qty'] ?? 1);
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
 
         if (!$itemId) {
             throw new \RuntimeException('Item ID is required');
         }
 
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->updateItem($quote, (int) $itemId, $qty);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
@@ -215,126 +183,53 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Remove item from cart
      */
-    private function removeItemFromCart(array $context): Cart
+    private function removeItemFromCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $itemId = $args['itemId'] ?? null;
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
 
         if (!$itemId) {
             throw new \RuntimeException('Item ID is required');
         }
 
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->removeItem($quote, (int) $itemId);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
-     * Set fulfillment type for a cart item (SHIP or PICKUP)
-     * Used for omnichannel scenarios like BOPIS (Buy Online, Pickup In Store)
+     * Set fulfillment type for a cart item
      */
-    private function setCartItemFulfillment(array $context): Cart
+    private function setCartItemFulfillment(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $itemId = $args['itemId'] ?? null;
-        $fulfillmentType = strtoupper($args['fulfillmentType'] ?? 'SHIP');
-
-        // Validate fulfillment type
-        if (!in_array($fulfillmentType, ['SHIP', 'PICKUP'], true)) {
-            throw new \RuntimeException('Invalid fulfillment type. Must be SHIP or PICKUP');
-        }
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
+        $fulfillmentType = $args['fulfillmentType'] ?? 'SHIP';
 
         if (!$itemId) {
             throw new \RuntimeException('Item ID is required');
         }
 
-        // Find the item
-        $targetItem = null;
-        foreach ($quote->getAllVisibleItems() as $item) {
-            if ((int) $item->getId() === (int) $itemId) {
-                $targetItem = $item;
-                break;
-            }
-        }
-
-        if (!$targetItem) {
-            throw new \RuntimeException('Cart item not found');
-        }
-
-        $this->setItemFulfillmentType($targetItem, $fulfillmentType);
+        $quote = $this->resolveAndVerify($context, $uriVariables);
+        $quote = $this->cartService->setItemFulfillmentType($quote, (int) $itemId, $fulfillmentType);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
-     * Set fulfillment type on a quote item using additional_data field
-     */
-    private function setItemFulfillmentType(\Mage_Sales_Model_Quote_Item $item, string $fulfillmentType): void
-    {
-        $additionalData = $item->getAdditionalData();
-        $data = $additionalData ? json_decode($additionalData, true) : [];
-
-        if (!is_array($data)) {
-            $data = [];
-        }
-
-        $data['fulfillment_type'] = $fulfillmentType;
-
-        $item->setAdditionalData(json_encode($data));
-        $item->save();
-    }
-
-    /**
      * Apply coupon code to cart
      */
-    private function applyCouponToCart(array $context): Cart
+    private function applyCouponToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $couponCode = $args['couponCode'] ?? '';
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
 
         if (!$couponCode) {
             throw new \RuntimeException('Coupon code is required');
         }
 
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->applyCoupon($quote, $couponCode);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
@@ -343,23 +238,9 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Remove coupon code from cart
      */
-    private function removeCouponFromCart(array $context): Cart
+    private function removeCouponFromCart(array $context, array $uriVariables): Cart
     {
-        $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
-
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->removeCoupon($quote);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
@@ -368,25 +249,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Set shipping address on cart
      */
-    private function setShippingAddressOnCart(array $context): Cart
+    private function setShippingAddressOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
 
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
-
-        $addressData = $this->mapInputToAddressData($args);
-        $quote = $this->cartService->setShippingAddress($quote, $addressData);
+        $quote = $this->resolveAndVerify($context, $uriVariables);
+        $quote = $this->cartService->setShippingAddress($quote, $this->mapInputToAddressData($args));
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
@@ -394,24 +262,12 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Set billing address on cart
      */
-    private function setBillingAddressOnCart(array $context): Cart
+    private function setBillingAddressOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $sameAsShipping = $args['sameAsShipping'] ?? false;
 
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
-
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $addressData = $sameAsShipping ? [] : $this->mapInputToAddressData($args);
         $quote = $this->cartService->setBillingAddress($quote, $addressData, $sameAsShipping);
 
@@ -421,29 +277,17 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Set shipping method on cart
      */
-    private function setShippingMethodOnCart(array $context): Cart
+    private function setShippingMethodOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $carrierCode = $args['carrierCode'] ?? '';
         $methodCode = $args['methodCode'] ?? '';
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
 
         if (!$carrierCode || !$methodCode) {
             throw new \RuntimeException('Carrier code and method code are required');
         }
 
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setShippingMethod($quote, $carrierCode, $methodCode);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
@@ -452,29 +296,17 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Set payment method on cart
      */
-    private function setPaymentMethodOnCart(array $context): Cart
+    private function setPaymentMethodOnCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $methodCode = $args['methodCode'] ?? '';
         $additionalData = $args['additionalData'] ?? null;
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
 
         if (!$methodCode) {
             throw new \RuntimeException('Payment method code is required');
         }
 
+        $quote = $this->resolveAndVerify($context, $uriVariables);
         $quote = $this->cartService->setPaymentMethod($quote, $methodCode, $additionalData);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
@@ -482,9 +314,6 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
 
     /**
      * Assign customer to cart (merge guest cart)
-     *
-     * Security: Only allows assigning the authenticated user's own customer ID.
-     * Prevents IDOR where any authenticated user could assign any customer to a cart.
      */
     private function assignCustomerToCart(array $context): Cart
     {
@@ -496,12 +325,10 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
         if (!$maskedId) {
             throw new \RuntimeException('Masked cart ID is required');
         }
-
         if (!$authenticatedCustomerId) {
             throw new \RuntimeException('Authentication required');
         }
 
-        // Security: Only allow assigning your own customer ID
         $customerId = (int) $authenticatedCustomerId;
         if ($requestedCustomerId && (int) $requestedCustomerId !== $customerId) {
             throw new \RuntimeException('Cannot assign a different customer to this cart');
@@ -513,163 +340,31 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Apply giftcard to cart
+     * Apply gift card to cart
      */
-    private function applyGiftcardToCart(array $context): Cart
+    private function applyGiftcardToCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $giftcardCode = trim($args['giftcardCode'] ?? '');
 
-        if (!$giftcardCode) {
-            throw new \RuntimeException('Gift card code is required');
-        }
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
-
-        // Check if cart has gift card products
-        foreach ($quote->getAllItems() as $item) {
-            if ($item->getProductType() === 'giftcard') {
-                throw new \RuntimeException('Gift cards cannot be used to purchase gift card products');
-            }
-        }
-
-        // Load gift card by code
-        $giftcard = \Mage::getModel('giftcard/giftcard')->loadByCode($giftcardCode);
-
-        if (!$giftcard->getId()) {
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not valid');
-        }
-
-        if (!$giftcard->isValid()) {
-            $status = $giftcard->getStatus();
-            if ($status === 'pending') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" is pending activation');
-            }
-            if ($status === 'expired') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has expired');
-            }
-            if ($status === 'used') {
-                throw new \RuntimeException('Gift card "' . $giftcardCode . '" has been fully used');
-            }
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not active');
-        }
-
-        // Get currently applied codes
-        $appliedCodes = $quote->getGiftcardCodes();
-        if ($appliedCodes) {
-            $appliedCodes = json_decode($appliedCodes, true);
-        } else {
-            $appliedCodes = [];
-        }
-
-        // Check if already applied
-        if (isset($appliedCodes[$giftcardCode])) {
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is already applied');
-        }
-
-        // Apply gift card - store max amount available (in quote currency)
-        $quoteCurrency = $quote->getQuoteCurrencyCode();
-        $appliedCodes[$giftcardCode] = $giftcard->getBalance($quoteCurrency);
-
-        $quote->setGiftcardCodes(json_encode($appliedCodes));
-        $quote->collectTotals()->save();
+        $quote = $this->resolveAndVerify($context, $uriVariables);
+        $quote = $this->cartService->applyGiftcard($quote, $giftcardCode);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
     }
 
     /**
-     * Remove giftcard from cart
+     * Remove gift card from cart
      */
-    private function removeGiftcardFromCart(array $context): Cart
+    private function removeGiftcardFromCart(array $context, array $uriVariables): Cart
     {
         $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
         $giftcardCode = trim($args['giftcardCode'] ?? '');
 
-        if (!$giftcardCode) {
-            throw new \RuntimeException('Gift card code is required');
-        }
-
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new \RuntimeException('Cart not found');
-        }
-
-        $this->verifyCartAccess($quote, $context);
-
-        // Get currently applied codes
-        $appliedCodes = $quote->getGiftcardCodes();
-        if ($appliedCodes) {
-            $appliedCodes = json_decode($appliedCodes, true);
-        } else {
-            $appliedCodes = [];
-        }
-
-        // Check if gift card is applied
-        if (!isset($appliedCodes[$giftcardCode])) {
-            throw new \RuntimeException('Gift card "' . $giftcardCode . '" is not applied to this cart');
-        }
-
-        // Remove the code
-        unset($appliedCodes[$giftcardCode]);
-
-        if (empty($appliedCodes)) {
-            $quote->setGiftcardCodes(null);
-            $quote->setGiftcardAmount(0);
-            $quote->setBaseGiftcardAmount(0);
-        } else {
-            $quote->setGiftcardCodes(json_encode($appliedCodes));
-        }
-
-        $quote->collectTotals()->save();
+        $quote = $this->resolveAndVerify($context, $uriVariables);
+        $quote = $this->cartService->removeGiftcard($quote, $giftcardCode);
 
         return $this->cartMapper->mapQuoteToCart($quote, false);
-    }
-
-    /**
-     * Verify cart ownership for authenticated customers.
-     * Guest carts accessed via maskedId are already secure (cryptographic 32-char hex).
-     * Customer carts accessed via cartId must belong to the authenticated customer.
-     */
-    private function verifyCartAccess(\Mage_Sales_Model_Quote $quote, array $context): void
-    {
-        $customerId = $this->getAuthenticatedCustomerId();
-        $quoteCustomerId = $quote->getCustomerId() ? (int) $quote->getCustomerId() : null;
-
-        // Admins/POS/API users can access any cart
-        if ($this->isAdmin() || $this->isPosUser() || $this->isApiUser()) {
-            return;
-        }
-
-        // If cart belongs to a customer, verify the authenticated user matches
-        if ($quoteCustomerId !== null) {
-            if ($customerId === null || $quoteCustomerId !== $customerId) {
-                throw new AccessDeniedHttpException('You do not have access to this cart');
-            }
-            return;
-        }
-
-        // Guest cart (no customer_id) — only allow access via maskedId
-        $args = $context['args']['input'] ?? [];
-        if (!empty($args['cartId']) && empty($args['maskedId'])) {
-            throw new AccessDeniedHttpException('Guest carts can only be accessed via masked ID');
-        }
     }
 
     /**
