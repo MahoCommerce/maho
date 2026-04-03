@@ -410,32 +410,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $shipments = [];
 
         foreach ($order->getShipmentsCollection() as $shipment) {
-            $dto = new Shipment();
-            $dto->id = (int) $shipment->getId();
-            $dto->incrementId = $shipment->getIncrementId();
-            $dto->totalQty = (int) $shipment->getTotalQty();
-            $dto->createdAt = $shipment->getCreatedAt();
-
-            // Map tracking numbers
-            foreach ($shipment->getTracksCollection() as $track) {
-                $trackDto = new ShipmentTrack();
-                $trackDto->id = (int) $track->getId();
-                $trackDto->carrier = $track->getCarrierCode();
-                $trackDto->title = $track->getTitle();
-                $trackDto->trackNumber = $track->getTrackNumber();
-                $dto->tracks[] = $trackDto;
-            }
-
-            // Map shipped items
-            foreach ($shipment->getItemsCollection() as $item) {
-                $itemDto = new ShipmentItem();
-                $itemDto->sku = $item->getSku();
-                $itemDto->name = $item->getName();
-                $itemDto->qty = (float) $item->getQty();
-                $dto->items[] = $itemDto;
-            }
-
-            $shipments[] = $dto;
+            $shipments[] = ShipmentMapper::mapToDto($shipment);
         }
 
         return $shipments;

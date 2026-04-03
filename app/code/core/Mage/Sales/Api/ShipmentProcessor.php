@@ -151,42 +151,6 @@ final class ShipmentProcessor extends \Maho\ApiPlatform\Processor
             $shipment->sendEmail(true, $comment ?? '');
         }
 
-        return $this->mapToDto($shipment);
-    }
-
-    private function mapToDto(\Mage_Sales_Model_Order_Shipment $shipment): Shipment
-    {
-        $dto = new Shipment();
-        $dto->id = (int) $shipment->getId();
-        $dto->orderId = (int) $shipment->getOrderId();
-        $dto->incrementId = $shipment->getIncrementId();
-        $dto->totalQty = (int) $shipment->getTotalQty();
-        $dto->createdAt = $shipment->getCreatedAt();
-
-        $order = $shipment->getOrder();
-        $dto->orderIncrementId = $order ? $order->getIncrementId() : null;
-
-        // Map tracks
-        $dto->tracks = [];
-        foreach ($shipment->getAllTracks() as $track) {
-            $trackDto = new ShipmentTrack();
-            $trackDto->id = (int) $track->getId();
-            $trackDto->carrier = $track->getCarrierCode();
-            $trackDto->title = $track->getTitle();
-            $trackDto->trackNumber = $track->getTrackNumber();
-            $dto->tracks[] = $trackDto;
-        }
-
-        // Map items
-        $dto->items = [];
-        foreach ($shipment->getAllItems() as $item) {
-            $itemDto = new ShipmentItem();
-            $itemDto->sku = $item->getSku();
-            $itemDto->name = $item->getName();
-            $itemDto->qty = (float) $item->getQty();
-            $dto->items[] = $itemDto;
-        }
-
-        return $dto;
+        return ShipmentMapper::mapToDto($shipment);
     }
 }
