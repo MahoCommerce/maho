@@ -85,14 +85,7 @@ class CustomerQueryHandler
             throw ValidationException::requiredField('email, firstName, lastName');
         }
 
-        // Check if customer already exists
-        $existingCustomer = \Mage::getModel('customer/customer')
-            ->setWebsiteId(\Mage::app()->getWebsite()->getId())
-            ->loadByEmail($email);
-
-        if ($existingCustomer->getId()) {
-            throw ValidationException::invalidValue('email', 'a customer with this email already exists');
-        }
+        $this->ensureEmailUnique($email);
 
         // Create new customer
         $customer = \Mage::getModel('customer/customer');
@@ -208,6 +201,19 @@ class CustomerQueryHandler
             ]];
         } catch (\Exception $e) {
             throw ValidationException::invalidValue('address', 'failed to update: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Ensure no customer exists with the given email in the current website
+     *
+     * @throws ValidationException if a customer with this email already exists
+     */
+    private function ensureEmailUnique(string $email): void
+    {
+        $existing = $this->customerService->getCustomerByEmail($email);
+        if ($existing) {
+            throw ValidationException::invalidValue('email', 'a customer with this email already exists');
         }
     }
 
