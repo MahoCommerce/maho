@@ -16,8 +16,6 @@ namespace Mage\Cms\Api;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
-use Maho\ApiPlatform\Service\ContentSanitizer;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * CMS Page Processor — extends CrudProcessor with content sanitization and store access checks.
@@ -30,20 +28,12 @@ final class CmsPageProcessor extends CrudProcessor
     protected ?string $writePermission = 'cms-pages/write';
     protected ?string $deletePermission = 'cms-pages/delete';
 
-    public function __construct(
-        Security $security,
-        private readonly ContentSanitizer $contentSanitizer,
-    ) {
-        parent::__construct($security);
-    }
-
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        // Sanitize content
         $content = $model->getData('content');
         if ($content !== null) {
-            $model->setData('content', $this->contentSanitizer->sanitize($content));
+            $model->setData('content', \Mage::getSingleton('core/input_filter_maliciousCode')->filter($content));
         }
 
         // Resolve store IDs from store codes

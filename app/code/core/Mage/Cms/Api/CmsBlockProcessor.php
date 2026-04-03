@@ -16,8 +16,6 @@ namespace Mage\Cms\Api;
 use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\Security\ApiUser;
-use Maho\ApiPlatform\Service\ContentSanitizer;
-use Symfony\Bundle\SecurityBundle\Security;
 
 /**
  * CMS Block Processor — extends CrudProcessor with content sanitization and store access checks.
@@ -30,23 +28,14 @@ final class CmsBlockProcessor extends CrudProcessor
     protected ?string $writePermission = 'cms-blocks/write';
     protected ?string $deletePermission = 'cms-blocks/delete';
 
-    public function __construct(
-        Security $security,
-        private readonly ContentSanitizer $contentSanitizer,
-    ) {
-        parent::__construct($security);
-    }
-
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
-        // Sanitize content
         $content = $model->getData('content');
         if ($content !== null) {
-            $model->setData('content', $this->contentSanitizer->sanitize($content));
+            $model->setData('content', \Mage::getSingleton('core/input_filter_maliciousCode')->filter($content));
         }
 
-        // Resolve store IDs from store codes
         if ($data instanceof CmsBlock) {
             $storeIds = $this->resolveStoreIds($data->stores, $user);
             $model->setData('stores', $storeIds);
