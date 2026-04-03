@@ -160,10 +160,9 @@ class ProductService
      */
     public function getProductBySku(string $sku): ?\Mage_Catalog_Model_Product
     {
-        $productId = \Mage::getModel('catalog/product')
-            ->getIdBySku($sku);
+        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
 
-        return $productId ? $this->getProductById((int) $productId) : null;
+        return $product instanceof \Mage_Catalog_Model_Product ? $product : null;
     }
 
     /**
