@@ -22,6 +22,7 @@ use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 
 #[ApiResource(
@@ -151,23 +152,46 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Reset password with token',
         ),
     ],
+    extraProperties: [
+        'model' => 'customer/customer',
+    ],
 )]
-class Customer extends \Maho\ApiPlatform\Resource
+class Customer extends CrudResource
 {
+    #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
+
     public string $email = '';
+
+    #[ApiProperty(extraProperties: ['modelField' => 'firstname'])]
     public ?string $firstName = null;
+
+    #[ApiProperty(extraProperties: ['modelField' => 'lastname'])]
     public ?string $lastName = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $fullName = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isSubscribed = false;
 
-    #[ApiProperty(writable: false)]
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'group_id'])]
     public int $groupId = 1;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?Address $defaultBillingAddress = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?Address $defaultShippingAddress = null;
+
     /** @var Address[] */
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $addresses = [];
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'created_at'])]
     public ?string $createdAt = null;
+
+    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'updated_at'])]
     public ?string $updatedAt = null;
 
     /** @var string|null Write-only password for registration */
@@ -182,4 +206,9 @@ class Customer extends \Maho\ApiPlatform\Resource
     #[ApiProperty(writable: true, readable: false)]
     public ?string $newPassword = null;
 
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->fullName = trim(($dto->firstName ?? '') . ' ' . ($dto->lastName ?? ''));
+        $dto->password = null;
+    }
 }

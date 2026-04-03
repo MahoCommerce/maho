@@ -25,6 +25,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
 use ApiPlatform\Metadata\GraphQl\DeleteMutation;
+use Maho\ApiPlatform\CrudResource;
 
 #[ApiResource(
     shortName: 'Address',
@@ -32,7 +33,6 @@ use ApiPlatform\Metadata\GraphQl\DeleteMutation;
     provider: AddressProvider::class,
     processor: AddressProcessor::class,
     operations: [
-        // Simple routes using only address ID (globally unique)
         new Get(
             uriTemplate: '/addresses/{id}',
             description: 'Get a specific address by ID',
@@ -48,7 +48,6 @@ use ApiPlatform\Metadata\GraphQl\DeleteMutation;
             description: 'Delete an address',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
-        // Simple route for authenticated customers to create/list their own addresses
         new GetCollection(
             name: 'get_my_addresses',
             uriTemplate: '/addresses',
@@ -61,7 +60,6 @@ use ApiPlatform\Metadata\GraphQl\DeleteMutation;
             description: 'Create a new address for the authenticated customer',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
-        // Routes using /customers/me/* pattern (frontend compatibility)
         new GetCollection(
             name: 'get_me_addresses',
             uriTemplate: '/customers/me/addresses',
@@ -92,7 +90,6 @@ use ApiPlatform\Metadata\GraphQl\DeleteMutation;
             description: 'Delete an address for the authenticated customer',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
-        // Customer-scoped routes for listing/creating (admin or explicit customer ID)
         new GetCollection(
             name: 'get_customer_addresses',
             uriTemplate: '/customers/{customerId}/addresses',
@@ -173,26 +170,111 @@ use ApiPlatform\Metadata\GraphQl\DeleteMutation;
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
     ],
+    extraProperties: [
+        'model' => 'customer/address',
+    ],
 )]
-class Address extends \Maho\ApiPlatform\Resource
+class Address extends CrudResource
 {
     #[ApiProperty(identifier: true)]
     public ?int $id = null;
 
-    #[ApiProperty(identifier: false)]
+    #[ApiProperty(identifier: false, extraProperties: ['modelField' => 'parent_id'])]
     public ?int $customerId = null;
+
+    #[ApiProperty(extraProperties: ['modelField' => 'firstname'])]
     public string $firstName = '';
+
+    #[ApiProperty(extraProperties: ['modelField' => 'lastname'])]
     public string $lastName = '';
+
     public ?string $company = null;
+
     /** @var string[]|string Street lines (accepts string or array, normalized to array in processor) */
     public mixed $street = [];
+
     public string $city = '';
     public ?string $region = null;
+
     /** @var int|null Region ID (accepts string from frontend, normalized to int in processor) */
+    #[ApiProperty(extraProperties: ['modelField' => 'region_id'])]
     public mixed $regionId = null;
+
     public string $postcode = '';
+
+    #[ApiProperty(extraProperties: ['modelField' => 'country_id'])]
     public string $countryId = '';
+
     public string $telephone = '';
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isDefaultBilling = false;
+
+    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isDefaultShipping = false;
+
+    public static function afterLoad(self $dto, object $model): void
+    {
+        // Normalize street to array
+        $street = $model->getStreet();
+        $dto->street = is_array($street) ? $street : ($street ? [$street] : []);
+
+        // Normalize regionId
+        $regionId = $model->getData('region_id');
+        $dto->regionId = $regionId ? (int) $regionId : null;
+    }
+
+    /**
+     * Create Address DTO from an order address model.
+     */
+    public static function fromOrderAddress(\Mage_Sales_Model_Order_Address $address): self
+    {
+        return self::fromGenericAddress($address);
+    }
+
+    /**
+     * Create Address DTO from a quote address model.
+     */
+    public static function fromQuoteAddress(\Mage_Sales_Model_Quote_Address $address): self
+    {
+        return self::fromGenericAddress($address);
+    }
+
+    /**
+     * Create Address DTO from a customer address model with default billing/shipping info.
+     */
+    public static function fromCustomerAddress(
+        \Mage_Customer_Model_Address $address,
+        ?\Mage_Customer_Model_Customer $customer = null,
+    ): self {
+        $dto = self::fromModel($address);
+
+        if ($customer !== null) {
+            $dto->isDefaultBilling = $address->getId() == $customer->getDefaultBilling();
+            $dto->isDefaultShipping = $address->getId() == $customer->getDefaultShipping();
+        }
+
+        return $dto;
+    }
+
+    /**
+     * Map common address fields from any address-like model (order, quote).
+     */
+    private static function fromGenericAddress(\Maho\DataObject $address): self
+    {
+        $dto = new self();
+        $dto->id = (int) $address->getId();
+        $dto->firstName = $address->getData('firstname') ?? '';
+        $dto->lastName = $address->getData('lastname') ?? '';
+        $dto->company = $address->getData('company');
+        $dto->street = $address->getStreet();
+        $dto->city = $address->getData('city') ?? '';
+        $dto->region = $address->getData('region');
+        $dto->regionId = $address->getData('region_id') ? (int) $address->getData('region_id') : null;
+        $dto->postcode = $address->getData('postcode') ?? '';
+        $dto->countryId = $address->getData('country_id') ?? '';
+        $dto->telephone = $address->getData('telephone') ?? '';
+
+        return $dto;
+    }
 }
