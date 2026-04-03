@@ -16,6 +16,7 @@ namespace Mage\Checkout\Api;
 use ApiPlatform\Metadata\ApiProperty;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
@@ -50,66 +51,77 @@ use Mage\Customer\Api\Address;
         new Get(
             uriTemplate: '/guest-carts/{id}',
             name: 'get_guest_cart',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Get a guest cart by masked ID',
         ),
         new Post(
             uriTemplate: '/guest-carts/{id}/items',
             name: 'add_guest_item',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Add item to guest cart',
         ),
         new Put(
             uriTemplate: '/guest-carts/{id}/items/{itemId}',
             name: 'update_guest_item',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Update item quantity in guest cart',
         ),
         new Delete(
             uriTemplate: '/guest-carts/{id}/items/{itemId}',
             name: 'remove_guest_item',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Remove item from guest cart',
         ),
         new Post(
             uriTemplate: '/guest-carts/{id}/coupon',
             name: 'apply_guest_coupon',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Apply coupon to guest cart',
         ),
         new Delete(
             uriTemplate: '/guest-carts/{id}/coupon',
             name: 'remove_guest_coupon',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Remove coupon from guest cart',
         ),
         new Post(
             uriTemplate: '/guest-carts/{id}/giftcard',
             name: 'apply_guest_giftcard',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Apply gift card to guest cart',
         ),
         new Delete(
             uriTemplate: '/guest-carts/{id}/giftcard/{code}',
             name: 'remove_guest_giftcard',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Remove gift card from guest cart',
         ),
         new Get(
             uriTemplate: '/guest-carts/{id}/totals',
             name: 'get_guest_totals',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Get guest cart totals',
         ),
         new Post(
             uriTemplate: '/guest-carts/{id}/shipping-methods',
             name: 'get_guest_shipping',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Get available shipping methods for guest cart',
         ),
         new Get(
             uriTemplate: '/guest-carts/{id}/payment-methods',
             name: 'get_guest_payments',
+            uriVariables: ['id' => new Link(fromClass: Cart::class, identifiers: [])],
             security: 'true',
             description: 'Get available payment methods for guest cart',
         ),
