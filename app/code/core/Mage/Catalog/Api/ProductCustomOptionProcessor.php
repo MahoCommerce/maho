@@ -277,27 +277,9 @@ final class ProductCustomOptionProcessor extends \Maho\ApiPlatform\Processor
      */
     private function syncProductOptionFlags(int $productId): void
     {
-        $resource = Mage::getSingleton('core/resource');
-        $read = $resource->getConnection('core_read');
-        $write = $resource->getConnection('core_write');
-        $optionTable = $resource->getTableName('catalog/product_option');
-
-        $hasOptions = (bool) $read->fetchOne(
-            "SELECT COUNT(*) FROM {$optionTable} WHERE product_id = ?",
-            [$productId],
-        );
-        $hasRequired = (bool) $read->fetchOne(
-            "SELECT COUNT(*) FROM {$optionTable} WHERE product_id = ? AND is_require = 1",
-            [$productId],
-        );
-
-        $write->update(
-            $resource->getTableName('catalog/product'),
-            [
-                'has_options' => $hasOptions ? 1 : 0,
-                'required_options' => $hasRequired ? 1 : 0,
-            ],
-            ['entity_id = ?' => $productId],
-        );
+        $product = \Mage::getModel('catalog/product')->load($productId);
+        if ($product->getId()) {
+            $product->save();
+        }
     }
 }
