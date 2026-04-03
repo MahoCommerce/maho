@@ -166,9 +166,6 @@
                 <ttl>300</ttl>
                 <auto_clean>all</auto_clean>
             </cache>
-            <graphql>
-                <naming_convention>graphql</naming_convention>
-            </graphql>
             <oauth2>
                 <token_lifetime>3600</token_lifetime>
                 <refresh_token_lifetime>86400</refresh_token_lifetime>
