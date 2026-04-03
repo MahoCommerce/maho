@@ -22,8 +22,8 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
+use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\Service\StoreContext;
 
 #[ApiResource(
     shortName: 'BlogPost',
@@ -42,19 +42,19 @@ use Maho\ApiPlatform\Service\StoreContext;
         ),
         new Post(
             uriTemplate: '/blog-posts',
-            processor: BlogPostProcessor::class,
+            processor: CrudProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Creates a new blog post',
         ),
         new Put(
             uriTemplate: '/blog-posts/{id}',
-            processor: BlogPostProcessor::class,
+            processor: CrudProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Updates a blog post',
         ),
         new Delete(
             uriTemplate: '/blog-posts/{id}',
-            processor: BlogPostProcessor::class,
+            processor: CrudProcessor::class,
             security: "is_granted('ROLE_API_USER')",
             description: 'Deletes a blog post',
         ),
@@ -95,9 +95,8 @@ class BlogPost extends CrudResource
 
     public bool $isActive = true;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
-    /** @var string[] */
-    public array $stores = ['all'];
+    /** @var int[] */
+    public array $stores = [0];
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     /** @var int[] */
@@ -118,8 +117,7 @@ class BlogPost extends CrudResource
         $dto->status = $dto->isActive ? 'enabled' : 'disabled';
         $dto->imageUrl = $model->getImageUrl();
 
-        $postStores = $model->getStores();
-        $dto->stores = StoreContext::storeIdsToStoreCodes($postStores);
+        $dto->stores = array_map('intval', $model->getStores());
         $dto->categoryIds = array_map('intval', $model->getCategories());
 
         if ($model->getContent()) {

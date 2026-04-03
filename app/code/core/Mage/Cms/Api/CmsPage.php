@@ -22,10 +22,7 @@ use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
-use Maho\ApiPlatform\CrudProvider;
-use Maho\ApiPlatform\CrudProcessor;
 use Maho\ApiPlatform\CrudResource;
-use Maho\ApiPlatform\Service\StoreContext;
 
 #[ApiResource(
     shortName: 'CmsPage',
@@ -85,9 +82,8 @@ class CmsPage extends CrudResource
 
     public bool $isActive = true;
 
-    #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
-    /** @var string[] */
-    public array $stores = ['all'];
+    /** @var int[] */
+    public array $stores = [0];
 
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'creation_time'])]
     public ?string $createdAt = null;
@@ -104,8 +100,7 @@ class CmsPage extends CrudResource
         $dto->status = $dto->isActive ? 'enabled' : 'disabled';
 
         if (method_exists($model->getResource(), 'lookupStoreIds')) {
-            $storeIds = $model->getResource()->lookupStoreIds($model->getId());
-            $dto->stores = StoreContext::storeIdsToStoreCodes($storeIds);
+            $dto->stores = array_map('intval', $model->getResource()->lookupStoreIds($model->getId()));
         }
     }
 }

@@ -50,6 +50,12 @@ class CrudProcessor extends Processor
                 $this->entityType = strtolower((string) preg_replace('/[A-Z]/', '_$0', lcfirst($short)));
                 $this->entityLabel = $short;
             }
+
+            if (!$this->writePermission) {
+                $base = trim(preg_replace('#/\{[^}]+\}#', '', $operation->getUriTemplate()), '/');
+                $this->writePermission = $base . '/write';
+                $this->deletePermission = $base . '/delete';
+            }
         }
 
         // Parent handles auth check, permission check, and create/update/delete routing
@@ -67,6 +73,7 @@ class CrudProcessor extends Processor
             $isNew = !$model->getId();
             $this->validate($data, $model, $isNew);
             $data->applyToModel($model);
+            $this->validateStoreAccess($data, $user);
             $this->beforeSave($model, $data, $user);
         }
     }
@@ -93,21 +100,39 @@ class CrudProcessor extends Processor
     }
 
     /**
-     * Return the model's store IDs for access validation, or null to skip the check.
-     * Override in subclasses for store-scoped entities.
+     * For store-scoped entities (DTO has a `stores` property), validate that
+     * the API user can access the entity's assigned stores.
      */
-    protected function getEntityStoreIds(object $model): ?array
-    {
-        return null;
-    }
-
     #[\Override]
     protected function authorizeEntity(object $model, ApiUser $user): void
     {
-        $storeIds = $this->getEntityStoreIds($model);
-        if ($storeIds !== null) {
-            $this->validateEntityStoreAccess($storeIds, $user, $this->entityLabel);
+        if (!$this->isStoreScoped()) {
+            return;
         }
+
+        $storeIds = $model->getData('stores') ?? $model->getData('store_id');
+        if ($storeIds !== null) {
+            $this->validateEntityStoreAccess(
+                is_array($storeIds) ? $storeIds : [$storeIds],
+                $user,
+                $this->entityLabel,
+            );
+        }
+    }
+
+    /**
+     * For store-scoped entities, validate the user can access the submitted store IDs.
+     */
+    private function validateStoreAccess(CrudResource $data, ApiUser $user): void
+    {
+        if ($this->isStoreScoped()) {
+            $this->validateEntityStoreAccess($data->stores, $user, $this->entityLabel);
+        }
+    }
+
+    private function isStoreScoped(): bool
+    {
+        return $this->resourceClass !== null && property_exists($this->resourceClass, 'stores');
     }
 
     /** Hook: validate incoming data before save. Throw BadRequestHttpException on errors. */

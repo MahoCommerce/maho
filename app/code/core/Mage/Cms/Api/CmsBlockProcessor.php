@@ -19,27 +19,12 @@ use Maho\ApiPlatform\Security\ApiUser;
 
 final class CmsBlockProcessor extends CrudProcessor
 {
-    protected ?string $writePermission = 'cms-blocks/write';
-    protected ?string $deletePermission = 'cms-blocks/delete';
-
-    #[\Override]
-    protected function getEntityStoreIds(object $model): array
-    {
-        $stores = $model->getStoreId();
-        return is_array($stores) ? $stores : [$stores];
-    }
-
     #[\Override]
     protected function beforeSave(object $model, CrudResource $data, ApiUser $user): void
     {
         $content = $model->getData('content');
         if ($content !== null) {
             $model->setData('content', \Mage::getSingleton('core/input_filter_maliciousCode')->filter($content));
-        }
-
-        if ($data instanceof CmsBlock) {
-            $storeIds = $this->resolveStoreIds($data->stores, $user);
-            $model->setData('stores', $storeIds);
         }
     }
 }
