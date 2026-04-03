@@ -28,8 +28,6 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class BlogPostProvider extends CrudProvider
 {
-    protected int $defaultPageSize = 10;
-    protected int $maxPageSize = 50;
     protected array $defaultSort = ['publish_date' => 'DESC'];
 
     #[\Override]

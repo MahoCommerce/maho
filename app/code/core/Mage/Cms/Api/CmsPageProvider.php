@@ -27,8 +27,6 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class CmsPageProvider extends CrudProvider
 {
-    protected int $defaultPageSize = 100;
-    protected int $maxPageSize = 100;
     protected array $defaultSort = ['title' => 'ASC'];
 
     /**

@@ -33,8 +33,6 @@ final class ReviewProvider extends CrudProvider
 {
     use CacheTrait;
 
-    protected int $defaultPageSize = 10;
-    protected int $maxPageSize = 100;
 
     private function getCacheTtl(): int
     {

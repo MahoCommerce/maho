@@ -28,8 +28,6 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class BlogCategoryProvider extends CrudProvider
 {
-    protected int $defaultPageSize = 50;
-    protected int $maxPageSize = 100;
     protected array $defaultSort = ['position' => 'ASC'];
 
     #[\Override]
