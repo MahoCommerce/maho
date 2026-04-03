@@ -38,6 +38,22 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $this->customerService = new CustomerService();
     }
 
+    /**
+     * Ensure no customer exists with the given email in the specified website
+     *
+     * @throws ConflictHttpException if a customer with this email already exists
+     */
+    private function ensureEmailUnique(string $email, int $websiteId): void
+    {
+        $existingCustomer = \Mage::getModel('customer/customer')
+            ->setWebsiteId($websiteId)
+            ->loadByEmail($email);
+
+        if ($existingCustomer->getId()) {
+            throw new ConflictHttpException('A customer with this email already exists');
+        }
+    }
+
     private function checkRateLimit(string $key, int $maxAttempts, int $windowSeconds): void
     {
         if (\Mage::helper('core')->isRateLimitExceeded(false, true, $key, $maxAttempts, $windowSeconds)) {
@@ -146,14 +162,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException("Password must be at least {$minPasswordLength} characters");
         }
 
-        // Check if email already exists
-        $existingCustomer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId)
-            ->loadByEmail($data->email);
-
-        if ($existingCustomer->getId()) {
-            throw new ConflictHttpException('A customer with this email already exists');
-        }
+        $this->ensureEmailUnique($data->email, $websiteId);
 
         // Create customer
         $customer = \Mage::getModel('customer/customer');
@@ -207,14 +216,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('A valid email address is required');
         }
 
-        // Check if email already exists
-        $existingCustomer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId)
-            ->loadByEmail($email);
-
-        if ($existingCustomer->getId()) {
-            throw new ConflictHttpException('A customer with this email already exists');
-        }
+        $this->ensureEmailUnique($email, $websiteId);
 
         // Create customer with random password
         $customer = \Mage::getModel('customer/customer');
@@ -271,17 +273,11 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
 
         $customer = \Mage::getModel('customer/customer')
-            ->setWebsiteId($websiteId)
-            ->loadByEmail($email);
+            ->setWebsiteId($websiteId);
 
-        if (!$customer->getId()) {
-            // Dummy hash comparison to equalize timing with real password check
-            password_verify($password, '$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012');
-            throw new BadRequestHttpException('Invalid email or password');
-        }
-
-        // Validate password
-        if (!$customer->validatePassword($password)) {
+        try {
+            $customer->authenticate($email, $password);
+        } catch (\Mage_Core_Exception $e) {
             throw new BadRequestHttpException('Invalid email or password');
         }
 

@@ -92,23 +92,16 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
         $this->checkRateLimit('auth_token:email:' . strtolower($email), 5, 60);
 
         try {
-            $websiteId = \Mage::app()->getStore()->getWebsiteId();
-
             $customer = \Mage::getModel('customer/customer')
-                ->setWebsiteId($websiteId)
-                ->loadByEmail($email);
+                ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId());
 
-            if (!$customer->getId()) {
-                password_verify($password, '$2y$10$abcdefghijklmnopqrstuuABCDEFGHIJKLMNOPQRSTUVWXYZ012');
+            try {
+                $customer->authenticate($email, $password);
+            } catch (\Mage_Core_Exception $e) {
+                if ($e->getCode() === \Mage_Customer_Model_Customer::EXCEPTION_EMAIL_NOT_CONFIRMED) {
+                    throw new HttpException(403, 'This account is not confirmed. Please check your email for the confirmation link.');
+                }
                 throw new UnauthorizedHttpException('Bearer', 'Invalid email or password');
-            }
-
-            if (!$customer->validatePassword($password)) {
-                throw new UnauthorizedHttpException('Bearer', 'Invalid email or password');
-            }
-
-            if ($customer->getConfirmation() && $customer->isConfirmationRequired()) {
-                throw new HttpException(403, 'This account is not confirmed. Please check your email for the confirmation link.');
             }
 
             $token = $this->jwtService->generateCustomerToken($customer);

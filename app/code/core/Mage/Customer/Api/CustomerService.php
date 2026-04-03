@@ -19,30 +19,23 @@ class CustomerService
 {
     /**
      * Authenticate customer with email and password
+     *
+     * Delegates to Mage_Customer_Model_Customer::authenticate() which handles
+     * loadByEmail, validatePassword, confirmation check, and fires the
+     * customer_customer_authenticated event.
+     *
+     * @throws \Mage_Core_Exception on invalid credentials or unconfirmed account
      */
     public function authenticate(#[\SensitiveParameter]
         string $email, #[\SensitiveParameter]
-        string $password): ?\Mage_Customer_Model_Customer
+        string $password): \Mage_Customer_Model_Customer
     {
-        try {
-            $customer = \Mage::getModel('customer/customer')
-                ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
-                ->loadByEmail($email);
+        $customer = \Mage::getModel('customer/customer')
+            ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId());
 
-            if (!$customer->getId()) {
-                return null;
-            }
+        $customer->authenticate($email, $password);
 
-            // Validate password
-            if (!$customer->validatePassword($password)) {
-                return null;
-            }
-
-            return $customer;
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-            return null;
-        }
+        return $customer;
     }
 
     /**
