@@ -117,6 +117,7 @@ final class ReviewProvider extends CrudProvider
 
                 $reviews = [];
                 foreach ($collection as $review) {
+                    /** @var Review $dto */
                     $dto = $this->toDto($review);
                     $dto->productName = $productNames[$dto->productId] ?? null;
                     $reviews[] = $dto;

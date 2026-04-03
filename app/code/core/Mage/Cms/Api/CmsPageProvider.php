@@ -115,6 +115,7 @@ final class CmsPageProvider extends CrudProvider
             return null;
         }
 
+        /** @var CmsPage */
         return $this->toDto($page);
     }
 }
