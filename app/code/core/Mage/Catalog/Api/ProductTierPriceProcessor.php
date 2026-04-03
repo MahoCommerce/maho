@@ -15,7 +15,6 @@ namespace Mage\Catalog\Api;
 
 use ApiPlatform\Metadata\DeleteOperationInterface;
 use ApiPlatform\Metadata\Operation;
-use Mage;
 use Maho\ApiPlatform\Trait\ProductLoaderTrait;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
@@ -88,10 +87,6 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
             ];
         }
 
-        // Delete all existing tier prices first for clean replacement
-        $this->deleteAllTierPrices($productId);
-
-        // Force-load existing state so backend model knows to insert (not diff)
         $product->getTierPrice();
         $product->setTierPrice($tierPrices);
 
@@ -107,21 +102,12 @@ final class ProductTierPriceProcessor extends \Maho\ApiPlatform\Processor
 
     private function handleDeleteAll(int $productId): null
     {
-        // Verify product exists
-        $this->loadProduct($productId);
-
-        $this->deleteAllTierPrices($productId);
+        $product = $this->loadProduct($productId);
+        $product->getTierPrice();
+        $product->setTierPrice([]);
+        $this->safeSave($product, 'delete tier prices');
 
         return null;
-    }
-
-    private function deleteAllTierPrices(int $productId): void
-    {
-        $resource = Mage::getSingleton('core/resource');
-        $write = $resource->getConnection('core_write');
-        $table = $resource->getTableName('catalog/product_attribute_tier_price');
-
-        $write->delete($table, ['entity_id = ?' => $productId]);
     }
 
 }
