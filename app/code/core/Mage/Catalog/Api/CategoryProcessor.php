@@ -88,7 +88,7 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         if ($data->urlKey !== null) {
             $category->setUrlKey($data->urlKey);
         } else {
-            $category->setUrlKey($this->generateUrlKey($data->name));
+            $category->setUrlKey($category->formatUrlKey($data->name));
         }
 
         $this->applyCategoryData($category, $data);
@@ -207,13 +207,6 @@ final class CategoryProcessor extends \Maho\ApiPlatform\Processor
         }
     }
 
-    private function generateUrlKey(string $name): string
-    {
-        $urlKey = strtolower(trim($name));
-        $urlKey = preg_replace('/[^a-z0-9\s-]/', '', $urlKey);
-        $urlKey = preg_replace('/[\s-]+/', '-', $urlKey);
-        return trim($urlKey, '-');
-    }
 
     private function refreshDto(Mage_Catalog_Model_Category $category, Category $data): Category
     {
