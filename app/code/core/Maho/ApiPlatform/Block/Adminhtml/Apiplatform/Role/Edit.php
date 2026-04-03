@@ -15,7 +15,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_Role_Edit extends Mage_Adminh
     public function __construct()
     {
         $this->_objectId = 'role_id';
-        $this->_blockGroup = 'maho_apiplatform';
+        $this->_blockGroup = 'apiplatform';
         $this->_controller = 'adminhtml_apiplatform_role';
 
         parent::__construct();

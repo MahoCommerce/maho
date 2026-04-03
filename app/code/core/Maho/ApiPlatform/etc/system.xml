@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config>
     <sections>
-        <maho_apiplatform translate="label" module="maho_apiplatform">
+        <apiplatform translate="label" module="apiplatform">
             <label>API Platform</label>
             <tab>service</tab>
             <sort_order>100</sort_order>
@@ -119,6 +119,6 @@
                     </fields>
                 </contact>
             </groups>
-        </maho_apiplatform>
+        </apiplatform>
     </sections>
 </config>

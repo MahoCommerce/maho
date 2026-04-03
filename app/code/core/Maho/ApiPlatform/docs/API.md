@@ -885,7 +885,7 @@ Any API controller or processor can verify captcha tokens via the ApiPlatform he
 
 ```php
 /** @var Maho_ApiPlatform_Helper_Data $helper */
-$helper = Mage::helper('maho_apiplatform');
+$helper = Mage::helper('apiplatform');
 
 // Get config for the frontend
 $captchaConfig = $helper->getCaptchaConfig();

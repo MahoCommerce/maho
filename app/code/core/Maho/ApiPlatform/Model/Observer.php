@@ -62,7 +62,7 @@ class Maho_ApiPlatform_Model_Observer
         }
 
         /** @var Maho_ApiPlatform_Helper_Data $helper */
-        $helper = Mage::helper('maho_apiplatform');
+        $helper = Mage::helper('apiplatform');
         $sunsetDate = $helper->getLegacySunsetDate();
 
         // RFC 8594 Deprecation header
@@ -172,7 +172,7 @@ class Maho_ApiPlatform_Model_Observer
      */
     public static function getCacheTtl(): int
     {
-        $ttl = (int) Mage::getStoreConfig('maho_apiplatform/cache/ttl');
+        $ttl = (int) Mage::getStoreConfig('apiplatform/cache/ttl');
         return $ttl > 0 ? $ttl : 300;
     }
 

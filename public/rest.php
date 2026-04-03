@@ -94,9 +94,9 @@ if (str_contains($requestUri, '/api/admin/')) {
 }
 
 // Set environment variables for Symfony
-$_ENV['APP_SECRET'] = Mage::getStoreConfig('maho_apiplatform/oauth2/secret')
+$_ENV['APP_SECRET'] = Mage::getStoreConfig('apiplatform/oauth2/secret')
     ?: hash('sha256', (string) Mage::getConfig()->getNode('global/crypt/key') . 'symfony_app_secret');
-$corsOrigins = Mage::getStoreConfig('maho_apiplatform/general/cors_origins');
+$corsOrigins = Mage::getStoreConfig('apiplatform/general/cors_origins');
 if (!$corsOrigins) {
     $baseUrl = (string) Mage::getStoreConfig('web/secure/base_url');
     $parsed = parse_url($baseUrl);

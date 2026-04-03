@@ -5,12 +5,12 @@
             <children>
                 <api>
                     <children>
-                        <api2_users translate="title" module="maho_apiplatform">
+                        <api2_users translate="title" module="apiplatform">
                             <title>REST/GraphQL - Users</title>
                             <action>adminhtml/apiplatform_user</action>
                             <sort_order>1</sort_order>
                         </api2_users>
-                        <api2_roles translate="title" module="maho_apiplatform">
+                        <api2_roles translate="title" module="apiplatform">
                             <title>REST/GraphQL - Roles</title>
                             <action>adminhtml/apiplatform_role</action>
                             <sort_order>2</sort_order>
@@ -28,18 +28,18 @@
                         <children>
                             <config>
                                 <children>
-                                    <maho_apiplatform translate="title" module="maho_apiplatform">
+                                    <apiplatform translate="title" module="apiplatform">
                                         <title>API Platform</title>
-                                    </maho_apiplatform>
+                                    </apiplatform>
                                 </children>
                             </config>
                             <api>
                                 <children>
-                                    <api2_users translate="title" module="maho_apiplatform">
+                                    <api2_users translate="title" module="apiplatform">
                                         <title>REST/GraphQL - Users</title>
                                         <sort_order>1</sort_order>
                                     </api2_users>
-                                    <api2_roles translate="title" module="maho_apiplatform">
+                                    <api2_roles translate="title" module="apiplatform">
                                         <title>REST/GraphQL - Roles</title>
                                         <sort_order>2</sort_order>
                                     </api2_roles>

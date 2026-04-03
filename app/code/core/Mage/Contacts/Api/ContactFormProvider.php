@@ -17,10 +17,10 @@ use Maho\ApiPlatform\Service\StoreContext;
 
 class ContactFormProvider extends \Maho\ApiPlatform\Provider
 {
-    private const CONFIG_ENABLED = 'maho_apiplatform/contact/enabled';
-    private const CONFIG_CAPTCHA_PROVIDER = 'maho_apiplatform/contact/captcha_provider';
-    private const CONFIG_CAPTCHA_SITE_KEY = 'maho_apiplatform/contact/captcha_site_key';
-    private const CONFIG_HONEYPOT = 'maho_apiplatform/contact/honeypot_enabled';
+    private const CONFIG_ENABLED = 'apiplatform/contact/enabled';
+    private const CONFIG_CAPTCHA_PROVIDER = 'apiplatform/contact/captcha_provider';
+    private const CONFIG_CAPTCHA_SITE_KEY = 'apiplatform/contact/captcha_site_key';
+    private const CONFIG_HONEYPOT = 'apiplatform/contact/honeypot_enabled';
 
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): ContactForm

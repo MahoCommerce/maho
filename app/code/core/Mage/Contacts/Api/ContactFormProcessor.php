@@ -21,11 +21,11 @@ use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class ContactFormProcessor extends \Maho\ApiPlatform\Processor
 {
-    private const CONFIG_ENABLED = 'maho_apiplatform/contact/enabled';
-    private const CONFIG_CAPTCHA_PROVIDER = 'maho_apiplatform/contact/captcha_provider';
-    private const CONFIG_CAPTCHA_SECRET = 'maho_apiplatform/contact/captcha_secret_key';
-    private const CONFIG_HONEYPOT = 'maho_apiplatform/contact/honeypot_enabled';
-    private const CONFIG_RATE_LIMIT = 'maho_apiplatform/contact/rate_limit';
+    private const CONFIG_ENABLED = 'apiplatform/contact/enabled';
+    private const CONFIG_CAPTCHA_PROVIDER = 'apiplatform/contact/captcha_provider';
+    private const CONFIG_CAPTCHA_SECRET = 'apiplatform/contact/captcha_secret_key';
+    private const CONFIG_HONEYPOT = 'apiplatform/contact/honeypot_enabled';
+    private const CONFIG_RATE_LIMIT = 'apiplatform/contact/rate_limit';
 
     private const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
     private const RECAPTCHA_VERIFY_URL = 'https://www.google.com/recaptcha/api/siteverify';

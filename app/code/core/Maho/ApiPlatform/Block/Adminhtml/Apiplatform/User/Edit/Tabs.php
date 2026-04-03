@@ -26,14 +26,14 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit_Tabs extends Mage_A
         $this->addTab('main', [
             'label'   => $this->__('Account Information'),
             'title'   => $this->__('Account Information'),
-            'content' => $this->getLayout()->createBlock('maho_apiplatform/adminhtml_apiplatform_user_edit_tab_main')->toHtml(),
+            'content' => $this->getLayout()->createBlock('apiplatform/adminhtml_apiplatform_user_edit_tab_main')->toHtml(),
             'active'  => true,
         ]);
 
         $this->addTab('role', [
             'label'   => $this->__('Role'),
             'title'   => $this->__('Role'),
-            'content' => $this->getLayout()->createBlock('maho_apiplatform/adminhtml_apiplatform_user_edit_tab_role')->toHtml(),
+            'content' => $this->getLayout()->createBlock('apiplatform/adminhtml_apiplatform_user_edit_tab_role')->toHtml(),
         ]);
 
         return parent::_beforeToHtml();

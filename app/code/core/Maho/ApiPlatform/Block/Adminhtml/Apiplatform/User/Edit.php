@@ -15,7 +15,7 @@ class Maho_ApiPlatform_Block_Adminhtml_Apiplatform_User_Edit extends Mage_Adminh
     public function __construct()
     {
         $this->_objectId = 'user_id';
-        $this->_blockGroup = 'maho_apiplatform';
+        $this->_blockGroup = 'apiplatform';
         $this->_controller = 'adminhtml_apiplatform_user';
 
         parent::__construct();

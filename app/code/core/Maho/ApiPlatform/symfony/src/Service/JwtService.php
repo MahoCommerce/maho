@@ -29,9 +29,9 @@ use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
  */
 class JwtService
 {
-    private const CONFIG_PATH_SECRET = 'maho_apiplatform/oauth2/secret';
+    private const CONFIG_PATH_SECRET = 'apiplatform/oauth2/secret';
     private const CONFIG_PATH_LEGACY = 'maho_api/settings/jwt_secret';
-    private const CONFIG_PATH_TOKEN_LIFETIME = 'maho_apiplatform/oauth2/token_lifetime';
+    private const CONFIG_PATH_TOKEN_LIFETIME = 'apiplatform/oauth2/token_lifetime';
     private const DEFAULT_TOKEN_EXPIRY_SECONDS = 86400; // 24 hours
     private const AUDIENCE = 'maho-api';
 
@@ -303,7 +303,7 @@ class JwtService
         }
 
         if (empty($secret)) {
-            throw new \RuntimeException('JWT secret not configured. Please set maho_apiplatform/oauth2/secret in configuration.');
+            throw new \RuntimeException('JWT secret not configured. Please set apiplatform/oauth2/secret in configuration.');
         }
 
         if (strlen($secret) < 32) {

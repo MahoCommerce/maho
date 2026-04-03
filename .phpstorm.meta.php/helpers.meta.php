@@ -50,7 +50,7 @@ namespace PHPSTORM_META {
         'index/data' => \Mage_Index_Helper_Data::class,
         'log/dashboard' => \Mage_Log_Helper_Dashboard::class,
         'log/data' => \Mage_Log_Helper_Data::class,
-        'maho_apiplatform/data' => \Maho_ApiPlatform_Helper_Data::class,
+        'apiplatform/data' => \Maho_ApiPlatform_Helper_Data::class,
         'maho_paypal/data' => \Maho_Paypal_Helper_Data::class,
         'oauth/data' => \Mage_Oauth_Helper_Data::class,
         'paypaluk/data' => \Mage_PaypalUk_Helper_Data::class,
