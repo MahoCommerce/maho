@@ -53,8 +53,16 @@ final class CartProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Handle guest-cart REST operations using masked ID from URI
+        // Note: uriVariables[id] is cast to int by API Platform. Extract full masked ID from URI.
         if (in_array($operationName, ['get_guest_cart', 'get_guest_totals', 'get_guest_shipping', 'get_guest_payments'])) {
-            $maskedId = (string) ($uriVariables['id'] ?? '');
+            $maskedId = null;
+            $request = $context['request'] ?? null;
+            if ($request instanceof \Symfony\Component\HttpFoundation\Request) {
+                if (preg_match('#/guest-carts/([a-f0-9]{32})#i', $request->getPathInfo(), $m)) {
+                    $maskedId = $m[1];
+                }
+            }
+            $maskedId = $maskedId ?? (string) ($uriVariables['id'] ?? '');
             if (!$maskedId) {
                 return null;
             }
