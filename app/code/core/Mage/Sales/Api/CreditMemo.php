@@ -79,12 +79,11 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
-    extraProperties: [
-        'model' => 'sales/order_creditmemo',
-    ],
 )]
 class CreditMemo extends CrudResource
 {
+    public const MODEL = 'sales/order_creditmemo';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

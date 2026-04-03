@@ -52,12 +52,11 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
     ],
-    extraProperties: [
-        'model' => 'maho_pos/payment',
-    ],
 )]
 class PosPayment extends CrudResource
 {
+    public const MODEL = 'maho_pos/payment';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

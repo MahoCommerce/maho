@@ -37,12 +37,11 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Switch current store context',
         ),
     ],
-    extraProperties: [
-        'model' => 'core/store',
-    ],
 )]
 class Store extends CrudResource
 {
+    public const MODEL = 'core/store';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

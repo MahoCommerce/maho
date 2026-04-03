@@ -56,12 +56,11 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
-    extraProperties: [
-        'model' => 'cataloginventory/stock_item',
-    ],
 )]
 class StockUpdate extends CrudResource
 {
+    public const MODEL = 'cataloginventory/stock_item';
+
     #[ApiProperty(identifier: true)]
     public string $sku = '';
 

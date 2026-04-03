@@ -170,12 +170,11 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
     ],
-    extraProperties: [
-        'model' => 'customer/address',
-    ],
 )]
 class Address extends CrudResource
 {
+    public const MODEL = 'customer/address';
+
     #[ApiProperty(identifier: true)]
     public ?int $id = null;
 

@@ -152,12 +152,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Reset password with token',
         ),
     ],
-    extraProperties: [
-        'model' => 'customer/customer',
-    ],
 )]
 class Customer extends CrudResource
 {
+    public const MODEL = 'customer/customer';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

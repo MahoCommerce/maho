@@ -45,12 +45,11 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Get a country by ISO code',
         ),
     ],
-    extraProperties: [
-        'model' => 'directory/country',
-    ],
 )]
 class Country extends CrudResource
 {
+    public const MODEL = 'directory/country';
+
     #[ApiProperty(identifier: true, writable: false, extraProperties: ['modelField' => 'country_id'])]
     public ?string $id = null;
 

@@ -63,12 +63,11 @@ use Maho\ApiPlatform\Service\StoreContext;
             args: ['identifier' => ['type' => 'String!']],
         ),
     ],
-    extraProperties: [
-        'model' => 'cms/page',
-    ],
 )]
 class CmsPage extends CrudResource
 {
+    public const MODEL = 'cms/page';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

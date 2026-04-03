@@ -29,12 +29,11 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Get available currencies with exchange rates',
         ),
     ],
-    extraProperties: [
-        'model' => 'directory/currency',
-    ],
 )]
 class Currency extends CrudResource
 {
+    public const MODEL = 'directory/currency';
+
     #[ApiProperty(identifier: true, writable: false, extraProperties: ['modelField' => 'currency_code'])]
     public string $code = '';
 

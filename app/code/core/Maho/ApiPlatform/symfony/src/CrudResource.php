@@ -24,11 +24,11 @@ use ApiPlatform\Metadata\ApiResource;
  *
  * Usage:
  *   #[ApiResource(
- *       extraProperties: ['model' => 'blog/article'],
  *       provider: CrudProvider::class,
  *       operations: [new Get(uriTemplate: '/articles/{id}')],
  *   )]
  *   class Article extends CrudResource {
+ *       public const MODEL = 'blog/article';
  *       public ?int $id = null;
  *       public ?string $title = null;
  *       public ?string $urlKey = null;  // maps to url_key on the model
@@ -37,9 +37,9 @@ use ApiPlatform\Metadata\ApiResource;
  * Properties are mapped to model fields via camelCase to snake_case convention.
  * Types are coerced based on PHP property type declarations.
  *
- * extraProperties options:
- *   'model'      => 'module/model'   (required) Mage model alias
- *   'primaryKey'  => 'page_id'       (optional) model PK field, default: 'entity_id'
+ * Constants:
+ *   MODEL        = 'module/model'   (required) Mage model alias
+ *   PRIMARY_KEY  = 'page_id'        (optional) model PK field, auto-detected by default
  */
 abstract class CrudResource extends Resource
 {
@@ -59,23 +59,26 @@ abstract class CrudResource extends Resource
 
         $ref = new \ReflectionClass($class);
 
-        // Read extraProperties from ApiResource attribute
-        $attrs = $ref->getAttributes(ApiResource::class);
-        $extra = [];
-        if (!empty($attrs)) {
-            $args = $attrs[0]->getArguments();
-            $extra = $args['extraProperties'] ?? [];
+        // Read model alias from MODEL constant (preferred) or extraProperties fallback
+        $model = defined("{$class}::MODEL") ? constant("{$class}::MODEL") : null;
+        $primaryKey = defined("{$class}::PRIMARY_KEY") ? constant("{$class}::PRIMARY_KEY") : null;
+
+        if (!$model) {
+            // Fallback: read from ApiResource extraProperties
+            $attrs = $ref->getAttributes(ApiResource::class);
+            if (!empty($attrs)) {
+                $extra = $attrs[0]->getArguments()['extraProperties'] ?? [];
+                $model = $extra['model'] ?? null;
+                $primaryKey = $primaryKey ?? ($extra['primaryKey'] ?? null);
+            }
         }
 
-        $model = $extra['model'] ?? null;
         if (!$model) {
             throw new \LogicException(
-                "{$class} extends CrudResource but has no 'model' in extraProperties. "
-                . "Add: #[ApiResource(extraProperties: ['model' => 'module/model'], ...)]",
+                "{$class} extends CrudResource but has no model. "
+                . "Add: public const MODEL = 'module/model';",
             );
         }
-
-        $primaryKey = $extra['primaryKey'] ?? null;
 
         // Build field mappings from public properties
         $fields = [];

@@ -46,12 +46,11 @@ use Maho\ApiPlatform\CrudResource;
             description: 'Get blog categories, optionally filter by URL key',
         ),
     ],
-    extraProperties: [
-        'model' => 'blog/category',
-    ],
 )]
 class BlogCategory extends CrudResource
 {
+    public const MODEL = 'blog/category';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

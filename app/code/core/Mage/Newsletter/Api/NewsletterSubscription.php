@@ -69,12 +69,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             description: 'Unsubscribe from newsletter',
         ),
     ],
-    extraProperties: [
-        'model' => 'newsletter/subscriber',
-    ],
 )]
 class NewsletterSubscription extends CrudResource
 {
+    public const MODEL = 'newsletter/subscriber';
+
     #[ApiProperty(extraProperties: ['modelField' => 'subscriber_email'])]
     public ?string $email = null;
 

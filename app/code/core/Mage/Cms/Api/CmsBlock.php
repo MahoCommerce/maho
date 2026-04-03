@@ -65,12 +65,11 @@ use Maho\ApiPlatform\Service\StoreContext;
             resolver: CustomQueryResolver::class,
         ),
     ],
-    extraProperties: [
-        'model' => 'cms/block',
-    ],
 )]
 class CmsBlock extends CrudResource
 {
+    public const MODEL = 'cms/block';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

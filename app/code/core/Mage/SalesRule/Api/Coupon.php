@@ -124,12 +124,11 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER') or is_granted('ROLE_CUSTOMER')",
         ),
     ],
-    extraProperties: [
-        'model' => 'salesrule/coupon',
-    ],
 )]
 class Coupon extends CrudResource
 {
+    public const MODEL = 'salesrule/coupon';
+
     private const DISCOUNT_TYPE_MAP = [
         'by_percent' => 'percent',
         'by_fixed' => 'fixed',

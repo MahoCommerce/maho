@@ -69,12 +69,11 @@ use Maho\ApiPlatform\Service\StoreContext;
             description: 'Get blog posts, optionally filter by URL key',
         ),
     ],
-    extraProperties: [
-        'model' => 'blog/post',
-    ],
 )]
 class BlogPost extends CrudResource
 {
+    public const MODEL = 'blog/post';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

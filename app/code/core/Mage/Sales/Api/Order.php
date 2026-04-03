@@ -156,12 +156,11 @@ use Mage\Customer\Api\Address;
             resolver: CustomQueryResolver::class,
         ),
     ],
-    extraProperties: [
-        'model' => 'sales/order',
-    ],
 )]
 class Order extends CrudResource
 {
+    public const MODEL = 'sales/order';
+
     #[ApiProperty(identifier: true, writable: false, description: 'Order entity ID')]
     public ?int $id = null;
 

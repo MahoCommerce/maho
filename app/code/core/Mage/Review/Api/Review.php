@@ -92,12 +92,11 @@ use Maho\ApiPlatform\CrudResource;
             ],
         ),
     ],
-    extraProperties: [
-        'model' => 'review/review',
-    ],
 )]
 class Review extends CrudResource
 {
+    public const MODEL = 'review/review';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

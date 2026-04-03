@@ -77,12 +77,11 @@ use Maho\ApiPlatform\Service\ContentDirectiveProcessor;
             resolver: CustomQueryResolver::class,
         ),
     ],
-    extraProperties: [
-        'model' => 'catalog/category',
-    ],
 )]
 class Category extends CrudResource
 {
+    public const MODEL = 'catalog/category';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

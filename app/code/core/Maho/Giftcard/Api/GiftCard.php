@@ -83,12 +83,11 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_API_USER')",
         ),
     ],
-    extraProperties: [
-        'model' => 'giftcard/giftcard',
-    ],
 )]
 class GiftCard extends CrudResource
 {
+    public const MODEL = 'giftcard/giftcard';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 

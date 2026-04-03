@@ -48,12 +48,11 @@ use Maho\ApiPlatform\CrudResource;
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
     ],
-    extraProperties: [
-        'model' => 'sales/order_invoice',
-    ],
 )]
 class Invoice extends CrudResource
 {
+    public const MODEL = 'sales/order_invoice';
+
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
