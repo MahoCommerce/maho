@@ -153,7 +153,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
         $coupon = \Mage::getModel('salesrule/coupon');
         $coupon->loadByCode($code);
 
-        return CouponMapper::mapToDto($coupon, $rule);
+        return Coupon::fromModel($coupon);
     }
 
     private function doUpdate(int $id, array $data): Coupon
@@ -236,7 +236,7 @@ final class CouponProcessor extends \Maho\ApiPlatform\Processor
 
         $coupon->load($id);
 
-        return CouponMapper::mapToDto($coupon, $rule);
+        return Coupon::fromModel($coupon);
     }
 
     private function doDelete(int $id): null

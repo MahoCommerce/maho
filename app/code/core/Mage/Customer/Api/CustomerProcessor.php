@@ -28,13 +28,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
  */
 final class CustomerProcessor extends \Maho\ApiPlatform\Processor
 {
-    private readonly CustomerMapper $customerMapper;
     private readonly CustomerService $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->customerMapper = new CustomerMapper();
         $this->customerService = new CustomerService();
     }
 
@@ -189,7 +187,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Return the created customer (without password)
-        return $this->customerMapper->mapToDto($customer);
+        return Customer::fromModel($customer);
     }
 
     /**
@@ -251,7 +249,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new \RuntimeException('Failed to create customer');
         }
 
-        return $this->customerMapper->mapToDto($customer);
+        return Customer::fromModel($customer);
     }
 
     /**
@@ -282,7 +280,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Invalid email or password');
         }
 
-        return $this->customerMapper->mapToDto($customer);
+        return Customer::fromModel($customer);
     }
 
     /**
@@ -350,7 +348,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        return $this->customerMapper->mapToDto($customer);
+        return Customer::fromModel($customer);
     }
 
     /**
@@ -388,7 +386,7 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException($e->getMessage());
         }
 
-        return $this->customerMapper->mapToDto($customer);
+        return Customer::fromModel($customer);
     }
 
     /**
@@ -539,6 +537,6 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $order->setCustomerLastname($customer->getLastname());
         $order->save();
 
-        return (new CustomerMapper())->mapToDto($customer);
+        return Customer::fromModel($customer);
     }
 }

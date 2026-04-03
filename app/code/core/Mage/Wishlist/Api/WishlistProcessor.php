@@ -177,7 +177,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         WishlistProvider::invalidateCache($customerId);
 
         // Return the wishlist item
-        return WishlistItemMapper::mapToDto($item, $product);
+        return WishlistItem::fromModel($item);
     }
 
     /**
@@ -269,7 +269,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Build response before deleting (we need the item data)
-        $wishlistItem = WishlistItemMapper::mapToDto($item, $product);
+        $wishlistItem = WishlistItem::fromModel($item);
 
         // Remove from wishlist
         $item->delete();
@@ -314,7 +314,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
             $item = $wishlist->addNewItem($product);
             if ($item instanceof \Mage_Wishlist_Model_Item) {
                 $item->save();
-                $addedItems[] = WishlistItemMapper::mapToDto($item, $product);
+                $addedItems[] = WishlistItem::fromModel($item);
             }
         }
 
@@ -339,7 +339,7 @@ final class WishlistProcessor extends \Maho\ApiPlatform\Processor
         foreach ($itemCollection as $item) {
             $product = $item->getProduct();
             if ($product && $product->getId()) {
-                return WishlistItemMapper::mapToDto($item, $product);
+                return WishlistItem::fromModel($item);
             }
         }
 

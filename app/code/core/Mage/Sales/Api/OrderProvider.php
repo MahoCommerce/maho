@@ -17,7 +17,6 @@ use ApiPlatform\Metadata\Operation;
 use ApiPlatform\Metadata\CollectionOperationInterface;
 use ApiPlatform\State\Pagination\TraversablePaginator;
 use Mage\Customer\Api\Address;
-use Mage\Customer\Api\AddressMapper;
 use Symfony\Bundle\SecurityBundle\Security;
 
 /**
@@ -25,18 +24,14 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
-    private AddressMapper $addressMapper;
     private OrderService $orderService;
     private PaymentService $paymentService;
-    private readonly PosPaymentMapper $posPaymentMapper;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->addressMapper = new AddressMapper();
         $this->orderService = new OrderService();
         $this->paymentService = new PaymentService();
-        $this->posPaymentMapper = new PosPaymentMapper();
     }
 
     /**
@@ -282,7 +277,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         } else {
             $billingAddress = $order->getBillingAddress();
             if ($billingAddress && $billingAddress->getId()) {
-                $dto->billingAddress = $this->addressMapper->fromOrderAddress($billingAddress);
+                $dto->billingAddress = Address::fromOrderAddress($billingAddress);
             }
         }
 
@@ -293,7 +288,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
             // Map shipping address (only for single-order detail views)
             $shippingAddress = $order->getShippingAddress();
             if ($shippingAddress && $shippingAddress->getId()) {
-                $dto->shippingAddress = $this->addressMapper->fromOrderAddress($shippingAddress);
+                $dto->shippingAddress = Address::fromOrderAddress($shippingAddress);
             }
         }
 
@@ -412,7 +407,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $shipments = [];
 
         foreach ($order->getShipmentsCollection() as $shipment) {
-            $shipments[] = ShipmentMapper::mapToDto($shipment);
+            $shipments[] = Shipment::fromModel($shipment);
         }
 
         return $shipments;
@@ -429,7 +424,7 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         $payments = [];
 
         foreach ($collection as $payment) {
-            $payments[] = $this->posPaymentMapper->mapToDto($payment);
+            $payments[] = PosPayment::fromModel($payment);
         }
 
         return $payments;

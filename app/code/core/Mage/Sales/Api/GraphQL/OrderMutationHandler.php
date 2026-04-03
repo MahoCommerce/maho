@@ -17,6 +17,7 @@ use Mage\Checkout\Api\CartService;
 use Mage\Sales\Api\OrderProvider;
 use Mage\Sales\Api\OrderService;
 use Mage\Sales\Api\PaymentService;
+use Mage\Sales\Api\PosPayment;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 
@@ -32,7 +33,6 @@ class OrderMutationHandler
     private OrderProvider $orderProvider;
     private CartService $cartService;
     private PaymentService $paymentService;
-    private \Mage\Sales\Api\PosPaymentMapper $posPaymentMapper;
 
     /**
      * POS payment method mapping
@@ -60,7 +60,6 @@ class OrderMutationHandler
         $this->orderProvider = $orderProvider;
         $this->cartService = $cartService ?? new CartService();
         $this->paymentService = new PaymentService();
-        $this->posPaymentMapper = new \Mage\Sales\Api\PosPaymentMapper();
     }
 
     /**
@@ -219,7 +218,7 @@ class OrderMutationHandler
 
         $result = [];
         foreach ($collection as $payment) {
-            $dto = $this->posPaymentMapper->mapToDto($payment);
+            $dto = PosPayment::fromModel($payment);
             $result[] = [
                 'paymentId' => $dto->id,
                 'orderId' => $dto->orderId,

@@ -13,19 +13,13 @@ declare(strict_types=1);
 
 namespace Mage\Checkout\Api;
 
-use Mage\Customer\Api\AddressMapper;
+use Mage\Customer\Api\Address;
 
 /**
  * Shared cart-to-DTO mapping logic used by both CartProvider and CartProcessor
  */
 class CartMapper
 {
-    private AddressMapper $addressMapper;
-
-    public function __construct()
-    {
-        $this->addressMapper = new AddressMapper();
-    }
 
     /**
      * Map Maho quote model to Cart DTO
@@ -67,13 +61,13 @@ class CartMapper
         // Map billing address
         $billingAddress = $quote->getBillingAddress();
         if ($billingAddress && $billingAddress->getId()) {
-            $cart->billingAddress = $this->addressMapper->fromQuoteAddress($billingAddress);
+            $cart->billingAddress = Address::fromQuoteAddress($billingAddress);
         }
 
         // Map shipping address
         $shippingAddress = $quote->getShippingAddress();
         if ($shippingAddress && $shippingAddress->getId()) {
-            $cart->shippingAddress = $this->addressMapper->fromQuoteAddress($shippingAddress);
+            $cart->shippingAddress = Address::fromQuoteAddress($shippingAddress);
 
             // Get available shipping methods
             $cart->availableShippingMethods = $this->getAvailableShippingMethods($shippingAddress);

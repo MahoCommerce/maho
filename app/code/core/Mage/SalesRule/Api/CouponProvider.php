@@ -44,11 +44,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
             throw new NotFoundHttpException('Coupon not found');
         }
 
-        /** @var \Mage_SalesRule_Model_Rule $rule */
-        $rule = \Mage::getModel('salesrule/rule');
-        $rule->load($coupon->getRuleId());
-
-        return CouponMapper::mapToDto($coupon, $rule);
+        return Coupon::fromModel($coupon);
     }
 
     #[\Override]
@@ -71,10 +67,7 @@ final class CouponProvider extends \Maho\ApiPlatform\Provider
 
         $coupons = [];
         foreach ($collection as $coupon) {
-            /** @var \Mage_SalesRule_Model_Rule $rule */
-            $rule = \Mage::getModel('salesrule/rule');
-            $rule->load($coupon->getRuleId());
-            $coupons[] = CouponMapper::mapToDto($coupon, $rule);
+            $coupons[] = Coupon::fromModel($coupon);
         }
 
         return new TraversablePaginator(new \ArrayIterator($coupons), $page, $pageSize, $total);

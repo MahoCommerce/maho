@@ -23,13 +23,11 @@ use ApiPlatform\Metadata\Operation;
 final class PaymentProcessor extends \Maho\ApiPlatform\Processor
 {
     private PaymentService $paymentService;
-    private readonly PosPaymentMapper $posPaymentMapper;
 
     public function __construct()
     {
         parent::__construct();
         $this->paymentService = new PaymentService();
-        $this->posPaymentMapper = new PosPaymentMapper();
     }
 
     /**
@@ -90,7 +88,7 @@ final class PaymentProcessor extends \Maho\ApiPlatform\Processor
             $receiptData,
         );
 
-        return $this->posPaymentMapper->mapToDto($payment);
+        return PosPayment::fromModel($payment);
     }
 
     /**
@@ -122,7 +120,7 @@ final class PaymentProcessor extends \Maho\ApiPlatform\Processor
 
         $dtos = [];
         foreach ($createdPayments as $payment) {
-            $dtos[] = $this->posPaymentMapper->mapToDto($payment);
+            $dtos[] = PosPayment::fromModel($payment);
         }
 
         return $dtos;

@@ -26,15 +26,11 @@ use Symfony\Bundle\SecurityBundle\Security;
  */
 final class CustomerProvider extends \Maho\ApiPlatform\Provider
 {
-    private AddressMapper $addressMapper;
-    private CustomerMapper $customerMapper;
     private CustomerService $customerService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->addressMapper = new AddressMapper();
-        $this->customerMapper = new CustomerMapper();
         $this->customerService = new CustomerService();
     }
 
@@ -145,14 +141,14 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
      */
     public function mapToDto(\Mage_Customer_Model_Customer $customer): Customer
     {
-        $dto = $this->customerMapper->mapToDto($customer);
+        $dto = Customer::fromModel($customer);
 
         $subscriber = \Mage::getModel('newsletter/subscriber')->loadByCustomer($customer);
         $dto->isSubscribed = $subscriber->isSubscribed();
 
         $dto->addresses = [];
         foreach ($customer->getAddresses() as $address) {
-            $addressDto = $this->addressMapper->fromCustomerAddress($address);
+            $addressDto = Address::fromCustomerAddress($address);
 
             if ($address->getId() == $customer->getDefaultBilling()) {
                 $addressDto->isDefaultBilling = true;
@@ -180,14 +176,14 @@ final class CustomerProvider extends \Maho\ApiPlatform\Provider
         array $defaultBillingIds,
         array $addressMap,
     ): Customer {
-        $dto = $this->customerMapper->mapToDto($customer);
+        $dto = Customer::fromModel($customer);
 
         // Only include default billing address from pre-loaded map
         $customerId = (int) $customer->getId();
         if (isset($defaultBillingIds[$customerId])) {
             $addressId = $defaultBillingIds[$customerId];
             if (isset($addressMap[$addressId])) {
-                $addressDto = $this->addressMapper->fromCustomerAddress($addressMap[$addressId]);
+                $addressDto = Address::fromCustomerAddress($addressMap[$addressId]);
                 $addressDto->isDefaultBilling = true;
                 $dto->defaultBillingAddress = $addressDto;
             }

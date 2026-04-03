@@ -30,7 +30,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     private OrderProvider $orderProvider;
     private OrderService $orderService;
     private PaymentService $paymentService;
-    private readonly PosPaymentMapper $posPaymentMapper;
 
     public function __construct(Security $security)
     {
@@ -39,7 +38,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $this->orderProvider = new OrderProvider($security);
         $this->orderService = new OrderService();
         $this->paymentService = new PaymentService();
-        $this->posPaymentMapper = new PosPaymentMapper();
     }
 
     /**
@@ -254,7 +252,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         );
 
         $savedPayments = array_map(
-            fn($p) => $this->posPaymentMapper->mapToDto($p),
+            fn($p) => PosPayment::fromModel($p),
             $createdPayments,
         );
 
@@ -352,7 +350,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $authCode,
         );
 
-        return $this->posPaymentMapper->mapToDto($posPayment);
+        return PosPayment::fromModel($posPayment);
     }
 
     /**

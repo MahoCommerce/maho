@@ -31,12 +31,9 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 final class AddressProcessor extends \Maho\ApiPlatform\Processor
 {
-    private readonly AddressMapper $addressMapper;
-
     public function __construct(Security $security)
     {
         parent::__construct($security);
-        $this->addressMapper = new AddressMapper();
     }
 
     /**
@@ -151,7 +148,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
             throw new BadRequestHttpException('Failed to create address');
         }
 
-        return $this->addressMapper->fromCustomerAddress($address, $customer);
+        return Address::fromCustomerAddress($address, $customer);
     }
 
     /**
@@ -206,7 +203,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         // Reload customer to get updated defaults
         $customer = \Mage::getModel('customer/customer')->load($customer->getId());
 
-        return $this->addressMapper->fromCustomerAddress($address, $customer);
+        return Address::fromCustomerAddress($address, $customer);
     }
 
     /**
@@ -379,7 +376,7 @@ final class AddressProcessor extends \Maho\ApiPlatform\Processor
         }
 
         // Build Address DTO from existing data + GraphQL args (partial update)
-        $addressDto = $this->addressMapper->fromCustomerAddress($existingAddress, $customer);
+        $addressDto = Address::fromCustomerAddress($existingAddress, $customer);
         if (isset($args['firstName'])) {
             $addressDto->firstName = $args['firstName'];
         }

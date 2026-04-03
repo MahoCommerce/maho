@@ -28,12 +28,9 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  */
 final class AddressProvider extends \Maho\ApiPlatform\Provider
 {
-    private AddressMapper $addressMapper;
-
     public function __construct(\Symfony\Bundle\SecurityBundle\Security $security)
     {
         parent::__construct($security);
-        $this->addressMapper = new AddressMapper();
     }
 
     /**
@@ -159,6 +156,6 @@ final class AddressProvider extends \Maho\ApiPlatform\Provider
      */
     public function mapToDto(\Mage_Customer_Model_Address $address, \Mage_Customer_Model_Customer $customer): Address
     {
-        return $this->addressMapper->fromCustomerAddress($address, $customer);
+        return Address::fromCustomerAddress($address, $customer);
     }
 }

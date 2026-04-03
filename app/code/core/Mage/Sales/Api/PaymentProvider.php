@@ -108,7 +108,7 @@ final class PaymentProvider extends \Maho\ApiPlatform\Provider
 
         $payments = [];
         foreach ($collection as $payment) {
-            $payments[] = (new PosPaymentMapper())->mapToDto($payment);
+            $payments[] = PosPayment::fromModel($payment);
         }
 
         return $payments;
@@ -131,7 +131,7 @@ final class PaymentProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return (new PosPaymentMapper())->mapToDto($payment);
+        return PosPayment::fromModel($payment);
     }
 
     /**
@@ -142,11 +142,10 @@ final class PaymentProvider extends \Maho\ApiPlatform\Provider
     private function getOrderPayments(int $orderId): array
     {
         $collection = $this->paymentService->getOrderPayments($orderId);
-        $mapper = new PosPaymentMapper();
         $payments = [];
 
         foreach ($collection as $payment) {
-            $payments[] = $mapper->mapToDto($payment);
+            $payments[] = PosPayment::fromModel($payment);
         }
 
         return $payments;
