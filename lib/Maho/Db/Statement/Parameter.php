@@ -23,7 +23,7 @@ declare(strict_types=1);
 
 namespace Maho\Db\Statement;
 
-class Parameter
+class Parameter implements \Stringable
 {
     /**
      * Actual parameter value
