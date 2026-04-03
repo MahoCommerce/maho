@@ -107,7 +107,7 @@ class CustomerUserProvider implements UserProviderInterface
         }
 
         // Handle email format - look up customer by email
-        if (filter_var($identifier, FILTER_VALIDATE_EMAIL)) {
+        if (\Mage::helper('core')->isValidEmail($identifier)) {
             $customer = \Mage::getModel('customer/customer')
                 ->setWebsiteId(\Mage::app()->getStore()->getWebsiteId())
                 ->loadByEmail($identifier);
