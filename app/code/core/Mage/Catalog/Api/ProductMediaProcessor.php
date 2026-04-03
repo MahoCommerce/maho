@@ -127,6 +127,7 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
                     $lastImage = end($gallery['images']);
                     $file = $lastImage['file'] ?? null;
                     if ($file) {
+                        /** @var \Mage_Catalog_Model_Product_Attribute_Backend_Media $backend */
                         $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
                         $backend->updateImage($product, $file, ['label' => $label]);
                     }
@@ -192,13 +193,14 @@ final class ProductMediaProcessor extends \Maho\ApiPlatform\Processor
             $updateData['disabled'] = $body['disabled'] ? 1 : 0;
         }
         if (!empty($updateData)) {
+            /** @var \Mage_Catalog_Model_Product_Attribute_Backend_Media $backend */
             $backend = $product->getResource()->getAttribute('media_gallery')->getBackend();
             $backend->updateImage($product, $file, $updateData);
         }
 
         // Update role assignments
         $types = $body['types'] ?? null;
-        if (is_array($types) && $file !== null) {
+        if (is_array($types)) {
             if (in_array('image', $types, true)) {
                 $product->setData('image', $file);
             }

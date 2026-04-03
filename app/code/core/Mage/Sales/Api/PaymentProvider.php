@@ -108,7 +108,7 @@ final class PaymentProvider extends \Maho\ApiPlatform\Provider
 
         $payments = [];
         foreach ($collection as $payment) {
-            $payments[] = $this->mapToDto($payment);
+            $payments[] = (new PosPaymentMapper())->mapToDto($payment);
         }
 
         return $payments;
@@ -131,7 +131,7 @@ final class PaymentProvider extends \Maho\ApiPlatform\Provider
             return null;
         }
 
-        return $this->mapToDto($payment);
+        return (new PosPaymentMapper())->mapToDto($payment);
     }
 
     /**
