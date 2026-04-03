@@ -164,19 +164,19 @@ class Order extends CrudResource
     #[ApiProperty(identifier: true, writable: false, description: 'Order entity ID')]
     public ?int $id = null;
 
-    #[ApiProperty(writable: false, description: 'Human-readable order number (e.g., 100000123)', extraProperties: ['modelField' => 'increment_id'])]
+    #[ApiProperty(writable: false, description: 'Human-readable order number (e.g., 100000123)')]
     public ?string $incrementId = null;
 
-    #[ApiProperty(writable: false, description: 'Customer ID, null for guest orders', extraProperties: ['modelField' => 'customer_id'])]
+    #[ApiProperty(writable: false, description: 'Customer ID, null for guest orders')]
     public ?int $customerId = null;
 
-    #[ApiProperty(writable: false, description: 'Customer email address', extraProperties: ['modelField' => 'customer_email'])]
+    #[ApiProperty(writable: false, description: 'Customer email address')]
     public ?string $customerEmail = null;
 
-    #[ApiProperty(writable: false, description: 'Customer first name', extraProperties: ['modelField' => 'customer_firstname'])]
+    #[ApiProperty(writable: false, description: 'Customer first name')]
     public ?string $customerFirstname = null;
 
-    #[ApiProperty(writable: false, description: 'Customer last name', extraProperties: ['modelField' => 'customer_lastname'])]
+    #[ApiProperty(writable: false, description: 'Customer last name')]
     public ?string $customerLastname = null;
 
     #[ApiProperty(writable: false, description: 'Order status (pending, processing, complete, canceled, etc.)')]
@@ -205,25 +205,25 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Payment method display title', extraProperties: ['computed' => true])]
     public ?string $paymentMethodTitle = null;
 
-    #[ApiProperty(writable: false, description: 'Shipping method code (carrier_method)', extraProperties: ['modelField' => 'shipping_method'])]
+    #[ApiProperty(writable: false, description: 'Shipping method code (carrier_method)')]
     public ?string $shippingMethod = null;
 
-    #[ApiProperty(writable: false, description: 'Shipping method description', extraProperties: ['modelField' => 'shipping_description'])]
+    #[ApiProperty(writable: false, description: 'Shipping method description')]
     public ?string $shippingDescription = null;
 
-    #[ApiProperty(writable: false, description: 'Applied coupon code', extraProperties: ['modelField' => 'coupon_code'])]
+    #[ApiProperty(writable: false, description: 'Applied coupon code')]
     public ?string $couponCode = null;
 
-    #[ApiProperty(writable: false, description: 'Store ID', extraProperties: ['modelField' => 'store_id'])]
+    #[ApiProperty(writable: false, description: 'Store ID')]
     public int $storeId = 1;
 
     #[ApiProperty(writable: false, description: 'Order currency code', extraProperties: ['computed' => true])]
     public string $currency = 'AUD';
 
-    #[ApiProperty(writable: false, description: 'Total number of distinct items', extraProperties: ['modelField' => 'total_item_count'])]
+    #[ApiProperty(writable: false, description: 'Total number of distinct items')]
     public int $totalItemCount = 0;
 
-    #[ApiProperty(writable: false, description: 'Total quantity ordered', extraProperties: ['modelField' => 'total_qty_ordered'])]
+    #[ApiProperty(writable: false, description: 'Total quantity ordered')]
     public float $totalQtyOrdered = 0;
 
     #[ApiProperty(writable: false, description: 'Access token for guest order lookup', extraProperties: ['computed' => true])]
@@ -232,10 +232,10 @@ class Order extends CrudResource
     #[ApiProperty(writable: false, description: 'Change amount for cash payments', extraProperties: ['computed' => true])]
     public ?float $changeAmount = null;
 
-    #[ApiProperty(writable: false, description: 'Order creation date (UTC)', extraProperties: ['modelField' => 'created_at'])]
+    #[ApiProperty(writable: false, description: 'Order creation date (UTC)')]
     public ?string $createdAt = null;
 
-    #[ApiProperty(writable: false, description: 'Last update date (UTC)', extraProperties: ['modelField' => 'updated_at'])]
+    #[ApiProperty(writable: false, description: 'Last update date (UTC)')]
     public ?string $updatedAt = null;
 
     /** @var array<array{note: string|null, createdAt: string, isCustomerNotified: bool, isVisibleOnFront: bool}> */

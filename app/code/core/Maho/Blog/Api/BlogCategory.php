@@ -60,10 +60,7 @@ class BlogCategory extends CrudResource
     public ?string $path = null;
     public int $level = 0;
     public int $position = 0;
-
-    #[ApiProperty(extraProperties: ['modelField' => 'is_active'])]
     public bool $isActive = true;
-
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
     public ?string $metaKeywords = null;

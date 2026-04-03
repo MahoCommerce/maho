@@ -174,7 +174,7 @@ class Customer extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public bool $isSubscribed = false;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'group_id'])]
+    #[ApiProperty(writable: false)]
     public int $groupId = 1;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -187,10 +187,10 @@ class Customer extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public array $addresses = [];
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'created_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'updated_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $updatedAt = null;
 
     /** @var string|null Write-only password for registration */

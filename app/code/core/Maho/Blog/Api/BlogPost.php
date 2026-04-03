@@ -85,9 +85,7 @@ class BlogPost extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $imageUrl = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'publish_date'])]
     public ?string $publishDate = null;
-
     public ?string $publishedAt = null;
     public ?string $metaTitle = null;
     public ?string $metaDescription = null;
@@ -96,7 +94,6 @@ class BlogPost extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
 
-    #[ApiProperty(extraProperties: ['modelField' => 'is_active'])]
     public bool $isActive = true;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -110,10 +107,10 @@ class BlogPost extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $excerpt = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'created_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'updated_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $updatedAt = null;
 
     public static function afterLoad(self $dto, object $model): void

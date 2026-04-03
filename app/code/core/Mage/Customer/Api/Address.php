@@ -196,12 +196,10 @@ class Address extends CrudResource
     public ?string $region = null;
 
     /** @var int|null Region ID (accepts string from frontend, normalized to int in processor) */
-    #[ApiProperty(extraProperties: ['modelField' => 'region_id'])]
     public mixed $regionId = null;
 
     public string $postcode = '';
 
-    #[ApiProperty(extraProperties: ['modelField' => 'country_id'])]
     public string $countryId = '';
 
     public string $telephone = '';

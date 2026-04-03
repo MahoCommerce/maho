@@ -96,7 +96,6 @@ class GiftCard extends CrudResource
     #[ApiProperty(writable: false)]
     public float $balance = 0.0;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'initial_balance'])]
     public float $initialBalance = 0.0;
 
     #[ApiProperty(writable: false)]
@@ -105,7 +104,7 @@ class GiftCard extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['modelField' => 'expires_at'])]
     public ?string $expirationDate = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'currency_code'])]
+    #[ApiProperty(writable: false)]
     public ?string $currencyCode = null;
 
     #[ApiProperty(writable: false)]

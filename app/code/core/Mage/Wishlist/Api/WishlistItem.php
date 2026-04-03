@@ -110,7 +110,6 @@ class WishlistItem extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'product_id'])]
     public ?int $productId = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -135,7 +134,7 @@ class WishlistItem extends CrudResource
 
     public ?string $description = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'added_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $addedAt = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

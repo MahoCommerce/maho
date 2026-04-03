@@ -77,7 +77,6 @@ class NewsletterSubscription extends CrudResource
     #[ApiProperty(extraProperties: ['modelField' => 'subscriber_email'])]
     public ?string $email = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'customer_id'])]
     public ?int $customerId = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

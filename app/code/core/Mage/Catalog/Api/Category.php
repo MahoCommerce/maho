@@ -84,16 +84,14 @@ class Category extends CrudResource
     #[ApiProperty(identifier: true, writable: false)]
     public ?int $id = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'parent_id'])]
     public ?int $parentId = null;
 
     public string $name = '';
     public ?string $description = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'url_key'])]
     public ?string $urlKey = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'url_path'])]
+    #[ApiProperty(writable: false)]
     public ?string $urlPath = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -102,10 +100,8 @@ class Category extends CrudResource
     public int $level = 0;
     public int $position = 0;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'is_active'])]
     public bool $isActive = true;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'include_in_menu'])]
     public bool $includeInMenu = true;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
@@ -122,28 +118,23 @@ class Category extends CrudResource
     #[ApiProperty(writable: false)]
     public ?string $path = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'display_mode'])]
     public ?string $displayMode = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?string $cmsBlock = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'meta_title'])]
     public ?string $metaTitle = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'meta_keywords'])]
     public ?string $metaKeywords = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'meta_description'])]
     public ?string $metaDescription = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'page_layout'])]
     public ?string $pageLayout = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'created_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'updated_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $updatedAt = null;
 
     public static function afterLoad(self $dto, object $model): void

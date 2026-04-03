@@ -116,10 +116,9 @@ class Review extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'pending';
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'created_at'])]
+    #[ApiProperty(writable: false)]
     public ?string $createdAt = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'customer_id'])]
     public ?int $customerId = null;
 
     public static function afterLoad(self $dto, object $model): void

@@ -66,10 +66,8 @@ class StockUpdate extends CrudResource
 
     public float $qty = 0;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'is_in_stock'])]
     public ?bool $isInStock = null;
 
-    #[ApiProperty(extraProperties: ['modelField' => 'manage_stock'])]
     public ?bool $manageStock = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

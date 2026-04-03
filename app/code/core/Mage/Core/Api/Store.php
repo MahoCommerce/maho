@@ -63,7 +63,7 @@ class Store extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public ?int $rootCategoryId = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'is_active'])]
+    #[ApiProperty(writable: false)]
     public bool $isActive = true;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

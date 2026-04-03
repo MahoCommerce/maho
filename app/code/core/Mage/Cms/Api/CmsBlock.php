@@ -79,7 +79,6 @@ class CmsBlock extends CrudResource
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
     public string $status = 'enabled';
 
-    #[ApiProperty(extraProperties: ['modelField' => 'is_active'])]
     public bool $isActive = true;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]

@@ -141,7 +141,7 @@ class Coupon extends CrudResource
 
     public ?string $code = null;
 
-    #[ApiProperty(writable: false, extraProperties: ['modelField' => 'rule_id'])]
+    #[ApiProperty(writable: false)]
     public ?int $ruleId = null;
 
     #[ApiProperty(writable: false, extraProperties: ['computed' => true])]
