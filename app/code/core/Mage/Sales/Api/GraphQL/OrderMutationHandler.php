@@ -16,6 +16,7 @@ namespace Mage\Sales\Api\GraphQL;
 use Mage\Checkout\Api\CartService;
 use Mage\Sales\Api\OrderProvider;
 use Mage\Sales\Api\OrderService;
+use Mage\Sales\Api\PaymentService;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 
