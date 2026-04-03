@@ -1062,14 +1062,7 @@ class CartService
             $payment = $order->getPayment();
             if ($payment && $payment->getIsTransactionClosed() && $order->canInvoice()) {
                 try {
-                    $invoice = $order->prepareInvoice();
-                    $invoice->setRequestedCaptureCase(\Mage_Sales_Model_Order_Invoice::CAPTURE_OFFLINE);
-                    $invoice->register();
-                    $invoice->getOrder()->setIsInProcess(true);
-                    \Mage::getModel('core/resource_transaction')
-                        ->addObject($invoice)
-                        ->addObject($invoice->getOrder())
-                        ->save();
+                    $this->orderService->createInvoiceForOrder($order);
                     \Mage::log("PlaceStorefrontOrder - Auto-invoiced: {$order->getIncrementId()}");
                 } catch (\Exception $e) {
                     \Mage::logException($e);
