@@ -21,6 +21,7 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\GraphQl\Query;
 use ApiPlatform\Metadata\GraphQl\QueryCollection;
 use ApiPlatform\Metadata\GraphQl\Mutation;
+use Maho\ApiPlatform\CrudResource;
 use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
 use Mage\Customer\Api\Address;
 
@@ -155,94 +156,101 @@ use Mage\Customer\Api\Address;
             resolver: CustomQueryResolver::class,
         ),
     ],
+    extraProperties: [
+        'model' => 'sales/order',
+    ],
 )]
-class Order extends \Maho\ApiPlatform\Resource
+class Order extends CrudResource
 {
-    #[ApiProperty(description: 'Order entity ID', writable: false)]
+    #[ApiProperty(identifier: true, writable: false, description: 'Order entity ID')]
     public ?int $id = null;
 
-    #[ApiProperty(description: 'Human-readable order number (e.g., 100000123)', writable: false)]
+    #[ApiProperty(writable: false, description: 'Human-readable order number (e.g., 100000123)', extraProperties: ['modelField' => 'increment_id'])]
     public ?string $incrementId = null;
 
-    #[ApiProperty(description: 'Customer ID, null for guest orders', writable: false)]
+    #[ApiProperty(writable: false, description: 'Customer ID, null for guest orders', extraProperties: ['modelField' => 'customer_id'])]
     public ?int $customerId = null;
 
-    #[ApiProperty(description: 'Customer email address', writable: false)]
+    #[ApiProperty(writable: false, description: 'Customer email address', extraProperties: ['modelField' => 'customer_email'])]
     public ?string $customerEmail = null;
 
-    #[ApiProperty(description: 'Customer first name', writable: false)]
+    #[ApiProperty(writable: false, description: 'Customer first name', extraProperties: ['modelField' => 'customer_firstname'])]
     public ?string $customerFirstname = null;
 
-    #[ApiProperty(description: 'Customer last name', writable: false)]
+    #[ApiProperty(writable: false, description: 'Customer last name', extraProperties: ['modelField' => 'customer_lastname'])]
     public ?string $customerLastname = null;
 
-    #[ApiProperty(description: 'Order status (pending, processing, complete, canceled, etc.)', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order status (pending, processing, complete, canceled, etc.)')]
     public ?string $status = null;
 
-    #[ApiProperty(description: 'Order state (new, processing, complete, closed, canceled)', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order state (new, processing, complete, closed, canceled)')]
     public ?string $state = null;
 
     /** @var OrderItem[] */
-    #[ApiProperty(description: 'Order line items', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order line items', extraProperties: ['computed' => true])]
     public array $items = [];
 
-    #[ApiProperty(readableLink: true, description: 'Billing address', writable: false)]
+    #[ApiProperty(readableLink: true, writable: false, description: 'Billing address', extraProperties: ['computed' => true])]
     public ?Address $billingAddress = null;
 
-    #[ApiProperty(readableLink: true, description: 'Shipping address', writable: false)]
+    #[ApiProperty(readableLink: true, writable: false, description: 'Shipping address', extraProperties: ['computed' => true])]
     public ?Address $shippingAddress = null;
 
     /** @var array<string, float|null> */
-    #[ApiProperty(description: 'Order price totals', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order price totals', extraProperties: ['computed' => true])]
     public array $prices = [];
 
-    #[ApiProperty(description: 'Payment method code', writable: false)]
+    #[ApiProperty(writable: false, description: 'Payment method code', extraProperties: ['computed' => true])]
     public ?string $paymentMethod = null;
 
-    #[ApiProperty(description: 'Payment method display title', writable: false)]
+    #[ApiProperty(writable: false, description: 'Payment method display title', extraProperties: ['computed' => true])]
     public ?string $paymentMethodTitle = null;
 
-    #[ApiProperty(description: 'Shipping method code (carrier_method)', writable: false)]
+    #[ApiProperty(writable: false, description: 'Shipping method code (carrier_method)', extraProperties: ['modelField' => 'shipping_method'])]
     public ?string $shippingMethod = null;
 
-    #[ApiProperty(description: 'Shipping method description', writable: false)]
+    #[ApiProperty(writable: false, description: 'Shipping method description', extraProperties: ['modelField' => 'shipping_description'])]
     public ?string $shippingDescription = null;
 
-    #[ApiProperty(description: 'Applied coupon code', writable: false)]
+    #[ApiProperty(writable: false, description: 'Applied coupon code', extraProperties: ['modelField' => 'coupon_code'])]
     public ?string $couponCode = null;
 
-    #[ApiProperty(description: 'Store ID', writable: false)]
+    #[ApiProperty(writable: false, description: 'Store ID', extraProperties: ['modelField' => 'store_id'])]
     public int $storeId = 1;
 
-    #[ApiProperty(description: 'Order currency code', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order currency code', extraProperties: ['computed' => true])]
     public string $currency = 'AUD';
 
-    #[ApiProperty(description: 'Total number of distinct items', writable: false)]
+    #[ApiProperty(writable: false, description: 'Total number of distinct items', extraProperties: ['modelField' => 'total_item_count'])]
     public int $totalItemCount = 0;
 
-    #[ApiProperty(description: 'Total quantity ordered', writable: false)]
+    #[ApiProperty(writable: false, description: 'Total quantity ordered', extraProperties: ['modelField' => 'total_qty_ordered'])]
     public float $totalQtyOrdered = 0;
 
-    #[ApiProperty(description: 'Access token for guest order lookup', writable: false)]
+    #[ApiProperty(writable: false, description: 'Access token for guest order lookup', extraProperties: ['computed' => true])]
     public ?string $accessToken = null;
 
-    #[ApiProperty(description: 'Change amount for cash payments', writable: false)]
+    #[ApiProperty(writable: false, description: 'Change amount for cash payments', extraProperties: ['computed' => true])]
     public ?float $changeAmount = null;
 
-    #[ApiProperty(description: 'Order creation date (UTC)', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order creation date (UTC)', extraProperties: ['modelField' => 'created_at'])]
     public ?string $createdAt = null;
 
-    #[ApiProperty(description: 'Last update date (UTC)', writable: false)]
+    #[ApiProperty(writable: false, description: 'Last update date (UTC)', extraProperties: ['modelField' => 'updated_at'])]
     public ?string $updatedAt = null;
 
     /** @var array<array{note: string|null, createdAt: string, isCustomerNotified: bool, isVisibleOnFront: bool}> */
-    #[ApiProperty(description: 'Order status change history', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order status change history', extraProperties: ['computed' => true])]
     public array $statusHistory = [];
 
     /** @var Shipment[] */
-    #[ApiProperty(description: 'Order shipments', writable: false)]
+    #[ApiProperty(writable: false, description: 'Order shipments', extraProperties: ['computed' => true])]
     public array $shipments = [];
 
     public function __construct() {}
 
+    public static function afterLoad(self $dto, object $model): void
+    {
+        $dto->currency = $model->getOrderCurrencyCode() ?: \Mage::app()->getStore()->getDefaultCurrencyCode();
+    }
 }
