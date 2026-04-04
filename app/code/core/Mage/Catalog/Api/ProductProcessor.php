@@ -243,7 +243,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             : Mage_Catalog_Model_Product_Status::STATUS_DISABLED;
 
         if ($data->barcode !== null) {
-            $attrData[ProductService::getBarcodeAttributeCode()] = $data->barcode;
+            $attrData['barcode'] = $data->barcode;
         }
         if ($data->pageLayout !== null) {
             $attrData['page_layout'] = $data->pageLayout;
@@ -341,7 +341,7 @@ final class ProductProcessor extends \Maho\ApiPlatform\Processor
             $product->setData('meta_keyword', $data->metaKeywords);
         }
         if ($data->barcode !== null) {
-            $product->setData(ProductService::getBarcodeAttributeCode(), $data->barcode);
+            $product->setData('barcode', $data->barcode);
         }
         if ($data->pageLayout !== null) {
             $product->setData('page_layout', $data->pageLayout);

@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Mage\Catalog\Api\GraphQL;
 
 use Mage\Catalog\Api\ProductProvider;
-use Mage\Catalog\Api\ProductService;
 use Maho\ApiPlatform\Exception\ValidationException;
 
 /**
@@ -26,12 +25,10 @@ use Maho\ApiPlatform\Exception\ValidationException;
  */
 class ProductQueryHandler
 {
-    private ProductService $productService;
     private ProductProvider $productProvider;
 
-    public function __construct(ProductService $productService, ProductProvider $productProvider)
+    public function __construct(ProductProvider $productProvider)
     {
-        $this->productService = $productService;
         $this->productProvider = $productProvider;
     }
 
@@ -44,8 +41,8 @@ class ProductQueryHandler
         if (!$id) {
             throw ValidationException::requiredField('id');
         }
-        $product = $this->productService->getProductById((int) $id);
-        return ['product' => $product ? $this->productProvider->toDto($product)->toArray() : null];
+        $product = \Mage::getModel('catalog/product')->load((int) $id);
+        return ['product' => $product->getId() ? $this->productProvider->toDto($product)->toArray() : null];
     }
 
     /**
@@ -57,8 +54,9 @@ class ProductQueryHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $product = $this->productService->getProductBySku($sku);
-        return ['productBySku' => $product ? $this->productProvider->toDto($product)->toArray() : null];
+        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
+        $dto = $product instanceof \Mage_Catalog_Model_Product ? $this->productProvider->toDto($product)->toArray() : null;
+        return ['productBySku' => $dto];
     }
 
     /**
@@ -70,8 +68,12 @@ class ProductQueryHandler
         if (!$barcode) {
             throw ValidationException::requiredField('barcode');
         }
-        $product = $this->productService->getProductByBarcode($barcode);
-        return ['productByBarcode' => $product ? $this->productProvider->toDto($product)->toArray() : null];
+        $product = \Mage::getModel('catalog/product')
+            ->getCollection()
+            ->addAttributeToFilter('barcode', $barcode)
+            ->getFirstItem();
+        /** @var \Mage_Catalog_Model_Product $product */
+        return ['productByBarcode' => $product->getId() ? $this->productProvider->toDto($product)->toArray() : null];
     }
 
     /**
@@ -82,21 +84,40 @@ class ProductQueryHandler
         $search = $variables['search'] ?? $variables['query'] ?? '';
         $page = $variables['page'] ?? 1;
         $pageSize = $variables['pageSize'] ?? $variables['limit'] ?? 20;
-        $storeId = $variables['storeId'] ?? $context['store_id'] ?? null;
         $categoryId = $variables['categoryId'] ?? null;
 
-        $filters = [];
-        if ($categoryId) {
-            $filters['categoryId'] = $categoryId;
+        // Use search layer for text queries, catalog layer for browsing
+        if (!empty($search)) {
+            \Mage::helper('catalogsearch')->getQuery()->setQueryText($search);
+            $layer = \Mage::getSingleton('catalogsearch/layer');
+        } else {
+            $layer = \Mage::getSingleton('catalog/layer');
         }
 
-        $result = $this->productService->searchProducts($search, $page, $pageSize, $filters, null, $storeId);
-        $edges = array_values(array_map(fn($p) => ['node' => $this->mapForRelay($p)], $result['products'] ?? []));
+        if ($categoryId) {
+            $category = \Mage::getModel('catalog/category')->load((int) $categoryId);
+            if ($category->getId()) {
+                $layer->setCurrentCategory($category);
+            }
+        }
+
+        $collection = $layer->getProductCollection();
+        $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+        $collection->setOrder('name', 'ASC');
+
+        $total = $collection->getSize();
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+
+        $edges = [];
+        foreach ($collection as $product) {
+            $edges[] = ['node' => $this->mapForRelay($product)];
+        }
 
         return ['products' => [
             'edges' => $edges,
             'pageInfo' => [
-                'totalCount' => $result['total'] ?? 0,
+                'totalCount' => $total,
                 'currentPage' => $page,
                 'pageSize' => $pageSize,
             ],
@@ -112,30 +133,19 @@ class ProductQueryHandler
         if (!$sku) {
             throw ValidationException::requiredField('sku');
         }
-        $product = $this->productService->getProductBySku($sku);
-        if (!$product) {
+        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
+        if (!$product instanceof \Mage_Catalog_Model_Product) {
             return ['getConfigurableProduct' => null];
         }
 
-        // toDto with forListing: false loads configurable options, variants, etc.
         return ['getConfigurableProduct' => $this->productProvider->toDto($product)->toArray()];
     }
 
     /**
-     * Map a product to relay-style format for paginated GraphQL responses.
-     *
-     * Accepts either a Mage model or a search-index array (Meilisearch).
-     * For models, delegates to the Provider DTO to ensure events fire.
-     * For arrays (search results), maps directly since there's no model to load.
-     *
-     * @param \Mage_Catalog_Model_Product|array $product
+     * Map a product model to relay-style format for paginated GraphQL responses.
      */
-    public function mapForRelay($product, bool $includeConfigurableData = false): array
+    public function mapForRelay(\Mage_Catalog_Model_Product $product, bool $includeConfigurableData = false): array
     {
-        if (is_array($product)) {
-            return $this->mapSearchResultForRelay($product, $includeConfigurableData);
-        }
-
         $dto = $this->productProvider->toDto($product, forListing: true);
         $typeName = $this->getProductTypeName($product->getTypeId());
 
@@ -154,45 +164,6 @@ class ProductQueryHandler
         if ($includeConfigurableData && !empty($dto->configurableOptions)) {
             $result['configurableOptions'] = $dto->configurableOptions;
             $result['variants'] = $dto->variants;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Map a search-index array (Meilisearch) result to relay format.
-     * No model available — map directly from the array.
-     */
-    private function mapSearchResultForRelay(array $product, bool $includeConfigurableData = false): array
-    {
-        $stockStatus = $product['stock_status'] ?? 'out_of_stock';
-        $type = $product['type'] ?? $product['type_id'] ?? \Mage_Catalog_Model_Product_Type::TYPE_SIMPLE;
-        $imageUrl = $product['thumbnail_url'] ?? $product['image_url'] ?? null;
-        if ($imageUrl && str_contains($imageUrl, 'placeholder')) {
-            $imageUrl = $product['thumbnail_url'] ?? $imageUrl;
-        }
-        $typeName = $this->getProductTypeName($type);
-
-        $result = [
-            '__typename' => $typeName,
-            'id' => (int) ($product['id'] ?? $product['objectID'] ?? 0),
-            'sku' => $product['sku'] ?? '',
-            'name' => $product['name'] ?? '',
-            'type' => strtoupper($type),
-            'finalPrice' => ['value' => (float) ($product['final_price'] ?? $product['price'] ?? 0)],
-            'stockStatus' => strtoupper(str_replace('-', '_', $stockStatus)),
-            'stockQty' => (int) ($product['stock_qty'] ?? 0),
-            'images' => $imageUrl ? [['url' => $imageUrl, 'label' => $product['name'] ?? '']] : [],
-        ];
-
-        // For configurable products from Meilisearch, load full product to get options
-        if ($includeConfigurableData && $type === \Mage_Catalog_Model_Product_Type::TYPE_CONFIGURABLE) {
-            $fullProduct = \Mage::getModel('catalog/product')->load($result['id']);
-            if ($fullProduct->getId()) {
-                $dto = $this->productProvider->toDto($fullProduct);
-                $result['configurableOptions'] = $dto->configurableOptions;
-                $result['variants'] = $dto->variants;
-            }
         }
 
         return $result;

@@ -363,7 +363,7 @@ class Product extends CrudResource
             $dto->minimalPrice = (float) $minimalPrice;
         }
 
-        $dto->barcode = $model->getData(ProductService::getBarcodeAttributeCode()) ?: null;
+        $dto->barcode = $model->getData('barcode') ?: null;
 
         static $mediaConfig = null;
         $mediaConfig ??= \Mage::getModel('catalog/product_media_config');
@@ -395,7 +395,7 @@ class Product extends CrudResource
     }
 
     /**
-     * Create a Product DTO from an associative array (e.g. cached or Meilisearch data).
+     * Create a Product DTO from an associative array.
      * Only sets properties that exist on the class; unknown keys are ignored.
      */
     public static function fromArray(array $data): self

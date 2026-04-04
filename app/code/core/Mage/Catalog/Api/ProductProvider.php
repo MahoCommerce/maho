@@ -23,59 +23,11 @@ use Maho\ApiPlatform\Service\StoreContext;
  */
 final class ProductProvider extends \Maho\ApiPlatform\Provider
 {
-    private ?ProductService $productService = null;
     private ?\Mage_Catalog_Model_Product_Media_Config $mediaConfig = null;
 
     private function getMediaConfig(): \Mage_Catalog_Model_Product_Media_Config
     {
         return $this->mediaConfig ??= \Mage::getModel('catalog/product_media_config');
-    }
-
-    /**
-     * Get or initialize ProductService (lazy initialization after store context is set)
-     */
-    private function getProductService(): ProductService
-    {
-        if ($this->productService !== null) {
-            return $this->productService;
-        }
-
-        // Try to use Meilisearch for better performance (via Meilisearch extension config)
-        $meilisearchClient = null;
-        $indexBaseName = null;
-
-        try {
-            // Check if Meilisearch module is installed and enabled
-            if (\Mage::helper('core')->isModuleEnabled('Meilisearch_Search')) {
-                $helperAlias = 'meilisearch_search/config';
-                $helperClass = \Mage::getConfig()->getHelperClassName($helperAlias);
-
-                if (class_exists($helperClass)) {
-                    $configHelper = new $helperClass();
-
-                    if (method_exists($configHelper, 'getServerUrl') && method_exists($configHelper, 'getAPIKey')) {
-                        $host = $configHelper->getServerUrl();
-                        $apiKey = $configHelper->getAPIKey();
-                        $indexPrefix = rtrim(
-                            (method_exists($configHelper, 'getIndexPrefix') ? $configHelper->getIndexPrefix() : null) ?: 'maho',
-                            '_',
-                        );
-
-                        if ($host && $apiKey && class_exists(\Meilisearch\Client::class)) {
-                            $meilisearchClient = new \Meilisearch\Client($host, $apiKey);
-                            $storeCode = StoreContext::getStoreCode() ?: 'default';
-                            $indexBaseName = $indexPrefix . '_' . $storeCode;
-                        }
-                    }
-                }
-            }
-        } catch (\Throwable $e) {
-            // Fall back to MySQL if Meilisearch fails or extension not installed
-            \Mage::log('Meilisearch init failed: ' . $e->getMessage(), \Mage::LOG_WARNING);
-        }
-
-        $this->productService = new ProductService($meilisearchClient, $indexBaseName);
-        return $this->productService;
     }
 
     /**
@@ -86,7 +38,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     #[\Override]
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): TraversablePaginator|Product|null
     {
-        // Ensure valid store context (MUST happen before getProductService)
+        // Ensure valid store context
         StoreContext::ensureStore();
 
         // Handle custom GraphQL queries
@@ -135,12 +87,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             }
         }
 
-        $mahoProduct = $this->getProductService()->getProductById($id);
-        if (!$mahoProduct) {
+        $product = \Mage::getModel('catalog/product')->load($id);
+        if (!$product->getId()) {
             return null;
         }
 
-        $dto = $this->toDto($mahoProduct);
+        $dto = $this->toDto($product);
 
         \Mage::app()->getCache()->save(
             (string) json_encode($dto->toArray()),
@@ -157,8 +109,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     private function getProductBySku(string $sku): ?Product
     {
-        $mahoProduct = $this->getProductService()->getProductBySku($sku);
-        return $mahoProduct ? $this->toDto($mahoProduct) : null;
+        $product = \Mage::getModel('catalog/product')->loadByAttribute('sku', $sku);
+        return $product instanceof \Mage_Catalog_Model_Product ? $this->toDto($product) : null;
     }
 
     /**
@@ -166,8 +118,12 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
      */
     private function getProductByBarcode(string $barcode): ?Product
     {
-        $mahoProduct = $this->getProductService()->getProductByBarcode($barcode);
-        return $mahoProduct ? $this->toDto($mahoProduct) : null;
+        $product = \Mage::getModel('catalog/product')
+            ->getCollection()
+            ->addAttributeToFilter('barcode', $barcode)
+            ->getFirstItem();
+        /** @var \Mage_Catalog_Model_Product $product */
+        return $product->getId() ? $this->toDto($product) : null;
     }
 
     /**
@@ -254,27 +210,33 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             return $this->getByUrlKey((string) $requestFilters['urlKey'], $page, $pageSize);
         }
 
-        // Build filters for ProductService
-        $serviceFilters = [];
-        if (!empty($requestFilters['categoryId'])) {
-            $serviceFilters['categoryId'] = (int) $requestFilters['categoryId'];
-        }
-        // Map priceMin/priceMax to priceFrom/priceTo for ProductService
-        if (!empty($requestFilters['priceMin'])) {
-            $serviceFilters['priceFrom'] = (float) $requestFilters['priceMin'];
-        }
-        if (!empty($requestFilters['priceMax'])) {
-            $serviceFilters['priceTo'] = (float) $requestFilters['priceMax'];
+        // Use search layer for text queries, catalog layer for browsing
+        if (!empty($search)) {
+            \Mage::helper('catalogsearch')->getQuery()->setQueryText($search);
+            $layer = \Mage::getSingleton('catalogsearch/layer');
+        } else {
+            $layer = \Mage::getSingleton('catalog/layer');
         }
 
-        // Build sort
-        $sort = null;
-        if (!empty($requestFilters['sortBy'])) {
-            $sortDir = ($requestFilters['sortDir'] ?? 'asc') === 'desc' ? 'DESC' : 'ASC';
-            $sort = [
-                'field' => $requestFilters['sortBy'],
-                'direction' => $sortDir,
-            ];
+        if (!empty($requestFilters['categoryId'])) {
+            $category = \Mage::getModel('catalog/category')->load((int) $requestFilters['categoryId']);
+            if ($category->getId()) {
+                $layer->setCurrentCategory($category);
+            }
+        }
+
+        $collection = $layer->getProductCollection();
+        $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+
+        if (!empty($requestFilters['priceMin']) || !empty($requestFilters['priceMax'])) {
+            $priceFilter = [];
+            if (!empty($requestFilters['priceMin'])) {
+                $priceFilter['from'] = (string) (float) $requestFilters['priceMin'];
+            }
+            if (!empty($requestFilters['priceMax'])) {
+                $priceFilter['to'] = (string) (float) $requestFilters['priceMax'];
+            }
+            $collection->addAttributeToFilter('price', $priceFilter);
         }
 
         // Extract attribute filters — REST uses attr_ prefix, GraphQL uses JSON string
@@ -290,24 +252,35 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                 $attributeFilters[substr($key, 5)] = $value;
             }
         }
+        foreach ($attributeFilters as $code => $value) {
+            if (preg_match('/^[a-z][a-z0-9_]*$/', $code)) {
+                $collection->addAttributeToFilter($code, $value);
+            }
+        }
 
-        $result = $this->getProductService()->searchProducts(
-            query: $search,
-            page: $page,
-            pageSize: $pageSize,
-            filters: $serviceFilters,
-            sort: $sort,
-            storeId: StoreContext::getStoreId(),
-            attributeFilters: $attributeFilters,
-        );
+        if (!empty($requestFilters['sortBy'])) {
+            $sortDir = ($requestFilters['sortDir'] ?? 'asc') === 'desc' ? 'DESC' : 'ASC';
+            $collection->setOrder($requestFilters['sortBy'], $sortDir);
+        } else {
+            $collection->setOrder('name', 'ASC');
+        }
+
+        $total = $collection->getSize();
+        $collection->setPageSize($pageSize);
+        $collection->setCurPage($page);
+
+        $result = [
+            'products' => iterator_to_array($collection),
+            'total' => $total,
+        ];
 
         // Collect product IDs for batch operations
         $productIds = [];
-        $mahoProducts = [];
+        $products = [];
         foreach ($result['products'] as $product) {
             if ($product instanceof \Mage_Catalog_Model_Product) {
                 $productIds[] = (int) $product->getId();
-                $mahoProducts[] = $product;
+                $products[] = $product;
             }
         }
 
@@ -461,7 +434,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
 
             $childIds = array_map(fn($c) => $c->getId(), $childProducts);
             $stockByChild = $this->batchLoadStockItems($childIds);
-            $barcodeAttr = ProductService::getBarcodeAttributeCode();
 
             $dto->variants = [];
             foreach ($childProducts as $child) {
@@ -479,8 +451,8 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
                     'inStock' => $si ? (bool) $si->getIsInStock() : false,
                     'attributes' => $attrs,
                 ];
-                if ($barcodeAttr && $child->getData($barcodeAttr)) {
-                    $variant['barcode'] = (string) $child->getData($barcodeAttr);
+                if ($child->getData('barcode')) {
+                    $variant['barcode'] = (string) $child->getData('barcode');
                 }
                 if ($child->getImage() && $child->getImage() !== 'no_selection') {
                     $variant['imageUrl'] = $mediaConfig->getMediaUrl($child->getImage());

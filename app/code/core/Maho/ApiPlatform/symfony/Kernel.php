@@ -224,9 +224,6 @@ class Kernel extends BaseKernel
             ->arg('$providerLocator', tagged_locator('maho.api.state_provider'))
             ->tag('api_platform.graphql.query_resolver');
 
-        $services->set(\Mage\Catalog\Api\ProductService::class)
-            ->factory([new Reference(Factory\ServiceFactory::class), 'createProductService']);
-
         $services->set(EventListener\DefaultDenyListener::class)
             ->arg('$resourceMetadataFactory', new Reference('api_platform.metadata.resource.metadata_collection_factory'))
             ->tag('kernel.event_listener', ['event' => 'kernel.request', 'priority' => 28]);
