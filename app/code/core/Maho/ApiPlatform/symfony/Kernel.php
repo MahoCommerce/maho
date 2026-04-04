@@ -232,7 +232,8 @@ class Kernel extends BaseKernel
     protected function configureRoutes(RoutingConfigurator $routes): void
     {
         $routes->import('.', 'api_platform')->prefix('/api');
-        $routes->import('%kernel.project_dir%/Controller/', 'attribute');
+        // Controller routes loaded via Maho routing, not Symfony attributes
+        // $routes->import('%kernel.project_dir%/Controller/', 'attribute');
     }
 
     /**
