@@ -50,6 +50,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Post(
             uriTemplate: '/customers',
             description: 'Create a new customer (register)',
+            security: 'true',
         ),
         new Put(
             uriTemplate: '/customers/me',
@@ -67,16 +68,19 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             uriTemplate: '/customers/forgot-password',
             name: 'forgot_password_rest',
             description: 'Request password reset email',
+            security: 'true',
         ),
         new Post(
             uriTemplate: '/customers/reset-password',
             name: 'reset_password_rest',
             description: 'Reset password with token',
+            security: 'true',
         ),
         new Post(
             uriTemplate: '/customers/create-from-order',
             name: 'create_from_order',
             description: 'Create customer account from a placed guest order',
+            security: 'true',
         ),
     ],
     graphQlOperations: [
@@ -150,6 +154,7 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
                 'newPassword' => ['type' => 'String!'],
             ],
             description: 'Reset password with token',
+            security: 'true',
         ),
     ],
 )]

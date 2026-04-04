@@ -62,7 +62,7 @@ class AuthToken extends \Maho\ApiPlatform\Resource
     public ?array $apiUser = null;
 
     #[ApiProperty(description: 'Customer cart ID')]
-    public ?int $cartId = null;
+    public int|string|null $cartId = null;
 
     #[ApiProperty(description: 'Customer cart masked ID')]
     public ?string $cartMaskedId = null;
