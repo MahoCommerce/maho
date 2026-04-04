@@ -23,10 +23,16 @@ class Maho_AdminActivityLog_Model_Activity extends Mage_Core_Model_Abstract
             return $this;
         }
 
-        $adminUser = Mage::getSingleton('admin/session')->getUser();
-        if ($adminUser) {
-            $data['user_id'] = $adminUser->getId();
-            $data['username'] = $adminUser->getUsername();
+        // Support both admin user and API consumer
+        if (isset($data['consumer_id'])) {
+            $data['user_id'] = null;
+            // Username will be set by caller as "API: ConsumerName"
+        } else {
+            $adminUser = Mage::getSingleton('admin/session')->getUser();
+            if ($adminUser) {
+                $data['user_id'] = $adminUser->getId();
+                $data['username'] = $adminUser->getUsername();
+            }
         }
 
         $data['ip_address'] ??= Mage::helper('core/http')->getRemoteAddr();

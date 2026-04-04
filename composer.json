@@ -63,7 +63,15 @@
         "symfony/polyfill-php84": "^1.31",
         "symfony/polyfill-php85": "^1.32",
         "symfony/validator": "^7.4",
-        "symfony/var-dumper": "^7.4"
+        "symfony/var-dumper": "^7.4",
+        "api-platform/core": "^4.3",
+        "nelmio/cors-bundle": "^2.6",
+        "symfony/expression-language": "^7.4",
+        "symfony/framework-bundle": "^7.4",
+        "symfony/security-bundle": "^7.4",
+        "symfony/twig-bundle": "^7.4",
+        "webonyx/graphql-php": "^15.31",
+        "lcobucci/jwt": "^5.6"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
@@ -108,7 +116,8 @@
     "autoload": {
         "psr-4": {
             "MahoCLI\\": "lib/MahoCLI",
-            "Maho\\": "lib/Maho"
+            "Maho\\": "lib/Maho",
+            "Maho\\ApiPlatform\\": "app/code/core/Maho/ApiPlatform/symfony/"
         }
     },
     "autoload-dev": {
