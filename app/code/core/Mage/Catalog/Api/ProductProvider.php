@@ -297,7 +297,6 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
             pageSize: $pageSize,
             filters: $serviceFilters,
             sort: $sort,
-            usePosIndex: false,
             storeId: StoreContext::getStoreId(),
             attributeFilters: $attributeFilters,
         );
