@@ -224,9 +224,11 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isJobEnabled(string $jobCode): bool
     {
-        $node = Mage::getConfig()->getNode("crontab/jobs/{$jobCode}/schedule/enabled")
-            ?? Mage::getConfig()->getNode("default/crontab/jobs/{$jobCode}/schedule/enabled");
-        return $node === null || (string) $node !== '0';
+        $node = Mage::getConfig()->getNode("crontab/jobs/{$jobCode}/schedule/enabled");
+        if ($node === false) {
+            $node = Mage::getConfig()->getNode("default/crontab/jobs/{$jobCode}/schedule/enabled");
+        }
+        return $node === false || (string) $node !== '0';
     }
 
     public function setJobEnabled(string $jobCode, bool $enabled): void
