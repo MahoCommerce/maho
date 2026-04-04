@@ -39,24 +39,29 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
 
         $context = $this->detector->detect($text, $line, $character);
 
+        $range = [
+            'start' => ['line' => $line, 'character' => $context['prefixStart']],
+            'end' => ['line' => $line, 'character' => $character],
+        ];
+
         return match ($context['context']) {
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_MODEL_ALIAS
-                => $this->completeAliases('model', $context['prefix']),
+                => $this->completeAliases('model', $context['prefix'], $range),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_HELPER_ALIAS
-                => $this->completeAliases('helper', $context['prefix']),
+                => $this->completeAliases('helper', $context['prefix'], $range),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_BLOCK_ALIAS
-                => $this->completeAliases('block', $context['prefix']),
+                => $this->completeAliases('block', $context['prefix'], $range),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_RESOURCE_MODEL_ALIAS
-                => $this->completeAliases('resource_model', $context['prefix']),
+                => $this->completeAliases('resource_model', $context['prefix'], $range),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_CONFIG_PATH
-                => $this->completeConfigPaths($context['prefix']),
+                => $this->completeConfigPaths($context['prefix'], $range),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_EVENT_NAME
-                => $this->completeEventNames($context['prefix']),
+                => $this->completeEventNames($context['prefix'], $range),
             default => ['isIncomplete' => false, 'items' => []],
         };
     }
 
-    private function completeAliases(string $type, string $prefix): array
+    private function completeAliases(string $type, string $prefix, array $range): array
     {
         $aliases = $this->registry->get('classAlias', 'getAllAliases', [$type]);
 
@@ -71,7 +76,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
                 'kind' => 6, // CompletionItemKind.Variable
                 'detail' => $info['class'],
                 'documentation' => $info['class'],
-                'insertText' => $alias,
+                'textEdit' => ['range' => $range, 'newText' => $alias],
             ];
 
             if (count($items) >= 200) {
@@ -82,7 +87,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
         return ['isIncomplete' => false, 'items' => $items];
     }
 
-    private function completeConfigPaths(string $prefix): array
+    private function completeConfigPaths(string $prefix, array $range): array
     {
         $paths = $this->registry->get('configPath', 'getAllPaths');
 
@@ -102,7 +107,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
                 'kind' => 10, // CompletionItemKind.Property
                 'detail' => $detail,
                 'documentation' => "{$info['section_label']} > {$info['group_label']} > {$info['label']}",
-                'insertText' => $path,
+                'textEdit' => ['range' => $range, 'newText' => $path],
             ];
 
             if (count($items) >= 200) {
@@ -113,7 +118,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
         return ['isIncomplete' => false, 'items' => $items];
     }
 
-    private function completeEventNames(string $prefix): array
+    private function completeEventNames(string $prefix, array $range): array
     {
         $allEvents = $this->registry->get('event', 'getAllEvents');
 
@@ -135,7 +140,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
                     'label' => $name,
                     'kind' => 23, // CompletionItemKind.Event
                     'detail' => "{$observerCount} observer(s) in {$area}",
-                    'insertText' => $name,
+                    'textEdit' => ['range' => $range, 'newText' => $name],
                 ];
 
                 if (count($items) >= 200) {

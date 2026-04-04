@@ -53,13 +53,13 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     /**
      * Detect what context the cursor is in for completion.
      *
-     * @return array{context: string, prefix: string}
+     * @return array{context: string, prefix: string, prefixStart: int}
      */
     public function detect(string $text, int $line, int $character): array
     {
         $lines = explode("\n", $text);
         if (!isset($lines[$line])) {
-            return ['context' => self::CONTEXT_NONE, 'prefix' => ''];
+            return ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
         }
 
         $lineText = $lines[$line];
@@ -68,15 +68,17 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         foreach (self::PATTERNS as $context => $patterns) {
             foreach ($patterns as $pattern) {
                 if (preg_match($pattern, $textBeforeCursor, $matches)) {
+                    $prefix = $matches[1] ?? '';
                     return [
                         'context' => $context,
-                        'prefix' => $matches[1] ?? '',
+                        'prefix' => $prefix,
+                        'prefixStart' => $character - strlen($prefix),
                     ];
                 }
             }
         }
 
-        return ['context' => self::CONTEXT_NONE, 'prefix' => ''];
+        return ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
     }
 
     /**
