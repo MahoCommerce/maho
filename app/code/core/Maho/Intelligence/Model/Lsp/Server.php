@@ -94,9 +94,9 @@ class Maho_Intelligence_Model_Lsp_Server
         }
 
         // Requests (have id) — must send a response
-        $result = $this->handleRequest($method, $params);
+        [$found, $result] = $this->handleRequest($method, $params);
 
-        if ($result === null) {
+        if (!$found) {
             $this->sendError($id, -32601, "Method not found: {$method}");
         } else {
             $this->sendResult($id, $result);
@@ -115,15 +115,18 @@ class Maho_Intelligence_Model_Lsp_Server
         };
     }
 
-    private function handleRequest(?string $method, array $params): ?array
+    /**
+     * @return array{bool, mixed} [methodFound, result]
+     */
+    private function handleRequest(?string $method, array $params): array
     {
         return match ($method) {
-            'initialize' => $this->handleInitialize($params),
-            'shutdown' => $this->handleShutdown(),
-            'textDocument/completion' => $this->completionHandler->handle($params),
-            'textDocument/definition' => $this->definitionHandler->handle($params),
-            'textDocument/hover' => $this->hoverHandler->handle($params),
-            default => null,
+            'initialize' => [true, $this->handleInitialize($params)],
+            'shutdown' => [true, $this->handleShutdown()],
+            'textDocument/completion' => [true, $this->completionHandler->handle($params)],
+            'textDocument/definition' => [true, $this->definitionHandler->handle($params)],
+            'textDocument/hover' => [true, $this->hoverHandler->handle($params)],
+            default => [false, null],
         };
     }
 
@@ -149,10 +152,10 @@ class Maho_Intelligence_Model_Lsp_Server
         ];
     }
 
-    private function handleShutdown(): array
+    private function handleShutdown(): null
     {
         $this->shutdownRequested = true;
-        return [];
+        return null;
     }
 
     private function handleDidOpen(array $params): void
