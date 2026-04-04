@@ -243,10 +243,6 @@ class AdminGraphQlController
             // Order operations (camelCase)
             'placeOrder', 'PlaceOrder'
                 => $this->orderHandler->handlePlaceOrder($variables, $context),
-            'placeOrderWithSplitPayments', 'PlaceOrderWithSplitPayments'
-                => $this->orderHandler->handlePlaceOrderWithSplitPayments($variables, $context),
-            'orderPayments', 'getOrderPayments', 'GetOrderPayments'
-                => $this->orderHandler->handleOrderPayments($variables),
             'lookupOrder', 'getOrderByIncrementId', 'LookupOrder'
                 => $this->orderHandler->handleLookupOrder($variables),
             'customerOrders', 'getCustomerOrders', 'CustomerOrders'

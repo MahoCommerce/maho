@@ -16,7 +16,6 @@ namespace Mage\Sales\Api;
 use ApiPlatform\Metadata\Operation;
 use Mage\Checkout\Api\CartService;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -29,7 +28,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     private CartService $cartService;
     private OrderProvider $orderProvider;
     private OrderService $orderService;
-    private PaymentService $paymentService;
 
     public function __construct(Security $security)
     {
@@ -37,14 +35,13 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         $this->cartService = new CartService();
         $this->orderProvider = new OrderProvider($security);
         $this->orderService = new OrderService();
-        $this->paymentService = new PaymentService();
     }
 
     /**
      * Process order mutations
      */
     #[\Override]
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Order|PlaceOrderWithSplitPaymentsResult|PosPayment
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Order
     {
         $operationName = $operation->getName();
 
@@ -56,8 +53,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         return match ($operationName) {
             'placeOrder', '_api_/orders_post', 'place_guest_order' => $this->placeOrder($context),
             'cancelOrder' => $this->cancelOrder($context),
-            'placeOrderWithSplitPayments' => $this->placeOrderWithSplitPayments($context),
-            'recordPayment' => $this->recordPayment($context),
             'verify_order' => $this->verifyOrder($context),
             default => $data instanceof Order ? $data : new Order(),
         };
@@ -165,195 +160,6 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
     }
 
     /**
-     * Place order with split payments (POS)
-     */
-    private function placeOrderWithSplitPayments(array $context): PlaceOrderWithSplitPaymentsResult
-    {
-        // POS operation — require admin, POS, or API user role
-        if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
-            throw new AccessDeniedHttpException('Admin, POS, or API user access required for split payments');
-        }
-
-        $args = $context['args']['input'] ?? [];
-        $cartId = $args['cartId'] ?? null;
-        $maskedId = $args['maskedId'] ?? null;
-        $payments = $args['payments'] ?? [];
-        $registerId = (int) ($args['registerId'] ?? 1);
-        $shippingMethod = $args['shippingMethod'] ?? null;
-        $employeeId = isset($args['employeeId']) ? (int) $args['employeeId'] : null;
-
-        if (!$cartId && !$maskedId) {
-            throw new BadRequestHttpException('Cart ID or masked ID is required');
-        }
-
-        if (empty($payments)) {
-            throw new BadRequestHttpException('At least one payment is required');
-        }
-
-        // Get quote
-        $quote = $this->cartService->getCart(
-            $cartId ? (int) $cartId : null,
-            $maskedId,
-        );
-
-        if (!$quote) {
-            throw new NotFoundHttpException('Cart not found');
-        }
-
-        // Apply POS defaults (address, shipping, payment, email)
-        $this->cartService->preparePosQuote(
-            $quote,
-            $shippingMethod,
-            'maho_pos_split',
-        );
-
-        $quote->collectTotals();
-        $quote->save();
-
-        // Validate payment total
-        $totalPayment = 0.0;
-        foreach ($payments as $paymentData) {
-            $totalPayment += (float) ($paymentData['amount'] ?? 0);
-        }
-
-        $grandTotal = (float) $quote->getGrandTotal();
-        if ($totalPayment < $grandTotal - 0.01) {
-            throw new BadRequestHttpException(
-                "Insufficient payment: total payment ({$totalPayment}) is less than order total ({$grandTotal})",
-            );
-        }
-
-        // Place order
-        $result = $this->orderService->placeAdminOrder(
-            $quote,
-            null,
-            null,
-            null,
-            $employeeId,
-        );
-
-        $order = $result['order'];
-
-        // Normalize payment data keys for PaymentService
-        $normalizedPayments = array_map(fn($p) => [
-            'methodCode' => $p['method'] ?? $p['methodCode'] ?? 'cash',
-            'amount' => (float) $p['amount'],
-            'cardType' => $p['cardType'] ?? null,
-            'cardLast4' => $p['cardLast4'] ?? null,
-            'authCode' => $p['authCode'] ?? null,
-            'transactionId' => $p['transactionId'] ?? null,
-            'terminalId' => $p['terminalId'] ?? null,
-        ], $payments);
-
-        $createdPayments = $this->paymentService->recordMultiplePayments(
-            (int) $order->getId(),
-            $registerId,
-            $normalizedPayments,
-        );
-
-        $savedPayments = array_map(
-            fn($p) => PosPayment::fromModel($p),
-            $createdPayments,
-        );
-
-        // Create invoice and shipment
-        $invoiceDto = null;
-        $shipmentDto = null;
-
-        try {
-            $invoice = $this->orderService->createInvoiceForOrder($order);
-            if ($invoice) {
-                $invoiceDto = new Invoice();
-                $invoiceDto->id = (int) $invoice->getId();
-                $invoiceDto->incrementId = $invoice->getIncrementId();
-                $invoiceDto->orderId = (int) $order->getId();
-                $invoiceDto->grandTotal = (float) $invoice->getGrandTotal();
-                $invoiceDto->state = (int) $invoice->getState();
-                $invoiceDto->createdAt = $invoice->getCreatedAt();
-            }
-
-            $shipment = $this->orderService->createShipmentForOrder($order);
-            if ($shipment) {
-                $shipmentDto = new Shipment();
-                $shipmentDto->id = (int) $shipment->getId();
-                $shipmentDto->incrementId = $shipment->getIncrementId();
-                $shipmentDto->orderId = (int) $order->getId();
-                $shipmentDto->totalQty = (int) $shipment->getTotalQty();
-                $shipmentDto->createdAt = $shipment->getCreatedAt();
-            }
-
-            // Reload order to get updated state
-            $order->load($order->getId());
-        } catch (\Exception $e) {
-            \Mage::logException($e);
-        }
-
-        // Calculate change amount (for cash payments)
-        $changeAmount = max(0, $totalPayment - $grandTotal);
-
-        // Build result
-        $resultDto = new PlaceOrderWithSplitPaymentsResult();
-        $resultDto->order = $this->orderProvider->mapToDto($order);
-        $resultDto->payments = $savedPayments;
-        $resultDto->changeAmount = $changeAmount > 0 ? round($changeAmount, 2) : null;
-        $resultDto->invoice = $invoiceDto;
-        $resultDto->shipment = $shipmentDto;
-
-        return $resultDto;
-    }
-
-    /**
-     * Record a payment against an order
-     */
-    private function recordPayment(array $context): PosPayment
-    {
-        // recordPayment is a POS operation — require admin, POS, or API user role
-        if (!$this->isAdmin() && !$this->isPosUser() && !$this->isApiUser()) {
-            throw new AccessDeniedHttpException('Admin, POS, or API user access required to record payments');
-        }
-
-        $args = $context['args']['input'] ?? [];
-        $orderId = (int) ($args['orderId'] ?? 0);
-        $method = $args['method'] ?? $args['methodCode'] ?? 'cash';
-        $amount = (float) ($args['amount'] ?? 0);
-        $registerId = (int) ($args['registerId'] ?? 1);
-        $transactionId = $args['transactionId'] ?? null;
-        $terminalId = $args['terminalId'] ?? null;
-        $cardType = $args['cardType'] ?? null;
-        $cardLast4 = $args['cardLast4'] ?? null;
-        $authCode = $args['authCode'] ?? null;
-
-        if (!$orderId) {
-            throw new BadRequestHttpException('Order ID is required');
-        }
-
-        if ($amount <= 0) {
-            throw new BadRequestHttpException('Amount must be greater than 0');
-        }
-
-        // Verify order exists
-        $order = \Mage::getModel('sales/order')->load($orderId);
-        if (!$order->getId()) {
-            throw new NotFoundHttpException('Order not found');
-        }
-
-        // Record payment
-        $posPayment = $this->paymentService->recordPayment(
-            $orderId,
-            $registerId,
-            $method,
-            $amount,
-            $terminalId,
-            $transactionId,
-            $cardType,
-            $cardLast4,
-            $authCode,
-        );
-
-        return PosPayment::fromModel($posPayment);
-    }
-
-    /**
      * Verify the current user has access to place an order for this cart
      */
     private function verifyCartOwnership(\Mage_Sales_Model_Quote $quote, bool $accessedByMaskedId): void
@@ -362,7 +168,7 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
             $quote,
             $accessedByMaskedId,
             $this->getAuthenticatedCustomerId(),
-            $this->isAdmin() || $this->isPosUser() || $this->isApiUser(),
+            $this->isAdmin() || $this->isApiUser(),
         );
     }
 

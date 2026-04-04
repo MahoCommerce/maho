@@ -46,30 +46,11 @@ class ProductService
     }
 
     /**
-     * Get the barcode attribute code (from POS module if available, or default)
+     * Get the barcode attribute code
      */
     public static function getBarcodeAttributeCode(): string
     {
-        static $cached = null;
-        if ($cached !== null) {
-            return $cached;
-        }
-
-        try {
-            $helperClass = \Mage::getConfig()->getHelperClassName('maho_pos');
-            if (class_exists($helperClass)) {
-                $posHelper = new $helperClass();
-                if (method_exists($posHelper, 'getBarcodeAttributeCode')) {
-                    $cached = $posHelper->getBarcodeAttributeCode();
-                    return $cached;
-                }
-            }
-        } catch (\Throwable) {
-            // POS module not available
-        }
-
-        $cached = 'barcode';
-        return $cached;
+        return 'barcode';
     }
 
     /**
@@ -191,7 +172,6 @@ class ProductService
      * @param int $pageSize Items per page
      * @param array $filters Additional filters
      * @param array|null $sort Sorting options
-     * @param bool $usePosIndex Use POS index (includes disabled/out of stock)
      * @param int|null $storeId Filter by store ID
      * @param array<string, string> $attributeFilters EAV attribute filters (code => value)
      */
@@ -201,7 +181,6 @@ class ProductService
         int $pageSize = 20,
         array $filters = [],
         ?array $sort = null,
-        bool $usePosIndex = false,
         ?int $storeId = null,
         array $attributeFilters = [],
     ): array {
@@ -221,18 +200,11 @@ class ProductService
         // Use Meilisearch for all product queries when available (much faster than MySQL)
         if ($this->useMeilisearch) {
             try {
-                $results = $this->searchWithMeilisearch($query, $page, $pageSize, $filters, $sort, $usePosIndex, $storeId, $attributeFilters);
+                $results = $this->searchWithMeilisearch($query, $page, $pageSize, $filters, $sort, $storeId, $attributeFilters);
 
-                // Fallback to MySQL if no results - handles cases where:
-                // 1. POS needs to find products by GTIN (even if disabled/out of stock)
-                // 2. Category filtering when category_ids isn't fully indexed in Meilisearch
-                $shouldFallback = empty($results['products']) && (
-                    ($usePosIndex && !empty($query)) ||
-                    isset($filters['categoryId'])
-                );
-
-                if ($shouldFallback) {
-                    $results = $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex, $attributeFilters);
+                // Fallback to MySQL if no results for category filtering
+                if (empty($results['products']) && isset($filters['categoryId'])) {
+                    $results = $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $attributeFilters);
                 }
 
                 return $results;
@@ -242,7 +214,7 @@ class ProductService
             }
         }
 
-        return $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $usePosIndex, $attributeFilters);
+        return $this->searchWithMysql($query, $page, $pageSize, $filters, $sort, $attributeFilters);
     }
 
     /**
@@ -257,7 +229,6 @@ class ProductService
         int $pageSize,
         array $filters,
         ?array $sort,
-        bool $usePosIndex = false,
         ?int $storeId = null,
         array $attributeFilters = [],
     ): array {
@@ -277,10 +248,7 @@ class ProductService
         //     $filterStrings[] = "store_id = {$storeId}";
         // }
 
-        // Always filter to enabled products (non-POS index is storefront-only)
-        if (!$usePosIndex) {
-            $filterStrings[] = 'status = enabled';
-        }
+        $filterStrings[] = 'status = enabled';
 
         if (isset($filters['stockStatus']) && $filters['stockStatus'] !== 'OUT_OF_STOCK') {
             $filterStrings[] = 'stock_status != out_of_stock';
@@ -321,9 +289,7 @@ class ProductService
             }
         }
 
-        if (!empty($filterStrings)) {
-            $searchParams['filter'] = implode(' AND ', $filterStrings);
-        }
+        $searchParams['filter'] = implode(' AND ', $filterStrings);
 
         // Add sorting - use currency-specific price field when sorting by price
         if ($sort) {
@@ -335,23 +301,8 @@ class ProductService
             $searchParams['sort'] = [$sortField . $direction];
         }
 
-        // Use POS index or regular products index
-        // Fallback to regular index if POS index doesn't exist yet
-        if ($usePosIndex) {
-            $indexName = $this->getIndexName('pos');
-            try {
-                $index = $this->meilisearchClient->index($indexName);
-                // Test if index exists by getting stats
-                $index->stats();
-            } catch (\Exception $e) {
-                // POS index doesn't exist, fall back to regular products index
-                $indexName = $this->getIndexName('products');
-                $index = $this->meilisearchClient->index($indexName);
-            }
-        } else {
-            $indexName = $this->getIndexName('products');
-            $index = $this->meilisearchClient->index($indexName);
-        }
+        $indexName = $this->getIndexName('products');
+        $index = $this->meilisearchClient->index($indexName);
 
         $results = $index->search($query, $searchParams);
 
@@ -453,7 +404,6 @@ class ProductService
         int $pageSize,
         array $filters,
         ?array $sort,
-        bool $includeDisabled = false,
         array $attributeFilters = [],
     ): array {
         // Get barcode attribute to include in selection
@@ -483,15 +433,11 @@ class ProductService
         }
 
         // Apply status/visibility filters
-        // Always enforce enabled + visible for storefront requests (non-POS)
-        if (!$includeDisabled) {
-            $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-            // Include: Catalog (2), Search (3), Catalog,Search (4) - exclude: Not Visible Individually (1)
-            $collection->addAttributeToFilter('visibility', ['neq' => \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE]);
-        }
+        $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
+        // Include: Catalog (2), Search (3), Catalog,Search (4) - exclude: Not Visible Individually (1)
+        $collection->addAttributeToFilter('visibility', ['neq' => \Mage_Catalog_Model_Product_Visibility::VISIBILITY_NOT_VISIBLE]);
 
-        // For POS fallback search, skip stock status filter to find out-of-stock products
-        if (isset($filters['stockStatus']) && !$includeDisabled) {
+        if (isset($filters['stockStatus'])) {
             $stockStatus = $filters['stockStatus'];
             if ($stockStatus !== 'OUT_OF_STOCK') {
                 $collection->joinField(
@@ -603,16 +549,15 @@ class ProductService
      * Index all products to Meilisearch
      *
      * @param int|null $storeId Store ID to index products for (null = all stores)
-     * @param bool $posIndex Whether to create POS index (includes disabled/out of stock)
      * @return array Indexing statistics
      */
-    public function indexAllProducts(?int $storeId = null, bool $posIndex = false): array
+    public function indexAllProducts(?int $storeId = null): array
     {
         if (!$this->useMeilisearch) {
             throw new \RuntimeException('Meilisearch client not configured');
         }
 
-        $indexName = $posIndex ? $this->getIndexName('pos') : $this->getIndexName('products');
+        $indexName = $this->getIndexName('products');
 
         // Create index with explicit primary key to avoid ambiguity with 'store_id'
         $index = $this->meilisearchClient->index($indexName);
@@ -622,7 +567,7 @@ class ProductService
             // Index already exists, that's fine
         }
 
-        // Configure index settings for optimal POS search
+        // Configure index settings
         $index->updateSettings([
             'searchableAttributes' => [
                 'sku',
@@ -660,19 +605,14 @@ class ProductService
             ],
         ]);
 
-        // Get all products (for POS, include disabled and out of stock)
         $collection = \Mage::getModel('catalog/product')
             ->getCollection()
             ->addAttributeToSelect([
                 'name', 'sku', 'price', 'special_price', 'status',
                 'image', 'thumbnail', 'description', 'type_id',
                 self::getBarcodeAttributeCode(),
-            ]);
-
-        // For non-POS index, filter to enabled and in-stock products only
-        if (!$posIndex) {
-            $collection->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
-        }
+            ])
+            ->addAttributeToFilter('status', \Mage_Catalog_Model_Product_Status::STATUS_ENABLED);
 
         // Filter by store if specified
         if ($storeId !== null) {

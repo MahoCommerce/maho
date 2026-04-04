@@ -13,11 +13,8 @@ declare(strict_types=1);
 
 namespace Mage\Sales\Api\GraphQL;
 
-use Mage\Checkout\Api\CartService;
 use Mage\Sales\Api\OrderProvider;
 use Mage\Sales\Api\OrderService;
-use Mage\Sales\Api\PaymentService;
-use Mage\Sales\Api\PosPayment;
 use Maho\ApiPlatform\Exception\NotFoundException;
 use Maho\ApiPlatform\Exception\ValidationException;
 
@@ -31,35 +28,11 @@ class OrderMutationHandler
 {
     private OrderService $orderService;
     private OrderProvider $orderProvider;
-    private CartService $cartService;
-    private PaymentService $paymentService;
 
-    /**
-     * POS payment method mapping
-     */
-    private const POS_PAYMENT_MAP = [
-        'Cash' => 'cashondelivery',
-        'cash' => 'cashondelivery',
-        'Card' => 'purchaseorder',
-        'card' => 'purchaseorder',
-        'EFTPOS' => 'purchaseorder',
-        'eftpos' => 'purchaseorder',
-        'Split' => 'maho_pos_split',
-        'split' => 'maho_pos_split',
-        'GiftCard' => 'free',
-        'giftcard' => 'free',  // Gift card covers full amount
-        'Mobile' => 'purchaseorder',
-        'mobile' => 'purchaseorder',
-        'Afterpay' => 'purchaseorder',
-        'afterpay' => 'purchaseorder',
-    ];
-
-    public function __construct(OrderService $orderService, OrderProvider $orderProvider, ?CartService $cartService = null)
+    public function __construct(OrderService $orderService, OrderProvider $orderProvider)
     {
         $this->orderService = $orderService;
         $this->orderProvider = $orderProvider;
-        $this->cartService = $cartService ?? new CartService();
-        $this->paymentService = new PaymentService();
     }
 
     /**
@@ -72,22 +45,23 @@ class OrderMutationHandler
             throw ValidationException::requiredField('cartId');
         }
 
-        $quote = $this->loadPosQuote((int) $cartId);
+        $quote = $this->loadAdminQuote((int) $cartId);
 
         $paymentMethod = $variables['paymentMethod'] ?? null;
+        $shippingMethod = $variables['shippingMethod'] ?? null;
+
         if ($paymentMethod) {
-            $paymentMethod = self::POS_PAYMENT_MAP[$paymentMethod] ?? $paymentMethod;
+            $quote->getPayment()->setMethod($paymentMethod);
+        }
+        if ($shippingMethod && !$quote->isVirtual()) {
+            $shippingAddress = $quote->getShippingAddress();
+            $shippingAddress->setShippingMethod($shippingMethod);
+            $shippingAddress->setCollectShippingRates(1);
         }
 
-        $this->cartService->preparePosQuote(
-            $quote,
-            $variables['shippingMethod'] ?? null,
-            $paymentMethod,
-            $variables['guestEmail'] ?? null,
-        );
-
-        $quote->collectTotals();
-        $quote->save();
+        if ($paymentMethod || $shippingMethod) {
+            $quote->collectTotals()->save();
+        }
 
         $result = $this->orderService->placeAdminOrder(
             $quote,
@@ -114,131 +88,6 @@ class OrderMutationHandler
             'shipment' => $invoiceAndShipment['shipment'],
             'changeAmount' => $result['changeAmount'] ?? null,
         ]];
-    }
-
-    /**
-     * Handle placeOrderWithSplitPayments mutation
-     */
-    public function handlePlaceOrderWithSplitPayments(array $variables, array $context): array
-    {
-        $cartId = $variables['cartId'] ?? null;
-        $payments = $variables['payments'] ?? [];
-        $registerId = $variables['registerId'] ?? 1;
-
-        if (!$cartId) {
-            throw ValidationException::requiredField('cartId');
-        }
-        if (empty($payments)) {
-            throw ValidationException::requiredField('payments');
-        }
-
-        $quote = $this->loadPosQuote((int) $cartId);
-
-        $this->cartService->preparePosQuote(
-            $quote,
-            $variables['shippingMethod'] ?? null,
-            'maho_pos_split',
-        );
-
-        $quote->collectTotals();
-        $quote->save();
-
-        // Validate payment amounts before placing the order to avoid
-        // leaving an order in an inconsistent state if validation fails
-        $grandTotal = (float) $quote->getGrandTotal();
-        $totalPayment = 0.0;
-        foreach ($payments as $paymentData) {
-            $amount = (float) ($paymentData['amount'] ?? 0);
-            if ($amount <= 0) {
-                throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException('Each payment amount must be greater than 0');
-            }
-            $totalPayment += $amount;
-        }
-
-        $tolerance = 0.01;
-        if ($totalPayment < $grandTotal - $tolerance) {
-            throw new \Symfony\Component\HttpKernel\Exception\BadRequestHttpException(
-                sprintf('Total payment (%.2f) is less than order total (%.2f)', $totalPayment, $grandTotal),
-            );
-        }
-
-        $result = $this->orderService->placeAdminOrder($quote, null, null, null, $context['admin_user_id'] ?? null);
-
-        $order = $result['order'];
-
-        $createdPayments = $this->paymentService->recordMultiplePayments(
-            (int) $order->getId(),
-            (int) $registerId,
-            $payments,
-        );
-
-        $savedPayments = [];
-        foreach ($createdPayments as $posPayment) {
-            $savedPayments[] = [
-                'paymentId' => (int) $posPayment->getId(),
-                'methodCode' => $posPayment->getMethodCode(),
-                'methodLabel' => PaymentService::getMethodLabel($posPayment->getMethodCode()),
-                'amount' => [
-                    'value' => (float) $posPayment->getAmount(),
-                    'formatted' => \Mage::helper('core')->currency($posPayment->getAmount(), true, false),
-                ],
-                'status' => $posPayment->getStatus(),
-            ];
-        }
-
-        $invoiceAndShipment = $this->createInvoiceAndShipment($order);
-
-        return ['placeOrderWithSplitPayments' => [
-            'order' => [
-                'orderId' => (int) $order->getId(),
-                'incrementId' => $order->getIncrementId(),
-                'status' => $order->getStatus(),
-                'grandTotal' => [
-                    'value' => (float) $order->getGrandTotal(),
-                    'formatted' => \Mage::helper('core')->currency($order->getGrandTotal(), true, false),
-                ],
-            ],
-            'invoice' => $invoiceAndShipment['invoice'],
-            'shipment' => $invoiceAndShipment['shipment'],
-            'payments' => $savedPayments,
-        ]];
-    }
-
-    /**
-     * Handle orderPayments query
-     */
-    public function handleOrderPayments(array $variables): array
-    {
-        $orderId = $variables['orderId'] ?? null;
-        if (!$orderId) {
-            throw ValidationException::requiredField('orderId');
-        }
-
-        $collection = $this->paymentService->getOrderPayments((int) $orderId);
-
-        $result = [];
-        foreach ($collection as $payment) {
-            $dto = PosPayment::fromModel($payment);
-            $result[] = [
-                'paymentId' => $dto->id,
-                'orderId' => $dto->orderId,
-                'registerId' => $dto->registerId,
-                'methodCode' => $dto->methodCode,
-                'methodLabel' => $dto->methodLabel,
-                'amount' => [
-                    'value' => $dto->amount,
-                    'formatted' => \Mage::helper('core')->currency($dto->amount, true, false),
-                ],
-                'cardType' => $dto->cardType,
-                'cardLast4' => $dto->cardLast4,
-                'authCode' => $dto->authCode,
-                'transactionId' => $dto->transactionId,
-                'status' => $dto->status,
-                'createdAt' => $dto->createdAt,
-            ];
-        }
-
-        return ['orderPayments' => $result];
     }
 
     /**
@@ -284,7 +133,7 @@ class OrderMutationHandler
 
             return ['customerOrders' => $result];
         } catch (\Exception $e) {
-            \Mage::log('handleGetCustomerOrders error: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), \Mage::LOG_ERROR, 'pos_api.log');
+            \Mage::log('handleGetCustomerOrders error: ' . $e->getMessage() . "\n" . $e->getTraceAsString(), \Mage::LOG_ERROR, 'api.log');
             throw $e;
         }
     }
@@ -313,7 +162,7 @@ class OrderMutationHandler
 
             return ['recentOrders' => $result];
         } catch (\Exception $e) {
-            \Mage::log('handleRecentOrders error: ' . $e->getMessage(), \Mage::LOG_ERROR, 'pos_api.log');
+            \Mage::log('handleRecentOrders error: ' . $e->getMessage(), \Mage::LOG_ERROR, 'api.log');
             throw $e;
         }
     }
@@ -359,7 +208,7 @@ class OrderMutationHandler
 
             return ['searchOrders' => $result];
         } catch (\Exception $e) {
-            \Mage::log('handleSearchOrders error: ' . $e->getMessage(), \Mage::LOG_ERROR, 'pos_api.log');
+            \Mage::log('handleSearchOrders error: ' . $e->getMessage(), \Mage::LOG_ERROR, 'api.log');
             throw $e;
         }
     }
@@ -374,7 +223,7 @@ class OrderMutationHandler
         $refundToStoreCredit = $variables['refundToStoreCredit'] ?? false;
         $adjustmentPositive = (float) ($variables['adjustmentPositive'] ?? 0);
         $adjustmentNegative = (float) ($variables['adjustmentNegative'] ?? 0);
-        $comment = $variables['comment'] ?? 'POS Return';
+        $comment = $variables['comment'] ?? 'Return';
 
         if (!$orderId) {
             throw ValidationException::requiredField('orderId');
@@ -465,9 +314,9 @@ class OrderMutationHandler
     }
 
     /**
-     * Load a quote by ID without store filtering, for admin/POS context
+     * Load a quote by ID without store filtering, for admin context
      */
-    private function loadPosQuote(int $cartId): \Mage_Sales_Model_Quote
+    private function loadAdminQuote(int $cartId): \Mage_Sales_Model_Quote
     {
         $quote = \Mage::getModel('sales/quote')->loadByIdWithoutStore($cartId);
         if (!$quote || !$quote->getId()) {

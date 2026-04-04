@@ -83,7 +83,6 @@ class ProductQueryHandler
         $page = $variables['page'] ?? 1;
         $pageSize = $variables['pageSize'] ?? $variables['limit'] ?? 20;
         $storeId = $variables['storeId'] ?? $context['store_id'] ?? null;
-        $usePosIndex = $variables['usePosIndex'] ?? false;
         $categoryId = $variables['categoryId'] ?? null;
 
         $filters = [];
@@ -91,7 +90,7 @@ class ProductQueryHandler
             $filters['categoryId'] = $categoryId;
         }
 
-        $result = $this->productService->searchProducts($search, $page, $pageSize, $filters, null, $usePosIndex, $storeId);
+        $result = $this->productService->searchProducts($search, $page, $pageSize, $filters, null, $storeId);
         $edges = array_values(array_map(fn($p) => ['node' => $this->mapForRelay($p)], $result['products'] ?? []));
 
         return ['products' => [

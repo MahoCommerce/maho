@@ -25,22 +25,20 @@ use Symfony\Bundle\SecurityBundle\Security;
 final class OrderProvider extends \Maho\ApiPlatform\Provider
 {
     private OrderService $orderService;
-    private PaymentService $paymentService;
 
     public function __construct(Security $security)
     {
         parent::__construct($security);
         $this->orderService = new OrderService();
-        $this->paymentService = new PaymentService();
     }
 
     /**
      * Provide order data based on operation type
      *
-     * @return Order|TraversablePaginator<Order>|PosPayment[]|PaymentSummary[]|null
+     * @return Order|TraversablePaginator<Order>|null
      */
     #[\Override]
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Order|TraversablePaginator|array|null
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Order|TraversablePaginator|null
     {
         $operationName = $operation->getName();
 
@@ -50,28 +48,8 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         }
 
         // Handle REST collection endpoint (GET /orders)
-        if ($operation instanceof CollectionOperationInterface && !in_array($operationName, ['orderPayments', 'orderPaymentSummary', 'customerOrders', 'my_orders'])) {
+        if ($operation instanceof CollectionOperationInterface && !in_array($operationName, ['customerOrders', 'my_orders'])) {
             return $this->getCollection($context);
-        }
-
-        // Handle orderPayments query - get all POS payments for an order
-        if ($operationName === 'orderPayments') {
-            $orderId = $context['args']['orderId'] ?? null;
-            if (!$orderId) {
-                return [];
-            }
-
-            return $this->getOrderPayments((int) $orderId);
-        }
-
-        // Handle orderPaymentSummary query - get payment summary grouped by method
-        if ($operationName === 'orderPaymentSummary') {
-            $orderId = $context['args']['orderId'] ?? null;
-            if (!$orderId) {
-                return [];
-            }
-
-            return $this->getOrderPaymentSummary((int) $orderId);
         }
 
         // Handle guestOrder query - get order by increment ID and access token
@@ -413,59 +391,4 @@ final class OrderProvider extends \Maho\ApiPlatform\Provider
         return $shipments;
     }
 
-    /**
-     * Get all POS payments for an order
-     *
-     * @return PosPayment[]
-     */
-    private function getOrderPayments(int $orderId): array
-    {
-        $collection = $this->paymentService->getOrderPayments($orderId);
-        $payments = [];
-
-        foreach ($collection as $payment) {
-            $payments[] = PosPayment::fromModel($payment);
-        }
-
-        return $payments;
-    }
-
-    /**
-     * Get payment summary grouped by method
-     *
-     * @return PaymentSummary[]
-     */
-    private function getOrderPaymentSummary(int $orderId): array
-    {
-        $collection = $this->paymentService->getOrderPayments($orderId);
-
-        // Group payments by method
-        $grouped = [];
-        foreach ($collection as $payment) {
-            $method = $payment->getMethodCode();
-            if (!isset($grouped[$method])) {
-                $grouped[$method] = [
-                    'method' => $method,
-                    'methodTitle' => PaymentService::getMethodLabel($method),
-                    'totalAmount' => 0.0,
-                    'paymentCount' => 0,
-                ];
-            }
-            $grouped[$method]['totalAmount'] += (float) $payment->getAmount();
-            $grouped[$method]['paymentCount']++;
-        }
-
-        // Convert to DTOs
-        $summaries = [];
-        foreach ($grouped as $data) {
-            $dto = new PaymentSummary();
-            $dto->method = $data['method'];
-            $dto->methodTitle = $data['methodTitle'];
-            $dto->totalAmount = round($data['totalAmount'], 2);
-            $dto->paymentCount = $data['paymentCount'];
-            $summaries[] = $dto;
-        }
-
-        return $summaries;
-    }
 }

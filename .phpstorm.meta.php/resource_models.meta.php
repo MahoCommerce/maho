@@ -360,8 +360,6 @@ namespace PHPSTORM_META {
         'maho_paypal_resource/vault_token_collection' => \Maho_Paypal_Model_Resource_Vault_Token_Collection::class,
         'maho_paypal_resource/webhook_event' => \Maho_Paypal_Model_Resource_Webhook_Event::class,
         'maho_paypal_resource/webhook_event_collection' => \Maho_Paypal_Model_Resource_Webhook_Event_Collection::class,
-        'maho_pos_resource/payment' => \Maho_Pos_Model_Resource_Payment::class,
-        'maho_pos_resource/payment_collection' => \Maho_Pos_Model_Resource_Payment_Collection::class,
         'newsletter_resource/problem' => \Mage_Newsletter_Model_Resource_Problem::class,
         'newsletter_resource/problem_collection' => \Mage_Newsletter_Model_Resource_Problem_Collection::class,
         'newsletter_resource/queue' => \Mage_Newsletter_Model_Resource_Queue::class,

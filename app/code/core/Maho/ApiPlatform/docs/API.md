@@ -1063,7 +1063,6 @@ Domain-specific traits that can be added to providers or processors as needed:
 | `StoreContext` | Store scope management, `storeIdsToStoreCodes()`, `isAvailableForStore()` |
 | `AddressMapper` | Maps order/quote/customer address models to the Address DTO |
 | `CustomerMapper` | Maps customer models to the Customer DTO |
-| `PosPaymentMapper` | Maps POS payment models to the PosPayment DTO |
 | `ContentSanitizer` | Sanitizes HTML content for CMS/blog resources |
 | `ArrayPaginator` | Paginated collection wrapper for API Platform, with `::empty()` factory |
 

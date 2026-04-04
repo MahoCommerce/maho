@@ -114,47 +114,6 @@ use Mage\Customer\Api\Address;
             description: 'Cancel an order',
             security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
         ),
-        new Mutation(
-            name: 'placeOrderWithSplitPayments',
-            args: [
-                'cartId' => ['type' => 'ID!'],
-                'maskedId' => ['type' => 'String'],
-                'registerId' => ['type' => 'Int'],
-                'payments' => ['type' => '[PaymentInput!]!'],
-            ],
-            description: 'Place order with split payment methods (POS)',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
-        ),
-        new Mutation(
-            name: 'recordPayment',
-            args: [
-                'orderId' => ['type' => 'ID!'],
-                'amount' => ['type' => 'Float!'],
-                'method' => ['type' => 'String', 'description' => 'Payment method code (default: cash)'],
-                'registerId' => ['type' => 'Int'],
-                'transactionId' => ['type' => 'String'],
-                'terminalId' => ['type' => 'String'],
-                'cardType' => ['type' => 'String'],
-                'cardLast4' => ['type' => 'String'],
-                'authCode' => ['type' => 'String'],
-            ],
-            description: 'Record a payment against an order',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
-        ),
-        new Query(
-            name: 'orderPayments',
-            args: ['orderId' => ['type' => 'ID!']],
-            description: 'Get all POS payments for an order',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
-            resolver: CustomQueryResolver::class,
-        ),
-        new Query(
-            name: 'orderPaymentSummary',
-            args: ['orderId' => ['type' => 'ID!']],
-            description: 'Get payment summary grouped by method',
-            security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
-            resolver: CustomQueryResolver::class,
-        ),
     ],
 )]
 class Order extends CrudResource

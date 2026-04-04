@@ -69,7 +69,6 @@ class ApiPermissionRegistry
         'newsletter'   => ['label' => 'Newsletter', 'group' => 'Storefront', 'section' => 'Other', 'operations' => ['read' => 'View Status', 'write' => 'Subscribe/Unsubscribe']],
 
         'url-resolver' => ['label' => 'URL Resolver', 'group' => 'Storefront', 'section' => 'System', 'operations' => ['read' => 'Resolve']],
-        'pos'          => ['label' => 'POS', 'group' => 'Storefront', 'section' => 'Other', 'operations' => ['read' => 'View', 'write' => 'Manage']],
 
         // ── Content ──
         'cms-pages'  => ['label' => 'CMS Pages', 'group' => 'Storefront', 'section' => 'Content', 'operations' => ['read' => 'View', 'write' => 'Create & Update', 'delete' => 'Delete']],
@@ -136,7 +135,6 @@ class ApiPermissionRegistry
         'store-config'       => 'stores',
         'countries'          => 'countries',
         'url-resolver'       => 'url-resolver',
-        'pos-payments'       => 'pos',
         'shipments'          => 'shipments',
         'invoices'           => 'invoices',
         'items'              => null, // sub-resource, fall through to parent
@@ -256,9 +254,6 @@ class ApiPermissionRegistry
         // URL Resolver
         'urlResolveResult'   => 'url-resolver',
         'resolveUrl'         => 'url-resolver',
-        // POS
-        'posPayment'         => 'pos',
-        'orderPosPayments'   => 'pos',
     ];
 
     /**
