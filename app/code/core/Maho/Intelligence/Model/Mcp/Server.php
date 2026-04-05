@@ -19,7 +19,7 @@ class Maho_Intelligence_Model_Mcp_Server
     private const JSONRPC_VERSION = '2.0';
 
     private LoopInterface $loop;
-    private Maho_Intelligence_Model_Lsp_Transport $transport;
+    private Maho_Intelligence_Model_Mcp_Transport $transport;
     private Maho_Intelligence_Model_Registry $registry;
     /** @var array<string, array{description: string, inputSchema: array, handler: callable}> */
     private array $tools = [];
@@ -28,7 +28,7 @@ class Maho_Intelligence_Model_Mcp_Server
     {
         $this->loop = Loop::get();
         $this->registry = Mage::getModel('intelligence/registry');
-        $this->transport = new Maho_Intelligence_Model_Lsp_Transport($this->loop);
+        $this->transport = new Maho_Intelligence_Model_Mcp_Transport($this->loop);
 
         $this->registerTools();
 
@@ -176,15 +176,15 @@ class Maho_Intelligence_Model_Mcp_Server
             return;
         }
 
-        $result = match ($method) {
-            'initialize' => $this->handleInitialize(),
-            'ping' => new \stdClass(),
-            'tools/list' => $this->handleToolsList(),
-            'tools/call' => $this->handleToolsCall($params),
-            default => null,
+        [$found, $result] = match ($method) {
+            'initialize' => [true, $this->handleInitialize()],
+            'ping' => [true, new \stdClass()],
+            'tools/list' => [true, $this->handleToolsList()],
+            'tools/call' => [true, $this->handleToolsCall($params)],
+            default => [false, null],
         };
 
-        if ($result === null && $method !== 'initialize') {
+        if (!$found) {
             $this->sendError($id, -32601, "Method not found: {$method}");
         } else {
             $this->sendResult($id, $result);

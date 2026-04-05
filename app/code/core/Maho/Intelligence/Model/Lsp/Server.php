@@ -42,7 +42,6 @@ class Maho_Intelligence_Model_Lsp_Server
     /** @var array<string, TimerInterface> Pending diagnostic timers keyed by URI */
     private array $diagnosticTimers = [];
 
-
     public function run(): void
     {
         $this->loop = Loop::get();

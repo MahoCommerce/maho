@@ -535,10 +535,11 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     private function getXmlParentPath(array $lines, int $targetLine): string
     {
         $stack = [];
+        $inComment = false;
 
         for ($i = 0; $i < $targetLine; $i++) {
             $line = $lines[$i];
-            $this->processXmlLineForPath($line, $stack);
+            $inComment = $this->processXmlLineForPath($line, $stack, $inComment);
         }
 
         return implode('/', $stack);
@@ -546,13 +547,32 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
     /**
      * Process a single XML line, updating the tag stack.
-     * Handles opening tags, closing tags, and inline (self-contained) tags.
+     * Handles opening tags, closing tags, inline (self-contained) tags,
+     * and multi-line comments.
+     *
+     * @return bool Whether we are still inside a multi-line comment after this line
      */
-    private function processXmlLineForPath(string $line, array &$stack): void
+    private function processXmlLineForPath(string $line, array &$stack, bool $inComment): bool
     {
-        // Skip comments
-        if (preg_match('/^\s*<!--/', $line)) {
-            return;
+        if ($inComment) {
+            if (str_contains($line, '-->')) {
+                $line = substr($line, strpos($line, '-->') + 3);
+                $inComment = false;
+            } else {
+                return true;
+            }
+        }
+
+        // Strip inline comments and detect unclosed comment starts
+        while (($commentStart = strpos($line, '<!--')) !== false) {
+            $commentEnd = strpos($line, '-->', $commentStart + 4);
+            if ($commentEnd !== false) {
+                $line = substr($line, 0, $commentStart) . substr($line, $commentEnd + 3);
+            } else {
+                $line = substr($line, 0, $commentStart);
+                $inComment = true;
+                break;
+            }
         }
 
         // Find all XML tags on this line
@@ -583,6 +603,8 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
                 $stack[] = $tagName;
             }
         }
+
+        return $inComment;
     }
 
     /**

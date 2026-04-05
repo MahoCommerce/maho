@@ -307,5 +307,4 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
 
         return null;
     }
-
 }
