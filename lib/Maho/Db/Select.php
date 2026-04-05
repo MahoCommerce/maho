@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace Maho\Db;
 
-class Select
+class Select implements \Stringable
 {
     // Query part constants
     public const DISTINCT       = 'distinct';
@@ -592,7 +592,7 @@ class Select
      * @param string $correlationName Correlation name or table alias
      * @return $this
      */
-    public function columns(array|string $cols = '*', ?string $correlationName = null): self
+    public function columns(array|string|Expr $cols = '*', ?string $correlationName = null): self
     {
         if ($correlationName === null && count($this->_parts[self::FROM])) {
             $correlationNameKeys = array_keys($this->_parts[self::FROM]);

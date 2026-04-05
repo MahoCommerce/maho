@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
  *
  * Provides compatibility layer for Mage_Core_Controller_Response_Http while using Symfony HttpFoundation
  */
-class Mage_Core_Controller_Response_Http
+class Mage_Core_Controller_Response_Http implements \Stringable
 {
     /**
      * Symfony Response instance
@@ -711,7 +711,7 @@ class Mage_Core_Controller_Response_Http
     {
         ob_start();
         $this->sendResponse();
-        return ob_get_clean();
+        return (string) ob_get_clean();
     }
 
     /**

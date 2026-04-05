@@ -233,6 +233,7 @@ namespace PHPSTORM_META {
         'core_resource/variable_collection' => \Mage_Core_Model_Resource_Variable_Collection::class,
         'core_resource/website' => \Mage_Core_Model_Resource_Website::class,
         'core_resource/website_collection' => \Mage_Core_Model_Resource_Website_Collection::class,
+        'cron_resource/configuredjobs_collection' => \Mage_Cron_Model_Resource_ConfiguredJobs_Collection::class,
         'cron_resource/schedule' => \Mage_Cron_Model_Resource_Schedule::class,
         'cron_resource/schedule_collection' => \Mage_Cron_Model_Resource_Schedule_Collection::class,
         'customer_resource/address' => \Mage_Customer_Model_Resource_Address::class,
