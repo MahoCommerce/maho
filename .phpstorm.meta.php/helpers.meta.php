@@ -48,6 +48,7 @@ namespace PHPSTORM_META {
         'googleanalytics/data' => \Mage_GoogleAnalytics_Helper_Data::class,
         'importexport/data' => \Mage_ImportExport_Helper_Data::class,
         'index/data' => \Mage_Index_Helper_Data::class,
+        'intelligence/data' => \Maho_Intelligence_Helper_Data::class,
         'log/dashboard' => \Mage_Log_Helper_Dashboard::class,
         'log/data' => \Mage_Log_Helper_Data::class,
         'maho_paypal/data' => \Maho_Paypal_Helper_Data::class,

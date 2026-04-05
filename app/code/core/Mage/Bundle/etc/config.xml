@@ -138,16 +138,6 @@
                 <bundle>bundle/sales_order_pdf_items_creditmemo</bundle>
             </creditmemo>
         </pdf>
-        <events>
-            <catalogindex_plain_reindex_after>
-                <observers>
-                    <bundle>
-                        <class>bundle/observer</class>
-                        <method>catalogIndexPlainReindexAfter</method>
-                    </bundle>
-                </observers>
-            </catalogindex_plain_reindex_after>
-        </events>
     </global>
     <frontend>
         <translate>
