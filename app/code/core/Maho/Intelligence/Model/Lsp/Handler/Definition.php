@@ -37,11 +37,31 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
             return null;
         }
 
-        $context = $this->detector->detectAtCursor($text, $line, $character);
+        $context = $this->detector->detectAtCursor($text, $line, $character, $uri);
         if ($context === null) {
             return null;
         }
 
+        return match ($context['context']) {
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_MODEL_ALIAS,
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_HELPER_ALIAS,
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_BLOCK_ALIAS,
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_RESOURCE_MODEL_ALIAS
+                => $this->definitionForAlias($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_FQCN
+                => $this->definitionForFqcn($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_XML_METHOD
+                => $this->definitionForMethod($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_CRON_RUN_MODEL
+                => $this->definitionForCronModel($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_TEMPLATE_PATH
+                => $this->definitionForTemplate($context),
+            default => null,
+        };
+    }
+
+    private function definitionForAlias(array $context): ?array
+    {
         $type = match ($context['context']) {
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_MODEL_ALIAS => 'model',
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_HELPER_ALIAS => 'helper',
@@ -60,12 +80,92 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
             return null;
         }
 
+        return $this->fileLocation($resolved['file']);
+    }
+
+    private function definitionForFqcn(array $context): ?array
+    {
+        $file = Maho::findClassFile($context['alias']);
+
+        return $file !== false ? $this->fileLocation($file) : null;
+    }
+
+    private function definitionForMethod(array $context): ?array
+    {
+        $classAlias = $context['classAlias'] ?? null;
+        $classType = $context['classType'] ?? 'model';
+        $method = $context['method'] ?? null;
+
+        if ($classAlias === null || $method === null) {
+            return null;
+        }
+
+        $resolved = $this->registry->get('classAlias', 'resolveAlias', [$classType, $classAlias]);
+        if ($resolved['file'] === null) {
+            return null;
+        }
+
+        $methodLine = $this->findMethodLine($resolved['file'], $method);
+
+        return $this->fileLocation($resolved['file'], $methodLine);
+    }
+
+    private function definitionForCronModel(array $context): ?array
+    {
+        $classAlias = $context['classAlias'] ?? null;
+        $method = $context['method'] ?? null;
+
+        if ($classAlias === null) {
+            return null;
+        }
+
+        $resolved = $this->registry->get('classAlias', 'resolveAlias', ['model', $classAlias]);
+        if ($resolved['file'] === null) {
+            return null;
+        }
+
+        $methodLine = $method !== null ? $this->findMethodLine($resolved['file'], $method) : 0;
+
+        return $this->fileLocation($resolved['file'], $methodLine);
+    }
+
+    private function definitionForTemplate(array $context): ?array
+    {
+        $templatePath = $context['alias'];
+
+        $file = Maho::findFile('app/design/frontend/base/default/template/' . $templatePath);
+        if ($file === false) {
+            $file = Maho::findFile('app/design/adminhtml/default/default/template/' . $templatePath);
+        }
+
+        return $file !== false ? $this->fileLocation($file) : null;
+    }
+
+    private function fileLocation(string $filePath, int $line = 0): array
+    {
         return [
-            'uri' => 'file://' . $resolved['file'],
+            'uri' => 'file://' . $filePath,
             'range' => [
-                'start' => ['line' => 0, 'character' => 0],
-                'end' => ['line' => 0, 'character' => 0],
+                'start' => ['line' => $line, 'character' => 0],
+                'end' => ['line' => $line, 'character' => 0],
             ],
         ];
+    }
+
+    private function findMethodLine(string $filePath, string $method): int
+    {
+        $lines = @file($filePath);
+        if ($lines === false) {
+            return 0;
+        }
+
+        $pattern = '/function\s+' . preg_quote($method, '/') . '\s*\(/';
+        foreach ($lines as $i => $line) {
+            if (preg_match($pattern, $line)) {
+                return $i;
+            }
+        }
+
+        return 0;
     }
 }

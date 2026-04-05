@@ -37,7 +37,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
             return ['isIncomplete' => false, 'items' => []];
         }
 
-        $context = $this->detector->detect($text, $line, $character);
+        $context = $this->detector->detect($text, $line, $character, $uri);
 
         $range = [
             'start' => ['line' => $line, 'character' => $context['prefixStart']],

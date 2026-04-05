@@ -278,31 +278,8 @@ class Maho_Intelligence_Model_Provider_ClassAlias
 
     private function findClassFile(string $className): ?string
     {
-        $file = str_replace(['_', '\\'], DIRECTORY_SEPARATOR, $className) . '.php';
-
-        $paths = [
-            BP . '/app/code/core/' . $file,
-            BP . '/app/code/community/' . $file,
-            BP . '/app/code/local/' . $file,
-        ];
-
-        foreach ($paths as $path) {
-            if (file_exists($path)) {
-                return $path;
-            }
-        }
-
-        foreach (spl_autoload_functions() as $autoloader) {
-            if (is_array($autoloader) && $autoloader[0] instanceof \Composer\Autoload\ClassLoader) {
-                $found = $autoloader[0]->findFile($className);
-                if ($found !== false) {
-                    return realpath($found) ?: $found;
-                }
-                break;
-            }
-        }
-
-        return null;
+        $file = Maho::findClassFile($className);
+        return $file !== false ? $file : null;
     }
 
     private function findClassesWithPrefix(string $prefix): array

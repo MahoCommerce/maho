@@ -37,7 +37,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
             return null;
         }
 
-        $context = $this->detector->detectAtCursor($text, $line, $character);
+        $context = $this->detector->detectAtCursor($text, $line, $character, $uri);
         if ($context === null) {
             return null;
         }
@@ -52,6 +52,16 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
                 => $this->hoverEvent($context),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_CONFIG_PATH
                 => $this->hoverConfigPath($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_FQCN
+                => $this->hoverFqcn($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_XML_METHOD
+                => $this->hoverMethod($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_CRON_RUN_MODEL
+                => $this->hoverCronModel($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_TEMPLATE_PATH
+                => $this->hoverTemplate($context),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_LAYOUT_HANDLE
+                => $this->hoverLayoutHandle($context),
             default => null,
         };
     }
@@ -84,12 +94,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
             $markdown .= "**Rewritten by**: `{$resolved['rewritten_by']}`\n";
         }
 
-        return [
-            'contents' => [
-                'kind' => 'markdown',
-                'value' => $markdown,
-            ],
-        ];
+        return $this->markdown($markdown);
     }
 
     private function hoverEvent(array $context): array
@@ -97,12 +102,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         $observers = $this->registry->get('event', 'getObserversForEvent', [$context['alias']]);
 
         if (empty($observers)) {
-            return [
-                'contents' => [
-                    'kind' => 'markdown',
-                    'value' => "**Event**: `{$context['alias']}`\n\nNo observers registered.",
-                ],
-            ];
+            return $this->markdown("**Event**: `{$context['alias']}`\n\nNo observers registered.");
         }
 
         $markdown = "**Event**: `{$context['alias']}`\n\n";
@@ -114,12 +114,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
             $markdown .= "\n";
         }
 
-        return [
-            'contents' => [
-                'kind' => 'markdown',
-                'value' => $markdown,
-            ],
-        ];
+        return $this->markdown($markdown);
     }
 
     private function hoverConfigPath(array $context): array
@@ -146,11 +141,171 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
             }
         }
 
+        return $this->markdown($markdown);
+    }
+
+    private function hoverFqcn(array $context): array
+    {
+        $className = $context['alias'];
+        $file = Maho::findClassFile($className);
+
+        $markdown = "**Class**: `{$className}`\n\n";
+
+        if ($file !== false) {
+            $relativePath = str_replace(BP . '/', '', $file);
+            $markdown .= "**File**: `{$relativePath}`\n";
+        } else {
+            $markdown .= "Class file not found.\n";
+        }
+
+        return $this->markdown($markdown);
+    }
+
+    private function hoverMethod(array $context): array
+    {
+        $classAlias = $context['classAlias'] ?? null;
+        $classType = $context['classType'] ?? 'model';
+        $method = $context['method'] ?? $context['alias'];
+
+        if ($classAlias === null) {
+            return $this->markdown("**Method**: `{$method}`\n\nCould not determine parent class.");
+        }
+
+        $resolved = $this->registry->get('classAlias', 'resolveAlias', [$classType, $classAlias]);
+
+        $markdown = "**Method**: `{$method}`\n\n";
+        $markdown .= "**Class**: `{$resolved['class']}` (`{$classAlias}`)\n\n";
+
+        if ($resolved['file']) {
+            $relativePath = str_replace(BP . '/', '', $resolved['file']);
+            $markdown .= "**File**: `{$relativePath}`\n\n";
+
+            $signature = $this->getMethodSignature($resolved['file'], $method);
+            if ($signature !== null) {
+                $markdown .= "```php\n{$signature}\n```\n";
+            } else {
+                $markdown .= "Method `{$method}` not found in class.\n";
+            }
+        }
+
+        return $this->markdown($markdown);
+    }
+
+    private function hoverCronModel(array $context): ?array
+    {
+        $classAlias = $context['classAlias'] ?? null;
+        $method = $context['method'] ?? null;
+
+        if ($classAlias === null) {
+            return null;
+        }
+
+        $resolved = $this->registry->get('classAlias', 'resolveAlias', ['model', $classAlias]);
+
+        $markdown = "**Cron callback**: `{$context['alias']}`\n\n";
+        $markdown .= "**Class**: `{$resolved['class']}` (`{$classAlias}`)\n\n";
+
+        if ($resolved['file']) {
+            $relativePath = str_replace(BP . '/', '', $resolved['file']);
+            $markdown .= "**File**: `{$relativePath}`\n\n";
+
+            if ($method !== null) {
+                $signature = $this->getMethodSignature($resolved['file'], $method);
+                if ($signature !== null) {
+                    $markdown .= "```php\n{$signature}\n```\n";
+                } else {
+                    $markdown .= "Method `{$method}` not found in class.\n";
+                }
+            }
+        }
+
+        return $this->markdown($markdown);
+    }
+
+    private function hoverTemplate(array $context): array
+    {
+        $templatePath = $context['alias'];
+        $markdown = "**Template**: `{$templatePath}`\n\n";
+
+        $file = Maho::findFile('app/design/frontend/base/default/template/' . $templatePath);
+        if ($file === false) {
+            $file = Maho::findFile('app/design/adminhtml/default/default/template/' . $templatePath);
+        }
+
+        if ($file !== false) {
+            $relativePath = str_replace(BP . '/', '', $file);
+            $markdown .= "**File**: `{$relativePath}`\n";
+        } else {
+            $markdown .= "Template file not found.\n";
+        }
+
+        return $this->markdown($markdown);
+    }
+
+    private function hoverLayoutHandle(array $context): array
+    {
+        $handle = $context['alias'];
+        $markdown = "**Layout handle**: `{$handle}`\n\n";
+
+        $frontendHandles = $this->registry->get('layout', 'getHandles', ['frontend']);
+        $adminhtmlHandles = $this->registry->get('layout', 'getHandles', ['adminhtml']);
+
+        $info = $frontendHandles[$handle] ?? $adminhtmlHandles[$handle] ?? null;
+        if ($info !== null) {
+            $markdown .= "**Defined in**: `{$info['file']}`\n\n";
+            if (!empty($info['blocks'])) {
+                $markdown .= '**Blocks**: ' . count($info['blocks']) . "\n";
+            }
+        } else {
+            $markdown .= "Handle not found in layout configuration.\n";
+        }
+
+        return $this->markdown($markdown);
+    }
+
+    private function markdown(string $value): array
+    {
         return [
             'contents' => [
                 'kind' => 'markdown',
-                'value' => $markdown,
+                'value' => $value,
             ],
         ];
     }
+
+    private function getMethodSignature(string $filePath, string $method): ?string
+    {
+        if (!file_exists($filePath)) {
+            return null;
+        }
+
+        $lines = file($filePath);
+        if ($lines === false) {
+            return null;
+        }
+
+        $pattern = '/function\s+' . preg_quote($method, '/') . '\s*\(/';
+        foreach ($lines as $i => $line) {
+            if (preg_match($pattern, $line)) {
+                $signature = trim($line);
+                // If the signature continues on the next line (multi-line params)
+                if (!str_contains($signature, ')') && isset($lines[$i + 1])) {
+                    for ($j = $i + 1; $j < min($i + 10, count($lines)); $j++) {
+                        $signature .= ' ' . trim($lines[$j]);
+                        if (str_contains($lines[$j], ')')) {
+                            break;
+                        }
+                    }
+                }
+                // Trim to just the signature (up to and including the closing brace/semicolon)
+                if (preg_match('/^(.*?\))/', $signature, $m)) {
+                    return $m[1];
+                }
+                return $signature;
+            }
+        }
+
+        return null;
+    }
+
 }

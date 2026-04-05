@@ -13,6 +13,12 @@ declare(strict_types=1);
 /**
  * Detects what kind of Maho context the cursor is in, enabling
  * context-aware completions, definitions, and hover info.
+ *
+ * Supports both PHP and XML files. For XML, the detector parses
+ * the document's tag ancestry to determine the correct alias type
+ * based on the XML path (e.g. global/events/.../observers/.../class
+ * resolves as a model alias, while global/models/.../class resolves
+ * as a FQCN class prefix).
  */
 class Maho_Intelligence_Model_Lsp_ContextDetector
 {
@@ -23,6 +29,11 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     public const CONTEXT_RESOURCE_MODEL_ALIAS = 'resource_model_alias';
     public const CONTEXT_CONFIG_PATH = 'config_path';
     public const CONTEXT_EVENT_NAME = 'event_name';
+    public const CONTEXT_XML_METHOD = 'xml_method';
+    public const CONTEXT_CRON_RUN_MODEL = 'cron_run_model';
+    public const CONTEXT_TEMPLATE_PATH = 'template_path';
+    public const CONTEXT_LAYOUT_HANDLE = 'layout_handle';
+    public const CONTEXT_FQCN = 'fqcn';
 
     private const CALL_PATTERNS = [
         self::CONTEXT_MODEL_ALIAS => [
@@ -48,6 +59,58 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         self::CONTEXT_EVENT_NAME => [
             'Mage::dispatchEvent',
         ],
+    ];
+
+    /**
+     * Tags whose meaning is unambiguous regardless of XML path.
+     */
+    private const XML_TAG_TO_CONTEXT = [
+        'source_model'  => self::CONTEXT_MODEL_ALIAS,
+        'backend_model' => self::CONTEXT_MODEL_ALIAS,
+        'frontend_model' => self::CONTEXT_BLOCK_ALIAS,
+        'render'        => self::CONTEXT_BLOCK_ALIAS,
+        'renderer'      => self::CONTEXT_BLOCK_ALIAS,
+        'resourceModel' => self::CONTEXT_RESOURCE_MODEL_ALIAS,
+    ];
+
+    /**
+     * Attributes whose meaning is unambiguous regardless of XML path.
+     */
+    private const XML_ATTR_TO_CONTEXT = [
+        'type'     => self::CONTEXT_BLOCK_ALIAS,
+        'template' => self::CONTEXT_TEMPLATE_PATH,
+        'ifconfig' => self::CONTEXT_CONFIG_PATH,
+        'handle'   => self::CONTEXT_LAYOUT_HANDLE,
+    ];
+
+    /**
+     * XML path patterns that determine what a <class> tag means.
+     * Checked in order — first match wins. The path is the parent
+     * path (excluding the <class> tag itself).
+     */
+    private const XML_CLASS_PATH_RULES = [
+        // Observer class: always a model alias
+        '/\/events\/[^\/]+\/observers\/[^\/]+$/' => self::CONTEXT_MODEL_ALIAS,
+        // Total collectors: model alias
+        '/\/totals\/[^\/]+$/' => self::CONTEXT_MODEL_ALIAS,
+        // Global search: model alias
+        '/\/global_search\/[^\/]+$/' => self::CONTEXT_MODEL_ALIAS,
+        // Model/block/helper group class prefix: FQCN
+        '/\/models\/[^\/]+$/' => self::CONTEXT_FQCN,
+        '/\/blocks\/[^\/]+$/' => self::CONTEXT_FQCN,
+        '/\/helpers\/[^\/]+$/' => self::CONTEXT_FQCN,
+        // Resource setup class: FQCN
+        '/\/setup$/' => self::CONTEXT_FQCN,
+        // Router class: FQCN
+        '/\/routers\/[^\/]+$/' => self::CONTEXT_FQCN,
+    ];
+
+    /**
+     * XML path patterns that determine what a <model> tag means.
+     */
+    private const XML_MODEL_PATH_RULES = [
+        // Cron run callback: alias::method
+        '/\/jobs\/[^\/]+\/run$/' => self::CONTEXT_CRON_RUN_MODEL,
     ];
 
     /** @var array<string, list<string>>|null */
@@ -90,12 +153,38 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return $this->cursorPatterns;
     }
 
+    public static function isXmlUri(string $uri): bool
+    {
+        return (bool) preg_match('/\.xml$/i', parse_url($uri, PHP_URL_PATH) ?? '');
+    }
+
     /**
      * Detect what context the cursor is in for completion.
      *
      * @return array{context: string, prefix: string, prefixStart: int}
      */
-    public function detect(string $text, int $line, int $character): array
+    public function detect(string $text, int $line, int $character, string $uri = ''): array
+    {
+        if (self::isXmlUri($uri)) {
+            return $this->detectXml($text, $line, $character);
+        }
+        return $this->detectPhp($text, $line, $character);
+    }
+
+    /**
+     * Detect context for an existing alias string at cursor position (for definition/hover).
+     *
+     * @return array{context: string, alias: string, ...}|null
+     */
+    public function detectAtCursor(string $text, int $line, int $character, string $uri = ''): ?array
+    {
+        if (self::isXmlUri($uri)) {
+            return $this->detectXmlAtCursor($text, $line, $character);
+        }
+        return $this->detectPhpAtCursor($text, $line, $character);
+    }
+
+    private function detectPhp(string $text, int $line, int $character): array
     {
         $lines = explode("\n", $text);
         if (!isset($lines[$line])) {
@@ -120,13 +209,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
     }
 
-    /**
-     * Detect context for an existing alias string at cursor position (for definition/hover).
-     * Looks for a complete quoted string containing the cursor.
-     *
-     * @return array{context: string, alias: string}|null
-     */
-    public function detectAtCursor(string $text, int $line, int $character): ?array
+    private function detectPhpAtCursor(string $text, int $line, int $character): ?array
     {
         $lines = explode("\n", $text);
         if (!isset($lines[$line])) {
@@ -149,6 +232,392 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
                         }
                     }
                 }
+            }
+        }
+
+        return null;
+    }
+
+    private function detectXml(string $text, int $line, int $character): array
+    {
+        $none = ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
+
+        $lines = explode("\n", $text);
+        if (!isset($lines[$line])) {
+            return $none;
+        }
+
+        $textBeforeCursor = substr($lines[$line], 0, $character);
+        $parentPath = $this->getXmlParentPath($lines, $line);
+
+        // Attribute value: attrName="partial
+        if (preg_match('/(\w+)=["\']([^"\']*)?$/', $textBeforeCursor, $m)) {
+            $attrName = $m[1];
+            $prefix = $m[2] ?? '';
+            $context = $this->resolveXmlAttributeContext($attrName);
+            if ($context !== null) {
+                return [
+                    'context' => $context,
+                    'prefix' => $prefix,
+                    'prefixStart' => $character - strlen($prefix),
+                ];
+            }
+        }
+
+        // Tag content: <tagName>partial
+        if (preg_match('/<(\w+)>([^<]*)?$/', $textBeforeCursor, $m)) {
+            $tagName = $m[1];
+            $prefix = $m[2] ?? '';
+            $context = $this->resolveXmlTagContext($tagName, $prefix, $parentPath);
+            if ($context !== self::CONTEXT_NONE) {
+                return [
+                    'context' => $context,
+                    'prefix' => $prefix,
+                    'prefixStart' => $character - strlen($prefix),
+                ];
+            }
+        }
+
+        return $none;
+    }
+
+    private function detectXmlAtCursor(string $text, int $line, int $character): ?array
+    {
+        $lines = explode("\n", $text);
+        if (!isset($lines[$line])) {
+            return null;
+        }
+
+        $lineText = $lines[$line];
+        $parentPath = $this->getXmlParentPath($lines, $line);
+
+        // Attribute value: attrName="value"
+        if (preg_match_all('/(\w+)=["\']([^"\']*)["\']/', $lineText, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+            foreach ($matches as $match) {
+                $valueStart = $match[2][1];
+                $valueEnd = $valueStart + strlen($match[2][0]);
+                if ($character >= $valueStart && $character <= $valueEnd) {
+                    $attrName = $match[1][0];
+                    $value = $match[2][0];
+                    return $this->resolveXmlAttributeAtCursor($attrName, $value, $lines, $line);
+                }
+            }
+        }
+
+        // Tag content: <tagName>value</tagName>
+        if (preg_match_all('/<(\w+)>([^<]+)<\/\1>/', $lineText, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+            foreach ($matches as $match) {
+                $valueStart = $match[2][1];
+                $valueEnd = $valueStart + strlen($match[2][0]);
+                if ($character >= $valueStart && $character <= $valueEnd) {
+                    $tagName = $match[1][0];
+                    $value = trim($match[2][0]);
+                    return $this->resolveXmlTagAtCursor($tagName, $value, $lines, $line, $parentPath);
+                }
+            }
+        }
+
+        // Dynamic tag inside <rewrite>: <alias_suffix>FQCN</alias_suffix>
+        if (str_contains($parentPath, '/rewrite')) {
+            if (preg_match_all('/<(\w+)>([A-Z][^<]+)<\/\1>/', $lineText, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
+                foreach ($matches as $match) {
+                    $valueStart = $match[2][1];
+                    $valueEnd = $valueStart + strlen($match[2][0]);
+                    if ($character >= $valueStart && $character <= $valueEnd) {
+                        return [
+                            'context' => self::CONTEXT_FQCN,
+                            'alias' => trim($match[2][0]),
+                        ];
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Resolve context for an XML tag based on its name, value, and parent path.
+     */
+    private function resolveXmlTagContext(string $tagName, string $value, string $parentPath): string
+    {
+        return self::XML_TAG_TO_CONTEXT[$tagName] ?? match ($tagName) {
+            'class' => $this->resolveClassTagContext($value, $parentPath),
+            'model' => $this->resolveModelTagContext($value, $parentPath),
+            'block' => str_contains($value, '/') ? self::CONTEXT_BLOCK_ALIAS : self::CONTEXT_NONE,
+            'method' => self::CONTEXT_XML_METHOD,
+            'helper' => self::CONTEXT_HELPER_ALIAS,
+            'template', 'file' => (str_ends_with($value, '.phtml') || str_ends_with($value, '.html'))
+                ? self::CONTEXT_TEMPLATE_PATH
+                : self::CONTEXT_NONE,
+            default => self::CONTEXT_NONE,
+        };
+    }
+
+    /**
+     * Resolve context for an XML tag at cursor position (hover/definition).
+     */
+    private function resolveXmlTagAtCursor(string $tagName, string $value, array $lines, int $lineNum, string $parentPath): ?array
+    {
+        if (isset(self::XML_TAG_TO_CONTEXT[$tagName])) {
+            return [
+                'context' => self::XML_TAG_TO_CONTEXT[$tagName],
+                'alias' => $value,
+            ];
+        }
+
+        return match ($tagName) {
+            'class' => [
+                'context' => $this->resolveClassTagContext($value, $parentPath),
+                'alias' => $value,
+            ],
+
+            'model' => $this->resolveModelTagAtCursor($value, $parentPath),
+
+            'block' => str_contains($value, '/')
+                ? ['context' => self::CONTEXT_BLOCK_ALIAS, 'alias' => $value]
+                : null,
+
+            'helper' => str_contains($value, '/')
+                ? ['context' => self::CONTEXT_HELPER_ALIAS, 'alias' => $value]
+                : null,
+
+            'method' => [
+                'context' => self::CONTEXT_XML_METHOD,
+                'alias' => $value,
+                'method' => $value,
+                'classAlias' => $this->findSiblingTagValue($lines, $lineNum, 'class'),
+                'classType' => 'model',
+            ],
+
+            'template', 'file' => (str_ends_with($value, '.phtml') || str_ends_with($value, '.html'))
+                ? ['context' => self::CONTEXT_TEMPLATE_PATH, 'alias' => $value]
+                : null,
+
+            default => null,
+        };
+    }
+
+    /**
+     * Determine what a <class> tag means based on its XML parent path.
+     */
+    private function resolveClassTagContext(string $value, string $parentPath): string
+    {
+        foreach (self::XML_CLASS_PATH_RULES as $pattern => $context) {
+            if (preg_match($pattern, $parentPath)) {
+                return $context;
+            }
+        }
+
+        // Fallback: if value contains '/' it's an alias, otherwise FQCN
+        return str_contains($value, '/') ? self::CONTEXT_MODEL_ALIAS : self::CONTEXT_FQCN;
+    }
+
+    /**
+     * Determine what a <model> tag means based on its XML parent path.
+     */
+    private function resolveModelTagContext(string $value, string $parentPath): string
+    {
+        foreach (self::XML_MODEL_PATH_RULES as $pattern => $context) {
+            if (preg_match($pattern, $parentPath)) {
+                return $context;
+            }
+        }
+
+        if (str_contains($value, '::')) {
+            return self::CONTEXT_CRON_RUN_MODEL;
+        }
+
+        return str_contains($value, '/') ? self::CONTEXT_MODEL_ALIAS : self::CONTEXT_FQCN;
+    }
+
+    /**
+     * Resolve a <model> tag at cursor for hover/definition.
+     */
+    private function resolveModelTagAtCursor(string $value, string $parentPath): ?array
+    {
+        $context = $this->resolveModelTagContext($value, $parentPath);
+
+        if ($context === self::CONTEXT_CRON_RUN_MODEL && str_contains($value, '::')) {
+            [$alias, $method] = explode('::', $value, 2);
+            return [
+                'context' => self::CONTEXT_CRON_RUN_MODEL,
+                'alias' => $value,
+                'classAlias' => $alias,
+                'method' => $method,
+            ];
+        }
+
+        if ($context === self::CONTEXT_NONE) {
+            return null;
+        }
+
+        return [
+            'context' => $context,
+            'alias' => $value,
+        ];
+    }
+
+    /**
+     * Resolve context for an XML attribute (simple, unambiguous).
+     */
+    private function resolveXmlAttributeContext(string $attrName): ?string
+    {
+        if ($attrName === 'method') {
+            return self::CONTEXT_XML_METHOD;
+        }
+
+        return self::XML_ATTR_TO_CONTEXT[$attrName] ?? null;
+    }
+
+    /**
+     * Resolve an XML attribute at cursor for hover/definition.
+     */
+    private function resolveXmlAttributeAtCursor(
+        string $attrName,
+        string $value,
+        array $lines,
+        int $lineNum,
+    ): ?array {
+        return match ($attrName) {
+            'type' => str_contains($value, '/')
+                ? ['context' => self::CONTEXT_BLOCK_ALIAS, 'alias' => $value]
+                : null,
+            'template' => ['context' => self::CONTEXT_TEMPLATE_PATH, 'alias' => $value],
+            'ifconfig' => ['context' => self::CONTEXT_CONFIG_PATH, 'alias' => $value],
+            'handle' => ['context' => self::CONTEXT_LAYOUT_HANDLE, 'alias' => $value],
+            'method' => [
+                'context' => self::CONTEXT_XML_METHOD,
+                'alias' => $value,
+                'method' => $value,
+                'classAlias' => $this->findBlockTypeFromActionContext($lines, $lineNum),
+                'classType' => 'block',
+            ],
+            'helper' => $this->resolveHelperAttribute($value),
+            default => null,
+        };
+    }
+
+    /**
+     * Parse layout helper attribute: "module/helper_class/methodName"
+     */
+    private function resolveHelperAttribute(string $value): array
+    {
+        $parts = explode('/', $value);
+        if (count($parts) < 3) {
+            return [
+                'context' => self::CONTEXT_HELPER_ALIAS,
+                'alias' => $value,
+            ];
+        }
+
+        $method = array_pop($parts);
+        $helperAlias = implode('/', $parts);
+
+        return [
+            'context' => self::CONTEXT_XML_METHOD,
+            'alias' => $value,
+            'method' => $method,
+            'classAlias' => $helperAlias,
+            'classType' => 'helper',
+        ];
+    }
+
+    /**
+     * Build the XML parent path by scanning tags from the start of the
+     * document up to (but not including) the target line. Maintains a
+     * stack of open tags; inline tags (opened and closed on the same line)
+     * are ignored since they are leaf nodes, not parents.
+     *
+     * Example: for cursor on <class> inside an observer definition,
+     * returns "config/global/events/some_event/observers/my_observer"
+     */
+    private function getXmlParentPath(array $lines, int $targetLine): string
+    {
+        $stack = [];
+
+        for ($i = 0; $i < $targetLine; $i++) {
+            $line = $lines[$i];
+            $this->processXmlLineForPath($line, $stack);
+        }
+
+        return implode('/', $stack);
+    }
+
+    /**
+     * Process a single XML line, updating the tag stack.
+     * Handles opening tags, closing tags, and inline (self-contained) tags.
+     */
+    private function processXmlLineForPath(string $line, array &$stack): void
+    {
+        // Skip comments
+        if (preg_match('/^\s*<!--/', $line)) {
+            return;
+        }
+
+        // Find all XML tags on this line
+        preg_match_all('/<(\/?)([\w:.-]+)([^>]*?)(\/?)\s*>/', $line, $matches, PREG_SET_ORDER);
+
+        foreach ($matches as $m) {
+            $isClosing = $m[1] === '/';
+            $tagName = $m[2];
+            $isSelfClosing = $m[4] === '/';
+
+            if ($isSelfClosing) {
+                continue;
+            }
+
+            if ($isClosing) {
+                // Pop matching tag from stack (search from end)
+                for ($j = count($stack) - 1; $j >= 0; $j--) {
+                    if ($stack[$j] === $tagName) {
+                        array_splice($stack, $j);
+                        break;
+                    }
+                }
+            } else {
+                // Check if the tag is also closed on this same line (inline tag)
+                if (preg_match('/<' . preg_quote($tagName, '/') . '(?:\s[^>]*)?>.*<\/' . preg_quote($tagName, '/') . '>/', $line)) {
+                    continue;
+                }
+                $stack[] = $tagName;
+            }
+        }
+    }
+
+    /**
+     * Search sibling lines for a <tagName>value</tagName> near the current line.
+     * Used to find <class> sibling of <method> in observer definitions.
+     */
+    private function findSiblingTagValue(array $lines, int $lineNum, string $tagName): ?string
+    {
+        $searchRange = 5;
+        $start = max(0, $lineNum - $searchRange);
+        $end = min(count($lines) - 1, $lineNum + $searchRange);
+
+        for ($i = $start; $i <= $end; $i++) {
+            if ($i === $lineNum) {
+                continue;
+            }
+            if (preg_match("/<{$tagName}>([^<]+)<\/{$tagName}>/", $lines[$i], $m)) {
+                return trim($m[1]);
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Find the block type from the parent <block type="..."> of an <action method="...">.
+     */
+    private function findBlockTypeFromActionContext(array $lines, int $lineNum): ?string
+    {
+        for ($i = $lineNum - 1; $i >= max(0, $lineNum - 30); $i--) {
+            if (preg_match('/<block\b[^>]*\btype=["\']([^"\']+)["\']/', $lines[$i], $m)) {
+                return $m[1];
+            }
+            if (str_contains($lines[$i], '</block>')) {
+                break;
             }
         }
 
