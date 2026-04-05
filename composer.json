@@ -87,7 +87,6 @@
         "phpstan/phpstan-strict-rules": "^2.0",
         "rector/rector": "^2",
         "pestphp/pest": "^4",
-        "php-mcp/server": "^3.3",
         "psy/psysh": "^0.12.10",
         "react/stream": "^1.4"
     },

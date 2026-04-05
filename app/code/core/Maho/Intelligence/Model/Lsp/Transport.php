@@ -98,6 +98,8 @@ class Maho_Intelligence_Model_Lsp_Transport
             $decoded = json_decode($body, true);
             if (is_array($decoded)) {
                 ($this->onMessage)($decoded);
+            } else {
+                fwrite(STDERR, "maho-intelligence: invalid JSON-RPC payload, skipping\n");
             }
         }
     }

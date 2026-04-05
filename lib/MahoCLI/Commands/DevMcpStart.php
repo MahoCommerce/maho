@@ -27,8 +27,8 @@ class DevMcpStart extends BaseMahoCommand
     #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        if (!class_exists(\PhpMcp\Server\Server::class)) {
-            $output->writeln('<error>php-mcp/server is not installed. Run: composer require --dev php-mcp/server</error>');
+        if (!class_exists(\React\Stream\ReadableResourceStream::class)) {
+            $output->writeln('<error>react/stream is not installed. Run: composer require react/stream</error>');
             return Command::FAILURE;
         }
 

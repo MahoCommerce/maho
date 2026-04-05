@@ -14,6 +14,13 @@ class Maho_Intelligence_Model_Provider_ClassAlias
 {
     private const TYPES = ['model', 'block', 'helper'];
 
+    /** @var array<string, array> */
+    private array $cachedAliases = [];
+
+    private ?array $cachedRewrites = null;
+
+    private ?array $cachedResourceModelAliases = null;
+
     /**
      * Resolve a single alias to its class name, file path, and rewrite info
      */
@@ -126,12 +133,16 @@ class Maho_Intelligence_Model_Provider_ClassAlias
      */
     public function getAllAliases(string $type): array
     {
-        $config = Mage::getConfig();
-        $result = [];
+        if (isset($this->cachedAliases[$type])) {
+            return $this->cachedAliases[$type];
+        }
 
         if ($type === 'resource_model') {
-            return $this->getAllResourceModelAliases();
+            return $this->cachedAliases[$type] = $this->getAllResourceModelAliases();
         }
+
+        $config = Mage::getConfig();
+        $result = [];
 
         $groupsNode = $config->getNode("global/{$type}s");
         if (!$groupsNode) {
@@ -160,6 +171,7 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         }
 
         ksort($result);
+        $this->cachedAliases[$type] = $result;
         return $result;
     }
 
@@ -168,6 +180,10 @@ class Maho_Intelligence_Model_Provider_ClassAlias
      */
     public function getAllRewrites(): array
     {
+        if ($this->cachedRewrites !== null) {
+            return $this->cachedRewrites;
+        }
+
         $config = Mage::getConfig();
         $rewrites = [];
 
@@ -202,11 +218,16 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         }
 
         ksort($rewrites);
+        $this->cachedRewrites = $rewrites;
         return $rewrites;
     }
 
     private function getAllResourceModelAliases(): array
     {
+        if ($this->cachedResourceModelAliases !== null) {
+            return $this->cachedResourceModelAliases;
+        }
+
         $config = Mage::getConfig();
         $result = [];
 
@@ -243,6 +264,7 @@ class Maho_Intelligence_Model_Provider_ClassAlias
         }
 
         ksort($result);
+        $this->cachedResourceModelAliases = $result;
         return $result;
     }
 

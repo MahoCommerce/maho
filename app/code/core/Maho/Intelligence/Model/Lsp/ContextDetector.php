@@ -24,31 +24,71 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     public const CONTEXT_CONFIG_PATH = 'config_path';
     public const CONTEXT_EVENT_NAME = 'event_name';
 
-    private const PATTERNS = [
+    private const CALL_PATTERNS = [
         self::CONTEXT_MODEL_ALIAS => [
-            '/Mage::getModel\(\s*[\'"]([^\'"]*)?$/',
-            '/Mage::getSingleton\(\s*[\'"]([^\'"]*)?$/',
+            'Mage::getModel',
+            'Mage::getSingleton',
         ],
         self::CONTEXT_HELPER_ALIAS => [
-            '/Mage::helper\(\s*[\'"]([^\'"]*)?$/',
+            'Mage::helper',
         ],
         self::CONTEXT_BLOCK_ALIAS => [
-            '/->createBlock\(\s*[\'"]([^\'"]*)?$/',
-            '/->getBlockSingleton\(\s*[\'"]([^\'"]*)?$/',
-            '/getLayout\(\)->createBlock\(\s*[\'"]([^\'"]*)?$/',
+            '->createBlock',
+            '->getBlockSingleton',
+            'getLayout()->createBlock',
         ],
         self::CONTEXT_RESOURCE_MODEL_ALIAS => [
-            '/Mage::getResourceModel\(\s*[\'"]([^\'"]*)?$/',
-            '/Mage::getResourceSingleton\(\s*[\'"]([^\'"]*)?$/',
+            'Mage::getResourceModel',
+            'Mage::getResourceSingleton',
         ],
         self::CONTEXT_CONFIG_PATH => [
-            '/Mage::getStoreConfig\(\s*[\'"]([^\'"]*)?$/',
-            '/Mage::getStoreConfigFlag\(\s*[\'"]([^\'"]*)?$/',
+            'Mage::getStoreConfig',
+            'Mage::getStoreConfigFlag',
         ],
         self::CONTEXT_EVENT_NAME => [
-            '/Mage::dispatchEvent\(\s*[\'"]([^\'"]*)?$/',
+            'Mage::dispatchEvent',
         ],
     ];
+
+    /** @var array<string, list<string>>|null */
+    private ?array $completionPatterns = null;
+
+    /** @var array<string, list<string>>|null */
+    private ?array $cursorPatterns = null;
+
+    /**
+     * @return array<string, list<string>>
+     */
+    private function getCompletionPatterns(): array
+    {
+        if ($this->completionPatterns === null) {
+            $this->completionPatterns = [];
+            foreach (self::CALL_PATTERNS as $context => $calls) {
+                foreach ($calls as $call) {
+                    $escaped = preg_quote($call, '/');
+                    $this->completionPatterns[$context][] = "/{$escaped}\\(\\s*['\"]([^'\"]*)?$/";
+                }
+            }
+        }
+        return $this->completionPatterns;
+    }
+
+    /**
+     * @return array<string, list<string>>
+     */
+    private function getCursorPatterns(): array
+    {
+        if ($this->cursorPatterns === null) {
+            $this->cursorPatterns = [];
+            foreach (self::CALL_PATTERNS as $context => $calls) {
+                foreach ($calls as $call) {
+                    $escaped = preg_quote($call, '/');
+                    $this->cursorPatterns[$context][] = "/{$escaped}\\(\\s*['\"]([^'\"]+)['\"]\\)/";
+                }
+            }
+        }
+        return $this->cursorPatterns;
+    }
 
     /**
      * Detect what context the cursor is in for completion.
@@ -62,10 +102,9 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
             return ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
         }
 
-        $lineText = $lines[$line];
-        $textBeforeCursor = substr($lineText, 0, $character);
+        $textBeforeCursor = substr($lines[$line], 0, $character);
 
-        foreach (self::PATTERNS as $context => $patterns) {
+        foreach ($this->getCompletionPatterns() as $context => $patterns) {
             foreach ($patterns as $pattern) {
                 if (preg_match($pattern, $textBeforeCursor, $matches)) {
                     $prefix = $matches[1] ?? '';
@@ -96,32 +135,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
 
         $lineText = $lines[$line];
 
-        $contextPatterns = [
-            self::CONTEXT_MODEL_ALIAS => [
-                '/Mage::getModel\(\s*[\'"]([^\'"]+)[\'"]\)/',
-                '/Mage::getSingleton\(\s*[\'"]([^\'"]+)[\'"]\)/',
-            ],
-            self::CONTEXT_HELPER_ALIAS => [
-                '/Mage::helper\(\s*[\'"]([^\'"]+)[\'"]\)/',
-            ],
-            self::CONTEXT_BLOCK_ALIAS => [
-                '/->createBlock\(\s*[\'"]([^\'"]+)[\'"]\)/',
-                '/->getBlockSingleton\(\s*[\'"]([^\'"]+)[\'"]\)/',
-            ],
-            self::CONTEXT_RESOURCE_MODEL_ALIAS => [
-                '/Mage::getResourceModel\(\s*[\'"]([^\'"]+)[\'"]\)/',
-                '/Mage::getResourceSingleton\(\s*[\'"]([^\'"]+)[\'"]\)/',
-            ],
-            self::CONTEXT_CONFIG_PATH => [
-                '/Mage::getStoreConfig\(\s*[\'"]([^\'"]+)[\'"]\)/',
-                '/Mage::getStoreConfigFlag\(\s*[\'"]([^\'"]+)[\'"]\)/',
-            ],
-            self::CONTEXT_EVENT_NAME => [
-                '/Mage::dispatchEvent\(\s*[\'"]([^\'"]+)[\'"]\)/',
-            ],
-        ];
-
-        foreach ($contextPatterns as $context => $patterns) {
+        foreach ($this->getCursorPatterns() as $context => $patterns) {
             foreach ($patterns as $pattern) {
                 if (preg_match_all($pattern, $lineText, $matches, PREG_SET_ORDER | PREG_OFFSET_CAPTURE)) {
                     foreach ($matches as $match) {

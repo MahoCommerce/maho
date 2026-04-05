@@ -10,76 +10,260 @@
 
 declare(strict_types=1);
 
-use PhpMcp\Server\Server;
-use PhpMcp\Server\Transports\StdioServerTransport;
+use React\EventLoop\Loop;
+use React\EventLoop\LoopInterface;
 
 class Maho_Intelligence_Model_Mcp_Server
 {
+    private const PROTOCOL_VERSION = '2024-11-05';
+    private const JSONRPC_VERSION = '2.0';
+
+    private LoopInterface $loop;
+    private Maho_Intelligence_Model_Lsp_Transport $transport;
+    private Maho_Intelligence_Model_Registry $registry;
+    /** @var array<string, array{description: string, inputSchema: array, handler: callable}> */
+    private array $tools = [];
+
     public function run(): void
     {
-        $registry = Mage::getModel('intelligence/registry');
+        $this->loop = Loop::get();
+        $this->registry = Mage::getModel('intelligence/registry');
+        $this->transport = new Maho_Intelligence_Model_Lsp_Transport($this->loop);
 
-        $server = Server::make()
-            ->withServerInfo('maho-intelligence', Mage::getVersion())
-            ->withInstructions($this->getInstructions())
-            ->withTool(
-                fn(string $type, string $alias) => $registry->get('classAlias', 'resolveAlias', [$type, $alias]),
-                name: 'resolve_alias',
-                description: 'Resolve a Maho class alias (e.g. catalog/product) to its PHP class name, file path, and rewrite info. Type must be one of: model, block, helper, resource_model.',
-            )
-            ->withTool(
-                fn(string $type) => $registry->get('classAlias', 'getAllAliases', [$type]),
-                name: 'list_aliases',
-                description: 'List all class aliases for a given type. Type must be one of: model, block, helper, resource_model.',
-            )
-            ->withTool(
-                fn() => $registry->get('classAlias', 'getAllRewrites'),
-                name: 'list_rewrites',
-                description: 'List all class rewrites with conflict detection. Shows original class, rewriting class, and flags conflicts where multiple modules rewrite the same class.',
-            )
-            ->withTool(
-                fn(?string $pattern = null) => $this->filterEvents($registry, $pattern),
-                name: 'list_events',
-                description: 'List all events and their observers. Optionally filter by event name pattern (substring match).',
-            )
-            ->withTool(
-                fn(string $path) => $this->getMergedConfig($path),
-                name: 'get_merged_config',
-                description: 'Get the merged XML configuration for a given path (e.g. global/models, frontend/routers, default/web/secure). Returns the fully merged config from all modules as a JSON object.',
-            )
-            ->withTool(
-                fn() => $registry->get('module', 'getAllModules'),
-                name: 'list_modules',
-                description: 'List all active modules with their versions, code pool, and dependencies.',
-            )
-            ->withTool(
-                fn(?string $section = null) => $this->filterConfigPaths($registry, $section),
-                name: 'list_config_paths',
-                description: 'List all system.xml configuration paths with labels, types, and default values. Optionally filter by section name.',
-            )
-            ->withTool(
-                fn(string $area = 'frontend') => $registry->get('layout', 'getHandles', [$area]),
-                name: 'list_layout_handles',
-                description: 'List layout handles and their block hierarchy for an area. Area must be frontend or adminhtml.',
-            )
-            ->withTool(
-                fn() => $registry->get('cron', 'getAllJobs'),
-                name: 'list_cron_jobs',
-                description: 'List all cron job definitions with their model::method callbacks and schedules.',
-            )
-            ->withTool(
-                fn() => $registry->get('table', 'getAllTables'),
-                name: 'list_tables',
-                description: 'List all database table name mappings from resource model configuration.',
-            )
-            ->withTool(
-                fn() => $registry->get('acl', 'getTree'),
-                name: 'list_acl_resources',
-                description: 'Get the ACL resource tree for admin permissions.',
-            )
-            ->build();
+        $this->registerTools();
 
-        $server->listen(new StdioServerTransport());
+        $this->transport->listen(
+            onMessage: fn(array $msg) => $this->handleMessage($msg),
+            onClose: fn() => $this->loop->stop(),
+        );
+
+        $this->loop->run();
+    }
+
+    private function registerTools(): void
+    {
+        $registry = $this->registry;
+
+        $this->addTool(
+            'resolve_alias',
+            'Resolve a Maho class alias (e.g. catalog/product) to its PHP class name, file path, and rewrite info. Type must be one of: model, block, helper, resource_model.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'type' => ['type' => 'string', 'description' => 'Alias type: model, block, helper, or resource_model'],
+                    'alias' => ['type' => 'string', 'description' => 'Class alias (e.g. catalog/product)'],
+                ],
+                'required' => ['type', 'alias'],
+            ],
+            fn(array $args) => $registry->get('classAlias', 'resolveAlias', [$args['type'], $args['alias']]),
+        );
+
+        $this->addTool(
+            'list_aliases',
+            'List all class aliases for a given type. Type must be one of: model, block, helper, resource_model.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'type' => ['type' => 'string', 'description' => 'Alias type: model, block, helper, or resource_model'],
+                ],
+                'required' => ['type'],
+            ],
+            fn(array $args) => $registry->get('classAlias', 'getAllAliases', [$args['type']]),
+        );
+
+        $this->addTool(
+            'list_rewrites',
+            'List all class rewrites with conflict detection. Shows original class, rewriting class, and flags conflicts where multiple modules rewrite the same class.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('classAlias', 'getAllRewrites'),
+        );
+
+        $this->addTool(
+            'list_events',
+            'List all events and their observers. Optionally filter by event name pattern (substring match).',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'pattern' => ['type' => 'string', 'description' => 'Optional substring to filter event names'],
+                ],
+            ],
+            fn(array $args) => $this->filterEvents($args['pattern'] ?? null),
+        );
+
+        $this->addTool(
+            'get_merged_config',
+            'Get the merged XML configuration for a given path (e.g. global/models, frontend/routers, default/web/secure). Returns the fully merged config from all modules as a JSON object.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'path' => ['type' => 'string', 'description' => 'Config path (e.g. global/models)'],
+                ],
+                'required' => ['path'],
+            ],
+            fn(array $args) => $this->getMergedConfig($args['path']),
+        );
+
+        $this->addTool(
+            'list_modules',
+            'List all active modules with their versions, code pool, and dependencies.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('module', 'getAllModules'),
+        );
+
+        $this->addTool(
+            'list_config_paths',
+            'List all system.xml configuration paths with labels, types, and default values. Optionally filter by section name.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'section' => ['type' => 'string', 'description' => 'Optional section name to filter by'],
+                ],
+            ],
+            fn(array $args) => $this->filterConfigPaths($args['section'] ?? null),
+        );
+
+        $this->addTool(
+            'list_layout_handles',
+            'List layout handles and their block hierarchy for an area. Area must be frontend or adminhtml.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'area' => ['type' => 'string', 'description' => 'Area: frontend or adminhtml', 'default' => 'frontend'],
+                ],
+            ],
+            fn(array $args) => $registry->get('layout', 'getHandles', [$args['area'] ?? 'frontend']),
+        );
+
+        $this->addTool(
+            'list_cron_jobs',
+            'List all cron job definitions with their model::method callbacks and schedules.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('cron', 'getAllJobs'),
+        );
+
+        $this->addTool(
+            'list_tables',
+            'List all database table name mappings from resource model configuration.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('table', 'getAllTables'),
+        );
+
+        $this->addTool(
+            'list_acl_resources',
+            'Get the ACL resource tree for admin permissions.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('acl', 'getTree'),
+        );
+    }
+
+    private function addTool(string $name, string $description, array $inputSchema, callable $handler): void
+    {
+        $this->tools[$name] = [
+            'description' => $description,
+            'inputSchema' => $inputSchema,
+            'handler' => $handler,
+        ];
+    }
+
+    private function handleMessage(array $message): void
+    {
+        $method = $message['method'] ?? null;
+        $id = $message['id'] ?? null;
+        $params = $message['params'] ?? [];
+
+        // Notifications (no id) don't require a response
+        if ($id === null) {
+            return;
+        }
+
+        $result = match ($method) {
+            'initialize' => $this->handleInitialize(),
+            'ping' => new \stdClass(),
+            'tools/list' => $this->handleToolsList(),
+            'tools/call' => $this->handleToolsCall($params),
+            default => null,
+        };
+
+        if ($result === null && $method !== 'initialize') {
+            $this->sendError($id, -32601, "Method not found: {$method}");
+        } else {
+            $this->sendResult($id, $result);
+        }
+    }
+
+    private function handleInitialize(): array
+    {
+        return [
+            'protocolVersion' => self::PROTOCOL_VERSION,
+            'capabilities' => [
+                'tools' => ['listChanged' => false],
+            ],
+            'serverInfo' => [
+                'name' => 'maho-intelligence',
+                'version' => Mage::getVersion(),
+            ],
+            'instructions' => $this->getInstructions(),
+        ];
+    }
+
+    private function handleToolsList(): array
+    {
+        $tools = [];
+        foreach ($this->tools as $name => $tool) {
+            $tools[] = [
+                'name' => $name,
+                'description' => $tool['description'],
+                'inputSchema' => $tool['inputSchema'],
+            ];
+        }
+        return ['tools' => $tools];
+    }
+
+    private function handleToolsCall(array $params): array
+    {
+        $name = $params['name'] ?? '';
+        $arguments = $params['arguments'] ?? [];
+
+        if (!isset($this->tools[$name])) {
+            return [
+                'content' => [['type' => 'text', 'text' => "Unknown tool: {$name}"]],
+                'isError' => true,
+            ];
+        }
+
+        try {
+            $result = ($this->tools[$name]['handler'])($arguments);
+            $text = json_encode($result, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            return [
+                'content' => [['type' => 'text', 'text' => $text]],
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'content' => [['type' => 'text', 'text' => "Error: {$e->getMessage()}"]],
+                'isError' => true,
+            ];
+        }
+    }
+
+    private function sendResult(int|string $id, mixed $result): void
+    {
+        $this->transport->send([
+            'jsonrpc' => self::JSONRPC_VERSION,
+            'id' => $id,
+            'result' => $result,
+        ]);
+    }
+
+    private function sendError(int|string $id, int $code, string $message): void
+    {
+        $this->transport->send([
+            'jsonrpc' => self::JSONRPC_VERSION,
+            'id' => $id,
+            'error' => [
+                'code' => $code,
+                'message' => $message,
+            ],
+        ]);
     }
 
     private function getInstructions(): string
@@ -99,9 +283,9 @@ Key concepts:
 INSTRUCTIONS;
     }
 
-    private function filterEvents(Maho_Intelligence_Model_Registry $registry, ?string $pattern): array
+    private function filterEvents(?string $pattern): array
     {
-        $events = $registry->get('event', 'getAllEvents');
+        $events = $this->registry->get('event', 'getAllEvents');
         if ($pattern === null) {
             return $events;
         }
@@ -118,9 +302,9 @@ INSTRUCTIONS;
         return $filtered;
     }
 
-    private function filterConfigPaths(Maho_Intelligence_Model_Registry $registry, ?string $section): array
+    private function filterConfigPaths(?string $section): array
     {
-        $paths = $registry->get('configPath', 'getAllPaths');
+        $paths = $this->registry->get('configPath', 'getAllPaths');
         if ($section === null) {
             return $paths;
         }

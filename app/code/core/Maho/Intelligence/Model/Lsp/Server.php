@@ -42,7 +42,6 @@ class Maho_Intelligence_Model_Lsp_Server
     /** @var array<string, TimerInterface> Pending diagnostic timers keyed by URI */
     private array $diagnosticTimers = [];
 
-    private bool $shutdownRequested = false;
 
     public function run(): void
     {
@@ -110,7 +109,7 @@ class Maho_Intelligence_Model_Lsp_Server
             'textDocument/didOpen' => $this->handleDidOpen($params),
             'textDocument/didChange' => $this->handleDidChange($params),
             'textDocument/didClose' => $this->handleDidClose($params),
-            'exit' => exit($this->shutdownRequested ? 0 : 1),
+            'exit' => $this->loop->stop(),
             default => null,
         };
     }
@@ -154,7 +153,6 @@ class Maho_Intelligence_Model_Lsp_Server
 
     private function handleShutdown(): null
     {
-        $this->shutdownRequested = true;
         return null;
     }
 
