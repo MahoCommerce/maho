@@ -55,8 +55,8 @@ class Maho_Intelligence_Model_Lsp_XmlStructureIndex
             $this->rebuild();
         }
 
-        if ($filename !== '' && isset($this->childrenMap[$filename][$parentPath])) {
-            return $this->childrenMap[$filename][$parentPath];
+        if ($filename !== '' && isset($this->childrenMap[$filename])) {
+            return $this->childrenMap[$filename][$parentPath] ?? [];
         }
 
         return $this->layoutChildrenMap[$parentPath] ?? [];
@@ -165,16 +165,12 @@ class Maho_Intelligence_Model_Lsp_XmlStructureIndex
             if (!in_array($name, $childNames, true)) {
                 $childNames[] = $name;
             }
+            $childPath = $currentPath . '/' . $name;
+            $this->walkXmlTree($child, $childPath, $map);
         }
 
         if ($childNames !== [] && $currentPath !== '') {
             $map[$currentPath] = $childNames;
-        }
-
-        foreach ($node->children() as $child) {
-            $name = $child->getName();
-            $childPath = $currentPath === '' ? $name : $currentPath . '/' . $name;
-            $this->walkXmlTree($child, $childPath, $map);
         }
     }
 }
