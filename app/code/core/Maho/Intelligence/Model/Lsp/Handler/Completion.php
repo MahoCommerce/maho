@@ -57,6 +57,8 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
                 => $this->completeConfigPaths($context['prefix'], $range),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_EVENT_NAME
                 => $this->completeEventNames($context['prefix'], $range),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_FQCN
+                => $this->completeFqcn($context['prefix'], $range),
             default => ['isIncomplete' => false, 'items' => []],
         };
     }
@@ -150,5 +152,56 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
         }
 
         return ['isIncomplete' => false, 'items' => $items];
+    }
+
+    private function completeFqcn(string $prefix, array $range): array
+    {
+        $prefixes = $this->getAllClassPrefixes();
+
+        $items = [];
+        foreach ($prefixes as $classPrefix => $info) {
+            if ($prefix !== '' && !str_starts_with($classPrefix, $prefix)) {
+                continue;
+            }
+
+            $items[] = [
+                'label' => $classPrefix,
+                'kind' => 7, // CompletionItemKind.Class
+                'detail' => "{$info['type']} group: {$info['group']}",
+                'textEdit' => ['range' => $range, 'newText' => $classPrefix],
+            ];
+
+            if (count($items) >= 200) {
+                return ['isIncomplete' => true, 'items' => $items];
+            }
+        }
+
+        return ['isIncomplete' => false, 'items' => $items];
+    }
+
+    /**
+     * @return array<string, array{type: string, group: string}>
+     */
+    private function getAllClassPrefixes(): array
+    {
+        $config = Mage::getConfig();
+        $prefixes = [];
+
+        foreach (['model', 'block', 'helper'] as $type) {
+            $groupsNode = $config->getNode("global/{$type}s");
+            if (!$groupsNode) {
+                continue;
+            }
+
+            foreach ($groupsNode->children() as $group => $groupConfig) {
+                $classPrefix = (string) ($groupConfig->class ?? '');
+                if ($classPrefix !== '') {
+                    $prefixes[$classPrefix] = ['type' => $type, 'group' => (string) $group];
+                }
+            }
+        }
+
+        ksort($prefixes);
+        return $prefixes;
     }
 }
