@@ -22,7 +22,7 @@ use React\EventLoop\TimerInterface;
  * - textDocument/completion
  * - textDocument/definition
  * - textDocument/hover
- * - textDocument/didOpen, didChange, didClose
+ * - textDocument/didOpen, didChange, didSave, didClose
  */
 class Maho_Intelligence_Model_Lsp_Server
 {
@@ -33,6 +33,8 @@ class Maho_Intelligence_Model_Lsp_Server
     private Maho_Intelligence_Model_Lsp_DocumentStore $documents;
     private Maho_Intelligence_Model_Lsp_ContextDetector $detector;
     private Maho_Intelligence_Model_Registry $registry;
+
+    private Maho_Intelligence_Model_Lsp_XmlStructureIndex $xmlStructureIndex;
 
     private Maho_Intelligence_Model_Lsp_Handler_Completion $completionHandler;
     private Maho_Intelligence_Model_Lsp_Handler_Definition $definitionHandler;
@@ -49,7 +51,9 @@ class Maho_Intelligence_Model_Lsp_Server
 
         $this->registry = Mage::getModel('intelligence/registry');
         $this->documents = new Maho_Intelligence_Model_Lsp_DocumentStore();
+        $this->xmlStructureIndex = new Maho_Intelligence_Model_Lsp_XmlStructureIndex();
         $this->detector = new Maho_Intelligence_Model_Lsp_ContextDetector();
+        $this->detector->setStructureIndex($this->xmlStructureIndex);
         $this->transport = new Maho_Intelligence_Model_Lsp_Transport($loop);
 
         $this->completionHandler = new Maho_Intelligence_Model_Lsp_Handler_Completion(
@@ -107,6 +111,7 @@ class Maho_Intelligence_Model_Lsp_Server
             'initialized' => null,
             'textDocument/didOpen' => $this->handleDidOpen($params),
             'textDocument/didChange' => $this->handleDidChange($params),
+            'textDocument/didSave' => $this->handleDidSave($params),
             'textDocument/didClose' => $this->handleDidClose($params),
             'exit' => $this->loop->stop(),
             default => null,
@@ -135,9 +140,10 @@ class Maho_Intelligence_Model_Lsp_Server
                 'textDocumentSync' => [
                     'openClose' => true,
                     'change' => 1, // Full sync
+                    'save' => true,
                 ],
                 'completionProvider' => [
-                    'triggerCharacters' => ["'", '"'],
+                    'triggerCharacters' => ["'", '"', '<'],
                     'resolveProvider' => false,
                 ],
                 'definitionProvider' => true,
@@ -176,6 +182,14 @@ class Maho_Intelligence_Model_Lsp_Server
         }
     }
 
+    private function handleDidSave(array $params): void
+    {
+        $uri = $params['textDocument']['uri'] ?? '';
+        if ($this->isModuleXmlUri($uri)) {
+            $this->xmlStructureIndex->invalidate();
+        }
+    }
+
     private function handleDidClose(array $params): void
     {
         $uri = $params['textDocument']['uri'];
@@ -185,6 +199,11 @@ class Maho_Intelligence_Model_Lsp_Server
             'uri' => $uri,
             'diagnostics' => [],
         ]);
+    }
+
+    private function isModuleXmlUri(string $uri): bool
+    {
+        return str_ends_with($uri, '.xml');
     }
 
     private function scheduleDiagnostics(string $uri, string $text): void

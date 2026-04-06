@@ -34,6 +34,22 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     public const CONTEXT_TEMPLATE_PATH = 'template_path';
     public const CONTEXT_LAYOUT_HANDLE = 'layout_handle';
     public const CONTEXT_FQCN = 'fqcn';
+    public const CONTEXT_XML_ELEMENT_NAME = 'xml_element_name';
+
+    private ?Maho_Intelligence_Model_Lsp_XmlStructureIndex $structureIndex = null;
+
+    public function setStructureIndex(Maho_Intelligence_Model_Lsp_XmlStructureIndex $index): void
+    {
+        $this->structureIndex = $index;
+    }
+
+    public function getStructureIndex(): Maho_Intelligence_Model_Lsp_XmlStructureIndex
+    {
+        if ($this->structureIndex === null) {
+            $this->structureIndex = new Maho_Intelligence_Model_Lsp_XmlStructureIndex();
+        }
+        return $this->structureIndex;
+    }
 
     private const CALL_PATTERNS = [
         self::CONTEXT_MODEL_ALIAS => [
@@ -166,7 +182,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     public function detect(string $text, int $line, int $character, string $uri = ''): array
     {
         if (self::isXmlUri($uri)) {
-            return $this->detectXml($text, $line, $character);
+            return $this->detectXml($text, $line, $character, $uri);
         }
         return $this->detectPhp($text, $line, $character);
     }
@@ -238,7 +254,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return null;
     }
 
-    private function detectXml(string $text, int $line, int $character): array
+    private function detectXml(string $text, int $line, int $character, string $uri = ''): array
     {
         $none = ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
 
@@ -274,6 +290,21 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
                     'context' => $context,
                     'prefix' => $prefix,
                     'prefixStart' => $character - strlen($prefix),
+                ];
+            }
+        }
+
+        // Structural element name: <partial at the start of a new element
+        // No trailing \s* — avoids matching "<block " (attribute context)
+        if (preg_match('/<([a-zA-Z_][\w.-]*)?$/', $textBeforeCursor, $m)) {
+            $prefix = $m[1] ?? '';
+            $suggestions = $this->getStructuralSuggestions($parentPath, $uri);
+            if ($suggestions !== []) {
+                return [
+                    'context' => self::CONTEXT_XML_ELEMENT_NAME,
+                    'prefix' => $prefix,
+                    'prefixStart' => $character - strlen($prefix),
+                    'suggestions' => $suggestions,
                 ];
             }
         }
@@ -521,6 +552,21 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
             'classAlias' => $helperAlias,
             'classType' => 'helper',
         ];
+    }
+
+    /**
+     * Look up valid child element names from the dynamic XML structure index.
+     *
+     * @return list<string>
+     */
+    private function getStructuralSuggestions(string $parentPath, string $uri): array
+    {
+        if ($parentPath === '') {
+            return [];
+        }
+
+        $filename = basename(parse_url($uri, PHP_URL_PATH) ?? '');
+        return $this->getStructureIndex()->getChildren($parentPath, $filename);
     }
 
     /**

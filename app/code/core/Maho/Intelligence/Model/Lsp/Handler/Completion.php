@@ -59,6 +59,8 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
                 => $this->completeEventNames($context['prefix'], $range),
             Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_FQCN
                 => $this->completeFqcn($context['prefix'], $range),
+            Maho_Intelligence_Model_Lsp_ContextDetector::CONTEXT_XML_ELEMENT_NAME
+                => $this->completeXmlElements($context['prefix'], $context['suggestions'] ?? [], $range),
             default => ['isIncomplete' => false, 'items' => []],
         };
     }
@@ -149,6 +151,28 @@ class Maho_Intelligence_Model_Lsp_Handler_Completion
                     return ['isIncomplete' => true, 'items' => $items];
                 }
             }
+        }
+
+        return ['isIncomplete' => false, 'items' => $items];
+    }
+
+    /**
+     * @param list<string> $suggestions
+     */
+    private function completeXmlElements(string $prefix, array $suggestions, array $range): array
+    {
+        $items = [];
+        foreach ($suggestions as $i => $element) {
+            if ($prefix !== '' && !str_starts_with($element, $prefix)) {
+                continue;
+            }
+
+            $items[] = [
+                'label' => $element,
+                'kind' => 14, // CompletionItemKind.Keyword
+                'sortText' => str_pad((string) $i, 4, '0', STR_PAD_LEFT),
+                'textEdit' => ['range' => $range, 'newText' => $element],
+            ];
         }
 
         return ['isIncomplete' => false, 'items' => $items];
