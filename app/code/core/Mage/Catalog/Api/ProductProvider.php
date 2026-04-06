@@ -185,8 +185,7 @@ final class ProductProvider extends \Maho\ApiPlatform\Provider
     {
         // Merge REST filters and GraphQL args (GraphQL args take precedence)
         $requestFilters = array_merge($context['filters'] ?? [], $context['args'] ?? []);
-        $page = (int) ($requestFilters['page'] ?? 1);
-        $pageSize = max(1, min((int) ($requestFilters['itemsPerPage'] ?? $requestFilters['pageSize'] ?? 20), 100));
+        ['page' => $page, 'pageSize' => $pageSize] = $this->extractPagination($context);
         // Support both 'search' and 'q' parameters for compatibility
         $search = $requestFilters['search'] ?? $requestFilters['q'] ?? '';
 

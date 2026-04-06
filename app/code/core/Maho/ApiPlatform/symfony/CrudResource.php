@@ -193,10 +193,24 @@ abstract class CrudResource extends Resource
             return '';
         }
 
-        $filter = \Mage::helper('cms')->getPageTemplateProcessor();
-        $filter->setStoreId(Service\StoreContext::getStoreId());
+        // Strip widget and block directives - they instantiate blocks that
+        // depend on sessions/layout which are not available in the API context
+        $content = preg_replace('/\{\{widget\b[^}]*\}\}/', '', $content);
+        $content = preg_replace('/\{\{block\b[^}]*\}\}/', '', $content);
 
-        return $filter->filter($content);
+        // If no remaining directives, return early
+        if (!str_contains($content, '{{')) {
+            return $content;
+        }
+
+        try {
+            $filter = \Mage::helper('cms')->getPageTemplateProcessor();
+            $filter->setStoreId(Service\StoreContext::getStoreId());
+            return $filter->filter($content);
+        } catch (\Throwable $e) {
+            \Mage::logException($e);
+            return preg_replace('/\{\{[^}]+\}\}/', '', $content);
+        }
     }
 
     /**
