@@ -116,7 +116,7 @@ class Maho_Intelligence_Model_Lsp_XmlStructureIndex
         }
 
         $map = [];
-        $this->walkXmlTree($root, '', $map);
+        $this->walkXmlTree($root, $root->getName(), $map);
         return $map;
     }
 
@@ -148,7 +148,7 @@ class Maho_Intelligence_Model_Lsp_XmlStructureIndex
         }
 
         $map = [];
-        $this->walkXmlTree($root, '', $map);
+        $this->walkXmlTree($root, $root->getName(), $map);
         return $map;
     }
 
