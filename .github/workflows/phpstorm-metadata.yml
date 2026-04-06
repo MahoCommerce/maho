@@ -36,7 +36,7 @@ jobs:
         run: composer install --prefer-dist --no-progress --ignore-platform-req=ext-*
 
       - name: Generate PHPStorm metadata
-        run: ./maho phpstorm:metadata:generate
+        run: ./maho dev:phpstorm:metadata:generate
 
       - name: Check for uncommitted changes
         id: git-check
@@ -46,5 +46,5 @@ jobs:
       - name: Fail if changes detected
         if: steps.git-check.outputs.changed == '1'
         run: |
-          echo "PHPStorm metadata changes detected. Please run './maho phpstorm:metadata:generate' and commit the changes."
+          echo "PHPStorm metadata changes detected. Please run './maho dev:phpstorm:metadata:generate' and commit the changes."
           exit 1
