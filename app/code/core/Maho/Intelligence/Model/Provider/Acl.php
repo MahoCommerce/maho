@@ -13,11 +13,12 @@ declare(strict_types=1);
 class Maho_Intelligence_Model_Provider_Acl
 {
     /**
-     * Get ACL resource tree
+     * Get ACL resource tree from merged adminhtml.xml config
      */
     public function getTree(): array
     {
-        $aclNode = Mage::getConfig()->getNode('adminhtml/acl/resources');
+        $adminConfig = Mage::getSingleton('admin/config')->getAdminhtmlConfig();
+        $aclNode = $adminConfig->getNode('acl/resources');
         if (!$aclNode) {
             return [];
         }

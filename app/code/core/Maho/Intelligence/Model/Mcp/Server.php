@@ -154,6 +154,89 @@ class Maho_Intelligence_Model_Mcp_Server
             ['type' => 'object', 'properties' => new \stdClass()],
             fn(array $args) => $registry->get('acl', 'getTree'),
         );
+
+        $this->addTool(
+            'list_admin_menu',
+            'Get the admin panel menu structure with titles, actions, and sort order.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('adminMenu', 'getMenu'),
+        );
+
+        $this->addTool(
+            'list_routes',
+            'List all frontend and admin route definitions with frontNames, modules, and controller overrides.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('router', 'getAllRoutes'),
+        );
+
+        $this->addTool(
+            'list_eav_entity_types',
+            'List all EAV entity types (product, category, customer, etc.) with their models and tables.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('eavAttribute', 'getEntityTypes'),
+        );
+
+        $this->addTool(
+            'list_eav_attributes',
+            'List all EAV attributes for a given entity type (e.g. catalog_product, customer, catalog_category) with backend types, frontend inputs, and validation info.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'entity_type' => ['type' => 'string', 'description' => 'Entity type code (e.g. catalog_product, customer, catalog_category, customer_address)'],
+                ],
+                'required' => ['entity_type'],
+            ],
+            fn(array $args) => $registry->get('eavAttribute', 'getAttributes', [$args['entity_type']]),
+        );
+
+        $this->addTool(
+            'list_stores',
+            'Get the website → store group → store view hierarchy showing multi-store configuration.',
+            ['type' => 'object', 'properties' => new \stdClass()],
+            fn(array $args) => $registry->get('store', 'getHierarchy'),
+        );
+
+        $this->addTool(
+            'get_db_schema',
+            'Get full database table schema including columns (types, nullable, defaults), indexes, and foreign keys. Accepts a table name (e.g. catalog_product_entity) or resource alias (e.g. catalog/product_entity).',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'table' => ['type' => 'string', 'description' => 'Table name or resource alias (e.g. catalog_product_entity or catalog/product_entity)'],
+                ],
+                'required' => ['table'],
+            ],
+            fn(array $args) => $registry->get('dbSchema', 'getTableSchema', [$args['table']]),
+        );
+
+        $this->addTool(
+            'get_class_context',
+            'Get full context for a Maho class alias: resolved class, file, rewrites, class hierarchy, module, observed events, and all rewrites in the same group. Type must be one of: model, block, helper, resource_model.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'type' => ['type' => 'string', 'description' => 'Alias type: model, block, helper, or resource_model'],
+                    'alias' => ['type' => 'string', 'description' => 'Class alias (e.g. catalog/product)'],
+                ],
+                'required' => ['type', 'alias'],
+            ],
+            fn(array $args) => $registry->get('classContext', 'getContext', [$args['type'], $args['alias']]),
+        );
+
+        $this->addTool(
+            'get_template_overrides',
+            'Get the theme fallback chain for a template file, showing all locations where it could exist and which one is resolved. Also lists all theme-overridden templates when called without a template path.',
+            [
+                'type' => 'object',
+                'properties' => [
+                    'template' => ['type' => 'string', 'description' => 'Template path (e.g. catalog/product/view.phtml). Omit to list all overridden templates.'],
+                    'area' => ['type' => 'string', 'description' => 'Area: frontend or adminhtml (default: frontend)'],
+                ],
+            ],
+            fn(array $args) => isset($args['template'])
+                ? $registry->get('templateFallback', 'getOverrides', [$args['template'], $args['area'] ?? 'frontend'])
+                : $registry->get('templateFallback', 'getThemeOverrides', [$args['area'] ?? 'frontend']),
+        );
     }
 
     private function addTool(string $name, string $description, array $inputSchema, callable $handler): void
@@ -280,6 +363,11 @@ Key concepts:
 - Events: observer pattern where modules register listeners for named events
 - Config paths: system.xml defines admin-configurable settings at paths like 'web/secure/base_url'
 - Layout handles: XML-defined UI composition with blocks and templates
+- Routers: URL frontName-to-module mappings with controller override chains
+- EAV: Entity-Attribute-Value system for extensible product/customer/category attributes
+- Store hierarchy: website -> store group -> store view for multi-store setups
+- ACL: admin permission tree controlling access to backend features
+- Admin menu: navigation structure for the admin panel
 INSTRUCTIONS;
     }
 
