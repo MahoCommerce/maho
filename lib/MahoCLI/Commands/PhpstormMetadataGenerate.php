@@ -23,7 +23,7 @@ use RecursiveIteratorIterator;
 use RegexIterator;
 
 #[AsCommand(
-    name: 'phpstorm:metadata:generate',
+    name: 'dev:phpstorm:metadata:generate',
     description: 'Generate PhpStorm metadata files for better IDE support',
 )]
 class PhpstormMetadataGenerate extends BaseMahoCommand

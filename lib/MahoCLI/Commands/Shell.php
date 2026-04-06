@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'shell',
+    name: 'dev:shell',
     description: 'Opens an interactive PHP shell with Maho bootstrapped',
 )]
 class Shell extends BaseMahoCommand

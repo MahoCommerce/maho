@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 #[AsCommand(
-    name: 'health-check',
+    name: 'dev:health-check',
     description: 'Health check your Maho project',
 )]
 class HealthCheck extends BaseMahoCommand

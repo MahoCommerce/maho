@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'create-command',
+    name: 'dev:create-command',
     description: 'Create a new command that will integrate into your project\'s Maho CLI set of commands',
 )]
 class CreateCommand extends BaseMahoCommand
