@@ -137,7 +137,7 @@ class Maho_Intelligence_Model_Lsp_Server
                     'change' => 1, // Full sync
                 ],
                 'completionProvider' => [
-                    'triggerCharacters' => ["'", '"'],
+                    'triggerCharacters' => ["'", '"', '<'],
                     'resolveProvider' => false,
                 ],
                 'definitionProvider' => true,

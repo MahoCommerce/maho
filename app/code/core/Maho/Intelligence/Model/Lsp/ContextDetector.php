@@ -34,6 +34,70 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     public const CONTEXT_TEMPLATE_PATH = 'template_path';
     public const CONTEXT_LAYOUT_HANDLE = 'layout_handle';
     public const CONTEXT_FQCN = 'fqcn';
+    public const CONTEXT_XML_ELEMENT_NAME = 'xml_element_name';
+
+    /**
+     * Structural rules keyed by filename pattern.
+     * Each entry: XML parent path pattern => list of valid child element names.
+     * Paths use '*' to represent dynamic (user-defined) element names.
+     * Checked in order — first match wins within each file group.
+     *
+     * @var array<string, array<string, list<string>>>
+     */
+    private const XML_STRUCTURAL_RULES = [
+        'system.xml' => [
+            'config' => ['tabs', 'sections'],
+            'config/tabs/*' => ['label', 'sort_order'],
+            'config/sections/*' => ['label', 'tab', 'sort_order', 'show_in_default', 'show_in_website', 'show_in_store', 'groups', 'class'],
+            'config/sections/*/groups/*' => ['label', 'sort_order', 'show_in_default', 'show_in_website', 'show_in_store', 'fields', 'frontend_model', 'expanded', 'comment'],
+            'config/sections/*/groups/*/fields/*' => ['label', 'frontend_type', 'source_model', 'backend_model', 'frontend_model', 'frontend_class', 'validate', 'sort_order', 'show_in_default', 'show_in_website', 'show_in_store', 'comment', 'tooltip', 'depends', 'config_path'],
+        ],
+        'config.xml' => [
+            'config' => ['modules', 'global', 'frontend', 'adminhtml', 'admin', 'crontab', 'default', 'stores', 'websites'],
+            'config/global' => ['models', 'blocks', 'helpers', 'resources', 'events', 'cache', 'template', 'fieldsets', 'sales', 'pdf', 'page'],
+            'config/global/models/*' => ['class', 'resourceModel'],
+            'config/global/models/*/entities/*' => ['table'],
+            'config/global/blocks/*' => ['class'],
+            'config/global/helpers/*' => ['class'],
+            'config/global/resources/*' => ['connection'],
+            'config/global/resources/*/connection' => ['use'],
+            'config/global/events/*/observers/*' => ['class', 'method', 'type'],
+            'config/global/cache/types/*' => ['label', 'description', 'tags'],
+            'config/frontend' => ['routers', 'layout', 'translate', 'events', 'secure_url'],
+            'config/frontend/routers/*' => ['use', 'args'],
+            'config/frontend/routers/*/args' => ['module', 'frontName'],
+            'config/frontend/layout/updates/*' => ['file'],
+            'config/frontend/translate/modules/*' => ['files'],
+            'config/frontend/translate/modules/*/files' => ['default'],
+            'config/frontend/events/*/observers/*' => ['class', 'method', 'type'],
+            'config/adminhtml' => ['routers', 'layout', 'translate', 'events', 'menu', 'acl'],
+            'config/adminhtml/routers/*' => ['use', 'args'],
+            'config/adminhtml/routers/*/args' => ['module', 'frontName'],
+            'config/adminhtml/layout/updates/*' => ['file'],
+            'config/adminhtml/translate/modules/*' => ['files'],
+            'config/adminhtml/translate/modules/*/files' => ['default'],
+            'config/adminhtml/events/*/observers/*' => ['class', 'method', 'type'],
+            'config/admin/routers/*/args' => ['module', 'frontName'],
+            'config/crontab/jobs/*' => ['schedule', 'run'],
+            'config/crontab/jobs/*/schedule' => ['cron_expr', 'config_path'],
+            'config/crontab/jobs/*/run' => ['model'],
+        ],
+        'adminhtml.xml' => [
+            'config' => ['menu', 'acl'],
+            'config/menu/*' => ['title', 'sort_order', 'action', 'children', 'depends'],
+            'config/menu/*/children/*' => ['title', 'sort_order', 'action', 'children', 'depends'],
+            'config/menu/*/children/*/children/*' => ['title', 'sort_order', 'action', 'children', 'depends'],
+            'config/acl/resources/admin/children/*' => ['title', 'sort_order', 'children'],
+            'config/acl/resources/admin/children/*/children/*' => ['title', 'sort_order', 'children'],
+            'config/acl/resources/admin/children/*/children/*/children/*' => ['title', 'sort_order', 'children'],
+        ],
+        '*' => [
+            'layout/*' => ['block', 'reference', 'remove', 'update', 'label'],
+            'layout/*/reference' => ['block', 'action', 'remove'],
+            'layout/*/block' => ['block', 'action', 'remove'],
+            'layout/*/reference/block' => ['block', 'action', 'remove'],
+        ],
+    ];
 
     private const CALL_PATTERNS = [
         self::CONTEXT_MODEL_ALIAS => [
@@ -166,7 +230,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
     public function detect(string $text, int $line, int $character, string $uri = ''): array
     {
         if (self::isXmlUri($uri)) {
-            return $this->detectXml($text, $line, $character);
+            return $this->detectXml($text, $line, $character, $uri);
         }
         return $this->detectPhp($text, $line, $character);
     }
@@ -238,7 +302,7 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
         return null;
     }
 
-    private function detectXml(string $text, int $line, int $character): array
+    private function detectXml(string $text, int $line, int $character, string $uri = ''): array
     {
         $none = ['context' => self::CONTEXT_NONE, 'prefix' => '', 'prefixStart' => $character];
 
@@ -274,6 +338,21 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
                     'context' => $context,
                     'prefix' => $prefix,
                     'prefixStart' => $character - strlen($prefix),
+                ];
+            }
+        }
+
+        // Structural element name: <partial at the start of a new element
+        // No trailing \s* — avoids matching "<block " (attribute context)
+        if (preg_match('/<([a-zA-Z_][\w.-]*)?$/', $textBeforeCursor, $m)) {
+            $prefix = $m[1] ?? '';
+            $suggestions = $this->getStructuralSuggestions($parentPath, $uri);
+            if ($suggestions !== []) {
+                return [
+                    'context' => self::CONTEXT_XML_ELEMENT_NAME,
+                    'prefix' => $prefix,
+                    'prefixStart' => $character - strlen($prefix),
+                    'suggestions' => $suggestions,
                 ];
             }
         }
@@ -521,6 +600,53 @@ class Maho_Intelligence_Model_Lsp_ContextDetector
             'classAlias' => $helperAlias,
             'classType' => 'helper',
         ];
+    }
+
+    /**
+     * Match the current XML parent path against structural rules and return
+     * valid child element names. Rules use '*' to match dynamic element names.
+     * File-specific rules are checked first, then fallback '*' rules.
+     *
+     * @return list<string>
+     */
+    private function getStructuralSuggestions(string $parentPath, string $uri): array
+    {
+        if ($parentPath === '') {
+            return [];
+        }
+
+        $filename = basename(parse_url($uri, PHP_URL_PATH) ?? '');
+        $parentParts = explode('/', $parentPath);
+
+        $ruleSets = [];
+        if ($filename !== '' && isset(self::XML_STRUCTURAL_RULES[$filename])) {
+            $ruleSets[] = self::XML_STRUCTURAL_RULES[$filename];
+        }
+        $ruleSets[] = self::XML_STRUCTURAL_RULES['*'];
+
+        foreach ($ruleSets as $rules) {
+            foreach ($rules as $rulePattern => $children) {
+                $ruleParts = explode('/', $rulePattern);
+
+                if (count($ruleParts) !== count($parentParts)) {
+                    continue;
+                }
+
+                $match = true;
+                for ($i = 0, $count = count($ruleParts); $i < $count; $i++) {
+                    if ($ruleParts[$i] !== '*' && $ruleParts[$i] !== $parentParts[$i]) {
+                        $match = false;
+                        break;
+                    }
+                }
+
+                if ($match) {
+                    return $children;
+                }
+            }
+        }
+
+        return [];
     }
 
     /**
