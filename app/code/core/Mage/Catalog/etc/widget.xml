@@ -9,7 +9,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<widgets>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/widget.xsd">
     <new_products type="catalog/product_widget_new" translate="name description" module="catalog">
         <name>Catalog New Products List</name>
         <description>List of Products that are set as New</description>

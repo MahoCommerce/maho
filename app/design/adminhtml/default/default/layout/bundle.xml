@@ -10,7 +10,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
 
 <!--
 Layout handle for budle products

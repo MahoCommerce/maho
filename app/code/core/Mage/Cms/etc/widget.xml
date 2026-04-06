@@ -9,7 +9,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<widgets>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/widget.xsd">
     <cms_page_link type="cms/widget_page_link" translate="name description" module="cms">
         <name>CMS Page Link</name>
         <description>Link to a CMS Page</description>

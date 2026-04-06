@@ -8,7 +8,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 -->
-<config>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../lib/Maho/Schema/module.xsd">
     <modules>
         <Maho_FeedManager>
             <active>true</active>

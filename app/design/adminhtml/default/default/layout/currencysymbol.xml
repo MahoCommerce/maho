@@ -9,7 +9,8 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_system_currencysymbol_index>
         <reference name="content">
             <block type="currencysymbol/adminhtml_system_currencysymbol" name="mage.system.currencysymbol" template="currencysymbol/grid.phtml"/>

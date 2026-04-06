@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="common.xsd"/>
+
+    <xs:element name="jstranslator">
+        <xs:annotation>
+            <xs:documentation>
+                JavaScript translation file (*/etc/jstranslator.xml).
+                Maps JavaScript validation rules and UI strings to translatable messages.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="global" type="translationSectionType">
+                    <xs:annotation>
+                        <xs:documentation>Global translations not tied to a specific script file.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="script" type="scriptSectionType">
+                    <xs:annotation>
+                        <xs:documentation>Translations for a specific JavaScript file.</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+            </xs:choice>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="translationSectionType">
+        <xs:annotation>
+            <xs:documentation>
+                Container for translation entries. Each child element is a translation key
+                with a message child containing the translatable text.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="module" type="moduleAliasType" use="required">
+            <xs:annotation>
+                <xs:documentation>Module alias for translation context (e.g. core, catalog).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="scriptSectionType">
+        <xs:annotation>
+            <xs:documentation>
+                Container for translations associated with a specific JavaScript file.
+                Each child element is a translation key with a message child.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="path" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Path to the JavaScript file (e.g. validation.js, mage/adminhtml/rules.js).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="module" type="moduleAliasType" use="required">
+            <xs:annotation>
+                <xs:documentation>Module alias for translation context (e.g. core, catalog).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="area" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Application area (e.g. adminhtml). Optional, defaults to frontend.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="type" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Script type (e.g. skin_js for theme JavaScript files).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="translationEntryType">
+        <xs:annotation>
+            <xs:documentation>
+                Structure for a translation entry. The element name serves as the translation key.
+                Contains a message element with the translatable text.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="message" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Translatable message text. May contain %s placeholders for sprintf-style substitution.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional">
+            <xs:annotation>
+                <xs:documentation>Space-separated list of child elements to translate (typically "message").</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="module" type="moduleAliasType" use="optional">
+            <xs:annotation>
+                <xs:documentation>Override the parent section's module for this specific entry.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+</xs:schema>

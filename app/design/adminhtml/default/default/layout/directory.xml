@@ -1,5 +1,6 @@
 <?xml version="1.0"?>
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <!-- Countries Management -->
     <adminhtml_directory_country_index>
         <reference name="content">

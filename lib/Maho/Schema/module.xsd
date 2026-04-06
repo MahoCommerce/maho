@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="common.xsd"/>
+
+    <xs:element name="config">
+        <xs:annotation>
+            <xs:documentation>
+                Module declaration file (app/etc/modules/*.xml).
+                Declares a module with its active state, code pool, and optional dependencies.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="modules">
+                    <xs:complexType>
+                        <xs:sequence>
+                            <xs:any processContents="skip" maxOccurs="unbounded">
+                                <xs:annotation>
+                                    <xs:documentation>
+                                        Module name element (e.g. Mage_Core, Maho_Blog).
+                                        The element name must match the Vendor_Module pattern.
+                                    </xs:documentation>
+                                </xs:annotation>
+                            </xs:any>
+                        </xs:sequence>
+                    </xs:complexType>
+                </xs:element>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="moduleDeclarationType">
+        <xs:annotation>
+            <xs:documentation>
+                Structure for a module declaration.
+                Used as the type for dynamically-named module elements inside modules.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="active" type="booleanFlag">
+                <xs:annotation>
+                    <xs:documentation>Whether the module is active (true/false).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="codePool" type="codePoolType">
+                <xs:annotation>
+                    <xs:documentation>Code pool where the module resides (core, community, or local).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="depends" type="moduleDependsType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Optional list of modules this module depends on.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="moduleDependsType">
+        <xs:annotation>
+            <xs:documentation>
+                List of module dependencies. Each child element is a self-closing tag
+                whose name is the required module (e.g. Mage_Core, Mage_Eav).
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

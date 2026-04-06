@@ -10,7 +10,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_catalog_search_edit>
         <reference name="content">
             <block type="adminhtml/catalog_search_edit" name="catalog_search_edit" />

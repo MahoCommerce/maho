@@ -9,7 +9,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<widgets>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/widget.xsd">
     <sales_widget_guestfrom type="sales/widget_guest_form" translate="name description" module="sales">
         <name>Orders and Returns</name>
         <description>Orders and Returns Search Form</description>

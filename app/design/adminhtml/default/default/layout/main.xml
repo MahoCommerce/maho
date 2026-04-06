@@ -23,7 +23,8 @@ Supported layout update handles (special):
 - systemPreview
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
 
 <!--
 Form key for inserting into various forms

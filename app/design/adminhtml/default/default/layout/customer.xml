@@ -11,7 +11,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_customer_edit>
         <reference name="content">
             <block type="adminhtml/customer_edit" name="customer_edit"></block>

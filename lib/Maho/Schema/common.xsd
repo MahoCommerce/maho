@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:simpleType name="translateAttributeType">
+        <xs:annotation>
+            <xs:documentation>Space-separated list of child element names that should be translated.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z_][a-zA-Z0-9_]*(\s+[a-zA-Z_][a-zA-Z0-9_]*)*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="moduleCodeType">
+        <xs:annotation>
+            <xs:documentation>Module code in Vendor_Module format (e.g. Mage_Catalog, Maho_Blog).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[A-Z][a-zA-Z0-9]*_[A-Z][a-zA-Z0-9]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="moduleAliasType">
+        <xs:annotation>
+            <xs:documentation>Module alias used for translations (e.g. catalog, adminhtml, core).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-zA-Z][a-zA-Z0-9_]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="classAliasType">
+        <xs:annotation>
+            <xs:documentation>Class alias in group/class format (e.g. catalog/product, core/template).</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[a-z][a-z0-9_]*/[a-z][a-zA-Z0-9_]*"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="booleanFlag">
+        <xs:annotation>
+            <xs:documentation>Boolean value accepted as 0, 1, true, or false.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="0"/>
+            <xs:enumeration value="1"/>
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="sortOrderType">
+        <xs:annotation>
+            <xs:documentation>Sort order value, typically a positive integer.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:integer"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="codePoolType">
+        <xs:annotation>
+            <xs:documentation>Code pool location for module files.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="core"/>
+            <xs:enumeration value="community"/>
+            <xs:enumeration value="local"/>
+        </xs:restriction>
+    </xs:simpleType>
+</xs:schema>

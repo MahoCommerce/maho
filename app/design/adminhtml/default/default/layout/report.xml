@@ -10,7 +10,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_report_statistics_index>
         <reference name="content">
             <block type="adminhtml/report_refresh_statistics" template="report/refresh/statistics.phtml" name="sales.report.refreshstatistics" />

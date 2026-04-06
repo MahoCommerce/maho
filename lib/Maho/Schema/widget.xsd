@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="common.xsd"/>
+
+    <xs:element name="widgets">
+        <xs:annotation>
+            <xs:documentation>
+                Widget configuration file (*/etc/widget.xml).
+                Defines widget types with their parameters and display options.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Widget definitions. Element name is the widget identifier.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:any>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="widgetType">
+        <xs:annotation>
+            <xs:documentation>
+                Widget definition. The element name is the widget identifier,
+                the type attribute specifies the block class alias.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="name" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Display name of the widget.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="is_email_compatible" type="booleanFlag" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Whether the widget can be used in email templates.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="parameters" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Widget parameter definitions. Children are dynamically-named parameter elements.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="supported_blocks" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Block types that support this widget (used in design-level widget.xml).</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+        <xs:attribute name="type" type="classAliasType" use="required">
+            <xs:annotation>
+                <xs:documentation>Block class alias (e.g. cms/block_widget_page_link).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="widgetParameterType">
+        <xs:annotation>
+            <xs:documentation>Widget parameter definition rendered as a form field in the widget configuration dialog.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="label" type="xs:string" minOccurs="0"/>
+            <xs:element name="description" type="xs:string" minOccurs="0"/>
+            <xs:element name="required" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="visible" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="type" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Parameter input type (e.g. text, select, multiselect, complex).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="value" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Default value.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="values" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Available options for select/multiselect parameters.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="source_model" type="xs:string" minOccurs="0"/>
+            <xs:element name="sort_order" type="sortOrderType" minOccurs="0"/>
+            <xs:element name="helper_block" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Custom chooser block for complex parameter types.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="type" type="classAliasType" minOccurs="0"/>
+                        <xs:element name="data" minOccurs="0">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="depends" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Parameter visibility dependencies.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+</xs:schema>

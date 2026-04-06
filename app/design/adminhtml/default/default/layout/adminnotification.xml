@@ -10,7 +10,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <default>
         <reference name="notifications">
             <block type="adminhtml/notification_toolbar" name="notification_toolbar" as="notification_toolbar" acl="system/adminnotification/show_toolbar" template="notification/toolbar.phtml" />

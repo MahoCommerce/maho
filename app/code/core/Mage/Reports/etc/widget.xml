@@ -9,7 +9,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<widgets>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/widget.xsd">
     <recently_viewed type="reports/product_widget_viewed" translate="name description" module="reports">
         <name>Recently Viewed Products</name>
         <description>List of Products Recently Viewed by Visitor</description>

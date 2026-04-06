@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="common.xsd"/>
+
+    <xs:element name="layout">
+        <xs:annotation>
+            <xs:documentation>
+                Layout XML configuration file (app/design/{area}/{package}/{theme}/layout/*.xml).
+                Defines page structure through blocks, references, actions, and layout handles.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Layout handles (e.g. default, catalog_product_view, checkout_cart_index).
+                            Handle names are dynamic and correspond to controller action routes or custom identifiers.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:any>
+            </xs:sequence>
+            <xs:attribute name="version" type="xs:string" use="optional">
+                <xs:annotation>
+                    <xs:documentation>Layout XML version (e.g. 0.1.0).</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Layout handle content type (used by dynamically-named handle elements) -->
+
+    <xs:complexType name="handleType">
+        <xs:annotation>
+            <xs:documentation>
+                Layout handle definition. Contains blocks, references, removes, and updates
+                that define the page structure for a specific route or context.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="label" type="xs:string"/>
+            <xs:element name="block" type="blockType"/>
+            <xs:element name="reference" type="referenceType"/>
+            <xs:element name="remove" type="removeType"/>
+            <xs:element name="update" type="updateType"/>
+            <xs:element name="action" type="actionType"/>
+        </xs:choice>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+
+    <!-- Block -->
+
+    <xs:complexType name="blockType">
+        <xs:annotation>
+            <xs:documentation>
+                Block definition. Creates a UI component that renders output via a template.
+                Blocks can contain child blocks and actions.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="label" type="xs:string"/>
+            <xs:element name="block" type="blockType"/>
+            <xs:element name="action" type="actionType"/>
+            <xs:element name="remove" type="removeType"/>
+            <xs:element name="update" type="updateType"/>
+        </xs:choice>
+        <xs:attribute name="type" type="classAliasType" use="optional">
+            <xs:annotation>
+                <xs:documentation>Block type alias (e.g. page/html, catalog/product_list).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Unique block name identifier.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="as" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Alias for accessing this block as a child (e.g. header, content).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="template" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Path to the template file (e.g. catalog/product/view.phtml).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="output" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Output method name, typically "toHtml". Only set on the root block.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="before" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Position before a named sibling block. Use "-" for first position.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="after" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Position after a named sibling block. Use "*" for last position.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="class" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Explicit PHP class name (overrides type-based resolution).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="parent" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Explicit parent block name.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ifconfig" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Config path for conditional rendering (e.g. payment/paypal_express/active).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+
+    <!-- Reference -->
+
+    <xs:complexType name="referenceType">
+        <xs:annotation>
+            <xs:documentation>
+                References an existing block by name for modification.
+                Can add child blocks and actions to the referenced block.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="label" type="xs:string"/>
+            <xs:element name="block" type="blockType"/>
+            <xs:element name="action" type="actionType"/>
+            <xs:element name="remove" type="removeType"/>
+            <xs:element name="update" type="updateType"/>
+        </xs:choice>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Name of the block to reference.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="before" type="xs:string" use="optional"/>
+        <xs:attribute name="after" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <!-- Remove -->
+
+    <xs:complexType name="removeType">
+        <xs:annotation>
+            <xs:documentation>Removes a named block from the layout.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="name" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Name of the block to remove.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- Update -->
+
+    <xs:complexType name="updateType">
+        <xs:annotation>
+            <xs:documentation>Includes another layout handle's instructions.</xs:documentation>
+        </xs:annotation>
+        <xs:attribute name="handle" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Name of the layout handle to include.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ifconfig" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <!-- Action -->
+
+    <xs:complexType name="actionType">
+        <xs:annotation>
+            <xs:documentation>
+                Invokes a method on the parent block. Children are method arguments
+                where element names correspond to parameter names.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Method arguments. Element names match method parameter names.
+                        Content is the argument value.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:any>
+        </xs:sequence>
+        <xs:attribute name="method" type="xs:string" use="required">
+            <xs:annotation>
+                <xs:documentation>Method name to invoke on the parent block.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="block" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Target block name (when action targets a different block).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="ifconfig" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Config path for conditional execution.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="json" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Argument name to JSON-decode before passing.</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+</xs:schema>

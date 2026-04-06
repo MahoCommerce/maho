@@ -10,7 +10,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<jstranslator>
+<jstranslator xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/jstranslator.xsd">
     <script path="mage/adminhtml/wysiwyg/widget.js" module="widget">
         <widget-ui-insert translate="message" module="widget">
             <message>Insert Widget...</message>

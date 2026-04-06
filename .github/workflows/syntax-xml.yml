@@ -43,7 +43,7 @@ jobs:
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         run: "sudo apt-get -y install libxml2-utils"
 
-      - name: Check changed files
+      - name: Check XML syntax
         if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
         run: |
           set +e
@@ -54,6 +54,25 @@ jobs:
                   ERROR=255
                   LINE=$(echo "$MESSAGE" | head -n 1 | cut -d":" -f 2)
                   echo "::error file=$FILE,line=$LINE::$MESSAGE"
+              fi
+          done
+          exit $ERROR
+
+      - name: Validate XML against XSD schemas
+        if: ${{ steps.changed-files.outputs.any_changed == 'true' }}
+        run: |
+          set +e
+          ERROR=0
+          for FILE in ${{ steps.changed-files.outputs.all_changed_files }}; do
+              SCHEMA_REF=$(grep -oP 'noNamespaceSchemaLocation="\K[^"]+' "$FILE" 2>/dev/null)
+              if [ -n "$SCHEMA_REF" ]; then
+                  SCHEMA="$(dirname "$FILE")/$SCHEMA_REF"
+                  MESSAGE=$(xmllint --schema "$SCHEMA" --noout "$FILE" 2>&1)
+                  if [ $? -ne 0 ]; then
+                      ERROR=255
+                      LINE=$(echo "$MESSAGE" | head -n 1 | cut -d":" -f 2)
+                      echo "::error file=$FILE,line=$LINE::$MESSAGE"
+                  fi
               fi
           done
           exit $ERROR

@@ -10,7 +10,8 @@
  */
 
 -->
-<layout version="0.1.0">
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd" version="0.1.0">
     <checkout_cart_index>
         <reference name="checkout.cart.top_methods">
             <block type="paypaluk/express_shortcut" name="checkout.cart.methods.paypaluk_express.top" before="-" template="paypal/express/shortcut.phtml" ifconfig="payment/paypaluk_express/active">

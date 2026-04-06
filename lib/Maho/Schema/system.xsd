@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="common.xsd"/>
+
+    <xs:element name="config">
+        <xs:annotation>
+            <xs:documentation>
+                System configuration file (*/etc/system.xml).
+                Defines admin panel configuration tabs, sections, groups, and fields.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="tabs" type="tabsContainerType" minOccurs="0"/>
+                <xs:element name="sections" type="sectionsContainerType" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Tabs -->
+
+    <xs:complexType name="tabsContainerType">
+        <xs:annotation>
+            <xs:documentation>Container for configuration tab definitions. Children are dynamically-named tab elements.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="tabType">
+        <xs:annotation>
+            <xs:documentation>Configuration tab displayed in admin System &gt; Configuration sidebar.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="label" type="xs:string"/>
+            <xs:element name="sort_order" type="sortOrderType" minOccurs="0"/>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+
+    <!-- Sections -->
+
+    <xs:complexType name="sectionsContainerType">
+        <xs:annotation>
+            <xs:documentation>Container for configuration section definitions. Children are dynamically-named section elements.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="sectionType">
+        <xs:annotation>
+            <xs:documentation>Configuration section displayed as a page in admin System &gt; Configuration.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="label" type="xs:string" minOccurs="0"/>
+            <xs:element name="tab" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Reference to the tab this section belongs to.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="sort_order" type="sortOrderType" minOccurs="0"/>
+            <xs:element name="show_in_default" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="show_in_website" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="show_in_store" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="class" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>CSS class (e.g. separator-top).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="groups" type="groupsContainerType" minOccurs="0"/>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+
+    <!-- Groups -->
+
+    <xs:complexType name="groupsContainerType">
+        <xs:annotation>
+            <xs:documentation>Container for configuration group definitions. Children are dynamically-named group elements.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="groupType">
+        <xs:annotation>
+            <xs:documentation>Configuration group displayed as a fieldset within a section.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="label" type="xs:string" minOccurs="0"/>
+            <xs:element name="sort_order" type="sortOrderType" minOccurs="0"/>
+            <xs:element name="show_in_default" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="show_in_website" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="show_in_store" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="frontend_model" type="classAliasType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Custom block class alias for rendering (e.g. adminhtml/system_config_form_fieldset).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="frontend_class" type="xs:string" minOccurs="0"/>
+            <xs:element name="fieldset_css" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>CSS class for the fieldset wrapper.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="expanded" type="booleanFlag" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Whether the group is expanded by default in the admin UI.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="class" type="xs:string" minOccurs="0"/>
+            <xs:element name="comment" type="xs:string" minOccurs="0"/>
+            <xs:element name="help_url" type="xs:string" minOccurs="0"/>
+            <xs:element name="learn_more_link" type="xs:string" minOccurs="0"/>
+            <xs:element name="clone_fields" type="booleanFlag" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Enable field cloning for multi-store setups.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="clone_model" type="classAliasType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Model class alias handling field cloning.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="group" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Parent group reference for nested group structures.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="activity_path" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Config path controlling group enable/disable state.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="fields" type="fieldsContainerType" minOccurs="0"/>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+        <xs:attribute name="type" type="xs:string" use="optional"/>
+    </xs:complexType>
+
+    <!-- Fields -->
+
+    <xs:complexType name="fieldsContainerType">
+        <xs:annotation>
+            <xs:documentation>Container for configuration field definitions. Children are dynamically-named field elements.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="frontendTypeEnum">
+        <xs:annotation>
+            <xs:documentation>Available frontend types for configuration fields.</xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="text"/>
+            <xs:enumeration value="textarea"/>
+            <xs:enumeration value="select"/>
+            <xs:enumeration value="multiselect"/>
+            <xs:enumeration value="boolean"/>
+            <xs:enumeration value="password"/>
+            <xs:enumeration value="obscure"/>
+            <xs:enumeration value="file"/>
+            <xs:enumeration value="image"/>
+            <xs:enumeration value="color"/>
+            <xs:enumeration value="time"/>
+            <xs:enumeration value="label"/>
+            <xs:enumeration value="button"/>
+            <xs:enumeration value="export"/>
+            <xs:enumeration value="import"/>
+            <xs:enumeration value="allowspecific"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="fieldType">
+        <xs:annotation>
+            <xs:documentation>Configuration field definition rendered as a form element in admin.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="label" type="xs:string" minOccurs="0"/>
+            <xs:element name="comment" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Help text displayed below the field.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="tooltip" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Hover tooltip text.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="frontend_type" type="frontendTypeEnum" minOccurs="0"/>
+            <xs:element name="frontend_model" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Custom block class alias for field rendering.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="frontend_class" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>CSS validation class (e.g. validate-number, required-entry).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="backend_model" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Model class alias for custom save/load handling.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="source_model" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Model class alias providing option values for select/multiselect.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="config_path" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Override the default config path (section/group/field).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="validate" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Space-separated validation rules (e.g. required-entry validate-digits).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="sort_order" type="sortOrderType" minOccurs="0"/>
+            <xs:element name="show_in_default" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="show_in_website" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="show_in_store" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="can_be_empty" type="booleanFlag" minOccurs="0"/>
+            <xs:element name="upload_dir" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Upload directory path for file/image fields.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType mixed="true">
+                    <xs:attribute name="scope_info" type="booleanFlag" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="base_url" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Base URL for uploaded files display.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType mixed="true">
+                    <xs:attribute name="type" type="xs:string" use="optional">
+                        <xs:annotation>
+                            <xs:documentation>URL type: media, skin, or js.</xs:documentation>
+                        </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="scope_info" type="booleanFlag" use="optional"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="depends" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>
+                        Field visibility dependencies. Children are field name elements
+                        whose text content is the required value.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="shared" type="booleanFlag" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Whether the field value is shared across stores.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="requires" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Required field dependencies.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="button_label" type="xs:string" minOccurs="0"/>
+            <xs:element name="button_url" type="xs:string" minOccurs="0"/>
+            <xs:element name="fields" type="fieldsContainerType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Nested field definitions for field groups (when type="group").</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+        <xs:attribute name="type" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>Field type modifier (e.g. "group" for nested field groups).</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+</xs:schema>

@@ -8,7 +8,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<jstranslator>
+<jstranslator xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+              xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/jstranslator.xsd">
     <script path="mage/adminhtml/catalog/category.js" module="catalog">
         <confirm-delete translate="message">
             <message>Are you sure you want to delete this category?</message>

@@ -11,7 +11,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_cms_page_index>
         <reference name="content">
             <block type="adminhtml/cms_page" name="cms_page"></block>

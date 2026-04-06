@@ -9,7 +9,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<widgets>
+<widgets xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/widget.xsd">
     <newsletter_subscribe type="newsletter/widget_subscribe" translate="name description" module="newsletter">
         <name>Newsletter Subscription Form</name>
         <description>Newsletter Subscribe Form</description>

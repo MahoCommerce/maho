@@ -11,7 +11,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_widget_index>
         <block name="wysiwyg_widget" type="widget/adminhtml_widget" output="toHtml" />
     </adminhtml_widget_index>

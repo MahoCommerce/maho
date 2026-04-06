@@ -11,7 +11,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_sales_order_grid>
         <update handle="formkey"/>
         <block type="adminhtml/sales_order_grid" name="sales_order.grid" output="toHtml"></block>

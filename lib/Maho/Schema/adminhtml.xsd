@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="common.xsd"/>
+
+    <xs:element name="config">
+        <xs:annotation>
+            <xs:documentation>
+                Admin menu and ACL configuration file (*/etc/adminhtml.xml).
+                Defines admin panel navigation menu items and access control resources.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="menu" type="menuContainerType" minOccurs="0"/>
+                <xs:element name="acl" type="aclContainerType" minOccurs="0"/>
+            </xs:all>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Menu -->
+
+    <xs:complexType name="menuContainerType">
+        <xs:annotation>
+            <xs:documentation>Top-level menu container. Children are top-level menu items with dynamic names.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="menuItemType">
+        <xs:annotation>
+            <xs:documentation>
+                Menu item definition. The element name serves as the menu item identifier.
+                Can contain nested children for sub-menus.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="title" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Display title for the menu item.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="sort_order" type="sortOrderType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Numeric sort order for positioning within the menu level.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="action" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Admin controller action route (e.g. adminhtml/catalog_product).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="depends" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Module dependencies for this menu item to be visible.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="module" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="children" type="menuContainerType" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Sub-menu items. Contains dynamically-named menu item elements.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+
+    <!-- ACL -->
+
+    <xs:complexType name="aclContainerType">
+        <xs:annotation>
+            <xs:documentation>ACL container defining admin permission resources.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="resources">
+                <xs:annotation>
+                    <xs:documentation>
+                        ACL resource tree. Contains admin (permission tree), all (allow everything),
+                        and optionally privilegeSets.
+                    </xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="privilegeSets" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Privilege set definitions (view, edit, delete).</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="aclResourceType">
+        <xs:annotation>
+            <xs:documentation>
+                ACL resource definition. The element name serves as the resource identifier.
+                Can contain nested children for permission hierarchy.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="title" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Display title for the ACL resource.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="sort_order" type="sortOrderType" minOccurs="0"/>
+            <xs:element name="children" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Child ACL resources. Contains dynamically-named resource elements.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+        <xs:attribute name="translate" type="translateAttributeType" use="optional"/>
+        <xs:attribute name="module" type="moduleAliasType" use="optional"/>
+    </xs:complexType>
+</xs:schema>

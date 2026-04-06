@@ -10,7 +10,8 @@
  */
 -->
 
-<layout>
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd">
     <adminhtml_sales_order_view>
         <reference name="order_item_extra_info">
             <block type="giftmessage/adminhtml_sales_order_view_giftoptions" name="gift_options_link" template="giftmessage/sales/order/view/giftoptions.phtml">

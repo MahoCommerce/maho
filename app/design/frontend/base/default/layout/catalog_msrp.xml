@@ -10,7 +10,8 @@
  */
 
 -->
-<layout version="0.1.0">
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd" version="0.1.0">
 <!--
 Default layout, loads most of the pages
 -->

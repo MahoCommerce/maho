@@ -8,7 +8,8 @@
  * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
  */
 -->
-<layout version="0.1.0">
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd" version="0.1.0">
     <!-- PDF Invoice Layout -->
     <sales_pdf_invoice>
         <block type="sales/order_pdf_invoice" name="sales.pdf.invoice" template="sales/order/pdf/invoice/default.phtml" />

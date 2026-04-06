@@ -9,7 +9,8 @@
  * @license     https://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
 -->
-<layout version="0.1.0">
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd" version="0.1.0">
     <contacts_index_index translate="label">
         <label>Contact Us Form</label>
         <reference name="head">

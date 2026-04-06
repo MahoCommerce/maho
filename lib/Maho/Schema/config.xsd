@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/**
+ * Maho
+ *
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
+ * @license    https://opensource.org/licenses/afl-3.0.php Academic Free License (AFL 3.0)
+ */
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:include schemaLocation="common.xsd"/>
+
+    <xs:element name="config">
+        <xs:annotation>
+            <xs:documentation>
+                Module configuration file (*/etc/config.xml) or base system config (app/etc/config.xml).
+                This is the most complex XML format in Maho. Multiple config.xml files from different
+                modules are deep-merged into a single configuration tree at runtime.
+
+                Each file is a partial document — sections can be split across modules.
+                This schema validates individual files (fragments), not the merged result.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:annotation>
+                <xs:documentation>
+                    Top-level sections include: modules, global, frontend, adminhtml, admin,
+                    install, crontab, default, stores, websites, and potentially others added
+                    by modules or the base system config.
+                </xs:documentation>
+            </xs:annotation>
+            <xs:sequence>
+                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <!-- Freeform type for sections with fully dynamic structure -->
+
+    <xs:complexType name="freeformType" mixed="true">
+        <xs:annotation>
+            <xs:documentation>Freeform content with arbitrary nesting. Used for default config values, stores, websites.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute processContents="skip"/>
+    </xs:complexType>
+
+    <!-- Modules section -->
+
+    <xs:complexType name="configModulesType">
+        <xs:annotation>
+            <xs:documentation>Module version declarations. Each child element is a module name with a version.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="moduleVersionType">
+        <xs:annotation>
+            <xs:documentation>Module version declaration inside config.xml (not to be confused with module.xsd declarations).</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="version" type="xs:string"/>
+        </xs:all>
+    </xs:complexType>
+
+    <!-- Global section -->
+
+    <xs:complexType name="globalType">
+        <xs:annotation>
+            <xs:documentation>
+                Global application configuration. Contains model/block/helper registries,
+                database resources, events, cache types, templates, and more.
+
+                Modules can add arbitrary sub-sections, so this type allows any children.
+                Common children include: models, blocks, helpers, resources, resource, events,
+                cache, template, session, request, url_rewrite, request_rewrite, fieldsets,
+                payment, currency, catalog, sales, customer, cms, pdf, index, eav_attributes,
+                eav_frontendclasses, catalogindex, catalogsearch_fulltext, ignore_user_agents,
+                importexport, newsletter, page, salesrule, widget, wishlist, translate, layout.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Class registry (models, blocks, helpers) -->
+
+    <xs:complexType name="classRegistryType">
+        <xs:annotation>
+            <xs:documentation>
+                Class alias registry container. Children are dynamically-named alias groups,
+                each mapping a short alias prefix to a PHP class prefix.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="classAliasGroupType">
+        <xs:annotation>
+            <xs:documentation>
+                Class alias group definition. Maps a group alias to a PHP class prefix
+                and optionally defines a resource model association and entity table mappings.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="class" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>PHP class prefix (e.g. Mage_Catalog_Model).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="resourceModel" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Associated resource model alias (e.g. catalog_resource).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="entities" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Database entity-to-table mappings for resource models.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="rewrite" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Class rewrites (overrides) for this alias group.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="entityType">
+        <xs:annotation>
+            <xs:documentation>Database entity mapping.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="table" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Database table name for this entity.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <!-- Events -->
+
+    <xs:complexType name="eventsType">
+        <xs:annotation>
+            <xs:documentation>Event observer registry. Children are dynamically-named event elements.</xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="eventType">
+        <xs:annotation>
+            <xs:documentation>Event definition with observer registrations.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="observers">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="observerType">
+        <xs:annotation>
+            <xs:documentation>Event observer definition.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="class" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Observer class alias (e.g. catalog/observer).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="method" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Observer method name to invoke.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="type" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Observer type: singleton (default), model, or object.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <!-- Area configuration (frontend, adminhtml, install) -->
+
+    <xs:complexType name="areaType">
+        <xs:annotation>
+            <xs:documentation>
+                Area-specific configuration (frontend, adminhtml, install).
+                Contains routers, layout updates, translations, events, and other area-scoped settings.
+
+                Modules can add arbitrary sub-sections, so this type allows any children.
+                Common children include: routers, layout, translate, events, secure_url,
+                web, validator_data, default, models, blocks, helpers, acl.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:sequence>
+            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- Admin area (distinct from adminhtml) -->
+
+    <xs:complexType name="adminAreaType">
+        <xs:annotation>
+            <xs:documentation>Admin-specific configuration (routing, fieldsets).</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="routers" minOccurs="0">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="fieldsets" type="freeformType" minOccurs="0"/>
+        </xs:all>
+    </xs:complexType>
+
+    <!-- Router definition -->
+
+    <xs:complexType name="routerType">
+        <xs:annotation>
+            <xs:documentation>URL router definition mapping a front name to a module's controllers.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="use" type="xs:string" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Router type: standard or admin.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="args" minOccurs="0">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="module" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Controller module class prefix.</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="frontName" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>URL front name (e.g. catalog, checkout).</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="modules" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Module override chain for admin routes.</xs:documentation>
+                            </xs:annotation>
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <!-- Layout update file reference -->
+
+    <xs:complexType name="layoutUpdateType">
+        <xs:annotation>
+            <xs:documentation>Layout update file declaration.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="file" type="xs:string">
+                <xs:annotation>
+                    <xs:documentation>Layout XML file name (e.g. catalog.xml).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+
+    <!-- Crontab section -->
+
+    <xs:complexType name="crontabType">
+        <xs:annotation>
+            <xs:documentation>Scheduled task (cron job) configuration.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="jobs" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Cron job definitions. Children are dynamically-named job elements.</xs:documentation>
+                </xs:annotation>
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="events" type="freeformType" minOccurs="0"/>
+        </xs:all>
+    </xs:complexType>
+
+    <xs:complexType name="cronJobType">
+        <xs:annotation>
+            <xs:documentation>Individual cron job definition.</xs:documentation>
+        </xs:annotation>
+        <xs:all>
+            <xs:element name="schedule" minOccurs="0">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="cron_expr" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Cron expression (e.g. "0 * * * *" for every hour).</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                        <xs:element name="config_path" type="xs:string" minOccurs="0">
+                            <xs:annotation>
+                                <xs:documentation>Config path to read cron expression from (alternative to cron_expr).</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="run" minOccurs="0">
+                <xs:complexType>
+                    <xs:all>
+                        <xs:element name="model" type="xs:string">
+                            <xs:annotation>
+                                <xs:documentation>Model alias and method (e.g. module/observer::methodName).</xs:documentation>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:all>
+                </xs:complexType>
+            </xs:element>
+        </xs:all>
+    </xs:complexType>
+</xs:schema>

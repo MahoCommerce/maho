@@ -10,7 +10,8 @@
  */
 
 -->
-<layout version="0.1.0">
+<layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../../lib/Maho/Schema/layout.xsd" version="0.1.0">
     <catalog_product_view>
         <reference name="product.info">
             <block type="payment/catalog_product_view_profile" name="product.info.additional.recurring.schedule" as="recurring_info" template="payment/catalog/product/view/profile/schedule.phtml">
