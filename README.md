@@ -7,6 +7,11 @@
   <a href="https://deepwiki.com/MahoCommerce/maho" target="_blank"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
 </p>
 <p align="center">
+  <a href="https://github.com/MahoCommerce/phpstorm" target="_blank"><img src="https://img.shields.io/badge/PHPStorm-Plugin-000000?logo=phpstorm&logoColor=white" alt="PHPStorm Plugin" /></a>
+  <a href="https://github.com/MahoCommerce/vscode" target="_blank"><img src="https://img.shields.io/badge/VS_Code-Extension-2F80ED?logo=vscodium&logoColor=white" alt="VS Code Extension" /></a>
+  <a href="https://github.com/MahoCommerce/zed" target="_blank"><img src="https://img.shields.io/badge/Zed-Extension-084CCF?logo=zedindustries&logoColor=white" alt="Zed Extension" /></a>
+</p>
+<p align="center">
   <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="" width=400 />
   <br>
   <strong>open on-premise ecommerce platform</strong><br>
