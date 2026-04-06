@@ -132,13 +132,14 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
     private function definitionForTemplate(array $context): ?array
     {
         $templatePath = $context['alias'];
+        $designPackage = Mage::getSingleton('core/design_package');
 
-        $file = Maho::findFile('app/design/frontend/base/default/template/' . $templatePath);
-        if ($file === false) {
-            $file = Maho::findFile('app/design/adminhtml/default/default/template/' . $templatePath);
+        $file = $designPackage->getTemplateFilename($templatePath, ['_area' => 'frontend']);
+        if (!file_exists($file)) {
+            $file = $designPackage->getTemplateFilename($templatePath, ['_area' => 'adminhtml']);
         }
 
-        return $file !== false ? $this->fileLocation($file) : null;
+        return file_exists($file) ? $this->fileLocation($file) : null;
     }
 
     private function fileLocation(string $filePath, int $line = 0): array

@@ -60,6 +60,10 @@ class Maho_Intelligence_Model_Lsp_Transport
     public function send(array $message): void
     {
         $json = json_encode($message, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if ($json === false) {
+            fwrite(STDERR, 'maho-intelligence: json_encode failed: ' . json_last_error_msg() . "\n");
+            return;
+        }
         $length = strlen($json);
         $this->stdout->write("Content-Length: {$length}\r\n\r\n{$json}");
     }
