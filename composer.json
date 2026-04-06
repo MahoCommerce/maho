@@ -87,7 +87,8 @@
         "phpstan/phpstan-strict-rules": "^2.0",
         "rector/rector": "^2",
         "pestphp/pest": "^4",
-        "psy/psysh": "^0.12.10"
+        "psy/psysh": "^0.12.10",
+        "react/stream": "^1.4"
     },
     "suggest": {
         "ext-pdo_pgsql": "Required for PostgreSQL database support",
