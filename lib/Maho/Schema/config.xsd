@@ -22,16 +22,23 @@
             </xs:documentation>
         </xs:annotation>
         <xs:complexType>
-            <xs:annotation>
-                <xs:documentation>
-                    Top-level sections include: modules, global, frontend, adminhtml, admin,
-                    install, crontab, default, stores, websites, and potentially others added
-                    by modules or the base system config.
-                </xs:documentation>
-            </xs:annotation>
-            <xs:sequence>
-                <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                <xs:element name="modules" type="configModulesType"/>
+                <xs:element name="global" type="globalType"/>
+                <xs:element name="frontend" type="areaType"/>
+                <xs:element name="adminhtml" type="areaType"/>
+                <xs:element name="admin" type="adminAreaType"/>
+                <xs:element name="install" type="areaType"/>
+                <xs:element name="crontab" type="crontabType"/>
+                <xs:element name="default" type="freeformType">
+                    <xs:annotation>
+                        <xs:documentation>Default system configuration values (section/group/field = value).</xs:documentation>
+                    </xs:annotation>
+                </xs:element>
+                <xs:element name="stores" type="freeformType"/>
+                <xs:element name="websites" type="freeformType"/>
+                <xs:any processContents="skip"/>
+            </xs:choice>
         </xs:complexType>
     </xs:element>
 
@@ -74,18 +81,83 @@
             <xs:documentation>
                 Global application configuration. Contains model/block/helper registries,
                 database resources, events, cache types, templates, and more.
-
-                Modules can add arbitrary sub-sections, so this type allows any children.
-                Common children include: models, blocks, helpers, resources, resource, events,
-                cache, template, session, request, url_rewrite, request_rewrite, fieldsets,
-                payment, currency, catalog, sales, customer, cms, pdf, index, eav_attributes,
-                eav_frontendclasses, catalogindex, catalogsearch_fulltext, ignore_user_agents,
-                importexport, newsletter, page, salesrule, widget, wishlist, translate, layout.
+                Modules can add arbitrary sub-sections beyond the ones listed here.
             </xs:documentation>
         </xs:annotation>
-        <xs:sequence>
-            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="models" type="classRegistryType">
+                <xs:annotation>
+                    <xs:documentation>Model class alias registry.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="blocks" type="classRegistryType">
+                <xs:annotation>
+                    <xs:documentation>Block class alias registry.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="helpers" type="classRegistryType">
+                <xs:annotation>
+                    <xs:documentation>Helper class alias registry.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="resources" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>Database resource and connection definitions.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="resource" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>Resource type definitions (database adapter types).</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="events" type="eventsType"/>
+            <xs:element name="cache" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>Cache type definitions and configuration.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="template" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>Email template definitions.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="fieldsets" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>Data fieldset definitions for copying/filtering between objects.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="session" type="freeformType"/>
+            <xs:element name="request" type="freeformType"/>
+            <xs:element name="url_rewrite" type="freeformType"/>
+            <xs:element name="request_rewrite" type="freeformType"/>
+            <xs:element name="payment" type="freeformType"/>
+            <xs:element name="currency" type="freeformType"/>
+            <xs:element name="catalog" type="freeformType"/>
+            <xs:element name="sales" type="freeformType"/>
+            <xs:element name="customer" type="freeformType"/>
+            <xs:element name="cms" type="freeformType"/>
+            <xs:element name="pdf" type="freeformType"/>
+            <xs:element name="index" type="freeformType"/>
+            <xs:element name="log" type="freeformType"/>
+            <xs:element name="install" type="freeformType"/>
+            <xs:element name="eav_attributes" type="freeformType"/>
+            <xs:element name="eav_frontendclasses" type="freeformType"/>
+            <xs:element name="catalogindex" type="freeformType"/>
+            <xs:element name="catalogsearch_fulltext" type="freeformType"/>
+            <xs:element name="ignore_user_agents" type="freeformType"/>
+            <xs:element name="importexport" type="freeformType"/>
+            <xs:element name="newsletter" type="freeformType"/>
+            <xs:element name="page" type="freeformType"/>
+            <xs:element name="salesrule" type="freeformType"/>
+            <xs:element name="catalogrule" type="freeformType"/>
+            <xs:element name="widget" type="freeformType"/>
+            <xs:element name="wishlist" type="freeformType"/>
+            <xs:element name="translate" type="freeformType"/>
+            <xs:element name="layout" type="freeformType"/>
+            <xs:element name="ignoredModules" type="freeformType"/>
+            <xs:element name="disable_local_modules" type="xs:string"/>
+            <xs:any processContents="skip"/>
+        </xs:choice>
     </xs:complexType>
 
     <!-- Class registry (models, blocks, helpers) -->
@@ -212,15 +284,36 @@
             <xs:documentation>
                 Area-specific configuration (frontend, adminhtml, install).
                 Contains routers, layout updates, translations, events, and other area-scoped settings.
-
-                Modules can add arbitrary sub-sections, so this type allows any children.
-                Common children include: routers, layout, translate, events, secure_url,
-                web, validator_data, default, models, blocks, helpers, acl.
+                Modules can add arbitrary sub-sections beyond the ones listed here.
             </xs:documentation>
         </xs:annotation>
-        <xs:sequence>
-            <xs:any processContents="skip" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="routers" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>URL router definitions for this area.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="layout" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>Layout file update declarations.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="translate" type="freeformType">
+                <xs:annotation>
+                    <xs:documentation>Translation CSV file declarations.</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="events" type="eventsType"/>
+            <xs:element name="secure_url" type="freeformType"/>
+            <xs:element name="web" type="freeformType"/>
+            <xs:element name="validator_data" type="freeformType"/>
+            <xs:element name="default" type="freeformType"/>
+            <xs:element name="models" type="classRegistryType"/>
+            <xs:element name="blocks" type="classRegistryType"/>
+            <xs:element name="helpers" type="classRegistryType"/>
+            <xs:element name="acl" type="freeformType"/>
+            <xs:any processContents="skip"/>
+        </xs:choice>
     </xs:complexType>
 
     <!-- Admin area (distinct from adminhtml) -->
