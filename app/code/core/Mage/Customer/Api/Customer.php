@@ -99,13 +99,6 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
             ],
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
-        new Query(
-            name: 'me',
-            args: [],
-            description: 'Get current authenticated customer',
-            security: "is_granted('ROLE_USER') or is_granted('ROLE_API_USER')",
-            resolver: CustomQueryResolver::class,
-        ),
         new Mutation(
             name: 'createCustomerQuick',
             description: 'Quick customer creation for POS',
