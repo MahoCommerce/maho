@@ -1311,6 +1311,26 @@ span.delete-file {
     text-align: right
 }
 
+.grid-nav {
+    float: left;
+    margin: 3px 0 0 8px;
+    background: white;
+    display: flex;
+    place-items: center;
+}
+
+button.grid-nav-btn {
+    margin: 0 !important;
+    background: #fff;
+    color: #555;
+    padding: 0 8px;
+}
+
+.grid-nav-position {
+    font-size: 11px;
+    margin-inline: 5px;
+}
+
 .content-header .form-buttons button {
     margin-bottom: 3px
 }

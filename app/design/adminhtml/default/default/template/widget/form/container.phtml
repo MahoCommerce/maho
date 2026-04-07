@@ -12,11 +12,19 @@
 /** @var Mage_Adminhtml_Block_Widget_Form_Container $this */
 $headerHtml = $this->getHeaderHtml();
 $headerButtons = $this->getButtonsHtml('header');
+$gridNav = $this->getGridNavigation();
 ?>
 <?= $this->getFormInitScripts() ?>
 <?php if ($this->getHeaderText() || $headerButtons): ?>
     <div class="content-header">
         <?= $headerHtml ?>
+        <?php if ($gridNav): ?>
+            <span class="grid-nav">
+                <button type="button" class="scalable grid-nav-btn" title="<?= $this->escapeHtml($this->__('Previous')) ?>" <?php if (!$gridNav['prev_url']): ?>disabled<?php else: ?>onclick="setLocation('<?= $this->escapeUrl($gridNav['prev_url']) ?>')"<?php endif ?>>‹</button>
+                <span class="grid-nav-position"><?= (int) $gridNav['position'] ?> / <?= (int) $gridNav['total'] ?></span>
+                <button type="button" class="scalable grid-nav-btn" title="<?= $this->escapeHtml($this->__('Next')) ?>" <?php if (!$gridNav['next_url']): ?>disabled<?php else: ?>onclick="setLocation('<?= $this->escapeUrl($gridNav['next_url']) ?>')"<?php endif ?>>›</button>
+            </span>
+        <?php endif ?>
         <p class="form-buttons"><?= $headerButtons ?></p>
     </div>
 <?php endif ?>
