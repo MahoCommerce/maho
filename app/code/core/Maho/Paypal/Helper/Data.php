@@ -159,6 +159,34 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 
         $quote->setIsActive(0);
         $quote->save();
+
+        // Register capture on the order immediately so payment data is complete
+        // before any external system (e.g. dispatch) pulls it, instead of
+        // relying on the CaptureCompleted webhook which may arrive seconds later.
+        if ($intent === Maho_Paypal_Model_Config::PAYMENT_ACTION_CAPTURE) {
+            $capture = $paymentsData['captures'][0] ?? [];
+            $captureId = $capture['id'] ?? '';
+            $captureAmount = (float) ($capture['amount']['value'] ?? 0);
+
+            if ($captureId && $captureAmount) {
+                $order = Mage::getModel('sales/order')->load($quote->getId(), 'quote_id');
+                if ($order->getId()) {
+                    $orderPayment = $order->getPayment();
+                    $orderPayment->setAdditionalInformation('paypal_capture_id', $captureId);
+                    $orderPayment->setTransactionId($captureId);
+                    $orderPayment->setIsTransactionClosed(true);
+                    $orderPayment->registerCaptureNotification($captureAmount);
+
+                    $invoice = $orderPayment->getCreatedInvoice();
+                    $transactionSave = Mage::getModel('core/resource_transaction')
+                        ->addObject($order);
+                    if ($invoice) {
+                        $transactionSave->addObject($invoice);
+                    }
+                    $transactionSave->save();
+                }
+            }
+        }
     }
 
     public function saveVaultToken(array $paypalResult, Mage_Sales_Model_Quote $quote): void
