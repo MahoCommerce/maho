@@ -214,7 +214,7 @@ class Kernel extends BaseKernel
             ->private();
 
         $services->load('Maho\\ApiPlatform\\', '%kernel.project_dir%/')
-            ->exclude(['%kernel.project_dir%/Kernel.php']);
+            ->exclude(['%kernel.project_dir%/Kernel.php', '%kernel.project_dir%/config/']);
 
         $services->set(EventListener\ApiExceptionListener::class)
             ->arg('$debug', '%kernel.debug%')
