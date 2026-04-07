@@ -129,12 +129,6 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
         // Ensure correct checkout method for sessionless contexts (webhooks)
         if ($quote->getCustomerId() && !$quote->getData('checkout_method')) {
             $quote->setData('checkout_method', Mage_Checkout_Model_Type_Onepage::METHOD_CUSTOMER);
-            // Load and attach the customer so _prepareCustomerQuote() doesn't
-            // overwrite the quote's customer with an empty session object
-            $customer = Mage::getModel('customer/customer')->load($quote->getCustomerId());
-            if ($customer->getId()) {
-                $quote->setCustomer($customer);
-            }
         }
 
         $quote->collectTotals();
