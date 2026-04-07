@@ -48,28 +48,17 @@ const MahoCaptcha = {
     async loadAltchaScripts() {
         if (typeof customElements.get('altcha-widget') === 'function') return;
 
-        await Promise.all([
-            new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = '/js/altcha-i18n.min.js';
-                script.type = 'module';
-                script.onload = resolve;
-                script.onerror = () => reject(`${script.src} Not Found`);
-                document.head.appendChild(script);
-            }),
-            new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = '/js/altcha.min.js';
-                script.type = 'module';
-                script.onload = resolve;
-                script.onerror = () => reject(`${script.src} Not Found`);
-                document.head.appendChild(script);
-            }),
-        ]);
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = '/js/altcha-i18n.min.js';
+            script.type = 'module';
+            script.onload = resolve;
+            script.onerror = () => reject(`${script.src} Not Found`);
+            document.head.appendChild(script);
+        });
 
         const styleEl = document.createElement('style');
         styleEl.textContent = `
-        altcha-widget {display: flex;position: fixed;bottom: 0;right: 0}
         dialog.maho-captcha-verifying {
             margin: auto;
             display: flex;
@@ -125,7 +114,10 @@ const MahoCaptcha = {
         this.altchaState = state;
 
         // Fix for error `An invalid form control with name='' is not focusable.`
-        document.querySelector('#maho_captcha input[type=checkbox]').disabled = state === 'verifying';
+        const checkbox = document.querySelector('#maho_captcha input[type=checkbox]');
+        if (checkbox) {
+            checkbox.disabled = state === 'verifying';
+        }
 
         // Replicate maho_captcha input into all forms
         if (state === 'verified' && typeof payload === 'string') {

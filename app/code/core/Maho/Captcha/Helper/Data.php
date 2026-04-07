@@ -58,13 +58,13 @@ class Maho_Captcha_Helper_Data extends Mage_Core_Helper_Abstract
     public function getWidgetAttributes(): \Maho\DataObject
     {
         return new \Maho\DataObject([
-            'challengeurl' => $this->getChallengeUrl(),
+            'challenge' => $this->getChallengeUrl(),
             'name' => 'maho_captcha',
             'id' => 'maho_captcha',
             'auto' => 'onload',
-            'hidelogo' => '',
-            'hidefooter' => '',
-            'refetchonexpire' => '',
+            'hideLogo' => '',
+            'hideFooter' => '',
+            'display' => 'invisible',
         ]);
     }
 
