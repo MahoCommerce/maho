@@ -67,12 +67,26 @@ class Mage_Directory_Model_Resource_Country_Collection extends Mage_Core_Model_R
     /**
      * Load allowed countries for specific store
      *
+     * When $type is 'shipping', reads general/country/allow_shipping first and
+     * falls back to general/country/allow if the shipping list is empty.
+     * For any other $type (null, 'billing', etc.) the existing allow list is used.
+     *
      * @param mixed $store
+     * @param string|null $type Address type — 'shipping' to use the dedicated shipping country list
      * @return $this
      */
-    public function loadByStore($store = null)
+    public function loadByStore($store = null, ?string $type = null)
     {
-        $allowCountries = explode(',', (string) $this->_getStoreConfig('general/country/allow', $store));
+        $configPath = 'general/country/allow';
+
+        if ($type === 'shipping') {
+            $shippingCountries = trim((string) $this->_getStoreConfig('general/country/allow_shipping', $store));
+            if ($shippingCountries !== '') {
+                $configPath = 'general/country/allow_shipping';
+            }
+        }
+
+        $allowCountries = explode(',', (string) $this->_getStoreConfig($configPath, $store));
         if (!empty($allowCountries)) {
             $this->addFieldToFilter('main_table.country_id', ['in' => $allowCountries]);
         }

@@ -29,15 +29,17 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
     }
 
     /**
+     * @param string|null $type Address type ('shipping' or 'billing') to filter the country list
      * @return Mage_Directory_Model_Resource_Country_Collection
      */
-    public function getCountryCollection()
+    public function getCountryCollection(?string $type = null)
     {
-        $collection = $this->getData('country_collection');
+        $dataKey = 'country_collection' . ($type ? '_' . $type : '');
+        $collection = $this->getData($dataKey);
         if (is_null($collection)) {
             $collection = Mage::getModel('directory/country')->getResourceCollection()
-                ->loadByStore();
-            $this->setData('country_collection', $collection);
+                ->loadByStore(null, $type);
+            $this->setData($dataKey, $collection);
         }
 
         return $collection;
@@ -48,20 +50,22 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      * @param string $name
      * @param string $id
      * @param string $title
+     * @param string|null $type Address type ('shipping' or 'billing') to filter the country list
      * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
-    public function getCountryHtmlSelect($defValue = null, $name = 'country_id', $id = 'country', $title = 'Country')
+    public function getCountryHtmlSelect($defValue = null, $name = 'country_id', $id = 'country', $title = 'Country', ?string $type = null)
     {
         \Maho\Profiler::start('TEST: ' . __METHOD__);
         if (is_null($defValue)) {
             $defValue = $this->getCountryId();
         }
-        $cacheKey = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode();
+        $cacheKey = 'DIRECTORY_COUNTRY_SELECT_STORE_' . Mage::app()->getStore()->getCode()
+            . ($type ? '_' . strtoupper($type) : '');
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
             $options = $cache;
         } else {
-            $options = $this->getCountryCollection()->toOptionArray();
+            $options = $this->getCountryCollection($type)->toOptionArray();
             if (Mage::app()->useCache('config')) {
                 Mage::app()->saveCache($options, $cacheKey, ['config']);
             }
