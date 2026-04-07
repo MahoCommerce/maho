@@ -120,9 +120,7 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
 
         $payment->save();
 
-        if (!$quote->getBillingAddress()->getFirstname()) {
-            $this->importPaypalAddress($paypalResult, $quote);
-        }
+        $this->importPaypalAddress($paypalResult, $quote);
 
         $this->saveVaultToken($paypalResult, $quote);
 
