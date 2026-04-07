@@ -124,7 +124,6 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
      */
     public function getRegionJsonByStore($storeId = null)
     {
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         if (!$this->_regionJson) {
             $store = $this->_app->getStore($storeId);
             $cacheKey = 'DIRECTORY_REGIONS_JSON_STORE' . (string) $store->getId();
@@ -144,7 +143,6 @@ class Mage_Directory_Helper_Data extends Mage_Core_Helper_Abstract
             $this->_regionJson = $json;
         }
 
-        \Maho\Profiler::stop('TEST: ' . __METHOD__);
         return $this->_regionJson;
     }
 
