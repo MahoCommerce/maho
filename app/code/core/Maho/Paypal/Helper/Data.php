@@ -169,21 +169,29 @@ class Maho_Paypal_Helper_Data extends Mage_Core_Helper_Abstract
             $captureAmount = (float) ($capture['amount']['value'] ?? 0);
 
             if ($captureId && $captureAmount) {
-                $order = Mage::getModel('sales/order')->load($quote->getId(), 'quote_id');
-                if ($order->getId()) {
-                    $orderPayment = $order->getPayment();
-                    $orderPayment->setAdditionalInformation('paypal_capture_id', $captureId);
-                    $orderPayment->setTransactionId($captureId);
-                    $orderPayment->setIsTransactionClosed(true);
-                    $orderPayment->registerCaptureNotification($captureAmount);
+                try {
+                    $order = Mage::getModel('sales/order')->load($quote->getId(), 'quote_id');
+                    if ($order->getId()) {
+                        $orderPayment = $order->getPayment();
+                        $orderPayment->setAdditionalInformation('paypal_capture_id', $captureId);
+                        $orderPayment->setTransactionId($captureId);
+                        $orderPayment->setIsTransactionClosed(true);
+                        $orderPayment->registerCaptureNotification($captureAmount);
 
-                    $invoice = $orderPayment->getCreatedInvoice();
-                    $transactionSave = Mage::getModel('core/resource_transaction')
-                        ->addObject($order);
-                    if ($invoice) {
-                        $transactionSave->addObject($invoice);
+                        $invoice = $orderPayment->getCreatedInvoice();
+                        $transactionSave = Mage::getModel('core/resource_transaction')
+                            ->addObject($order);
+                        if ($invoice) {
+                            $transactionSave->addObject($invoice);
+                        }
+                        $transactionSave->save();
                     }
-                    $transactionSave->save();
+                } catch (\Throwable $e) {
+                    Mage::log(
+                        sprintf('Inline capture registration failed for PayPal order %s: %s', $paypalResult['id'], $e->getMessage()),
+                        Mage::LOG_ERROR,
+                        'paypal.log',
+                    );
                 }
             }
         }
