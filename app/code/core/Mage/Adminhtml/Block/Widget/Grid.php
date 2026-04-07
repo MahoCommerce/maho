@@ -807,13 +807,20 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
         $orderParts = $select->getPart(\Maho\Db\Select::ORDER);
 
         $orderExprs = [];
+        $hasIdInOrder = false;
         foreach ($orderParts as $term) {
+            if (!$term instanceof \Maho\Db\Expr && $term[0] === $this->_entityIdField) {
+                $hasIdInOrder = true;
+            }
             $orderExprs[] = $term instanceof \Maho\Db\Expr ? $term->__toString() : ($term[0] . ' ' . $term[1]);
         }
         if (!$orderExprs) {
             $orderExprs[] = $this->_entityIdField . ' DESC';
+        } elseif (!$hasIdInOrder) {
+            $lastTerm = end($orderParts);
+            $dir = (!$lastTerm instanceof \Maho\Db\Expr && strtoupper($lastTerm[1]) === 'ASC') ? 'ASC' : 'DESC';
+            $orderExprs[] = $this->_entityIdField . ' ' . $dir;
         }
-        $orderExprs[] = $this->_entityIdField . ' DESC';
         $orderSql = implode(', ', $orderExprs);
 
         $id = $this->_entityIdField;
