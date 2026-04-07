@@ -77,6 +77,10 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     protected $_defaultFilter   = [];
 
+    protected bool $_enableEntityNavigation = false;
+
+    protected string $_entityIdField = 'entity_id';
+
     /**
      * Export flag
      *
@@ -787,7 +791,56 @@ class Mage_Adminhtml_Block_Widget_Grid extends Mage_Adminhtml_Block_Widget
      */
     protected function _afterLoadCollection()
     {
+        if ($this->_enableEntityNavigation && $this->_saveParametersInSession) {
+            $this->_storeNavigationQuery();
+        }
         return $this;
+    }
+
+    protected function _storeNavigationQuery(): void
+    {
+        if (!$this->getCollection()) {
+            return;
+        }
+
+        $select = clone $this->getCollection()->getSelect();
+        $orderParts = $select->getPart(\Maho\Db\Select::ORDER);
+
+        $orderExprs = [];
+        $hasIdInOrder = false;
+        foreach ($orderParts as $term) {
+            if (!$term instanceof \Maho\Db\Expr && $term[0] === $this->_entityIdField) {
+                $hasIdInOrder = true;
+            }
+            $orderExprs[] = $term instanceof \Maho\Db\Expr ? $term->__toString() : ($term[0] . ' ' . $term[1]);
+        }
+        if (!$orderExprs) {
+            $orderExprs[] = $this->_entityIdField . ' DESC';
+        } elseif (!$hasIdInOrder) {
+            $lastTerm = end($orderParts);
+            $dir = (!$lastTerm instanceof \Maho\Db\Expr && strtoupper($lastTerm[1]) === 'ASC') ? 'ASC' : 'DESC';
+            $orderExprs[] = $this->_entityIdField . ' ' . $dir;
+        }
+        $orderSql = implode(', ', $orderExprs);
+
+        $id = $this->_entityIdField;
+        $w = "ORDER BY {$orderSql}";
+        $select->reset(\Maho\Db\Select::LIMIT_COUNT);
+        $select->reset(\Maho\Db\Select::LIMIT_OFFSET);
+        $select->reset(\Maho\Db\Select::COLUMNS);
+        $select->columns([
+            $id,
+            'prev_id'  => new \Maho\Db\Expr("LAG({$id}) OVER ({$w})"),
+            'next_id'  => new \Maho\Db\Expr("LEAD({$id}) OVER ({$w})"),
+            'position' => new \Maho\Db\Expr("ROW_NUMBER() OVER ({$w})"),
+            'total'    => new \Maho\Db\Expr('COUNT(*) OVER ()'),
+        ]);
+
+        Mage::getSingleton('adminhtml/session')->setData($this->getId() . '_nav', [
+            'sql' => $select->assemble(),
+            'bind' => [],
+            'id_field' => $id,
+        ]);
     }
 
     /**
