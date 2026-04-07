@@ -56,7 +56,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      */
     public function getCountryHtmlSelect($defValue = null, $name = 'country_id', $id = 'country', $title = 'Country', ?string $type = null)
     {
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         if (is_null($defValue)) {
             $defValue = $this->getCountryId();
         }
@@ -79,7 +78,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
             ->setOptions($this->sortCountryOptions($options))
             ->getHtml();
 
-        \Maho\Profiler::stop('TEST: ' . __METHOD__);
         return $html;
     }
 
@@ -105,7 +103,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      */
     public function getRegionHtmlSelect()
     {
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         $cacheKey = 'DIRECTORY_REGION_SELECT_STORE' . Mage::app()->getStore()->getId();
         if (Mage::app()->useCache('config') && $cache = Mage::app()->loadCache($cacheKey)) {
             $options = $cache;
@@ -123,7 +120,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
             ->setValue((int) $this->getRegionId())
             ->setOptions($options)
             ->getHtml();
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         return $html;
     }
 
@@ -144,7 +140,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
      */
     public function getRegionsJs()
     {
-        \Maho\Profiler::start('TEST: ' . __METHOD__);
         $regionsJs = $this->getData('regions_js');
         if (!$regionsJs) {
             $countryIds = [];
@@ -167,7 +162,6 @@ class Mage_Directory_Block_Data extends Mage_Core_Block_Template
             }
             $regionsJs = Mage::helper('core')->jsonEncode($regions);
         }
-        \Maho\Profiler::stop('TEST: ' . __METHOD__);
         return $regionsJs;
     }
 
