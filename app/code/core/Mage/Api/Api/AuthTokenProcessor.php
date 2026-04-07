@@ -128,6 +128,25 @@ class AuthTokenProcessor extends \Maho\ApiPlatform\Processor
                         }
 
                         $customerCart->merge($guestCart);
+
+                        // Import customer default addresses so shipping quotes work on cart page
+                        $defaultShipping = $customer->getDefaultShippingAddress();
+                        if ($defaultShipping && $defaultShipping->getId()) {
+                            $shippingAddress = $customerCart->getShippingAddress();
+                            if (!$shippingAddress->getFirstname()) {
+                                $shippingAddress->importCustomerAddress($defaultShipping);
+                                $shippingAddress->setSaveInAddressBook(0);
+                            }
+                        }
+                        $defaultBilling = $customer->getDefaultBillingAddress();
+                        if ($defaultBilling && $defaultBilling->getId()) {
+                            $billingAddress = $customerCart->getBillingAddress();
+                            if (!$billingAddress->getFirstname()) {
+                                $billingAddress->importCustomerAddress($defaultBilling);
+                                $billingAddress->setSaveInAddressBook(0);
+                            }
+                        }
+
                         $customerCart->collectTotals();
                         $customerCart->save();
 
