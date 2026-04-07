@@ -36,7 +36,7 @@
         "ext-spl": "*",
         "ext-zip": "*",
         "ext-zlib": "*",
-        "altcha-org/altcha": "^1.1.0",
+        "altcha-org/altcha": "^2.0.0",
         "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
         "cbschuld/browser.php": "^2.0",
