@@ -347,6 +347,11 @@ class CartService
                 $buyRequest->setData('options_files', $optionsFiles);
             }
         }
+        // Set store context before addProduct so item prices are calculated correctly
+        if ($quote->getStoreId()) {
+            \Mage::app()->setCurrentStore($quote->getStoreId());
+        }
+
         $result = $quote->addProduct($product, $buyRequest);
 
         // addProduct returns a string error message on failure
@@ -1228,13 +1233,28 @@ class CartService
      */
     private function collectAndVerifyTotals(\Mage_Sales_Model_Quote $quote): void
     {
+        // Set store context so price calculation uses the correct store (not admin store 0)
+        if ($quote->getStoreId()) {
+            \Mage::app()->setCurrentStore($quote->getStoreId());
+            $quote->setStore(\Mage::app()->getStore($quote->getStoreId()));
+        }
+
         // Ensure quote has addresses — collectTotals() calculates per-address,
         // so without addresses all totals (including discounts) return 0
         $quote->getBillingAddress();
         $quote->getShippingAddress();
 
+        // Clear address item cache — getAllItems() caches its result, so if collectTotals
+        // was called before the item was added (e.g. during cart creation), the cache is stale.
+        foreach ($quote->getAllAddresses() as $address) {
+            $address->unsetData('cached_items_all');
+            $address->unsetData('cached_items_nominal');
+            $address->unsetData('cached_items_nonnominal');
+        }
+
         $quote->setTotalsCollectedFlag(false);
         $quote->collectTotals();
+
     }
 
     /**
