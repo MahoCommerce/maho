@@ -17,7 +17,7 @@ class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
             if (!$helper->isEnabled()) {
                 Mage::throwException($helper->__('Captcha is disabled'));
             }
-            $this->getResponse()->setBodyJson($helper->createChallenge());
+            $this->getResponse()->setBodyJson($helper->createChallenge()->toArray());
         } catch (Mage_Core_Exception $e) {
             $error = $e->getMessage();
         } catch (Exception $e) {

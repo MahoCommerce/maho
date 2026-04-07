@@ -59,6 +59,7 @@ const MahoCaptcha = {
 
         const styleEl = document.createElement('style');
         styleEl.textContent = `
+        altcha-widget {display: flex;position: fixed;bottom: 0;right: 0;z-index: 9999}
         dialog.maho-captcha-verifying {
             margin: auto;
             display: flex;
