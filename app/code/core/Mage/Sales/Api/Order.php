@@ -101,6 +101,8 @@ use Mage\Customer\Api\Address;
                 'maskedId' => ['type' => 'String'],
                 'paymentMethod' => ['type' => 'String'],
                 'shippingMethod' => ['type' => 'String'],
+                'guestEmail' => ['type' => 'String'],
+                'orderNote' => ['type' => 'String'],
             ],
             description: 'Place order from cart (requires maskedId for guest, or authentication for customer carts)',
         ),
