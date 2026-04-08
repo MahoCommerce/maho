@@ -102,6 +102,12 @@ use Maho\ApiPlatform\GraphQl\CustomQueryResolver;
         new Mutation(
             name: 'createCustomerQuick',
             description: 'Quick customer creation for POS',
+            args: [
+                'email' => ['type' => 'String!', 'description' => 'Customer email'],
+                'firstname' => ['type' => 'String!', 'description' => 'First name'],
+                'lastname' => ['type' => 'String!', 'description' => 'Last name'],
+                'telephone' => ['type' => 'String', 'description' => 'Phone number'],
+            ],
             security: "is_granted('ROLE_ADMIN') or is_granted('ROLE_POS') or is_granted('ROLE_API_USER')",
         ),
         new Mutation(

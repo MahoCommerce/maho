@@ -1283,6 +1283,8 @@ class CartService
             if (!$shippingAddress->getShippingMethod() || $shippingMethod) {
                 $method = $shippingMethod ?: 'freeshipping_freeshipping';
                 $shippingAddress->setShippingMethod($method);
+                // Collect rates so the rate object exists for validation
+                $shippingAddress->setCollectShippingRates(1)->collectShippingRates();
                 if ($method === 'freeshipping_freeshipping') {
                     $shippingAddress->setShippingDescription('Free Shipping - POS Pickup');
                     $shippingAddress->setShippingAmount(0);

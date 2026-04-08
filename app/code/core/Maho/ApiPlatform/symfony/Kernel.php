@@ -148,6 +148,10 @@ class Kernel extends BaseKernel
         ]);
 
         $container->extension('security', [
+            'role_hierarchy' => [
+                'ROLE_ADMIN' => ['ROLE_USER', 'ROLE_POS', 'ROLE_API_USER'],
+                'ROLE_POS' => ['ROLE_USER'],
+            ],
             'password_hashers' => [
                 \Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface::class => 'auto',
             ],

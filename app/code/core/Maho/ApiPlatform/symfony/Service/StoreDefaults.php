@@ -50,16 +50,23 @@ class StoreDefaults
      */
     public static function getPosAddress(?int $storeId = null): array
     {
+        // Read from POS module config (structured address fields), fall back to core store info
+        $posPrefix = 'mageaustralia_pos/store_address/';
+        $corePrefix = 'general/store_information/';
+
         return [
             'firstname' => 'POS',
             'lastname' => 'Customer',
-            'street' => \Mage::getStoreConfig('general/store_information/address', $storeId) ?: 'In-Store Pickup',
-            'city' => \Mage::getStoreConfig('general/store_information/city', $storeId) ?: 'Store',
-            'region' => \Mage::getStoreConfig('general/store_information/region', $storeId) ?: '',
-            'region_id' => (int) (\Mage::getStoreConfig('general/store_information/region_id', $storeId) ?: 0),
-            'postcode' => \Mage::getStoreConfig('general/store_information/postcode', $storeId) ?: '0000',
-            'country_id' => self::getCountryId($storeId),
-            'telephone' => \Mage::getStoreConfig('general/store_information/phone', $storeId) ?: '0000000000',
+            'street' => \Mage::getStoreConfig($posPrefix . 'street', $storeId)
+                ?: \Mage::getStoreConfig($corePrefix . 'address', $storeId) ?: 'In-Store Pickup',
+            'city' => \Mage::getStoreConfig($posPrefix . 'city', $storeId) ?: 'Store',
+            'region' => \Mage::getStoreConfig($posPrefix . 'region', $storeId) ?: 'N/A',
+            'postcode' => \Mage::getStoreConfig($posPrefix . 'postcode', $storeId) ?: '0000',
+            'country_id' => \Mage::getStoreConfig($posPrefix . 'country_id', $storeId)
+                ?: \Mage::getStoreConfig($corePrefix . 'merchant_country', $storeId)
+                ?: 'AU',
+            'telephone' => \Mage::getStoreConfig($posPrefix . 'telephone', $storeId)
+                ?: \Mage::getStoreConfig($corePrefix . 'phone', $storeId) ?: '0000000000',
         ];
     }
 

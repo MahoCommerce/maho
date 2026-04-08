@@ -318,11 +318,39 @@ final class CartProcessor extends \Maho\ApiPlatform\Processor
     /**
      * Assign customer to cart (merge guest cart)
      */
-    private function assignCustomerToCart(array $context): Cart
+    private function assignCustomerToCart(array $context, array $uriVariables = []): Cart
     {
         $args = $context['args']['input'] ?? [];
+        $cartId = $args['cartId'] ?? null;
         $maskedId = $args['maskedId'] ?? null;
         $requestedCustomerId = $args['customerId'] ?? null;
+
+        // Admin/POS users can assign any customer to any cart
+        if ($this->isAdmin() || $this->isPosUser() || $this->isApiUser()) {
+            if (!$requestedCustomerId) {
+                throw new \RuntimeException('Customer ID is required');
+            }
+            $quote = $this->cartService->getCart(
+                $cartId ? (int) $cartId : null,
+                $maskedId,
+            );
+            if (!$quote) {
+                throw new \RuntimeException('Cart not found');
+            }
+
+            $customerId = (int) $requestedCustomerId;
+            $customer = \Mage::getModel('customer/customer')->load($customerId);
+            if (!$customer->getId()) {
+                throw new \RuntimeException('Customer not found');
+            }
+
+            $quote->assignCustomer($customer);
+            $quote->collectTotals()->save();
+
+            return $this->cartMapper->mapQuoteToCart($quote, false);
+        }
+
+        // Customer self-assignment (merge guest cart)
         $authenticatedCustomerId = $this->getAuthenticatedCustomerId();
 
         if (!$maskedId) {

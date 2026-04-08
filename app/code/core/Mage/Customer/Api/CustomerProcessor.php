@@ -195,7 +195,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
      */
     private function createCustomerQuick(array $context): Customer
     {
-        $args = $context['args']['input'] ?? [];
+        // With explicit args, values come directly in args (not nested under input)
+        $args = $context['args']['input'] ?? $context['args'] ?? [];
 
         StoreContext::ensureStore();
         $this->checkRateLimit('create_customer:ip:' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'), 10, 3600);
@@ -203,8 +204,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $websiteId = \Mage::app()->getStore($storeId)->getWebsiteId();
 
         $email = $args['email'] ?? '';
-        $firstName = $args['firstName'] ?? '';
-        $lastName = $args['lastName'] ?? '';
+        $firstName = $args['firstname'] ?? '';
+        $lastName = $args['lastname'] ?? '';
         $telephone = $args['telephone'] ?? null;
 
         if (empty($email)) {
@@ -301,8 +302,8 @@ final class CustomerProcessor extends \Maho\ApiPlatform\Processor
         $args = $context['args']['input'] ?? [];
 
         return $this->doUpdateProfile(
-            firstName: $args['firstName'] ?? null,
-            lastName: $args['lastName'] ?? null,
+            firstName: $args['firstname'] ?? null,
+            lastName: $args['lastname'] ?? null,
             email: $args['email'] ?? null,
         );
     }

@@ -86,20 +86,31 @@ final class OrderProcessor extends \Maho\ApiPlatform\Processor
         // Verify cart ownership
         $this->verifyCartOwnership($quote, $maskedId !== null);
 
-        // Set payment method on quote if provided
-        if ($paymentMethod) {
-            $quote->getPayment()->setMethod($paymentMethod);
-        }
-
-        // Set shipping method on quote if provided
-        if ($shippingMethod && !$quote->isVirtual()) {
-            $shippingAddress = $quote->getShippingAddress();
-            $shippingAddress->setShippingMethod($shippingMethod);
-            $shippingAddress->setCollectShippingRates(1);
-        }
-
-        if ($paymentMethod || $shippingMethod) {
+        // For admin/POS orders, apply default addresses and checkout settings
+        // so orders can be placed without the full checkout flow
+        if ($this->isAdmin() || $this->isPosUser()) {
+            $this->cartService->preparePosQuote(
+                $quote,
+                $shippingMethod,
+                $paymentMethod,
+            );
             $quote->collectTotals()->save();
+        } else {
+            // Set payment method on quote if provided
+            if ($paymentMethod) {
+                $quote->getPayment()->setMethod($paymentMethod);
+            }
+
+            // Set shipping method on quote if provided
+            if ($shippingMethod && !$quote->isVirtual()) {
+                $shippingAddress = $quote->getShippingAddress();
+                $shippingAddress->setShippingMethod($shippingMethod);
+                $shippingAddress->setCollectShippingRates(1);
+            }
+
+            if ($paymentMethod || $shippingMethod) {
+                $quote->collectTotals()->save();
+            }
         }
 
         // Place order
