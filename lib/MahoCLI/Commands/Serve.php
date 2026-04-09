@@ -20,7 +20,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'dev:serve',
+    name: 'serve',
     description: 'Run Maho with the built in web server',
 )]
 class Serve extends BaseMahoCommand
