@@ -12,6 +12,9 @@
 
 declare(strict_types=1);
 
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Acl_Role_Registry extends \Laminas\Permissions\Acl\Role\Registry
 {
     /**

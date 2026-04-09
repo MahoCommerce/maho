@@ -13,6 +13,9 @@
 use Laminas\Soap\Server as LaminasSoapServer;
 use Laminas\Soap\Exception\ExceptionInterface as LaminasSoapException;
 
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 class Mage_Api_Model_Server_Adapter_Soap extends \Maho\DataObject implements Mage_Api_Model_Server_Adapter_Interface
 {
     /**

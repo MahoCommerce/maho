@@ -22,6 +22,9 @@
  *
  * @package    Mage_Api2
  */
+/**
+ * @deprecated since 26.5 Use Maho_ApiPlatform instead.
+ */
 abstract class Mage_Api2_Model_Resource_Validator
 {
     /**
