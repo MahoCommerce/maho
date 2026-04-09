@@ -21,6 +21,8 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
         $this->_objectId    = 'order_id';
         $this->_controller  = 'sales_order';
         $this->_mode        = 'view';
+        $this->_gridNavigationId = 'sales_order_grid';
+        $this->_gridNavigationRoute = '*/*/view';
 
         parent::__construct();
 
@@ -358,6 +360,15 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
     public function getReviewPaymentUrl($action)
     {
         return $this->getUrl('*/*/reviewPayment', ['action' => $action]);
+    }
+
+    #[\Override]
+    protected function getNavigationUrl(int $entityId): string
+    {
+        return Mage_Adminhtml_Block_Widget_Container::getUrl(
+            $this->_gridNavigationRoute,
+            [$this->_objectId => $entityId],
+        );
     }
 
     /**

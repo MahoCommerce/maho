@@ -71,8 +71,6 @@ $application->addCommand(new \MahoCLI\Commands\Install());
 $application->addCommand(new \MahoCLI\Commands\Migrate());
 $application->addCommand(new \MahoCLI\Commands\LegacyRenameMysql4Classes());
 
-$application->addCommand(new \MahoCLI\Commands\PhpstormMetadataGenerate());
-
 $application->addCommand(new \MahoCLI\Commands\Serve());
 $application->addCommand(new \MahoCLI\Commands\Shell());
 

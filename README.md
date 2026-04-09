@@ -1,70 +1,89 @@
 <p align="center">
-  <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="" />
-  <img src="https://img.shields.io/badge/PHP-8.3+-8993be.svg" alt="" />
-  <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="" />
-  <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="" />
-  <a href="https://crowdin.com/project/maho" target="_blank"><img src="https://img.shields.io/badge/Localize-98%25-32c754" alt="" /></a>
-  <a href="https://deepwiki.com/MahoCommerce/maho" target="_blank"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
+  <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="Maho" width=400 />
 </p>
 <p align="center">
-  <img src="https://mahocommerce.com/assets/maho-logo.svg" alt="" width=400 />
-  <br>
-  <strong>open on-premise ecommerce platform</strong><br>
-  <i>#StrongRoots #ForwardThinking #FamiliarYetDifferent</i>
+  <img src="https://poser.pugx.org/mahocommerce/maho/license.svg" alt="License" />
+  <img src="https://img.shields.io/badge/PHP-8.3+-8993be.svg" alt="PHP 8.3+" />
+  <img src="https://github.com/MahoCommerce/maho/actions/workflows/security-php.yml/badge.svg" alt="Security" />
+  <img src="https://github.com/MahoCommerce/maho/actions/workflows/codeql-analysis.yml/badge.svg" alt="CodeQL" />
+  <a href="https://crowdin.com/project/maho" target="_blank"><img src="https://img.shields.io/badge/Localize-98%25-32c754" alt="Localization" /></a>
+  <a href="https://deepwiki.com/MahoCommerce/maho" target="_blank"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki" /></a>
+</p>
+<p align="center">
+  <a href="https://github.com/MahoCommerce/phpstorm" target="_blank"><img src="https://img.shields.io/badge/PHPStorm-Plugin-000000?logo=phpstorm&logoColor=white" alt="PHPStorm Plugin" /></a>
+  <a href="https://github.com/MahoCommerce/vscode" target="_blank"><img src="https://img.shields.io/badge/VS_Code-Extension-2F80ED?logo=vscodium&logoColor=white" alt="VS Code Extension" /></a>
+  <a href="https://github.com/MahoCommerce/zed" target="_blank"><img src="https://img.shields.io/badge/Zed-Extension-084CCF?logo=zedindustries&logoColor=white" alt="Zed Extension" /></a>
 </p>
 
-**Maho** is a free and **open source ecommerce platform**, created in 2024 by
-[a former maintainer of OpenMage](https://fabrizioballiano.com).
-Based on the M1 platform, Maho grants **hyper stability** and a **vast ecosystem of 
-modules and extensions**.
+**Maho** is a modern, open-source ecommerce platform built on PHP 8.3+, Symfony, Doctrine DBAL,
+Laminas, and 100% vanilla JS. A drop-in replacement for Magento 1 projects with full compatibility
+and a complete toolchain including Composer and PHPStan plugins, and language packs.
 
-**Maho's primary goals** are to propel this wonderful platform into the future, with **high performance,
-new features, modern developer-friendly architecture, zero hassles and zero baggage**.
+### Modern tech stack
 
-We will try to make Maho as backward compatible as possible, but we won't let the ghosts of the
-past to stop the innovation we need to bring to developers and store owners.
+- **PHP 8.3+** with strict types, attributes, and modern language features
+- **Doctrine DBAL 4** for database operations - supports MySQL, MariaDB, PostgreSQL, and SQLite
+- **Symfony components** for HTTP, caching, console, validation, mailer, and more
+- **Monolog** for structured logging, **DomPdf** for PDF generation
+- **100% vanilla JavaScript** - no jQuery, no Prototype.js, no legacy frameworks
+- **No legacy baggage** - Zend Framework and IE compatibility code have been completely removed
 
-### Where does Maho stands in the ecommerce platforms landscape
+### Enterprise features built in
 
-We believe Maho has a clear space in the plethora of ecommerce platforms:
-- Magento2/MageOS: Ideal for large or enterprise on-premise projects
-- Maho: Perfect for on-premise medium-to-small projects seeking a modern, streamlined platform
-- OpenMage: Suited for more conservative projects that desire complete control
-- Shopify: Best for medium-to-small SaaS projects
+- **Automated email marketing** with multi-step campaigns and behavior-based triggers
+- **Customer segmentation** with rule-based targeting
+- **Dynamic categories** that update automatically based on product rules
+- **Passkey and 2FA authentication** for secure admin access
+- **PayPal v6 SDK** with advanced checkout, vault, and Pay Later; **[1st party Braintree module](https://github.com/MahoCommerce/module-braintree)** for cards, Apple Pay, and Google Pay
+- **Blog module**, Meta Pixel integration, and advanced payment restrictions
+- **Multi-store** capabilities with comprehensive APIs (REST, SOAP, JSON-RPC)
 
-## Origin, meaning, and pronunciation of Maho
+### Developer experience
 
-"Maho" ([pronounced as "mah-hoh"](https://www.ingles.com/pronunciacion/majo)) draws inspiration from various
-cultural meanings:
+- **50+ CLI commands** for admin, cache, indexing, cron, database, and development tasks
+- **Built-in LSP and MCP server** for deep IDE integration and AI-assisted development
+- **Composer plugin** for module management, **PHPStan plugin** for static analysis
+- **Language packs** via Crowdin with 98% coverage
+- Clean MVC architecture, event-driven system, and modular design
 
-- **Maho (or Majo) is the name given to the ancient indigenous people of Lanzarote and Fuerteventura**,
-  islands in the Atlantic archipelago of the Canary Islands (Spain), home of this project's maintainer.  
-  The Mahos were a **resilient and advanced population who thrived in the challenging island environments**
-  before the 15th century. They left significant evidence of their agricultural, social, technological,
-  cultural, and spiritual achievements, which continue to impact the culture of the islands to this day.  
-  As the Mahos, our platform has a long history, it's simple yet advanced, and it's enduring daring times.
-- **In Spanish, it means nice, pleasant, attractive, cool**, who doesn't want a cool platform to build on?
-- **In Japanese, it means magic or sorcery**, reflecting the powerful and transformative nature of what
-  we want to achieve.
+## Getting started
 
-Notice there's no "Mage" in our name? That's intentional.  
-While we honor our roots in Magento and OpenMage, it's time for a fresh start.  
-Mage was groundbreaking, and we still admire it, but the perception of it being "dead"
-became a hurdle for ongoing support and development.  
-By adopting a new identity, we're opening doors to new perspectives and possibilities.  
-This name change signals to the community that while we build on a solid foundation, we're evolving into something
-distinctly powerful and forward-looking.
+```bash
+composer create-project mahocommerce/maho-starter yourproject
+```
 
-**Maho is a new tree growing from time-tested roots – familiar in essence, yet branching out in exciting
-new directions.**
+Or try it instantly with Docker:
 
-## Get in touch
+```bash
+docker run -p 54321:443 mahocommerce/maho:nightly
+```
 
-- [Send us a good old email](mailto:info@mahocommerce.com)
-- [Chat on Maho's discord server](https://discord.gg/dWgcVUFTrS)
+Then open https://localhost:54321 and follow the web installer (select SQLite to skip database setup).
+
+For production Docker setups, see the [official Docker images](https://hub.docker.com/r/mahocommerce/maho).
+Full details on web server configuration, database setup, and deployment options in the
+[Getting Started guide](https://mahocommerce.com/getting-started).
+
+## Documentation
+
+- [mahocommerce.com](https://mahocommerce.com) - official documentation
+- [PHP API reference](https://phpdoc.mahocommerce.com) - full class and method documentation
+- [DeepWiki](https://deepwiki.com/MahoCommerce/maho) - AI-powered code exploration
+- [Contributing Guide](CONTRIBUTING.md) - development setup, code style, testing, and PR guidelines
+
+## About the name
+
+"Maho" ([pronounced "mah-hoh"](https://www.ingles.com/pronunciacion/majo)) is the name of the
+ancient indigenous people of Lanzarote and Fuerteventura in the Canary Islands - a resilient
+population who thrived in challenging environments. In Spanish it means *nice, cool*; in Japanese
+it means *magic*. The name reflects our strength and resilience in the demanding landscape of modern ecommerce.
+
+## Community
+
+- [Discord](https://discord.gg/dWgcVUFTrS)
+- [GitHub Discussions](https://github.com/MahoCommerce/maho/discussions)
+- [Email](mailto:info@mahocommerce.com)
 
 ## Code of Conduct
 
-We are committed to fostering a welcoming and inclusive community, thus we ask all participants to [review and
-abide by our Code of Conduct](https://github.com/MahoCommerce/maho?tab=coc-ov-file) in full.  
-Violations will be addressed promptly.
+All participants are expected to follow our [Code of Conduct](https://github.com/MahoCommerce/maho?tab=coc-ov-file).

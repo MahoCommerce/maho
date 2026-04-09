@@ -17,7 +17,7 @@
             <div class="shipping-fields-grid">
                 <div class="form-field">
                     <label for="country" class="required"><em>*</em> <?= $this->__('Country') ?></label>
-                    <?= Mage::getBlockSingleton('directory/data')->getCountryHtmlSelect($this->getEstimateCountryId()) ?>
+                    <?= Mage::getBlockSingleton('directory/data')->getCountryHtmlSelect($this->getEstimateCountryId(), 'country_id', 'country', 'Country', 'shipping') ?>
                 </div>
                 <div class="form-field">
                     <label for="region_id" class="required"><em>*</em> <?= $this->__('State/Province') ?></label>
