@@ -121,26 +121,6 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
             }
 
             try {
-                // Generate code if creating new
-                if (!$model->getId() && (!isset($data['code']) || $data['code'] === '')) {
-                    $data['code'] = Mage::helper('giftcard')->generateCode();
-                }
-
-                // Set website_id for new gift cards
-                if (!$model->getId() && (!isset($data['website_id']) || $data['website_id'] === '')) {
-                    $data['website_id'] = Mage::app()->getWebsite()->getId();
-                }
-
-                // Set expiration if not set
-                if (!$model->getId() && (!isset($data['expires_at']) || $data['expires_at'] === '')) {
-                    $data['expires_at'] = Mage::helper('giftcard')->calculateExpirationDate();
-                }
-
-                // For new gift cards, set initial_balance = balance
-                if (!$model->getId() && isset($data['balance'])) {
-                    $data['initial_balance'] = $data['balance'];
-                }
-
                 // If balance changed on existing card, record as adjustment
                 $oldBalance = (float) $model->getBalance();
                 $newBalance = isset($data['balance']) ? (float) $data['balance'] : $oldBalance;

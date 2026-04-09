@@ -13,7 +13,7 @@ use Tests\MahoBackendTestCase;
 
 uses(MahoBackendTestCase::class);
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Create import model
     $this->importModel = Mage::getModel('importexport/import_entity_category');
 
@@ -26,58 +26,67 @@ beforeEach(function () {
         ->count();
 });
 
-afterEach(function () {
-    // Clean up any created categories
-    $collection = Mage::getModel('catalog/category')->getCollection()
-        ->addAttributeToFilter('level', ['gt' => 0])
-        ->addAttributeToFilter('entity_id', ['gt' => 2]); // Don't delete default category
+afterEach(function (): void {
+    // Clean up only test-created categories (identified by url_key prefix)
+    $testUrlKeys = [
+        'test-import-%',
+        'level1', 'level2', 'level3',
+        'auto-generated-key-',
+        'test-scope', 'another-category',
+        'test-category', 'test-multistore',
+        'to-delete',
+    ];
 
-    foreach ($collection as $category) {
-        try {
-            $category->delete();
-        } catch (Exception $e) {
-            // Ignore deletion errors in cleanup
+    foreach ($testUrlKeys as $pattern) {
+        $collection = Mage::getModel('catalog/category')->getCollection()
+            ->addAttributeToFilter('url_key', ['like' => $pattern]);
+        foreach ($collection as $category) {
+            try {
+                $category->delete();
+            } catch (Exception $e) {
+                // Ignore deletion errors in cleanup
+            }
         }
     }
 });
 
-it('creates new categories with parent_id', function () {
+it('creates new categories with parent_id', function (): void {
     // First import top-level categories
     $csvData1 = [
         ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
-        ['', '2', '', 'Electronics', '1', 'electronics'],
-        ['', '2', '', 'Clothing', '1', 'clothing'],
+        ['', '2', '', 'Test Import Electronics', '1', 'test-import-electronics'],
+        ['', '2', '', 'Test Import Clothing', '1', 'test-import-clothing'],
     ];
     createAndImportCsv($csvData1);
 
-    $electronics = findCategoryByUrlKey('electronics');
-    $clothing = findCategoryByUrlKey('clothing');
+    $electronics = findCategoryByUrlKey('test-import-electronics');
+    $clothing = findCategoryByUrlKey('test-import-clothing');
 
     // Then import subcategories
     $csvData2 = [
         ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
-        ['', (string) $electronics->getId(), '', 'Phones', '1', 'phones'],
+        ['', (string) $electronics->getId(), '', 'Test Import Phones', '1', 'test-import-phones'],
     ];
     createAndImportCsv($csvData2);
 
     // Check electronics category was created
     expect($electronics)->not->toBeNull()
-        ->and($electronics->getName())->toBe('Electronics')
+        ->and($electronics->getName())->toBe('Test Import Electronics')
         ->and($electronics->getIsActive())->toBe(1);
 
     // Check phones subcategory was created with correct parent
-    $phones = findCategoryByUrlKey('phones');
+    $phones = findCategoryByUrlKey('test-import-phones');
     expect($phones)->not->toBeNull()
-        ->and($phones->getName())->toBe('Phones')
+        ->and($phones->getName())->toBe('Test Import Phones')
         ->and($phones->getParentId())->toBe((int) $electronics->getId());
 
     // Check clothing category was created
-    $clothing = findCategoryByUrlKey('clothing');
+    $clothing = findCategoryByUrlKey('test-import-clothing');
     expect($clothing)->not->toBeNull()
-        ->and($clothing->getName())->toBe('Clothing');
+        ->and($clothing->getName())->toBe('Test Import Clothing');
 });
 
-it('updates existing categories', function () {
+it('updates existing categories', function (): void {
     // First create a category
     $category = Mage::getModel('catalog/category');
     $category->setName('Original Name')
@@ -100,7 +109,7 @@ it('updates existing categories', function () {
         ->and($category->getIsActive())->toBe(1);
 });
 
-it('handles multi-store data correctly', function () {
+it('handles multi-store data correctly', function (): void {
     // First create the category
     $csvData1 = [
         ['category_id', 'parent_id', '_store', 'name', 'description', 'url_key'],
@@ -133,7 +142,7 @@ it('handles multi-store data correctly', function () {
         ->and($storeCategory->getDescription())->toBe('German description');
 });
 
-it('validates required parent_id field for new categories', function () {
+it('validates required parent_id field for new categories', function (): void {
     $csvData = [
         ['category_id', 'parent_id', '_store', 'name'],
         ['', '', '', 'Invalid Category'], // No parent_id for new category
@@ -155,7 +164,7 @@ it('validates required parent_id field for new categories', function () {
     expect($hasPathEmptyError)->toBeTrue();
 });
 
-it('validates parent_id format', function () {
+it('validates parent_id format', function (): void {
     $csvData = [
         ['category_id', 'parent_id', '_store', 'name'],
         ['', 'invalid_id', '', 'Invalid Category'],
@@ -168,7 +177,7 @@ it('validates parent_id format', function () {
     expect($GLOBALS['testImportModel']->getErrorsCount())->toBeGreaterThan(0);
 });
 
-it('validates parent category exists', function () {
+it('validates parent category exists', function (): void {
     $csvData = [
         ['category_id', 'parent_id', '_store', 'name'],
         ['', '9999', '', 'Child Category'], // Non-existent parent ID
@@ -190,7 +199,7 @@ it('validates parent category exists', function () {
     expect($hasParentError)->toBeTrue();
 });
 
-it('handles delete behavior correctly', function () {
+it('handles delete behavior correctly', function (): void {
     // Create test category first
     $category = Mage::getModel('catalog/category');
     $category->setName('To Delete')
@@ -214,7 +223,7 @@ it('handles delete behavior correctly', function () {
     expect($deletedCategory->getId())->toBeNull();
 });
 
-it('maintains category tree integrity', function () {
+it('maintains category tree integrity', function (): void {
     // Import Level 1 first
     $csvData1 = [
         ['category_id', 'parent_id', '_store', 'name', 'is_active', 'url_key'],
@@ -258,7 +267,7 @@ it('maintains category tree integrity', function () {
         ->and($level3->getPath())->toContain($level2->getId() . '/' . $level3->getId());
 });
 
-it('generates url_key from name when missing', function () {
+it('generates url_key from name when missing', function (): void {
     $csvData = [
         ['category_id', 'parent_id', '_store', 'name'],
         ['', '2', '', 'Auto Generated Key!'], // Name with special chars, no url_key
@@ -272,7 +281,7 @@ it('generates url_key from name when missing', function () {
         ->and($category->getUrlKey())->toBe('auto-generated-key-');
 });
 
-it('handles scope resolution correctly', function () {
+it('handles scope resolution correctly', function (): void {
     // First create categories in default scope
     $csvData1 = [
         ['category_id', 'parent_id', '_store', 'name', 'description', 'url_key'],

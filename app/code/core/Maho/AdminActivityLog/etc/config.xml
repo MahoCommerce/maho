@@ -12,7 +12,7 @@
 <config>
     <modules>
         <Maho_AdminActivityLog>
-            <version>1.0.0</version>
+            <version>1.0.1</version>
         </Maho_AdminActivityLog>
     </modules>
     <global>

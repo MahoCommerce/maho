@@ -24,7 +24,7 @@ declare(strict_types=1);
  * - Must have $_batchSize property of type int
  * - Must have $_errors property of type array
  */
-trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
+trait Maho_FeedManager_Model_Generator_ProductWriterTrait
 {
     // ──────────────────────────────────────────────────────────────────────
     // Output engine properties

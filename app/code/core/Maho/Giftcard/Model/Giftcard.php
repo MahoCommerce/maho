@@ -61,6 +61,56 @@ class Maho_Giftcard_Model_Giftcard extends Mage_Core_Model_Abstract
         $this->_init('giftcard/giftcard');
     }
 
+    #[\Override]
+    protected function _beforeSave()
+    {
+        if ($this->isObjectNew()) {
+            $helper = Mage::helper('giftcard');
+
+            if (!$this->getCode()) {
+                $this->setCode($helper->generateCode());
+            }
+
+            if (!$this->getWebsiteId()) {
+                $this->setWebsiteId((int) Mage::app()->getStore()->getWebsiteId());
+            }
+
+            if (!$this->getExpiresAt()) {
+                $this->setExpiresAt($helper->calculateExpirationDate());
+            }
+
+            if (!$this->getData('initial_balance') && $this->getData('balance')) {
+                $this->setInitialBalance((float) $this->getData('balance'));
+            } elseif (!$this->getData('balance') && $this->getData('initial_balance')) {
+                $this->setBalance((float) $this->getData('initial_balance'));
+            }
+
+            if (!$this->getStatus()) {
+                $this->setStatus(self::STATUS_ACTIVE);
+            }
+
+            $this->setData('created_at', Mage_Core_Model_Locale::now());
+        }
+
+        $this->setData('updated_at', Mage_Core_Model_Locale::now());
+
+        return parent::_beforeSave();
+    }
+
+    #[\Override]
+    protected function _afterSave()
+    {
+        if ($this->isObjectNew() && $this->getRecipientEmail()) {
+            try {
+                Mage::helper('giftcard')->sendGiftcardEmail($this);
+            } catch (\Exception $e) {
+                Mage::logException($e);
+            }
+        }
+
+        return parent::_afterSave();
+    }
+
     /**
      * Load gift card by code
      *

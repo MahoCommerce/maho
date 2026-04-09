@@ -57,7 +57,7 @@ final class SecureGetImageSizeRector extends AbstractRector
         }
 
         // Skip Maho\Io itself - it contains the safe wrapper implementation
-        $filePath = $this->file->getFilePath();
+        $filePath = $this->getFile()->getFilePath();
         if (str_contains($filePath, 'lib/Maho/Io.php')) {
             return null;
         }
