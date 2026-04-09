@@ -19,7 +19,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'legacy:rename-mysql4-classes',
+    name: 'dev:legacy:rename-mysql4-classes',
     description: 'Search for old Mysql4 classes and replaces them with Resource classes',
 )]
 class LegacyRenameMysql4Classes extends BaseMahoCommand
