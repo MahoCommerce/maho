@@ -32,7 +32,7 @@ jobs:
 
     - name: Check for unused translations
       run: |
-        output=$(./maho translations:unused)
+        output=$(./maho dev:translations:unused)
         if [ -n "$output" ]; then
           echo "❌ Found unused translations:"
           echo "$output"

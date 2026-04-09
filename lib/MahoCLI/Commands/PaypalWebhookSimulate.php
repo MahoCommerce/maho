@@ -21,7 +21,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'paypal:webhook:simulate',
+    name: 'dev:paypal:webhook:simulate',
     description: 'Simulate a PayPal webhook event for testing',
 )]
 class PaypalWebhookSimulate extends BaseMahoCommand

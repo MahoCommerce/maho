@@ -36,7 +36,7 @@
         "ext-spl": "*",
         "ext-zip": "*",
         "ext-zlib": "*",
-        "altcha-org/altcha": "^1.1.0",
+        "altcha-org/altcha": "^2.0.0",
         "bacon/bacon-qr-code": "^3.0",
         "composer-runtime-api": "^2",
         "cbschuld/browser.php": "^2.0",
@@ -95,7 +95,8 @@
         "phpstan/phpstan-strict-rules": "^2.0",
         "rector/rector": "^2",
         "pestphp/pest": "^4",
-        "psy/psysh": "^0.12.10"
+        "psy/psysh": "^0.12.10",
+        "react/stream": "^1.4"
     },
     "suggest": {
         "ext-pdo_pgsql": "Required for PostgreSQL database support",

@@ -622,6 +622,9 @@ class Mage_Checkout_Model_Type_Onepage
         $shipping   = $quote->isVirtual() ? null : $quote->getShippingAddress();
 
         $customer = $this->getCustomerSession()->getCustomer();
+        if (!$customer->getId() && $quote->getCustomerId()) {
+            $customer = Mage::getModel('customer/customer')->load($quote->getCustomerId());
+        }
         if (!$billing->getCustomerId() || $billing->getSaveInAddressBook()) {
             $customerBilling = $billing->exportCustomerAddress();
             $customer->addAddress($customerBilling);

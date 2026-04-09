@@ -179,7 +179,11 @@ class varienGrid {
             const formData = new FormData();
 
             Object.entries(this.reloadParams || {}).forEach(([key, value]) => {
-                formData.append(key, value);
+                if (Array.isArray(value)) {
+                    value.forEach(v => formData.append(key, v));
+                } else {
+                    formData.append(key, value);
+                }
             });
 
             mahoFetch(ajaxUrl, {
