@@ -1395,7 +1395,7 @@ class Mage_Core_Model_App
                     }
                 }
 
-                foreach ($this->_getCompiledObservers($area, $eventName) as $entry) {
+                foreach (Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [] as $entry) {
                     $observers[$entry['name']] = [
                         'type'  => $entry['type'],
                         'model' => $entry['class'],
@@ -1507,11 +1507,6 @@ class Mage_Core_Model_App
             }
         }
         return PHP_INT_MAX;
-    }
-
-    protected function _getCompiledObservers(string $area, string $eventName): array
-    {
-        return Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [];
     }
 
     protected function _applyCompiledReplaces(string $area, string $eventName, array &$observers): void
