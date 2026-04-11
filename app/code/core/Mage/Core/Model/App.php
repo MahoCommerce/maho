@@ -199,7 +199,6 @@ class Mage_Core_Model_App
      */
     protected $_events = [];
 
-
     /**
      * Update process run flag
      *
