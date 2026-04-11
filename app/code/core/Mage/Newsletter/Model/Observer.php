@@ -15,6 +15,7 @@ class Mage_Newsletter_Model_Observer
     /**
      * @return $this
      */
+    #[\Maho\Attributes\Observer('customer_save_after')]
     public function subscribeCustomer(\Maho\Event\Observer $observer)
     {
         $customer = $observer->getEvent()->getCustomer();
@@ -29,6 +30,7 @@ class Mage_Newsletter_Model_Observer
      *
      * @return $this
      */
+    #[\Maho\Attributes\Observer('customer_delete_after')]
     public function customerDeleted(\Maho\Event\Observer $observer)
     {
         $subscriber = Mage::getModel('newsletter/subscriber')
@@ -42,6 +44,7 @@ class Mage_Newsletter_Model_Observer
     /**
      * @param \Maho\Event\Observer $schedule
      */
+    #[\Maho\Attributes\CronJob('*/5 * * * *', name: 'newsletter_send_all')]
     public function scheduledSend($schedule)
     {
         $countOfQueue  = 3;

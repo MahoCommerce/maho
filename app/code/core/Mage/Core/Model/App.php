@@ -199,6 +199,7 @@ class Mage_Core_Model_App
      */
     protected $_events = [];
 
+
     /**
      * Update process run flag
      *
@@ -1375,24 +1376,44 @@ class Mage_Core_Model_App
         $eventName = strtolower($eventName);
         foreach ($this->_events as $area => $events) {
             if (!isset($events[$eventName])) {
+                $observers = [];
+                $modulePositions = $this->_getModulePositions();
+
                 $eventConfig = $this->getConfig()->getEventConfig($area, $eventName);
-                if (!$eventConfig) {
+                if ($eventConfig) {
+                    /**
+                     * @var string $obsName
+                     * @var Mage_Core_Model_Config_Element $obsConfig
+                     */
+                    foreach ($eventConfig->observers->children() as $obsName => $obsConfig) {
+                        $observers[$obsName] = [
+                            'type'  => (string) $obsConfig->type,
+                            'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
+                            'method' => (string) $obsConfig->method,
+                            'args'  => (array) $obsConfig->args,
+                            '_pos'  => $this->_getModelModulePosition($obsConfig, $modulePositions),
+                        ];
+                    }
+                }
+
+                foreach ($this->_getCompiledObservers($area, $eventName) as $entry) {
+                    $observers[$entry['name']] = [
+                        'type'  => $entry['type'],
+                        'model' => $entry['class'],
+                        'method' => $entry['method'],
+                        'args'  => $entry['args'],
+                        '_pos'  => $modulePositions[$entry['module']] ?? PHP_INT_MAX,
+                    ];
+                }
+
+                $this->_applyCompiledReplaces($area, $eventName, $observers);
+
+                if ($observers === []) {
                     $this->_events[$area][$eventName] = false;
                     continue;
                 }
-                $observers = [];
-                /**
-                 * @var string $obsName
-                 * @var Mage_Core_Model_Config_Element $obsConfig
-                 */
-                foreach ($eventConfig->observers->children() as $obsName => $obsConfig) {
-                    $observers[$obsName] = [
-                        'type'  => (string) $obsConfig->type,
-                        'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
-                        'method' => (string) $obsConfig->method,
-                        'args'  => (array) $obsConfig->args,
-                    ];
-                }
+
+                uasort($observers, fn(array $a, array $b) => $a['_pos'] <=> $b['_pos']);
                 $events[$eventName]['observers'] = $observers;
                 $this->_events[$area][$eventName]['observers'] = $observers;
             }
@@ -1456,6 +1477,52 @@ class Mage_Core_Model_App
             Mage::throwException($message);
         }
         return $this;
+    }
+
+    protected function _getModulePositions(): array
+    {
+        static $positions = null;
+        if ($positions === null) {
+            $positions = [];
+            $pos = 0;
+            $modules = $this->getConfig()->getNode('modules');
+            if ($modules) {
+                foreach ($modules->children() as $moduleName => $module) {
+                    $positions[$moduleName] = $pos++;
+                }
+            }
+        }
+        return $positions;
+    }
+
+    protected function _getModelModulePosition(Mage_Core_Model_Config_Element $obsConfig, array $modulePositions): int
+    {
+        $model = $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName();
+        // For class aliases like 'wishlist/observer', the group name maps to a module
+        if (str_contains($model, '/')) {
+            $group = explode('/', $model)[0];
+            $classPrefix = (string) $this->getConfig()->getNode("global/models/{$group}/class");
+            // Mage_Wishlist_Model → Mage_Wishlist
+            if ($classPrefix && preg_match('/^(.+)_[^_]+$/', $classPrefix, $m)) {
+                return $modulePositions[$m[1]] ?? PHP_INT_MAX;
+            }
+        }
+        return PHP_INT_MAX;
+    }
+
+    protected function _getCompiledObservers(string $area, string $eventName): array
+    {
+        return Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [];
+    }
+
+    protected function _applyCompiledReplaces(string $area, string $eventName, array &$observers): void
+    {
+        $replaces = Maho::getCompiledAttributes()['replaces'] ?? [];
+        foreach ($replaces as $replace) {
+            if ($replace['area'] === $area && $replace['event'] === $eventName) {
+                unset($observers[$replace['target']]);
+            }
+        }
     }
 
     /**

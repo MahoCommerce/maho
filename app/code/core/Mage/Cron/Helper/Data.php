@@ -51,7 +51,30 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
             ];
         }
 
+        foreach (self::getCompiledCronJobs() as $jobCode => $jobDef) {
+            $cronExpr = '';
+            $configPath = $jobDef['config_path'] ?? '';
+            if ($configPath) {
+                $cronExpr = (string) Mage::getStoreConfig($configPath);
+            }
+            if (empty($cronExpr) && !empty($jobDef['schedule'])) {
+                $cronExpr = $jobDef['schedule'];
+            }
+            $result[$jobCode] = [
+                'job_code' => $jobCode,
+                'model_method' => $jobDef['class'] . '::' . $jobDef['method'],
+                'cron_expr' => $cronExpr,
+                'config_path' => $configPath,
+                'enabled' => true,
+            ];
+        }
+
         return $result;
+    }
+
+    public static function getCompiledCronJobs(): array
+    {
+        return \Maho::getCompiledAttributes()['crontab'] ?? [];
     }
 
     public function getHumanReadableCronExpr(string $expr): string
