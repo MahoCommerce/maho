@@ -51,7 +51,7 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
             ];
         }
 
-        foreach (self::getCompiledCronJobs() as $jobCode => $jobDef) {
+        foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
             $cronExpr = '';
             $configPath = $jobDef['config_path'] ?? '';
             if ($configPath) {
@@ -70,11 +70,6 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         return $result;
-    }
-
-    public static function getCompiledCronJobs(): array
-    {
-        return \Maho::getCompiledAttributes()['crontab'] ?? [];
     }
 
     public function getHumanReadableCronExpr(string $expr): string

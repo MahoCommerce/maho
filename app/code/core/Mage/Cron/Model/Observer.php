@@ -81,7 +81,7 @@ class Mage_Cron_Model_Observer
         $schedules = $this->getPendingSchedules();
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
         $defaultJobsRoot = Mage::getConfig()->getNode('default/crontab/jobs');
-        $compiledJobs = Mage_Cron_Helper_Data::getCompiledCronJobs();
+        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
 
         /** @var Mage_Cron_Model_Schedule $schedule */
         foreach ($schedules->getIterator() as $schedule) {
@@ -131,7 +131,7 @@ class Mage_Cron_Model_Observer
             }
         }
 
-        foreach (Mage_Cron_Helper_Data::getCompiledCronJobs() as $jobCode => $jobDef) {
+        foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
             if ($jobDef['schedule'] !== 'always') {
                 continue;
             }
@@ -410,7 +410,7 @@ class Mage_Cron_Model_Observer
         $scheduleAheadFor = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_AHEAD_FOR) * 60;
         $schedule = Mage::getModel('cron/schedule');
 
-        foreach (Mage_Cron_Helper_Data::getCompiledCronJobs() as $jobCode => $jobDef) {
+        foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
             if (!Mage::helper('cron')->isJobEnabled($jobCode)) {
                 continue;
             }
