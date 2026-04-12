@@ -32,7 +32,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return  Mage_Wishlist_Model_Observer
      */
-    #[\Maho\Attributes\Observer('checkout_cart_update_items_before')]
+    #[Maho\Config\Observer('checkout_cart_update_items_before')]
     public function processCartUpdateBefore($observer)
     {
         $cart = $observer->getEvent()->getCart();
@@ -74,7 +74,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
     /**
      * @param \Maho\Event\Observer $observer
      */
-    #[\Maho\Attributes\Observer('checkout_cart_add_product_complete')]
+    #[Maho\Config\Observer('checkout_cart_add_product_complete')]
     public function processAddToCart($observer)
     {
         /** @var Mage_Core_Controller_Request_Http $request */
@@ -131,7 +131,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    #[\Maho\Attributes\Observer('customer_login', area: 'frontend')]
+    #[Maho\Config\Observer('customer_login', area: 'frontend')]
     public function customerLogin(\Maho\Event\Observer $observer)
     {
         Mage::helper('wishlist')->calculate();
@@ -144,7 +144,7 @@ class Mage_Wishlist_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    #[\Maho\Attributes\Observer('customer_logout', area: 'frontend')]
+    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
     public function customerLogout(\Maho\Event\Observer $observer)
     {
         Mage::getSingleton('customer/session')->setWishlistItemCount(0);

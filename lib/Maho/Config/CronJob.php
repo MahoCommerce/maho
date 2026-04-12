@@ -10,19 +10,16 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-namespace Maho\Attributes;
+namespace Maho\Config;
 
 use Attribute;
 
-#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
-readonly class Observer
+#[Attribute(Attribute::TARGET_METHOD)]
+readonly class CronJob
 {
     public function __construct(
-        public string $event,
-        public string $area = 'global',
-        public string $type = 'singleton',
+        public ?string $schedule = null,
+        public ?string $configPath = null,
         public ?string $name = null,
-        public ?string $replaces = null,
-        public array $args = [],
     ) {}
 }
