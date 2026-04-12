@@ -14,9 +14,23 @@ namespace Maho\Config;
 
 use Attribute;
 
+/**
+ * Registers a method as a cron job.
+ *
+ * Compiled at `composer dump-autoload` into `vendor/composer/maho_attributes.php`.
+ * Run `composer dump-autoload` after adding, modifying, or removing this attribute.
+ * Provide either a fixed `$schedule` or a `$configPath` for admin-configurable schedules, not both.
+ *
+ * @see Mage_Cron_Model_Observer::dispatch()
+ */
 #[Attribute(Attribute::TARGET_METHOD)]
 readonly class CronJob
 {
+    /**
+     * @param ?string $schedule   Cron expression (e.g. '0 2 * * *')
+     * @param ?string $configPath Config path for admin-configurable schedule (e.g. 'crontab/jobs/my_job/schedule/cron_expr')
+     * @param ?string $name       Job name, auto-generated from class and method if omitted
+     */
     public function __construct(
         public ?string $schedule = null,
         public ?string $configPath = null,
