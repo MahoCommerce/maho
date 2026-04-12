@@ -1335,36 +1335,6 @@ class Mage_Core_Model_App
     /**
      * Dispatch event to observers
      *
-     * Default arguments can be defined in `config.xml` using the `<args>` node. These are merged with the $args parameter.
-     *
-     * For example, this defines `is_ajax=1` for the `controller_action_predispatch` event:
-     * ```xml
-     * <global>
-     *     <events>
-     *         <controller_action_predispatch>
-     *             <observers>
-     *                 <my_event_observer>
-     *                     <class>Company_Name_Model_Observer</class>
-     *                     <method>process</method>
-     *                     <args>
-     *                         <is_ajax>1</is_ajax>
-     *                     </args>
-     *                 </my_event_observer>
-     *             </observers>
-     *         </controller_action_predispatch>
-     *     </events>
-     * </global>
-     * ```
-     *
-     * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
-     * ```php
-     * public function process(\Maho\Event\Observer $observer): void
-     * {
-     *     $isAjax = (bool) $observer->getIsAjax();
-     *     // ...
-     * }
-     * ```
-     *
      * @param string $eventName
      * @param array $args
      * @return $this
@@ -1399,7 +1369,6 @@ class Mage_Core_Model_App
                         'model'  => $entry['alias'],
                         'module' => $entry['module'],
                         'method' => $entry['method'],
-                        'args'   => $entry['args'],
                     ];
                 }
 
@@ -1420,14 +1389,15 @@ class Mage_Core_Model_App
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
+                $obsArgs = $obs['args'] ?? [];
                 $observer = new \Maho\Event\Observer([
                     'event' => new \Maho\Event([
-                        ...$obs['args'], // Default config.xml <args>
-                        ...$args,        // Mage::dispatchEvent() $args
+                        ...$obsArgs, // Default config.xml <args>
+                        ...$args,    // Mage::dispatchEvent() $args
                         'name' => $eventName,
                     ]),
-                    ...$obs['args'], // Default config.xml <args>
-                    ...$args,        // Mage::dispatchEvent() $args
+                    ...$obsArgs, // Default config.xml <args>
+                    ...$args,    // Mage::dispatchEvent() $args
                 ]);
                 \Maho\Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {

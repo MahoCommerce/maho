@@ -1223,16 +1223,16 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "v4.0.8",
+            "version": "v4.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "59bc2e8a3b3661712d1f529cfda9aefe33ab547e"
+                "reference": "dbcaf42e2313ad4ea2faed3fd81e2510c913a836"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/59bc2e8a3b3661712d1f529cfda9aefe33ab547e",
-                "reference": "59bc2e8a3b3661712d1f529cfda9aefe33ab547e",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/dbcaf42e2313ad4ea2faed3fd81e2510c913a836",
+                "reference": "dbcaf42e2313ad4ea2faed3fd81e2510c913a836",
                 "shasum": ""
             },
             "require": {
@@ -1265,9 +1265,9 @@
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.0.8"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.0.9"
             },
-            "time": "2026-04-12T19:39:21+00:00"
+            "time": "2026-04-12T20:13:44+00:00"
         },
         {
             "name": "masterminds/html5",
