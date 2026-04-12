@@ -131,11 +131,12 @@ class Mage_Cron_Model_Observer
             }
         }
 
+        $cronHelper = Mage::helper('cron');
         foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
-            if ($jobDef['schedule'] !== 'always') {
+            if ($cronHelper->resolveCompiledCronExpr($jobDef) !== 'always') {
                 continue;
             }
-            if (!Mage::helper('cron')->isJobEnabled($jobCode)) {
+            if (!$cronHelper->isJobEnabled($jobCode)) {
                 continue;
             }
             $schedule = $this->_getAlwaysJobSchedule($jobCode);
@@ -359,7 +360,7 @@ class Mage_Cron_Model_Observer
         array $jobDef,
         bool $isAlways = false,
     ): self {
-        $model = Mage::getSingleton($jobDef['alias']);
+        $model = Mage::getModel($jobDef['alias']);
         if (!$model || !method_exists($model, $jobDef['method'])) {
             Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $jobDef['alias'], $jobDef['method']));
         }
@@ -431,19 +432,14 @@ class Mage_Cron_Model_Observer
     {
         $scheduleAheadFor = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_AHEAD_FOR) * 60;
         $schedule = Mage::getModel('cron/schedule');
+        $cronHelper = Mage::helper('cron');
 
         foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
-            if (!Mage::helper('cron')->isJobEnabled($jobCode)) {
+            if (!$cronHelper->isJobEnabled($jobCode)) {
                 continue;
             }
 
-            $cronExpr = '';
-            if (!empty($jobDef['config_path'])) {
-                $cronExpr = Mage::getStoreConfig($jobDef['config_path']);
-            }
-            if (empty($cronExpr) && !empty($jobDef['schedule'])) {
-                $cronExpr = $jobDef['schedule'];
-            }
+            $cronExpr = $cronHelper->resolveCompiledCronExpr($jobDef);
             if (!$cronExpr || $cronExpr === 'always') {
                 continue;
             }

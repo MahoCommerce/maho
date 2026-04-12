@@ -52,24 +52,29 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
         }
 
         foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
-            $cronExpr = '';
             $configPath = $jobDef['config_path'] ?? '';
-            if ($configPath) {
-                $cronExpr = (string) Mage::getStoreConfig($configPath);
-            }
-            if (empty($cronExpr) && !empty($jobDef['schedule'])) {
-                $cronExpr = $jobDef['schedule'];
-            }
             $result[$jobCode] = [
                 'job_code' => $jobCode,
                 'model_method' => $jobDef['alias'] . '::' . $jobDef['method'],
-                'cron_expr' => $cronExpr,
+                'cron_expr' => $this->resolveCompiledCronExpr($jobDef),
                 'config_path' => $configPath,
-                'enabled' => true,
+                'enabled' => $this->isJobEnabled($jobCode),
             ];
         }
 
         return $result;
+    }
+
+    public function resolveCompiledCronExpr(array $jobDef): string
+    {
+        $cronExpr = '';
+        if (!empty($jobDef['config_path'])) {
+            $cronExpr = (string) Mage::getStoreConfig($jobDef['config_path']);
+        }
+        if (empty($cronExpr) && !empty($jobDef['schedule'])) {
+            $cronExpr = $jobDef['schedule'];
+        }
+        return $cronExpr;
     }
 
     public function getHumanReadableCronExpr(string $expr): string
