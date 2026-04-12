@@ -10,7 +10,7 @@
 
 class Maho_Captcha_Model_Observer
 {
-    #[Maho\Config\Observer('controller_action_predispatch_checkout_onepage_savebilling', area: 'frontend', args: ['is_ajax' => 1])]
+    #[Maho\Config\Observer('controller_action_predispatch_checkout_onepage_savebilling', area: 'frontend')]
     #[Maho\Config\Observer('controller_action_predispatch_contacts_index_post', area: 'frontend')]
     #[Maho\Config\Observer('controller_action_predispatch_customer_account_createpost', area: 'frontend')]
     #[Maho\Config\Observer('controller_action_predispatch_customer_account_forgotpasswordpost', area: 'frontend')]
@@ -32,7 +32,7 @@ class Maho_Captcha_Model_Observer
             return;
         }
 
-        $isAjax = (bool) $observer->getEvent()->getIsAjax();
+        $isAjax = $controller->getRequest()->isAjax();
         $this->failedVerification($controller, $isAjax);
     }
 

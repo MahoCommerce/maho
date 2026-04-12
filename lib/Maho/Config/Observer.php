@@ -35,7 +35,6 @@ readonly class Observer
      *                          Accepts either the explicit id, the class name, or the class alias format
      *                          (e.g. `'my_observer'`, `'Mage_Catalog_Model_Observer::myMethod'`,
      *                          or `'catalog/observer::myMethod'`).
-     * @param array   $args     Additional arguments passed to the observer via the event object
      */
     public function __construct(
         public string $event,
@@ -43,6 +42,5 @@ readonly class Observer
         public string $type = 'singleton',
         public ?string $id = null,
         public ?string $replaces = null,
-        public array $args = [],
     ) {}
 }
