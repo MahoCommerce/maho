@@ -1376,7 +1376,6 @@ class Mage_Core_Model_App
         foreach ($this->_events as $area => $events) {
             if (!isset($events[$eventName])) {
                 $observers = [];
-                $modulePositions = $this->_getModulePositions();
 
                 $eventConfig = $this->getConfig()->getEventConfig($area, $eventName);
                 if ($eventConfig) {
@@ -1390,7 +1389,6 @@ class Mage_Core_Model_App
                             'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
                             'method' => (string) $obsConfig->method,
                             'args'  => (array) $obsConfig->args,
-                            '_pos'  => $this->_getModelModulePosition($obsConfig, $modulePositions),
                         ];
                     }
                 }
@@ -1398,10 +1396,9 @@ class Mage_Core_Model_App
                 foreach (Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [] as $entry) {
                     $observers[$entry['name']] = [
                         'type'  => $entry['type'],
-                        'model' => $entry['class'],
+                        'model' => $entry['alias'],
                         'method' => $entry['method'],
                         'args'  => $entry['args'],
-                        '_pos'  => $modulePositions[$entry['module']] ?? PHP_INT_MAX,
                     ];
                 }
 
@@ -1412,7 +1409,8 @@ class Mage_Core_Model_App
                     continue;
                 }
 
-                uasort($observers, fn(array $a, array $b) => $a['_pos'] <=> $b['_pos']);
+                uasort($observers, fn(array $a, array $b) =>
+                    $this->_getAliasModulePosition($a['model']) <=> $this->_getAliasModulePosition($b['model']));
                 $events[$eventName]['observers'] = $observers;
                 $this->_events[$area][$eventName]['observers'] = $observers;
             }
@@ -1478,7 +1476,7 @@ class Mage_Core_Model_App
         return $this;
     }
 
-    protected function _getModulePositions(): array
+    protected function _getAliasModulePosition(string $alias): int
     {
         static $positions = null;
         if ($positions === null) {
@@ -1491,31 +1489,22 @@ class Mage_Core_Model_App
                 }
             }
         }
-        return $positions;
-    }
 
-    protected function _getModelModulePosition(Mage_Core_Model_Config_Element $obsConfig, array $modulePositions): int
-    {
-        $model = $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName();
-        // For class aliases like 'wishlist/observer', the group name maps to a module
-        if (str_contains($model, '/')) {
-            $group = explode('/', $model)[0];
+        if (str_contains($alias, '/')) {
+            $group = explode('/', $alias)[0];
             $classPrefix = (string) $this->getConfig()->getNode("global/models/{$group}/class");
-            // Mage_Wishlist_Model → Mage_Wishlist
             if ($classPrefix && preg_match('/^(.+)_[^_]+$/', $classPrefix, $m)) {
-                return $modulePositions[$m[1]] ?? PHP_INT_MAX;
+                return $positions[$m[1]] ?? PHP_INT_MAX;
             }
         }
+
         return PHP_INT_MAX;
     }
 
     protected function _applyCompiledReplaces(string $area, string $eventName, array &$observers): void
     {
-        $replaces = Maho::getCompiledAttributes()['replaces'] ?? [];
-        foreach ($replaces as $replace) {
-            if ($replace['area'] === $area && $replace['event'] === $eventName) {
-                unset($observers[$replace['target']]);
-            }
+        foreach (Maho::getCompiledAttributes()['replaces'][$area][$eventName] ?? [] as $replace) {
+            unset($observers[$replace['target']]);
         }
     }
 

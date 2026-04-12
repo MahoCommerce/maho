@@ -338,6 +338,42 @@ class Mage_Cron_Model_Observer
     protected function _processJob($schedule, $jobConfig, $isAlways = false)
     {
         $runConfig = $jobConfig->run;
+        if (!$runConfig->model) {
+            Mage::throwException(Mage::helper('cron')->__('No callbacks found'));
+        }
+        if (!preg_match(self::REGEX_RUN_MODEL, (string) $runConfig->model, $run)) {
+            Mage::throwException(Mage::helper('cron')->__('Invalid model/method definition, expecting "model/class::method".'));
+        }
+        if (!($model = Mage::getModel($run[1])) || !method_exists($model, $run[2])) {
+            Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $run[1], $run[2]));
+        }
+
+        return $this->_executeScheduledJob($schedule, [$model, $run[2]], $isAlways);
+    }
+
+    /**
+     * Process a compiled (attribute-registered) cron job.
+     */
+    protected function _processCompiledJob(
+        Mage_Cron_Model_Schedule $schedule,
+        array $jobDef,
+        bool $isAlways = false,
+    ): self {
+        $model = Mage::getSingleton($jobDef['alias']);
+        if (!$model || !method_exists($model, $jobDef['method'])) {
+            Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $jobDef['alias'], $jobDef['method']));
+        }
+
+        return $this->_executeScheduledJob($schedule, [$model, $jobDef['method']], $isAlways);
+    }
+
+    /**
+     * Execute a scheduled job with lifetime checks, locking, and status management.
+     *
+     * @return $this|void
+     */
+    protected function _executeScheduledJob(Mage_Cron_Model_Schedule $schedule, callable $callback, bool $isAlways = false)
+    {
         if (!$isAlways) {
             $scheduleLifetime = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_LIFETIME) * 60;
             $now = Mage::getSingleton('core/date')->gmtTimestamp();
@@ -347,7 +383,6 @@ class Mage_Cron_Model_Observer
             }
         }
 
-        $arguments = [];
         $errorStatus = Mage_Cron_Model_Schedule::STATUS_ERROR;
         try {
             if (!$isAlways) {
@@ -355,19 +390,6 @@ class Mage_Cron_Model_Observer
                     $errorStatus = Mage_Cron_Model_Schedule::STATUS_MISSED;
                     Mage::throwException(Mage::helper('cron')->__('Too late for the schedule.'));
                 }
-            }
-            if ($runConfig->model) {
-                if (!preg_match(self::REGEX_RUN_MODEL, (string) $runConfig->model, $run)) {
-                    Mage::throwException(Mage::helper('cron')->__('Invalid model/method definition, expecting "model/class::method".'));
-                }
-                if (!($model = Mage::getModel($run[1])) || !method_exists($model, $run[2])) {
-                    Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $run[1], $run[2]));
-                }
-                $callback = [$model, $run[2]];
-                $arguments = [$schedule];
-            }
-            if (empty($callback)) {
-                Mage::throwException(Mage::helper('cron')->__('No callbacks found'));
             }
 
             if (!$isAlways) {
@@ -386,7 +408,7 @@ class Mage_Cron_Model_Observer
                 ->setExecutedAt(Mage::getSingleton('core/date')->gmtDate())
                 ->save();
 
-            call_user_func_array($callback, $arguments);
+            call_user_func_array($callback, [$schedule]);
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
@@ -443,65 +465,6 @@ class Mage_Cron_Model_Observer
                 $schedule->unsScheduleId()->save();
             }
         }
-    }
-
-    protected function _processCompiledJob(
-        Mage_Cron_Model_Schedule $schedule,
-        array $jobDef,
-        bool $isAlways = false,
-    ): void {
-        if (!$isAlways) {
-            $scheduleLifetime = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_LIFETIME) * 60;
-            $now = Mage::getSingleton('core/date')->gmtTimestamp();
-            $time = strtotime($schedule->getScheduledAt());
-            if ($time > $now) {
-                return;
-            }
-        }
-
-        $errorStatus = Mage_Cron_Model_Schedule::STATUS_ERROR;
-        try {
-            if (!$isAlways) {
-                if ($time < $now - $scheduleLifetime) {
-                    $errorStatus = Mage_Cron_Model_Schedule::STATUS_MISSED;
-                    Mage::throwException(Mage::helper('cron')->__('Too late for the schedule.'));
-                }
-            }
-
-            $className = $jobDef['class'];
-            $method = $jobDef['method'];
-            $model = Mage::getSingleton($className);
-            if (!$model || !method_exists($model, $method)) {
-                Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $className, $method));
-            }
-            $callback = [$model, $method];
-
-            if (!$isAlways) {
-                if (!$schedule->tryLockJob()) {
-                    return;
-                }
-                $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_RUNNING);
-            }
-
-            $schedule
-                ->setExecutedAt(Mage::getSingleton('core/date')->gmtDate())
-                ->save();
-
-            call_user_func_array($callback, [$schedule]);
-
-            $schedule
-                ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
-                ->setFinishedAt(Mage::getSingleton('core/date')->gmtDate());
-        } catch (Exception $e) {
-            $schedule->setStatus($errorStatus)
-                ->setMessages($e->__toString());
-        }
-
-        if ($schedule->getIsError()) {
-            $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR);
-        }
-
-        $schedule->save();
     }
 
     /**

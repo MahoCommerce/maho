@@ -62,7 +62,7 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
             }
             $result[$jobCode] = [
                 'job_code' => $jobCode,
-                'model_method' => $jobDef['class'] . '::' . $jobDef['method'],
+                'model_method' => $jobDef['alias'] . '::' . $jobDef['method'],
                 'cron_expr' => $cronExpr,
                 'config_path' => $configPath,
                 'enabled' => true,
