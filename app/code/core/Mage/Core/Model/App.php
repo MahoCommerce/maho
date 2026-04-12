@@ -1490,12 +1490,17 @@ class Mage_Core_Model_App
             }
         }
 
+        static $groupCache = [];
+
         if (str_contains($alias, '/')) {
             $group = explode('/', $alias)[0];
-            $classPrefix = (string) $this->getConfig()->getNode("global/models/{$group}/class");
-            if ($classPrefix && preg_match('/^(.+)_[^_]+$/', $classPrefix, $m)) {
-                return $positions[$m[1]] ?? PHP_INT_MAX;
+            if (!isset($groupCache[$group])) {
+                $classPrefix = (string) $this->getConfig()->getNode("global/models/{$group}/class");
+                $groupCache[$group] = ($classPrefix && preg_match('/^(.+)_[^_]+$/', $classPrefix, $m))
+                    ? ($positions[$m[1]] ?? PHP_INT_MAX)
+                    : PHP_INT_MAX;
             }
+            return $groupCache[$group];
         }
 
         return PHP_INT_MAX;

@@ -439,7 +439,11 @@ class Mage_Cron_Model_Observer
             }
 
             $cronExpr = $cronHelper->resolveCompiledCronExpr($jobDef);
-            if (!$cronExpr || $cronExpr === 'always') {
+            if (!$cronExpr) {
+                Mage::log("Cron job '{$jobCode}' has no schedule expression and no config_path, skipping.", Mage::LOG_WARNING);
+                continue;
+            }
+            if ($cronExpr === 'always') {
                 continue;
             }
             $schedule->setJobCode($jobCode)
