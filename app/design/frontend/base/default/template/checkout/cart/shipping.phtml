@@ -24,7 +24,7 @@
                     <select id="region_id" name="region_id" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" style="display:none;"<?= ($this->isStateProvinceRequired() ? ' class="validate-select"' : '') ?>>
                         <option value=""><?= $this->__('Please select region, state or province') ?></option>
                     </select>
-                    <script type="text/javascript">
+                    <script>
                         document.getElementById('region_id').setAttribute('defaultValue', "<?= $this->getEstimateRegionId() ?>");
                     </script>
                     <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getEstimateRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text" style="display:none;" />
@@ -46,7 +46,7 @@
                 </button>
             </div>
         </form>
-        <script type="text/javascript">
+        <script>
             new RegionUpdater('country', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>);
         </script>
 
@@ -54,7 +54,7 @@
             <?= $this->setTemplate('checkout/cart/shipping/rates.phtml')->toHtml() ?>
         </div>
 
-        <script type="text/javascript">
+        <script>
         (function() {
             const countriesWithOptionalZip = <?= $this->helper('directory')->getCountriesWithOptionalZip(true) ?>;
             const form = document.getElementById('shipping-zip-form');

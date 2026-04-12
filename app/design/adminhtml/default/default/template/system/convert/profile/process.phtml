@@ -17,7 +17,7 @@
     img { margin-right:5px; }
     svg { margin-right:5px; }
 </style>
-<script type="text/javascript">
+<script>
     var FORM_KEY = "<?= $this->getFormKey() ?>";
 </script>
     <ul>
@@ -61,7 +61,7 @@
             </ul>
             <?php if ($batchId = $this->getBatchModel()->getId()):?>
                 <?php if ($this->getBatchModelHasAdapter()):?>
-                <script type="text/javascript">
+                <script>
                     var countOfStartedProfiles = 0;
                     var countOfUpdated = 0;
                     var countOfError = 0;
@@ -69,7 +69,7 @@
                     var totalRecords = <?= $this->getBatchItemsCount() ?>;
                     var config= <?= $this->getBatchConfigJson() ?>;
                 </script>
-                <script type="text/javascript">
+                <script>
                     function addImportData(data) {
                         importData.push(data);
                     }
@@ -230,7 +230,7 @@
                     }
                 </script>
                 <?php $importData = $this->getImportData();?>
-                <script type="text/javascript">
+                <script>
                     <?php foreach ($importData as  $importValue):?>
                     addImportData(<?= $this->jsonEncode($importValue) ?>);
                     <?php endforeach ?>
@@ -239,6 +239,6 @@
                 <?php endif ?>
             <?php endif ?>
             <?php if ($this->getShowFinished()):?>
-                <script type="text/javascript">document.getElementById('liFinished').style.display = 'block';</script>
+                <script>document.getElementById('liFinished').style.display = 'block';</script>
             <?php endif ?>
    <?php endif ?>

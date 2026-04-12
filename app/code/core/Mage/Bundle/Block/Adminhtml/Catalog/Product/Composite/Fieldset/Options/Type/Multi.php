@@ -31,7 +31,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Composite_Fieldset_Options_Typ
     #[\Override]
     public function setValidationContainer($elementId, $containerId)
     {
-        return '<script type="text/javascript">
+        return '<script>
             document.getElementById(\'' . $elementId . '\').advaiceContainer = \'' . $containerId . '\';
             </script>';
     }

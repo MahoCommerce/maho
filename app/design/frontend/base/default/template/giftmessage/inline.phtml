@@ -12,7 +12,7 @@
 /** @var Mage_GiftMessage_Block_Message_Inline $this */
 ?>
 <?php if(!$this->getDontDisplayContainer()): ?>
-<script type="text/javascript">
+<script>
     if (!window.toogleVisibilityOnObjects) {
         var toogleVisibilityOnObjects = function(source, objects) {
             if (typeof source == 'string') {
@@ -182,7 +182,7 @@
                             </div>
                         </li>
                     </ul>
-                    <script type="text/javascript">
+                    <script>
                         toogleRequired('gift-message-whole-message', ['gift-message-whole-from','gift-message-whole-to']);
                     </script>
                 </div>
@@ -234,7 +234,7 @@
                                      </div>
                                  </li>
                              </ul>
-                             <script type="text/javascript">
+                             <script>
                                 toogleRequired('gift-message-<?= $_item->getId() ?>-message', ['gift-message-<?= $_item->getId() ?>-from','gift-message-<?= $_item->getId() ?>-to']);
                              </script>
                          </div>
@@ -246,7 +246,7 @@
              <?php endif ?>
         </div>
     </div>
-    <script type="text/javascript">
+    <script>
         toogleVisibilityOnObjects('allow_gift_messages', ['allow-gift-message-container']);
         toogleVisibilityOnObjects('allow_gift_messages_for_order', ['allow-gift-messages-for-order-container']);
         toogleVisibilityOnObjects('allow_gift_messages_for_items', ['allow-gift-messages-for-items-container']);

@@ -46,7 +46,7 @@
             </button>
         </td>
     </tr>
-    <script type="text/javascript">
+    <script>
         Validation.addAllThese([
             ['not-negative-amount', '<?= $this->jsQuoteEscape($this->helper('sales')->__('Please enter positive number in this field.')) ?>', function(v) {
                 if (v.length) {

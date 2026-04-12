@@ -24,7 +24,7 @@
             <?php else: ?>
                 <?php $_option = $this->getFormattedOption($_option['value']); ?>
                 <?= $_option['value'] ?><?php if (isset($_option['remainder']) && $_option['remainder']): ?><span id="<?= $_dots = 'dots' . uniqid()?>"> ...</span><span id="<?= $_id = 'id' . uniqid() ?>"><?= $_option['remainder'] ?></span>
-                    <script type="text/javascript">
+                    <script>
                     document.getElementById('<?= $_id ?>').style.display = 'none';
                     document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});
                     document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_dots ?>').style.display = 'none';});

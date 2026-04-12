@@ -35,7 +35,7 @@
     <?php endforeach ?>
     </dl>
 </div>
-<script type="text/javascript">order.setPaymentMethod('<?= $this->getSelectedMethodCode() ?>')</script>
+<script>order.setPaymentMethod('<?= $this->getSelectedMethodCode() ?>')</script>
 <?php else: ?>
     <div><?= Mage::helper('sales')->__('No Payment Methods') ?></div>
 <?php endif ?>

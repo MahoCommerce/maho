@@ -32,7 +32,7 @@
                         <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio"/>
 
                         <?php if ($_rate->getCode() === $this->getAddressShippingMethod()): ?>
-                        <script type="text/javascript">
+                        <script>
                             lastPrice = <?= (float)$_rate->getPrice() ?>;
                         </script>
                         <?php endif ?>
@@ -60,7 +60,7 @@
         </dd>
     <?php endforeach ?>
     </dl>
-    <script type="text/javascript">
+    <script>
         <?php if (!empty($shippingCodePrice)): ?>
         var shippingCodePrice = {<?= implode(',',$shippingCodePrice) ?>};
         <?php endif ?>

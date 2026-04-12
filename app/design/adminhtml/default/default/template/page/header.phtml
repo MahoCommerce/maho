@@ -25,7 +25,7 @@
             <?php $defSearch = $this->__('Global Record Search') ?>
             <input id="global_search" name="query" type="text" class="input-text" value="<?php if(!empty($query)): ?><?= $query ?><?php else: ?><?= $this->quoteEscape($defSearch) ?><?php endif ?>" onfocus="if(this.value=='<?= $this->quoteEscape($defSearch, true) ?>')this.value=''; " onblur="if(this.value=='')this.value='<?= $defSearch ?>';" autocomplete="off" />
             <div id="global_search_autocomplete" class="autocomplete" style="display:none"></div>
-            <script type="text/javascript">
+            <script>
                 document.getElementById('global_search').addEventListener('input', function() {
                     let query = this.value;
                     if (query.length < 2) {

@@ -101,7 +101,7 @@
                         <select id="region_id_register" name="region_id" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                             <option value=""><?= $this->__('Please select region, state or province') ?></option>
                         </select>
-                        <script type="text/javascript">
+                        <script>
                             document.getElementById('region_id_register').setAttribute('defaultValue', "<?= $this->getFormData()->getRegionId() ?>");
                         </script>
                         <input type="text" id="region_register" name="region" value="<?= $this->escapeHtml($this->getRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
@@ -172,7 +172,7 @@
         <input name="context" type="hidden" value="checkout" />
     <?php endif ?>
 </form>
-<script type="text/javascript">
+<script>
     var dataFormRegister = new VarienForm('form-validate-register', true);
     <?php if($this->getShowAddressFields()): ?>
     new RegionUpdater('country_register', 'region_register', 'region_id_register', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'zip_register');

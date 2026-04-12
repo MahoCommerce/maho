@@ -44,7 +44,7 @@ $oneMethod = count($methods) <= 1;
     <?php endforeach ?>
 <?php endif ?>
 <?= $this->getChildChildHtml('additional') ?>
-<script type="text/javascript">
+<script>
 <?= $this->getChildChildHtml('scripts') ?>
 payment.init();
 <?php if (is_string($oneMethod)): ?>

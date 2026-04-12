@@ -46,7 +46,7 @@ $_showWebsite= $this->isMultiWebsites();
         </tfoot>
     </table>
 
-<script type="text/javascript">
+<script>
 var groupPriceRowTemplate = '<tr>'
     + '<td<?php if (!$_showWebsite): ?> style="display:none"<?php endif ?>>'
     + '<select class="<?= $_htmlClass ?> required-entry" name="<?= $_htmlName ?>[{{index}}][website_id]" id="group_price_row_{{index}}_website">'

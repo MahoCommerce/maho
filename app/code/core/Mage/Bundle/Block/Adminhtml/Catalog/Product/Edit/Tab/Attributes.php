@@ -56,7 +56,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Ma
         $tax = $this->getForm()->getElement('tax_class_id');
         if ($tax) {
             $tax->setAfterElementHtml(
-                '<script type="text/javascript">'
+                '<script>'
                 . "
                 function changeTaxClassId() {
                     if (document.getElementById('price_type').value == '" . Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC . "') {
@@ -113,7 +113,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes extends Ma
         $mapEnabled = $this->getForm()->getElement('msrp_enabled');
         if ($mapEnabled && $this->getCanEditPrice() !== false) {
             $mapEnabled->setAfterElementHtml(
-                '<script type="text/javascript">'
+                '<script>'
                 . "
                 function changePriceTypeMap() {
                     if (document.getElementById('price_type').value == " . Mage_Bundle_Model_Product_Price::PRICE_TYPE_DYNAMIC . ") {

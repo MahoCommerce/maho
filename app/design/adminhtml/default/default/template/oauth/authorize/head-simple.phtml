@@ -21,7 +21,7 @@
 <title><?= htmlspecialchars(html_entity_decode($this->getTitle())) ?></title>
 <?= Mage::helper('page')->getFaviconHtml() ?>
 
-<script type="text/javascript">
+<script>
     var BASE_URL = '<?= $this->getUrl('*') ?>';
     var SKIN_URL = '<?= $this->getSkinUrl() ?>';
     var FORM_KEY = '<?= $this->getFormKey() ?>';

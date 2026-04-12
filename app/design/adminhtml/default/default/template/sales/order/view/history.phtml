@@ -63,7 +63,7 @@
         </li>
     <?php endforeach ?>
     </ul>
-    <script type="text/javascript">
+    <script>
         if (document.getElementById('order_status')) document.getElementById('order_status').textContent = '<?= $this->jsQuoteEscape($this->getOrder()->getStatusLabel()) ?>';
     </script>
 </div>

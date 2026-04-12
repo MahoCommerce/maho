@@ -22,7 +22,7 @@
         <input type="hidden" name="SECURETOKENID" value="<?= $this->getSecureTokenId() ?>" />
         <input type="hidden" name="MODE" value="<?= $this->isTestMode() ? 'TEST' : 'LIVE' ?>" />
     </form>
-    <script type="text/javascript">
+    <script>
         document.getElementById('token_form').submit();
     </script>
 </body>

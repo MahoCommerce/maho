@@ -16,7 +16,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Select_Allowspecific extends
     public function getAfterElementHtml()
     {
         $javaScript = "
-            <script type=\"text/javascript\">
+            <script>
                 document.getElementById('{$this->getHtmlId()}').addEventListener('change', function(){
                     specific=document.getElementById('{$this->getHtmlId()}').value;
                     document.getElementById('{$this->_getSpecificCountryElementId()}').disabled = (!specific || specific!=1);

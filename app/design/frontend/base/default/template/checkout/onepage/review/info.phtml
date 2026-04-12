@@ -49,7 +49,7 @@
     </table>
 </div>
 <?= $this->getChildHtml('items_after') ?>
-<script type="text/javascript">truncateOptions();</script>
+<script>truncateOptions();</script>
 <div id="checkout-review-submit">
     <?= $this->getChildHtml('agreements') ?>
     <div class="buttons-set" id="review-buttons-container">
@@ -59,7 +59,7 @@
             <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" title="<?= $this->quoteEscape($this->__('Submitting order information...')) ?>" class="v-middle" /> <?= $this->__('Submitting order information...') ?>
         </span>
     </div>
-    <script type="text/javascript">
+    <script>
         review = new Review(
             '<?= $this->getUrl('checkout/onepage/saveOrder') ?>',
             '<?= $this->getUrl('checkout/onepage/success') ?>',

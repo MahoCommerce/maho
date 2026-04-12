@@ -39,7 +39,7 @@
         <?php endforeach ?>
         </tbody>
     </table>
-    <script type="text/javascript">
+    <script>
         document.getElementById('<?= $this->getPlaceholderId() ?>').addEventListener('click', function(event){
             this.classList.toggle('expanded');
             document.getElementById('<?= $this->getDetailsPlaceholderId() ?>').classList.toggle('no-display');

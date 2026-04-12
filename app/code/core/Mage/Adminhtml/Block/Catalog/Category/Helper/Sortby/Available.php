@@ -52,7 +52,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Helper_Sortby_Available extends \Mah
         $html .= ' onclick="toggleValueElements(this, this.parentNode);" class="checkbox" type="checkbox" />';
         $html .= ' <label for="' . $htmlId . '" class="normal">'
             . Mage::helper('adminhtml')->__('Use All Available Attributes') . '</label>';
-        $html .= '<script type="text/javascript">toggleValueElements(document.getElementById(\'' . $htmlId . '\'), document.getElementById(\'' . $htmlId
+        $html .= '<script>toggleValueElements(document.getElementById(\'' . $htmlId . '\'), document.getElementById(\'' . $htmlId
             . '\').parentNode);</script>';
 
         return $html;

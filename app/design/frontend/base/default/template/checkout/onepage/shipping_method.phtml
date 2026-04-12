@@ -13,7 +13,7 @@
 ?>
 <form id="co-shipping-method-form" action="">
     <div id="checkout-shipping-method-load"></div>
-    <script type="text/javascript">
+    <script>
         var shippingMethod = new ShippingMethod('co-shipping-method-form', "<?= $this->getUrl('checkout/onepage/saveShippingMethod') ?>");
     </script>
     <div id="onepage-checkout-shipping-method-additional-load"><?= $this->getChildHtml('additional') ?></div>

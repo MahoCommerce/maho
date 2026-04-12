@@ -76,7 +76,7 @@
                             <select id="<?= $prefix ?>:region_id" name="<?= $prefix ?>[region_id]" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                                 <option value=""><?= $this->__('Please select region, state or province') ?></option>
                             </select>
-                            <script type="text/javascript">
+                            <script>
                                 document.getElementById('<?= $prefix ?>:region_id').setAttribute('defaultValue', "<?= $this->getAddress()->getRegionId() ?>");
                             </script>
                             <input type="text" id="<?= $prefix ?>:region" name="<?= $prefix ?>[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
@@ -127,12 +127,12 @@
      </li>
     </ul>
 </div>
-<script type="text/javascript">
+<script>
     var <?= $prefix ?>RegionUpdater = new RegionUpdater('<?= $prefix ?>:country_id', '<?= $prefix ?>:region', '<?= $prefix ?>:region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, '<?= $prefix ?>:postcode');
     <?= $prefix ?>RegionUpdater.update();
 </script>
 <?php if ($this->getShowAsShippingCheckbox()): ?>
-<script type="text/javascript">
+<script>
     OrderReviewController.prototype._copyShippingToBilling_parent = OrderReviewController.prototype._copyShippingToBilling;
     OrderReviewController.prototype._copyShippingToBilling = function (event) {
         this._copyShippingToBilling_parent(event);

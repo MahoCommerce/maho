@@ -82,7 +82,7 @@
                             <select id="billing:region_id" name="billing[region_id]" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                                 <option value=""><?= $this->__('Please select region, state or province') ?></option>
                             </select>
-                            <script type="text/javascript">
+                            <script>
                                 document.getElementById('billing:region_id').setAttribute('defaultValue', "<?= $this->getAddress()->getRegionId() ?>");
                             </script>
                             <input type="text" id="billing:region" name="billing[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
@@ -173,7 +173,7 @@
     <?= $this->getBlockHtml('formkey') ?>
 </fieldset>
 </form>
-<script type="text/javascript">
+<script>
     var billing = new Billing('co-billing-form', '<?= $this->getUrl('checkout/onepage/getAddress') ?>address/', '<?= $this->getUrl('checkout/onepage/saveBilling') ?>');
     var billingForm = new VarienForm('co-billing-form');
 
