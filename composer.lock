@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a5fea1ee773e9570042055ba575af251",
+    "content-hash": "795dc791b93acf8fa826315d70917529",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -1223,16 +1223,16 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "v3.2.2",
+            "version": "v4.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "220501e3fb89cb69b6a13291b90eef48680c13f6"
+                "reference": "385ef3ae9906498d0a608bd2f1bc18574850a043"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/220501e3fb89cb69b6a13291b90eef48680c13f6",
-                "reference": "220501e3fb89cb69b6a13291b90eef48680c13f6",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/385ef3ae9906498d0a608bd2f1bc18574850a043",
+                "reference": "385ef3ae9906498d0a608bd2f1bc18574850a043",
                 "shasum": ""
             },
             "require": {
@@ -1265,9 +1265,9 @@
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v3.2.2"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.0.4"
             },
-            "time": "2026-02-03T09:08:22+00:00"
+            "time": "2026-04-12T13:42:35+00:00"
         },
         {
             "name": "masterminds/html5",
