@@ -1395,10 +1395,11 @@ class Mage_Core_Model_App
 
                 foreach (Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [] as $entry) {
                     $observers[$entry['name']] = [
-                        'type'  => $entry['type'],
-                        'model' => $entry['alias'],
+                        'type'   => $entry['type'],
+                        'model'  => $entry['alias'],
+                        'module' => $entry['module'],
                         'method' => $entry['method'],
-                        'args'  => $entry['args'],
+                        'args'   => $entry['args'],
                     ];
                 }
 
@@ -1410,7 +1411,7 @@ class Mage_Core_Model_App
                 }
 
                 uasort($observers, fn(array $a, array $b) =>
-                    $this->_getAliasModulePosition($a['model']) <=> $this->_getAliasModulePosition($b['model']));
+                    $this->_getObserverModulePosition($a) <=> $this->_getObserverModulePosition($b));
                 $events[$eventName]['observers'] = $observers;
                 $this->_events[$area][$eventName]['observers'] = $observers;
             }
@@ -1476,7 +1477,7 @@ class Mage_Core_Model_App
         return $this;
     }
 
-    protected function _getAliasModulePosition(string $alias): int
+    protected function _getObserverModulePosition(array $observer): int
     {
         static $positions = null;
         if ($positions === null) {
@@ -1490,7 +1491,12 @@ class Mage_Core_Model_App
             }
         }
 
+        if (isset($observer['module'])) {
+            return $positions[$observer['module']] ?? PHP_INT_MAX;
+        }
+
         static $groupCache = [];
+        $alias = $observer['model'];
 
         if (str_contains($alias, '/')) {
             $group = explode('/', $alias)[0];
