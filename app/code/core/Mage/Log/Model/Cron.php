@@ -62,7 +62,7 @@ class Mage_Log_Model_Cron extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    #[Maho\Config\CronJob(name: 'log_clean')]
+    #[Maho\Config\CronJob(configPath: 'crontab/jobs/log_clean/schedule/cron_expr', name: 'log_clean')]
     public function logClean()
     {
         if (!Mage::getStoreConfigFlag(self::XML_PATH_LOG_CLEAN_ENABLED)) {

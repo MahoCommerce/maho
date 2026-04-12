@@ -23,7 +23,7 @@ class Mage_Directory_Model_Observer
     /**
      * @throws Mage_Core_Exception
      */
-    #[Maho\Config\CronJob(name: 'currency_rates_update')]
+    #[Maho\Config\CronJob(configPath: 'crontab/jobs/currency_rates_update/schedule/cron_expr', name: 'currency_rates_update')]
     public function scheduledUpdateCurrencyRates()
     {
         $importWarnings = [];

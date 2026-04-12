@@ -15,7 +15,7 @@ class Mage_Paypal_Model_Observer
     /**
      * Goes to reports.paypal.com and fetches Settlement reports.
      */
-    #[Maho\Config\CronJob(name: 'paypal_fetch_settlement_reports')]
+    #[Maho\Config\CronJob(configPath: 'crontab/jobs/paypal_fetch_settlement_reports/schedule/cron_expr', name: 'paypal_fetch_settlement_reports')]
     public function fetchReports()
     {
         try {
