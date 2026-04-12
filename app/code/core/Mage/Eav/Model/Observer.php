@@ -28,7 +28,7 @@ class Mage_Eav_Model_Observer
         }
     }
 
-    #[Maho\Config\CronJob('0 0 * * *', name: 'eav_clean_orphaned_records')]
+    #[Maho\Config\CronJob('eav_clean_orphaned_records', schedule: '0 0 * * *')]
     public function cleanOrphanedRecords()
     {
         $resource = Mage::getSingleton('core/resource');

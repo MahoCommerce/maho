@@ -24,7 +24,7 @@ class Maho_CatalogLinkRule_Model_Processor
     /**
      * Process all active rules (called by cron)
      */
-    #[Maho\Config\CronJob(configPath: 'catalog/linkrule/schedule', name: 'cataloglinkrule_apply_all')]
+    #[Maho\Config\CronJob('cataloglinkrule_apply_all', configPath: 'catalog/linkrule/schedule')]
     public function processRules(): void
     {
         $resource = Mage::getSingleton('core/resource');

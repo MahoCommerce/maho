@@ -164,7 +164,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Cron job method for product prices to reindex
      */
-    #[Maho\Config\CronJob('0 2 * * *', name: 'catalog_product_index_price_reindex_all')]
+    #[Maho\Config\CronJob('catalog_product_index_price_reindex_all', schedule: '0 2 * * *')]
     public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule)
     {
         $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');

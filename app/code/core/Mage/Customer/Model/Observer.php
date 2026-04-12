@@ -212,7 +212,7 @@ class Mage_Customer_Model_Observer
     /**
      * Clear customer flow password table
      */
-    #[Maho\Config\CronJob('0 0 1 * *', name: 'customer_flowpassword')]
+    #[Maho\Config\CronJob('customer_flowpassword', schedule: '0 0 1 * *')]
     public function deleteCustomerFlowPassword()
     {
         $resource   = Mage::getSingleton('core/resource');

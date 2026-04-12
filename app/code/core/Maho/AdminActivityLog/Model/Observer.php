@@ -460,7 +460,7 @@ class Maho_AdminActivityLog_Model_Observer
         Mage::getModel('adminactivitylog/activity')->logActivity($data);
     }
 
-    #[Maho\Config\CronJob('0 2 * * *', name: 'adminactivitylog_clean_old_logs')]
+    #[Maho\Config\CronJob('adminactivitylog_clean_old_logs', schedule: '0 2 * * *')]
     public function cleanOldLogs(): void
     {
         Mage::helper('adminactivitylog')->cleanOldLogs();

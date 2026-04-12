@@ -214,7 +214,7 @@ class Mage_Tax_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
-    #[Maho\Config\CronJob(configPath: 'reports/crontab/tax_expr', name: 'aggregate_sales_report_tax_data')]
+    #[Maho\Config\CronJob('aggregate_sales_report_tax_data', configPath: 'reports/crontab/tax_expr')]
     public function aggregateSalesReportTaxData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);

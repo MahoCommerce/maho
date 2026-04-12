@@ -44,7 +44,7 @@ class Mage_Newsletter_Model_Observer
     /**
      * @param \Maho\Event\Observer $schedule
      */
-    #[Maho\Config\CronJob('*/5 * * * *', name: 'newsletter_send_all')]
+    #[Maho\Config\CronJob('newsletter_send_all', schedule: '*/5 * * * *')]
     public function scheduledSend($schedule)
     {
         $countOfQueue  = 3;

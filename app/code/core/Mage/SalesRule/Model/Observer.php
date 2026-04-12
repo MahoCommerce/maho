@@ -131,7 +131,7 @@ class Mage_SalesRule_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
-    #[Maho\Config\CronJob(configPath: 'reports/crontab/coupons_expr', name: 'aggregate_sales_report_coupons_data')]
+    #[Maho\Config\CronJob('aggregate_sales_report_coupons_data', configPath: 'reports/crontab/coupons_expr')]
     public function aggregateSalesReportCouponsData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);

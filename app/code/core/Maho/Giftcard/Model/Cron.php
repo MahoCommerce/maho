@@ -17,7 +17,7 @@ class Maho_Giftcard_Model_Cron
      * Process scheduled gift card emails
      * Runs every 5 minutes
      */
-    #[Maho\Config\CronJob('*/5 * * * *', name: 'giftcard_process_scheduled_emails')]
+    #[Maho\Config\CronJob('giftcard_process_scheduled_emails', schedule: '*/5 * * * *')]
     public function processScheduledEmails(): void
     {
         try {
@@ -47,7 +47,7 @@ class Maho_Giftcard_Model_Cron
      * Mark expired gift cards
      * Runs daily at 1 AM
      */
-    #[Maho\Config\CronJob('0 1 * * *', name: 'giftcard_mark_expired')]
+    #[Maho\Config\CronJob('giftcard_mark_expired', schedule: '0 1 * * *')]
     public function markExpiredGiftcards(): void
     {
         try {

@@ -15,7 +15,7 @@ class Mage_Core_Model_Observer
     /**
      * Cron job method to clean old cache resources
      */
-    #[Maho\Config\CronJob(configPath: 'system/cache/flush_cron_expr', name: 'core_clean_cache')]
+    #[Maho\Config\CronJob('core_clean_cache', configPath: 'system/cache/flush_cron_expr')]
     public function cleanCache(Mage_Cron_Model_Schedule $schedule)
     {
         Mage::app()->getCache()->prune();
@@ -45,7 +45,7 @@ class Mage_Core_Model_Observer
     /**
      * Clean up old minified CSS/JS files (cron job)
      */
-    #[Maho\Config\CronJob('0 4 * * *', name: 'core_minify_cleanup')]
+    #[Maho\Config\CronJob('core_minify_cleanup', schedule: '0 4 * * *')]
     public function cleanOldMinifiedFiles(Mage_Cron_Model_Schedule $schedule): void
     {
         Mage::helper('core/minify')->cleanupOldVersions();

@@ -25,7 +25,7 @@ class Mage_Sales_Model_Observer
      * @return $this
      * @throws Mage_Core_Exception
      */
-    #[Maho\Config\CronJob('0 0 * * *', name: 'sales_clean_quotes')]
+    #[Maho\Config\CronJob('sales_clean_quotes', schedule: '0 0 * * *')]
     public function cleanExpiredQuotes()
     {
         Mage::dispatchEvent('clear_expired_quotes_before', ['sales_observer' => $this]);
@@ -163,7 +163,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\CronJob(configPath: 'reports/crontab/sales_expr', name: 'aggregate_sales_report_order_data')]
+    #[Maho\Config\CronJob('aggregate_sales_report_order_data', configPath: 'reports/crontab/sales_expr')]
     public function aggregateSalesReportOrderData()
     {
         Mage::app()->getLocale()->emulate(0);
@@ -179,7 +179,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\CronJob(configPath: 'reports/crontab/shipping_expr', name: 'aggregate_sales_report_shipment_data')]
+    #[Maho\Config\CronJob('aggregate_sales_report_shipment_data', configPath: 'reports/crontab/shipping_expr')]
     public function aggregateSalesReportShipmentData()
     {
         Mage::app()->getLocale()->emulate(0);
@@ -195,7 +195,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\CronJob(configPath: 'reports/crontab/invoiced_expr', name: 'aggregate_sales_report_invoiced_data')]
+    #[Maho\Config\CronJob('aggregate_sales_report_invoiced_data', configPath: 'reports/crontab/invoiced_expr')]
     public function aggregateSalesReportInvoicedData()
     {
         Mage::app()->getLocale()->emulate(0);
@@ -211,7 +211,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\CronJob(configPath: 'reports/crontab/refunded_expr', name: 'aggregate_sales_report_refunded_data')]
+    #[Maho\Config\CronJob('aggregate_sales_report_refunded_data', configPath: 'reports/crontab/refunded_expr')]
     public function aggregateSalesReportRefundedData()
     {
         Mage::app()->getLocale()->emulate(0);
@@ -227,7 +227,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\CronJob(configPath: 'reports/crontab/bestsellers_expr', name: 'aggregate_sales_report_bestsellers_data')]
+    #[Maho\Config\CronJob('aggregate_sales_report_bestsellers_data', configPath: 'reports/crontab/bestsellers_expr')]
     public function aggregateSalesReportBestsellersData()
     {
         Mage::app()->getLocale()->emulate(0);

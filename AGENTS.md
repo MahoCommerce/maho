@@ -97,7 +97,7 @@ public function handleEvent(\Maho\Event\Observer $observer) {}
 #[Maho\Config\Observer('event_name', area: 'frontend')]
 public function handleFrontendEvent(\Maho\Event\Observer $observer) {}
 
-#[Maho\Config\CronJob('0 2 * * *', name: 'my_cron_job')]
+#[Maho\Config\CronJob('my_cron_job', schedule: '0 2 * * *')]
 public function runJob(Mage_Cron_Model_Schedule $schedule) {}
 ```
 

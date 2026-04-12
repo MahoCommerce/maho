@@ -247,7 +247,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
-    #[Maho\Config\CronJob('0 1 * * *', name: 'catalogrule_apply_all')]
+    #[Maho\Config\CronJob('catalogrule_apply_all', schedule: '0 1 * * *')]
     public function dailyCatalogUpdate($observer)
     {
         /** @var Mage_CatalogRule_Model_Rule $model */

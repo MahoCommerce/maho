@@ -145,7 +145,7 @@ class Mage_Index_Model_Observer
      * @return void
      * @throws Exception
      */
-    #[Maho\Config\CronJob('30 */4 * * *', name: 'index_clean_events')]
+    #[Maho\Config\CronJob('index_clean_events', schedule: '30 */4 * * *')]
     public function cleanOutdatedEvents()
     {
         $manualIndexProcessCollection = Mage::getSingleton('index/indexer')
