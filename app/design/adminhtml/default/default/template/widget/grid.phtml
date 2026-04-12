@@ -178,7 +178,7 @@ $numColumns = count($this->getColumns());
 </div>
 <?php if($this->canDisplayContainer()): ?>
 </div>
-<script type="text/javascript">
+<script>
     globalThis.<?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';
     <?php if($this->getRowClickCallback()): ?>

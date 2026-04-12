@@ -95,7 +95,7 @@
                         <select id="region_id" name="region_id" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                            <option value=""><?= $this->__('Please select region, state or province') ?></option>
                         </select>
-                        <script type="text/javascript">
+                        <script>
                             document.getElementById('region_id').defaultValue = "<?= $this->getAddress()->getRegionId() ?>";
                         </script>
                         <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" />
@@ -141,7 +141,7 @@
         <button type="submit" title="<?= $this->quoteEscape($this->__('Save Address')) ?>" class="button"><?= $this->__('Save Address') ?></button>
     </div>
 </form>
-<script type="text/javascript">
+<script>
     var dataForm = new VarienForm('form-validate', true);
     new RegionUpdater('country', 'region', 'region_id', <?= Mage::helper('directory')->getRegionJsonByStore() ?>, undefined, 'zip');
 </script>

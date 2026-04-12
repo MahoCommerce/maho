@@ -167,7 +167,7 @@
             <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Please wait...')) ?>" title="<?= $this->quoteEscape($this->__('Please wait...')) ?>" class="v-middle" /> <?= $this->__('Please wait...') ?>
         </span>
     </div>
-    <script type="text/javascript">
+    <script>
         function removeItem(url) {
             document.getElementById('compare-list-please-wait').style.display = 'block';
 
@@ -198,5 +198,5 @@
         }
     </script>
 <?php else: ?>
-    <script type="text/javascript">window.close();</script>
+    <script>window.close();</script>
 <?php endif ?>

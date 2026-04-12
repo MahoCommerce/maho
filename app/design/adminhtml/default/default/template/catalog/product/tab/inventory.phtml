@@ -35,7 +35,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_manage_stock') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_manage_stock" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_manage_stock]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
             <label for="inventory_use_config_manage_stock" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_manage_stock'), document.getElementById('inventory_use_config_manage_stock').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_manage_stock'), document.getElementById('inventory_use_config_manage_stock').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -58,7 +58,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_min_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_min_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_min_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" <?= $_readonly ?> />
             <label for="inventory_use_config_min_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_min_qty'), document.getElementById('inventory_use_config_min_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_min_qty'), document.getElementById('inventory_use_config_min_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -69,7 +69,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_min_sale_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_min_sale_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_min_sale_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?> />
             <label for="inventory_use_config_min_sale_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_min_sale_qty'), document.getElementById('inventory_use_config_min_sale_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_min_sale_qty'), document.getElementById('inventory_use_config_min_sale_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -80,7 +80,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_max_sale_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_max_sale_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_max_sale_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?> />
             <label for="inventory_use_config_max_sale_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_max_sale_qty'), document.getElementById('inventory_use_config_max_sale_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_max_sale_qty'), document.getElementById('inventory_use_config_max_sale_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 
@@ -121,7 +121,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_backorders') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_backorders" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_backorders]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?> />
             <label for="inventory_use_config_backorders" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_backorders'), document.getElementById('inventory_use_config_backorders').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_backorders'), document.getElementById('inventory_use_config_backorders').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
         <tr>
@@ -131,7 +131,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_notify_stock_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_notify_stock_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_notify_stock_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
             <label for="inventory_use_config_notify_stock_qty" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_notify_stock_qty'), document.getElementById('inventory_use_config_notify_stock_qty').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_notify_stock_qty'), document.getElementById('inventory_use_config_notify_stock_qty').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
 <?php endif ?>
@@ -146,7 +146,7 @@
             <?php $_checked = ($this->getFieldValue('use_config_enable_qty_increments') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_enable_qty_increments" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_enable_qty_increments]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
             <label for="inventory_use_config_enable_qty_increments" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-            <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_enable_qty_increments'), document.getElementById('inventory_use_config_enable_qty_increments').parentNode);</script><?php endif ?></td>
+            <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_enable_qty_increments'), document.getElementById('inventory_use_config_enable_qty_increments').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
         <tr>
@@ -156,7 +156,7 @@
                 <?php $_checked = ($this->getFieldValue('use_config_qty_increments') || $this->isNew()) ? 'checked="checked"' : '' ?>
                 <input type="checkbox" id="inventory_use_config_qty_increments" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_qty_increments]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>/>
                 <label for="inventory_use_config_qty_increments" class="normal"><?= Mage::helper('catalog')->__('Use Config Settings') ?></label>
-                <?php if (!$this->isReadonly()):?><script type="text/javascript">toggleValueElements(document.getElementById('inventory_use_config_qty_increments'), document.getElementById('inventory_use_config_qty_increments').parentNode);</script><?php endif ?></td>
+                <?php if (!$this->isReadonly()):?><script>toggleValueElements(document.getElementById('inventory_use_config_qty_increments'), document.getElementById('inventory_use_config_qty_increments').parentNode);</script><?php endif ?></td>
             <td class="value scope-label"><?= Mage::helper('adminhtml')->__('[GLOBAL]') ?></td>
         </tr>
         <tr>
@@ -173,7 +173,7 @@
         </table>
     </fieldset>
 </div>
-<script type="text/javascript">
+<script>
     function changeManageStockOption() {
         const manageStockCheckbox = document.getElementById('inventory_use_config_manage_stock');
         const manageStockSelect = document.getElementById('inventory_manage_stock');

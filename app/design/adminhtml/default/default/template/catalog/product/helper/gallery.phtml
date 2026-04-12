@@ -141,7 +141,7 @@
 <input type="hidden" id="<?= $this->getHtmlId() ?>_save_image"
        name="<?= $this->getElement()->getName() ?>[values]"
        value="<?= $this->escapeHtml($this->getImagesValuesJson()) ?>"/>
-<script type="text/javascript">
+<script>
 //<![CDATA[
 var <?= $this->getJsObjectName() ?> = new Product.Gallery('<?= $this->getHtmlId() ?>', <?= $this->getImageTypesJson() ?>);
 //]]>

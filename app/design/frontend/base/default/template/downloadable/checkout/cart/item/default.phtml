@@ -72,7 +72,7 @@ $_deleteUrl = $this->getDeleteUrlCustom(false);
             <?php $helpLinkId = 'cart-msrp-help-' . $_item->getId(); ?>
             <a id="<?= $helpLinkId ?>" href="#"
                class="map-help-link"><?= $this->__("What's this?") ?></a>
-            <script type="text/javascript">
+            <script>
                 Catalog.Map.addHelpLink('<?= $helpLinkId ?>', "<?= $this->jsQuoteEscape($this->__("What's this?")) ?>");
             </script>
         </span>

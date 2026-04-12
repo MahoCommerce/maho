@@ -15,7 +15,7 @@
     <h1><?= Mage::helper('customer')->__('You are now logged out') ?></h1>
 </div>
 <p><?= Mage::helper('customer')->__('You have logged out and will be redirected to our homepage in 5 seconds.') ?></p>
-<script type="text/javascript">
+<script>
     setTimeout(function() {
         location.href = '<?= $this->getUrl() ?>'
     }, 5000);

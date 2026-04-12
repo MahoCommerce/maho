@@ -67,7 +67,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
 
             // @codingStandardsIgnoreStart
             $form->getElement('website_id')->setAfterElementHtml(
-                '<script type="text/javascript">'
+                '<script>'
                 . "
                 var {$prefix}_websites = " . Mage::helper('core')->jsonEncode($websites) . ";
                 Validation.add(
@@ -254,7 +254,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_Account extends Mage_Adminhtml_Bloc
                 $disableStoreField = "document.getElementById('{$prefix}sendemail_store_id').disabled=(''==this.value || '0'==this.value);";
             }
             $sendEmail->setAfterElementHtml(
-                '<script type="text/javascript">'
+                '<script>'
                 . "
                 document.getElementById('{$prefix}website_id').disableSendemail = function() {
                     document.getElementById('{$prefix}sendemail').disabled = ('' == this.value || '0' == this.value);" .

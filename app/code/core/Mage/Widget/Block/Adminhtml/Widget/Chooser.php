@@ -173,7 +173,7 @@ class Mage_Widget_Block_Adminhtml_Widget_Chooser extends Mage_Adminhtml_Block_Te
             . $this->quoteEscape($this->getLabel() ?: Mage::helper('widget')->__('Not Selected'))
             . '</label>
             <div id="' . $chooserId . 'advice-container" class="hidden"></div>
-            <script type="text/javascript">
+            <script>
                 var instantiateChooser = function() {
                     window.' . $chooserId . ' = new WysiwygWidget.chooser(
                         "' . $chooserId . '",

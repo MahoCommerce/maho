@@ -20,7 +20,7 @@
 </div>
 <?php if( $form ): ?>
 <?= $form->toHtml() ?>
-<script type="text/javascript">
+<script>
     var wigetForm = new varienForm('<?= $form->getForm()->getId() ?>');
 </script>
 <?php endif ?>

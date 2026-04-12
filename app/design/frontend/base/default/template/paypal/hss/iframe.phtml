@@ -15,7 +15,7 @@
     <?= $this->__('Please do not refresh the page until you complete payment.') ?>
 </div>
 <iframe id="hss-iframe" style="display:none;" scrolling="no" frameborder="0" border="0" src="<?= $this->getFrameActionUrl() ?>" height="610" width="100%"></iframe>
-<script type="text/javascript">
+<script>
     const headers = document.querySelectorAll('#' + checkout.accordion.container.getAttribute('id') + ' .section');
     headers.forEach(header => {
         header.classList.remove('allow');

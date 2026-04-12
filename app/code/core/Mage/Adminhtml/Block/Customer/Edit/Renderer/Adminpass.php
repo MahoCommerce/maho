@@ -37,7 +37,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Adminpass extends Mage_Adminht
     protected function _getScriptHtml(\Maho\Data\Form\Element\AbstractElement $element)
     {
         return <<<SCRIPT
-<script type="text/javascript">
+<script>
     document.querySelectorAll('#_accountnew_password,#account-send-pass').forEach(function(elem) {
         elem.addEventListener('change', function() {
             var newPasswordField = document.getElementById('_accountnew_password');

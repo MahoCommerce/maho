@@ -12,7 +12,7 @@
 /** @var Mage_Checkout_Block_Onepage_Payment $this */
 ?>
 <?= $this->getChildChildHtml('before_form') ?>
-<script type="text/javascript">
+<script>
     var quoteBaseGrandTotal = <?= (float)$this->getQuoteBaseGrandTotal() ?>;
     var checkQuoteBaseGrandTotal = quoteBaseGrandTotal;
     var quoteGrandTotalClean = quoteBaseGrandTotal;
@@ -38,7 +38,7 @@
         <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle" /> <?= $this->__('Loading next step...') ?>
     </span>
 </div>
-<script type="text/javascript">
+<script>
     payment.currentMethod = "<?= $this->getChild('methods')->getSelectedMethodCode() ?>";
     function toggleToolTip(event) {
         let paymentToolTip = document.getElementById('payment-tool-tip');

@@ -11,7 +11,7 @@
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Invoice_Create_Tracking $this */
 ?>
-<script type="text/javascript">
+<script>
 var trackingControl;
 trackingControl = {
     index : 0,
@@ -87,6 +87,6 @@ trackingControl = {
     </tbody>
 </table>
 </div>
-<script type="text/javascript">
+<script>
 trackingControl.template = new Template('<tr>' + document.getElementById('track_row_template').innerHTML.replace(/__index__/g, '{{index}}') + '<\/tr>', Template.HANDLEBARS_PATTERN);
 </script>

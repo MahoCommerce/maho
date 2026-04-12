@@ -49,7 +49,7 @@ $numColumns = count($this->getColumns());
 </table>
 </div>
 <?php if($this->canDisplayContainer()): ?>
-<script type="text/javascript">
+<script>
 //<![CDATA[
     <?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';

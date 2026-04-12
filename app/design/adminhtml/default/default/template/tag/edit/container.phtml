@@ -25,7 +25,7 @@
 
     <?= $this->getTagAssignAccordionHtml() ?>
 
-<script type="text/javascript">
+<script>
     function saveAndContinueEdit(url) {
         var tagForm = new varienForm('edit_form');
         tagForm.submit(url);
@@ -39,7 +39,7 @@
         <p class="content-buttons form-buttons"><?= $this->getButtonsHtml('footer') ?></p>
     </div>
 <?php endif ?>
-<script type="text/javascript">
+<script>
     var editForm = new varienForm('edit_form', '<?= $this->getValidationUrl() ?>');
 </script>
 <?= $this->getFormScripts() ?>

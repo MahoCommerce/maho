@@ -32,7 +32,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Import extends \Maho\Data\Fo
         $html .= '<input id="time_condition" type="hidden" name="' . $this->getName() . '" value="' . time() . '" />';
 
         $html .= <<<EndHTML
-        <script type="text/javascript">
+        <script>
         document.getElementById('carriers_tablerate_condition_name').addEventListener('change', checkConditionName);
         function checkConditionName(event)
         {

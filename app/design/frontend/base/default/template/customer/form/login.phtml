@@ -93,7 +93,7 @@
         <?= $this->getChildHtml('forgotpassword_form') ?>
     </dialog>
 
-    <script type="text/javascript">
+    <script>
         var dataForm = new VarienForm('login-form', true);
 
         <?php if ($isMagicLinkEnabled && $magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>

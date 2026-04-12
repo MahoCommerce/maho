@@ -72,7 +72,7 @@ class Gallery extends AbstractElement
             }
         }
         if ($i == 0) {
-            $html .= '<script type="text/javascript">document.getElementById("gallery_thead").style.visibility="hidden";</script>';
+            $html .= '<script>document.getElementById("gallery_thead").style.visibility="hidden";</script>';
         }
 
         $html .= '</tbody></table>';

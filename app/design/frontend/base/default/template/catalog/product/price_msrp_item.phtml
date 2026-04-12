@@ -39,7 +39,7 @@
             <span id="<?= $priceElementId ?>" style="display:none"></span>
             <?php $popupId = 'msrp-popup-' . $_id . $_coreHelper->getRandomString(20); ?>
             <a href="#" id="<?php echo($popupId);?>"><?= $this->__('Click for price') ?></a>
-            <script type="text/javascript">
+            <script>
                 window.addEventListener('load', function() {
                     const priceElement = document.getElementById("<?= $priceElementId ?>");
                     const realPrice = <?= $this->getRealPriceJs($_product) ?>;
@@ -89,7 +89,7 @@
 
         <?php $helpLinkId = 'msrp-help-' . $_id . $_coreHelper->getRandomString(20); ?>
         <a href="#" id="<?php echo($helpLinkId);?>"><?= $this->__("What's this?") ?></a>
-        <script type="text/javascript">
+        <script>
             Catalog.Map.addHelpLink(
                 '<?= $helpLinkId ?>',
                 '<?= $this->jsQuoteEscape($this->__("What's this?")) ?>'

@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'label' => Mage::helper('adminhtml')->__('Used Currently For'),
                 'container_id' => 'used_currently_for',
                 'after_element_html' =>
-                    '<script type="text/javascript">' .
+                    '<script>' .
                     ($this->getEmailTemplate()->getSystemConfigPathsWhereUsedCurrently()
                         ? '' : 'document.getElementById(\'' . 'used_currently_for' . '\').style.display = \'none\'; ') .
                     '</script>',
@@ -58,7 +58,7 @@ class Mage_Adminhtml_Block_System_Email_Template_Edit_Form extends Mage_Adminhtm
                 'label' => Mage::helper('adminhtml')->__('Used as Default For'),
                 'container_id' => 'used_default_for',
                 'after_element_html' =>
-                    '<script type="text/javascript">' .
+                    '<script>' .
                     ((bool) $this->getEmailTemplate()->getOrigTemplateCode()
                         ? '' : 'document.getElementById(\'' . 'used_default_for' . '\').style.display = \'none\'; ') .
                     '</script>',

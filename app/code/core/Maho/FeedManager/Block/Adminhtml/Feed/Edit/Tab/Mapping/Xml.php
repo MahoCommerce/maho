@@ -79,7 +79,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Xml extends Maho_Fe
         </div>
 
 
-        <script type="text/javascript">
+        <script>
         var XmlBuilder = {
             structure: ' . Mage::helper('core')->jsonEncode($structureData) . ',
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',

@@ -124,7 +124,7 @@
     &nbsp;<?= Mage::helper('catalog')->__('Price') ?> <strong>'{{value}}'</strong>
 </div>
 <?= $this->getGridHtml() ?>
-<script type="text/javascript">
+<script>
 var superProduct = new Product.Configurable(<?= $this->getAttributesJson() ?>,<?= $this->getLinksJson() ?>,'<?= $this->getHtmlId() ?>_',<?= $this->getGridJsObject() ?>, <?= ( $this->isReadonly() ? 'true' : 'false') ?>);
 superProduct.createEmptyUrl = '<?= $this->getNewEmptyProductUrl() ?>';
 superProduct.createNormalUrl = '<?= $this->getNewProductUrl() ?>';

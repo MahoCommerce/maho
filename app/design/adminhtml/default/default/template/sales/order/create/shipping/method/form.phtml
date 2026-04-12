@@ -69,7 +69,7 @@
             </a>
         </div>
     <?php else: ?>
-        <script type="text/javascript">document.getElementById('order-shipping-method-choose').style.display = 'block';</script>
+        <script>document.getElementById('order-shipping-method-choose').style.display = 'block';</script>
     <?php endif ?>
 <?php elseif($this->getIsRateRequest()): ?>
     <strong><?= Mage::helper('sales')->__('Sorry, no quotes are available for this order at this time.') ?></strong>
@@ -82,7 +82,7 @@
     </div>
 <?php endif ?>
 <div style="display:none;" id="shipping-method-overlay" class="overlay"><span><?= $this->__('Shipping method selection is not applicable') ?></span></div>
-<script type="text/javascript">
+<script>
 order.overlay('shipping-method-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif ?>);
 order.overlay('address-shipping-overlay', <?php if ($this->getQuote()->isVirtual()): ?>false<?php else: ?>true<?php endif ?>);
 </script>

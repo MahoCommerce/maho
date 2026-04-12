@@ -29,7 +29,7 @@
 <?php if ($this->getIsInCatalogProduct()): ?>
     <input type="hidden" id="pp_checkout_url" name="return_url" value="" />
 <?php endif ?>
-<script type="text/javascript">
+<script>
     document.getElementById('<?= $shortcutHtmlId ?>').addEventListener('click', function(event) {
         <?php if ($this->getConfirmationUrl()): ?>
         if (confirm('<?= $this->jsQuoteEscape($this->getConfirmationMessage()) ?>')) {
