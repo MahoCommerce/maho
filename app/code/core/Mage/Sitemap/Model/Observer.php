@@ -19,7 +19,7 @@ class Mage_Sitemap_Model_Observer
     /**
      * Cronjob expression configuration
      */
-    public const XML_PATH_CRON_EXPR = 'crontab/jobs/generate_sitemaps/schedule/cron_expr';
+    public const XML_PATH_CRON_EXPR = 'crontab/jobs/sitemap_generate/schedule/cron_expr';
 
     /**
      * Error email template configuration
@@ -41,6 +41,7 @@ class Mage_Sitemap_Model_Observer
      *
      * @param Mage_Cron_Model_Schedule $schedule
      */
+    #[Maho\Config\CronJob('sitemap_generate', configPath: 'crontab/jobs/sitemap_generate/schedule/cron_expr')]
     public function scheduledGenerateSitemaps($schedule)
     {
         $errors = [];

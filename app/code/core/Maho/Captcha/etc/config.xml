@@ -37,65 +37,6 @@
                 </args>
             </captcha>
         </routers>
-        <events>
-            <controller_action_predispatch_checkout_onepage_savebilling>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verify</method>
-                        <args><is_ajax>1</is_ajax></args>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_checkout_onepage_savebilling>
-            <controller_action_predispatch_contacts_index_post>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verify</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_contacts_index_post>
-            <controller_action_predispatch_customer_account_createpost>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verify</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_customer_account_createpost>
-            <controller_action_predispatch_customer_account_forgotpasswordpost>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verify</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_customer_account_forgotpasswordpost>
-            <controller_action_predispatch_newsletter_subscriber_new>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verify</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_newsletter_subscriber_new>
-            <controller_action_predispatch_review_product_post>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verify</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_review_product_post>
-            <controller_action_predispatch_wishlist_index_send>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verify</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_wishlist_index_send>
-        </events>
         <layout>
             <updates>
                 <captcha>
@@ -114,24 +55,6 @@
         </translate>
     </frontend>
     <adminhtml>
-        <events>
-            <admin_user_authenticate_before>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verifyAdmin</method>
-                    </captcha>
-                </observers>
-            </admin_user_authenticate_before>
-            <controller_action_predispatch_adminhtml_index_forgotpassword>
-                <observers>
-                    <captcha>
-                        <class>captcha/observer</class>
-                        <method>verifyAdmin</method>
-                    </captcha>
-                </observers>
-            </controller_action_predispatch_adminhtml_index_forgotpassword>
-        </events>
         <layout>
             <updates>
                 <captcha>

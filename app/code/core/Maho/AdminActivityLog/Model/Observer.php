@@ -45,6 +45,7 @@ class Maho_AdminActivityLog_Model_Observer
         return $this->_currentActionGroupId;
     }
 
+    #[Maho\Config\Observer('admin_user_authenticate_after', area: 'adminhtml', id: 'adminactivitylog_login_success')]
     public function logAdminLogin(\Maho\Event\Observer $observer): void
     {
         try {
@@ -61,6 +62,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('admin_session_user_logout', area: 'adminhtml', id: 'adminactivitylog_logout')]
     public function logAdminLogout(\Maho\Event\Observer $observer): void
     {
         try {
@@ -77,6 +79,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('admin_session_user_login_failed', area: 'adminhtml', id: 'adminactivitylog_login_failed')]
     public function logAdminLoginFailed(\Maho\Event\Observer $observer): void
     {
         try {
@@ -96,6 +99,8 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('model_save_before', area: 'adminhtml', id: 'adminactivitylog_save_before')]
+    #[Maho\Config\Observer('model_delete_before', area: 'adminhtml', id: 'adminactivitylog_delete_before')]
     public function logAdminActivityBefore(\Maho\Event\Observer $observer): void
     {
         try {
@@ -125,6 +130,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('model_save_after', area: 'adminhtml', id: 'adminactivitylog_save_after')]
     public function logAdminActivityAfter(\Maho\Event\Observer $observer): void
     {
         try {
@@ -208,6 +214,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('model_delete_after', area: 'adminhtml', id: 'adminactivitylog_delete_after')]
     public function logAdminDelete(\Maho\Event\Observer $observer): void
     {
         try {
@@ -240,6 +247,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('controller_action_predispatch_adminhtml', area: 'adminhtml', id: 'adminactivitylog_page_visit')]
     public function logPageVisit(\Maho\Event\Observer $observer): void
     {
         try {
@@ -321,6 +329,7 @@ class Maho_AdminActivityLog_Model_Observer
         return array_diff_key($data, array_flip($this->ignoreFields));
     }
 
+    #[Maho\Config\Observer('controller_action_postdispatch_adminhtml', area: 'adminhtml', id: 'adminactivitylog_mass_action')]
     public function logMassAction(\Maho\Event\Observer $observer): void
     {
         if (!Mage::helper('adminactivitylog')->shouldLogMassActions()) {
@@ -451,11 +460,13 @@ class Maho_AdminActivityLog_Model_Observer
         Mage::getModel('adminactivitylog/activity')->logActivity($data);
     }
 
+    #[Maho\Config\CronJob('adminactivitylog_clean_old_logs', schedule: '0 2 * * *')]
     public function cleanOldLogs(): void
     {
         Mage::helper('adminactivitylog')->cleanOldLogs();
     }
 
+    #[Maho\Config\Observer('encryption_key_regenerated', id: 'adminactivitylog_recrypt_data')]
     public function encryptionKeyRegenerated(\Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */

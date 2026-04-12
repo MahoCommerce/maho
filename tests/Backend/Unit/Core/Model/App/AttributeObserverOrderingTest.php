@@ -30,24 +30,7 @@ function resolveObservers(string $area, string $eventName): array
     return $events[$area][$eventName]['observers'] ?? [];
 }
 
-/**
- * Resolve the module name for an observer from its model alias.
- */
-function getObserverModule(string $model): ?string
-{
-    if (!str_contains($model, '/')) {
-        return null;
-    }
-
-    $group = explode('/', $model)[0];
-    $classPrefix = (string) Mage::getConfig()->getNode("global/models/{$group}/class");
-    if ($classPrefix && preg_match('/^(.+)_[^_]+$/', $classPrefix, $m)) {
-        return $m[1];
-    }
-    return null;
-}
-
-it('interleaves XML and attribute observers in module dependency order', function () {
+it('orders attribute observers by module dependency', function () {
     $observers = resolveObservers('frontend', 'customer_logout');
 
     $positions = [];
@@ -59,7 +42,7 @@ it('interleaves XML and attribute observers in module dependency order', functio
     // Extract the module position for each observer in execution order
     $observerModulePositions = [];
     foreach ($observers as $name => $obs) {
-        $module = getObserverModule($obs['model']);
+        $module = $obs['module'] ?? null;
         if ($module !== null && isset($positions[$module])) {
             $observerModulePositions[$name] = $positions[$module];
         }
@@ -78,7 +61,7 @@ it('interleaves XML and attribute observers in module dependency order', functio
     expect(count(array_unique($observerModulePositions)))->toBeGreaterThanOrEqual(2);
 });
 
-it('places attribute observers from same module alongside XML observers', function () {
+it('resolves attribute observers for the expected event', function () {
     $observers = resolveObservers('global', 'customer_save_after');
 
     expect($observers)->toHaveKey('Mage_Newsletter_Model_Observer::subscribeCustomer');

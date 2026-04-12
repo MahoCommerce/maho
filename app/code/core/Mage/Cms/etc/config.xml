@@ -26,16 +26,6 @@
                 </args>
             </cms>
         </routers>
-        <events>
-            <controller_action_noroute>
-                <observers>
-                    <cms>
-                        <class>cms/observer</class>
-                        <method>noRoute</method>
-                    </cms>
-                </observers>
-            </controller_action_noroute>
-        </events>
         <translate>
             <modules>
                 <Mage_Cms>
@@ -151,16 +141,6 @@
                 <class>Mage_Cms_Block</class>
             </cms>
         </blocks>
-        <events>
-            <controller_front_init_routers>
-                <observers>
-                    <cms>
-                        <class>Mage_Cms_Controller_Router</class>
-                        <method>initControllerRouters</method>
-                    </cms>
-                </observers>
-            </controller_front_init_routers>
-        </events>
         <cms>
             <page>
                 <tempate_filter>cms/template_filter</tempate_filter>

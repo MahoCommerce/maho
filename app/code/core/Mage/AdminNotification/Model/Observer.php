@@ -15,6 +15,7 @@ class Mage_AdminNotification_Model_Observer
     /**
      * Predispath admin action controller
      */
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'adminhtml')]
     public function preDispatch(\Maho\Event\Observer $observer)
     {
         if (Mage::getSingleton('admin/session')->isLoggedIn()) {

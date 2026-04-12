@@ -68,16 +68,6 @@
                 </Mage_Review>
             </modules>
         </translate>
-        <events>
-            <catalog_product_delete_after_done>
-                <observers>
-                    <review>
-                        <class>review/observer</class>
-                        <method>processProductAfterDeleteEvent</method>
-                    </review>
-                </observers>
-            </catalog_product_delete_after_done>
-        </events>
     </adminhtml>
     <frontend>
         <routers>
@@ -89,16 +79,6 @@
                 </args>
             </review>
         </routers>
-        <events>
-            <review_save_after>
-                <observers>
-                    <rss>
-                        <class>rss/observer</class>
-                        <method>reviewSaveAfter</method>
-                    </rss>
-                </observers>
-            </review_save_after>
-        </events>
         <translate>
             <modules>
                 <Mage_Review>
@@ -115,26 +95,6 @@
                 </review>
             </updates>
         </layout>
-        <events>
-            <tag_tag_product_collection_load_after>
-                <observers>
-                    <review>
-                        <type>model</type>
-                        <class>review/observer</class>
-                        <method>tagProductCollectionLoadAfter</method>
-                    </review>
-                </observers>
-            </tag_tag_product_collection_load_after>
-            <catalog_block_product_list_collection>
-                <observers>
-                    <review>
-                        <type>model</type>
-                        <class>review/observer</class>
-                        <method>catalogBlockProductCollectionBeforeToHtml</method>
-                    </review>
-                </observers>
-            </catalog_block_product_list_collection>
-        </events>
         <secure_url>
             <review_customer>/review/customer/</review_customer>
         </secure_url>

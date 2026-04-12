@@ -17,6 +17,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('adminhtml_catalog_product_edit_prepare_form', area: 'adminhtml')]
     public function setWeeeRendererInForm(\Maho\Event\Observer $observer)
     {
         //adminhtml_catalog_product_edit_prepare_form
@@ -42,6 +43,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('adminhtml_catalog_product_form_prepare_excluded_field_list', area: 'adminhtml')]
     public function updateExcludedFieldList(\Maho\Event\Observer $observer)
     {
         //adminhtml_catalog_product_form_prepare_excluded_field_list
@@ -62,6 +64,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_prepare_price_select', type: 'model')]
     public function prepareCatalogIndexSelect(\Maho\Event\Observer $observer)
     {
         $storeId = (int) $observer->getEvent()->getStoreId();
@@ -165,6 +168,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'adminhtml', type: 'model')]
     public function addWeeeTaxAttributeType(\Maho\Event\Observer $observer)
     {
         // adminhtml_product_attribute_types
@@ -199,6 +203,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_save_before', type: 'model')]
     public function assignBackendModelToAttribute(\Maho\Event\Observer $observer)
     {
         $backendModel = Mage_Weee_Model_Attribute_Backend_Weee_Tax::getBackendModelName();
@@ -226,6 +231,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('adminhtml_catalog_product_edit_element_types', area: 'adminhtml')]
     public function updateElementTypes(\Maho\Event\Observer $observer)
     {
         $response = $observer->getEvent()->getResponse();
@@ -240,6 +246,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('catalogrule_after_apply')]
     public function updateDiscountPercents(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('weee')->isEnabled()) {
@@ -262,6 +269,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_product_view_config')]
     public function updateCofigurableProductOptions(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Weee_Helper_Data $weeeHelper */
@@ -313,6 +321,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
+    #[Maho\Config\Observer('bundle_product_view_config')]
     public function updateBundleProductOptions(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Weee_Helper_Data $weeeHelper */
@@ -362,6 +371,8 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\Observer('create_order_session_quote_initialized')]
+    #[Maho\Config\Observer('init_from_order_session_quote_initialized')]
     public function setSessionQuoteStore(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Weee_Helper_Data $weeeHelper */

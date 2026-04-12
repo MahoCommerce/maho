@@ -19,6 +19,7 @@ class Mage_Admin_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'adminhtml', id: 'auth')]
     public function actionPreDispatchAdmin($observer)
     {
         /** @var Mage_Admin_Model_Session $session */

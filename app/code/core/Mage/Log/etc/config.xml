@@ -142,13 +142,4 @@
             </log>
         </system>
     </default>
-    <crontab>
-        <jobs>
-            <log_clean>
-                <run>
-                    <model>log/cron::logClean</model>
-                </run>
-            </log_clean>
-        </jobs>
-    </crontab>
 </config>

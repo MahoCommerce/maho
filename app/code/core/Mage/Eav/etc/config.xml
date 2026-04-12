@@ -99,16 +99,6 @@
         </eav_frontendclasses>
         <eav_attributes>
         </eav_attributes>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <eav>
-                        <class>eav/observer</class>
-                        <method>onControllerActionPredispatch</method>
-                    </eav>
-                </observers>
-            </controller_action_predispatch>
-        </events>
     </global>
     <adminhtml>
         <translate>
@@ -132,18 +122,6 @@
             </modules>
         </translate>
     </frontend>
-    <crontab>
-        <jobs>
-            <eav_clean_orphaned_records>
-                <schedule>
-                    <cron_expr>0 0 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>eav/observer::cleanOrphanedRecords</model>
-                </run>
-            </eav_clean_orphaned_records>
-        </jobs>
-    </crontab>
     <default>
         <general>
             <validator_data>

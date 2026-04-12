@@ -17,6 +17,7 @@ class Mage_Review_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('tag_tag_product_collection_load_after', area: 'frontend', type: 'model')]
     public function tagProductCollectionLoadAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Tag_Model_Resource_Product_Collection $collection */
@@ -32,6 +33,7 @@ class Mage_Review_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_delete_after_done', area: 'adminhtml')]
     public function processProductAfterDeleteEvent(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $eventProduct */
@@ -48,6 +50,7 @@ class Mage_Review_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_block_product_list_collection', area: 'frontend', type: 'model')]
     public function catalogBlockProductCollectionBeforeToHtml(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Resource_Product_Collection $productCollection */

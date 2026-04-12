@@ -20,6 +20,7 @@ class Mage_Downloadable_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  Mage_Downloadable_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_product_prepare_save', area: 'adminhtml')]
     public function prepareProductSave($observer)
     {
         $request = $observer->getEvent()->getRequest();
@@ -38,6 +39,8 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('sales_order_item_save_commit_after', area: 'adminhtml')]
+    #[Maho\Config\Observer('sales_order_item_save_commit_after', area: 'frontend')]
     public function saveDownloadableOrderItem(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
@@ -116,6 +119,7 @@ class Mage_Downloadable_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('checkout_type_onepage_save_order_after', area: 'frontend')]
     public function setHasDownloadableProducts($observer)
     {
         $session = Mage::getSingleton('checkout/session');
@@ -142,6 +146,8 @@ class Mage_Downloadable_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('sales_order_save_commit_after', area: 'adminhtml')]
+    #[Maho\Config\Observer('sales_order_save_commit_after', area: 'frontend')]
     public function setLinkStatus($observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -243,6 +249,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('checkout_allow_guest', area: 'frontend')]
     public function isAllowedGuestCheckout(\Maho\Event\Observer $observer)
     {
         $quote  = $observer->getEvent()->getQuote();
@@ -272,6 +279,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('product_option_renderer_init', area: 'frontend')]
     public function initOptionRenderer(\Maho\Event\Observer $observer)
     {
         $block = $observer->getBlock();
