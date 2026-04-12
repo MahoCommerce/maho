@@ -64,7 +64,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    #[Maho\Config\Observer('catalog_prepare_price_select', type: 'model')]
+    #[Maho\Config\Observer('catalog_prepare_price_select')]
     public function prepareCatalogIndexSelect(\Maho\Event\Observer $observer)
     {
         $storeId = (int) $observer->getEvent()->getStoreId();
@@ -168,7 +168,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'adminhtml', type: 'model')]
+    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'adminhtml')]
     public function addWeeeTaxAttributeType(\Maho\Event\Observer $observer)
     {
         // adminhtml_product_attribute_types
@@ -203,7 +203,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    #[Maho\Config\Observer('catalog_entity_attribute_save_before', type: 'model')]
+    #[Maho\Config\Observer('catalog_entity_attribute_save_before')]
     public function assignBackendModelToAttribute(\Maho\Event\Observer $observer)
     {
         $backendModel = Mage_Weee_Model_Attribute_Backend_Weee_Tax::getBackendModelName();

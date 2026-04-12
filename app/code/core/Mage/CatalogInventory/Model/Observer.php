@@ -41,7 +41,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_load_after')]
+    #[Maho\Config\Observer('catalog_product_load_after', type: 'singleton')]
     public function addInventoryData($observer)
     {
         $product = $observer->getEvent()->getProduct();
@@ -62,7 +62,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_clear')]
+    #[Maho\Config\Observer('catalog_product_clear', type: 'singleton')]
     public function removeInventoryData($observer)
     {
         $product = $observer->getEvent()->getProduct();
@@ -82,7 +82,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_collection_load_after')]
+    #[Maho\Config\Observer('catalog_product_collection_load_after', type: 'singleton')]
     public function addStockStatusToCollection($observer)
     {
         /** @var Mage_Catalog_Model_Resource_Product_Collection $productCollection */
@@ -104,7 +104,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('sales_quote_item_collection_products_after_load')]
+    #[Maho\Config\Observer('sales_quote_item_collection_products_after_load', type: 'singleton')]
     public function addInventoryDataToCollection($observer)
     {
         $productCollection = $observer->getEvent()->getProductCollection();
@@ -118,7 +118,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_save_after')]
+    #[Maho\Config\Observer('catalog_product_save_after', type: 'singleton')]
     public function saveInventoryData($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -147,7 +147,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_model_product_duplicate')]
+    #[Maho\Config\Observer('catalog_model_product_duplicate', type: 'singleton')]
     public function copyInventoryData($observer)
     {
         /** @var Mage_Catalog_Model_Product $currentProduct */
@@ -290,7 +290,7 @@ class Mage_CatalogInventory_Model_Observer
      * @return $this
      * @throws Mage_Core_Exception
      */
-    #[Maho\Config\Observer('sales_quote_item_qty_set_after')]
+    #[Maho\Config\Observer('sales_quote_item_qty_set_after', type: 'singleton')]
     public function checkQuoteItemQty($observer)
     {
         /** @var Mage_Sales_Model_Quote_Item $quoteItem */
@@ -575,7 +575,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('checkout_submit_all_after')]
+    #[Maho\Config\Observer('checkout_submit_all_after', type: 'singleton')]
     public function checkoutAllSubmitAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
@@ -595,7 +595,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return Mage_CatalogInventory_Model_Observer|void
      */
-    #[Maho\Config\Observer('sales_model_service_quote_submit_before')]
+    #[Maho\Config\Observer('sales_model_service_quote_submit_before', type: 'singleton')]
     public function subtractQuoteInventory(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
@@ -621,7 +621,7 @@ class Mage_CatalogInventory_Model_Observer
      * Revert quote items inventory data (cover not success order place case)
      * @param \Maho\Event\Observer $observer
      */
-    #[Maho\Config\Observer('sales_model_service_quote_submit_failure')]
+    #[Maho\Config\Observer('sales_model_service_quote_submit_failure', type: 'singleton')]
     public function revertQuoteInventory($observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */
@@ -704,7 +704,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('sales_model_service_quote_submit_success')]
+    #[Maho\Config\Observer('sales_model_service_quote_submit_success', type: 'singleton')]
     public function reindexQuoteInventory($observer)
     {
         // Reindex quote ids
@@ -760,7 +760,7 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
-    #[Maho\Config\Observer('sales_order_creditmemo_save_after')]
+    #[Maho\Config\Observer('sales_order_creditmemo_save_after', type: 'singleton')]
     public function refundOrderInventory($observer)
     {
         /** @var Mage_Sales_Model_Order_Creditmemo $creditmemo */
@@ -800,7 +800,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('sales_order_item_cancel')]
+    #[Maho\Config\Observer('sales_order_item_cancel', type: 'singleton')]
     public function cancelOrderItem($observer)
     {
         /** @var Mage_Sales_Model_Order_Item $item */
@@ -823,7 +823,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('admin_system_config_changed_section_cataloginventory')]
+    #[Maho\Config\Observer('admin_system_config_changed_section_cataloginventory', type: 'singleton')]
     public function updateItemsStockUponConfigChange($observer)
     {
         Mage::getResourceSingleton('cataloginventory/stock')->updateSetOutOfStock();
@@ -886,9 +886,9 @@ class Mage_CatalogInventory_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_product_prepare_index_select')]
-    #[Maho\Config\Observer('prepare_catalog_product_index_select')]
-    #[Maho\Config\Observer('prepare_product_children_id_list_select')]
+    #[Maho\Config\Observer('catalog_product_prepare_index_select', type: 'singleton')]
+    #[Maho\Config\Observer('prepare_catalog_product_index_select', type: 'singleton')]
+    #[Maho\Config\Observer('prepare_product_children_id_list_select', type: 'singleton')]
     public function prepareCatalogProductIndexSelect(\Maho\Event\Observer $observer)
     {
         $select     = $observer->getEvent()->getSelect();
@@ -935,9 +935,9 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @throws Exception
      */
-    #[Maho\Config\Observer('end_index_events_cataloginventory_stock_item_save')]
-    #[Maho\Config\Observer('end_process_event_cataloginventory_stock_item_save')]
-    #[Maho\Config\Observer('after_reindex_process_cataloginventory_stock', area: 'adminhtml')]
+    #[Maho\Config\Observer('end_index_events_cataloginventory_stock_item_save', type: 'singleton')]
+    #[Maho\Config\Observer('end_process_event_cataloginventory_stock_item_save', type: 'singleton')]
+    #[Maho\Config\Observer('after_reindex_process_cataloginventory_stock', area: 'adminhtml', type: 'singleton')]
     public function reindexProductsMassAction($observer): void
     {
         Mage::getSingleton('index/indexer')->indexEvents(
@@ -952,7 +952,7 @@ class Mage_CatalogInventory_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_block_product_status_display')]
+    #[Maho\Config\Observer('catalog_block_product_status_display', type: 'singleton')]
     public function displayProductStatusInfo($observer)
     {
         $info = $observer->getEvent()->getStatus();
