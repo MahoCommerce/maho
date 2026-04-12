@@ -60,7 +60,7 @@
 
                             <?php if ($_displayInclTax || $_displayBothPrices): ?>
                                 <?php $_incl = $_checkoutHelper->getPriceInclTax($_item); ?>
-                                <?php if ($_displayBothPrices): ?><br /><?= $this->__('Incl. Tax') ?>: <?php endif ?>
+                                <?php if ($_displayBothPrices): ?><br><?= $this->__('Incl. Tax') ?>: <?php endif ?>
                                 <?php if ($_weeeHelper->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
                                     <?= $_checkoutHelper->formatPrice($_incl + $_weeeHelper->getWeeeTaxInclTax($_item)) ?>
                                 <?php elseif ($_weeeHelper->typeOfDisplay($_item, 2, 'sales') && $_weeeApplied): ?>

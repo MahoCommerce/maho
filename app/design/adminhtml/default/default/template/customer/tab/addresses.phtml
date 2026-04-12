@@ -415,11 +415,11 @@ class addressesModel {
             const addressElement = container.addressItem.querySelector('address');
             if (addressElement) {
                 let html = this.evaluateTemplate(this.itemContentTemplate, data);
-                html = html.replace(/(<br\s*\/?\s*>){2,}/gi, '<br/>');
-                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}\s*<br\s*\/?\s*>/gi, '<br/>');
-                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}(.*)<br\s*\/?\s*>/gi, '<br/>$2<br/>');
-                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){1,}<br\s*\/?\s*>/gi, '<br/>$1<br/>');
-                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){2,}(.*?)<br\s*\/?\s*>/gi, '<br/>$1, $3<br/>');
+                html = html.replace(/(<br\s*\/?\s*>){2,}/gi, '<br>');
+                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}\s*<br\s*\/?\s*>/gi, '<br>');
+                html = html.replace(/<br\s*\/?\s*>(\s*,){1,}(.*)<br\s*\/?\s*>/gi, '<br>$2<br>');
+                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){1,}<br\s*\/?\s*>/gi, '<br>$1<br>');
+                html = html.replace(/<br\s*\/?\s*>(.*?)(,\s*){2,}(.*?)<br\s*\/?\s*>/gi, '<br>$1, $3<br>');
                 html = html.replace(/t:\s*<br\s*\/?\s*>/gi, '');
                 html = html.replace(/f:\s*<br\s*\/?\s*>/gi, '');
                 html = html.replace(/vat:\s*$/gi, '');
@@ -578,14 +578,14 @@ class addressesModel {
                 }
             }
             html += '</select>';
-            html += `<input type="hidden" name="${regionHtmlName}" id="${regionHtmlId}"/>`;
+            html += `<input type="hidden" name="${regionHtmlName}" id="${regionHtmlId}">`;
 
             reqLabel.forEach(item => item.style.display = '');
             newInputId = regionIdHtmlId;
         } else {
             // Create visible text input 'region' and hidden 'region_id'
-            html = `<input type="text" name="${regionHtmlName}" id="${regionHtmlId}" class="input-text" title="${this.regionElement.title}" />` +
-                   `<input type="hidden" name="${regionIdHtmlName}" id="${regionIdHtmlId}"/>`;
+            html = `<input type="text" name="${regionHtmlName}" id="${regionHtmlId}" class="input-text" title="${this.regionElement.title}">` +
+                   `<input type="hidden" name="${regionIdHtmlName}" id="${regionIdHtmlId}">`;
 
             reqLabel.forEach(item => item.style.display = 'none');
             newInputId = regionHtmlId;

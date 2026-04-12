@@ -1303,7 +1303,7 @@ class Mage_Customer_Model_Customer extends Mage_Core_Model_Abstract
         $errors = $this->getErrors();
         if ($errors) {
             $this->unsetData();
-            $this->printError(implode('<br />', $errors));
+            $this->printError(implode('<br>', $errors));
             return null;
         }
 

@@ -400,7 +400,7 @@ class varienGridMassaction {
         this.useSelectAll = false;
         this.currentItem = false;
         this.lastChecked = { left: false, top: false, checkbox: false };
-        this.fieldTemplate = (data) => `<input type="hidden" name="${data.name}" value="${data.value}" />`;
+        this.fieldTemplate = (data) => `<input type="hidden" name="${data.name}" value="${data.value}">`;
 
         // Initialize
         this.setOldCallback('row_click', grid.rowClickCallback);

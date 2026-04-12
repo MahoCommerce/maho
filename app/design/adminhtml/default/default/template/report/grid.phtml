@@ -69,7 +69,7 @@ $numColumns = count($this->getColumns());
 
     <div class="grid">
     <table cellspacing="0" class="data" id="<?= $this->getId() ?>_table">
-        <col/>
+        <col>
         <?php foreach ($this->getColumns() as $_column): ?>
         <col <?= $_column->getHtmlProperty() ?>/>
         <?php endforeach ?>

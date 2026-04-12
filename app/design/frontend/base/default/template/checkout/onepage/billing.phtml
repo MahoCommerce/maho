@@ -118,7 +118,7 @@
                     </div>
                 </li>
                 <?php if(!$this->isCustomerLoggedIn()): ?>
-                <input type="hidden" name="checkout_method" value="guest" />
+                <input type="hidden" name="checkout_method" value="guest">
         <?php $_dob = $this->getLayout()->createBlock('customer/widget_dob') ?>
         <?php $_gender = $this->getLayout()->createBlock('customer/widget_gender') ?>
             <?php if ($_dob->isEnabled() || $_gender->isEnabled()): ?>
@@ -145,7 +145,7 @@
                         <input type="checkbox" name="billing[save_in_address_book]" value="1" title="<?= $this->quoteEscape($this->__('Save in address book')) ?>" id="billing:save_in_address_book" onchange="if(window.shipping) shipping.setSameAsBilling(false);"<?php if ($this->getAddress()->getSaveInAddressBook()):?> checked="checked"<?php endif ?> class="checkbox" /><label for="billing:save_in_address_book"><?= $this->__('Save in address book') ?></label>
                     </li>
                 <?php else: ?>
-                    <li class="no-display"><input type="hidden" name="billing[save_in_address_book]" value="1" /></li>
+                    <li class="no-display"><input type="hidden" name="billing[save_in_address_book]" value="1"></li>
                 <?php endif ?>
                 <?= $this->getChildHtml('form.additional.info') ?>
             </ul>
@@ -162,7 +162,7 @@
     <?php endif ?>
     </ul>
     <?php if (!$this->canShip()): ?>
-        <input type="hidden" name="billing[use_for_shipping]" value="1" />
+        <input type="hidden" name="billing[use_for_shipping]" value="1">
     <?php endif ?>
     <div class="buttons-set" id="billing-buttons-container">
         <button type="submit" title="<?= $this->quoteEscape($this->__('Continue')) ?>" class="button" onclick="billing.save()"><?= $this->__('Continue') ?></button>

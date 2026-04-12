@@ -37,7 +37,7 @@ if ($this->getIsShipping()):
 
     <fieldset class="np">
     <div id = "<?= $_addressChoiceContainerId ?>" class="order-choose-address">
-        <?= Mage::helper('sales')->__('Select from existing customer addresses:') ?><br/>
+        <?= Mage::helper('sales')->__('Select from existing customer addresses:') ?><br>
         <?php $_id = $this->getForm()->getHtmlIdPrefix() . 'customer_address_id' ?>
         <select id="<?= $_id ?>"  name="<?= $this->getForm()->getHtmlNamePrefix() ?>[customer_address_id]" style="width:97.5%;" onchange="order.selectAddress(this, '<?= $_fieldsContainerId ?>')">
             <option value=""><?= Mage::helper('sales')->__('Add New Address') ?></option>
@@ -50,7 +50,7 @@ if ($this->getIsShipping()):
             <?php endforeach ?>
 
         </select>
-        <br/>
+        <br>
         <?php if ($this->getIsShipping()): ?>
             <input type="checkbox" id="order-shipping_as_billing" name="shipping_as_billing" value="1" onclick="order.setShippingAsBilling(this.checked)" <?php if ($this->getIsAsBilling()): ?>checked<?php endif ?>/>
             <label for="order-shipping_as_billing" class="no-float"><?= Mage::helper('sales')->__('Same As Billing Address') ?></label>

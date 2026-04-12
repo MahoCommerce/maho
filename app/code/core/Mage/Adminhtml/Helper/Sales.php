@@ -22,7 +22,7 @@ class Mage_Adminhtml_Helper_Sales extends Mage_Core_Helper_Abstract
      * @param   string $separator
      * @return  string
      */
-    public function displayPriceAttribute($dataObject, $code, $strong = false, $separator = '<br/>')
+    public function displayPriceAttribute($dataObject, $code, $strong = false, $separator = '<br>')
     {
         return $this->displayPrices(
             $dataObject,
@@ -43,7 +43,7 @@ class Mage_Adminhtml_Helper_Sales extends Mage_Core_Helper_Abstract
      * @param   string $separator
      * @return  string
      */
-    public function displayPrices($dataObject, $basePrice, $price, $strong = false, $separator = '<br/>')
+    public function displayPrices($dataObject, $basePrice, $price, $strong = false, $separator = '<br>')
     {
         $order = false;
         if ($dataObject instanceof Mage_Sales_Model_Order) {

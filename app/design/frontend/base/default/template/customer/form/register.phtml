@@ -56,7 +56,7 @@
 <?php if($this->getShowAddressFields()): ?>
     <fieldset class="fieldset">
         <legend class="visually-hidden"><?= $this->__('Address Information') ?></legend>
-        <input type="hidden" name="create_address" value="1" />
+        <input type="hidden" name="create_address" value="1">
         <ul class="form-list">
             <li class="fields">
                 <div class="field">
@@ -123,8 +123,8 @@
                 </div>
             </li>
         </ul>
-        <input type="hidden" name="default_billing" value="1" />
-        <input type="hidden" name="default_shipping" value="1" />
+        <input type="hidden" name="default_billing" value="1">
+        <input type="hidden" name="default_shipping" value="1">
     </fieldset>
 <?php endif ?>
     <?php $magicLinkMode = Mage::helper('customer')->getMagicLinkRegistrationMode(); ?>
@@ -169,7 +169,7 @@
         <button type="submit" title="<?= $this->quoteEscape($this->__('Register')) ?>" class="button"><?= $this->__('Register') ?></button>
     </div>
     <?php if (Mage::helper('checkout')->isContextCheckout()): ?>
-        <input name="context" type="hidden" value="checkout" />
+        <input name="context" type="hidden" value="checkout">
     <?php endif ?>
 </form>
 <script>

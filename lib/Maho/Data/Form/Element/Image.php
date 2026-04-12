@@ -97,7 +97,7 @@ class Image extends AbstractElement
         if (is_array($value)) {
             return '';
         }
-        return '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $value . '" />';
+        return '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $value . '">';
     }
 
     /**

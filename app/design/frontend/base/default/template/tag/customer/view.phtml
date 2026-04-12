@@ -24,9 +24,9 @@
 <table class="data-table" id="my-tags-table">
 <?php if(count($this->getMyProducts()) > 0): ?>
     <?php $params[Mage_Core_Model_Url::FORM_KEY] = $this->getFormKey() ?>
-    <col width="1" />
-    <col />
-    <col width="1" />
+    <col width="1">
+    <col>
+    <col width="1">
     <tbody>
     <?php $iterator = 0 ?>
     <?php foreach($this->getMyProducts() as $_product): ?>

@@ -19,10 +19,10 @@
     </span>
     <div class="f-left">
         <?php if ($this->canSendCommentEmail()): ?>
-            <input name="comment[is_customer_notified]" type="checkbox" id="history_notify" value="1" />
-            <label class="normal" for="history_notify"><?= Mage::helper('sales')->__('Notify Customer by Email') ?></label><br />
+            <input name="comment[is_customer_notified]" type="checkbox" id="history_notify" value="1">
+            <label class="normal" for="history_notify"><?= Mage::helper('sales')->__('Notify Customer by Email') ?></label><br>
         <?php endif ?>
-        <input name="comment[is_visible_on_front]" type="checkbox" id="history_visible" value="1" /><label class="normal" for="history_visible"> <?= Mage::helper('sales')->__('Visible on Frontend') ?></label>
+        <input name="comment[is_visible_on_front]" type="checkbox" id="history_visible" value="1"><label class="normal" for="history_visible"> <?= Mage::helper('sales')->__('Visible on Frontend') ?></label>
     </div>
     <div class="f-right">
         <?= $this->getChildHtml('submit_button') ?>

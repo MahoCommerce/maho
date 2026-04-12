@@ -12,10 +12,10 @@
 <?php /** @var Mage_Adminhtml_Block_Sales_Order_Shipment_View_Tracking $this */ ?>
 <div class="field-row grid" id="shipment_tracking_info">
 <table cellspacing="0" class="data">
-    <col width="100" />
-    <col />
-    <col />
-    <col width="80" />
+    <col width="100">
+    <col>
+    <col>
+    <col width="80">
     <thead>
         <tr class="headings">
             <th><?= Mage::helper('sales')->__('Carrier') ?></th>
@@ -33,8 +33,8 @@
                     <?php endforeach ?>
                 </select>
             </td>
-            <td><input class="input-text" type="text" id="tracking_title" name="title" value="" /></td>
-            <td><input class="input-text" type="text" id="tracking_number" name="number" value="" /></td>
+            <td><input class="input-text" type="text" id="tracking_title" name="title" value=""></td>
+            <td><input class="input-text" type="text" id="tracking_number" name="number" value=""></td>
             <td class="last"><?= $this->getSaveButtonHtml() ?></td>
         </tr>
     </tfoot>

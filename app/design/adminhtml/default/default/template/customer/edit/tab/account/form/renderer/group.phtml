@@ -26,7 +26,7 @@ $_class = $_element->getFieldsetHtmlClass();
     <td class="<?= $_element->hasValueClass() ? $_element->getValueClass() : 'value' ?><?= $_class ? " {$_class}-value" : '' ?>">
         <?= trim($_element->getElementHtml()) ?>
         <?php if ($this->getDisableAutoGroupChangeAttribute()): ?>
-            <br/>
+            <br>
             <input id="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementId()) ?>" name="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementName()) ?>" type="checkbox"<?php if ($this->getDisableAutoGroupChangeCheckboxState() == 'checked') :?> checked="checked"<?php endif ?> value="1"/>
             <label for="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementId()) ?>"><?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxLabel()) ?></label>
         <?php endif ?>

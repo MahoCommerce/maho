@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Sales_Order_Abstract extends Mage_Adminhtml_Block_Wid
      * @param string $separator
      * @return string
      */
-    public function displayPriceAttribute($code, $strong = false, $separator = '<br/>')
+    public function displayPriceAttribute($code, $strong = false, $separator = '<br>')
     {
         /** @var Mage_Adminhtml_Helper_Sales $helper */
         $helper = $this->helper('adminhtml/sales');
@@ -60,7 +60,7 @@ class Mage_Adminhtml_Block_Sales_Order_Abstract extends Mage_Adminhtml_Block_Wid
      * @param string $separator
      * @return string
      */
-    public function displayPrices($basePrice, $price, $strong = false, $separator = '<br/>')
+    public function displayPrices($basePrice, $price, $strong = false, $separator = '<br>')
     {
         /** @var Mage_Adminhtml_Helper_Sales $helper */
         $helper = $this->helper('adminhtml/sales');

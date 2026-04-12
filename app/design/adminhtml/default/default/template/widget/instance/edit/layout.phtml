@@ -34,10 +34,10 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
         '<input type="hidden" name="widget_instance[{{id}}][<?= $container['name'] ?>][page_id]" value="{{page_id}}" />'+
         '<input type="hidden" class="layout_handle_pattern" name="widget_instance[{{id}}][<?= $container['name'] ?>][layout_handle]" value="<?= $container['layout_handle'] ?>" />'+
         '<table cellspacing="0" class="option-header">'+
-            '<col width="200" />'+
-            '<col width="220" />'+
-            '<col width="320" />'+
-            '<col />'+
+            '<col width="200">'+
+            '<col width="220">'+
+            '<col width="320">'+
+            '<col>'+
             '<thead>'+
                 '<tr>'+
                     '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__($container['label'])) ?></label></th>'+
@@ -84,14 +84,14 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
     '</div>'+
 <?php endforeach ?>
 '<div class="no-display all_pages group_container" id="all_pages_{{id}}">'+
-    '<input type="hidden" class="container_name" name="__[container_name]" value="widget_instance[{{id}}][all_pages]" />'+
-    '<input type="hidden" name="widget_instance[{{id}}][all_pages][page_id]" value="{{page_id}}" />'+
-    '<input type="hidden" class="layout_handle_pattern" name="widget_instance[{{id}}][all_pages][layout_handle]" value="default" />'+
-    '<input type="hidden" class="for_all" name="widget_instance[{{id}}][all_pages][for]" value="all" />'+
+    '<input type="hidden" class="container_name" name="__[container_name]" value="widget_instance[{{id}}][all_pages]">'+
+    '<input type="hidden" name="widget_instance[{{id}}][all_pages][page_id]" value="{{page_id}}">'+
+    '<input type="hidden" class="layout_handle_pattern" name="widget_instance[{{id}}][all_pages][layout_handle]" value="default">'+
+    '<input type="hidden" class="for_all" name="widget_instance[{{id}}][all_pages][for]" value="all">'+
     '<table cellspacing="0" class="option-header">'+
-        '<col width="220" />'+
-        '<col width="320" />'+
-        '<col />'+
+        '<col width="220">'+
+        '<col width="320">'+
+        '<col>'+
         '<thead>'+
             '<tr>'+
                 '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Block Reference')) ?> <span class="required">*</span></label></th>'+
@@ -117,15 +117,15 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
     '</table>'+
 '</div>'+
 '<div class="no-display ignore-validate pages group_container" id="pages_{{id}}">'+
-    '<input type="hidden" class="container_name" name="__[container_name]" value="widget_instance[{{id}}][pages]" />'+
-    '<input type="hidden" name="widget_instance[{{id}}][pages][page_id]" value="{{page_id}}" />'+
-    '<input type="hidden" class="layout_handle_pattern" name="widget_instance[{{id}}][all_pages][layout_handle]" value="default" />'+
-    '<input type="hidden" class="for_all" name="widget_instance[{{id}}][pages][for]" value="all" />'+
+    '<input type="hidden" class="container_name" name="__[container_name]" value="widget_instance[{{id}}][pages]">'+
+    '<input type="hidden" name="widget_instance[{{id}}][pages][page_id]" value="{{page_id}}">'+
+    '<input type="hidden" class="layout_handle_pattern" name="widget_instance[{{id}}][all_pages][layout_handle]" value="default">'+
+    '<input type="hidden" class="for_all" name="widget_instance[{{id}}][pages][for]" value="all">'+
     '<table cellspacing="0" class="option-header">'+
-        '<col width="200" />'+
-        '<col width="220" />'+
-        '<col width="320" />'+
-        '<col />'+
+        '<col width="200">'+
+        '<col width="220">'+
+        '<col width="320">'+
+        '<col>'+
         '<thead>'+
             '<tr>'+
                 '<th><label><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Page')) ?> <span class="required">*</span></label></th>'+

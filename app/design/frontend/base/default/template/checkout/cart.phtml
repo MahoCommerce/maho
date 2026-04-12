@@ -30,15 +30,15 @@
     <form action="<?= $this->getFormActionUrl() ?>" method="post">
         <?= $this->getBlockHtml('formkey') ?>
         <table id="shopping-cart-table" class="cart-table data-table" role="table" aria-label="<?= $this->__('Shopping cart items') ?>">
-            <col width="1" />
-            <col width="999" />
-            <col width="1" />
-            <col width="1" />
-            <col width="1" />
-            <col width="1" />
+            <col width="1">
+            <col width="999">
+            <col width="1">
+            <col width="1">
+            <col width="1">
+            <col width="1">
             <?php if ($this->helper('tax')->displayCartBothPrices()): ?>
-            <col width="1" />
-            <col width="1" />
+            <col width="1">
+            <col width="1">
             <?php endif ?>
 
         <?php $mergedCells = ($this->helper('tax')->displayCartBothPrices() ? 2 : 1); ?>

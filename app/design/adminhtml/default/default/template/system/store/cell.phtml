@@ -16,5 +16,5 @@ $object = $this->getObject();
 <a href="<?= $this->getLinkUrl() ?>" class="<?= $object->getIsDefault() ? 'bold' : '' ?> <?= $this->getClass() ?>" title="<?= $this->__('Id') . ': ' . $object->getId() ?>">
     <?= $this->escapeHtml($object->getName()) ?>
 </a>
-<br />
+<br>
 <span class="additional-info">(<?= $this->getInfo() ?>)</span>

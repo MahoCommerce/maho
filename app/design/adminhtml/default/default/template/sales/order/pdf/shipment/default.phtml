@@ -25,9 +25,9 @@ $order = $this->getOrder();
         <div class="pdf-document-info">
             <h1><?= $this->__('Shipment # %s', $this->getShipmentNumber()) ?></h1>
             <?php if ($orderNumber = $this->getOrderNumber()): ?>
-                <?= $this->__('Order # %s', $orderNumber) ?><br />
+                <?= $this->__('Order # %s', $orderNumber) ?><br>
             <?php endif; ?>
-            <?= $this->__('Shipment Date: %s', $this->getShipmentDate()) ?><br />
+            <?= $this->__('Shipment Date: %s', $this->getShipmentDate()) ?><br>
             <?php if ($orderDate = $this->getOrderDate()): ?>
                 <?= $this->__('Order Date: %s', $orderDate) ?>
             <?php endif; ?>

@@ -20,11 +20,11 @@
     <td colspan="10" class="grid weee">
     <table cellspacing="0" class="data border" id="<?= $_htmlId ?>_table">
         <?php if ($_multiWebsite): ?>
-        <col width="135" />
+        <col width="135">
         <?php endif ?>
-        <col width="140" />
-        <col />
-        <col width="1" />
+        <col width="140">
+        <col>
+        <col width="1">
         <thead>
             <tr class="headings">
                 <th <?php if (!$_multiWebsite): ?>style="display:none"<?php endif ?>><?= Mage::helper('sales')->__('Website') ?></th>
@@ -46,7 +46,7 @@
                     <option value="<?= $_country['value'] ?>"><?= htmlspecialchars($_country['label']) ?></option>
                     <?php endforeach ?>
                 </select>
-                <br />
+                <br>
                 <select disabled="no-template" class="<?= $_htmlClass ?> state" name="<?= $_htmlName ?>[__index__][state]" id="#{prefix}_weee_tax_row___index___state">
                     <option value="0">*</option>
                 </select>

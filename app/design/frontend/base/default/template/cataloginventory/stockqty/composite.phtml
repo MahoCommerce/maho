@@ -19,8 +19,8 @@
         <a href="#" id="<?= $this->getPlaceholderId() ?>" title="<?= $this->quoteEscape($this->__('Only %s left', ($this->getStockQty()))) ?>"><?= $this->__('Only %s left', "<strong>{$this->getStockQty()}</strong>") ?></a>
     </p>
     <table id="<?= $this->getDetailsPlaceholderId() ?>" class="availability-only-details no-display">
-        <col />
-        <col width="1" />
+        <col>
+        <col width="1">
         <thead>
             <tr>
                 <th><?= $this->__('Product Name') ?></th>

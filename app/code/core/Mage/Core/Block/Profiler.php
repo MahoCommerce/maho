@@ -39,7 +39,7 @@ class Mage_Core_Block_Profiler extends Mage_Core_Block_Abstract
 
         $out = "<a href=\"javascript:void(0)\" onclick=\"document.getElementById('profiler_section').style.display=document.getElementById('profiler_section').style.display=='block'?'none':'block'\">[profiler]</a>";
         $out .= '<div id="profiler_section" style="background:white;display:block">';
-        $out .= 'Memory usage: real: ' . $memoryUsage . '(' . $memoryUsageMB . 'MB), emalloc: ' . $emalloc . '(' . $emallocMB . 'MB)<br />';
+        $out .= 'Memory usage: real: ' . $memoryUsage . '(' . $memoryUsageMB . 'MB), emalloc: ' . $emalloc . '(' . $emallocMB . 'MB)<br>';
 
         if ($timers) {
             $out .= '<table border="1" cellspacing="0" cellpadding="2" style="width:auto">';

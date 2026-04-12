@@ -21,17 +21,17 @@
         <div class="auto-scroll">
         <?php if($this->getItemCount()): ?>
         <table style="width:100%">
-            <col />
+            <col>
             <?php if ($this->canDisplayItemQty()): ?>
-            <col width="20" />
+            <col width="20">
             <?php endif ?>
             <?php if($this->canDisplayPrice()): ?>
-            <col width="60" />
+            <col width="60">
             <?php endif ?>
             <?php if($this->canRemoveItems()): ?>
-            <col width="16" />
+            <col width="16">
             <?php endif ?>
-            <col width="16" />
+            <col width="16">
             <tr>
                 <th><?= Mage::helper('sales')->__('Item') ?></th>
                 <?php if ($this->canDisplayItemQty()): ?>

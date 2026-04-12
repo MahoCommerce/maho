@@ -41,10 +41,10 @@
 <div class="grid">
     <div class="hor-scroll">
         <table cellspacing="0" id="downloadable_sample_table" class="data border">
-            <col />
-            <col width="1" />
-            <col width="1" />
-            <col width="1" />
+            <col>
+            <col width="1">
+            <col width="1">
+            <col width="1">
             <thead>
                 <tr class="headings">
                     <th><?= $helper->__('Title') ?> <span class="required">*</span></th>
@@ -68,12 +68,12 @@
 <template id="downloadable-sample-template">
     <tr id="downloadable_sample_{{id}}">
         <td>
-            <input type="hidden" class="__delete__" name="downloadable[sample][{{id}}][is_delete]" value="" />
-            <input type="hidden" name="downloadable[sample][{{id}}][sample_id]" value="{{sample_id}}" />
-            <input type="text" class="required-entry input-text" name="downloadable[sample][{{id}}][title]" value="{{title}}" />
+            <input type="hidden" class="__delete__" name="downloadable[sample][{{id}}][is_delete]" value="">
+            <input type="hidden" name="downloadable[sample][{{id}}][sample_id]" value="{{sample_id}}">
+            <input type="text" class="required-entry input-text" name="downloadable[sample][{{id}}][title]" value="{{title}}">
             <?php if ($product->getStoreId()): ?>
             <br>
-            <input type="checkbox" id="downloadable_sample_{{id}}_title" name="downloadable[sample][{{id}}][use_default_title]" value="1" />
+            <input type="checkbox" id="downloadable_sample_{{id}}_title" name="downloadable[sample][{{id}}][use_default_title]" value="1">
             <label class="normal" for="downloadable_sample_{{id}}_title"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
         </td>
@@ -81,10 +81,10 @@
             <div class="files-wide">
                 <div class="row a-right">
                     <label for="downloadable_sample_{{id}}_file_type" class="a-left">
-                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_file_type" name="downloadable[sample][{{id}}][type]" value="file" />
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_file_type" name="downloadable[sample][{{id}}][type]" value="file">
                         <?= $helper->__('File:') ?>
                     </label>
-                    <input type="hidden" class="validate-downloadable-file" id="downloadable_sample_{{id}}_file_save" name="downloadable[sample][{{id}}][file]" value="{{file_save}}" />
+                    <input type="hidden" class="validate-downloadable-file" id="downloadable_sample_{{id}}_file_save" name="downloadable[sample][{{id}}][file]" value="{{file_save}}">
                     <?= $this->getBrowseButtonHtml() ?>
                     <?= $this->getDeleteButtonHtml() ?>
                     <div id="downloadable_sample_{{id}}_file" class="uploader a-left">
@@ -95,10 +95,10 @@
                 </div>
                 <div class="row">
                     <label for="downloadable_sample_{{id}}_url_type">
-                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_url_type" name="downloadable[sample][{{id}}][type]" value="url" />
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_sample_{{id}}_url_type" name="downloadable[sample][{{id}}][type]" value="url">
                         <?= $helper->__('URL:') ?>
                     </label>
-                    <input type="text" class="validate-downloadable-url input-text" id="downloadable_sample_{{id}}_url_save" name="downloadable[sample][{{id}}][sample_url]" value="{{sample_url}}" />
+                    <input type="text" class="validate-downloadable-url input-text" id="downloadable_sample_{{id}}_url_save" name="downloadable[sample][{{id}}][sample_url]" value="{{sample_url}}">
                 </div>
             </div>
             <div>
@@ -106,7 +106,7 @@
             </div>
         </td>
         <td class="a-center">
-            <input type="text" name="downloadable[sample][{{id}}][sort_order]" value="{{sort_order}}" class="input-text sort" />
+            <input type="text" name="downloadable[sample][{{id}}][sort_order]" value="{{sort_order}}" class="input-text sort">
         </td>
         <td>
             <button id="downloadable_link_{{id}}_delete_button" type="button" class="scalable delete icon-btn delete-sample-item"><span><?= $helper->__('Delete') ?></span></button>

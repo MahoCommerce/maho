@@ -24,7 +24,7 @@
                 <p><small><?= $shortDescription ?></small></p>
             <?php endif ?>
             <p><?php if ($product->getPrice() != $product->getFinalPrice()): ?>
-                <?= $this->__('Regular Price:') ?> <strong style="text-decoration:line-through;"><?= Mage::helper('core')->currency($product->getPrice()) ?></strong><br />
+                <?= $this->__('Regular Price:') ?> <strong style="text-decoration:line-through;"><?= Mage::helper('core')->currency($product->getPrice()) ?></strong><br>
                 <strong><?= $this->__('Special price:') ?> <span style="color:#FF0000;"><?= Mage::helper('core')->currency($product->getFinalPrice()) ?></span></strong>
             <?php else: ?>
                 <strong><?= $this->__('Price:') ?></strong> <?= Mage::helper('core')->currency($product->getPrice()) ?>

@@ -48,7 +48,7 @@
                 <label for="current_password" class="required"><?= $this->quoteEscape($this->__('Current Password')) ?></label>
                 <div class="input-box">
                     <!-- This is a dummy hidden field to trick firefox from automatically filling the password -->
-                    <input type="text" class="input-text no-display" name="dummy" id="dummy" />
+                    <input type="text" class="input-text no-display" name="dummy" id="dummy">
                     <input type="password" title="<?= $this->quoteEscape($this->__('Current Password')) ?>" class="input-text required-entry" name="current_password" id="current_password" autocomplete="off" />
                 </div>
             </li>

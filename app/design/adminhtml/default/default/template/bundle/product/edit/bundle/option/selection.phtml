@@ -36,7 +36,7 @@ const bundleTemplateRow ='<td>' +
                 '    <input type="hidden" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][option_id]" value="{{option_id}}">' +
                 '    <input type="hidden" class="product" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][product_id]" value="{{product_id}}">' +
                 '    <input type="hidden" name="<?= $this->getFieldName() ?>[{{parentIndex}}][{{index}}][delete]" value="{{delete}}" class="delete">' +
-                '    {{name}}<br />' +
+                '    {{name}}<br>' +
                 '   <div  class="nobr">' +
                 '        <strong><?= $this->helper('sales')->__('SKU') ?>:</strong> <a href="<?= $this->getUrl('*/catalog_product/edit', ['store' => $this->getRequest()->getParam('store')]) ?>id/{{product_id}}/">{{sku}}</a>' +
                 '    </div>' +

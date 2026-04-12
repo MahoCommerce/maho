@@ -25,12 +25,12 @@ $order = $this->getOrder();
         <div class="pdf-document-info">
             <h1><?= $this->__('Credit Memo # %s', $this->getCreditmemoNumber()) ?></h1>
             <?php if ($orderNumber = $this->getOrderNumber()): ?>
-                <?= $this->__('Order # %s', $orderNumber) ?><br />
+                <?= $this->__('Order # %s', $orderNumber) ?><br>
             <?php endif; ?>
             <?php if ($invoiceNumber = $this->getInvoiceNumber()): ?>
-                <?= $this->__('Invoice # %s', $invoiceNumber) ?><br />
+                <?= $this->__('Invoice # %s', $invoiceNumber) ?><br>
             <?php endif; ?>
-            <?= $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?><br />
+            <?= $this->__('Credit Memo Date: %s', $this->getCreditmemoDate()) ?><br>
             <?php if ($orderDate = $this->getOrderDate()): ?>
                 <?= $this->__('Order Date: %s', $orderDate) ?>
             <?php endif; ?>

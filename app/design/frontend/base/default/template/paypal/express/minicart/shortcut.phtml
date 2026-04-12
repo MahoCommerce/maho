@@ -22,7 +22,7 @@
 
 <?php if ($this->getConfirmationUrl() || $this->getIsInCatalogProduct()): ?>
     <?php if ($this->getIsInCatalogProduct()): ?>
-        <input type="hidden" id="pp_checkout_url" name="return_url" value="" />
+        <input type="hidden" id="pp_checkout_url" name="return_url" value="">
     <?php endif ?>
     <script>
         document.getElementById('<?= $shortcutHtmlId ?>').addEventListener('click', function(event) {

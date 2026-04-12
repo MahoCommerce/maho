@@ -26,7 +26,7 @@
     <?php if ($this->canSendNewOrderConfirmationEmail()): ?>
     <p>
         <label for="send_confirmation" class="normal"><?= Mage::helper('sales')->__('Email Order Confirmation') ?></label>
-        <input type="checkbox" id="send_confirmation" name="order[send_confirmation]" value="1" checked="checked"/>
+        <input type="checkbox" id="send_confirmation" name="order[send_confirmation]" value="1" checked="checked">
     </p>
     <?php endif ?>
     <p><?= $this->getButtonHtml(Mage::helper('sales')->__('Submit Order'),'order.submit()','save') ?></p>
