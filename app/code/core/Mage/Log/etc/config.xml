@@ -112,8 +112,6 @@
             </email>
         </template>
     </global>
-    <frontend>
-    </frontend>
     <adminhtml>
         <translate>
             <modules>

@@ -91,19 +91,25 @@ class Mage_Cron_Model_Observer
 
             $jobCode = $schedule->getJobCode();
 
-            if (isset($compiledJobs[$jobCode])) {
-                $this->_processCompiledJob($schedule, $compiledJobs[$jobCode]);
-                continue;
-            }
-
-            $jobConfig = $jobsRoot->{$jobCode};
-            if (!$jobConfig || !$jobConfig->run) {
-                $jobConfig = $defaultJobsRoot->{$jobCode};
-                if (!$jobConfig || !$jobConfig->run) {
+            try {
+                if (isset($compiledJobs[$jobCode])) {
+                    $this->_processCompiledJob($schedule, $compiledJobs[$jobCode]);
                     continue;
                 }
+
+                $jobConfig = $jobsRoot->{$jobCode};
+                if (!$jobConfig || !$jobConfig->run) {
+                    $jobConfig = $defaultJobsRoot->{$jobCode};
+                    if (!$jobConfig || !$jobConfig->run) {
+                        continue;
+                    }
+                }
+                $this->_processJob($schedule, $jobConfig);
+            } catch (Exception $e) {
+                $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
+                    ->setMessages($e->__toString())
+                    ->save();
             }
-            $this->_processJob($schedule, $jobConfig);
         }
 
         $this->generate();
@@ -141,7 +147,13 @@ class Mage_Cron_Model_Observer
             }
             $schedule = $this->_getAlwaysJobSchedule($jobCode);
             if ($schedule !== false) {
-                $this->_processCompiledJob($schedule, $jobDef, true);
+                try {
+                    $this->_processCompiledJob($schedule, $jobDef, true);
+                } catch (Exception $e) {
+                    $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
+                        ->setMessages($e->__toString())
+                        ->save();
+                }
             }
         }
     }
