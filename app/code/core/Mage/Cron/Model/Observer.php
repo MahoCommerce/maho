@@ -334,9 +334,8 @@ class Mage_Cron_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @param SimpleXMLElement $jobConfig
      * @param bool $isAlways
-     * @return $this|void
      */
-    protected function _processJob($schedule, $jobConfig, $isAlways = false)
+    protected function _processJob($schedule, $jobConfig, $isAlways = false): self
     {
         $runConfig = $jobConfig->run;
         if (!$runConfig->model) {
@@ -370,17 +369,15 @@ class Mage_Cron_Model_Observer
 
     /**
      * Execute a scheduled job with lifetime checks, locking, and status management.
-     *
-     * @return $this|void
      */
-    protected function _executeScheduledJob(Mage_Cron_Model_Schedule $schedule, callable $callback, bool $isAlways = false)
+    protected function _executeScheduledJob(Mage_Cron_Model_Schedule $schedule, callable $callback, bool $isAlways = false): self
     {
         if (!$isAlways) {
             $scheduleLifetime = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_LIFETIME) * 60;
             $now = Mage::getSingleton('core/date')->gmtTimestamp();
             $time = strtotime($schedule->getScheduledAt());
             if ($time > $now) {
-                return;
+                return $this;
             }
         }
 
@@ -396,7 +393,7 @@ class Mage_Cron_Model_Observer
             if (!$isAlways) {
                 if (!$schedule->tryLockJob()) {
                     // another cron started this job intermittently, so skip it
-                    return;
+                    return $this;
                 }
                 /**
                 though running status is set in tryLockJob we must set it here because the object
