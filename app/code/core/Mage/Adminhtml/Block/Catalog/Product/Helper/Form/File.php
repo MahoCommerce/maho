@@ -68,7 +68,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_File extends \Maho\Data\F
                 $html .= '<input type="checkbox"'
                     . ' name="' . parent::getName() . '[delete]" value="1" class="checkbox"'
                     . ' id="' . $this->getHtmlId() . '_delete"'
-                    . ($this->getDisabled() ? ' disabled="disabled"' : '') . '/>';
+                    . ($this->getDisabled() ? ' disabled="disabled"' : '') . '>';
                 $html .= '<label for="' . $this->getHtmlId() . '_delete"'
                     . ($this->getDisabled() ? ' class="disabled"' : '') . '> ' . $label . '</label>';
                 $html .= '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '">';
@@ -85,7 +85,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_File extends \Maho\Data\F
             $html .= '<input type="checkbox"'
                 . ' name="' . parent::getName() . '[delete]" value="1" class="checkbox"'
                 . ' id="' . $this->getHtmlId() . '_delete"'
-                . ($this->getDisabled() ? ' disabled="disabled"' : '') . '/>';
+                . ($this->getDisabled() ? ' disabled="disabled"' : '') . '>';
             $html .= '<label for="' . $this->getHtmlId() . '_delete"'
                 . ($this->getDisabled() ? ' class="disabled"' : '') . '> ' . $label . '</label>';
             $html .= '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '">';

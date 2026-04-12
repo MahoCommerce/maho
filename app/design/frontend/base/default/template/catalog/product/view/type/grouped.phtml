@@ -31,7 +31,7 @@
                          src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(105, 80) ?>"
                          srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->constrainOnly(true)->resize(210, 160) ?> 2x"
                          alt="<?= $this->escapeHtml($this->getImageLabel()) ?>"
-                         title="<?= $this->escapeHtml($this->getImageLabel()) ?>" />
+                         title="<?= $this->escapeHtml($this->getImageLabel()) ?>">
                 </td>
                 <td class="name">
                     <p class="name-wrapper">

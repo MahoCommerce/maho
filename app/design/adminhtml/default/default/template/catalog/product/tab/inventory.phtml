@@ -64,7 +64,7 @@
 
         <tr>
             <td class="label"><label for="inventory_min_sale_qty"><?= Mage::helper('catalog')->__('Minimum Qty Allowed in Shopping Cart') ?></label></td>
-            <td class="value"><input type="text" class="input-text validate-number" id="inventory_min_sale_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][min_sale_qty]" value="<?= (bool) $this->getProduct()->getId() ? $this->getFieldValueAsFloat('min_sale_qty') : Mage::helper('catalog/product')->getDefaultProductValue('min_sale_qty', $this->getProduct()->getTypeId()) ?>" <?= $_readonly ?>/>
+            <td class="value"><input type="text" class="input-text validate-number" id="inventory_min_sale_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][min_sale_qty]" value="<?= (bool) $this->getProduct()->getId() ? $this->getFieldValueAsFloat('min_sale_qty') : Mage::helper('catalog/product')->getDefaultProductValue('min_sale_qty', $this->getProduct()->getTypeId()) ?>" <?= $_readonly ?>>
 
             <?php $_checked = ($this->getFieldValue('use_config_min_sale_qty') || $this->isNew()) ? 'checked="checked"' : '' ?>
             <input type="checkbox" id="inventory_use_config_min_sale_qty" name="<?= $this->getFieldSuffix() ?>[stock_data][use_config_min_sale_qty]" value="1" <?= $_checked ?> onclick="toggleValueElements(this, this.parentNode);" class="checkbox" <?= $_readonly ?>>

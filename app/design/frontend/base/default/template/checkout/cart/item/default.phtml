@@ -129,7 +129,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
     <td class="product-cart-actions" data-rwd-label="<?= $this->__('Qty') ?>">
         <input type="text" pattern="\d*(\.\d+)?" name="cart[<?= $_item->getId() ?>][qty]" value="<?= $this->getQty() ?>" size="4"
                data-cart-item-id="<?= $this->jsQuoteEscape($_item->getSku()) ?>"
-               title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12" />
+               title="<?= $this->quoteEscape($this->__('Qty')) ?>" class="input-text qty" maxlength="12">
 
         <button type="submit" name="update_cart_action" data-cart-item-update value="update_qty" title="<?= $this->quoteEscape($this->__('Update')) ?>" class="button btn-update"><?= $this->__('Update') ?>
         </button>

@@ -128,7 +128,7 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
                 <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
                 <?php if ($preIsCustom): ?>required<?php endif; ?>
                 value="<?php echo $preIsCustom ? $this->escapeHtml($preAmount) : ''; ?>"
-            />
+            >
         </div>
     <?php else: ?>
         <div class="field">
@@ -149,7 +149,7 @@ $preDeliveryDate = $this->getPreconfiguredValue('giftcard_delivery_date');
                 <?php if ($this->getMinAmount()): ?>min="<?php echo (int)$this->getMinAmount(); ?>"<?php endif; ?>
                 <?php if ($this->getMaxAmount()): ?>max="<?php echo (int)$this->getMaxAmount(); ?>"<?php endif; ?>
                 value="<?php echo $preAmount !== null ? $this->escapeHtml($preAmount) : ''; ?>"
-            />
+            >
         </div>
     <?php endif; ?>
 

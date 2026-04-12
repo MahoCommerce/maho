@@ -36,7 +36,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_File extends \Maho\Data\Form
         if ((string) $this->getValue()) {
             $label = Mage::helper('adminhtml')->__('Delete File');
             $html .= '<div>' . Mage::helper('adminhtml')->escapeHtml($this->getValue()) . ' ';
-            $html .= '<input type="checkbox" name="' . parent::getName() . '[delete]" value="1" class="checkbox" id="' . $this->getHtmlId() . '_delete"' . ($this->getDisabled() ? ' disabled="disabled"' : '') . '/>';
+            $html .= '<input type="checkbox" name="' . parent::getName() . '[delete]" value="1" class="checkbox" id="' . $this->getHtmlId() . '_delete"' . ($this->getDisabled() ? ' disabled="disabled"' : '') . '>';
             $html .= '<label for="' . $this->getHtmlId() . '_delete"' . ($this->getDisabled() ? ' class="disabled"' : '') . '> ' . $label . '</label>';
             $html .= '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '">';
             $html .= '</div>';

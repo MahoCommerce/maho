@@ -29,7 +29,7 @@
                         </ul>
                    <?php else: ?>
                         <?php $_checked = $this->isMethodActive($_code) ? 'checked="checked"' : '' ?>
-                        <input <?= $_radioProperty ?> value="<?= $_code ?>" id="s_method_<?= $_code ?>" <?= $_checked ?>/>
+                        <input <?= $_radioProperty ?> value="<?= $_code ?>" id="s_method_<?= $_code ?>" <?= $_checked ?>>
                         <label class="normal" for="s_method_<?= $_code ?>">
                             <?= $this->escapeHtml($_rate->getMethodTitle() ? $_rate->getMethodTitle() : $_rate->getMethodDescription()) ?> -
                             <strong>

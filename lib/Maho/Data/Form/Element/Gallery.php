@@ -66,8 +66,8 @@ class Gallery extends AbstractElement
                     <img id="' . $this->getHtmlId() . '_image_' . $type . '_' . $image->getValueId() . '" src="' . $url . '" alt="' . $image->getValue() . '" height="25" align="absmiddle" class="small-image-preview"></a><br>';
                     $html .= '<input type="file" name="' . $this->getName() . '_' . $type . '[' . $image->getValueId() . ']" size="1"></td>';
                 }
-                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="input" name="' . parent::getName() . '[position][' . $image->getValueId() . ']" value="' . $image->getPosition() . '" id="' . $this->getHtmlId() . '_position_' . $image->getValueId() . '" size="3"/></td>';
-                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="checkbox" name="' . parent::getName() . '[delete][' . $image->getValueId() . ']" value="' . $image->getValueId() . '" id="' . $this->getHtmlId() . '_delete_' . $image->getValueId() . '"/></td>';
+                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="input" name="' . parent::getName() . '[position][' . $image->getValueId() . ']" value="' . $image->getPosition() . '" id="' . $this->getHtmlId() . '_position_' . $image->getValueId() . '" size="3"></td>';
+                $html .= '<td class="gallery" align="center" style="vertical-align:bottom;"><input type="checkbox" name="' . parent::getName() . '[delete][' . $image->getValueId() . ']" value="' . $image->getValueId() . '" id="' . $this->getHtmlId() . '_delete_' . $image->getValueId() . '"></td>';
                 $html .= '</tr>';
             }
         }

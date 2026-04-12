@@ -75,7 +75,7 @@ class Image extends AbstractElement
             $html .= '<input type="checkbox"'
                 . ' name="' . parent::getName() . '[delete]" value="1" class="checkbox"'
                 . ' id="' . $this->getHtmlId() . '_delete"' . ($this->getDisabled() ? ' disabled="disabled"' : '')
-                . '/>';
+                . '>';
             $html .= '<label for="' . $this->getHtmlId() . '_delete"'
                 . ($this->getDisabled() ? ' class="disabled"' : '') . '> ' . $label . '</label>';
             $html .= $this->_getHiddenInput();
