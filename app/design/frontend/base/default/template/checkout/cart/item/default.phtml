@@ -27,7 +27,7 @@ $_weeeAmount = $_item->getWeeeTaxAppliedAmount();
         <?php if ($this->hasProductUrl()):?>
             <a href="<?= $this->getProductUrl() ?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image">
         <?php endif ?>
-            <img src="<?= $this->getProductThumbnail()->resize(180) ?>" alt="<?= $this->escapeHtml($this->getProductName()) ?>" />
+            <img src="<?= $this->getProductThumbnail()->resize(180) ?>" alt="<?= $this->escapeHtml($this->getProductName()) ?>">
         <?php if ($this->hasProductUrl()):?>
             </a>
         <?php endif ?>

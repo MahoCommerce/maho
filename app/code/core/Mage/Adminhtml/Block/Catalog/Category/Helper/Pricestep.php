@@ -50,7 +50,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Helper_Pricestep extends \Maho\Data\
             $html .= ' disabled="disabled"';
         }
 
-        $html .= ' onclick="toggleValueElements(this, this.parentNode);" class="checkbox" type="checkbox" />';
+        $html .= ' onclick="toggleValueElements(this, this.parentNode);" class="checkbox" type="checkbox">';
 
         $html .= ' <label for="' . $htmlId . '" class="normal">'
             . Mage::helper('adminhtml')->__('Use Config Settings') . '</label>';

@@ -29,7 +29,7 @@ class Mage_Adminhtml_Block_System_Config_Form_Field_Import extends \Maho\Data\Fo
     {
         $html = '';
 
-        $html .= '<input id="time_condition" type="hidden" name="' . $this->getName() . '" value="' . time() . '" />';
+        $html .= '<input id="time_condition" type="hidden" name="' . $this->getName() . '" value="' . time() . '">';
 
         $html .= <<<EndHTML
         <script>

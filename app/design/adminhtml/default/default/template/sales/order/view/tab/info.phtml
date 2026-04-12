@@ -17,7 +17,7 @@
         <?= $this->getChildHtml('order_messages') ?>
     </div>
     <?= $this->getChildHtml('order_info') ?>
-    <input type="hidden" name="order_id" value="<?= $_order->getId() ?>"/>
+    <input type="hidden" name="order_id" value="<?= $_order->getId() ?>">
     <?php if ($_order->getIsVirtual()): ?>
     <div class="box-right">
     <?php else: ?>

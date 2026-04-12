@@ -27,7 +27,7 @@ $_class = $_element->getFieldsetHtmlClass();
         <?= trim($_element->getElementHtml()) ?>
         <?php if ($this->getDisableAutoGroupChangeAttribute()): ?>
             <br>
-            <input id="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementId()) ?>" name="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementName()) ?>" type="checkbox"<?php if ($this->getDisableAutoGroupChangeCheckboxState() == 'checked') :?> checked="checked"<?php endif ?> value="1"/>
+            <input id="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementId()) ?>" name="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementName()) ?>" type="checkbox"<?php if ($this->getDisableAutoGroupChangeCheckboxState() == 'checked') :?> checked="checked"<?php endif ?> value="1">
             <label for="<?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxElementId()) ?>"><?= $this->escapeHtml($this->getDisableAutoGroupChangeCheckboxLabel()) ?></label>
         <?php endif ?>
         <?php if ($_note): ?>

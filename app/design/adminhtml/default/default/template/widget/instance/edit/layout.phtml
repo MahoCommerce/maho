@@ -30,9 +30,9 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
         '</div>'+
 <?php foreach ($this->getDisplayOnContainers() as $container): ?>
     '<div class="no-display <?= $container['code'] ?> group_container" id="<?= $container['name'] ?>_{{id}}">'+
-        '<input type="hidden" class="container_name" name="__[container_name]" value="widget_instance[{{id}}][<?= $container['name'] ?>]" />'+
-        '<input type="hidden" name="widget_instance[{{id}}][<?= $container['name'] ?>][page_id]" value="{{page_id}}" />'+
-        '<input type="hidden" class="layout_handle_pattern" name="widget_instance[{{id}}][<?= $container['name'] ?>][layout_handle]" value="<?= $container['layout_handle'] ?>" />'+
+        '<input type="hidden" class="container_name" name="__[container_name]" value="widget_instance[{{id}}][<?= $container['name'] ?>]">'+
+        '<input type="hidden" name="widget_instance[{{id}}][<?= $container['name'] ?>][page_id]" value="{{page_id}}">'+
+        '<input type="hidden" class="layout_handle_pattern" name="widget_instance[{{id}}][<?= $container['name'] ?>][layout_handle]" value="<?= $container['layout_handle'] ?>">'+
         '<table cellspacing="0" class="option-header">'+
             '<col width="200">'+
             '<col width="220">'+
@@ -49,9 +49,9 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
             '<tbody>'+
                 '<tr>'+
                     '<td>'+
-                        '<input type="radio" class="radio for_all" id="all_<?= $container['name'] ?>_{{id}}" name="widget_instance[{{id}}][<?= $container['name'] ?>][for]" value="all" onclick="WidgetInstance.togglePageGroupChooser(this)" checked="checked" />&nbsp;'+
+                        '<input type="radio" class="radio for_all" id="all_<?= $container['name'] ?>_{{id}}" name="widget_instance[{{id}}][<?= $container['name'] ?>][for]" value="all" onclick="WidgetInstance.togglePageGroupChooser(this)" checked="checked">&nbsp;'+
                         '<label for="all_<?= $container['name'] ?>_{{id}}"><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('All')) ?></label>&nbsp;&nbsp;&nbsp;'+
-                        '<input type="radio" class="radio for_specific" id="specific_<?= $container['name'] ?>_{{id}}" name="widget_instance[{{id}}][<?= $container['name'] ?>][for]" value="specific" onclick="WidgetInstance.togglePageGroupChooser(this)" />&nbsp;'+
+                        '<input type="radio" class="radio for_specific" id="specific_<?= $container['name'] ?>_{{id}}" name="widget_instance[{{id}}][<?= $container['name'] ?>][for]" value="specific" onclick="WidgetInstance.togglePageGroupChooser(this)">&nbsp;'+
                         '<label for="specific_<?= $container['name'] ?>_{{id}}"><?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Specific %s', $container['label'])) ?></label>'+
                     '</td>'+
                     '<td>'+
@@ -68,10 +68,10 @@ var pageGroupTemplate = '<div class="options-box page_group_container" id="page_
             '</tbody>'+
         '</table>'+
         '<div class="no-display chooser_container" id="<?= $container['name'] ?>_ids_{{id}}">'+
-            '<input type="hidden" class="is_anchor_only" name="widget_instance[{{id}}][<?= $container['name'] ?>][is_anchor_only]" value="<?= $container['is_anchor_only'] ?>" />'+
-            '<input type="hidden" class="product_type_id" name="widget_instance[{{id}}][<?= $container['name'] ?>][product_type_id]" value="<?= $container['product_type_id'] ?>" />'+
+            '<input type="hidden" class="is_anchor_only" name="widget_instance[{{id}}][<?= $container['name'] ?>][is_anchor_only]" value="<?= $container['is_anchor_only'] ?>">'+
+            '<input type="hidden" class="product_type_id" name="widget_instance[{{id}}][<?= $container['name'] ?>][product_type_id]" value="<?= $container['product_type_id'] ?>">'+
             '<p>' +
-                '<input type="text" class="input-text entities" name="widget_instance[{{id}}][<?= $container['name'] ?>][entities]" value="{{<?= $container['name'] ?>_entities}}" readonly="readonly" />&nbsp;' +
+                '<input type="text" class="input-text entities" name="widget_instance[{{id}}][<?= $container['name'] ?>][entities]" value="{{<?= $container['name'] ?>_entities}}" readonly="readonly">&nbsp;' +
                 '<a class="widget-option-chooser" href="javascript:void(0)" onclick="WidgetInstance.displayEntityChooser(\'<?= $container['code'] ?>\', \'<?= $container['name'] ?>_ids_{{id}}\')"  title="<?= $this->helper('core')->jsQuoteEscape(Mage::helper('widget')->__('Open Chooser')) ?>">' +
                     '<?= $this->helper('core')->jsQuoteEscape($this->getIconSvg('list-search')) ?>' +
                 '</a>&nbsp;' +

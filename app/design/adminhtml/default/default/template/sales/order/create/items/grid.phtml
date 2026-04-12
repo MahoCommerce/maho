@@ -193,13 +193,13 @@
                             <?php endif ?>
                             <?php if ($this->canApplyCustomPrice($_item)): ?>
                             <div class="nobr">
-                            <input type="checkbox" id="item_use_custom_price_<?= $_item->getId() ?>"<?php if ($_isCustomPrice): ?> checked="checked"<?php endif ?> onclick="order.toggleCustomPrice(this, 'item_custom_price_<?= $_item->getId() ?>', 'item_tier_block_<?= $_item->getId() ?>');"/>
+                            <input type="checkbox" id="item_use_custom_price_<?= $_item->getId() ?>"<?php if ($_isCustomPrice): ?> checked="checked"<?php endif ?> onclick="order.toggleCustomPrice(this, 'item_custom_price_<?= $_item->getId() ?>', 'item_tier_block_<?= $_item->getId() ?>');">
                             <label class="normal" for="item_use_custom_price_<?= $_item->getId() ?>"><?= $this->helper('sales')->__('Custom Price') ?>*</label>
                             </div>
                             <?php endif ?>
-                            <input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf("%.2f", $this->getOriginalEditablePrice($_item))?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price"/>
+                            <input id="item_custom_price_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][custom_price]" value="<?= sprintf("%.2f", $this->getOriginalEditablePrice($_item))?>"<?php if (!$_isCustomPrice): ?> style="display:none" disabled="disabled"<?php endif ?> class="input-text item-price">
                         </td>
-                        <td><input name="item[<?= $_item->getId() ?>][qty]" class="input-text item-qty" value="<?= $_item->getQty()*1 ?>" maxlength="12" /></td>
+                        <td><input name="item[<?= $_item->getId() ?>][qty]" class="input-text item-qty" value="<?= $_item->getQty()*1 ?>" maxlength="12"></td>
                         <td class="price">
 
 
@@ -285,7 +285,7 @@
                         </td>
                         <td class="price">
                             <?= $this->formatPrice(-$_item->getDiscountAmount()) ?><br>
-                            <input id="item_use_discount_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][use_discount]"<?php if (!$_item->getNoDiscount()): ?>checked="checked"<?php endif ?> value="1" type="checkbox" />
+                            <input id="item_use_discount_<?= $_item->getId() ?>" name="item[<?= $_item->getId() ?>][use_discount]"<?php if (!$_item->getNoDiscount()): ?>checked="checked"<?php endif ?> value="1" type="checkbox">
                             <label for="item_use_discount_<?= $_item->getId() ?>" class="normal"><?= $this->helper('sales')->__('Apply') ?></label>
                         </td>
                         <td class="price">

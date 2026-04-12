@@ -21,7 +21,7 @@
                 <label for="name"><?= $helper->__('Title') ?></label>
             </td>
             <td class="value">
-                <input type="text" class="input-text" id="downloadable_links_title" name="product[links_title]" value="<?= $this->escapeHtml($product->getId() ? $product->getLinksTitle() : $this->getLinksTitle()) ?>" <?= ($product->getStoreId() && $this->getUsedDefault()) ? 'disabled': '' ?> />
+                <input type="text" class="input-text" id="downloadable_links_title" name="product[links_title]" value="<?= $this->escapeHtml($product->getId() ? $product->getLinksTitle() : $this->getLinksTitle()) ?>" <?= ($product->getStoreId() && $this->getUsedDefault()) ? 'disabled': '' ?>>
             </td>
             <td class="scope-label">
             <?php if (!Mage::app()->isSingleStoreMode()): ?>
@@ -30,7 +30,7 @@
             </td>
             <td class="value use-default">
             <?php if($product->getStoreId()): ?>
-                <input id="link_title_default" type="checkbox" name="use_default[]" value="links_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault() ? 'checked' : '' ?> />
+                <input id="link_title_default" type="checkbox" name="use_default[]" value="links_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault() ? 'checked' : '' ?>>
                 <label class="normal" for="link_title_default"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
             </td>
@@ -106,11 +106,11 @@
         <?php if ($this->getCanReadPrice() !== false) : ?>
         <?php $disabled = $this->getCanEditPrice() === false ? 'disabled' : '' ?>
         <td class="input-price">
-            <input type="text" id="downloadable_link_{{id}}_price_value" class="input-text validate-number link-prices <?= $disabled ?>" name="downloadable[link][{{id}}][price]" value="{{price}}" <?= $disabled ?> />
+            <input type="text" id="downloadable_link_{{id}}_price_value" class="input-text validate-number link-prices <?= $disabled ?>" name="downloadable[link][{{id}}][price]" value="{{price}}" <?= $disabled ?>>
             <label>[<?= Mage::app()->getStore($product->getStoreId())->getBaseCurrencyCode() ?>]</label>
             <?php if ($product->getStoreId() && Mage::helper('downloadable')->getIsPriceWebsiteScope()): ?>
             <br>
-            <input type="checkbox" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1" <?= $disabled ?> /> <label for="downloadable_link_{{id}}_price"><?= $helper->__('Use Default Value') ?></label>
+            <input type="checkbox" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1" <?= $disabled ?>> <label for="downloadable_link_{{id}}_price"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
         </td>
         <?php else: ?>

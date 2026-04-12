@@ -204,7 +204,7 @@
         <td class="a-center">
             <?php if ($this->canShowPriceInfo($_item)): ?>
                 <?php if ($this->canEditQty()) : ?>
-                    <input type="text" class="input-text qty-input" name="invoice[items][<?= $_item->getOrderItemId() ?>]" value="<?= $_item->getQty()*1 ?>" />
+                    <input type="text" class="input-text qty-input" name="invoice[items][<?= $_item->getOrderItemId() ?>]" value="<?= $_item->getQty()*1 ?>">
                 <?php else: ?>
                     <?= $_item->getQty()*1 ?>
                 <?php endif ?>

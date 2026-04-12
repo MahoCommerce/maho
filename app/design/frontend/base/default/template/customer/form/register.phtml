@@ -15,9 +15,9 @@
 <form action="<?= $this->getPostActionUrl() ?>" method="post" id="form-validate-register" enctype="multipart/form-data" novalidate aria-label="<?= $this->__('Registration Form') ?>">
     <fieldset class="fieldset">
         <legend class="visually-hidden"><?= $this->__('Personal Information') ?></legend>
-        <input type="hidden" name="success_url" value="<?= $this->getSuccessUrl() ?>" />
-        <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>" />
-        <input type="hidden" name="form_key" value="<?= Mage::getSingleton('core/session')->getFormKey() ?>" />
+        <input type="hidden" name="success_url" value="<?= $this->getSuccessUrl() ?>">
+        <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>">
+        <input type="hidden" name="form_key" value="<?= Mage::getSingleton('core/session')->getFormKey() ?>">
         <p class="required"><?= $this->__('* Required Fields') ?></p>
         <ul class="form-list">
             <li class="fields">
@@ -26,13 +26,13 @@
             <li>
                 <label for="email_address_register" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Email Address') ?></label>
                 <div class="input-box">
-                    <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address_register" value="<?= $this->escapeHtml($this->getFormData()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" aria-required="true" />
+                    <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="email" id="email_address_register" value="<?= $this->escapeHtml($this->getFormData()->getEmail()) ?>" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" class="input-text validate-email required-entry" aria-required="true">
                 </div>
             </li>
             <?php if ($this->isNewsletterEnabled()): ?>
             <li class="control">
                 <div class="input-box">
-                    <input type="checkbox" name="is_subscribed" title="<?= $this->quoteEscape($this->__('Sign Up for Newsletter')) ?>" value="1" id="is_subscribed_register"<?php if($this->getFormData()->getIsSubscribed()): ?> checked="checked"<?php endif ?> class="checkbox" />
+                    <input type="checkbox" name="is_subscribed" title="<?= $this->quoteEscape($this->__('Sign Up for Newsletter')) ?>" value="1" id="is_subscribed_register"<?php if($this->getFormData()->getIsSubscribed()): ?> checked="checked"<?php endif ?> class="checkbox">
                 </div>
                 <label for="is_subscribed_register"><?= $this->__('Sign Up for Newsletter') ?></label>
                 <?php /* Extensions placeholder */ ?>
@@ -62,13 +62,13 @@
                 <div class="field">
                     <label for="company_register"><?= $this->__('Company') ?></label>
                     <div class="input-box">
-                        <input type="text" name="company" id="company_register" value="<?= $this->escapeHtml($this->getFormData()->getCompany()) ?>" title="<?= $this->quoteEscape($this->__('Company')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('company') ?>" />
+                        <input type="text" name="company" id="company_register" value="<?= $this->escapeHtml($this->getFormData()->getCompany()) ?>" title="<?= $this->quoteEscape($this->__('Company')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('company') ?>">
                     </div>
                 </div>
                 <div class="field">
                     <label for="telephone_register" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Telephone') ?></label>
                     <div class="input-box">
-                        <input type="tel" name="telephone" id="telephone_register" value="<?= $this->escapeHtml($this->getFormData()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" aria-required="true" />
+                        <input type="tel" name="telephone" id="telephone_register" value="<?= $this->escapeHtml($this->getFormData()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" aria-required="true">
                     </div>
                 </div>
             </li>
@@ -76,7 +76,7 @@
             <li class="wide">
                 <label for="street_1_register" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Street Address') ?></label>
                 <div class="input-box">
-                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet(0)) ?>" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" id="street_1_register" class="input-text <?= $_streetValidationClass ?>" />
+                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet(0)) ?>" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" id="street_1_register" class="input-text <?= $_streetValidationClass ?>">
                 </div>
             </li>
         <?php $_streetValidationClass = trim(str_replace('required-entry', '', $_streetValidationClass)); ?>
@@ -84,7 +84,7 @@
             <li class="wide">
                 <label for="street_<?= $_i ?>_register"><?= $this->__('Street Address %s', $_i) ?></label>
                 <div class="input-box">
-                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet($_i-1)) ?>" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" id="street_<?= $_i ?>_register" class="input-text <?= $_streetValidationClass ?>" />
+                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getFormData()->getStreet($_i-1)) ?>" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" id="street_<?= $_i ?>_register" class="input-text <?= $_streetValidationClass ?>">
                 </div>
             </li>
         <?php endfor ?>
@@ -92,7 +92,7 @@
                 <div class="field">
                     <label for="city_register" class="required"><?= $this->__('City') ?></label>
                     <div class="input-box">
-                        <input type="text" name="city" value="<?= $this->escapeHtml($this->getFormData()->getCity()) ?>" title="<?= $this->quoteEscape($this->__('City')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city_register" />
+                        <input type="text" name="city" value="<?= $this->escapeHtml($this->getFormData()->getCity()) ?>" title="<?= $this->quoteEscape($this->__('City')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city_register">
                     </div>
                 </div>
                 <div class="field">
@@ -104,7 +104,7 @@
                         <script>
                             document.getElementById('region_id_register').setAttribute('defaultValue', "<?= $this->getFormData()->getRegionId() ?>");
                         </script>
-                        <input type="text" id="region_register" name="region" value="<?= $this->escapeHtml($this->getRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
+                        <input type="text" id="region_register" name="region" value="<?= $this->escapeHtml($this->getRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;">
                     </div>
                 </div>
             </li>
@@ -112,7 +112,7 @@
                 <div class="field">
                     <label for="zip_register" class="required"><?= $this->__('Zip/Postal Code') ?></label>
                     <div class="input-box">
-                        <input type="text" name="postcode" value="<?= $this->escapeHtml($this->getFormData()->getPostcode()) ?>" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" id="zip_register" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" />
+                        <input type="text" name="postcode" value="<?= $this->escapeHtml($this->getFormData()->getPostcode()) ?>" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" id="zip_register" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>">
                     </div>
                 </div>
                 <div class="field">
@@ -151,7 +151,7 @@
                 <div class="field">
                     <label for="confirmation_register" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Confirm Password') ?></label>
                     <div class="input-box">
-                        <input type="password" name="confirmation" title="<?= $this->quoteEscape($this->__('Confirm Password')) ?>" id="confirmation_register" class="input-text required-entry validate-cpassword" autocomplete="new-password" aria-required="true" />
+                        <input type="password" name="confirmation" title="<?= $this->quoteEscape($this->__('Confirm Password')) ?>" id="confirmation_register" class="input-text required-entry validate-cpassword" autocomplete="new-password" aria-required="true">
                     </div>
                 </div>
             </li>

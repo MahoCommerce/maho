@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <legend><?= $this->__("Profile Information") ?></legend>
         <span class="field-row">
             <label for="profile_name"><?= $this->__("Name:") ?> <span class="required">*</span></label>
-            <input class="required-entry required-entry input-text" id="profile_name" name="name" value="<?= $this->getValue('name') ?>"/>
+            <input class="required-entry required-entry input-text" id="profile_name" name="name" value="<?= $this->getValue('name') ?>">
         </span>
         <span class="field-row">
             <label for="profile_entity_type"><?= $this->__("Entity type:") ?></label>
@@ -220,14 +220,14 @@ document.addEventListener('DOMContentLoaded', function() {
         <span class="field-row">
             <label for="profile_number_of_records"><?= $this->__("Number of records:") ?></label>
             <span class="with-tip">
-                <input class="required-entry validate-number input-text" id="profile_number_of_records" name="gui_data[import][number_of_records]" value="<?= (($numbers = $this->getValue('gui_data/import/number_of_records')) ? $numbers : 1) ?>"/>
+                <input class="required-entry validate-number input-text" id="profile_number_of_records" name="gui_data[import][number_of_records]" value="<?= (($numbers = $this->getValue('gui_data/import/number_of_records')) ? $numbers : 1) ?>">
                 <small><?= $this->__("(You have to increase php memory_limit before changing this value)") ?></small>
             </span>
         </span>
         <span class="field-row">
             <label for="profile_decimal_separator"><?= $this->__("Decimal separator:") ?></label>
             <span class="with-tip">
-                <input class="required-entry input-text" id="profile_decimal_separator" name="gui_data[import][decimal_separator]" value="<?= (($separator = $this->getValue('gui_data/import/decimal_separator')) ? $separator : '.') ?>"/>
+                <input class="required-entry input-text" id="profile_decimal_separator" name="gui_data[import][decimal_separator]" value="<?= (($separator = $this->getValue('gui_data/import/decimal_separator')) ? $separator : '.') ?>">
             </span>
         </span>
     </fieldset>
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="profile_data_transfer_interactive">
             <span class="field-row">
                 <label for="interactive_filename"><?= $this->__("Archive file name:") ?></label>
-                <input class="input-text" id="interactive_filename" name="gui_data[interactive][filename]" value="<?= $this->getValue('gui_data/interactive/filename') ?>"/>
+                <input class="input-text" id="interactive_filename" name="gui_data[interactive][filename]" value="<?= $this->getValue('gui_data/interactive/filename') ?>">
                 <?= $this->__('(If left empty will be auto-generated)') ?>
             </span>
         </div>
@@ -263,12 +263,12 @@ document.addEventListener('DOMContentLoaded', function() {
             </span>
             <span class="field-row">
                 <label for="file_filename"><?= $this->__("File name:") ?></label>
-                <input class="input-text" id="file_filename" name="gui_data[file][filename]" value="<?= $this->getValue('gui_data/file/filename') ?>"/>
+                <input class="input-text" id="file_filename" name="gui_data[file][filename]" value="<?= $this->getValue('gui_data/file/filename') ?>">
             </span>
             <span class="field-row">
                 <label for="file_path"><?= $this->__("Path:") ?></label>
                 <span class="with-tip">
-                    <input class="input-text" id="file_path" name="gui_data[file][path]" value="<?= $this->getValue('gui_data/file/path') ?>"/>
+                    <input class="input-text" id="file_path" name="gui_data[file][path]" value="<?= $this->getValue('gui_data/file/path') ?>">
                     <small class="file_type_file">
                         <?= $this->__('(For Type "Local Server" need to use relative path to Magento install var/export or var/import, e.g. var/export, var/import, var/export/some/dir, var/import/some/dir)') ?>
                     </small>
@@ -277,15 +277,15 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="file_type_ftp">
                 <span class="field-row">
                     <label for="file_host"><?= $this->__("FTP Host[:Port]") ?></label>
-                    <input class="input-text" id="file_host" name="gui_data[file][host]" value="<?= $this->getValue('gui_data/file/host') ?>"/>
+                    <input class="input-text" id="file_host" name="gui_data[file][host]" value="<?= $this->getValue('gui_data/file/host') ?>">
                 </span>
                 <span class="field-row">
                     <label for="file_user"><?= $this->__("User name") ?></label>
-                    <input class="input-text" id="file_user" name="gui_data[file][user]" value="<?= $this->getValue('gui_data/file/user') ?>"/>
+                    <input class="input-text" id="file_user" name="gui_data[file][user]" value="<?= $this->getValue('gui_data/file/user') ?>">
                 </span>
                 <span class="field-row">
                     <label for="file_password"><?= $this->__("Password") ?></label>
-                    <input class="input-text" type="password" id="io_password" name="gui_data[file][password]" value="<?= $this->getValue('gui_data/file/password') ?>"/>
+                    <input class="input-text" type="password" id="io_password" name="gui_data[file][password]" value="<?= $this->getValue('gui_data/file/password') ?>">
                 </span>
                 <span class="field-row">
                     <label for="file_mode"><?= $this->__("File mode") ?></label>
@@ -321,7 +321,7 @@ document.addEventListener('DOMContentLoaded', function() {
             <span class="field-row">
                 <label for="parse_single_sheet"><?= $this->__("Spreadsheet Name:") ?></label>
                 <span class="with-tip">
-                    <input class="input-text" id="parse_single_sheet" name="gui_data[parse][single_sheet]" value="<?= $this->getValue('gui_data/parse/single_sheet') ?>"/>
+                    <input class="input-text" id="parse_single_sheet" name="gui_data[parse][single_sheet]" value="<?= $this->getValue('gui_data/parse/single_sheet') ?>">
                     <small><?= $this->__("(Leave empty for first spreadsheet)") ?></small>
                 </span>
             </span>
@@ -329,12 +329,12 @@ document.addEventListener('DOMContentLoaded', function() {
         <div class="parse_type_csv">
             <span class="field-row">
                 <label for="parse_delimiter"><?= $this->__("Value Delimiter:") ?></label>
-                <input class="input-text" style="width:3em" id="parse_delimiter" name="gui_data[parse][delimiter]" value="<?= $this->getValue('gui_data/parse/delimiter', ',') ?>"/>
+                <input class="input-text" style="width:3em" id="parse_delimiter" name="gui_data[parse][delimiter]" value="<?= $this->getValue('gui_data/parse/delimiter', ',') ?>">
                 <small><?= $this->__("(\\t for tab)") ?></small>
             </span>
             <span class="field-row">
                 <label for="parse_enclose"><?= $this->__("Enclose Values In:") ?></label>
-                <input class="input-text" style="width:3em" id="parse_enclose" name="gui_data[parse][enclose]" value="<?= $this->getValue('gui_data/parse/enclose', '', '"') ?>"/>
+                <input class="input-text" style="width:3em" id="parse_enclose" name="gui_data[parse][enclose]" value="<?= $this->getValue('gui_data/parse/enclose', '', '"') ?>">
                 <small><?= $this->__("Warning! Empty value can cause problems with CSV format.") ?></small>
             </span>
         </div>
@@ -382,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <?php endforeach ?>
                         </select>
                         &lt;--&gt;
-                        <?= $this->__("In File:") ?> <input class="input-text" name="gui_data[map][<?= $_entityType ?>][file][]"/>
+                        <?= $this->__("In File:") ?> <input class="input-text" name="gui_data[map][<?= $_entityType ?>][file][]">
                         <?= $this->getRemoveMapButtonHtml() ?>
                     </span>
                 </div>
@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <?php endforeach ?>
                             </select>
                             &lt;--&gt;
-                            <?= $this->__("In File:") ?> <input class="input-text" name="gui_data[map][<?= $_entityType ?>][file][]" value="<?= $this->getValue('gui_data/map/'.$_entityType.'/file/'.$_i) ?>"/>
+                            <?= $this->__("In File:") ?> <input class="input-text" name="gui_data[map][<?= $_entityType ?>][file][]" value="<?= $this->getValue('gui_data/map/'.$_entityType.'/file/'.$_i) ?>">
                             <?= $this->getRemoveMapButtonHtml() ?>
                         </span>
                     <?php endforeach ?>
@@ -413,12 +413,12 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="profile_entity_type_product">
                 <span class="field-row">
                     <label for="product_filter_name"><?= $this->__("Name:") ?></label>
-                    <input class="input-text" id="product_filter_name" name="gui_data[product][filter][name]" value="<?= $this->getValue('gui_data/product/filter/name') ?>"/>
+                    <input class="input-text" id="product_filter_name" name="gui_data[product][filter][name]" value="<?= $this->getValue('gui_data/product/filter/name') ?>">
                     <?= $this->__('(Starting with)') ?>
                 </span>
                 <span class="field-row">
                     <label for="product_filter_sku"><?= $this->__("SKU:") ?></label>
-                    <input class="input-text" id="product_filter_sku" name="gui_data[product][filter][sku]" value="<?= $this->getValue('gui_data/product/filter/sku') ?>"/>
+                    <input class="input-text" id="product_filter_sku" name="gui_data[product][filter][sku]" value="<?= $this->getValue('gui_data/product/filter/sku') ?>">
                     <?= $this->__('(Starting with)') ?>
                 </span>
                 <span class="field-row">
@@ -439,13 +439,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 </span>
                 <span class="field-row">
                     <label for="product_filter_price_from"><?= $this->__("Price:") ?></label>
-                    <input class="input-text" style="width:5em" id="product_filter_price_from" name="gui_data[product][filter][price][from]" value="<?= $this->getValue('gui_data/product/filter/price/from') ?>"/> <?= $this->__('to') ?>
-                    <input class="input-text" style="width:5em" id="product_filter_price_to" name="gui_data[product][filter][price][to]" value="<?= $this->getValue('gui_data/product/filter/price/to') ?>"/>
+                    <input class="input-text" style="width:5em" id="product_filter_price_from" name="gui_data[product][filter][price][from]" value="<?= $this->getValue('gui_data/product/filter/price/from') ?>"> <?= $this->__('to') ?>
+                    <input class="input-text" style="width:5em" id="product_filter_price_to" name="gui_data[product][filter][price][to]" value="<?= $this->getValue('gui_data/product/filter/price/to') ?>">
                 </span>
                 <span class="field-row">
                     <label for="product_filter_qty_from"><?= $this->__("Stock Quantity:") ?></label>
-                    <input class="input-text" style="width:5em" id="product_filter_qty_from" name="gui_data[product][filter][qty][from]" value="<?= $this->getValue('gui_data/product/filter/qty/from') ?>"/> <?= $this->__('to') ?>
-                    <input class="input-text" style="width:5em" id="product_filter_qty_to" name="gui_data[product][filter][qty][to]" value="<?= $this->getValue('gui_data/product/filter/qty/to') ?>"/>
+                    <input class="input-text" style="width:5em" id="product_filter_qty_from" name="gui_data[product][filter][qty][from]" value="<?= $this->getValue('gui_data/product/filter/qty/from') ?>"> <?= $this->__('to') ?>
+                    <input class="input-text" style="width:5em" id="product_filter_qty_to" name="gui_data[product][filter][qty][to]" value="<?= $this->getValue('gui_data/product/filter/qty/to') ?>">
                 </span>
                 <span class="field-row">
                     <label for="product_filter_visibility"><?= $this->__("Visibility:") ?></label>
@@ -467,17 +467,17 @@ document.addEventListener('DOMContentLoaded', function() {
             <div class="profile_entity_type_customer">
                 <span class="field-row">
                     <label for="customer_filter_firstname"><?= $this->__("First Name:") ?></label>
-                    <input class="input-text" id="customer_filter_firstname" name="gui_data[customer][filter][firstname]" value="<?= $this->getValue('gui_data/customer/filter/firstname') ?>"/>
+                    <input class="input-text" id="customer_filter_firstname" name="gui_data[customer][filter][firstname]" value="<?= $this->getValue('gui_data/customer/filter/firstname') ?>">
                     <?= $this->__('(Starting with)') ?>
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_lastname"><?= $this->__("Last Name:") ?></label>
-                    <input class="input-text" id="customer_filter_lastname" name="gui_data[customer][filter][lastname]" value="<?= $this->getValue('gui_data/customer/filter/lastname') ?>"/>
+                    <input class="input-text" id="customer_filter_lastname" name="gui_data[customer][filter][lastname]" value="<?= $this->getValue('gui_data/customer/filter/lastname') ?>">
                     <?= $this->__('(Starting with)') ?>
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_email"><?= $this->__("Email:") ?></label>
-                    <input class="input-text" id="customer_filter_email" name="gui_data[customer][filter][email]" value="<?= $this->getValue('gui_data/customer/filter/email') ?>"/>
+                    <input class="input-text" id="customer_filter_email" name="gui_data[customer][filter][email]" value="<?= $this->getValue('gui_data/customer/filter/email') ?>">
                     <?= $this->__('(Starting with)') ?>
                 </span>
                 <span class="field-row">
@@ -497,12 +497,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_telephone"><?= $this->__("Phone:") ?></label>
-                    <input class="input-text" id="customer_filter_telephone" name="gui_data[customer][filter][telephone]" value="<?= $this->getValue('gui_data/customer/filter/telephone') ?>"/>
+                    <input class="input-text" id="customer_filter_telephone" name="gui_data[customer][filter][telephone]" value="<?= $this->getValue('gui_data/customer/filter/telephone') ?>">
                     <?= $this->__('(Starting with)') ?>
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_postcode"><?= $this->__("Zip/Postal Code:") ?></label>
-                    <input class="input-text" id="customer_filter_postcode" name="gui_data[customer][filter][postcode]" value="<?= $this->getValue('gui_data/customer/filter/postcode') ?>"/>
+                    <input class="input-text" id="customer_filter_postcode" name="gui_data[customer][filter][postcode]" value="<?= $this->getValue('gui_data/customer/filter/postcode') ?>">
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_country"><?= $this->__("Country:") ?></label>
@@ -514,14 +514,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_region"><?= $this->__("State/Province:") ?></label>
-                    <input class="input-text" id="customer_filter_region" name="gui_data[customer][filter][region]" value="<?= $this->getValue('gui_data/customer/filter/region') ?>"/>
+                    <input class="input-text" id="customer_filter_region" name="gui_data[customer][filter][region]" value="<?= $this->getValue('gui_data/customer/filter/region') ?>">
                     <?= $this->__('(For US 2-letter state names)') ?>
                 </span>
                 <span class="field-row">
                     <label for="customer_filter_created_at_from"><?= $this->__("Customer Since:") ?></label>
-                    <input class="input-text" type="date" style="width:auto" id="customer_filter_created_at_from" name="gui_data[customer][filter][created_at][from]" value="<?= $this->getValue('gui_data/customer/filter/created_at/from') ?>"/>
+                    <input class="input-text" type="date" style="width:auto" id="customer_filter_created_at_from" name="gui_data[customer][filter][created_at][from]" value="<?= $this->getValue('gui_data/customer/filter/created_at/from') ?>">
                      <?= $this->__('to') ?>
-                    <input class="input-text" type="date" style="width:auto" id="customer_filter_created_at_to" name="gui_data[customer][filter][created_at][to]" value="<?= $this->getValue('gui_data/customer/filter/created_at/to') ?>"/>
+                    <input class="input-text" type="date" style="width:auto" id="customer_filter_created_at_to" name="gui_data[customer][filter][created_at][to]" value="<?= $this->getValue('gui_data/customer/filter/created_at/to') ?>">
                 </span>
             </div>
         </fieldset>

@@ -71,10 +71,10 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_File extends \Maho\Data\F
                     . ($this->getDisabled() ? ' disabled="disabled"' : '') . '/>';
                 $html .= '<label for="' . $this->getHtmlId() . '_delete"'
                     . ($this->getDisabled() ? ' class="disabled"' : '') . '> ' . $label . '</label>';
-                $html .= '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '" />';
+                $html .= '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '">';
                 $html .= '</span>';
             } elseif ($attribute->getIsRequired() && $this->getValue()) {
-                $html .= '<input value="' . $this->getValue() . '" id="' . $this->getHtmlId() . '_hidden" type="hidden" class="required-entry" />';
+                $html .= '<input value="' . $this->getValue() . '" id="' . $this->getHtmlId() . '_hidden" type="hidden" class="required-entry">';
                 $html .= '<script>
                     syncOnchangeValue(\'' . $this->getHtmlId() . '\', \'' . $this->getHtmlId() . '_hidden\');
                 </script>';
@@ -88,7 +88,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_File extends \Maho\Data\F
                 . ($this->getDisabled() ? ' disabled="disabled"' : '') . '/>';
             $html .= '<label for="' . $this->getHtmlId() . '_delete"'
                 . ($this->getDisabled() ? ' class="disabled"' : '') . '> ' . $label . '</label>';
-            $html .= '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '" />';
+            $html .= '<input type="hidden" name="' . parent::getName() . '[value]" value="' . $this->getValue() . '">';
             $html .= '</span>';
         }
 

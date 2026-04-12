@@ -15,7 +15,7 @@
     <span class="paypal-or"><?= $this->__('-OR-') ?></span>
 
     <?php $shortcutHtmlId = $this->getShortcutHtmlId() ?>
-    <a class="paypal-button" data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl()?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>" title="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>" /></a>
+    <a class="paypal-button" data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl()?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>" title="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>"></a>
 </p>
 
 <?php if ($this->getConfirmationUrl() || $this->getIsInCatalogProduct()): ?>

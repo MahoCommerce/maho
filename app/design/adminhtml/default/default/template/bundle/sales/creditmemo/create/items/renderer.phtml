@@ -206,7 +206,7 @@
         <td class="a-center">
             <?php if ($this->canShowPriceInfo($_item)): ?>
                 <?php if ($this->canReturnItemToStock($_item)) : ?>
-                    <input type="checkbox" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][back_to_stock]" value="1"<?php if ($_item->getBackToStock()):?> checked="checked"<?php endif ?> />
+                    <input type="checkbox" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][back_to_stock]" value="1"<?php if ($_item->getBackToStock()):?> checked="checked"<?php endif ?>>
                 <?php endif ?>
             <?php else: ?>
                 &nbsp;
@@ -216,7 +216,7 @@
         <td class="a-center">
             <?php if ($this->canShowPriceInfo($_item)): ?>
                 <?php if ($this->canEditQty()) : ?>
-                    <input type="text" class="input-text qty-input" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][qty]" value="<?= $_item->getQty()*1 ?>" />
+                    <input type="text" class="input-text qty-input" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][qty]" value="<?= $_item->getQty()*1 ?>">
                 <?php else: ?>
                     <?= $_item->getQty()*1 ?>
                 <?php endif ?>

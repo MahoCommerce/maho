@@ -28,14 +28,14 @@
 </form>
 <div class="tool-tip" id="payment-tool-tip" style="display:none;">
     <div class="btn-close"><a href="#" id="payment-tool-tip-close" title="<?= $this->quoteEscape($this->__('Close')) ?>"><?= $this->__('Close') ?></a></div>
-    <div class="tool-tip-content"><img src="<?= $this->getSkinUrl('images/cvv.gif') ?>" alt="<?= $this->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" title="<?= $this->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" /></div>
+    <div class="tool-tip-content"><img src="<?= $this->getSkinUrl('images/cvv.gif') ?>" alt="<?= $this->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>" title="<?= $this->quoteEscape($this->__('Card Verification Number Visual Reference')) ?>"></div>
 </div>
 <?= $this->getChildChildHtml('additional') ?>
 <div class="buttons-set" id="payment-buttons-container">
     <?php // Moved to CC form ?>
     <button type="button" class="button" onclick="payment.save()"><?= $this->__('Continue') ?></button>
     <span class="please-wait" id="payment-please-wait" style="display:none;">
-        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle" /> <?= $this->__('Loading next step...') ?>
+        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle"> <?= $this->__('Loading next step...') ?>
     </span>
 </div>
 <script>

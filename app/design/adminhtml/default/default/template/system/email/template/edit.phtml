@@ -91,14 +91,14 @@
     <?= $this->getBlockHtml('formkey') ?>
     <fieldset>
         <input type="hidden" id="change_flag_element" name="_change_type_flag" value="">
-        <input type="hidden" id="orig_template_code" name="orig_template_code" value="<?= $this->getOrigTemplateCode() ?>" />
+        <input type="hidden" id="orig_template_code" name="orig_template_code" value="<?= $this->getOrigTemplateCode() ?>">
         <?= $this->getFormHtml() ?>
     </fieldset>
 </form>
 <form action="<?= $this->getPreviewUrl() ?>" method="post" id="email_template_preview_form" target="_blank">
     <?= $this->getBlockHtml('formkey') ?>
     <div class="no-display">
-        <input type="hidden" id="preview_type" name="type" value="<?= $this->isTextType()?1:2 ?>" />
+        <input type="hidden" id="preview_type" name="type" value="<?= $this->isTextType()?1:2 ?>">
         <input type="hidden" id="preview_text" name="text" value="">
         <input type="hidden" id="preview_styles" name="styles" value="">
     </div>

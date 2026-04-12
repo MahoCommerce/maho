@@ -29,7 +29,7 @@ $css = $this->getCssContent();
     <div class="giftcard">
         <?php if ($logoSrc): ?>
         <div class="giftcard-header">
-            <img src="<?= $logoSrc ?>" alt="Logo" />
+            <img src="<?= $logoSrc ?>" alt="Logo">
         </div>
         <?php endif; ?>
 
@@ -50,7 +50,7 @@ $css = $this->getCssContent();
                 <?php $qrCode = $helper->getQrCodeDataUrl($giftcard->getCode()); ?>
                 <?php if ($qrCode): ?>
                 <div class="giftcard-qr">
-                    <img src="<?= $qrCode ?>" alt="QR" />
+                    <img src="<?= $qrCode ?>" alt="QR">
                 </div>
                 <?php endif; ?>
             </div>

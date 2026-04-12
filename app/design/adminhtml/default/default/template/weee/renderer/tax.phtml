@@ -52,10 +52,10 @@
                 </select>
                 </td>
                 <td>
-                    <input disabled="no-template" class="<?= $_htmlClass ?> required-entry validate-greater-than-zero" type="text" name="<?= $_htmlName ?>[__index__][price]" value="'#{price}'" />
+                    <input disabled="no-template" class="<?= $_htmlClass ?> required-entry validate-greater-than-zero" type="text" name="<?= $_htmlName ?>[__index__][price]" value="'#{price}'">
                 </td>
                 <td class="last">
-                    <input type="hidden" name="<?= $_htmlName ?>[__index__][delete]" class="delete" disabled="no-template" value=""  id="#{prefix}_weee_tax_row___index___delete" />
+                    <input type="hidden" name="<?= $_htmlName ?>[__index__][delete]" class="delete" disabled="no-template" value=""  id="#{prefix}_weee_tax_row___index___delete">
                     <button title="Delete WEEE Tax" class="scalable delete icon-btn delete-product-option" onclick="weeeTaxControl.deleteItem('<?= $_htmlId ?>', event);return false"><span>Delete</span></button>
                 </td>
             </tr>

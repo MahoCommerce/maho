@@ -18,15 +18,15 @@
         <div><?= Mage::helper('sales')->__('Gift Message for the Entire Order') ?></div><br>
         <form id="<?= $this->getFieldId('form') ?>" action="<?= $this->getSaveUrl() ?>">
           <fieldset>
-              <input type="hidden" id="<?= $this->getFieldId('type') ?>" name="<?= $this->getFieldName('type') ?>" value="order" />
+              <input type="hidden" id="<?= $this->getFieldId('type') ?>" name="<?= $this->getFieldName('type') ?>" value="order">
               <table width="100%" cellspacing="0">
                 <tbody>
                   <tr>
                       <td class="label"><label><?= Mage::helper('sales')->__('From Name') ?><?= $_required ? '&nbsp;<span class="required">*</span>' : '' ?></label></td>
-                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('sender') ?>" name="<?= $this->getFieldName('sender') ?>" value="<?= $this->escapeHtml($this->getMessage()->getSender()) ?>" /></td>
+                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('sender') ?>" name="<?= $this->getFieldName('sender') ?>" value="<?= $this->escapeHtml($this->getMessage()->getSender()) ?>"></td>
                       <td>&nbsp;</td>
                       <td class="label"><label><?= Mage::helper('sales')->__('To Name') ?><?= $_required ? '&nbsp;<span class="required">*</span>' : '' ?></label></td>
-                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('recipient') ?>" name="<?= $this->getFieldName('recipient') ?>"  value="<?= $this->escapeHtml($this->getMessage()->getRecipient()) ?>" /></td>
+                      <td class="input-ele"><input class="input-text" type="text" id="<?= $this->getFieldId('recipient') ?>" name="<?= $this->getFieldName('recipient') ?>"  value="<?= $this->escapeHtml($this->getMessage()->getRecipient()) ?>"></td>
                   </tr>
                   <tr>
                       <td class="label" colspan="6"><label for="<?= $this->getFieldId('message') ?>"><?= Mage::helper('sales')->__('Gift Message') ?></label></td>

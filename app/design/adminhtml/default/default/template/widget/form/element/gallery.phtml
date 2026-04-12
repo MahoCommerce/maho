@@ -38,11 +38,11 @@
         <?php foreach ($this->getValues()->getAttributeBackend()->getImageTypes() as $type): ?>
             <td class="gallery" align="center" style="vertical-align:bottom;">
             <a href="<?= $image->setType($type)->getSourceUrl() ?>" target="_blank" onclick="imagePreview('<?= $this->getElement()->getHtmlId() ?>_image_<?= $type ?>_<?= $image->getValueId() ?>');return false;">
-            <img id="<?= $this->getElement()->getHtmlId() ?>_image_<?= $type ?>_<?= $image->getValueId() ?>" src="<?= $image->setType($type)->getSourceUrl() ?>?<?= time() ?>" alt="<?= $image->getValue() ?>" height="25" class="small-image-preview v-middle"/></a><br>
+            <img id="<?= $this->getElement()->getHtmlId() ?>_image_<?= $type ?>_<?= $image->getValueId() ?>" src="<?= $image->setType($type)->getSourceUrl() ?>?<?= time() ?>" alt="<?= $image->getValue() ?>" height="25" class="small-image-preview v-middle"></a><br>
             <input type="file" name="<?= $this->getElement()->getName() ?>_<?= $type ?>[<?= $image->getValueId() ?>]" size="1"></td>
         <?php endforeach ?>
-        <td class="gallery" align="center" style="vertical-align:bottom;"><input type="input" name="<?= $this->getElement()->getParentName() ?>[position][<?= $image->getValueId() ?>]" value="<?= $image->getPosition() ?>" id="<?= $this->getElement()->getHtmlId() ?>_position_<?= $image->getValueId() ?>" size="3"/></td>
-        <td class="gallery" align="center" style="vertical-align:bottom;"><?= $this->getDeleteButtonHtml($image->getValueId()) ?><input type="hidden" name="<?= $this->getElement()->getParentName() ?>[delete][<?= $image->getValueId() ?>]" id="<?= $this->getElement()->getHtmlId() ?>_delete_<?= $image->getValueId() ?>"/></td>
+        <td class="gallery" align="center" style="vertical-align:bottom;"><input type="input" name="<?= $this->getElement()->getParentName() ?>[position][<?= $image->getValueId() ?>]" value="<?= $image->getPosition() ?>" id="<?= $this->getElement()->getHtmlId() ?>_position_<?= $image->getValueId() ?>" size="3"></td>
+        <td class="gallery" align="center" style="vertical-align:bottom;"><?= $this->getDeleteButtonHtml($image->getValueId()) ?><input type="hidden" name="<?= $this->getElement()->getParentName() ?>[delete][<?= $image->getValueId() ?>]" id="<?= $this->getElement()->getHtmlId() ?>_delete_<?= $image->getValueId() ?>"></td>
         </tr>
     <?php endforeach ?>
 <?php endif ?>

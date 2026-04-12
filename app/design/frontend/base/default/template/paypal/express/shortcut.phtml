@@ -16,7 +16,7 @@
 <?php if ($this->isOrPositionBefore()): ?>
     <span class="paypal-or"><?= $this->__('-OR-') ?></span>
 <?php endif ?>
-<a data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl() ?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" title="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" /></a>
+<a data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl() ?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" title="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>"></a>
 </p>
 <?php if ($this->isOrPositionAfter()): ?>
 <li>

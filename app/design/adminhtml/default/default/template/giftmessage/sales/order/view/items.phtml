@@ -15,10 +15,10 @@
 <?php if ($this->canDisplayGiftmessage()): ?>
 <div id="gift-message-form-data-<?= $this->getItem()->getId() ?>" class="no-display">
     <form id="<?= $this->getFieldId('form') ?>" action="<?= $this->getSaveUrl() ?>">
-        <input type="hidden" id="<?= $this->getFieldId('type') ?>" name="<?= $this->getFieldName('type') ?>" value="order_item" />
-        <input type="hidden" id="<?= $this->getFieldId('sender') ?>" name="<?= $this->getFieldName('sender') ?>" value="<?= $this->getSender() ?>" />
-        <input type="hidden" id="<?= $this->getFieldId('recipient') ?>" name="<?= $this->getFieldName('recipient') ?>"  value="<?= $this->getRecipient() ?>" />
-        <input type="hidden" id="<?= $this->getFieldId('message') ?>" name="<?= $this->getFieldName('message') ?>"  value="<?= $this->getMessageText() ?>" />
+        <input type="hidden" id="<?= $this->getFieldId('type') ?>" name="<?= $this->getFieldName('type') ?>" value="order_item">
+        <input type="hidden" id="<?= $this->getFieldId('sender') ?>" name="<?= $this->getFieldName('sender') ?>" value="<?= $this->getSender() ?>">
+        <input type="hidden" id="<?= $this->getFieldId('recipient') ?>" name="<?= $this->getFieldName('recipient') ?>"  value="<?= $this->getRecipient() ?>">
+        <input type="hidden" id="<?= $this->getFieldId('message') ?>" name="<?= $this->getFieldName('message') ?>"  value="<?= $this->getMessageText() ?>">
     </form>
 
     <?php if ($this->getMessageText()): ?>

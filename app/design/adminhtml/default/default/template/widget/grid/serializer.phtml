@@ -25,7 +25,7 @@
     }, 100);
 </script>
 <?php else: ?>
-<input type="hidden" name="<?= $this->getInputElementName() ?>"  value="" id="<?= $_id ?>" />
+<input type="hidden" name="<?= $this->getInputElementName() ?>"  value="" id="<?= $_id ?>">
 <script>
     new serializerController('<?= $_id?>', <?= $this->getDataAsJSON() ?>, <?= $this->getColumnInputNames(true) ?>, <?= $this->getGridBlock()->getJsObjectName() ?>, '<?= $this->getReloadParamName() ?>');
 </script>
