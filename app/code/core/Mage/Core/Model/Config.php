@@ -89,7 +89,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @var array
      */
     protected $_cacheSections = [
-        'admin'     => 0,
         'adminhtml' => 0,
         'crontab'   => 0,
         'install'   => 0,
@@ -1021,7 +1020,6 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_FRONTEND, $mergeModel);
-                        $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_ADMIN, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_ADMINHTML, $mergeModel);
 
                         $mergeToObject->extend($mergeModel, true);
@@ -1663,7 +1661,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * Get fieldset from configuration
      *
      * @param string $name fieldset name
-     * @param string $root fieldset area, could be 'admin'
+     * @param string $root fieldset area, could be 'adminhtml'
      * @return null|Mage_Core_Model_Config_Element[]|SimpleXMLElement
      */
     public function getFieldset($name, $root = 'global')
