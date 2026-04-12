@@ -105,7 +105,7 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
                 $product->setData($result);
                 $html = sprintf(
                     '<table><tr>
-                    <td><a href="%s"><img src="%s" alt="" border="0" align="left" height="75" width="75" /></a></td>
+                    <td><a href="%s"><img src="%s" alt="" border="0" align="left" height="75" width="75"></a></td>
                     <td style="text-decoration:none;">%s',
                     $product->getProductUrl(),
                     $imageHelper->init($product, 'thumbnail')->resize(75, 75),
@@ -119,12 +119,12 @@ class Mage_Rss_Block_Catalog_Special extends Mage_Rss_Block_Catalog_Abstract
                 // add price data if needed
                 if ($product->getAllowedPriceInRss()) {
                     if (Mage::helper('catalog')->canApplyMsrp($product)) {
-                        $html .= '<br/><a href="' . $product->getProductUrl() . '">'
+                        $html .= '<br><a href="' . $product->getProductUrl() . '">'
                             . $this->__('Click for price') . '</a>';
                     } else {
                         $special = '';
                         if ($result['use_special']) {
-                            $special = '<br />' . Mage::helper('catalog')->__('Special Expires On: %s', $this->formatDate($result['special_to_date'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM));
+                            $special = '<br>' . Mage::helper('catalog')->__('Special Expires On: %s', $this->formatDate($result['special_to_date'], Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM));
                         }
                         $html .= sprintf(
                             '<p>%s %s%s</p>',

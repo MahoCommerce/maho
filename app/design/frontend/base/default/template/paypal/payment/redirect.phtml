@@ -15,7 +15,7 @@
     <li class="form-alt"><?= $this->getRedirectMessage() ?></li>
     <?php if ($code = $this->getCreateBACode()): ?>
         <li class="form-alt">
-            <label for="<?= $code ?>"><input type="checkbox" id="<?= $code ?>" value="1" name="payment[<?= $code ?>]" class="checkbox" />
+            <label for="<?= $code ?>"><input type="checkbox" id="<?= $code ?>" value="1" name="payment[<?= $code ?>]" class="checkbox">
             <?= $this->__('Sign a billing agreement to streamline further purchases with PayPal.') ?></label>
         </li>
     <?php endif ?>

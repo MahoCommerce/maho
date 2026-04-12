@@ -77,7 +77,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <span class="label"><?= Mage::helper('tax')->__('Excl. Tax:') ?></span>
                     <span class="price"
                           id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $_weeeTaxAmount, true, false) ?></span>
-                     <br/>
+                     <br>
                     <span class="weee">(<small>
                             <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?= $_weeeSeparator ?>
@@ -102,7 +102,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <span class="label"><?= Mage::helper('tax')->__('Incl. Tax:') ?></span>
                     <span class="price"
                           id="price-including-tax-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_finalPriceInclTax + $_weeeTaxAmountInclTaxes, true, false) ?></span>
-                    <br/>
+                    <br>
                     <span class="weee">(<small>
                             <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?= $_weeeSeparator ?>
@@ -124,7 +124,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                             : <?= Mage::helper('core')->currency($_weeeTaxAttribute->getAmount() + $_weeeTaxAttribute->getTaxAmount(), true, true) ?>
                         </small>
                     </span>
-                        <br/>
+                        <br>
                     <?php endforeach ?>
                     <span class="price-including-tax">
                     <span class="label"><?= Mage::helper('tax')->__('Incl. Tax:') ?></span>
@@ -157,7 +157,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <?php $weeeAmountToDisplay = $_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount ?>
                     <span class="regular-price"
                           id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $weeeAmountToDisplay, true, true) ?></span>
-                    <br/>
+                    <br>
                     <span class="weee">(<small>
                             <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?= $_weeeSeparator ?>
@@ -168,7 +168,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <?php elseif ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 4)): // incl. + weee ?>
                     <span class="regular-price"
                           id="product-price-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $_weeeTaxAmount, true, true) ?></span>
-                    <br/>
+                    <br>
                     <span class="weee">(<small>
                             <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                                 <?= $_weeeSeparator ?>
@@ -179,7 +179,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                 <?php elseif ($_weeeTaxAmount && Mage::helper('weee')->typeOfDisplay($_product, 2)): // excl. + weee + final ?>
                     <?php $weeeAmountToDisplay = $_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAmountInclTaxes : $_weeeTaxAmount ?>
                     <span class="regular-price"><?= Mage::helper('core')->currency($_price, true, true) ?></span>
-                    <br/>
+                    <br>
                     <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                         <span class="weee">
                         <small>
@@ -187,7 +187,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                             : <?= $_coreHelper->currency($_weeeTaxAttribute->getAmount() + ($_taxHelper->displayPriceIncludingTax() ? $_weeeTaxAttribute->getTaxAmount() : 0), true, true) ?>
                         </small>
                     </span>
-                        <br/>
+                        <br>
                     <?php endforeach ?>
                     <span class="regular-price"
                           id="product-price-weee-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_price + $weeeAmountToDisplay, true, true) ?></span>
@@ -250,7 +250,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <span class="price"
                           id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_finalPrice + $_weeeTaxAmount, true, false) ?></span>
                 </span>
-                    <br/>
+                    <br>
                     <span class="weee">(
                         <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                             <?= $_weeeSeparator ?>
@@ -294,7 +294,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                     <span class="price"
                           id="price-excluding-tax-<?= $_id ?><?= $this->getIdSuffix() ?>"><?= Mage::helper('core')->currency($_finalPrice + $_weeeTaxAmount, true, false) ?></span>
                 </span>
-                    <br/>
+                    <br>
             <span class="weee">(<small>
                     <?php foreach ($_weeeTaxAttributes as $_weeeTaxAttribute): ?>
                         <?= $_weeeSeparator ?>
@@ -329,7 +329,7 @@ $_specialPriceStoreLabel = $this->getProductAttribute('special_price')->getStore
                             : <?= Mage::helper('core')->currency($_weeeTaxAttribute->getAmount(), true, true) ?>
                         </small>
                     </span>
-                        <br/>
+                        <br>
                     <?php endforeach ?>
                     <span class="price-including-tax">
                     <span class="label"><?= Mage::helper('tax')->__('Incl. Tax:') ?></span>

@@ -75,7 +75,7 @@ class Maho_FeedManager_Block_Adminhtml_Dynamicrule_Edit_Tab_General extends Mage
             $fieldset->addField('is_system_note', 'note', [
                 'label' => $this->__('Type'),
                 'text' => '<span class="fm-status-system">' . $this->__('System Rule') . '</span>' .
-                          '<br/><small>' . $this->__('System rules can be modified but not deleted.') . '</small>',
+                          '<br><small>' . $this->__('System rules can be modified but not deleted.') . '</small>',
             ]);
         }
 

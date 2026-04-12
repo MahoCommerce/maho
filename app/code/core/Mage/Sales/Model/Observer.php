@@ -365,7 +365,7 @@ class Mage_Sales_Model_Observer
             && !empty($vatRequestDate)
         ) {
             $orderHistoryComment = Mage::helper('customer')->__('VAT Request Identifier')
-                . ': ' . $vatRequestId . '<br />' . Mage::helper('customer')->__('VAT Request Date')
+                . ': ' . $vatRequestId . '<br>' . Mage::helper('customer')->__('VAT Request Date')
                 . ': ' . $vatRequestDate;
             $orderInstance->addStatusHistoryComment($orderHistoryComment, false);
         }

@@ -29,9 +29,9 @@ $oneMethod = count($methods) <= 1;
         <?php $_code = $_method->getCode(); ?>
         <dt id="dt_method_<?= $_code ?>">
             <?php if (!$oneMethod): ?>
-                <input id="p_method_<?= $_code ?>" value="<?= $_code ?>" type="radio" name="payment[method]" title="<?= $this->escapeHtml($_method->getTitle()) ?>" onclick="payment.switchMethod('<?= $_code ?>')"<?php if ($this->getSelectedMethodCode() == $_code): ?> checked="checked"<?php endif ?> class="radio" />
+                <input id="p_method_<?= $_code ?>" value="<?= $_code ?>" type="radio" name="payment[method]" title="<?= $this->escapeHtml($_method->getTitle()) ?>" onclick="payment.switchMethod('<?= $_code ?>')"<?php if ($this->getSelectedMethodCode() == $_code): ?> checked="checked"<?php endif ?> class="radio">
             <?php else: ?>
-                <span class="no-display"><input id="p_method_<?= $_code ?>" value="<?= $_code ?>" type="radio" name="payment[method]" checked="checked" class="radio" /></span>
+                <span class="no-display"><input id="p_method_<?= $_code ?>" value="<?= $_code ?>" type="radio" name="payment[method]" checked="checked" class="radio"></span>
                 <?php $oneMethod = $_code; ?>
             <?php endif ?>
             <label for="p_method_<?= $_code ?>"><?= $this->escapeHtml($this->getMethodTitle($_method)) ?> <?= $this->getMethodLabelAfterHtml($_method) ?></label>

@@ -32,12 +32,12 @@ $numColumns = count($this->getColumns());
         <?php if($this->getDateFilterVisibility()): ?>
             <td class="a-left filter">
                 <div class="f-left">
-                    <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="date" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:auto" />&nbsp;&nbsp;</div>
+                    <div><?= $this->__('From') ?>:&nbsp;<input class="input-text no-changes required-entry" type="date" id="period_date_from" name="report_from" value="<?= $this->getFilter('report_from') ?>" style="width:auto">&nbsp;&nbsp;</div>
                     <div id="period_date_from_advaice"></div>
                 </div>
 
                 <div class="f-left">
-                    <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="date" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:auto" />&nbsp;&nbsp;</div>
+                    <div><?= $this->__('To') ?>:&nbsp;<input  class="input-text no-changes required-entry" type="date" id="period_date_to" name="report_to"  value="<?= $this->getFilter('report_to') ?>" style="width:auto">&nbsp;&nbsp;</div>
                     <div id="period_date_to_advaice"></div>
                 </div>
 
@@ -54,7 +54,7 @@ $numColumns = count($this->getColumns());
         <?php endif ?>
         <?php if($this->getExportVisibility()): ?>
             <td class="a-right">
-                <img src="<?= $this->getSkinUrl('images/icon_export.gif') ?>" alt="" class="v-middle"/>&nbsp; <?= $this->__('Export to:') ?>
+                <img src="<?= $this->getSkinUrl('images/icon_export.gif') ?>" alt="" class="v-middle">&nbsp; <?= $this->__('Export to:') ?>
                 <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;">
                 <?php foreach ($this->getExportTypes() as $_type): ?>
                     <option value="<?= $_type->getUrl() ?>"><?= $_type->getLabel() ?></option>
@@ -69,9 +69,9 @@ $numColumns = count($this->getColumns());
 
     <div class="grid">
     <table cellspacing="0" class="data" id="<?= $this->getId() ?>_table">
-        <col/>
+        <col>
         <?php foreach ($this->getColumns() as $_column): ?>
-        <col <?= $_column->getHtmlProperty() ?>/>
+        <col <?= $_column->getHtmlProperty() ?>>
         <?php endforeach ?>
         <?php if ($this->getHeadersVisibility() || $this->getFilterVisibility()): ?>
             <thead>

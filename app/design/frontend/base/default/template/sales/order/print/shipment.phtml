@@ -33,8 +33,8 @@
              <?php $tracks = $this->getShipmentTracks($shipment);
                 if ($tracks): ?>
                 <table class="data-table" id="my-shipment-tracking">
-                    <col />
-                    <col />
+                    <col>
+                    <col>
                     <thead>
                         <tr>
                             <th><?= Mage::helper('sales')->__('Title') ?></th>
@@ -59,9 +59,9 @@
     </div>
     <h3><?= $this->__('Items Shipped') ?></h3>
     <table class="data-table" id="my-shipment-table-<?= $this->getObjectData($shipment, 'id') ?>">
-        <col />
-        <col width="1" />
-        <col width="1" />
+        <col>
+        <col width="1">
+        <col width="1">
         <thead>
             <tr>
                 <th><?= $this->__('Product Name') ?></th>

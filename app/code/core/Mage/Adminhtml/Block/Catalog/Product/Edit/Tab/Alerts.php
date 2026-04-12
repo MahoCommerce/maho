@@ -34,7 +34,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Edit_Tab_Alerts extends Mage_Adminhtm
         if ($alertPriceAllow) {
             $accordion->addItem('price', [
                 'title'     => Mage::helper('adminhtml')->__('Price alert subscription was saved.'),
-                'content'   => $this->getLayout()->createBlock('adminhtml/catalog_product_edit_tab_alerts_price')->toHtml() . '<br />',
+                'content'   => $this->getLayout()->createBlock('adminhtml/catalog_product_edit_tab_alerts_price')->toHtml() . '<br>',
                 'open'      => true,
             ]);
         }

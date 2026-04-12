@@ -24,12 +24,12 @@
     <td colspan="10" class="grid tier">
     <table cellspacing="0" class="data border" id="tiers_table">
         <?php if ($_showWebsite): ?>
-        <col width="135" />
+        <col width="135">
         <?php endif ?>
-        <col width="120" />
-        <col width="95" />
-        <col />
-        <col width="1" />
+        <col width="120">
+        <col width="95">
+        <col>
+        <col width="1">
         <thead>
             <tr class="headings">
                 <th <?php if (!$_showWebsite): ?>style="display:none"<?php endif ?>><?= Mage::helper('sales')->__('Website') ?></th>
@@ -61,10 +61,10 @@ var tierPriceRowTemplate = '<tr>'
     + '<option value="<?= $_groupId ?>"><?= $this->jsQuoteEscape($this->escapeHtml($_groupName)) ?></option>'
     <?php endforeach ?>
     + '</select></td>'
-    + '<td class="nobr"><input class="<?= $_htmlClass ?> qty required-entry validate-greater-than-zero" type="text" name="<?= $_htmlName ?>[{{index}}][price_qty]" value="{{qty}}" id="tier_price_row_{{index}}_qty" />'
+    + '<td class="nobr"><input class="<?= $_htmlClass ?> qty required-entry validate-greater-than-zero" type="text" name="<?= $_htmlName ?>[{{index}}][price_qty]" value="{{qty}}" id="tier_price_row_{{index}}_qty">'
     + ' <small class="nobr"><?= $this->jsQuoteEscape(Mage::helper('catalog')->__('and above')) ?></small></td>'
-    + '<td><input class="<?= $_htmlClass ?> required-entry <?= $_priceValueValidation ?>" type="text" name="<?= $_htmlName ?>[{{index}}][price]" value="{{price}}" id="tier_price_row_{{index}}_price" /></td>'
-    + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="tier_price_row_{{index}}_delete" />'
+    + '<td><input class="<?= $_htmlClass ?> required-entry <?= $_priceValueValidation ?>" type="text" name="<?= $_htmlName ?>[{{index}}][price]" value="{{price}}" id="tier_price_row_{{index}}_price"></td>'
+    + '<td class="last"><input type="hidden" name="<?= $_htmlName ?>[{{index}}][delete]" class="delete" value="" id="tier_price_row_{{index}}_delete">'
     + '<button title="<?= $this->jsQuoteEscape(Mage::helper('catalog')->__("Delete Tier")) ?>" type="button" class="scalable delete icon-btn delete-product-option" id="tier_price_row_{{index}}_delete_button" onclick="return tierPriceControl.deleteItem(event);">'
     + '<?= $this->jsQuoteEscape(Mage::helper('catalog')->__("Delete")) ?></button></td>'
     + '</tr>';

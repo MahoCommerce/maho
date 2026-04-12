@@ -21,7 +21,7 @@
 <?php $this->getCurrencySymbolsData();?>
 
 <form id="currency_symbols_form" action="<?= $this->getFormActionUrl() ?>" method="post">
-    <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>" />
+    <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
 
     <div class="entry-edit">
         <div class="fieldset fieldset-wide">
@@ -29,10 +29,10 @@
                 <div class="hor-scroll">
                     <table cellspacing="0" class="data table-cat-img-sizes">
                         <colgroup>
-                            <col width="15%"/>
-                            <col width="15%"/>
-                            <col width="15%"/>
-                            <col />
+                            <col width="15%">
+                            <col width="15%">
+                            <col width="15%">
+                            <col>
                         </colgroup>
                         <thead>
                             <tr class="headings">
@@ -46,11 +46,11 @@
                             <?php foreach($this->getCurrencySymbolsData() as $key => $data): ?>
                             <tr>
                                 <td class="label">
-                                    <strong><?= $this->escapeHtml($data['currencyCode']) ?></strong><br/>
+                                    <strong><?= $this->escapeHtml($data['currencyCode']) ?></strong><br>
                                     <small><?= $this->escapeHtml($data['displayName']) ?></small>
                                 </td>
                                 <td class="label">
-                                    <strong><?= $this->escapeHtml($data['localeCode']) ?></strong><br/>
+                                    <strong><?= $this->escapeHtml($data['localeCode']) ?></strong><br>
                                     <small><?= $this->escapeHtml($data['localeName']) ?></small>
                                 </td>
                                 <td class="label">

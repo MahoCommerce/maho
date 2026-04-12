@@ -102,16 +102,16 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Filter_Datetime extends Mage_Admin
             . '<span class="label">' . $fromLabel . '</span>'
             . '<input type="' . $inputType . '" name="' . $this->_getHtmlName() . '[from]" id="' . $htmlId . '_from"'
                 . ' placeholder="' . $fromLabel . '"'
-                . ' value="' . $this->escapeHtml($fromValue) . '" class="input-text no-changes"/>'
+                . ' value="' . $this->escapeHtml($fromValue) . '" class="input-text no-changes">'
             . '</div>';
         $html .= '<div class="range-line date">'
             . '<span class="label">' . $toLabel . '</span>'
             . '<input type="' . $inputType . '" name="' . $this->_getHtmlName() . '[to]" id="' . $htmlId . '_to"'
                 . ' placeholder="' . $toLabel . '"'
-                . ' value="' . $this->escapeHtml($toValue) . '" class="input-text no-changes"/>'
+                . ' value="' . $this->escapeHtml($toValue) . '" class="input-text no-changes">'
             . '</div></div>';
         $html .= '<input type="hidden" name="' . $this->_getHtmlName() . '[locale]"'
-            . ' value="' . $this->getLocale()->getLocaleCode() . '"/>';
+            . ' value="' . $this->getLocale()->getLocaleCode() . '">';
         return $html;
     }
 

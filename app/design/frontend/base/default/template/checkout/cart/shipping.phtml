@@ -27,19 +27,19 @@
                     <script>
                         document.getElementById('region_id').setAttribute('defaultValue', "<?= $this->getEstimateRegionId() ?>");
                     </script>
-                    <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getEstimateRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text" style="display:none;" />
+                    <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getEstimateRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text" style="display:none;">
                 </div>
             </div>
             <?php if ($this->getCityActive()): ?>
             <div class="shipping-city-field">
                 <label for="city"<?= $this->isCityRequired() ? ' class="required"' : '' ?>><?php if ($this->isCityRequired()): ?><em>*</em> <?php endif ?><?= $this->__('City') ?></label>
-                <input class="input-text<?php if ($this->isCityRequired()):?> required-entry<?php endif ?>" id="city" type="text" name="estimate_city" value="<?= $this->escapeHtml($this->getEstimateCity()) ?>" />
+                <input class="input-text<?php if ($this->isCityRequired()):?> required-entry<?php endif ?>" id="city" type="text" name="estimate_city" value="<?= $this->escapeHtml($this->getEstimateCity()) ?>">
             </div>
             <?php endif ?>
             <div class="shipping-zip-row">
                 <div class="zip-field">
                     <label for="postcode" class="required"><em>*</em> <?= $this->__('Zip') ?></label>
-                    <input class="input-text validate-postcode<?php if ($this->isZipCodeRequired()):?> required-entry<?php endif ?>" type="text" id="postcode" name="estimate_postcode" value="<?= $this->escapeHtml($this->getEstimatePostcode()) ?>" />
+                    <input class="input-text validate-postcode<?php if ($this->isZipCodeRequired()):?> required-entry<?php endif ?>" type="text" id="postcode" name="estimate_postcode" value="<?= $this->escapeHtml($this->getEstimatePostcode()) ?>">
                 </div>
                 <button type="submit" title="<?= $this->quoteEscape($this->__('Estimate')) ?>" class="button2 btn-estimate">
                     <?= $this->__('Estimate') ?>

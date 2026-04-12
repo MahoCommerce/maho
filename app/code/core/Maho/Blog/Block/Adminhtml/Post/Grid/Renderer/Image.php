@@ -23,7 +23,7 @@ class Maho_Blog_Block_Adminhtml_Post_Grid_Renderer_Image extends Mage_Adminhtml_
         $imageUrl = Mage::getBaseUrl('media') . 'blog/' . $value;
 
         return sprintf(
-            '<img src="%s" alt="%s" style="width: 50px; height: 50px; object-fit: cover;" />',
+            '<img src="%s" alt="%s" style="width: 50px; height: 50px; object-fit: cover;">',
             $this->escapeHtml($imageUrl),
             $this->escapeHtml($row->getTitle()),
         );

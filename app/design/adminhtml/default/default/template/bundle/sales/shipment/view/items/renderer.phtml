@@ -42,7 +42,7 @@
             <h5 class="title"><?= $this->escapeHtml($_item->getName()) ?></h5>
             <div>
                 <strong><?= $this->helper('sales')->__('SKU') ?>:</strong>
-                <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
+                <?= implode('<br>', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
             </div>
         </td>
         <?php else: ?>

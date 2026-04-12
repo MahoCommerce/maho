@@ -21,7 +21,7 @@
         <?php $_labels = $this->getTitles() ?>
         <?php foreach ($this->getStores() as $_store): ?>
         <td>
-            <input class="input-text<?php if($_store->getId()==0): ?> required-entry<?php endif ?>" type="text" name="title[<?= $_store->getId() ?>]" value="<?= $_labels[$_store->getId()] ?>" />
+            <input class="input-text<?php if($_store->getId()==0): ?> required-entry<?php endif ?>" type="text" name="title[<?= $_store->getId() ?>]" value="<?= $_labels[$_store->getId()] ?>">
         </td>
         <?php endforeach ?>
     </tr>

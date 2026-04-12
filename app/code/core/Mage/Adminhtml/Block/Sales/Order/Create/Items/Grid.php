@@ -276,7 +276,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Items_Grid extends Mage_Adminhtml_
                 $price  = $this->convertPrice($data['price']);
                 $info[] = $this->helper('sales')->__('%s for %s', $qty, $price);
             }
-            $html = implode('<br/>', $info);
+            $html = implode('<br>', $info);
         }
         return $html;
     }

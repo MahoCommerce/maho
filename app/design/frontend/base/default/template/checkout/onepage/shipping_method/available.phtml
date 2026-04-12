@@ -27,9 +27,9 @@
                     <ul class="messages"><li class="error-msg"><ul><li><?= $this->escapeHtml($_rate->getErrorMessage()) ?></li></ul></li></ul>
                    <?php else: ?>
                         <?php if ($_sole) : ?>
-                        <span class="no-display"><input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>" checked="checked" /></span>
+                        <span class="no-display"><input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>" checked="checked"></span>
                         <?php else: ?>
-                        <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio"/>
+                        <input name="shipping_method" type="radio" value="<?= $_rate->getCode() ?>" id="s_method_<?= $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio">
 
                         <?php if ($_rate->getCode() === $this->getAddressShippingMethod()): ?>
                         <script>
@@ -41,7 +41,7 @@
                         <label for="s_method_<?= $_rate->getCode() ?>"<?php if ($_rate->getMethodLogo()): ?> style="display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: 8px;"<?php endif ?>>
                         <?php if ($_rate->getMethodLogo()): ?>
                         <span style="display: flex; justify-content: flex-end;">
-                            <img src="<?= $this->escapeUrl($_rate->getMethodLogo()) ?>" alt="" style="max-height: 24px; max-width: 80px; object-fit: contain;" />
+                            <img src="<?= $this->escapeUrl($_rate->getMethodLogo()) ?>" alt="" style="max-height: 24px; max-width: 80px; object-fit: contain;">
                         </span>
                         <?php endif ?>
                         <span><?= $this->escapeHtml($_rate->getMethodTitle()) ?>

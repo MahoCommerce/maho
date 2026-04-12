@@ -20,7 +20,7 @@ $optionId = $option->getId();
 <dd>
     <div class="input-box">
     <?php if ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_FIELD): ?>
-        <input type="text" id="option_<?= $optionId ?>" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" onchange="opConfig.reloadPrice()" />
+        <input type="text" id="option_<?= $optionId ?>" class="input-text<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" value="<?= $this->escapeHtml($this->getDefaultValue()) ?>" onchange="opConfig.reloadPrice()">
     <?php elseif ($option->getType() == Mage_Catalog_Model_Product_Option::OPTION_TYPE_AREA): ?>
         <textarea id="option_<?= $optionId ?>" class="<?= $option->getIsRequired() ? ' required-entry' : '' ?> <?= $option->getMaxCharacters() ? ' validate-length maximum-length-' . $option->getMaxCharacters() : '' ?> product-custom-option" name="options[<?= $option->getId() ?>]" rows="5" cols="25" onchange="opConfig.reloadPrice()"><?= $this->escapeHtml($this->getDefaultValue()) ?></textarea>
     <?php endif ?>

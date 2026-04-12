@@ -107,7 +107,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -117,7 +117,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -127,7 +127,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -137,7 +137,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -147,7 +147,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>
@@ -157,7 +157,7 @@ $newsletterContent = <<<EOD
                                     </tr>
                                     <tr>
                                         <td>
-                                            <hr/>
+                                            <hr>
                                         </td>
                                     </tr>
                                     <tr>

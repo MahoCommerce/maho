@@ -16,7 +16,7 @@
 <?php if ($this->isOrPositionBefore()): ?>
     <span class="paypal-or"><?= $this->__('-OR-') ?></span>
 <?php endif ?>
-<a data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl() ?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" title="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" /></a>
+<a data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl() ?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>" title="<?= Mage::helper('paypal')->__('Checkout with PayPal') ?>"></a>
 </p>
 <?php if ($this->isOrPositionAfter()): ?>
 <li>
@@ -27,7 +27,7 @@
  <?php endif ?>
 <?php if ($this->getConfirmationUrl() || $this->getIsInCatalogProduct()): ?>
 <?php if ($this->getIsInCatalogProduct()): ?>
-    <input type="hidden" id="pp_checkout_url" name="return_url" value="" />
+    <input type="hidden" id="pp_checkout_url" name="return_url" value="">
 <?php endif ?>
 <script>
     document.getElementById('<?= $shortcutHtmlId ?>').addEventListener('click', function(event) {

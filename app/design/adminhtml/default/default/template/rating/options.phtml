@@ -17,14 +17,14 @@
     <?php for( $_i=1;$_i<=5;$_i++ ): ?>
         <span class="field-row">
             <label for="option_<?= $_i ?>"><?= Mage::helper('rating')->__('Option Title:') ?></label>
-            <input id="option_<?= $_i ?>" name="option[<?= $_i ?>][code]" value="<?= $_i ?>" class="input-text" type="text" />
+            <input id="option_<?= $_i ?>" name="option[<?= $_i ?>][code]" value="<?= $_i ?>" class="input-text" type="text">
         </span>
     <?php endfor ?>
 <?php elseif( $options->getSize() > 0 ): ?>
     <?php foreach($options->getItems() as $_item): ?>
         <span class="field-row">
             <label for="option_<?= $_item->getId() ?>"><?= Mage::helper('rating')->__('Option Title:') ?></label>
-            <input id="option_<?= $_item->getId() ?>" name="option[<?= $_item->getId() ?>][code]" value="<?= $_item->getCode() ?>" class="input-text" type="text" />
+            <input id="option_<?= $_item->getId() ?>" name="option[<?= $_item->getId() ?>][code]" value="<?= $_item->getCode() ?>" class="input-text" type="text">
         </span>
     <?php endforeach ?>
 <?php endif ?>

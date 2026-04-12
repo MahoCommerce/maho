@@ -14,8 +14,8 @@
 <?php $_order=$this->getOrder() ?>
 <div>
 <?php $customerName = $_order->getCustomerFirstname() ? $_order->getCustomerName() : $_order->getBillingAddress()->getName(); ?>
-<?= $this->__('Customer Name: %s', $this->quoteEscape($customerName)) ?><br />
-<?= $this->__('Purchased From: %s', $this->quoteEscape($_order->getStore()->getGroup()->getName())) ?><br />
+<?= $this->__('Customer Name: %s', $this->quoteEscape($customerName)) ?><br>
+<?= $this->__('Purchased From: %s', $this->quoteEscape($_order->getStore()->getGroup()->getName())) ?><br>
 </div>
 <table cellspacing="0" cellpadding="0" border="0" width="100%" style="border:1px solid #bebcb7; background:#f8f7f5;">
     <thead>
@@ -31,10 +31,10 @@
         <tr <?= $i%2?'bgcolor="#eeeded"':'' ?>>
             <td align="left" valign="top" style="padding:3px 9px"><strong><?= $this->escapeHtml($_item->getName()) ?></strong>
             <?php if($_giftMessage = $this->getGiftMessageItem($_item)): ?>
-            <br /><strong><?= $this->__('Gift Message') ?></strong>
-            <br /><?= $this->__('From:') ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
-            <br /><?= $this->__('To:') ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
-            <br /><?= $this->__('Message:') ?><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
+            <br><strong><?= $this->__('Gift Message') ?></strong>
+            <br><?= $this->__('From:') ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
+            <br><?= $this->__('To:') ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
+            <br><?= $this->__('Message:') ?><br> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
             <?php endif ?>
             </td>
             <td align="center" valign="top" style="padding:3px 9px"><?= $_item->getQtyOrdered()*1 ?></td>
@@ -48,9 +48,9 @@
         <tr>
             <td colspan="3" align="left" style="padding:3px 9px">
             <strong><?= $this->__('Gift Message') ?></strong>
-            <br /><?= $this->__('From:') ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
-            <br /><?= $this->__('To:') ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
-            <br /><?= $this->__('Message:') ?><br /> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
+            <br><?= $this->__('From:') ?> <?= $this->escapeHtml($_giftMessage->getSender()) ?>
+            <br><?= $this->__('To:') ?> <?= $this->escapeHtml($_giftMessage->getRecipient()) ?>
+            <br><?= $this->__('Message:') ?><br> <?= $this->escapeHtml($_giftMessage->getMessage()) ?>
             </td>
         </tr>
      <?php endif ?>

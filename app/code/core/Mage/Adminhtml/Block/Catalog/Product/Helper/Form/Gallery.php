@@ -108,11 +108,11 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Gallery extends \Maho\Dat
         }
 
         if ($attribute->isScopeGlobal()) {
-            $html .= '<br/>' . Mage::helper('adminhtml')->__('[GLOBAL]');
+            $html .= '<br>' . Mage::helper('adminhtml')->__('[GLOBAL]');
         } elseif ($attribute->isScopeWebsite()) {
-            $html .= '<br/>' . Mage::helper('adminhtml')->__('[WEBSITE]');
+            $html .= '<br>' . Mage::helper('adminhtml')->__('[WEBSITE]');
         } elseif ($attribute->isScopeStore()) {
-            $html .= '<br/>' . Mage::helper('adminhtml')->__('[STORE VIEW]');
+            $html .= '<br>' . Mage::helper('adminhtml')->__('[STORE VIEW]');
         }
         return $html;
     }

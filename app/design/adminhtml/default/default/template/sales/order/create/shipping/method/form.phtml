@@ -29,7 +29,7 @@
                         </ul>
                    <?php else: ?>
                         <?php $_checked = $this->isMethodActive($_code) ? 'checked="checked"' : '' ?>
-                        <input <?= $_radioProperty ?> value="<?= $_code ?>" id="s_method_<?= $_code ?>" <?= $_checked ?>/>
+                        <input <?= $_radioProperty ?> value="<?= $_code ?>" id="s_method_<?= $_code ?>" <?= $_checked ?>>
                         <label class="normal" for="s_method_<?= $_code ?>">
                             <?= $this->escapeHtml($_rate->getMethodTitle() ? $_rate->getMethodTitle() : $_rate->getMethodDescription()) ?> -
                             <strong>
@@ -52,7 +52,7 @@
     </div>
     <?php if ($_rate = $this->getActiveMethodRate()): ?>
         <div id="order-shipping-method-info">
-            <strong><?= $this->escapeHtml($this->getCarrierName($_rate->getCarrier())) ?></strong><br/>
+            <strong><?= $this->escapeHtml($this->getCarrierName($_rate->getCarrier())) ?></strong><br>
             <?= $this->escapeHtml($_rate->getMethodTitle() ? $_rate->getMethodTitle() : $_rate->getMethodDescription()) ?> -
             <strong>
                 <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
@@ -63,7 +63,7 @@
                     (<?= $this->__('Incl. Tax') ?> <?= $_incl ?>)
                 <?php endif ?>
             </strong>
-            <br/>
+            <br>
             <a href="#" onclick="document.getElementById('order-shipping-method-info').style.display = 'none';document.getElementById('order-shipping-method-choose').style.display = 'block';return false">
                 <?= Mage::helper('sales')->__('Click to change shipping method') ?>
             </a>
@@ -78,7 +78,7 @@
         <a href="#" onclick="order.loadShippingRates();return false">
             <?= Mage::helper('sales')->__('Get shipping methods and rates') ?>
         </a>
-        <input type="hidden" name="order[has_shipping]" value="" class="required-entry" />
+        <input type="hidden" name="order[has_shipping]" value="" class="required-entry">
     </div>
 <?php endif ?>
 <div style="display:none;" id="shipping-method-overlay" class="overlay"><span><?= $this->__('Shipping method selection is not applicable') ?></span></div>

@@ -17,7 +17,7 @@
         <?= $this->getChildHtml('order_messages') ?>
     </div>
     <?= $this->getChildHtml('order_info') ?>
-    <input type="hidden" name="order_id" value="<?= $_order->getId() ?>"/>
+    <input type="hidden" name="order_id" value="<?= $_order->getId() ?>">
     <?php if ($_order->getIsVirtual()): ?>
     <div class="box-right">
     <?php else: ?>
@@ -47,7 +47,7 @@
             <fieldset>
                 <?php  if ($_order->getTracksCollection()->count()) : ?>
                 <a href="#" id="linkId" onclick="popWin('<?= $this->helper('shipping')->getTrackingPopupUrlBySalesModel($_order) ?>','trackorder','width=800,height=600,resizable=yes,scrollbars=yes')" title="<?= $this->quoteEscape($this->__('Track Order')) ?>"><?= $this->__('Track Order') ?></a>
-                <br/>
+                <br>
                     <?php foreach ($_order->getTracksCollection() as $_track): ?>
                         <div>
                             <?php $trackNumber = $_track->getNumber();?>

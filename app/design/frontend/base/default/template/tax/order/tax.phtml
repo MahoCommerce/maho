@@ -38,7 +38,7 @@
                 <?php if (!is_null($rate['percent'])): ?>
                     (<?= (float)$rate['percent'] ?>%)
                 <?php endif ?>
-                <br />
+                <br>
             </td>
             <?php if ($isFirst): ?>
                 <td <?= $this->getValueProperties()?> rowspan="<?= count($rates) ?>">
@@ -56,7 +56,7 @@
         <tr class="summary-details-<?= $taxIter ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>"<?php if (!$this->getIsPlaneMode()):?> style="display:none;"<?php endif ?>>
             <td <?= $this->getLabelProperties() ?>>
                 <?= $this->escapeHtml($weeeTitle) ?>
-                <br/>
+                <br>
             </td>
             <td <?= $this->getValueProperties() ?> rowspan="1">
                 <?= $_order->formatPrice($weeeAmount) ?>

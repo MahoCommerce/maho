@@ -21,7 +21,7 @@
                 <label for="name"><?= $helper->__('Title') ?></label>
             </td>
             <td class="value">
-                <input type="text" class="input-text" id="downloadable_links_title" name="product[links_title]" value="<?= $this->escapeHtml($product->getId() ? $product->getLinksTitle() : $this->getLinksTitle()) ?>" <?= ($product->getStoreId() && $this->getUsedDefault()) ? 'disabled': '' ?> />
+                <input type="text" class="input-text" id="downloadable_links_title" name="product[links_title]" value="<?= $this->escapeHtml($product->getId() ? $product->getLinksTitle() : $this->getLinksTitle()) ?>" <?= ($product->getStoreId() && $this->getUsedDefault()) ? 'disabled': '' ?>>
             </td>
             <td class="scope-label">
             <?php if (!Mage::app()->isSingleStoreMode()): ?>
@@ -30,7 +30,7 @@
             </td>
             <td class="value use-default">
             <?php if($product->getStoreId()): ?>
-                <input id="link_title_default" type="checkbox" name="use_default[]" value="links_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault() ? 'checked' : '' ?> />
+                <input id="link_title_default" type="checkbox" name="use_default[]" value="links_title" onclick="toggleValueElements(this, this.parentNode.parentNode)" <?= $this->getUsedDefault() ? 'checked' : '' ?>>
                 <label class="normal" for="link_title_default"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
             </td>
@@ -57,14 +57,14 @@
 <div class="grid">
     <div class="hor-scroll">
         <table cellspacing="0" id="downloadable_link_table" class="data border">
-            <col width="33%" />
-            <col />
-            <col />
-            <col />
-            <col width="1" />
-            <col width="1" />
-            <col width="1" />
-            <col width="1" />
+            <col width="33%">
+            <col>
+            <col>
+            <col>
+            <col width="1">
+            <col width="1">
+            <col width="1">
+            <col width="1">
             <thead>
                 <tr class="headings">
                     <th><?= $helper->__('Title') ?> <span class="required">*</span></th>
@@ -94,34 +94,34 @@
 <template id="downloadable-link-template">
     <tr id="downloadable_link_{{id}}">
         <td>
-            <input type="hidden" class="__delete__" name="downloadable[link][{{id}}][is_delete]" value="" />
-            <input type="hidden" name="downloadable[link][{{id}}][link_id]" value="{{link_id}}" />
-            <input type="text" class="required-entry input-text" name="downloadable[link][{{id}}][title]" value="{{title}}" />
+            <input type="hidden" class="__delete__" name="downloadable[link][{{id}}][is_delete]" value="">
+            <input type="hidden" name="downloadable[link][{{id}}][link_id]" value="{{link_id}}">
+            <input type="text" class="required-entry input-text" name="downloadable[link][{{id}}][title]" value="{{title}}">
             <?php if ($product->getStoreId()): ?>
             <br>
-            <input type="checkbox" id="downloadable_link_{{id}}_title" name="downloadable[link][{{id}}][use_default_title]" value="1" />
+            <input type="checkbox" id="downloadable_link_{{id}}_title" name="downloadable[link][{{id}}][use_default_title]" value="1">
             <label class="normal" for="downloadable_link_{{id}}_title"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
         </td>
         <?php if ($this->getCanReadPrice() !== false) : ?>
         <?php $disabled = $this->getCanEditPrice() === false ? 'disabled' : '' ?>
         <td class="input-price">
-            <input type="text" id="downloadable_link_{{id}}_price_value" class="input-text validate-number link-prices <?= $disabled ?>" name="downloadable[link][{{id}}][price]" value="{{price}}" <?= $disabled ?> />
+            <input type="text" id="downloadable_link_{{id}}_price_value" class="input-text validate-number link-prices <?= $disabled ?>" name="downloadable[link][{{id}}][price]" value="{{price}}" <?= $disabled ?>>
             <label>[<?= Mage::app()->getStore($product->getStoreId())->getBaseCurrencyCode() ?>]</label>
             <?php if ($product->getStoreId() && Mage::helper('downloadable')->getIsPriceWebsiteScope()): ?>
             <br>
-            <input type="checkbox" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1" <?= $disabled ?> /> <label for="downloadable_link_{{id}}_price"><?= $helper->__('Use Default Value') ?></label>
+            <input type="checkbox" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1" <?= $disabled ?>> <label for="downloadable_link_{{id}}_price"><?= $helper->__('Use Default Value') ?></label>
             <?php endif ?>
         </td>
         <?php else: ?>
-        <input type="hidden" id="downloadable_link_{{id}}_price_value" class="link-prices" name="downloadable[link][{{id}}][price]" value="0" />
+        <input type="hidden" id="downloadable_link_{{id}}_price_value" class="link-prices" name="downloadable[link][{{id}}][price]" value="0">
         <?php if ($product->getStoreId() && Mage::helper('downloadable')->getIsPriceWebsiteScope()): ?>
-        <input type="hidden" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1" />
+        <input type="hidden" id="downloadable_link_{{id}}_price" name="downloadable[link][{{id}}][use_default_price]" value="1">
         <?php endif ?>
         <?php endif ?>
         <td>
-            <input type="text" id="downloadable_link_{{id}}_downloads" name="downloadable[link][{{id}}][number_of_downloads]" class="input-text downloads" value="{{number_of_downloads}}" />
-            <p><input type="checkbox" class="checkbox" id="downloadable_link_{{id}}_is_unlimited" name="downloadable[link][{{id}}][is_unlimited]" value="1" /> <label for="downloadable_link_{{id}}_is_unlimited">Unlimited</label></p>
+            <input type="text" id="downloadable_link_{{id}}_downloads" name="downloadable[link][{{id}}][number_of_downloads]" class="input-text downloads" value="{{number_of_downloads}}">
+            <p><input type="checkbox" class="checkbox" id="downloadable_link_{{id}}_is_unlimited" name="downloadable[link][{{id}}][is_unlimited]" value="1"> <label for="downloadable_link_{{id}}_is_unlimited">Unlimited</label></p>
         </td>
         <td class="a-center">
             <select id="downloadable_link_{{id}}_shareable" name="downloadable[link][{{id}}][is_shareable]">
@@ -134,10 +134,10 @@
             <div class="files">
                 <div class="row a-right">
                     <label for="downloadable_link_{{id}}_sample_file_type" class="a-left">
-                        <input type="radio" class="radio" id="downloadable_link_{{id}}_sample_file_type" name="downloadable[link][{{id}}][sample][type]" value="file" />
+                        <input type="radio" class="radio" id="downloadable_link_{{id}}_sample_file_type" name="downloadable[link][{{id}}][sample][type]" value="file">
                         <?= $helper->__('File:') ?>
                     </label>
-                    <input type="hidden" class="validate-downloadable-file" id="downloadable_link_{{id}}_sample_file_save" name="downloadable[link][{{id}}][sample][file]" value="{{sample_file_save}}" />
+                    <input type="hidden" class="validate-downloadable-file" id="downloadable_link_{{id}}_sample_file_save" name="downloadable[link][{{id}}][sample][file]" value="{{sample_file_save}}">
                     <?= $this->getBrowseButtonHtml('sample_') ?>
                     <?= $this->getDeleteButtonHtml('sample_') ?>
                     <div id="downloadable_link_{{id}}_sample_file" class="uploader a-left">
@@ -148,14 +148,14 @@
                 </div>
                 <div class="row">
                     <label for="downloadable_link_{{id}}_sample_url_type">
-                        <input type="radio" class="radio" id="downloadable_link_{{id}}_sample_url_type" name="downloadable[link][{{id}}][sample][type]" value="url" />
+                        <input type="radio" class="radio" id="downloadable_link_{{id}}_sample_url_type" name="downloadable[link][{{id}}][sample][type]" value="url">
                         <?= $helper->__('URL:') ?>
                     </label>
-                    <input type="text" class="validate-downloadable-url input-text" id="downloadable_link_{{id}}_sample_url_save" name="downloadable[link][{{id}}][sample][url]" value="{{sample_url}}" />
+                    <input type="text" class="validate-downloadable-url input-text" id="downloadable_link_{{id}}_sample_url_save" name="downloadable[link][{{id}}][sample][url]" value="{{sample_url}}">
                 </div>
             </div>
             <div>
-                <input type="radio" class="radio" id="downloadable_link_{{id}}_sample_none_type" name="downloadable[link][{{id}}][sample][type]" value="none" />
+                <input type="radio" class="radio" id="downloadable_link_{{id}}_sample_none_type" name="downloadable[link][{{id}}][sample][type]" value="none">
                 <label for="downloadable_link_{{id}}_sample_none_type"><?= $helper->__('Disable Sample') ?></label>
             </div>
             <div>
@@ -166,10 +166,10 @@
             <div class="files">
                 <div class="row a-right">
                     <label for="downloadable_link_{{id}}_file_type" class="a-left">
-                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_link_{{id}}_file_type" name="downloadable[link][{{id}}][type]" value="file" />
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_link_{{id}}_file_type" name="downloadable[link][{{id}}][type]" value="file">
                         <?= $helper->__('File:') ?>
                     </label>
-                    <input type="hidden" class="validate-downloadable-file" id="downloadable_link_{{id}}_file_save" name="downloadable[link][{{id}}][file]" value="{{file_save}}" />
+                    <input type="hidden" class="validate-downloadable-file" id="downloadable_link_{{id}}_file_save" name="downloadable[link][{{id}}][file]" value="{{file_save}}">
                     <?= $this->getBrowseButtonHtml() ?>
                     <?= $this->getDeleteButtonHtml() ?>
                     <div id="downloadable_link_{{id}}_file" class="uploader a-left">
@@ -180,10 +180,10 @@
                 </div>
                 <div class="row">
                     <label for="downloadable_link_{{id}}_url_type">
-                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_link_{{id}}_url_type" name="downloadable[link][{{id}}][type]" value="url" />
+                        <input type="radio" class="radio validate-one-required-by-name" id="downloadable_link_{{id}}_url_type" name="downloadable[link][{{id}}][type]" value="url">
                         <?= $helper->__('URL:') ?>
                     </label>
-                    <input type="text" class="validate-downloadable-url input-text" id="downloadable_link_{{id}}_url_save" name="downloadable[link][{{id}}][link_url]" value="{{link_url}}" />
+                    <input type="text" class="validate-downloadable-url input-text" id="downloadable_link_{{id}}_url_save" name="downloadable[link][{{id}}][link_url]" value="{{link_url}}">
                 </div>
             </div>
             <div>
@@ -191,7 +191,7 @@
             </div>
         </td>
         <td class="a-center">
-            <input type="text" name="downloadable[link][{{id}}][sort_order]" value="{{sort_order}}" class="input-text sort" />
+            <input type="text" name="downloadable[link][{{id}}][sort_order]" value="{{sort_order}}" class="input-text sort">
         </td>
         <td>
             <button id="downloadable_link_{{id}}_delete_button" type="button" class="scalable delete icon-btn delete-link-item"><span><?= $helper->__('Delete') ?></span></button>
