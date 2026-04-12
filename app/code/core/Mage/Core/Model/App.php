@@ -1403,15 +1403,14 @@ class Mage_Core_Model_App
                 switch ($obs['type']) {
                     case 'disabled':
                         break;
-                    case 'object':
-                    case 'model':
+                    case 'singleton':
                         $method = $obs['method'];
-                        $object = Mage::getModel($obs['model']);
+                        $object = Mage::getSingleton($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                     default:
                         $method = $obs['method'];
-                        $object = Mage::getSingleton($obs['model']);
+                        $object = Mage::getModel($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                 }

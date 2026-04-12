@@ -161,7 +161,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    #[Maho\Config\Observer('customer_login', area: 'frontend', type: 'model')]
+    #[Maho\Config\Observer('customer_login', area: 'frontend')]
     public function bindCustomerLogin()
     {
         $this->_getResource()->updateCustomerFromVisitor($this);
@@ -175,7 +175,7 @@ class Mage_Catalog_Model_Product_Compare_Item extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
-    #[Maho\Config\Observer('customer_logout', area: 'frontend', type: 'model')]
+    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
     public function bindCustomerLogout(?\Maho\Event\Observer $observer = null)
     {
         $this->_getResource()->purgeVisitorByCustomer($this);

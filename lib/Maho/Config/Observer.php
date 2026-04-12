@@ -29,7 +29,7 @@ readonly class Observer
     /**
      * @param string  $event    Event name to observe (e.g. 'catalog_product_save_after')
      * @param string  $area     Area scope: 'global' (default), 'frontend', 'adminhtml', 'crontab', 'install'
-     * @param string  $type     Instantiation type: 'singleton' (default, shared instance) or 'model' (new instance per dispatch)
+     * @param string  $type     Instantiation type: 'model' (default, new instance per dispatch) or 'singleton' (shared instance)
      * @param ?string $id       Observer identifier, auto-generated if omitted. Set explicitly when other code references this observer by id.
      * @param ?string $replaces The `id` of another observer on the same event/area to disable and replace.
      *                          Accepts either the explicit id, the class name, or the class alias format
@@ -39,7 +39,7 @@ readonly class Observer
     public function __construct(
         public string $event,
         public string $area = 'global',
-        public string $type = 'singleton',
+        public string $type = 'model',
         public ?string $id = null,
         public ?string $replaces = null,
     ) {}
