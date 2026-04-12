@@ -44,7 +44,7 @@ class Mage_Rss_Model_Observer
     /**
      * Clean cache for notify stock rss
      */
-    #[Maho\Config\Observer('sales_order_save_after', area: 'frontend', name: 'notifystock')]
+    #[Maho\Config\Observer('sales_order_save_after', area: 'frontend', id: 'notifystock')]
     public function salesOrderItemSaveAfterNotifyStock(\Maho\Event\Observer $observer)
     {
         $this->_cleanCache(Mage_Rss_Block_Catalog_NotifyStock::CACHE_TAG);
@@ -53,7 +53,7 @@ class Mage_Rss_Model_Observer
     /**
      * Clean cache for catalog new orders rss
      */
-    #[Maho\Config\Observer('sales_order_save_after', area: 'frontend', name: 'ordernew')]
+    #[Maho\Config\Observer('sales_order_save_after', area: 'frontend', id: 'ordernew')]
     public function salesOrderItemSaveAfterOrderNew(\Maho\Event\Observer $observer)
     {
         $this->_cleanCache(Mage_Rss_Block_Order_New::CACHE_TAG);

@@ -39,7 +39,7 @@ class Mage_Paypal_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('checkout_submit_all_after', area: 'frontend', name: 'hss_save_order_after_submit')]
+    #[Maho\Config\Observer('checkout_submit_all_after', area: 'frontend', id: 'hss_save_order_after_submit')]
     public function saveOrderAfterSubmit(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -54,7 +54,7 @@ class Mage_Paypal_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('controller_action_postdispatch_checkout_onepage_saveorder', area: 'frontend', name: 'hss_save_order_onepage')]
+    #[Maho\Config\Observer('controller_action_postdispatch_checkout_onepage_saveorder', area: 'frontend', id: 'hss_save_order_onepage')]
     public function setResponseAfterSaveOrder(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */

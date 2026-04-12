@@ -12,7 +12,7 @@ declare(strict_types=1);
 
 class Maho_Paypal_Model_Observer
 {
-    #[Maho\Config\Observer('checkout_submit_all_after', name: 'maho_paypal_save_order_after_submit')]
+    #[Maho\Config\Observer('checkout_submit_all_after', id: 'maho_paypal_save_order_after_submit')]
     public function saveOrderAfterSubmit(\Maho\DataObject $observer): void
     {
         $order = $observer->getData('order');
@@ -43,7 +43,7 @@ class Maho_Paypal_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('encryption_key_regenerated', name: 'maho_paypal_encryption_key_regenerated')]
+    #[Maho\Config\Observer('encryption_key_regenerated', id: 'maho_paypal_encryption_key_regenerated')]
     public function encryptionKeyRegenerated(Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */

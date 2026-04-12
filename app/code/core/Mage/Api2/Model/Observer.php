@@ -67,7 +67,7 @@ class Mage_Api2_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
-    #[Maho\Config\Observer('api_user_authenticated', name: 'api2_upgrade_key')]
+    #[Maho\Config\Observer('api_user_authenticated', id: 'api2_upgrade_key')]
     public function upgradeApiKey($observer)
     {
         $apiKey = $observer->getEvent()->getApiKey();

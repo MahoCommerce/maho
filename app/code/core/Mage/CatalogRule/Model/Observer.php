@@ -92,7 +92,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
-    #[Maho\Config\Observer('sales_quote_collect_totals_before', area: 'frontend', name: 'preload_price_rules')]
+    #[Maho\Config\Observer('sales_quote_collect_totals_before', area: 'frontend', id: 'preload_price_rules')]
     public function preloadPriceRules(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */

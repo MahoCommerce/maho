@@ -21,7 +21,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    #[Maho\Config\Observer('sales_order_invoice_pay', name: 'giftcard_create_on_payment')]
+    #[Maho\Config\Observer('sales_order_invoice_pay', id: 'giftcard_create_on_payment')]
     public function createGiftcardsOnInvoicePaid(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Invoice $invoice */
@@ -195,7 +195,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    #[Maho\Config\Observer('catalog_product_save_before', name: 'giftcard_product_save')]
+    #[Maho\Config\Observer('catalog_product_save_before', id: 'giftcard_product_save')]
     public function catalogProductSaveBefore(Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -231,7 +231,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    #[Maho\Config\Observer('sales_quote_add_item', name: 'giftcard_set_price')]
+    #[Maho\Config\Observer('sales_quote_add_item', id: 'giftcard_set_price')]
     public function setGiftcardPrice(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote_Item $quoteItem */
@@ -282,7 +282,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    #[Maho\Config\Observer('sales_convert_quote_address_to_order', name: 'giftcard_apply_to_order')]
+    #[Maho\Config\Observer('sales_convert_quote_address_to_order', id: 'giftcard_apply_to_order')]
     public function applyGiftcardToOrder(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -324,7 +324,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    #[Maho\Config\Observer('sales_order_place_after', name: 'giftcard_deduct_balance')]
+    #[Maho\Config\Observer('sales_order_place_after', id: 'giftcard_deduct_balance')]
     public function deductGiftcardBalance(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -501,7 +501,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    #[Maho\Config\Observer('sales_order_creditmemo_refund', name: 'giftcard_refund_balance')]
+    #[Maho\Config\Observer('sales_order_creditmemo_refund', id: 'giftcard_refund_balance')]
     public function refundGiftcardBalance(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order_Creditmemo $creditmemo */
@@ -641,7 +641,7 @@ class Maho_Giftcard_Model_Observer
      *
      * @return void
      */
-    #[Maho\Config\Observer('order_cancel_after', name: 'giftcard_refund_on_cancel')]
+    #[Maho\Config\Observer('order_cancel_after', id: 'giftcard_refund_on_cancel')]
     public function refundGiftcardOnOrderCancel(Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -763,7 +763,7 @@ class Maho_Giftcard_Model_Observer
     /**
      * Process gift card in admin order create
      */
-    #[Maho\Config\Observer('adminhtml_sales_order_create_process_data_before', area: 'adminhtml', name: 'giftcard_process_admin_order')]
+    #[Maho\Config\Observer('adminhtml_sales_order_create_process_data_before', area: 'adminhtml', id: 'giftcard_process_admin_order')]
     public function processAdminOrderGiftcard(Maho\Event\Observer $observer): void
     {
         /** @var Mage_Core_Controller_Request_Http $requestModel */
@@ -893,7 +893,7 @@ class Maho_Giftcard_Model_Observer
      * Prevents non-zero-total payment methods (like Check/Money Order) from showing
      * when gift cards fully cover the order. Only the "free" payment method should show.
      */
-    #[Maho\Config\Observer('payment_method_is_active', name: 'giftcard_filter_payment_methods')]
+    #[Maho\Config\Observer('payment_method_is_active', id: 'giftcard_filter_payment_methods')]
     public function filterPaymentMethodsForZeroTotal(Maho\Event\Observer $observer): void
     {
         /** @var stdClass $result */

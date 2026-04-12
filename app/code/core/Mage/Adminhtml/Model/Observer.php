@@ -32,7 +32,7 @@ class Mage_Adminhtml_Model_Observer
         return $this;
     }
 
-    #[Maho\Config\Observer('adminhtml_controller_action_predispatch_start', name: 'store')]
+    #[Maho\Config\Observer('adminhtml_controller_action_predispatch_start', id: 'store')]
     public function bindStore()
     {
         Mage::app()->setCurrentStore('admin');
@@ -44,7 +44,7 @@ class Mage_Adminhtml_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('adminhtml_controller_action_predispatch_start', name: 'massaction')]
+    #[Maho\Config\Observer('adminhtml_controller_action_predispatch_start', id: 'massaction')]
     public function massactionPrepareKey()
     {
         $request = Mage::app()->getFrontController()->getRequest();

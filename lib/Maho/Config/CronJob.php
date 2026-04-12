@@ -27,12 +27,12 @@ use Attribute;
 readonly class CronJob
 {
     /**
-     * @param string  $jobCode    Job code identifier (e.g. 'sitemap_generate', 'core_clean_cache')
+     * @param string  $id         Job identifier (e.g. 'sitemap_generate', 'core_clean_cache')
      * @param ?string $schedule   Cron expression (e.g. '0 2 * * *')
      * @param ?string $configPath Config path for admin-configurable schedule (e.g. 'crontab/jobs/my_job/schedule/cron_expr')
      */
     public function __construct(
-        public string $jobCode,
+        public string $id,
         public ?string $schedule = null,
         public ?string $configPath = null,
     ) {}
