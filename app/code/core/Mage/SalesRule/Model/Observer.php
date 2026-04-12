@@ -19,6 +19,7 @@ class Mage_SalesRule_Model_Observer
      * @return $this
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    #[Maho\Config\Observer('sales_order_place_after')]
     public function sales_order_afterPlace($observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -84,6 +85,7 @@ class Mage_SalesRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      */
     // phpcs:ignore PSR1.Methods.CamelCapsMethodName.NotCamelCaps
+    #[Maho\Config\Observer('sales_order_payment_cancel')]
     public function sales_order_paymentCancel($observer)
     {
         $event = $observer->getEvent();
@@ -129,6 +131,7 @@ class Mage_SalesRule_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
+    #[Maho\Config\CronJob(configPath: 'reports/crontab/coupons_expr', name: 'aggregate_sales_report_coupons_data')]
     public function aggregateSalesReportCouponsData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
@@ -199,6 +202,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -216,6 +220,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_delete_after', area: 'adminhtml')]
     public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -232,6 +237,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('sales_quote_config_get_product_attributes')]
     public function addProductAttributes(\Maho\Event\Observer $observer)
     {
         /** @var \Maho\DataObject $attributesTransfer */
@@ -256,6 +262,7 @@ class Mage_SalesRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('sales_convert_quote_to_order')]
     public function addSalesRuleNameToOrder($observer)
     {
         /** @var Mage_Sales_Model_Order $order */

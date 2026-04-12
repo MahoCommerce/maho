@@ -32,6 +32,7 @@ class Mage_Cron_Model_Observer
     /**
      * Check if cron is running and warn admin users if not
      */
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'adminhtml', name: 'cron_status_check')]
     public function checkCronStatus(\Maho\Event\Observer $observer): void
     {
         if (!Mage::getSingleton('admin/session')->isLoggedIn()) {
@@ -76,6 +77,7 @@ class Mage_Cron_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('default', area: 'crontab', name: 'cron_observer')]
     public function dispatch($observer)
     {
         $schedules = $this->getPendingSchedules();
@@ -121,6 +123,7 @@ class Mage_Cron_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('always', area: 'crontab', name: 'cron_observer')]
     public function dispatchAlways($observer)
     {
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');

@@ -425,40 +425,6 @@
                 </customer_login_magic_link_email_template>
             </email>
         </template>
-        <events>
-            <customer_address_save_before>
-                <observers>
-                    <customer_address_before_save_viv_observer>
-                        <class>customer/observer</class>
-                        <method>beforeAddressSave</method>
-                    </customer_address_before_save_viv_observer>
-                </observers>
-            </customer_address_save_before>
-            <customer_address_save_after>
-                <observers>
-                    <customer_addres_after_save_viv_observer>
-                        <class>customer/observer</class>
-                        <method>afterAddressSave</method>
-                    </customer_addres_after_save_viv_observer>
-                </observers>
-            </customer_address_save_after>
-            <customer_customer_authenticated>
-                <observers>
-                    <customer_upgrade_password>
-                        <class>customer/observer</class>
-                        <method>actionUpgradeCustomerPassword</method>
-                    </customer_upgrade_password>
-                </observers>
-            </customer_customer_authenticated>
-            <session_before_renew_cookie>
-                <observers>
-                    <customer_session_before_renew_cookie>
-                        <class>customer/observer</class>
-                        <method>setCookieLifetime</method>
-                    </customer_session_before_renew_cookie>
-                </observers>
-            </session_before_renew_cookie>
-        </events>
     </global>
     <adminhtml>
         <translate>
@@ -475,24 +441,6 @@
         <secure_url>
             <customer>/customer/</customer>
         </secure_url>
-        <events>
-            <controller_action_layout_load_before>
-                <observers>
-                    <customer_is_logged_in_observer>
-                        <class>customer/observer</class>
-                        <method>beforeLoadLayout</method>
-                    </customer_is_logged_in_observer>
-                </observers>
-            </controller_action_layout_load_before>
-            <sales_model_service_quote_submit_after>
-                <observers>
-                    <restore_customer_group_id>
-                        <class>customer/observer</class>
-                        <method>quoteSubmitAfter</method>
-                    </restore_customer_group_id>
-                </observers>
-            </sales_model_service_quote_submit_after>
-        </events>
         <routers>
             <customer>
                 <use>standard</use>
@@ -635,16 +583,4 @@ T: {{var telephone}}
             </security>
         </admin>
     </default>
-    <crontab>
-        <jobs>
-            <customer_flowpassword>
-                <schedule>
-                    <cron_expr>0 0 1 * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>customer/observer::deleteCustomerFlowPassword</model>
-                </run>
-            </customer_flowpassword>
-        </jobs>
-    </crontab>
 </config>

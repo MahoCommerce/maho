@@ -277,6 +277,7 @@ class Mage_ProductAlert_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\CronJob(name: 'catalog_product_alert')]
     public function process()
     {
         $email = Mage::getModel('productalert/email');

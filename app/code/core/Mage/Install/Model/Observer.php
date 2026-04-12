@@ -12,6 +12,7 @@
 
 class Mage_Install_Model_Observer
 {
+    #[Maho\Config\Observer('core_locale_set_locale', area: 'install')]
     public function bindLocale(Maho\Event\Observer $observer): self
     {
         if ($locale = $observer->getEvent()->getLocale()) {
@@ -22,6 +23,7 @@ class Mage_Install_Model_Observer
         return $this;
     }
 
+    #[Maho\Config\Observer('mage_run_exception', area: 'install')]
     public function installFailure(Maho\Event\Observer $observer): void
     {
         echo '<h2>There was a problem proceeding with Maho installation.</h2>';

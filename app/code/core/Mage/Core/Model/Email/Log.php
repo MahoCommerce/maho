@@ -45,6 +45,7 @@ class Mage_Core_Model_Email_Log extends Mage_Core_Model_Abstract
     /**
      * Cron job: clean old log entries
      */
+    #[Maho\Config\CronJob('0 2 * * *', name: 'core_email_log_clean')]
     public function cleanOldLogs(): void
     {
         $days = (int) Mage::getStoreConfig('system/smtp/log_clean_after_days');

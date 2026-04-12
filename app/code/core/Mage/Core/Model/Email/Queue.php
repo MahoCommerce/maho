@@ -169,6 +169,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('*/1 * * * *', name: 'core_email_queue_send_all')]
     public function send()
     {
         $collection = Mage::getModel('core/email_queue')->getCollection()
@@ -253,6 +254,7 @@ class Mage_Core_Model_Email_Queue extends Mage_Core_Model_Abstract
      *
      * @return $this
      */
+    #[Maho\Config\CronJob('0 0 * * *', name: 'core_email_queue_clean_up')]
     public function cleanQueue()
     {
         $this->_getResource()->removeSentMessages();

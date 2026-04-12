@@ -162,32 +162,6 @@
         <request_rewrite>
             <model>core/url_rewrite_request</model>
         </request_rewrite>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <security_domain_policy>
-                        <class>Mage_Core_Model_Domainpolicy</class>
-                        <method>addDomainPolicyHeader</method>
-                    </security_domain_policy>
-                </observers>
-            </controller_action_predispatch>
-            <model_save_before>
-                <observers>
-                    <secure_var_processing>
-                        <class>core/observer</class>
-                        <method>secureVarProcessing</method>
-                    </secure_var_processing>
-                </observers>
-            </model_save_before>
-            <model_delete_before>
-                <observers>
-                    <secure_var_processing>
-                        <class>core/observer</class>
-                        <method>secureVarProcessing</method>
-                    </secure_var_processing>
-                </observers>
-            </model_delete_before>
-        </events>
     </global>
     <frontend>
         <routers>
@@ -226,24 +200,6 @@
                 </Mage_Core>
             </modules>
         </translate>
-        <events>
-            <cms_wysiwyg_config_prepare>
-                <observers>
-                    <variable_observer>
-                        <class>core/variable_observer</class>
-                        <method>prepareWysiwygPluginConfig</method>
-                    </variable_observer>
-                </observers>
-            </cms_wysiwyg_config_prepare>
-            <clean_cache_by_tags>
-                <observers>
-                    <clean_cache_observer>
-                        <class>core/observer</class>
-                        <method>cleanCacheByTags</method>
-                    </clean_cache_observer>
-                </observers>
-            </clean_cache_by_tags>
-        </events>
     </adminhtml>
     <install>
         <translate>
@@ -493,36 +449,4 @@
             </web>
         </default>
     </stores>
-    <crontab>
-        <jobs>
-            <core_clean_cache>
-                <schedule>
-                    <config_path>system/cache/flush_cron_expr</config_path>
-                </schedule>
-                <run>
-                    <model>core/observer::cleanCache</model>
-                </run>
-            </core_clean_cache>
-            <core_email_queue_send_all>
-                <schedule><cron_expr>*/1 * * * *</cron_expr></schedule>
-                <run><model>core/email_queue::send</model></run>
-            </core_email_queue_send_all>
-            <core_email_queue_clean_up>
-                <schedule><cron_expr>0 0 * * *</cron_expr></schedule>
-                <run><model>core/email_queue::cleanQueue</model></run>
-            </core_email_queue_clean_up>
-            <core_email_log_clean>
-                <schedule><cron_expr>0 2 * * *</cron_expr></schedule>
-                <run><model>core/email_log::cleanOldLogs</model></run>
-            </core_email_log_clean>
-            <core_session_clean>
-                <schedule><cron_expr>30 3 * * *</cron_expr></schedule>
-                <run><model>core/session::cleanExpiredSessions</model></run>
-            </core_session_clean>
-            <core_minify_cleanup>
-                <schedule><cron_expr>0 4 * * *</cron_expr></schedule>
-                <run><model>core/observer::cleanOldMinifiedFiles</model></run>
-            </core_minify_cleanup>
-        </jobs>
-    </crontab>
 </config>

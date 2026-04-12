@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 class Maho_Blog_Model_Observer
 {
+    #[Maho\Config\Observer('controller_action_predispatch_blog', name: 'blog_set_entity_key')]
     public function setBlogEntityKey(\Maho\Event\Observer $observer): void
     {
         $entityKey = 'blog_index';
@@ -25,6 +26,7 @@ class Maho_Blog_Model_Observer
         Mage::register('current_entity_key', $entityKey, true);
     }
 
+    #[Maho\Config\Observer('page_block_html_topmenu_gethtml_before', name: 'blog_add_topmenu_items')]
     public function addBlogToTopmenuItems(\Maho\Event\Observer $observer): void
     {
         if (!Mage::helper('blog')->shouldShowInNavigation()) {
@@ -75,6 +77,7 @@ class Maho_Blog_Model_Observer
     /**
      * Add blog content to sitemap generation
      */
+    #[Maho\Config\Observer('sitemap_urlset_generating_before', name: 'blog_add_to_sitemap')]
     public function addBlogToSitemap(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Sitemap_Model_Sitemap $sitemap */
@@ -294,6 +297,7 @@ class Maho_Blog_Model_Observer
         return $posts;
     }
 
+    #[Maho\Config\Observer('catalogsearch_autocomplete_collect_content', name: 'blog_add_autocomplete_content')]
     public function addBlogAutocompleteContent(\Maho\Event\Observer $observer): void
     {
         $autocompleteData = $observer->getEvent()->getAutocompleteData();

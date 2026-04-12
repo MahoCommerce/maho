@@ -72,6 +72,7 @@ class Mage_Core_Model_Session extends Mage_Core_Model_Session_Abstract
     /**
      * Clean expired sessions from filesystem (Redis does it automatically)
      */
+    #[Maho\Config\CronJob('30 3 * * *', name: 'core_session_clean')]
     public function cleanExpiredSessions(): void
     {
         try {

@@ -15,6 +15,7 @@ class Mage_Paypal_Model_Observer
     /**
      * Goes to reports.paypal.com and fetches Settlement reports.
      */
+    #[Maho\Config\CronJob(name: 'paypal_fetch_settlement_reports')]
     public function fetchReports()
     {
         try {
@@ -38,6 +39,7 @@ class Mage_Paypal_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('checkout_submit_all_after', area: 'frontend', name: 'hss_save_order_after_submit')]
     public function saveOrderAfterSubmit(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -52,6 +54,7 @@ class Mage_Paypal_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('controller_action_postdispatch_checkout_onepage_saveorder', area: 'frontend', name: 'hss_save_order_onepage')]
     public function setResponseAfterSaveOrder(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -88,6 +91,7 @@ class Mage_Paypal_Model_Observer
     /**
      * Load country dependent PayPal solutions system configuration
      */
+    #[Maho\Config\Observer('adminhtml_init_system_config', area: 'adminhtml')]
     public function loadCountryDependentSolutionsConfig(\Maho\Event\Observer $observer)
     {
         $countryCode = Mage::helper('paypal')->getConfigurationCountryCode();
@@ -114,6 +118,7 @@ class Mage_Paypal_Model_Observer
     /**
      * Update transaction with HTML representation of txn_id
      */
+    #[Maho\Config\Observer('sales_html_txn_id')]
     public function observeHtmlTransactionId(\Maho\Event\Observer $observer)
     {
         /** @var \Maho\DataObject $transaction */

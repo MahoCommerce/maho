@@ -15,6 +15,7 @@ class Mage_Tax_Model_Observer
     /**
      * Put quote address tax information into order
      */
+    #[Maho\Config\Observer('sales_convert_quote_address_to_order')]
     public function salesEventConvertQuoteAddressToOrder(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote_Address $address */
@@ -35,6 +36,7 @@ class Mage_Tax_Model_Observer
     /**
      * Save order tax information
      */
+    #[Maho\Config\Observer('sales_order_save_after')]
     public function salesEventOrderAfterSave(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Order $order */
@@ -147,6 +149,7 @@ class Mage_Tax_Model_Observer
      *
      * @return  Mage_Tax_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_prepare_price_select')]
     public function prepareCatalogIndexPriceSelect(\Maho\Event\Observer $observer)
     {
         $table = $observer->getEvent()->getTable();
@@ -178,6 +181,7 @@ class Mage_Tax_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  Mage_Tax_Model_Observer
      */
+    #[Maho\Config\Observer('catalog_product_collection_load_after')]
     public function addTaxPercentToProductCollection($observer)
     {
         $helper = Mage::helper('tax');
@@ -210,6 +214,7 @@ class Mage_Tax_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
+    #[Maho\Config\CronJob(configPath: 'reports/crontab/tax_expr', name: 'aggregate_sales_report_tax_data')]
     public function aggregateSalesReportTaxData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);
@@ -225,6 +230,7 @@ class Mage_Tax_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('sales_quote_collect_totals_before')]
     public function quoteCollectTotalsBefore(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Sales_Model_Quote $quote */

@@ -93,16 +93,4 @@
         </catalog>
     </default>
 
-    <crontab>
-        <jobs>
-            <cataloglinkrule_apply_all>
-                <schedule>
-                    <config_path>catalog/linkrule/schedule</config_path>
-                </schedule>
-                <run>
-                    <model>cataloglinkrule/processor::processRules</model>
-                </run>
-            </cataloglinkrule_apply_all>
-        </jobs>
-    </crontab>
 </config>

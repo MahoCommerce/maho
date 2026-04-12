@@ -191,6 +191,8 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_controller_product_save_visibility_changed', area: 'adminhtml', type: 'model')]
+    #[Maho\Config\Observer('catalog_controller_product_delete', area: 'adminhtml', type: 'model')]
     public function productEventAggregate($observer)
     {
         $this->_getProductEventTagsCollection($observer)->walk('aggregate');
@@ -203,6 +205,7 @@ class Mage_Tag_Model_Tag extends Mage_Core_Model_Abstract
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_delete_before', area: 'adminhtml', type: 'model')]
     public function productDeleteEventAction($observer)
     {
         $this->_getResource()->decrementProducts($this->_getProductEventTagsCollection($observer)->getAllIds());

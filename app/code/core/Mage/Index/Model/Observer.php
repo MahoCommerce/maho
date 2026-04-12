@@ -32,6 +32,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
+    #[Maho\Config\Observer('store_save_commit_after')]
     public function processStoreSave(\Maho\Event\Observer $observer)
     {
         $store = $observer->getEvent()->getStore();
@@ -47,6 +48,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
+    #[Maho\Config\Observer('store_group_save_commit_after')]
     public function processStoreGroupSave(\Maho\Event\Observer $observer)
     {
         $storeGroup = $observer->getEvent()->getStoreGroup();
@@ -62,6 +64,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
+    #[Maho\Config\Observer('website_save_commit_after')]
     public function processWebsiteSave(\Maho\Event\Observer $observer)
     {
         $website = $observer->getEvent()->getWebsite();
@@ -77,6 +80,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
+    #[Maho\Config\Observer('store_delete_commit_after')]
     public function processStoreDelete(\Maho\Event\Observer $observer)
     {
         $store = $observer->getEvent()->getStore();
@@ -92,6 +96,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
+    #[Maho\Config\Observer('store_group_delete_commit_after')]
     public function processStoreGroupDelete(\Maho\Event\Observer $observer)
     {
         $storeGroup = $observer->getEvent()->getStoreGroup();
@@ -107,6 +112,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
+    #[Maho\Config\Observer('website_delete_commit_after')]
     public function processWebsiteDelete(\Maho\Event\Observer $observer)
     {
         $website = $observer->getEvent()->getWebsite();
@@ -122,6 +128,7 @@ class Mage_Index_Model_Observer
      *
      * @throws Throwable
      */
+    #[Maho\Config\Observer('core_config_data_save_commit_after')]
     public function processConfigDataSave(\Maho\Event\Observer $observer)
     {
         $configData = $observer->getEvent()->getConfigData();
@@ -138,6 +145,7 @@ class Mage_Index_Model_Observer
      * @return void
      * @throws Exception
      */
+    #[Maho\Config\CronJob('30 */4 * * *', name: 'index_clean_events')]
     public function cleanOutdatedEvents()
     {
         $manualIndexProcessCollection = Mage::getSingleton('index/indexer')

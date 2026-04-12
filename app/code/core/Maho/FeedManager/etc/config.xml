@@ -75,17 +75,6 @@
                 </feedmanager_feed_failure>
             </email>
         </template>
-
-        <events>
-            <encryption_key_regenerated>
-                <observers>
-                    <feedmanager_encryption_key_regenerated>
-                        <class>feedmanager/observer</class>
-                        <method>encryptionKeyRegenerated</method>
-                    </feedmanager_encryption_key_regenerated>
-                </observers>
-            </encryption_key_regenerated>
-        </events>
     </global>
 
     <admin>
@@ -118,27 +107,6 @@
             </updates>
         </layout>
     </adminhtml>
-
-    <crontab>
-        <jobs>
-            <feedmanager_generate_scheduled>
-                <schedule>
-                    <cron_expr>0 * * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>feedmanager/cron::generateScheduledFeeds</model>
-                </run>
-            </feedmanager_generate_scheduled>
-            <feedmanager_cleanup_logs>
-                <schedule>
-                    <cron_expr>30 3 * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>feedmanager/cron::cleanupOldLogs</model>
-                </run>
-            </feedmanager_cleanup_logs>
-        </jobs>
-    </crontab>
 
     <default>
         <feedmanager>

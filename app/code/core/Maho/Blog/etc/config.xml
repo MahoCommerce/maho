@@ -63,48 +63,6 @@
                 </setup>
             </blog_setup>
         </resources>
-        <events>
-            <controller_front_init_routers>
-                <observers>
-                    <blog>
-                        <class>Maho_Blog_Controller_Router</class>
-                        <method>initControllerRouters</method>
-                    </blog>
-                </observers>
-            </controller_front_init_routers>
-            <controller_action_predispatch_blog>
-                <observers>
-                    <blog_set_entity_key>
-                        <class>blog/observer</class>
-                        <method>setBlogEntityKey</method>
-                    </blog_set_entity_key>
-                </observers>
-            </controller_action_predispatch_blog>
-            <page_block_html_topmenu_gethtml_before>
-                <observers>
-                    <blog_add_topmenu_items>
-                        <class>blog/observer</class>
-                        <method>addBlogToTopmenuItems</method>
-                    </blog_add_topmenu_items>
-                </observers>
-            </page_block_html_topmenu_gethtml_before>
-            <sitemap_urlset_generating_before>
-                <observers>
-                    <blog_add_to_sitemap>
-                        <class>blog/observer</class>
-                        <method>addBlogToSitemap</method>
-                    </blog_add_to_sitemap>
-                </observers>
-            </sitemap_urlset_generating_before>
-            <catalogsearch_autocomplete_collect_content>
-                <observers>
-                    <blog_add_autocomplete_content>
-                        <class>blog/observer</class>
-                        <method>addBlogAutocompleteContent</method>
-                    </blog_add_autocomplete_content>
-                </observers>
-            </catalogsearch_autocomplete_collect_content>
-        </events>
     </global>
     <api>
         <resources>

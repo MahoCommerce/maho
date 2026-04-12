@@ -363,6 +363,7 @@ class Mage_Core_Model_Resource
         return $this->_connections[$name];
     }
 
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'install')]
     public function checkDbConnection()
     {
         if (!$this->getConnection('core_read')) {

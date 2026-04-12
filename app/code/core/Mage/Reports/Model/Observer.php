@@ -17,6 +17,7 @@ class Mage_Reports_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
+    #[Maho\Config\CronJob(configPath: 'reports/crontab/viewed_expr', name: 'aggregate_reports_report_product_viewed_data')]
     public function aggregateReportsReportProductViewedData($schedule)
     {
         Mage::app()->getLocale()->emulate(0);

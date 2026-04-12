@@ -46,66 +46,6 @@
                 <class>Mage_Weee_Block</class>
             </weee>
         </blocks>
-        <events>
-            <catalog_prepare_price_select>
-                <observers>
-                    <weee>
-                        <type>model</type>
-                        <class>weee/observer</class>
-                        <method>prepareCatalogIndexSelect</method>
-                    </weee>
-                </observers>
-            </catalog_prepare_price_select>
-            <catalog_entity_attribute_save_before>
-                <observers>
-                    <weee>
-                        <type>model</type>
-                        <class>weee/observer</class>
-                        <method>assignBackendModelToAttribute</method>
-                    </weee>
-                </observers>
-            </catalog_entity_attribute_save_before>
-            <catalogrule_after_apply>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>updateDiscountPercents</method>
-                    </weee>
-                </observers>
-            </catalogrule_after_apply>
-            <catalog_product_view_config>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>updateCofigurableProductOptions</method>
-                    </weee>
-                </observers>
-            </catalog_product_view_config>
-            <bundle_product_view_config>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>updateBundleProductOptions</method>
-                    </weee>
-                </observers>
-            </bundle_product_view_config>
-            <create_order_session_quote_initialized>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>setSessionQuoteStore</method>
-                    </weee>
-                </observers>
-            </create_order_session_quote_initialized>
-            <init_from_order_session_quote_initialized>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>setSessionQuoteStore</method>
-                    </weee>
-                </observers>
-            </init_from_order_session_quote_initialized>
-        </events>
         <fieldsets>
             <sales_convert_quote_item>
                 <weee_tax_applied>
@@ -210,43 +150,6 @@
             </order_creditmemo>
         </sales>
     </global>
-    <adminhtml>
-        <events>
-            <adminhtml_catalog_product_edit_prepare_form>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>setWeeeRendererInForm</method>
-                    </weee>
-                </observers>
-            </adminhtml_catalog_product_edit_prepare_form>
-            <adminhtml_catalog_product_form_prepare_excluded_field_list>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>updateExcludedFieldList</method>
-                    </weee>
-                </observers>
-            </adminhtml_catalog_product_form_prepare_excluded_field_list>
-            <adminhtml_product_attribute_types>
-                <observers>
-                    <weee>
-                        <type>model</type>
-                        <class>weee/observer</class>
-                        <method>addWeeeTaxAttributeType</method>
-                    </weee>
-                </observers>
-            </adminhtml_product_attribute_types>
-            <adminhtml_catalog_product_edit_element_types>
-                <observers>
-                    <weee>
-                        <class>weee/observer</class>
-                        <method>updateElementTypes</method>
-                    </weee>
-                </observers>
-            </adminhtml_catalog_product_edit_element_types>
-        </events>
-    </adminhtml>
     <default>
         <sales>
             <totals_sort>

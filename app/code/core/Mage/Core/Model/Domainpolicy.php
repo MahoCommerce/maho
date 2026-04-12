@@ -63,6 +63,7 @@ class Mage_Core_Model_Domainpolicy
      *
      * @return $this
      */
+    #[Maho\Config\Observer('controller_action_predispatch')]
     public function addDomainPolicyHeader(\Maho\Event\Observer $observer)
     {
         $action = $observer->getControllerAction();

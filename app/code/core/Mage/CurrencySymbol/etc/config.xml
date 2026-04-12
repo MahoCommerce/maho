@@ -32,16 +32,6 @@
                 <class>Mage_CurrencySymbol_Block</class>
             </currencysymbol>
         </blocks>
-        <events>
-            <currency_display_options_forming>
-                <observers>
-                    <mage_currencysymbol_currency_display_options>
-                        <class>currencysymbol/observer</class>
-                        <method>currencyDisplayOptions</method>
-                    </mage_currencysymbol_currency_display_options>
-                </observers>
-            </currency_display_options_forming>
-        </events>
     </global>
 
     <admin>

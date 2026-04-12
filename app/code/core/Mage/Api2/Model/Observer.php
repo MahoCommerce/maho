@@ -15,6 +15,7 @@ class Mage_Api2_Model_Observer
     /**
      * Save relation of admin user to API2 role
      */
+    #[Maho\Config\Observer('admin_user_save_after')]
     public function saveAdminToRoleRelation(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Admin_Model_User $user Object */
@@ -38,6 +39,7 @@ class Mage_Api2_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */
@@ -65,6 +67,7 @@ class Mage_Api2_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('api_user_authenticated', name: 'api2_upgrade_key')]
     public function upgradeApiKey($observer)
     {
         $apiKey = $observer->getEvent()->getApiKey();

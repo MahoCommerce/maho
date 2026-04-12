@@ -17,6 +17,7 @@ class Mage_Cms_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('controller_action_noroute', area: 'frontend')]
     public function noRoute(\Maho\Event\Observer $observer)
     {
         $observer->getEvent()->getStatus()

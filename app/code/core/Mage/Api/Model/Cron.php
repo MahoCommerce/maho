@@ -16,6 +16,7 @@ class Mage_Api_Model_Cron
      * @param Mage_Cron_Model_Schedule $schedule
      * @return $this
      */
+    #[Maho\Config\CronJob('0 35 * * *', name: 'api_session_cleanup')]
     public function cleanOldSessions($schedule)
     {
         Mage::getResourceSingleton('api/user')->cleanOldSessions(null);
