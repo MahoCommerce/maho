@@ -51,7 +51,7 @@ final class Maho
     public static function getCompiledAttributes(): array
     {
         if (self::$compiledAttributes === null) {
-            $file = self::getBasePath() . '/var/compiled/attributes.php';
+            $file = self::getBasePath() . '/vendor/composer/maho_attributes.php';
             self::$compiledAttributes = file_exists($file) ? (include $file) : [];
         }
         return self::$compiledAttributes;

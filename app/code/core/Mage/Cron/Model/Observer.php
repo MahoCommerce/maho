@@ -430,6 +430,8 @@ class Mage_Cron_Model_Observer
         $scheduleAheadFor = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_AHEAD_FOR) * 60;
         $schedule = Mage::getModel('cron/schedule');
         $cronHelper = Mage::helper('cron');
+        $now = Mage::getSingleton('core/date')->gmtTimestamp();
+        $timeAhead = $now + $scheduleAheadFor;
 
         foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
             if (!$cronHelper->isJobEnabled($jobCode)) {
@@ -440,9 +442,6 @@ class Mage_Cron_Model_Observer
             if (!$cronExpr || $cronExpr === 'always') {
                 continue;
             }
-
-            $now = Mage::getSingleton('core/date')->gmtTimestamp();
-            $timeAhead = $now + $scheduleAheadFor;
             $schedule->setJobCode($jobCode)
                 ->setCronExpr($cronExpr)
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_PENDING);
