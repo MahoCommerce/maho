@@ -107,7 +107,6 @@ class Mage_Log_Model_Resource_Visitor_Online extends Mage_Core_Model_Resource_Db
 
             foreach ($visitors as $visitorData) {
                 unset($visitorData['last_url_id']);
-                $visitorData['remote_addr'] ??= 0;
 
                 $writeAdapter->insertForce($this->getMainTable(), $visitorData);
             }
