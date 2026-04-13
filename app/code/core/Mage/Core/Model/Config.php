@@ -1214,11 +1214,10 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                         Mage::getSingleton((string) $observer->class),
                         (string) $observer->method,
                     ],
-                    'object', 'model' => [
+                    default => [
                         Mage::getModel((string) $observer->class),
                         (string) $observer->method,
                     ],
-                    default => [$observer->getClassName(), (string) $observer->method],
                 };
 
                 $args = (array) $observer->args;
