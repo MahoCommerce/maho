@@ -129,7 +129,7 @@ class Maho_FeedManager_Model_Notifier
         // Send email
         /** @var Mage_Core_Model_Email_Template $emailTemplate */
         $emailTemplate = Mage::getModel('core/email_template');
-        $emailTemplate->setDesignConfig(['area' => 'adminhtml', 'store' => $storeId]);
+        $emailTemplate->setDesignConfig(['area' => 'admin', 'store' => $storeId]);
 
         $emailTemplate->sendTransactional(
             'feedmanager_feed_failure',

@@ -101,9 +101,9 @@ trait Mage_Core_Model_Pdf_Trait
 
     protected function getCssContent(): string
     {
-        // Ensure we're in adminhtml design area for CSS loading
+        // Ensure we're in admin design area for CSS loading
         $originalArea = Mage::getDesign()->getArea();
-        Mage::getDesign()->setArea('adminhtml');
+        Mage::getDesign()->setArea('admin');
 
         try {
             $cssPath = Mage::getDesign()->getTemplateFilename('sales/order/pdf/pdf.css', [

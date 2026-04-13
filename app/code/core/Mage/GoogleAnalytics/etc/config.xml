@@ -58,7 +58,7 @@
             </updates>
         </layout>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_GoogleAnalytics>
@@ -68,5 +68,5 @@
                 </Mage_GoogleAnalytics>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
 </config>

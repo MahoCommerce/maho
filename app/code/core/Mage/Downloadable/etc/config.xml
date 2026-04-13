@@ -170,33 +170,6 @@
             </creditmemo>
         </pdf>
     </global>
-    <adminhtml>
-        <translate>
-            <modules>
-                <Mage_Downloadable>
-                    <files>
-                        <default>Mage_Downloadable.csv</default>
-                    </files>
-                </Mage_Downloadable>
-            </modules>
-        </translate>
-        <sales>
-            <order>
-                <create>
-                    <available_product_types>
-                        <downloadable/>
-                    </available_product_types>
-                </create>
-            </order>
-        </sales>
-        <layout>
-            <updates>
-                <downloadable>
-                    <file>downloadable.xml</file>
-                </downloadable>
-            </updates>
-        </layout>
-    </adminhtml>
     <frontend>
         <routers>
             <downloadable>
@@ -287,6 +260,32 @@
                 </args>
             </adminhtml>
         </routers>
+    
+        <translate>
+            <modules>
+                <Mage_Downloadable>
+                    <files>
+                        <default>Mage_Downloadable.csv</default>
+                    </files>
+                </Mage_Downloadable>
+            </modules>
+        </translate>
+        <sales>
+            <order>
+                <create>
+                    <available_product_types>
+                        <downloadable/>
+                    </available_product_types>
+                </create>
+            </order>
+        </sales>
+        <layout>
+            <updates>
+                <downloadable>
+                    <file>downloadable.xml</file>
+                </downloadable>
+            </updates>
+        </layout>
     </admin>
     <default>
         <catalog>

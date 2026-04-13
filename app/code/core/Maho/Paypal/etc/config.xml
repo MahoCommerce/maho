@@ -106,9 +106,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-
-    <adminhtml>
+    
         <translate>
             <modules>
                 <Maho_Paypal>
@@ -125,7 +123,7 @@
                 </maho_paypal>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
 
     <default>
         <maho_paypal>

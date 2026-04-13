@@ -100,7 +100,7 @@
         <eav_attributes>
         </eav_attributes>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Eav>
@@ -110,7 +110,7 @@
                 </Mage_Eav>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <translate>
             <modules>

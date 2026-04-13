@@ -72,7 +72,7 @@
             </modules>
         </translate>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Rating>
@@ -82,5 +82,5 @@
                 </Mage_Rating>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
 </config>

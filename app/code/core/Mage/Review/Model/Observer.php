@@ -33,7 +33,7 @@ class Mage_Review_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_product_delete_after_done', area: 'adminhtml')]
+    #[Maho\Config\Observer('catalog_product_delete_after_done', area: 'admin')]
     public function processProductAfterDeleteEvent(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $eventProduct */

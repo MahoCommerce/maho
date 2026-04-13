@@ -32,7 +32,7 @@ class Mage_Cron_Model_Observer
     /**
      * Check if cron is running and warn admin users if not
      */
-    #[Maho\Config\Observer('controller_action_predispatch', area: 'adminhtml', id: 'cron_status_check')]
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'admin', id: 'cron_status_check')]
     public function checkCronStatus(\Maho\Event\Observer $observer): void
     {
         if (!Mage::getSingleton('admin/session')->isLoggedIn()) {

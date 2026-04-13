@@ -62,8 +62,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <layout>
             <updates>
                 <adminactivitylog>
@@ -71,7 +70,7 @@
                 </adminactivitylog>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <default>
         <admin>
             <adminactivitylog>

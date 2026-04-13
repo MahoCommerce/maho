@@ -66,7 +66,17 @@
             </related_cache_types>
         </widget>
     </global>
-    <adminhtml>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <widget before="Mage_Adminhtml">Mage_Widget_Adminhtml</widget>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    
         <translate>
             <modules>
                 <Mage_Widget>
@@ -83,16 +93,5 @@
                 </widget>
             </updates>
         </layout>
-    </adminhtml>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <widget before="Mage_Adminhtml">Mage_Widget_Adminhtml</widget>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
     </admin>
 </config>

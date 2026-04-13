@@ -39,7 +39,7 @@ class Mage_Api2_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml')]
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'admin')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Resource_Eav_Attribute $attribute */

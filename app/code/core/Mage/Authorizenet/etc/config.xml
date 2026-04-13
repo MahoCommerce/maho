@@ -28,25 +28,6 @@
         </helpers>
     </global>
 
-    <adminhtml>
-        <translate>
-            <modules>
-                <Mage_Authorizenet>
-                    <files>
-                        <default>Mage_Authorizenet.csv</default>
-                    </files>
-                </Mage_Authorizenet>
-            </modules>
-        </translate>
-        <layout>
-            <updates>
-                <authorizenet>
-                    <file>authorizenet.xml</file>
-                </authorizenet>
-            </updates>
-        </layout>
-    </adminhtml>
-
     <frontend>
         <translate>
             <modules>
@@ -85,5 +66,22 @@
                 </args>
             </adminhtml>
         </routers>
+    
+        <translate>
+            <modules>
+                <Mage_Authorizenet>
+                    <files>
+                        <default>Mage_Authorizenet.csv</default>
+                    </files>
+                </Mage_Authorizenet>
+            </modules>
+        </translate>
+        <layout>
+            <updates>
+                <authorizenet>
+                    <file>authorizenet.xml</file>
+                </authorizenet>
+            </updates>
+        </layout>
     </admin>
 </config>

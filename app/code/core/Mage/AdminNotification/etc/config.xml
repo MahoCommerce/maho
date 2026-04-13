@@ -44,7 +44,7 @@
             </adminnotification_setup>
         </resources>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_AdminNotification>
@@ -61,7 +61,7 @@
                 </adminnotification>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <default>
         <system>
             <adminnotification>

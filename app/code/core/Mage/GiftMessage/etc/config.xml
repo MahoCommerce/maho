@@ -66,7 +66,7 @@
             </gift_messages>
         </sales>
     </default>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_GiftMessage>
@@ -83,7 +83,7 @@
                 </giftmessage>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <frontend>
         <routers>
             <giftmessage>

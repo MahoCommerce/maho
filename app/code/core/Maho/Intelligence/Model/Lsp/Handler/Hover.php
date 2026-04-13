@@ -248,7 +248,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Hover
         $markdown = "**Layout handle**: `{$handle}`\n\n";
 
         $frontendHandles = $this->registry->get('layout', 'getHandles', ['frontend']);
-        $adminhtmlHandles = $this->registry->get('layout', 'getHandles', ['adminhtml']);
+        $adminhtmlHandles = $this->registry->get('layout', 'getHandles', ['admin']);
 
         $info = $frontendHandles[$handle] ?? $adminhtmlHandles[$handle] ?? null;
         if ($info !== null) {

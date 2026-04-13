@@ -123,7 +123,7 @@ class Mage_Core_Model_Translate_Inline
         }
 
         if (is_null($this->_isAllowed)) {
-            if (Mage::getDesign()->getArea() === Mage_Core_Model_App_Area::AREA_ADMINHTML) {
+            if (Mage::getDesign()->getArea() === Mage_Core_Model_App_Area::AREA_ADMIN) {
                 $active = Mage::getStoreConfigFlag('dev/translate_inline/active_admin', $store);
             } else {
                 $active = Mage::getStoreConfigFlag('dev/translate_inline/active', $store);
@@ -153,7 +153,7 @@ class Mage_Core_Model_Translate_Inline
         /** @var Mage_Core_Model_Resource_Translate_String $resource */
         $resource = Mage::getResourceModel('core/translate_string');
         foreach ($translate as $t) {
-            if (Mage::getDesign()->getArea() === Mage_Core_Model_App_Area::AREA_ADMINHTML) {
+            if (Mage::getDesign()->getArea() === Mage_Core_Model_App_Area::AREA_ADMIN) {
                 $storeId = 0;
             } elseif (empty($t['perstore'])) {
                 $resource->deleteTranslate($t['original'], null, false);
@@ -197,7 +197,7 @@ class Mage_Core_Model_Translate_Inline
     public function processResponseBody(&$body)
     {
         if (!$this->isAllowed()) {
-            if (Mage::getDesign()->getArea() === Mage_Core_Model_App_Area::AREA_ADMINHTML) {
+            if (Mage::getDesign()->getArea() === Mage_Core_Model_App_Area::AREA_ADMIN) {
                 $this->stripInlineTranslations($body);
             }
             return $this;

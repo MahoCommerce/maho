@@ -366,6 +366,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $resourceConfig = sprintf('config.%s.xml', $this->_getResourceConnectionModel('core'));
         $this->loadModulesConfiguration(['config.xml', $resourceConfig], $this);
 
+        $this->_migrateAdminhtmlConfig();
+
         // Prevent local.xml directives overwriting
         if ($this->_isLocalConfigLoaded) {
             $this->extend($this->_refLocalConfigObject);
@@ -374,6 +376,28 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
         $this->applyExtends();
         \Maho\Profiler::stop('config/load-modules');
         return $this;
+    }
+
+    protected function _migrateAdminhtmlConfig(): void
+    {
+        $adminhtmlNode = $this->getNode('adminhtml');
+        if ($adminhtmlNode === false || !$adminhtmlNode->hasChildren()) {
+            return;
+        }
+
+        Mage::log(
+            'Deprecated: <adminhtml> config section detected. Third-party modules should migrate to <admin>.',
+            Mage::LOG_NOTICE,
+        );
+
+        $adminNode = $this->getNode('admin');
+        if ($adminNode === false) {
+            $this->getNode()->addChild('admin');
+            $adminNode = $this->getNode('admin');
+        }
+
+        $adminNode->extend($adminhtmlNode);
+        unset($this->getNode()->adminhtml);
     }
 
     /**
@@ -1020,7 +1044,8 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                     if ($mergeModel->loadFile($configFile)) {
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_GLOBAL, $mergeModel);
                         $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_FRONTEND, $mergeModel);
-                        $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_ADMINHTML, $mergeModel);
+                        $this->_makeEventsLowerCase(Mage_Core_Model_App_Area::AREA_ADMIN, $mergeModel);
+                        $this->_makeEventsLowerCase('adminhtml', $mergeModel);
 
                         $mergeToObject->extend($mergeModel, true);
                     }

@@ -190,7 +190,7 @@
             </updates>
         </layout>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Core>
@@ -200,7 +200,7 @@
                 </Mage_Core>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <install>
         <translate>
             <modules>
@@ -279,7 +279,7 @@
                 </allowed_resources>
                 <ignored_resources>.svn,.htaccess</ignored_resources>
                 <loaded_modules>
-                    <Mage_Core />
+                    <Mage_Core/>
                 </loaded_modules>
             </media_storage_configuration>
         </system>
@@ -429,7 +429,7 @@
             <!-- Additional email for notifications -->
             <additional_notification_emails>
                 <!-- On creating a new admin user. You can specify several emails separated by commas. -->
-                <admin_user_create></admin_user_create>
+                <admin_user_create/>
             </additional_notification_emails>
         </general>
     </default>

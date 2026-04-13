@@ -65,7 +65,7 @@
             </email>
         </template>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Contacts>
@@ -75,7 +75,7 @@
                 </Mage_Contacts>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <contacts>
             <contacts>

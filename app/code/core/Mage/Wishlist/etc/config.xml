@@ -98,7 +98,7 @@
             <wishlist>/wishlist/</wishlist>
         </secure_url>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Wishlist>
@@ -108,7 +108,7 @@
                 </Mage_Wishlist>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <wishlist>
             <general>

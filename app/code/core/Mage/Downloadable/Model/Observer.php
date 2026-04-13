@@ -20,7 +20,7 @@ class Mage_Downloadable_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  Mage_Downloadable_Model_Observer
      */
-    #[Maho\Config\Observer('catalog_product_prepare_save', area: 'adminhtml')]
+    #[Maho\Config\Observer('catalog_product_prepare_save', area: 'admin')]
     public function prepareProductSave($observer)
     {
         $request = $observer->getEvent()->getRequest();
@@ -39,7 +39,7 @@ class Mage_Downloadable_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('sales_order_item_save_commit_after', area: 'adminhtml')]
+    #[Maho\Config\Observer('sales_order_item_save_commit_after', area: 'admin')]
     #[Maho\Config\Observer('sales_order_item_save_commit_after', area: 'frontend')]
     public function saveDownloadableOrderItem(\Maho\Event\Observer $observer)
     {
@@ -146,7 +146,7 @@ class Mage_Downloadable_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
-    #[Maho\Config\Observer('sales_order_save_commit_after', area: 'adminhtml')]
+    #[Maho\Config\Observer('sales_order_save_commit_after', area: 'admin')]
     #[Maho\Config\Observer('sales_order_save_commit_after', area: 'frontend')]
     public function setLinkStatus($observer)
     {

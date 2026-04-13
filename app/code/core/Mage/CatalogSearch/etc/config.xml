@@ -91,7 +91,7 @@
             </updates>
         </layout>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_CatalogSearch>
@@ -108,7 +108,7 @@
                 </catalogsearch>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <default>
         <catalog>
             <seo>

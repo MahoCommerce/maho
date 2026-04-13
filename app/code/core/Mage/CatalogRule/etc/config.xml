@@ -80,7 +80,7 @@
             </modules>
         </translate>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_CatalogRule>
@@ -90,5 +90,5 @@
                 </Mage_CatalogRule>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
 </config>

@@ -163,8 +163,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <layout>
             <updates>
                 <api2>
@@ -172,5 +171,5 @@
                 </api2>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
 </config>

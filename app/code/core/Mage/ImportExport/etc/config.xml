@@ -116,8 +116,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <translate>
             <modules>
                 <Mage_ImportExport>
@@ -134,7 +133,7 @@
                 </importexport>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <default>
         <system>
             <export_csv>

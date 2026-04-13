@@ -71,8 +71,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <layout>
             <updates>
                 <index>
@@ -89,5 +88,5 @@
                 </Mage_Index>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
 </config>

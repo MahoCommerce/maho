@@ -94,7 +94,7 @@
             </modules>
         </translate>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Api>
@@ -104,7 +104,7 @@
                 </Mage_Api>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <api>
             <config>

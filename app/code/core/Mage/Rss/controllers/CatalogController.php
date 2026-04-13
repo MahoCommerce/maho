@@ -87,11 +87,11 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
     {
         $action = strtolower($this->getRequest()->getActionName());
         if ($action == 'notifystock' && $this->isFeedEnable('catalog/notifystock')) {
-            $this->_currentArea = Mage_Core_Model_App_Area::AREA_ADMINHTML;
+            $this->_currentArea = Mage_Core_Model_App_Area::AREA_ADMIN;
             Mage::helper('rss')->authAdmin('catalog/products');
         }
         if ($action == 'review' && $this->isFeedEnable('catalog/review')) {
-            $this->_currentArea = Mage_Core_Model_App_Area::AREA_ADMINHTML;
+            $this->_currentArea = Mage_Core_Model_App_Area::AREA_ADMIN;
             Mage::helper('rss')->authAdmin('catalog/reviews_ratings');
         }
         return parent::preDispatch();

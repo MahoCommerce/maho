@@ -57,7 +57,7 @@
             </reports_setup>
         </resources>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Reports>
@@ -67,7 +67,7 @@
                 </Mage_Reports>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <translate>
             <modules>

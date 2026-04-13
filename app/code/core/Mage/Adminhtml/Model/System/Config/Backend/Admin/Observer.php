@@ -16,7 +16,7 @@ class Mage_Adminhtml_Model_System_Config_Backend_Admin_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
-    #[Maho\Config\Observer('admin_system_config_changed_section_admin', area: 'adminhtml')]
+    #[Maho\Config\Observer('admin_system_config_changed_section_admin', area: 'admin')]
     public function afterCustomUrlChanged($observer)
     {
         if (is_null(Mage::registry('custom_admin_path_redirect'))) {

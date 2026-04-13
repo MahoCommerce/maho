@@ -202,7 +202,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml')]
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'admin')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -220,7 +220,7 @@ class Mage_SalesRule_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_entity_attribute_delete_after', area: 'adminhtml')]
+    #[Maho\Config\Observer('catalog_entity_attribute_delete_after', area: 'admin')]
     public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */

@@ -119,7 +119,7 @@
             </coupon>
         </salesrule>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_SalesRule>
@@ -129,7 +129,7 @@
                 </Mage_SalesRule>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <translate>
             <modules>

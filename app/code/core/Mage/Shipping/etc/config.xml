@@ -72,7 +72,7 @@
             </shipping>
         </sales>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Shipping>
@@ -82,7 +82,7 @@
                 </Mage_Shipping>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <translate>
             <modules>

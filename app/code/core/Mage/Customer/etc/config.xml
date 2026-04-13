@@ -180,6 +180,16 @@
                 </fax>
             </customer_dataflow>
         </fieldsets>
+    
+        <translate>
+            <modules>
+                <Mage_Customer>
+                    <files>
+                        <default>Mage_Customer.csv</default>
+                    </files>
+                </Mage_Customer>
+            </modules>
+        </translate>
     </admin>
     <global>
         <fieldsets>
@@ -426,17 +436,6 @@
             </email>
         </template>
     </global>
-    <adminhtml>
-        <translate>
-            <modules>
-                <Mage_Customer>
-                    <files>
-                        <default>Mage_Customer.csv</default>
-                    </files>
-                </Mage_Customer>
-            </modules>
-        </translate>
-    </adminhtml>
     <frontend>
         <secure_url>
             <customer>/customer/</customer>

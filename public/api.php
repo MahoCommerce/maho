@@ -23,7 +23,7 @@ if (!Mage::isInstalled()) {
 Mage::$headersSentThrowsException = false;
 Mage::init('admin');
 Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_GLOBAL, Mage_Core_Model_App_Area::PART_EVENTS);
-Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMINHTML, Mage_Core_Model_App_Area::PART_EVENTS);
+Mage::app()->loadAreaPart(Mage_Core_Model_App_Area::AREA_ADMIN, Mage_Core_Model_App_Area::PART_EVENTS);
 
 // query parameter "type" is set by .htaccess rewrite rule
 $apiAlias = Mage::app()->getRequest()->getParam('type');

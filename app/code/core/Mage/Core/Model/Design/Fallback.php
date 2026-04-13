@@ -75,6 +75,7 @@ class Mage_Core_Model_Design_Fallback
      */
     public function getFallbackScheme($area, $package, $theme)
     {
+        $area = Mage_Core_Model_Design_Package::areaToDesignDir($area);
         $cacheKey = $area . '/' . $package . '/' . $theme;
 
         if (!isset($this->_cachedSchemes[$cacheKey])) {

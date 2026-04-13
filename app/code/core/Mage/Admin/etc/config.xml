@@ -73,7 +73,7 @@
             </emails>
         </admin>
     </default>
-    <adminhtml>
+    <admin>
         <layout>
             <updates>
                 <admin>
@@ -81,5 +81,5 @@
                 </admin>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
 </config>

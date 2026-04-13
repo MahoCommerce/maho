@@ -54,7 +54,7 @@
             </modules>
         </translate>
     </frontend>
-    <adminhtml>
+    <admin>
         <layout>
             <updates>
                 <captcha>
@@ -71,7 +71,7 @@
                 </Maho_Captcha>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <admin>
             <captcha>

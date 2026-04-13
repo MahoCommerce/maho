@@ -189,8 +189,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <translate>
             <modules>
                 <Mage_Bundle>
@@ -216,5 +215,5 @@
                 </create>
             </order>
         </sales>
-    </adminhtml>
+    </admin>
 </config>

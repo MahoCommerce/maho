@@ -47,7 +47,7 @@
             </email>
         </template>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Sitemap>
@@ -57,7 +57,7 @@
                 </Mage_Sitemap>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <sitemap>
             <page>

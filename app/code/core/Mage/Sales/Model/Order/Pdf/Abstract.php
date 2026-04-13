@@ -61,14 +61,14 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
     protected function _getLayout(): Mage_Core_Model_Layout
     {
         if (!$this->_layout) {
-            // Ensure we're using adminhtml design area for PDF layouts
+            // Ensure we're using admin design area for PDF layouts
             $originalArea = Mage::getDesign()->getArea();
-            Mage::getDesign()->setArea('adminhtml');
+            Mage::getDesign()->setArea('admin');
 
             $this->_layout = Mage::getSingleton('core/layout');
 
             // Restore original area if it was different
-            if ($originalArea !== 'adminhtml') {
+            if ($originalArea !== 'admin') {
                 Mage::getDesign()->setArea($originalArea);
             }
         }
@@ -99,9 +99,9 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
         $html = '';
         $isFirst = true;
 
-        // Set adminhtml design area for template/block loading
+        // Set admin design area for template/block loading
         $originalArea = Mage::getDesign()->getArea();
-        Mage::getDesign()->setArea('adminhtml');
+        Mage::getDesign()->setArea('admin');
 
         try {
             foreach ($documents as $document) {
@@ -140,7 +140,7 @@ abstract class Mage_Sales_Model_Order_Pdf_Abstract extends \Maho\DataObject
             }
         } finally {
             // Restore original area even if exceptions occur
-            if ($originalArea !== 'adminhtml') {
+            if ($originalArea !== 'admin') {
                 Mage::getDesign()->setArea($originalArea);
             }
         }

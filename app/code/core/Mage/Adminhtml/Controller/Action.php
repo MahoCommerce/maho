@@ -57,7 +57,7 @@ class Mage_Adminhtml_Controller_Action extends Mage_Core_Controller_Varien_Actio
      *
      * @var string
      */
-    protected $_currentArea = Mage_Core_Model_App_Area::AREA_ADMINHTML;
+    protected $_currentArea = Mage_Core_Model_App_Area::AREA_ADMIN;
 
     /**
      * Namespace for session.

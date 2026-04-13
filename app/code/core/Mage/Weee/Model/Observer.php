@@ -17,7 +17,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    #[Maho\Config\Observer('adminhtml_catalog_product_edit_prepare_form', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_catalog_product_edit_prepare_form', area: 'admin')]
     public function setWeeeRendererInForm(\Maho\Event\Observer $observer)
     {
         //adminhtml_catalog_product_edit_prepare_form
@@ -43,7 +43,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    #[Maho\Config\Observer('adminhtml_catalog_product_form_prepare_excluded_field_list', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_catalog_product_form_prepare_excluded_field_list', area: 'admin')]
     public function updateExcludedFieldList(\Maho\Event\Observer $observer)
     {
         //adminhtml_catalog_product_form_prepare_excluded_field_list
@@ -168,7 +168,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return  Mage_Weee_Model_Observer
      */
-    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'admin')]
     public function addWeeeTaxAttributeType(\Maho\Event\Observer $observer)
     {
         // adminhtml_product_attribute_types
@@ -231,7 +231,7 @@ class Mage_Weee_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return Mage_Weee_Model_Observer
      */
-    #[Maho\Config\Observer('adminhtml_catalog_product_edit_element_types', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_catalog_product_edit_element_types', area: 'admin')]
     public function updateElementTypes(\Maho\Event\Observer $observer)
     {
         $response = $observer->getEvent()->getResponse();

@@ -181,7 +181,7 @@
             </updates>
         </layout>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Checkout>
@@ -191,7 +191,7 @@
                 </Mage_Checkout>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <checkout>
             <options>

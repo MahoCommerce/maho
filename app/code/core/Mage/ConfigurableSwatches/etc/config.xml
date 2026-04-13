@@ -69,7 +69,7 @@
         </product>
     </frontend>
 
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_ConfigurableSwatches>
@@ -79,7 +79,7 @@
                 </Mage_ConfigurableSwatches>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
 
     <default>
         <configswatches>

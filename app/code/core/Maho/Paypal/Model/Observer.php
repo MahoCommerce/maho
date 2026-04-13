@@ -63,7 +63,7 @@ class Maho_Paypal_Model_Observer
         $output->writeln($result ? 'OK' : '<comment>SKIPPED</comment>');
     }
 
-    #[Maho\Config\Observer('adminhtml_init_system_config', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_init_system_config', area: 'admin')]
     public function addDeprecationNotice(\Maho\DataObject $observer): void
     {
         /** @var Maho_Paypal_Model_Config $config */

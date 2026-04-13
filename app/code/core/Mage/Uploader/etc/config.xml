@@ -32,7 +32,7 @@
             </uploader>
         </models>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Uploader>
@@ -42,7 +42,7 @@
                 </Mage_Uploader>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <translate>
             <modules>

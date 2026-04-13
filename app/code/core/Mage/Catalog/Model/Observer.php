@@ -153,7 +153,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Checking whether the using static urls in WYSIWYG allowed event
      */
-    #[Maho\Config\Observer('cms_wysiwyg_images_static_urls_allowed', area: 'adminhtml')]
+    #[Maho\Config\Observer('cms_wysiwyg_images_static_urls_allowed', area: 'admin')]
     public function catalogCheckIsUsingStaticUrlsAllowed(\Maho\Event\Observer $observer)
     {
         $storeId = $observer->getEvent()->getData('store_id');
@@ -282,7 +282,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'admin')]
     public function addFileAttributeType(\Maho\Event\Observer $observer)
     {
         $response = $observer->getEvent()->getResponse();
@@ -313,7 +313,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('adminhtml_catalog_product_edit_element_types', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_catalog_product_edit_element_types', area: 'admin')]
     public function addFileElementType(\Maho\Event\Observer $observer)
     {
         $response = $observer->getEvent()->getResponse();

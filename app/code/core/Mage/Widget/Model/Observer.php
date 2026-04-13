@@ -17,7 +17,7 @@ class Mage_Widget_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('cms_wysiwyg_config_prepare', area: 'adminhtml')]
+    #[Maho\Config\Observer('cms_wysiwyg_config_prepare', area: 'admin')]
     public function prepareWidgetsPluginConfig(\Maho\Event\Observer $observer)
     {
         $config = $observer->getEvent()->getConfig();

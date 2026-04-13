@@ -73,8 +73,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <layout>
             <updates>
                 <customersegmentation>
@@ -91,7 +90,7 @@
                 </Maho_CustomerSegmentation>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <customer>
             <customer_segments>

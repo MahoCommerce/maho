@@ -119,17 +119,6 @@
             <paypal_express_callbackshippingoptions>paypal/express/callbackshippingoptions</paypal_express_callbackshippingoptions>
         </secure_url>
     </frontend>
-    <adminhtml>
-        <translate>
-            <modules>
-                <Mage_Paypal>
-                    <files>
-                        <default>Mage_Paypal.csv</default>
-                    </files>
-                </Mage_Paypal>
-            </modules>
-        </translate>
-    </adminhtml>
     <default>
         <paypal>
             <bncode>Magento_Cart_Community</bncode>
@@ -277,5 +266,15 @@
                 </args>
             </adminhtml>
         </routers>
+    
+        <translate>
+            <modules>
+                <Mage_Paypal>
+                    <files>
+                        <default>Mage_Paypal.csv</default>
+                    </files>
+                </Mage_Paypal>
+            </modules>
+        </translate>
     </admin>
 </config>

@@ -38,7 +38,7 @@
             </rss_setup>
         </resources>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Rss>
@@ -55,7 +55,7 @@
                 </rss>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <frontend>
         <translate>
             <modules>

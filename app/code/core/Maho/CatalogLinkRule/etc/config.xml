@@ -54,7 +54,17 @@
         </blocks>
     </global>
 
-    <adminhtml>
+    <admin>
+        <routers>
+            <adminhtml>
+                <args>
+                    <modules>
+                        <Maho_CatalogLinkRule before="Mage_Adminhtml">Maho_CatalogLinkRule_Adminhtml</Maho_CatalogLinkRule>
+                    </modules>
+                </args>
+            </adminhtml>
+        </routers>
+    
         <layout>
             <updates>
                 <cataloglinkrule>
@@ -71,18 +81,6 @@
                 </Maho_CatalogLinkRule>
             </modules>
         </translate>
-    </adminhtml>
-
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Maho_CatalogLinkRule before="Mage_Adminhtml">Maho_CatalogLinkRule_Adminhtml</Maho_CatalogLinkRule>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
     </admin>
 
     <default>

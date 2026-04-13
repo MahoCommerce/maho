@@ -71,7 +71,7 @@ class Mage_Core_Model_Domainpolicy
 
         // Add X-Frame-Options header (existing functionality)
         $policy = null;
-        if ($action->getLayout()->getArea() === Mage_Core_Model_App_Area::AREA_ADMINHTML) {
+        if ($action->getLayout()->getArea() === Mage_Core_Model_App_Area::AREA_ADMIN) {
             $policy = $this->getBackendPolicy();
         } elseif ($action->getLayout()->getArea() === Mage_Core_Model_App_Area::AREA_FRONTEND) {
             $policy = $this->getFrontendPolicy();

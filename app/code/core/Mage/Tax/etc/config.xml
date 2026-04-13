@@ -169,7 +169,7 @@
             </totals>
         </pdf>
     </global>
-    <adminhtml>
+    <admin>
         <layout>
             <updates>
                 <tax>
@@ -186,7 +186,7 @@
                 </Mage_Tax>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <translate>
             <modules>

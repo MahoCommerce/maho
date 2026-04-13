@@ -20,7 +20,7 @@ class Mage_Api_Controller_Action extends Mage_Core_Controller_Front_Action
     #[\Override]
     public function preDispatch()
     {
-        $this->getLayout()->setArea('adminhtml');
+        $this->getLayout()->setArea('admin');
         Mage::app()->setCurrentStore('admin');
         $this->setFlag('', self::FLAG_NO_START_SESSION, 1); // Do not start standard session
         parent::preDispatch();

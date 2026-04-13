@@ -14,7 +14,10 @@ class Mage_Core_Model_App_Area
 {
     public const AREA_GLOBAL   = 'global';
     public const AREA_FRONTEND = 'frontend';
-    public const AREA_ADMINHTML = 'adminhtml';
+    public const AREA_ADMIN    = 'admin';
+
+    /** @deprecated Since 26.5 Use AREA_ADMIN instead */
+    public const AREA_ADMINHTML = self::AREA_ADMIN;
 
     public const PART_CONFIG   = 'config';
     public const PART_EVENTS   = 'events';

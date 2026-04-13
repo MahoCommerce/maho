@@ -43,7 +43,7 @@
             </updates>
         </layout>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Cms>
@@ -104,7 +104,7 @@
                 <resize_height>75</resize_height>
             </browser>
         </cms>
-    </adminhtml>
+    </admin>
     <global>
         <models>
             <cms>

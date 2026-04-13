@@ -44,9 +44,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-
-    <adminhtml>
+    
         <layout>
             <updates>
                 <currencysymbol>
@@ -63,5 +61,5 @@
                 </Mage_CurrencySymbol>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
 </config>

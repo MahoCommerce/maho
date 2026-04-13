@@ -136,7 +136,7 @@ class Maho_Intelligence_Model_Lsp_Handler_Definition
 
         $file = $designPackage->getTemplateFilename($templatePath, ['_area' => 'frontend']);
         if (!file_exists($file)) {
-            $file = $designPackage->getTemplateFilename($templatePath, ['_area' => 'adminhtml']);
+            $file = $designPackage->getTemplateFilename($templatePath, ['_area' => 'admin']);
         }
 
         return file_exists($file) ? $this->fileLocation($file) : null;

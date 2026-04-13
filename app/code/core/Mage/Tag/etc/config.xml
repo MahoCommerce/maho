@@ -97,7 +97,7 @@
             <tag_customer>/tag/customer/</tag_customer>
         </secure_url>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Tag>
@@ -114,7 +114,7 @@
                 </tag>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <default>
         <catalog>
             <tags>

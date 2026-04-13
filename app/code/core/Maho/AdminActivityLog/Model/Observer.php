@@ -45,7 +45,7 @@ class Maho_AdminActivityLog_Model_Observer
         return $this->_currentActionGroupId;
     }
 
-    #[Maho\Config\Observer('admin_user_authenticate_after', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_login_success')]
+    #[Maho\Config\Observer('admin_user_authenticate_after', area: 'admin', type: 'singleton', id: 'adminactivitylog_login_success')]
     public function logAdminLogin(\Maho\Event\Observer $observer): void
     {
         try {
@@ -62,7 +62,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('admin_session_user_logout', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_logout')]
+    #[Maho\Config\Observer('admin_session_user_logout', area: 'admin', type: 'singleton', id: 'adminactivitylog_logout')]
     public function logAdminLogout(\Maho\Event\Observer $observer): void
     {
         try {
@@ -79,7 +79,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('admin_session_user_login_failed', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_login_failed')]
+    #[Maho\Config\Observer('admin_session_user_login_failed', area: 'admin', type: 'singleton', id: 'adminactivitylog_login_failed')]
     public function logAdminLoginFailed(\Maho\Event\Observer $observer): void
     {
         try {
@@ -99,8 +99,8 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('model_save_before', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_save_before')]
-    #[Maho\Config\Observer('model_delete_before', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_delete_before')]
+    #[Maho\Config\Observer('model_save_before', area: 'admin', type: 'singleton', id: 'adminactivitylog_save_before')]
+    #[Maho\Config\Observer('model_delete_before', area: 'admin', type: 'singleton', id: 'adminactivitylog_delete_before')]
     public function logAdminActivityBefore(\Maho\Event\Observer $observer): void
     {
         try {
@@ -130,7 +130,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('model_save_after', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_save_after')]
+    #[Maho\Config\Observer('model_save_after', area: 'admin', type: 'singleton', id: 'adminactivitylog_save_after')]
     public function logAdminActivityAfter(\Maho\Event\Observer $observer): void
     {
         try {
@@ -214,7 +214,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('model_delete_after', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_delete_after')]
+    #[Maho\Config\Observer('model_delete_after', area: 'admin', type: 'singleton', id: 'adminactivitylog_delete_after')]
     public function logAdminDelete(\Maho\Event\Observer $observer): void
     {
         try {
@@ -247,7 +247,7 @@ class Maho_AdminActivityLog_Model_Observer
         }
     }
 
-    #[Maho\Config\Observer('controller_action_predispatch_adminhtml', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_page_visit')]
+    #[Maho\Config\Observer('controller_action_predispatch_adminhtml', area: 'admin', type: 'singleton', id: 'adminactivitylog_page_visit')]
     public function logPageVisit(\Maho\Event\Observer $observer): void
     {
         try {
@@ -329,7 +329,7 @@ class Maho_AdminActivityLog_Model_Observer
         return array_diff_key($data, array_flip($this->ignoreFields));
     }
 
-    #[Maho\Config\Observer('controller_action_postdispatch_adminhtml', area: 'adminhtml', type: 'singleton', id: 'adminactivitylog_mass_action')]
+    #[Maho\Config\Observer('controller_action_postdispatch_adminhtml', area: 'admin', type: 'singleton', id: 'adminactivitylog_mass_action')]
     public function logMassAction(\Maho\Event\Observer $observer): void
     {
         if (!Mage::helper('adminactivitylog')->shouldLogMassActions()) {

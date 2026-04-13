@@ -79,7 +79,7 @@
             </updates>
         </layout>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_PaypalUk>
@@ -89,7 +89,7 @@
                 </Mage_PaypalUk>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <default>
         <payment>
             <paypaluk_express>

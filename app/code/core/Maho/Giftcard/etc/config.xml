@@ -179,6 +179,14 @@
                 </args>
             </adminhtml>
         </routers>
+    
+        <layout>
+            <updates>
+                <giftcard>
+                    <file>giftcard.xml</file>
+                </giftcard>
+            </updates>
+        </layout>
     </admin>
 
     <frontend>
@@ -199,14 +207,4 @@
             </updates>
         </layout>
     </frontend>
-
-    <adminhtml>
-        <layout>
-            <updates>
-                <giftcard>
-                    <file>giftcard.xml</file>
-                </giftcard>
-            </updates>
-        </layout>
-    </adminhtml>
 </config>

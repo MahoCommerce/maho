@@ -80,7 +80,7 @@
             <tempate_filter>newsletter/template_filter</tempate_filter>
         </newsletter>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Newsletter>
@@ -97,7 +97,7 @@
                 </newsletter>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <frontend>
         <routers>
             <newsletter>

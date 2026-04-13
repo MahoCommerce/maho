@@ -87,9 +87,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-
-    <adminhtml>
+    
         <translate>
             <modules>
                 <Maho_FeedManager>
@@ -106,7 +104,7 @@
                 </feedmanager>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
 
     <default>
         <feedmanager>

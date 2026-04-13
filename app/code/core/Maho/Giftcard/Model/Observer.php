@@ -763,7 +763,7 @@ class Maho_Giftcard_Model_Observer
     /**
      * Process gift card in admin order create
      */
-    #[Maho\Config\Observer('adminhtml_sales_order_create_process_data_before', area: 'adminhtml', id: 'giftcard_process_admin_order')]
+    #[Maho\Config\Observer('adminhtml_sales_order_create_process_data_before', area: 'admin', id: 'giftcard_process_admin_order')]
     public function processAdminOrderGiftcard(Maho\Event\Observer $observer): void
     {
         /** @var Mage_Core_Controller_Request_Http $requestModel */

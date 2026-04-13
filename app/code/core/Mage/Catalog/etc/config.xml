@@ -203,6 +203,16 @@
                 </required_options>
             </catalog_product_dataflow>
         </fieldsets>
+    
+        <translate>
+            <modules>
+                <Mage_Catalog>
+                    <files>
+                        <default>Mage_Catalog.csv</default>
+                    </files>
+                </Mage_Catalog>
+            </modules>
+        </translate>
     </admin>
     <global>
         <models>
@@ -613,17 +623,6 @@
             </catalog_product>
         </eav_attributes>
     </global>
-    <adminhtml>
-        <translate>
-            <modules>
-                <Mage_Catalog>
-                    <files>
-                        <default>Mage_Catalog.csv</default>
-                    </files>
-                </Mage_Catalog>
-            </modules>
-        </translate>
-    </adminhtml>
     <frontend>
         <routers>
             <catalog>
@@ -728,8 +727,8 @@
                 <background_color>#ffffff</background_color>
             </product_image>
             <seo>
-                <product_url_suffix></product_url_suffix>
-                <category_url_suffix></category_url_suffix>
+                <product_url_suffix/>
+                <category_url_suffix/>
                 <product_use_categories>1</product_use_categories>
                 <save_rewrites_history>1</save_rewrites_history>
                 <title_separator>-</title_separator>

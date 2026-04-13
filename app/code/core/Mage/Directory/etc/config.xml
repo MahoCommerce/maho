@@ -119,8 +119,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <translate>
             <modules>
                 <Mage_Directory>
@@ -137,7 +136,7 @@
                 </directory>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <default>
         <system>
             <currency>

@@ -61,8 +61,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <global_search>
             <products>
                 <class>adminhtml/search_catalog</class>
@@ -122,7 +121,7 @@
                 <label><![CDATA[Please refresh "Catalog URL Rewrites" and "Product Attributes" in System -&gt; <a href="%s">Index Management</a>]]></label>
             </website_chnaged_indexers>
         </messages>
-    </adminhtml>
+    </admin>
     <default>
         <system>
             <media_storage_configuration>

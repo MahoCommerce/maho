@@ -33,7 +33,7 @@ class Mage_CatalogRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_save_commit_after', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_product_save_commit_after', area: 'admin', type: 'singleton')]
     public function applyAllRulesOnProduct($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -54,7 +54,7 @@ class Mage_CatalogRule_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_save_before', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_product_save_before', area: 'admin', type: 'singleton')]
     public function loadProductRules($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -74,7 +74,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_import_after', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_product_import_after', area: 'admin', type: 'singleton')]
     public function applyAllRules($observer)
     {
         /** @var Mage_CatalogRule_Model_Resource_Rule $resource */
@@ -176,7 +176,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return  $this
      */
-    #[Maho\Config\Observer('catalog_product_get_final_price', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_product_get_final_price', area: 'admin', type: 'singleton')]
     #[Maho\Config\Observer('catalog_product_get_final_price', area: 'crontab', type: 'singleton')]
     public function processAdminFinalPrice($observer)
     {
@@ -359,7 +359,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_entity_attribute_save_after', area: 'admin', type: 'singleton')]
     public function catalogAttributeSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -376,7 +376,7 @@ class Mage_CatalogRule_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_entity_attribute_delete_after', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_entity_attribute_delete_after', area: 'admin', type: 'singleton')]
     public function catalogAttributeDeleteAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -440,7 +440,7 @@ class Mage_CatalogRule_Model_Observer
     /**
      * Create catalog rule relations for imported products
      */
-    #[Maho\Config\Observer('catalog_product_import_finish_before', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('catalog_product_import_finish_before', area: 'admin', type: 'singleton')]
     public function createCatalogRulesRelations(\Maho\Event\Observer $observer)
     {
         /** @var Mage_ImportExport_Model_Import_Entity_Product $adapter */

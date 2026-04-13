@@ -58,7 +58,7 @@
             </review>
         </blocks>
     </global>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Review>
@@ -68,7 +68,7 @@
                 </Mage_Review>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <routers>
             <review>

@@ -128,6 +128,14 @@ class Mage_Core_Model_Design_Package
         return $this;
     }
 
+    public static function areaToDesignDir(string $area): string
+    {
+        return match ($area) {
+            'admin' => 'adminhtml',
+            default => $area,
+        };
+    }
+
     /**
      * Retrieve package area
      *
@@ -309,8 +317,9 @@ class Mage_Core_Model_Design_Package
     public function getBaseDir(array $params)
     {
         $this->updateParamDefaults($params);
+        $areaDir = self::areaToDesignDir($params['_area']);
         return (empty($params['_relative']) ? Mage::getBaseDir('design') . DS : '') .
-            $params['_area'] . DS . $params['_package'] . DS . $params['_theme'] . DS . $params['_type'];
+            $areaDir . DS . $params['_package'] . DS . $params['_theme'] . DS . $params['_type'];
     }
 
     /**
@@ -320,8 +329,9 @@ class Mage_Core_Model_Design_Package
     {
         $params['_type'] = 'skin';
         $this->updateParamDefaults($params);
+        $areaDir = self::areaToDesignDir($params['_area']);
         return (empty($params['_relative']) ? Mage::getBaseDir('skin') . DS : '') .
-            $params['_area'] . DS . $params['_package'] . DS . $params['_theme'];
+            $areaDir . DS . $params['_package'] . DS . $params['_theme'];
     }
 
     /**
@@ -331,8 +341,9 @@ class Mage_Core_Model_Design_Package
     {
         $params['_type'] = 'locale';
         $this->updateParamDefaults($params);
+        $areaDir = self::areaToDesignDir($params['_area']);
         return (empty($params['_relative']) ? Mage::getBaseDir('design') . DS : '') .
-            $params['_area'] . DS . $params['_package'] . DS . $params['_theme'] . DS . 'locale' . DS .
+            $areaDir . DS . $params['_package'] . DS . $params['_theme'] . DS . 'locale' . DS .
             Mage::app()->getLocale()->getLocaleCode();
     }
 
@@ -343,7 +354,8 @@ class Mage_Core_Model_Design_Package
     {
         $params['_type'] = 'skin';
         $this->updateParamDefaults($params);
-        $urlPath = $params['_area'] . '/' . $params['_package'] . '/' . $params['_theme'] . '/';
+        $areaDir = self::areaToDesignDir($params['_area']);
+        $urlPath = $areaDir . '/' . $params['_package'] . '/' . $params['_theme'] . '/';
         // Prevent XSS through malformed configuration
         $urlPath = htmlspecialchars($urlPath, ENT_HTML5 | ENT_QUOTES, 'UTF-8');
         return Mage::getBaseUrl('skin', isset($params['_secure']) ? (bool) $params['_secure'] : null) . $urlPath;

@@ -60,8 +60,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <translate>
             <modules>
                 <Mage_Cron>
@@ -71,5 +70,5 @@
                 </Mage_Cron>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
 </config>

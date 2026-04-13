@@ -1401,7 +1401,7 @@
                 <discount translate="title">
                     <title>Discount</title>
                     <source_field>discount_amount</source_field>
-                    <amount_prefix></amount_prefix>
+                    <amount_prefix/>
                     <title_source_field>discount_description</title_source_field>
                     <font_size>7</font_size>
                     <display_zero>0</display_zero>
@@ -1440,17 +1440,17 @@
         <layout>
             <sales_pdf_invoice>
                 <reference name="sales.pdf.invoice">
-                    <block type="sales/order_pdf_invoice" name="sales.pdf.invoice" template="sales/order/pdf/invoice/default.phtml" />
+                    <block type="sales/order_pdf_invoice" name="sales.pdf.invoice" template="sales/order/pdf/invoice/default.phtml"/>
                 </reference>
             </sales_pdf_invoice>
             <sales_pdf_shipment>
                 <reference name="sales.pdf.shipment">
-                    <block type="sales/order_pdf_shipment" name="sales.pdf.shipment" template="sales/order/pdf/shipment/default.phtml" />
+                    <block type="sales/order_pdf_shipment" name="sales.pdf.shipment" template="sales/order/pdf/shipment/default.phtml"/>
                 </reference>
             </sales_pdf_shipment>
             <sales_pdf_creditmemo>
                 <reference name="sales.pdf.creditmemo">
-                    <block type="sales/order_pdf_creditmemo" name="sales.pdf.creditmemo" template="sales/order/pdf/creditmemo/default.phtml" />
+                    <block type="sales/order_pdf_creditmemo" name="sales.pdf.creditmemo" template="sales/order/pdf/creditmemo/default.phtml"/>
                 </reference>
             </sales_pdf_creditmemo>
         </layout>
@@ -1491,7 +1491,7 @@
             </updates>
         </layout>
     </frontend>
-    <adminhtml>
+    <admin>
         <translate>
             <modules>
                 <Mage_Sales>
@@ -1508,7 +1508,7 @@
                 </sales>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
     <default>
         <sales>
             <totals_sort>

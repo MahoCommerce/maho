@@ -937,7 +937,7 @@ class Mage_CatalogInventory_Model_Observer
      */
     #[Maho\Config\Observer('end_index_events_cataloginventory_stock_item_save', type: 'singleton')]
     #[Maho\Config\Observer('end_process_event_cataloginventory_stock_item_save', type: 'singleton')]
-    #[Maho\Config\Observer('after_reindex_process_cataloginventory_stock', area: 'adminhtml', type: 'singleton')]
+    #[Maho\Config\Observer('after_reindex_process_cataloginventory_stock', area: 'admin', type: 'singleton')]
     public function reindexProductsMassAction($observer): void
     {
         Mage::getSingleton('index/indexer')->indexEvents(

@@ -82,7 +82,7 @@ class Mage_Sales_Model_Observer
      * @throws Exception
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_product_delete_before', area: 'adminhtml', id: 'sales_quote_observer')]
+    #[Maho\Config\Observer('catalog_product_delete_before', area: 'admin', id: 'sales_quote_observer')]
     public function substractQtyFromQuotes(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -96,7 +96,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalogrule_after_apply', area: 'adminhtml', id: 'sales_quote_observer')]
+    #[Maho\Config\Observer('catalogrule_after_apply', area: 'admin', id: 'sales_quote_observer')]
     public function markQuotesRecollectOnCatalogRules(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -126,7 +126,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_product_save_after', area: 'adminhtml', id: 'sales_quote')]
+    #[Maho\Config\Observer('catalog_product_save_after', area: 'admin', id: 'sales_quote')]
     public function catalogProductSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -145,7 +145,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('catalog_product_status_update', area: 'adminhtml', id: 'sales_quote')]
+    #[Maho\Config\Observer('catalog_product_status_update', area: 'admin', id: 'sales_quote')]
     public function catalogProductStatusUpdate(\Maho\Event\Observer $observer)
     {
         $status     = $observer->getEvent()->getStatus();
@@ -243,7 +243,7 @@ class Mage_Sales_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
-    #[Maho\Config\Observer('catalog_product_edit_form_render_recurring', area: 'adminhtml', id: 'payment')]
+    #[Maho\Config\Observer('catalog_product_edit_form_render_recurring', area: 'admin', id: 'payment')]
     public function prepareProductEditFormRecurringProfile($observer)
     {
         // replace the element of recurring payment profile field with a form
@@ -273,7 +273,7 @@ class Mage_Sales_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
-    #[Maho\Config\Observer('payment_method_is_active', area: 'adminhtml', id: 'sales_billing_agreement')]
+    #[Maho\Config\Observer('payment_method_is_active', area: 'admin', id: 'sales_billing_agreement')]
     public function restrictAdminBillingAgreementUsage($observer)
     {
         $methodInstance = $observer->getEvent()->getMethodInstance();
@@ -290,7 +290,7 @@ class Mage_Sales_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('customer_save_after', area: 'adminhtml', id: 'customer')]
+    #[Maho\Config\Observer('customer_save_after', area: 'admin', id: 'customer')]
     public function customerSaveAfter(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Customer_Model_Customer $customer */

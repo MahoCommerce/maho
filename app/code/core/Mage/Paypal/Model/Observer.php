@@ -91,7 +91,7 @@ class Mage_Paypal_Model_Observer
     /**
      * Load country dependent PayPal solutions system configuration
      */
-    #[Maho\Config\Observer('adminhtml_init_system_config', area: 'adminhtml')]
+    #[Maho\Config\Observer('adminhtml_init_system_config', area: 'admin')]
     public function loadCountryDependentSolutionsConfig(\Maho\Event\Observer $observer)
     {
         $countryCode = Mage::helper('paypal')->getConfigurationCountryCode();

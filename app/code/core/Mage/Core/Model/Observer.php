@@ -27,8 +27,8 @@ class Mage_Core_Model_Observer
      *
      * @return $this
      */
-    #[Maho\Config\Observer('clean_cache_by_tags', area: 'adminhtml')]
-    #[Maho\Config\Observer('admin_system_config_changed_section_catalog', area: 'adminhtml')]
+    #[Maho\Config\Observer('clean_cache_by_tags', area: 'admin')]
+    #[Maho\Config\Observer('admin_system_config_changed_section_catalog', area: 'admin')]
     public function cleanCacheByTags(\Maho\Event\Observer $observer)
     {
         /** @var array $tags */

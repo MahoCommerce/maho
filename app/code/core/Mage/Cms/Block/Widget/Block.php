@@ -100,6 +100,6 @@ class Mage_Cms_Block_Widget_Block extends Mage_Core_Block_Template implements Ma
      */
     public function isRequestFromAdminArea()
     {
-        return $this->getRequest()->getRouteName() === Mage_Core_Model_App_Area::AREA_ADMINHTML;
+        return $this->getRequest()->getRouteName() === 'adminhtml';
     }
 }

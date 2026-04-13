@@ -113,8 +113,7 @@
                 </args>
             </adminhtml>
         </routers>
-    </admin>
-    <adminhtml>
+    
         <layout>
             <updates>
                 <blog>
@@ -131,7 +130,7 @@
                 </Maho_Blog>
             </modules>
         </translate>
-    </adminhtml>
+    </admin>
     <frontend>
         <routers>
             <blog>

@@ -56,7 +56,7 @@
             </dataflow_setup>
         </resources>
     </global>
-    <adminhtml>
+    <admin>
         <layout>
             <updates>
                 <dataflow>
@@ -64,5 +64,5 @@
                 </dataflow>
             </updates>
         </layout>
-    </adminhtml>
+    </admin>
 </config>

@@ -36,8 +36,8 @@ class Maho_Captcha_Model_Observer
         $this->failedVerification($controller, $isAjax);
     }
 
-    #[Maho\Config\Observer('admin_user_authenticate_before', area: 'adminhtml')]
-    #[Maho\Config\Observer('controller_action_predispatch_adminhtml_index_forgotpassword', area: 'adminhtml')]
+    #[Maho\Config\Observer('admin_user_authenticate_before', area: 'admin')]
+    #[Maho\Config\Observer('controller_action_predispatch_adminhtml_index_forgotpassword', area: 'admin')]
     public function verifyAdmin(\Maho\Event\Observer $observer): void
     {
         $helper = Mage::helper('captcha');
