@@ -41,6 +41,7 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\E
                     'label'    => Mage::helper('cms')->__('Validate HTML'),
                     'type'     => 'button',
                     'class'    => 'validate-html',
+                    'style'    => 'margin-left: 4px;',
                     'onclick'  => "validateHtmlContent('{$this->getHtmlId()}', '$validateUrl');",
                 ])->toHtml();
         }
