@@ -117,9 +117,9 @@
             </order>
         </sales>
         <messages>
-            <website_chnaged_indexers translate="label" module="catalog">
+            <website_changed_indexers translate="label" module="catalog">
                 <label><![CDATA[Please refresh "Catalog URL Rewrites" and "Product Attributes" in System -&gt; <a href="%s">Index Management</a>]]></label>
-            </website_chnaged_indexers>
+            </website_changed_indexers>
         </messages>
     </admin>
     <default>
