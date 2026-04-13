@@ -72,7 +72,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping_Csv extends Maho_Fe
         </div>
 
 
-        <script type="text/javascript">
+        <script>
         var CsvBuilder = {
             columns: ' . Mage::helper('core')->jsonEncode($columnsData) . ',
             sourceTypes: ' . Mage::helper('core')->jsonEncode($sourceTypes) . ',

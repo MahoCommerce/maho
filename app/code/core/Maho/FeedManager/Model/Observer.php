@@ -15,6 +15,7 @@ class Maho_FeedManager_Model_Observer
     /**
      * Re-encrypt destination configs when encryption key is regenerated
      */
+    #[Maho\Config\Observer('encryption_key_regenerated')]
     public function encryptionKeyRegenerated(Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */

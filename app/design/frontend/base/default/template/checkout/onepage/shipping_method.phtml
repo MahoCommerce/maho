@@ -13,14 +13,14 @@
 ?>
 <form id="co-shipping-method-form" action="">
     <div id="checkout-shipping-method-load"></div>
-    <script type="text/javascript">
+    <script>
         var shippingMethod = new ShippingMethod('co-shipping-method-form', "<?= $this->getUrl('checkout/onepage/saveShippingMethod') ?>");
     </script>
     <div id="onepage-checkout-shipping-method-additional-load"><?= $this->getChildHtml('additional') ?></div>
     <div class="buttons-set" id="shipping-method-buttons-container">
         <button type="button" class="button" onclick="shippingMethod.save()"><?= $this->__('Continue') ?></button>
         <span id="shipping-method-please-wait" class="please-wait" style="display:none;">
-            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle" /> <?= $this->__('Loading next step...') ?>
+            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle"> <?= $this->__('Loading next step...') ?>
         </span>
     </div>
     <?= $this->getBlockHtml('formkey') ?>

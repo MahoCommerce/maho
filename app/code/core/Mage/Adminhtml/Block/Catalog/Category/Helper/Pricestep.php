@@ -43,18 +43,18 @@ class Mage_Adminhtml_Block_Catalog_Category_Helper_Pricestep extends \Maho\Data\
         parent::addClass('validate-number validate-number-range number-range-0.01-1000000000');
         $html = parent::getElementHtml();
         $htmlId = 'use_config_' . $this->getHtmlId();
-        $html .= '<br/><input id="' . $htmlId . '" name="use_config[]" value="' . $this->getId() . '"';
+        $html .= '<br><input id="' . $htmlId . '" name="use_config[]" value="' . $this->getId() . '"';
         $html .= ($disabled ? ' checked="checked"' : '');
 
         if ($this->getReadonly() || $elementDisabled) {
             $html .= ' disabled="disabled"';
         }
 
-        $html .= ' onclick="toggleValueElements(this, this.parentNode);" class="checkbox" type="checkbox" />';
+        $html .= ' onclick="toggleValueElements(this, this.parentNode);" class="checkbox" type="checkbox">';
 
         $html .= ' <label for="' . $htmlId . '" class="normal">'
             . Mage::helper('adminhtml')->__('Use Config Settings') . '</label>';
-        $html .= '<script type="text/javascript">' . 'toggleValueElements(document.getElementById(\'' . $htmlId . '\'), document.getElementById(\'' . $htmlId
+        $html .= '<script>' . 'toggleValueElements(document.getElementById(\'' . $htmlId . '\'), document.getElementById(\'' . $htmlId
             . '\').parentNode);' . '</script>';
 
         return $html;

@@ -18,6 +18,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      *
      * @return void
      */
+    #[Maho\Config\Observer('catalog_block_product_list_collection', area: 'frontend')]
     public function productListCollectionLoadAfter(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) {
@@ -63,6 +64,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Attach children products after product load
      * Observes: catalog_product_load_after
      */
+    #[Maho\Config\Observer('catalog_product_load_after', area: 'frontend')]
     public function productLoadAfter(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) { // functionality disabled
@@ -89,6 +91,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * if config swatches enabled.
      * Observes: catalog_product_attribute_backend_media_load_gallery_before
      */
+    #[Maho\Config\Observer('catalog_product_attribute_backend_media_load_gallery_before', area: 'frontend')]
     public function loadChildProductImagesOnMediaLoad(\Maho\Event\Observer $observer)
     {
         if (!Mage::helper('configurableswatches')->isEnabled()) { // functionality disabled
@@ -128,6 +131,7 @@ class Mage_ConfigurableSwatches_Model_Observer extends Mage_Core_Model_Abstract
      * Convert a catalog layer block with the right templates
      * Observes: controller_action_layout_generate_blocks_after
      */
+    #[Maho\Config\Observer('controller_action_layout_generate_blocks_after', area: 'frontend')]
     public function convertLayerBlock(\Maho\Event\Observer $observer)
     {
         $front = Mage::app()->getRequest()->getRouteName();

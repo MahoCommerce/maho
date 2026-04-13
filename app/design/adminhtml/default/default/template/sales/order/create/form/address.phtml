@@ -17,7 +17,7 @@ if ($this->getIsShipping()):
     $_fieldsContainerId = 'order-shipping_address_fields';
     $_addressChoiceContainerId = 'order-shipping_address_choice';
 ?>
-    <script type="text/javascript">
+    <script>
     order.shippingAddressContainer = '<?= $_fieldsContainerId ?>';
     order.setAddresses(<?= $this->getAddressCollectionJson() ?>);
     </script>
@@ -25,7 +25,7 @@ if ($this->getIsShipping()):
     $_fieldsContainerId = 'order-billing_address_fields';
     $_addressChoiceContainerId = 'order-billing_address_choice';
 ?>
-    <script type="text/javascript">
+    <script>
     order.billingAddressContainer = '<?= $_fieldsContainerId ?>';
     </script>
 <?php endif ?>
@@ -37,7 +37,7 @@ if ($this->getIsShipping()):
 
     <fieldset class="np">
     <div id = "<?= $_addressChoiceContainerId ?>" class="order-choose-address">
-        <?= Mage::helper('sales')->__('Select from existing customer addresses:') ?><br/>
+        <?= Mage::helper('sales')->__('Select from existing customer addresses:') ?><br>
         <?php $_id = $this->getForm()->getHtmlIdPrefix() . 'customer_address_id' ?>
         <select id="<?= $_id ?>"  name="<?= $this->getForm()->getHtmlNamePrefix() ?>[customer_address_id]" style="width:97.5%;" onchange="order.selectAddress(this, '<?= $_fieldsContainerId ?>')">
             <option value=""><?= Mage::helper('sales')->__('Add New Address') ?></option>
@@ -50,9 +50,9 @@ if ($this->getIsShipping()):
             <?php endforeach ?>
 
         </select>
-        <br/>
+        <br>
         <?php if ($this->getIsShipping()): ?>
-            <input type="checkbox" id="order-shipping_as_billing" name="shipping_as_billing" value="1" onclick="order.setShippingAsBilling(this.checked)" <?php if ($this->getIsAsBilling()): ?>checked<?php endif ?>/>
+            <input type="checkbox" id="order-shipping_as_billing" name="shipping_as_billing" value="1" onclick="order.setShippingAsBilling(this.checked)" <?php if ($this->getIsAsBilling()): ?>checked<?php endif ?>>
             <label for="order-shipping_as_billing" class="no-float"><?= Mage::helper('sales')->__('Same As Billing Address') ?></label>
         <?php else: ?>
             &nbsp;
@@ -64,13 +64,13 @@ if ($this->getIsShipping()):
             <?= $this->getForm()->toHtml() ?>
         </div>
         <div class="order-save-in-address-book">
-            <input name="<?= $this->getForm()->getHtmlNamePrefix() ?>[save_in_address_book]" type="checkbox" id="<?= $this->getForm()->getHtmlIdPrefix() ?>save_in_address_book" value="1" <?php if (!$this->getDontSaveInAddressBook() && $this->getAddress()->getSaveInAddressBook()):?> checked="checked"<?php endif ?>/>
+            <input name="<?= $this->getForm()->getHtmlNamePrefix() ?>[save_in_address_book]" type="checkbox" id="<?= $this->getForm()->getHtmlIdPrefix() ?>save_in_address_book" value="1" <?php if (!$this->getDontSaveInAddressBook() && $this->getAddress()->getSaveInAddressBook()):?> checked="checked"<?php endif ?>>
             <label for="<?= $this->getForm()->getHtmlIdPrefix() ?>save_in_address_book"><?= Mage::helper('sales')->__('Save in address book') ?></label>
         </div>
     </div>
     <?php $hideElement = 'address-' . ($this->getIsShipping() ? 'shipping' : 'billing') . '-overlay'; ?>
     <div style="display:none;" id="<?= $hideElement ?>" class="overlay"><span><?= $this->__('Shipping address selection is not applicable') ?></span></div>
-    <script type="text/javascript">
+    <script>
         order.bindAddressFields('<?= $_fieldsContainerId ?>');
         order.bindAddressFields('<?= $_addressChoiceContainerId ?>');
         <?php if ($this->getIsShipping() && $this->getIsAsBilling()): ?>

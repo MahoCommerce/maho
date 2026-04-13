@@ -39,7 +39,7 @@ $numColumns = count($this->getColumns());
                 <span class="pager-arrow disabled" aria-label="<?= $this->quoteEscape($this->__('Go to Previous page')) ?>"><?= $this->getIconSvg('circle-arrow-left') ?></span>
             <?php endif ?>
 
-            <input type="text" name="<?= $this->getVarNamePage() ?>" value="<?= $_curPage ?>" class="input-text page" onkeypress="<?= $this->getJsObjectName() ?>.inputPage(event, '<?= $_lastPage ?>')"/>
+            <input type="text" name="<?= $this->getVarNamePage() ?>" value="<?= $_curPage ?>" class="input-text page" onkeypress="<?= $this->getJsObjectName() ?>.inputPage(event, '<?= $_lastPage ?>')">
 
             <?php if($_curPage < $_lastPage): ?>
                 <a href="#" title="<?= $this->quoteEscape($this->__('Next page')) ?>" aria-label="<?= $this->quoteEscape($this->__('Go to Next page')) ?>" class="pager-arrow" onclick="<?= $this->getJsObjectName() ?>.setPage('<?= ($_curPage+1) ?>');return false;"><?= $this->getIconSvg('circle-arrow-right') ?></a>
@@ -67,7 +67,7 @@ $numColumns = count($this->getColumns());
     <?php endif ?>
     <?php if($this->getExportTypes()): ?>
         <td class="export a-right">
-            <img src="<?= $this->getSkinUrl('images/icon_export.gif') ?>" alt="" class="v-middle"/>&nbsp; <?= $this->__('Export to:') ?>
+            <img src="<?= $this->getSkinUrl('images/icon_export.gif') ?>" alt="" class="v-middle">&nbsp; <?= $this->__('Export to:') ?>
             <select name="<?= $this->getId() ?>_export" id="<?= $this->getId() ?>_export" style="width:8em;">
             <?php foreach ($this->getExportTypes() as $_type): ?>
                 <option value="<?= $_type->getUrl() ?>"><?= $_type->getLabel() ?></option>
@@ -89,7 +89,7 @@ $numColumns = count($this->getColumns());
     <div class="hor-scroll">
     <table cellspacing="0" class="data" id="<?= $this->getId() ?>_table">
         <?php foreach ($this->getColumns() as $_column): ?>
-        <col <?= $_column->getHtmlProperty() ?> />
+        <col <?= $_column->getHtmlProperty() ?>>
         <?php endforeach ?>
         <?php if ($this->getHeadersVisibility() || $this->getFilterVisibility()): ?>
             <thead>
@@ -178,7 +178,7 @@ $numColumns = count($this->getColumns());
 </div>
 <?php if($this->canDisplayContainer()): ?>
 </div>
-<script type="text/javascript">
+<script>
     globalThis.<?= $this->getJsObjectName() ?> = new varienGrid('<?= $this->getId() ?>', '<?= $this->getGridUrl() ?>', '<?= $this->getVarNamePage() ?>', '<?= $this->getVarNameSort() ?>', '<?= $this->getVarNameDir() ?>', '<?= $this->getVarNameFilter() ?>');
     <?= $this->getJsObjectName() ?>.useAjax = '<?= $this->getUseAjax() ?>';
     <?php if($this->getRowClickCallback()): ?>

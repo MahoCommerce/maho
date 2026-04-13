@@ -44,7 +44,7 @@ if(empty($_cartQty)) {
                     <?php else: ?>
                         <span class="label"><?= $this->__('Cart Subtotal:') ?></span> <?= Mage::helper('checkout')->formatPrice($this->getSubtotal()) ?>
                         <?php if ($_subtotalInclTax = $this->getSubtotalInclTax()): ?>
-                            <br />(<?= Mage::helper('checkout')->formatPrice($_subtotalInclTax) ?> <?= Mage::helper('tax')->getIncExcText(true) ?>)
+                            <br>(<?= Mage::helper('checkout')->formatPrice($_subtotalInclTax) ?> <?= Mage::helper('tax')->getIncExcText(true) ?>)
                         <?php endif ?>
                     <?php endif ?>
                 </p>
@@ -71,7 +71,7 @@ if(empty($_cartQty)) {
     <?php endif ?>
 </div>
 
-<script type="text/javascript">
+<script>
     if (typeof truncateOptions === 'function') truncateOptions();
     document.addEventListener('DOMContentLoaded', function() {
         window.minicart = new Minicart({

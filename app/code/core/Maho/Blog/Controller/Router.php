@@ -10,6 +10,7 @@
 
 class Maho_Blog_Controller_Router extends Mage_Core_Controller_Varien_Router_Abstract
 {
+    #[Maho\Config\Observer('controller_front_init_routers')]
     public function initControllerRouters(\Maho\Event\Observer $observer): void
     {
         /** @var Mage_Core_Controller_Varien_Front $front */

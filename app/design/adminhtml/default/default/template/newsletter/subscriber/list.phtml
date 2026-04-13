@@ -27,7 +27,7 @@
     <button class="scalable" onclick="subscriberController.addToQueue();"><span><?= Mage::helper('newsletter')->__('Add to Queue') ?></span></button>
 </div>
 <?php endif ?>
-<script type="text/javascript">
+<script>
     var subscriberController = {
         checkCheckboxes: function(controlCheckbox) {
             var elements = document.getElementById('subscriberGrid').getElementsByClassName('subscriberCheckbox');

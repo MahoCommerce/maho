@@ -26,14 +26,14 @@
         </div>
         <div class="map-popup-checkout">
             <form action="" method="POST" id="product_addtocart_form_from_popup">
-                <input type="hidden" name="product" class="product_id" value="" id="map-popup-product-id" />
+                <input type="hidden" name="product" class="product_id" value="" id="map-popup-product-id">
                 <div class="additional-addtocart-box">
                     <?= $this->getChildHtml() ?>
                 </div>
                 <button type="button" title="<?= $this->quoteEscape($this->__('Add to Cart')) ?>" class="button btn-cart" id="map-popup-button"><?= $this->__('Add to Cart') ?></button>
             </form>
         </div>
-        <script type="text/javascript">
+        <script>
             document.addEventListener("DOMContentLoaded", () => {
                 Catalog.Map.bindProductForm();
             });

@@ -33,7 +33,7 @@ $_validateButton = $this->getValidateButton();
             <?= $_validateButton->toHtml() ?>
         </div>
         <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>
-        <script type="text/javascript">
+        <script>
             document.addEventListener('DOMContentLoaded', function() {
                 var elm = document.getElementById('<?= $this->jsQuoteEscape($this->getVatFieldId()) ?>');
                 if (elm) {

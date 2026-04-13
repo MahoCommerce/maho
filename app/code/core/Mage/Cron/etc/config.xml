@@ -38,26 +38,6 @@
             </cron_resource>
         </models>
     </global>
-    <crontab>
-        <events>
-            <default>
-                <observers>
-                    <cron_observer>
-                        <class>cron/observer</class>
-                        <method>dispatch</method>
-                    </cron_observer>
-                </observers>
-            </default>
-            <always>
-                <observers>
-                    <cron_observer>
-                        <class>cron/observer</class>
-                        <method>dispatchAlways</method>
-                    </cron_observer>
-                </observers>
-            </always>
-        </events>
-    </crontab>
     <default>
         <system>
             <cron>
@@ -82,16 +62,6 @@
         </routers>
     </admin>
     <adminhtml>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <cron_status_check>
-                        <class>cron/observer</class>
-                        <method>checkCronStatus</method>
-                    </cron_status_check>
-                </observers>
-            </controller_action_predispatch>
-        </events>
         <translate>
             <modules>
                 <Mage_Cron>

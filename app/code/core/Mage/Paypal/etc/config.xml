@@ -16,16 +16,6 @@
         </Mage_Paypal>
     </modules>
     <global>
-        <events>
-            <sales_html_txn_id>
-                <observers>
-                    <paypal_transaction_html>
-                        <class>paypal/observer</class>
-                        <method>observeHtmlTransactionId</method>
-                    </paypal_transaction_html>
-                </observers>
-            </sales_html_txn_id>
-        </events>
         <models>
             <paypal>
                 <class>Mage_Paypal_Model</class>
@@ -128,36 +118,8 @@
         <secure_url>
             <paypal_express_callbackshippingoptions>paypal/express/callbackshippingoptions</paypal_express_callbackshippingoptions>
         </secure_url>
-        <events>
-            <checkout_submit_all_after>
-                <observers>
-                    <hss_save_order_after_submit>
-                        <class>paypal/observer</class>
-                        <method>saveOrderAfterSubmit</method>
-                    </hss_save_order_after_submit>
-                </observers>
-            </checkout_submit_all_after>
-            <controller_action_postdispatch_checkout_onepage_saveorder>
-                <observers>
-                    <hss_save_order_onepage>
-                        <class>paypal/observer</class>
-                        <method>setResponseAfterSaveOrder</method>
-                    </hss_save_order_onepage>
-                </observers>
-            </controller_action_postdispatch_checkout_onepage_saveorder>
-        </events>
     </frontend>
     <adminhtml>
-        <events>
-            <adminhtml_init_system_config>
-                <observers>
-                    <paypal>
-                        <class>paypal/observer</class>
-                        <method>loadCountryDependentSolutionsConfig</method>
-                    </paypal>
-                </observers>
-            </adminhtml_init_system_config>
-        </events>
         <translate>
             <modules>
                 <Mage_Paypal>
@@ -305,15 +267,6 @@
             </hosted_pro>
         </payment>
     </default>
-    <crontab>
-        <jobs>
-            <paypal_fetch_settlement_reports>
-                <run>
-                    <model>paypal/observer::fetchReports</model>
-                </run>
-            </paypal_fetch_settlement_reports>
-        </jobs>
-    </crontab>
     <admin>
         <routers>
             <adminhtml>

@@ -21,8 +21,8 @@
 <?php if ($_categories || $_misc): ?>
 <?php if($_misc): ?>
 <table class="data-table rss-table" id="rss-table-misc">
-    <col />
-    <col width="1" />
+    <col>
+    <col width="1">
     <thead>
         <tr>
             <th colspan="2"><?= $this->__('Miscellaneous Feeds') ?></th>
@@ -39,12 +39,12 @@
 </table>
 <?php endif ?>
 <?php if ($_categories && $_misc): ?>
-<br />
+<br>
 <?php endif ?>
 <?php if($_categories): ?>
 <table class="data-table rss-table" id="rss-table-category">
-    <col />
-    <col width="1" />
+    <col>
+    <col width="1">
     <thead>
         <tr>
             <th colspan="2"><?= $this->__('Category Feeds') ?></th>

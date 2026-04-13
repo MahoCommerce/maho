@@ -196,7 +196,7 @@ class Checkboxes extends AbstractElement
                 $html .= ' ' . $attribute . '="' . $value . '"';
             }
         }
-        $html .= ' value="' . $option['value'] . '" />'
+        $html .= ' value="' . $option['value'] . '">'
             . ' <label for="' . $id . '">' . $option['label'] . '</label></li>'
             . "\n";
         return $html;

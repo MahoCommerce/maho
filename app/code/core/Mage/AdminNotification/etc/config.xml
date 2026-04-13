@@ -54,16 +54,6 @@
                 </Mage_AdminNotification>
             </modules>
         </translate>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <adminnotification>
-                        <class>adminnotification/observer</class>
-                        <method>preDispatch</method>
-                    </adminnotification>
-                </observers>
-            </controller_action_predispatch>
-        </events>
         <layout>
             <updates>
                 <adminnotification>

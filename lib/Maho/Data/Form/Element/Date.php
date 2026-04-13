@@ -200,7 +200,7 @@ class Date extends AbstractElement
         $inputType = $this->getTime() ? 'datetime-local' : 'date';
 
         $html = sprintf(
-            '<input type="%s" name="%s" id="%s" value="%s" %s style="width:auto !important;" />',
+            '<input type="%s" name="%s" id="%s" value="%s" %s style="width:auto !important;">',
             $inputType,
             $this->getName(),
             $this->getHtmlId(),

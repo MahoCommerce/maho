@@ -63,7 +63,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
             foreach (explode("\n", $row->getStoreName()) as $k => $label) {
                 $scopes[] = str_repeat('&nbsp;', $k * 3) . $label;
             }
-            $out .= implode('<br/>', $scopes) . $this->__(' [deleted]');
+            $out .= implode('<br>', $scopes) . $this->__(' [deleted]');
             return $out;
         }
 
@@ -84,11 +84,11 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Store extends Mage_Adminh
         $data = $this->_getStoreModel()->getStoresStructure(false, $origStores);
 
         foreach ($data as $website) {
-            $out .= Mage::helper('core')->escapeHtml($website['label']) . '<br/>';
+            $out .= Mage::helper('core')->escapeHtml($website['label']) . '<br>';
             foreach ($website['children'] as $group) {
-                $out .= str_repeat('&nbsp;', 3) . Mage::helper('core')->escapeHtml($group['label']) . '<br/>';
+                $out .= str_repeat('&nbsp;', 3) . Mage::helper('core')->escapeHtml($group['label']) . '<br>';
                 foreach ($group['children'] as $store) {
-                    $out .= str_repeat('&nbsp;', 6) . Mage::helper('core')->escapeHtml($store['label']) . '<br/>';
+                    $out .= str_repeat('&nbsp;', 6) . Mage::helper('core')->escapeHtml($store['label']) . '<br>';
                 }
             }
         }

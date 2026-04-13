@@ -16,7 +16,7 @@ $order = $this->getOrder();
     <!-- Logo -->
     <?php if ($logoUrl = $this->getLogoUrl()): ?>
     <div class="pdf-logo">
-        <img src="<?= $logoUrl ?>" />
+        <img src="<?= $logoUrl ?>">
     </div>
     <?php endif; ?>
 
@@ -25,9 +25,9 @@ $order = $this->getOrder();
         <div class="pdf-document-info">
             <h1><?= $this->__('Invoice # %s', $this->getInvoiceNumber()) ?></h1>
             <?php if ($orderNumber = $this->getOrderNumber()): ?>
-                <?= $this->__('Order # %s', $orderNumber) ?><br />
+                <?= $this->__('Order # %s', $orderNumber) ?><br>
             <?php endif; ?>
-            <?= $this->__('Invoice Date: %s', $this->getInvoiceDate()) ?><br />
+            <?= $this->__('Invoice Date: %s', $this->getInvoiceDate()) ?><br>
             <?php if ($orderDate = $this->getOrderDate()): ?>
                 <?= $this->__('Order Date: %s', $orderDate) ?>
             <?php endif; ?>

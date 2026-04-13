@@ -26,7 +26,7 @@
                     <p class="note"><?= $this->__('To cancel pending authorizations and release amounts that have already been processed during this payment, click Cancel.') ?></p>
                 </div>
                 <?= $this->showNoticeMessage($this->__('Please enter another credit card number to complete your purchase.')) ?>
-                    <script type="text/javascript">
+                    <script>
                     function cancelPaymentAuthorizations(){
                         mahoFetch('<?= $this->getAdminCancelUrl() ?>')
                         .then(response => {

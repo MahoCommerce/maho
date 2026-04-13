@@ -29,7 +29,7 @@ $hasGiftcardProducts = $this->hasGiftcardProducts();
                 <p class="note"><?= Mage::helper('giftcard')->__('Gift cards cannot be used to purchase gift card products.') ?></p>
             <?php else: ?>
                 <p>
-                    <input type="text" class="input-text" id="giftcard:code" value="" name="giftcard_code" style="width:200px" placeholder="<?= Mage::helper('giftcard')->__('Enter gift card code') ?>" />&nbsp;<?= $this->getButtonHtml(Mage::helper('giftcard')->__('Apply'), 'order.applyGiftcard(document.getElementById(\'giftcard:code\').value)') ?>
+                    <input type="text" class="input-text" id="giftcard:code" value="" name="giftcard_code" style="width:200px" placeholder="<?= Mage::helper('giftcard')->__('Enter gift card code') ?>">&nbsp;<?= $this->getButtonHtml(Mage::helper('giftcard')->__('Apply'), 'order.applyGiftcard(document.getElementById(\'giftcard:code\').value)') ?>
                 </p>
 
                 <?php if (!empty($appliedGiftcards)): ?>

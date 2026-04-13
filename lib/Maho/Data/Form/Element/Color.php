@@ -61,7 +61,7 @@ class Color extends AbstractElement
 
         $html = '<input type="color" id="' . $id . ':html5" class="input-color-html5" '
             . 'value="#' . trim($this->getEscapedValue(), '#') . '" oninput="' . $oninput . '" '
-            . '/>' . "\n";
+            . '>' . "\n";
 
         $this->addClass('input-color');
         $html .= parent::getElementHtml();

@@ -77,6 +77,14 @@ class varienGrid {
         }
     }
     initGridAjax() {
+        const container = document.getElementById(this.containerId);
+        if (container) {
+            container.querySelectorAll('script').forEach(oldScript => {
+                const newScript = document.createElement('script');
+                newScript.textContent = oldScript.textContent;
+                oldScript.parentNode.replaceChild(newScript, oldScript);
+            });
+        }
         this.initGrid();
         this.initGridRows();
     }
@@ -308,7 +316,12 @@ class varienGrid {
             // Serialize elements manually since we don't have prototypejs Form.serializeElements
             const formData = new FormData();
             elements.forEach(element => {
-                formData.append(element.name, element.value);
+                if (element.tagName === 'SELECT' && element.multiple) {
+                    const vals = Array.from(element.selectedOptions).map(o => o.value);
+                    formData.append(element.name, vals.join(','));
+                } else {
+                    formData.append(element.name, element.value);
+                }
             });
             const serialized = new URLSearchParams(formData).toString();
             this.reload(this.addVarToUrl(this.filterVar, btoa(serialized)));
@@ -400,7 +413,7 @@ class varienGridMassaction {
         this.useSelectAll = false;
         this.currentItem = false;
         this.lastChecked = { left: false, top: false, checkbox: false };
-        this.fieldTemplate = (data) => `<input type="hidden" name="${data.name}" value="${data.value}" />`;
+        this.fieldTemplate = (data) => `<input type="hidden" name="${data.name}" value="${data.value}">`;
 
         // Initialize
         this.setOldCallback('row_click', grid.rowClickCallback);

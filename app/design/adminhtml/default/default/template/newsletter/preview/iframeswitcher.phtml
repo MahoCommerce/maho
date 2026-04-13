@@ -35,11 +35,11 @@
 <div id="loading-mask" style="display:none">
     <div class="backdrop"></div>
     <p class="loader" id="loading_mask_loader">
-        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Loading...')) ?>"/><br/><?= Mage::helper('adminhtml')->__('Please wait...') ?>
+        <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Loading...')) ?>"><br><?= Mage::helper('adminhtml')->__('Please wait...') ?>
     </p>
 </div>
 
-<script type="text/javascript">
+<script>
 const previewForm = document.getElementById('preview_form');
 const previewIframe = document.getElementById('preview_iframe');
 

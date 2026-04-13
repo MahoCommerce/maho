@@ -32,6 +32,7 @@ class Mage_Cron_Model_Observer
     /**
      * Check if cron is running and warn admin users if not
      */
+    #[Maho\Config\Observer('controller_action_predispatch', area: 'adminhtml', id: 'cron_status_check')]
     public function checkCronStatus(\Maho\Event\Observer $observer): void
     {
         if (!Mage::getSingleton('admin/session')->isLoggedIn()) {
@@ -76,25 +77,41 @@ class Mage_Cron_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('default', area: 'crontab', id: 'cron_observer')]
     public function dispatch($observer)
     {
         $schedules = $this->getPendingSchedules();
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
         $defaultJobsRoot = Mage::getConfig()->getNode('default/crontab/jobs');
+        $compiledJobs = Maho::getCompiledAttributes()['crontab'] ?? [];
 
         /** @var Mage_Cron_Model_Schedule $schedule */
         foreach ($schedules->getIterator() as $schedule) {
             if (!Mage::helper('cron')->isJobEnabled($schedule->getJobCode())) {
                 continue;
             }
-            $jobConfig = $jobsRoot->{$schedule->getJobCode()};
-            if (!$jobConfig || !$jobConfig->run) {
-                $jobConfig = $defaultJobsRoot->{$schedule->getJobCode()};
-                if (!$jobConfig || !$jobConfig->run) {
+
+            $jobCode = $schedule->getJobCode();
+
+            try {
+                if (isset($compiledJobs[$jobCode])) {
+                    $this->_processCompiledJob($schedule, $compiledJobs[$jobCode]);
                     continue;
                 }
+
+                $jobConfig = $jobsRoot->{$jobCode};
+                if (!$jobConfig || !$jobConfig->run) {
+                    $jobConfig = $defaultJobsRoot->{$jobCode};
+                    if (!$jobConfig || !$jobConfig->run) {
+                        continue;
+                    }
+                }
+                $this->_processJob($schedule, $jobConfig);
+            } catch (Exception $e) {
+                $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
+                    ->setMessages($e->__toString())
+                    ->save();
             }
-            $this->_processJob($schedule, $jobConfig);
         }
 
         $this->generate();
@@ -106,6 +123,7 @@ class Mage_Cron_Model_Observer
      *
      * @param \Maho\Event\Observer $observer
      */
+    #[Maho\Config\Observer('always', area: 'crontab', id: 'cron_observer')]
     public function dispatchAlways($observer)
     {
         $jobsRoot = Mage::getConfig()->getNode('crontab/jobs');
@@ -119,6 +137,26 @@ class Mage_Cron_Model_Observer
         if ($defaultJobsRoot instanceof \Maho\Simplexml\Element) {
             foreach ($defaultJobsRoot->children() as $jobCode => $jobConfig) {
                 $this->_processAlwaysTask($jobCode, $jobConfig);
+            }
+        }
+
+        $cronHelper = Mage::helper('cron');
+        foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
+            if ($cronHelper->resolveCompiledCronExpr($jobDef) !== 'always') {
+                continue;
+            }
+            if (!$cronHelper->isJobEnabled($jobCode)) {
+                continue;
+            }
+            $schedule = $this->_getAlwaysJobSchedule($jobCode);
+            if ($schedule !== false) {
+                try {
+                    $this->_processCompiledJob($schedule, $jobDef, true);
+                } catch (Exception $e) {
+                    $schedule->setStatus(Mage_Cron_Model_Schedule::STATUS_ERROR)
+                        ->setMessages($e->__toString())
+                        ->save();
+                }
             }
         }
     }
@@ -173,6 +211,8 @@ class Mage_Cron_Model_Observer
         if ($config instanceof Mage_Core_Model_Config_Element) {
             $this->_generateJobs($config->children(), $exists);
         }
+
+        $this->_generateCompiledJobs($exists);
 
         /**
          * save time schedules generation was ran with no expiration
@@ -309,21 +349,53 @@ class Mage_Cron_Model_Observer
      * @param Mage_Cron_Model_Schedule $schedule
      * @param SimpleXMLElement $jobConfig
      * @param bool $isAlways
-     * @return $this|void
      */
-    protected function _processJob($schedule, $jobConfig, $isAlways = false)
+    protected function _processJob($schedule, $jobConfig, $isAlways = false): self
     {
         $runConfig = $jobConfig->run;
+        if (!$runConfig->model) {
+            Mage::throwException(Mage::helper('cron')->__('No callbacks found'));
+        }
+        if (!preg_match(self::REGEX_RUN_MODEL, (string) $runConfig->model, $run)) {
+            Mage::throwException(Mage::helper('cron')->__('Invalid model/method definition, expecting "model/class::method".'));
+        }
+        if (!($model = Mage::getModel($run[1])) || !method_exists($model, $run[2])) {
+            Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $run[1], $run[2]));
+        }
+
+        return $this->_executeScheduledJob($schedule, [$model, $run[2]], $isAlways);
+    }
+
+    /**
+     * Process a compiled (attribute-registered) cron job.
+     */
+    protected function _processCompiledJob(
+        Mage_Cron_Model_Schedule $schedule,
+        array $jobDef,
+        bool $isAlways = false,
+    ): self {
+        $model = Mage::getModel($jobDef['alias']);
+        if (!$model || !method_exists($model, $jobDef['method'])) {
+            Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $jobDef['alias'], $jobDef['method']));
+        }
+
+        return $this->_executeScheduledJob($schedule, [$model, $jobDef['method']], $isAlways);
+    }
+
+    /**
+     * Execute a scheduled job with lifetime checks, locking, and status management.
+     */
+    protected function _executeScheduledJob(Mage_Cron_Model_Schedule $schedule, callable $callback, bool $isAlways = false): self
+    {
         if (!$isAlways) {
             $scheduleLifetime = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_LIFETIME) * 60;
             $now = Mage::getSingleton('core/date')->gmtTimestamp();
             $time = strtotime($schedule->getScheduledAt());
             if ($time > $now) {
-                return;
+                return $this;
             }
         }
 
-        $arguments = [];
         $errorStatus = Mage_Cron_Model_Schedule::STATUS_ERROR;
         try {
             if (!$isAlways) {
@@ -332,24 +404,11 @@ class Mage_Cron_Model_Observer
                     Mage::throwException(Mage::helper('cron')->__('Too late for the schedule.'));
                 }
             }
-            if ($runConfig->model) {
-                if (!preg_match(self::REGEX_RUN_MODEL, (string) $runConfig->model, $run)) {
-                    Mage::throwException(Mage::helper('cron')->__('Invalid model/method definition, expecting "model/class::method".'));
-                }
-                if (!($model = Mage::getModel($run[1])) || !method_exists($model, $run[2])) {
-                    Mage::throwException(Mage::helper('cron')->__('Invalid callback: %s::%s does not exist', $run[1], $run[2]));
-                }
-                $callback = [$model, $run[2]];
-                $arguments = [$schedule];
-            }
-            if (empty($callback)) {
-                Mage::throwException(Mage::helper('cron')->__('No callbacks found'));
-            }
 
             if (!$isAlways) {
                 if (!$schedule->tryLockJob()) {
                     // another cron started this job intermittently, so skip it
-                    return;
+                    return $this;
                 }
                 /**
                 though running status is set in tryLockJob we must set it here because the object
@@ -362,7 +421,7 @@ class Mage_Cron_Model_Observer
                 ->setExecutedAt(Mage::getSingleton('core/date')->gmtDate())
                 ->save();
 
-            call_user_func_array($callback, $arguments);
+            call_user_func_array($callback, [$schedule]);
 
             $schedule
                 ->setStatus(Mage_Cron_Model_Schedule::STATUS_SUCCESS)
@@ -379,6 +438,44 @@ class Mage_Cron_Model_Observer
         $schedule->save();
 
         return $this;
+    }
+
+    protected function _generateCompiledJobs(array $exists): void
+    {
+        $scheduleAheadFor = Mage::getStoreConfig(self::XML_PATH_SCHEDULE_AHEAD_FOR) * 60;
+        $schedule = Mage::getModel('cron/schedule');
+        $cronHelper = Mage::helper('cron');
+        $now = Mage::getSingleton('core/date')->gmtTimestamp();
+        $timeAhead = $now + $scheduleAheadFor;
+
+        foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
+            if (!$cronHelper->isJobEnabled($jobCode)) {
+                continue;
+            }
+
+            $cronExpr = $cronHelper->resolveCompiledCronExpr($jobDef);
+            if (!$cronExpr) {
+                Mage::log("Cron job '{$jobCode}' has no schedule expression and no config_path, skipping.", Mage::LOG_WARNING);
+                continue;
+            }
+            if ($cronExpr === 'always') {
+                continue;
+            }
+            $schedule->setJobCode($jobCode)
+                ->setCronExpr($cronExpr)
+                ->setStatus(Mage_Cron_Model_Schedule::STATUS_PENDING);
+
+            for ($time = $now; $time < $timeAhead; $time += 60) {
+                $ts = gmdate('Y-m-d H:i:00', $time);
+                if (!empty($exists[$jobCode . '/' . $ts])) {
+                    continue;
+                }
+                if (!$schedule->trySchedule($time)) {
+                    continue;
+                }
+                $schedule->unsScheduleId()->save();
+            }
+        }
     }
 
     /**

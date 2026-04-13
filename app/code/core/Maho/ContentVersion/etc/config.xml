@@ -42,32 +42,6 @@
                 </setup>
             </contentversion_setup>
         </resources>
-        <events>
-            <cms_page_save_before>
-                <observers>
-                    <contentversion_snapshot>
-                        <class>contentversion/observer</class>
-                        <method>beforeCmsPageSave</method>
-                    </contentversion_snapshot>
-                </observers>
-            </cms_page_save_before>
-            <cms_block_save_before>
-                <observers>
-                    <contentversion_snapshot>
-                        <class>contentversion/observer</class>
-                        <method>beforeCmsBlockSave</method>
-                    </contentversion_snapshot>
-                </observers>
-            </cms_block_save_before>
-            <blog_post_save_before>
-                <observers>
-                    <contentversion_snapshot>
-                        <class>contentversion/observer</class>
-                        <method>beforeBlogPostSave</method>
-                    </contentversion_snapshot>
-                </observers>
-            </blog_post_save_before>
-        </events>
         <blocks>
             <contentversion>
                 <class>Maho_ContentVersion_Block</class>

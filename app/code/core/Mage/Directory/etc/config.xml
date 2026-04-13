@@ -184,13 +184,4 @@
             </local>
         </general>
     </default>
-    <crontab>
-        <jobs>
-            <currency_rates_update>
-                <run>
-                    <model>directory/observer::scheduledUpdateCurrencyRates</model>
-                </run>
-            </currency_rates_update>
-        </jobs>
-    </crontab>
 </config>

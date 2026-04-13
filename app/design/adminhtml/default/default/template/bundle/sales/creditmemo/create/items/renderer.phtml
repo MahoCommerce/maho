@@ -47,7 +47,7 @@
         <td><h5 class="title"><?= $this->escapeHtml($_item->getName()) ?></h5>
             <div>
                 <strong><?= $this->helper('sales')->__('SKU') ?>:</strong>
-                <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
+                <?= implode('<br>', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
             </div>
         </td>
         <?php else: ?>
@@ -74,7 +74,7 @@
 
 
                         <?php if (Mage::helper('weee')->getApplied($_item)): ?>
-                            <br />
+                            <br>
                             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 1, 'sales')): ?>
                                 <small>
                                 <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
@@ -94,8 +94,8 @@
                             <?php endif ?>
 
                             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                <br />
-                                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br />
+                                <br>
+                                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br>
                                 <?php
                                 echo $this->displayPrices(
                                     $_item->getBasePrice()+$_item->getBaseWeeeTaxAppliedAmount()+$_item->getBaseWeeeTaxDisposition(),
@@ -106,7 +106,7 @@
                             <?php endif ?>
                         <?php endif ?>
                     </span>
-                    <br />
+                    <br>
                 <?php endif ?>
                 <?php if ($this->helper('tax')->displaySalesBothPrices() || $this->helper('tax')->displaySalesPriceInclTax()): ?>
                     <span class="price-incl-tax">
@@ -123,7 +123,7 @@
                         <?php endif ?>
 
                         <?php if (Mage::helper('weee')->getApplied($_item)): ?>
-                            <br />
+                            <br>
                             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 1, 'sales')): ?>
                                 <small>
                                 <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
@@ -143,8 +143,8 @@
                             <?php endif ?>
 
                             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                <br />
-                                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br /> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
+                                <br>
+                                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
                             <?php endif ?>
                         <?php endif ?>
                     </span>
@@ -206,7 +206,7 @@
         <td class="a-center">
             <?php if ($this->canShowPriceInfo($_item)): ?>
                 <?php if ($this->canReturnItemToStock($_item)) : ?>
-                    <input type="checkbox" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][back_to_stock]" value="1"<?php if ($_item->getBackToStock()):?> checked="checked"<?php endif ?> />
+                    <input type="checkbox" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][back_to_stock]" value="1"<?php if ($_item->getBackToStock()):?> checked="checked"<?php endif ?>>
                 <?php endif ?>
             <?php else: ?>
                 &nbsp;
@@ -216,7 +216,7 @@
         <td class="a-center">
             <?php if ($this->canShowPriceInfo($_item)): ?>
                 <?php if ($this->canEditQty()) : ?>
-                    <input type="text" class="input-text qty-input" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][qty]" value="<?= $_item->getQty()*1 ?>" />
+                    <input type="text" class="input-text qty-input" name="creditmemo[items][<?= $_item->getOrderItemId() ?>][qty]" value="<?= $_item->getQty()*1 ?>">
                 <?php else: ?>
                     <?= $_item->getQty()*1 ?>
                 <?php endif ?>
@@ -264,8 +264,8 @@
                             <?php endif ?>
 
                             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                <br />
-                                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br />
+                                <br>
+                                <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br>
                                 <?php
                                 echo $this->displayPrices(
                                     $_item->getBaseRowTotal()+$_item->getBaseWeeeTaxAppliedRowAmount()+$_item->getBaseWeeeTaxRowDisposition(),
@@ -276,7 +276,7 @@
                             <?php endif ?>
                         <?php endif ?>
                     </span>
-                    <br />
+                    <br>
                 <?php endif ?>
                 <?php if ($this->helper('tax')->displaySalesBothPrices() || $this->helper('tax')->displaySalesPriceInclTax()): ?>
                     <span class="price-incl-tax">
@@ -294,7 +294,7 @@
 
                         <?php if (Mage::helper('weee')->getApplied($_item)): ?>
 
-                            <br />
+                            <br>
                             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 1, 'sales')): ?>
                                 <small>
                                 <?php foreach (Mage::helper('weee')->getApplied($_item) as $tax): ?>
@@ -314,7 +314,7 @@
                             <?php endif ?>
 
                             <?php if (Mage::helper('weee')->typeOfDisplay($_item, 2, 'sales')): ?>
-                                <br /><span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br /> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseRowWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?></span>
+                                <br><span class="nobr"><?= Mage::helper('weee')->__('Total') ?>:<br> <?= $this->displayPrices($_baseIncl + Mage::helper('weee')->getBaseRowWeeeTaxInclTax($_item), $_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?></span>
                             <?php endif ?>
                         <?php endif ?>
                     </span>
@@ -364,7 +364,7 @@
                         <?= Mage::helper('core/string')->truncate($option['value'], 55, '', $_remainder) ?>
                         <?php if ($_remainder):?>
                             ... <span id="<?= $_id = 'id' . uniqid()?>"><?= $_remainder ?></span>
-                            <script type="text/javascript">
+                            <script>
                             document.getElementById('<?= $_id ?>').style.display = 'none';
                             document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseover', function(){document.getElementById('<?= $_id ?>').style.display = '';});
                             document.getElementById('<?= $_id ?>').parentElement.addEventListener('mouseout',  function(){document.getElementById('<?= $_id ?>').style.display = 'none';});

@@ -60,7 +60,7 @@ class Time extends AbstractElement
             }
         }
 
-        $html = '<input type="hidden" id="' . $this->getHtmlId() . '" />';
+        $html = '<input type="hidden" id="' . $this->getHtmlId() . '">';
         $html .= '<select name="' . $this->getName() . '" ' . $this->serialize($this->getHtmlAttributes()) . ' style="width:40px">' . "\n";
         for ($i = 0; $i < 24; $i++) {
             $hour = str_pad($i, 2, '0', STR_PAD_LEFT);

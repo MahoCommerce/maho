@@ -21,7 +21,7 @@
             <?php if(in_array($_value, ['custom'])) continue; ?>
             <option value="<?= $_value ?>" <?php if($this->getRequest()->getParam('period')==$_value): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
         <?php endforeach ?>
-    </select></p><br/>
+    </select></p><br>
     <?php
     $_containerStyle = "width:{$this->getWidth()}px;height:{$this->getHeight()}px; margin:0 auto;";
     ?>

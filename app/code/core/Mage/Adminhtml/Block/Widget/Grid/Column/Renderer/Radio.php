@@ -43,7 +43,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Radio extends Mage_Adminh
             $checked = ($value === $this->getColumn()->getValue()) ? ' checked="checked"' : '';
         }
         $html = '<input type="radio" name="' . $this->getColumn()->getHtmlName() . '" ';
-        $html .= 'value="' . $row->getId() . '" class="radio"' . $checked . '/>';
+        $html .= 'value="' . $row->getId() . '" class="radio"' . $checked . '>';
         return $html;
     }
 
@@ -54,7 +54,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Radio extends Mage_Adminh
         if ($filter = $this->getColumn()->getFilter()) {
             $checked = $filter->getValue() ? 'checked' : '';
         }
-        return '<input type="checkbox" name="'.$this->getColumn()->getName().'" onclick="'.$this->getColumn()->getGrid()->getJsObjectName().'.checkCheckboxes(this)" class="checkbox" '.$checked.' title="'.Mage::helper('adminhtml')->__('Select All').'"/>';
+        return '<input type="checkbox" name="'.$this->getColumn()->getName().'" onclick="'.$this->getColumn()->getGrid()->getJsObjectName().'.checkCheckboxes(this)" class="checkbox" '.$checked.' title="'.Mage::helper('adminhtml')->__('Select All').'">';
     }
     */
 }

@@ -15,21 +15,21 @@
 <?php if ($_source): ?>
     <tr>
         <td class="label"><?= $this->getShippingLabel() ?></td>
-        <td><input type="text" name="creditmemo[shipping_amount]" value="<?= $this->getShippingAmount() ?>" class="input-text not-negative-amount" style="width:60px;text-align:right" id="shipping_amount" /></td>
+        <td><input type="text" name="creditmemo[shipping_amount]" value="<?= $this->getShippingAmount() ?>" class="input-text not-negative-amount" style="width:60px;text-align:right" id="shipping_amount"></td>
     </tr>
     <tr>
         <td colspan="2"><div id="shipping_amount_adv"></div></td>
     </tr>
     <tr>
         <td class="label"><?= $this->helper('sales')->__('Adjustment Refund') ?></td>
-        <td><input type="text" name="creditmemo[adjustment_positive]" value="<?= $_source->getBaseAdjustmentPositive()*1 ?>" class="input-text not-negative-amount" style="width:60px;text-align:right" id="adjustment_positive" /></td>
+        <td><input type="text" name="creditmemo[adjustment_positive]" value="<?= $_source->getBaseAdjustmentPositive()*1 ?>" class="input-text not-negative-amount" style="width:60px;text-align:right" id="adjustment_positive"></td>
     </tr>
     <tr>
         <td colspan="2"><div id="adjustment_positive_adv"></div></td>
     </tr>
     <tr>
         <td class="label"><?= $this->helper('sales')->__('Adjustment Fee') ?></td>
-        <td><input type="text" name="creditmemo[adjustment_negative]" value="<?= $_source->getBaseAdjustmentNegative()*1 ?>" class="input-text not-negative-amount" style="width:60px;text-align:right" id="adjustment_negative"/></td>
+        <td><input type="text" name="creditmemo[adjustment_negative]" value="<?= $_source->getBaseAdjustmentNegative()*1 ?>" class="input-text not-negative-amount" style="width:60px;text-align:right" id="adjustment_negative"></td>
     </tr>
     <tr>
         <td colspan="2"><div id="adjustment_negative_adv"></div></td>
@@ -46,7 +46,7 @@
             </button>
         </td>
     </tr>
-    <script type="text/javascript">
+    <script>
         Validation.addAllThese([
             ['not-negative-amount', '<?= $this->jsQuoteEscape($this->helper('sales')->__('Please enter positive number in this field.')) ?>', function(v) {
                 if (v.length) {

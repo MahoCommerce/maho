@@ -17,11 +17,11 @@
 
 //Code partially copied from adminhtml/default/default/template/page/head.phtml
 ?>
-<meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>"/>
+<meta http-equiv="Content-Type" content="<?= $this->getContentType() ?>">
 <title><?= htmlspecialchars(html_entity_decode($this->getTitle())) ?></title>
 <?= Mage::helper('page')->getFaviconHtml() ?>
 
-<script type="text/javascript">
+<script>
     var BASE_URL = '<?= $this->getUrl('*') ?>';
     var SKIN_URL = '<?= $this->getSkinUrl() ?>';
     var FORM_KEY = '<?= $this->getFormKey() ?>';

@@ -80,12 +80,29 @@ $adapter->delete('table_name', 'id = 1');
 ```
 
 ### Other Key Systems
-- **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])` - Observers in `config.xml`
+- **Events**: `Mage::dispatchEvent('event_name', ['data' => $data])` - Observers defined via PHP attributes (see below)
 - **Layout**: XML-based configuration with block hierarchy and template assignment
 - **Sessions**: `Mage::getSingleton('customer/session')`, `'admin/session'`, `'checkout/session'`
 - **Translations**: CSV files in `app/locale/[locale]/` - Use `$this->__('Text')` in code
 - **Collections**: `Mage::getResourceModel('catalog/product_collection')->addAttributeToSelect('*')->addFieldToFilter('status', 1)`
 - **Errors**: `Mage::throwException()` for user-facing errors, `Mage::log()` for logging
+
+### Observers and Cron Jobs (PHP Attributes)
+Observers and cron jobs are defined via `#[Maho\Config\Observer]` and `#[Maho\Config\CronJob]` PHP attributes on methods — **not** in XML. Run `composer dump-autoload` after any changes. See the attribute class docblocks in `lib/Maho/Config/` for all parameters.
+
+```php
+#[Maho\Config\Observer('catalog_product_save_after')]
+public function handleEvent(\Maho\Event\Observer $observer) {}
+
+#[Maho\Config\Observer('event_name', area: 'frontend')]
+public function handleFrontendEvent(\Maho\Event\Observer $observer) {}
+
+#[Maho\Config\CronJob('my_cron_job', schedule: '0 2 * * *')]
+public function runJob(Mage_Cron_Model_Schedule $schedule) {}
+```
+
+- Prefer global area (default, omit `area:`) unless the observer must be restricted to a specific area
+- Do **not** define observers or cron jobs in `config.xml`
 
 ## Development Guidelines
 

@@ -226,7 +226,7 @@ class Mage_Adminhtml_Block_Catalog_Category_Tab_Attributes extends Mage_Adminhtm
         if ($group && $group->getAttributeGroupName() == 'Dynamic Category') {
             $newChildUrl = $this->getUrl('*/*/newConditionHtml/form/dynamic_conditions_fieldset');
 
-            $script = '<script type="text/javascript">
+            $script = '<script>
                 document.addEventListener("DOMContentLoaded", function() {
                     if (typeof VarienRulesForm !== "undefined") {
                         var conditionsFieldset = document.getElementById("dynamic_conditions_fieldset");

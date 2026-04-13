@@ -190,6 +190,12 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
             }
         }
 
+        foreach ($collection->getItems() as $item) {
+            if (!$item->hasData('rating_summary')) {
+                $item->setRatingSummary(Mage::getModel('review/review_summary'));
+            }
+        }
+
         return $this;
     }
 

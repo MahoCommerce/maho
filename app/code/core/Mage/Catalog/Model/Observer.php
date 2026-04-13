@@ -126,6 +126,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('log_log_clean_after')]
     public function catalogProductCompareClean(\Maho\Event\Observer $observer)
     {
         Mage::getModel('catalog/product_compare_item')->clean();
@@ -152,6 +153,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Checking whether the using static urls in WYSIWYG allowed event
      */
+    #[Maho\Config\Observer('cms_wysiwyg_images_static_urls_allowed', area: 'adminhtml')]
     public function catalogCheckIsUsingStaticUrlsAllowed(\Maho\Event\Observer $observer)
     {
         $storeId = $observer->getEvent()->getData('store_id');
@@ -162,6 +164,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Cron job method for product prices to reindex
      */
+    #[Maho\Config\CronJob('catalog_product_index_price_reindex_all', schedule: '0 2 * * *')]
     public function reindexProductPrices(Mage_Cron_Model_Schedule $schedule)
     {
         $indexProcess = Mage::getSingleton('index/indexer')->getProcessByCode('catalog_product_price');
@@ -174,6 +177,7 @@ class Mage_Catalog_Model_Observer
     /**
      * Adds catalog categories to top menu
      */
+    #[Maho\Config\Observer('page_block_html_topmenu_gethtml_before')]
     public function addCatalogToTopmenuItems(\Maho\Event\Observer $observer)
     {
         $block = $observer->getEvent()->getBlock();
@@ -256,6 +260,7 @@ class Mage_Catalog_Model_Observer
      *
      * @throws Mage_Core_Exception
      */
+    #[Maho\Config\Observer('catalog_entity_attribute_save_before')]
     public function checkReservedAttributeCodes(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Catalog_Model_Entity_Attribute $attribute */
@@ -277,6 +282,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('adminhtml_product_attribute_types', area: 'adminhtml')]
     public function addFileAttributeType(\Maho\Event\Observer $observer)
     {
         $response = $observer->getEvent()->getResponse();
@@ -307,6 +313,7 @@ class Mage_Catalog_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('adminhtml_catalog_product_edit_element_types', area: 'adminhtml')]
     public function addFileElementType(\Maho\Event\Observer $observer)
     {
         $response = $observer->getEvent()->getResponse();

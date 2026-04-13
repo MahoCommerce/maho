@@ -81,24 +81,6 @@
         </newsletter>
     </global>
     <adminhtml>
-        <events>
-            <customer_save_after>
-                <observers>
-                    <newsletter_subscribe_observer>
-                        <class>newsletter/observer</class>
-                        <method>subscribeCustomer</method>
-                    </newsletter_subscribe_observer>
-                </observers>
-            </customer_save_after>
-            <customer_delete_after>
-                <observers>
-                    <newsletter_subscribe_observer>
-                        <class>newsletter/observer</class>
-                        <method>customerDeleted</method>
-                    </newsletter_subscribe_observer>
-                </observers>
-            </customer_delete_after>
-        </events>
         <translate>
             <modules>
                 <Mage_Newsletter>
@@ -117,24 +99,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <events>
-            <customer_save_after>
-                <observers>
-                    <newsletter_subscribe_observer>
-                        <class>newsletter/observer</class>
-                        <method>subscribeCustomer</method>
-                    </newsletter_subscribe_observer>
-                </observers>
-            </customer_save_after>
-            <customer_delete_after>
-                <observers>
-                    <newsletter_subscribe_observer>
-                        <class>newsletter/observer</class>
-                        <method>customerDeleted</method>
-                    </newsletter_subscribe_observer>
-                </observers>
-            </customer_delete_after>
-        </events>
         <routers>
             <newsletter>
                 <use>standard</use>
@@ -181,16 +145,5 @@
             </sending>
         </newsletter>
     </default>
-    <crontab>
-        <jobs>
-            <newsletter_send_all>
-                <schedule>
-                    <cron_expr>*/5 * * * *</cron_expr>
-                </schedule>
-                <run>
-                    <model>newsletter/observer::scheduledSend</model>
-                </run>
-            </newsletter_send_all>
-        </jobs>
-    </crontab>
+
 </config>

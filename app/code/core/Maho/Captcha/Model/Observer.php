@@ -10,6 +10,13 @@
 
 class Maho_Captcha_Model_Observer
 {
+    #[Maho\Config\Observer('controller_action_predispatch_checkout_onepage_savebilling', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch_contacts_index_post', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch_customer_account_createpost', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch_customer_account_forgotpasswordpost', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch_newsletter_subscriber_new', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch_review_product_post', area: 'frontend')]
+    #[Maho\Config\Observer('controller_action_predispatch_wishlist_index_send', area: 'frontend')]
     public function verify(\Maho\Event\Observer $observer): void
     {
         $helper = Mage::helper('captcha');
@@ -25,7 +32,7 @@ class Maho_Captcha_Model_Observer
             return;
         }
 
-        $isAjax = (bool) $observer->getEvent()->getIsAjax();
+        $isAjax = $controller->getRequest()->isAjax();
         $this->failedVerification($controller, $isAjax);
     }
 
@@ -62,6 +69,8 @@ class Maho_Captcha_Model_Observer
         $config->setChallengeUrl($helper->getChallengeUrl());
     }
 
+    #[Maho\Config\Observer('admin_user_authenticate_before', area: 'adminhtml')]
+    #[Maho\Config\Observer('controller_action_predispatch_adminhtml_index_forgotpassword', area: 'adminhtml')]
     public function verifyAdmin(\Maho\Event\Observer $observer): void
     {
         $helper = Mage::helper('captcha');

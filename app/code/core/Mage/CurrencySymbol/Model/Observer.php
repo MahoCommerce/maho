@@ -17,6 +17,7 @@ class Mage_CurrencySymbol_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('currency_display_options_forming')]
     public function currencyDisplayOptions(\Maho\Event\Observer $observer)
     {
         $baseCode = $observer->getEvent()->getBaseCode();

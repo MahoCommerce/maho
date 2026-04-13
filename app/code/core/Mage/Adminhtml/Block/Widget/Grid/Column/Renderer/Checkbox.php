@@ -72,7 +72,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
         $html .= 'name="' . $this->getColumn()->getFieldName() . '" ';
         $html .= 'value="' . $this->escapeHtml($value) . '" ';
         $html .= 'class="' . ($this->getColumn()->getInlineCss() ?: 'checkbox') . '"';
-        $html .= $checked . $this->getDisabled() . '/>';
+        $html .= $checked . $this->getDisabled() . '>';
         return $html;
     }
 
@@ -101,7 +101,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Checkbox extends Mage_Adm
         $html .= 'name="' . $this->getColumn()->getFieldName() . '" ';
         $html .= 'onclick="' . $this->getColumn()->getGrid()->getJsObjectName() . '.checkCheckboxes(this)" ';
         $html .= 'class="checkbox"' . $checked . $disabled . ' ';
-        $html .= 'title="' . Mage::helper('adminhtml')->__('Select All') . '"/>';
+        $html .= 'title="' . Mage::helper('adminhtml')->__('Select All') . '">';
         return $html;
     }
 }

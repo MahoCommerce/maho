@@ -44,7 +44,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
 
         </tbody>
     </table>
-    <input type="hidden" name="<?= $this->getElement()->getName() ?>[__empty]" value="" />
+    <input type="hidden" name="<?= $this->getElement()->getName() ?>[__empty]" value="">
 </div>
 <div id="empty<?= $_htmlId ?>">
     <button style="" onclick="" class="scalable add" type="button" id="emptyAddBtn<?= $_htmlId ?>">
@@ -52,7 +52,7 @@ $_colspan = $_colspan > 1 ? 'colspan="' . $_colspan . '"' : '';
     </button>
 </div>
 
-<script type="text/javascript">
+<script>
 const arrayRow<?= $_htmlId ?> = {
     template: new Template(
         '<tr id="#{_id}">'

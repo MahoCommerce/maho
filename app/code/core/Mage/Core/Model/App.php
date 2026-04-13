@@ -1335,36 +1335,6 @@ class Mage_Core_Model_App
     /**
      * Dispatch event to observers
      *
-     * Default arguments can be defined in `config.xml` using the `<args>` node. These are merged with the $args parameter.
-     *
-     * For example, this defines `is_ajax=1` for the `controller_action_predispatch` event:
-     * ```xml
-     * <global>
-     *     <events>
-     *         <controller_action_predispatch>
-     *             <observers>
-     *                 <my_event_observer>
-     *                     <class>Company_Name_Model_Observer</class>
-     *                     <method>process</method>
-     *                     <args>
-     *                         <is_ajax>1</is_ajax>
-     *                     </args>
-     *                 </my_event_observer>
-     *             </observers>
-     *         </controller_action_predispatch>
-     *     </events>
-     * </global>
-     * ```
-     *
-     * In the observer method, `Company_Name_Model_Observer->process()`, access the args with:
-     * ```php
-     * public function process(\Maho\Event\Observer $observer): void
-     * {
-     *     $isAjax = (bool) $observer->getIsAjax();
-     *     // ...
-     * }
-     * ```
-     *
      * @param string $eventName
      * @param array $args
      * @return $this
@@ -1375,24 +1345,42 @@ class Mage_Core_Model_App
         $eventName = strtolower($eventName);
         foreach ($this->_events as $area => $events) {
             if (!isset($events[$eventName])) {
+                $observers = [];
+
                 $eventConfig = $this->getConfig()->getEventConfig($area, $eventName);
-                if (!$eventConfig) {
+                if ($eventConfig) {
+                    /**
+                     * @var string $obsName
+                     * @var Mage_Core_Model_Config_Element $obsConfig
+                     */
+                    foreach ($eventConfig->observers->children() as $obsName => $obsConfig) {
+                        $observers[$obsName] = [
+                            'type'  => (string) $obsConfig->type,
+                            'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
+                            'method' => (string) $obsConfig->method,
+                            'args'  => (array) $obsConfig->args,
+                        ];
+                    }
+                }
+
+                foreach (Maho::getCompiledAttributes()['observers'][$area][$eventName] ?? [] as $entry) {
+                    $observers[$entry['name']] = [
+                        'type'   => $entry['type'],
+                        'model'  => $entry['alias'],
+                        'module' => $entry['module'],
+                        'method' => $entry['method'],
+                    ];
+                }
+
+                $this->_applyCompiledReplaces($area, $eventName, $observers);
+
+                if ($observers === []) {
                     $this->_events[$area][$eventName] = false;
                     continue;
                 }
-                $observers = [];
-                /**
-                 * @var string $obsName
-                 * @var Mage_Core_Model_Config_Element $obsConfig
-                 */
-                foreach ($eventConfig->observers->children() as $obsName => $obsConfig) {
-                    $observers[$obsName] = [
-                        'type'  => (string) $obsConfig->type,
-                        'model' => $obsConfig->class ? (string) $obsConfig->class : $obsConfig->getClassName(),
-                        'method' => (string) $obsConfig->method,
-                        'args'  => (array) $obsConfig->args,
-                    ];
-                }
+
+                uasort($observers, fn(array $a, array $b) =>
+                    $this->_getObserverModulePosition($a) <=> $this->_getObserverModulePosition($b));
                 $events[$eventName]['observers'] = $observers;
                 $this->_events[$area][$eventName]['observers'] = $observers;
             }
@@ -1401,28 +1389,28 @@ class Mage_Core_Model_App
             }
 
             foreach ($events[$eventName]['observers'] as $obsName => $obs) {
+                $obsArgs = $obs['args'] ?? [];
                 $observer = new \Maho\Event\Observer([
                     'event' => new \Maho\Event([
-                        ...$obs['args'], // Default config.xml <args>
-                        ...$args,        // Mage::dispatchEvent() $args
+                        ...$obsArgs, // Default config.xml <args>
+                        ...$args,    // Mage::dispatchEvent() $args
                         'name' => $eventName,
                     ]),
-                    ...$obs['args'], // Default config.xml <args>
-                    ...$args,        // Mage::dispatchEvent() $args
+                    ...$obsArgs, // Default config.xml <args>
+                    ...$args,    // Mage::dispatchEvent() $args
                 ]);
                 \Maho\Profiler::start('OBSERVER: ' . $obsName);
                 switch ($obs['type']) {
                     case 'disabled':
                         break;
-                    case 'object':
-                    case 'model':
+                    case 'singleton':
                         $method = $obs['method'];
-                        $object = Mage::getModel($obs['model']);
+                        $object = Mage::getSingleton($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                     default:
                         $method = $obs['method'];
-                        $object = Mage::getSingleton($obs['model']);
+                        $object = Mage::getModel($obs['model']);
                         $this->_callObserverMethod($object, $method, $observer, $obsName);
                         break;
                 }
@@ -1456,6 +1444,48 @@ class Mage_Core_Model_App
             Mage::throwException($message);
         }
         return $this;
+    }
+
+    protected function _getObserverModulePosition(array $observer): int
+    {
+        static $positions = null;
+        if ($positions === null) {
+            $positions = [];
+            $pos = 0;
+            $modules = $this->getConfig()->getNode('modules');
+            if ($modules) {
+                foreach ($modules->children() as $moduleName => $module) {
+                    $positions[$moduleName] = $pos++;
+                }
+            }
+        }
+
+        if (isset($observer['module'])) {
+            return $positions[$observer['module']] ?? PHP_INT_MAX;
+        }
+
+        static $groupCache = [];
+        $alias = $observer['model'];
+
+        if (str_contains($alias, '/')) {
+            $group = explode('/', $alias)[0];
+            if (!isset($groupCache[$group])) {
+                $classPrefix = (string) $this->getConfig()->getNode("global/models/{$group}/class");
+                $groupCache[$group] = ($classPrefix && preg_match('/^(.+)_[^_]+$/', $classPrefix, $m))
+                    ? ($positions[$m[1]] ?? PHP_INT_MAX)
+                    : PHP_INT_MAX;
+            }
+            return $groupCache[$group];
+        }
+
+        return PHP_INT_MAX;
+    }
+
+    protected function _applyCompiledReplaces(string $area, string $eventName, array &$observers): void
+    {
+        foreach (Maho::getCompiledAttributes()['replaces'][$area][$eventName] ?? [] as $replace) {
+            unset($observers[$replace['target']]);
+        }
     }
 
     /**

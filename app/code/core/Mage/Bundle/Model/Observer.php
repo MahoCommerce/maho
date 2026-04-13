@@ -18,6 +18,7 @@ class Mage_Bundle_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_prepare_save', area: 'adminhtml')]
     public function prepareProductSave($observer)
     {
         /** @var Mage_Core_Controller_Request_Http $request */
@@ -56,6 +57,7 @@ class Mage_Bundle_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_upsell', area: 'frontend')]
     public function appendUpsellProducts($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -126,6 +128,8 @@ class Mage_Bundle_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'frontend')]
+    #[Maho\Config\Observer('sales_convert_quote_item_to_order_item', area: 'adminhtml')]
     public function appendBundleSelectionData($observer)
     {
         /** @var Mage_Sales_Model_Order_Item $orderItem */
@@ -149,6 +153,7 @@ class Mage_Bundle_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_collection_load_after', area: 'frontend')]
     public function loadProductOptions($observer)
     {
         $collection = $observer->getEvent()->getCollection();
@@ -164,6 +169,7 @@ class Mage_Bundle_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_model_product_duplicate', area: 'adminhtml')]
     public function duplicateProduct($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -226,6 +232,8 @@ class Mage_Bundle_Model_Observer
      * @param \Maho\Event\Observer $observer
      * @return $this
      */
+    #[Maho\Config\Observer('catalog_product_edit_action', area: 'adminhtml')]
+    #[Maho\Config\Observer('catalog_product_new_action', area: 'adminhtml')]
     public function setAttributeTabBlock($observer)
     {
         /** @var Mage_Catalog_Model_Product $product */
@@ -242,6 +250,7 @@ class Mage_Bundle_Model_Observer
      *
      * @return $this
      */
+    #[Maho\Config\Observer('product_option_renderer_init', area: 'frontend')]
     public function initOptionRenderer(\Maho\Event\Observer $observer)
     {
         /** @var Mage_Wishlist_Block_Customer_Wishlist_Item_Options $block */

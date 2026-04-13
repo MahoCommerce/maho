@@ -32,14 +32,14 @@ $jsVarName = 'opFile' . rand();
     </a>
     <?php if (!$option->getIsRequired()): ?>
         <label>
-            <input type="checkbox" onclick="<?= $jsVarName ?>.toggleFileDelete(this, this.closest('dd').querySelector('.input-box'))" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>"/>
+            <input type="checkbox" onclick="<?= $jsVarName ?>.toggleFileDelete(this, this.closest('dd').querySelector('.input-box'))" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>">
             <?= Mage::helper('catalog')->__('Delete') ?>
         </label>
     <?php endif ?>
 <?php endif ?>
     <div class="input-box<?= $fileExists ? ' no-display' : '' ?>">
-        <input type="file" name="<?= $fileName ?>" class="product-custom-option<?= $option->getIsRequired() ? ' required-entry' : '' ?>" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>" <?= $fileExists ? 'disabled="disabled"' : '' ?>/>
-        <input type="hidden" name="<?= $fieldNameAction ?>" value="<?= $fieldValueAction ?>" />
+        <input type="file" name="<?= $fileName ?>" class="product-custom-option<?= $option->getIsRequired() ? ' required-entry' : '' ?>" price="<?= $this->getCurrencyPrice($option->getPrice(true)) ?>" <?= $fileExists ? 'disabled="disabled"' : '' ?>>
+        <input type="hidden" name="<?= $fieldNameAction ?>" value="<?= $fieldValueAction ?>">
         <?php if ($option->getFileExtension()): ?>
         <p class="no-margin"><?= Mage::helper('catalog')->__('Allowed file extensions to upload')?>: <strong><?= $option->getFileExtension() ?></strong></p>
         <?php endif ?>

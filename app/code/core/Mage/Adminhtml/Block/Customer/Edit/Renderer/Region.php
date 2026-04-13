@@ -53,7 +53,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Renderer_Region extends Mage_Adminhtml_
         $html .= '<option value="">' . $this->_factory->getHelper('customer')->__('Please select') . '</option>';
         $html .= '</select>';
 
-        $html .= '<script type="text/javascript">' . "\n";
+        $html .= '<script>' . "\n";
         $html .= 'document.getElementById("' . $selectId . '").setAttribute("defaultValue", "' . $regionId . '");' . "\n";
         $html .= 'new RegionUpdater("' . $country->getHtmlId() . '", "' . $element->getHtmlId() . '", "' .
             $selectId . '", ' . Mage::helper('directory')->getRegionJsonByStore($quoteStoreId) . ');' . "\n";

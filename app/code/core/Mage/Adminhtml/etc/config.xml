@@ -50,28 +50,6 @@
                 </admin_emails_admin_notification_email_template>
             </email>
         </template>
-        <events>
-            <adminhtml_controller_action_predispatch_start>
-                <observers>
-                    <store>
-                        <class>adminhtml/observer</class>
-                        <method>bindStore</method>
-                    </store>
-                    <massaction>
-                        <class>adminhtml/observer</class>
-                        <method>massactionPrepareKey</method>
-                    </massaction>
-                </observers>
-            </adminhtml_controller_action_predispatch_start>
-            <session_before_renew_cookie>
-                <observers>
-                    <adminhtml_session_before_renew_cookie>
-                        <class>adminhtml/observer</class>
-                        <method>setCookieLifetime</method>
-                    </adminhtml_session_before_renew_cookie>
-                </observers>
-            </session_before_renew_cookie>
-        </events>
     </global>
     <admin>
         <routers>
@@ -85,40 +63,6 @@
         </routers>
     </admin>
     <adminhtml>
-        <events>
-            <controller_action_predispatch>
-                <observers>
-                    <auth>
-                        <class>admin/observer</class>
-                        <method>actionPreDispatchAdmin</method>
-                    </auth>
-                </observers>
-            </controller_action_predispatch>
-            <controller_action_layout_generate_blocks_before>
-                <observers>
-                    <display_bootup_warnings>
-                        <class>adminhtml/observer</class>
-                        <method>displayBootupWarnings</method>
-                    </display_bootup_warnings>
-                </observers>
-            </controller_action_layout_generate_blocks_before>
-            <core_locale_set_locale>
-                <observers>
-                    <bind_locale>
-                        <class>adminhtml/observer</class>
-                        <method>bindLocale</method>
-                    </bind_locale>
-                </observers>
-            </core_locale_set_locale>
-            <admin_system_config_changed_section_admin>
-                <observers>
-                    <bind_locale>
-                        <class>adminhtml/system_config_backend_admin_observer</class>
-                        <method>afterCustomUrlChanged</method>
-                    </bind_locale>
-                </observers>
-            </admin_system_config_changed_section_admin>
-        </events>
         <global_search>
             <products>
                 <class>adminhtml/search_catalog</class>

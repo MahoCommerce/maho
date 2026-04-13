@@ -104,11 +104,11 @@ class TranslateInline {
                 <tr><th class="label">Original:</th><td class="value">#{original_escape}</td></tr>
                 <tr><th class="label">Translated:</th><td class="value">#{translated_escape}</td></tr>
                 <tr><th class="label"><label for="perstore_#{i}">Store View Specific:</label></th><td class="value">
-                    <input id="perstore_#{i}" name="translate[#{i}][perstore]" type="checkbox" value="1"/>
+                    <input id="perstore_#{i}" name="translate[#{i}][perstore]" type="checkbox" value="1">
                 </td></tr>
                 <tr><th class="label"><label for="custom_#{i}">Custom:</label></th><td class="value">
-                    <input name="translate[#{i}][original]" type="hidden" value="#{scope}::#{original_escape}"/>
-                    <input id="custom_#{i}" name="translate[#{i}][custom]" class="input-text" value="#{translated_escape}" />
+                    <input name="translate[#{i}][original]" type="hidden" value="#{scope}::#{original_escape}">
+                    <input id="custom_#{i}" name="translate[#{i}][custom]" class="input-text" value="#{translated_escape}">
                 </td></tr>
             </table></div>
         `);

@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_Catalog_Product_Helper_Form_Price extends \Maho\Data\
     {
         $spanId = "dynamic-tax-{$attribute->getAttributeCode()}";
 
-        return "<script type='text/javascript'>if (dynamicTaxes == undefined) var dynamicTaxes = new Array(); dynamicTaxes[dynamicTaxes.length]='{$attribute->getAttributeCode()}'</script>";
+        return "<script>if (dynamicTaxes == undefined) var dynamicTaxes = new Array(); dynamicTaxes[dynamicTaxes.length]='{$attribute->getAttributeCode()}'</script>";
     }
 
     /**

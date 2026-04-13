@@ -48,6 +48,6 @@ class Mage_Adminhtml_Model_System_Config_Backend_Image_Favicon extends Mage_Admi
     #[\Override]
     protected function _getAllowedExtensions(): array
     {
-        return ['ico', 'png', 'gif', 'jpg', 'jpeg', 'apng', 'webp', 'avif', 'svg'];
+        return ['png', 'gif', 'jpg', 'jpeg', 'apng', 'webp', 'avif', 'svg'];
     }
 }

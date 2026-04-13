@@ -18,9 +18,9 @@
 ?>
 <li class="item" xmlns="http://www.w3.org/1999/html">
     <?php if ($this->hasProductUrl()): ?>
-        <a href="<?= $this->getProductUrl()?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image"><img src="<?= $this->getProductThumbnail()->resize(50, 50)->setWatermarkSize('30x10') ?>" width="50" height="50" alt="<?= $this->escapeHtml($this->getProductName()) ?>" /></a>
+        <a href="<?= $this->getProductUrl()?>" title="<?= $this->escapeHtml($this->getProductName()) ?>" class="product-image"><img src="<?= $this->getProductThumbnail()->resize(50, 50)->setWatermarkSize('30x10') ?>" width="50" height="50" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></a>
     <?php else: ?>
-        <span class="product-image"><img src="<?= $this->getProductThumbnail()->resize(50, 50)->setWatermarkSize('30x10') ?>" width="50" height="50" alt="<?= $this->escapeHtml($this->getProductName()) ?>" /></span>
+        <span class="product-image"><img src="<?= $this->getProductThumbnail()->resize(50, 50)->setWatermarkSize('30x10') ?>" width="50" height="50" alt="<?= $this->escapeHtml($this->getProductName()) ?>"></span>
     <?php endif ?>
     <div class="product-details">
         <p class="product-name"><?php if ($this->hasProductUrl()): ?><a href="<?= $this->getProductUrl() ?>"><?php endif ?><?= $this->escapeHtml($this->getProductName()) ?><?php if ($this->hasProductUrl()): ?></a><?php endif ?></p>
@@ -60,7 +60,7 @@
 
                             <?php if ($_displayInclTax || $_displayBothPrices): ?>
                                 <?php $_incl = $_checkoutHelper->getPriceInclTax($_item); ?>
-                                <?php if ($_displayBothPrices): ?><br /><?= $this->__('Incl. Tax') ?>: <?php endif ?>
+                                <?php if ($_displayBothPrices): ?><br><?= $this->__('Incl. Tax') ?>: <?php endif ?>
                                 <?php if ($_weeeHelper->typeOfDisplay($_item, [0, 1, 4], 'sales')): ?>
                                     <?= $_checkoutHelper->formatPrice($_incl + $_weeeHelper->getWeeeTaxInclTax($_item)) ?>
                                 <?php elseif ($_weeeHelper->typeOfDisplay($_item, 2, 'sales') && $_weeeApplied): ?>
@@ -88,7 +88,7 @@
                             class="qty cart-item-quantity input-text" name=""
                             value="<?= $this->getQty() ?>"
                             <?php if ($this->isOnCheckoutPage()) echo 'disabled'; ?>
-                            />
+                            >
 
                         <button id="qbutton-<?= $_item->getId() ?>"
                                 data-item-id="<?= $_item->getId() ?>"

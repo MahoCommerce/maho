@@ -251,7 +251,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      * @param string $separator
      * @return string
      */
-    public function displayPriceAttribute($code, $strong = false, $separator = '<br />')
+    public function displayPriceAttribute($code, $strong = false, $separator = '<br>')
     {
         if ($code == 'tax_amount' && $this->getOrder()->getRowTaxDisplayPrecision()) {
             return $this->displayRoundedPrices(
@@ -279,7 +279,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      * @param string $separator
      * @return string
      */
-    public function displayPrices($basePrice, $price, $strong = false, $separator = '<br />')
+    public function displayPrices($basePrice, $price, $strong = false, $separator = '<br>')
     {
         return $this->displayRoundedPrices($basePrice, $price, 2, $strong, $separator);
     }
@@ -294,7 +294,7 @@ class Mage_Adminhtml_Block_Sales_Items_Abstract extends Mage_Adminhtml_Block_Tem
      * @param   string $separator
      * @return  string
      */
-    public function displayRoundedPrices($basePrice, $price, $precision = 2, $strong = false, $separator = '<br />')
+    public function displayRoundedPrices($basePrice, $price, $precision = 2, $strong = false, $separator = '<br>')
     {
         if ($this->getOrder()->isCurrencyDifferent()) {
             $res = '';
