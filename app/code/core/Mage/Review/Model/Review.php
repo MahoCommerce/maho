@@ -190,10 +190,9 @@ class Mage_Review_Model_Review extends Mage_Core_Model_Abstract
             }
         }
 
-        $emptySummary = Mage::getModel('review/review_summary');
         foreach ($collection->getItems() as $item) {
             if (!$item->hasData('rating_summary')) {
-                $item->setRatingSummary($emptySummary);
+                $item->setRatingSummary(Mage::getModel('review/review_summary'));
             }
         }
 
