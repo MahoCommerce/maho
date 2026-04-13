@@ -24,6 +24,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     public function validateHtmlAction(): void
     {
         $html = $this->getRequest()->getPost('html', '');
+        $html = preg_replace('/\{\{[^{}]*\}\}/', '', $html);
 
         $prefix = "<!DOCTYPE html>\n<html lang=\"en\">\n<head><meta charset=\"utf-8\"><title>v</title></head>\n<body>\n";
         $suffix = "\n</body>\n</html>";

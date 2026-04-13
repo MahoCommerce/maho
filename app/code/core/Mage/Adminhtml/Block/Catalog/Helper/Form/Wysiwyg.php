@@ -31,6 +31,7 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\E
                     'type'     => 'button',
                     'disabled' => $this->getDisabled() || $this->getReadonly(),
                     'class'    => 'btn-wysiwyg',
+                    'style'    => 'margin-right: 4px;',
                     'onclick'  => "catalogWysiwygEditor.open('$wysiwygUrl', '{$this->getHtmlId()}')",
                 ])->toHtml();
         }
@@ -41,7 +42,6 @@ class Mage_Adminhtml_Block_Catalog_Helper_Form_Wysiwyg extends \Maho\Data\Form\E
                     'label'    => Mage::helper('cms')->__('Validate HTML'),
                     'type'     => 'button',
                     'class'    => 'validate-html',
-                    'style'    => 'margin-left: 4px;',
                     'onclick'  => "validateHtmlContent('{$this->getHtmlId()}', '$validateUrl');",
                 ])->toHtml();
         }
