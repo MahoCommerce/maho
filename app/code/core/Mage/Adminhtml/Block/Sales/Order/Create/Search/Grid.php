@@ -93,7 +93,7 @@ class Mage_Adminhtml_Block_Sales_Order_Create_Search_Grid extends Mage_Adminhtml
             ->addAttributeToSelect('gift_message_available')
             ->addStoreFilter()
             ->addAttributeToFilter('type_id', array_keys(
-                Mage::getConfig()->getNode('adminhtml/sales/order/create/available_product_types')->asArray(),
+                Mage::getConfig()->getNode('admin/sales/order/create/available_product_types')->asArray(),
             ))
             ->addAttributeToFilter('status', [
                 'in' => Mage::getSingleton('catalog/product_status')->getSaleableStatusIds(),

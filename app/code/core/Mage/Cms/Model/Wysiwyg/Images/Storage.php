@@ -412,7 +412,7 @@ class Mage_Cms_Model_Wysiwyg_Images_Storage extends \Maho\DataObject
     public function getConfig()
     {
         if (!$this->_config) {
-            $this->_config = Mage::getConfig()->getNode('cms/browser', 'adminhtml');
+            $this->_config = Mage::getConfig()->getNode('cms/browser', 'admin');
         }
 
         return $this->_config;

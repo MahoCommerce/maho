@@ -89,7 +89,7 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
      * @var array
      */
     protected $_cacheSections = [
-        'adminhtml' => 0,
+        'admin'     => 0,
         'crontab'   => 0,
         'install'   => 0,
         'stores'    => 1,
@@ -734,6 +734,13 @@ class Mage_Core_Model_Config extends Mage_Core_Model_Config_Base
                 }
             }
             $path = $scope . ($scopeCode ? '/' . $scopeCode : '') . (empty($path) ? '' : '/' . $path);
+        }
+
+        /**
+         * Backward compatibility: redirect adminhtml/ paths to admin/
+         */
+        if ($path !== null && str_starts_with($path, 'adminhtml/')) {
+            $path = 'admin/' . substr($path, 10);
         }
 
         /**

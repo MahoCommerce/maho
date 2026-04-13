@@ -287,7 +287,7 @@ class Mage_Adminhtml_Model_Sales_Order_Create extends \Maho\DataObject implement
         $this->initRuleData();
 
         $itemsCollection = $order->getItemsCollection(
-            array_keys(Mage::getConfig()->getNode('adminhtml/sales/order/create/available_product_types')->asArray()),
+            array_keys(Mage::getConfig()->getNode('admin/sales/order/create/available_product_types')->asArray()),
             true,
         );
 

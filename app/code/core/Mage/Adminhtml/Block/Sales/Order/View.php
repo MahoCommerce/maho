@@ -46,7 +46,7 @@ class Mage_Adminhtml_Block_Sales_Order_View extends Mage_Adminhtml_Block_Widget_
             $nonEditableTypes = array_keys($this->getOrder()->getResource()->aggregateProductsByTypes(
                 $order->getId(),
                 array_keys(Mage::getConfig()
-                    ->getNode('adminhtml/sales/order/create/available_product_types')
+                    ->getNode('admin/sales/order/create/available_product_types')
                     ->asArray()),
                 false,
             ));

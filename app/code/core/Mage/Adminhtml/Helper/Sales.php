@@ -79,7 +79,7 @@ class Mage_Adminhtml_Helper_Sales extends Mage_Core_Helper_Abstract
      */
     public function applySalableProductTypesFilter($collection)
     {
-        $productTypes = Mage::getConfig()->getNode('adminhtml/sales/order/create/available_product_types')->asArray();
+        $productTypes = Mage::getConfig()->getNode('admin/sales/order/create/available_product_types')->asArray();
         $productTypes = array_keys($productTypes);
         foreach ($collection->getItems() as $key => $item) {
             if ($item instanceof Mage_Catalog_Model_Product) {

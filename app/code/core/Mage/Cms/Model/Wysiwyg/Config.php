@@ -74,9 +74,9 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
                 'add_images'               => true,
                 'files_browser_window_url' => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg_images/index'),
                 'files_browser_window_width'
-                    => (int) Mage::getConfig()->getNode('adminhtml/cms/browser/window_width'),
+                    => (int) Mage::getConfig()->getNode('admin/cms/browser/window_width'),
                 'files_browser_window_height'
-                    => (int) Mage::getConfig()->getNode('adminhtml/cms/browser/window_height'),
+                    => (int) Mage::getConfig()->getNode('admin/cms/browser/window_height'),
             ]);
         }
 
