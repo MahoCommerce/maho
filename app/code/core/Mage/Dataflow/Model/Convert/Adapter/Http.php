@@ -17,7 +17,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
     {
         if (!$_FILES) {
             echo '<form method="POST" enctype="multipart/form-data">';
-            echo 'File to upload: <input type="file" name="io_file"/> <input type="submit" value="Upload"/>';
+            echo 'File to upload: <input type="file" name="io_file"> <input type="submit" value="Upload">';
             echo '</form>';
             exit;
         }
@@ -43,7 +43,7 @@ class Mage_Dataflow_Model_Convert_Adapter_Http extends Mage_Dataflow_Model_Conve
     {
         if (!$_FILES) {
             echo '<form method="POST" enctype="multipart/form-data">';
-            echo 'File to upload: <input type="file" name="io_file"/> <input type="submit" value="Upload"/>';
+            echo 'File to upload: <input type="file" name="io_file"> <input type="submit" value="Upload">';
             echo '</form>';
             exit;
         }

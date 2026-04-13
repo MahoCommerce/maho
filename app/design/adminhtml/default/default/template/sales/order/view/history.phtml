@@ -16,7 +16,7 @@
     <div id="history_form" class="order-history-form">
         <div><?= Mage::helper('sales')->__('Add Order Comments') ?></div>
         <span class="field-row">
-            <label class="normal" for="history_status"><?= Mage::helper('sales')->__('Status') ?></label><br/>
+            <label class="normal" for="history_status"><?= Mage::helper('sales')->__('Status') ?></label><br>
             <select name="history[status]" class="select" id="history_status">
             <?php foreach ($this->getStatuses() as $_code=>$_label): ?>
                 <option value="<?= $_code ?>"<?php if($_code==$this->getOrder()->getStatus()): ?> selected="selected"<?php endif ?>><?= $_label ?></option>
@@ -29,9 +29,9 @@
         </span>
         <div class="f-left">
             <?php if ($this->canSendCommentEmail()): ?>
-                <input name="history[is_customer_notified]" type="checkbox" id="history_notify" value="1" /><label class="normal" for="history_notify"> <?= Mage::helper('sales')->__('Notify Customer by Email') ?></label><br />
+                <input name="history[is_customer_notified]" type="checkbox" id="history_notify" value="1"><label class="normal" for="history_notify"> <?= Mage::helper('sales')->__('Notify Customer by Email') ?></label><br>
             <?php endif ?>
-            <input name="history[is_visible_on_front]" type="checkbox" id="history_visible" value="1" /><label class="normal" for="history_visible"> <?= Mage::helper('sales')->__('Visible on Frontend') ?></label>
+            <input name="history[is_visible_on_front]" type="checkbox" id="history_visible" value="1"><label class="normal" for="history_visible"> <?= Mage::helper('sales')->__('Visible on Frontend') ?></label>
         </div>
         <div class="f-right">
             <?= $this->getChildHtml('submit_button') ?>

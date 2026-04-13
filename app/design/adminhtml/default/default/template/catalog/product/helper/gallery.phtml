@@ -23,14 +23,14 @@
     </ul>
     <div class="grid">
         <table cellspacing="0" class="data border" id="<?= $this->getHtmlId() ?>_grid" width="100%">
-            <col width="1"/>
-            <col/>
-            <col width="70"/>
+            <col width="1">
+            <col>
+            <col width="70">
             <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
-                <col/>
+                <col>
             <?php endforeach ?>
-            <col width="70"/>
-            <col width="70"/>
+            <col width="70">
+            <col width="70">
             <thead>
             <tr class="headings">
                 <th><?= Mage::helper('catalog')->__('Image') ?></th>
@@ -109,8 +109,8 @@
             <?php endif ?>
             <tr id="<?= $this->getHtmlId() ?>-image-0">
                 <td class="cell-image"><?= Mage::helper('catalog')->__('No image') ?></td>
-                <td class="cell-label"><input type="hidden"/>&nbsp;</td>
-                <td class="cell-position"><input type="hidden"/>&nbsp;</td>
+                <td class="cell-label"><input type="hidden">&nbsp;</td>
+                <td class="cell-position"><input type="hidden">&nbsp;</td>
                 <?php foreach ($this->getImageTypes() as $typeId => $type): ?>
                     <td class="cell-<?= $typeId ?> a-center"><input
                                 type="radio" <?php if ($this->getElement()->getAttributeReadonly($typeId)) : ?> disabled="disabled" <?php endif ?>
@@ -118,8 +118,8 @@
                                 onclick="<?= $this->getJsObjectName() ?>.setProductImages('no_selection')"
                                 value="no_selection"/></td>
                 <?php endforeach ?>
-                <td class="cell-disable"><input type="hidden"/>&nbsp;</td>
-                <td class="cell-remove last"><input type="hidden"/>&nbsp;</td>
+                <td class="cell-disable"><input type="hidden">&nbsp;</td>
+                <td class="cell-remove last"><input type="hidden">&nbsp;</td>
             </tr>
             </tbody>
             <?php if (!$this->getElement()->getReadonly()): ?>

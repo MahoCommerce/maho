@@ -17,13 +17,13 @@
 <h2 class="sub-title"><?= $this->__('Refund #') ?><?= $_creditmemo->getIncrementId() ?> <span class="separator">|</span> <a href="<?= $this->getPrintCreditmemoUrl($_creditmemo) ?>" onclick="this.target='_blank'" class="link-print"><?= $this->__('Print Refund') ?></a></h2>
 <h3 class="table-caption"><?= $this->__('Items Refunded') ?></h3>
 <table class="data-table linearize-table" id="my-refund-table-<?= $_creditmemo->getId() ?>">
-    <col />
-    <col width="1" />
-    <col width="1" />
-    <col width="1" />
-    <col width="1" />
-    <col width="1" />
-    <col width="1" />
+    <col>
+    <col width="1">
+    <col width="1">
+    <col width="1">
+    <col width="1">
+    <col width="1">
+    <col width="1">
     <thead>
         <tr>
             <th><?= $this->__('Product Name') ?></th>

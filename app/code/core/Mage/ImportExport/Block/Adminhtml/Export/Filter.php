@@ -85,7 +85,7 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
             $html .= ' value="' . $this->_helper->escapeHtml($value) . '"';
         }
 
-        return $html . ' />';
+        return $html . '>';
     }
 
     /**
@@ -140,10 +140,10 @@ class Mage_ImportExport_Block_Adminhtml_Export_Filter extends Mage_Adminhtml_Blo
 
         return '<strong>' . Mage::helper('importexport')->__('From') . ':</strong>&nbsp;'
              . '<input type="text" name="' . $name . '[]" class="input-text input-text-range"'
-             . ' value="' . $fromValue . '"/>&nbsp;'
+             . ' value="' . $fromValue . '">&nbsp;'
              . '<strong>' . Mage::helper('importexport')->__('To')
              . ':</strong>&nbsp;<input type="text" name="' . $name
-             . '[]" class="input-text input-text-range" value="' . $toValue . '" />';
+             . '[]" class="input-text input-text-range" value="' . $toValue . '">';
     }
 
     /**

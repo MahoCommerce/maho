@@ -25,8 +25,8 @@
 <form action="<?= $this->getSaveUrl() ?>" method="post" id="form-validate" class="scaffold-form" enctype="multipart/form-data">
     <div class="fieldset">
     <?= $this->getBlockHtml('formkey') ?>
-    <input type="hidden" name="success_url" value="<?= $this->getSuccessUrl() ?>" />
-    <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>" />
+    <input type="hidden" name="success_url" value="<?= $this->getSuccessUrl() ?>">
+    <input type="hidden" name="error_url" value="<?= $this->getErrorUrl() ?>">
         <h2 class="legend"><?= $this->__('Contact Information') ?></h2>
         <p class="required"><?= $this->__('* Required Fields') ?></p>
         <ul class="form-list">
@@ -36,20 +36,20 @@
             <li class="wide">
                 <label for="company"><?= $this->__('Company') ?></label>
                 <div class="input-box">
-                    <input type="text" name="company" id="company" title="<?= $this->quoteEscape($this->__('Company')) ?>" value="<?= $this->escapeHtml($this->getAddress()->getCompany()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('company') ?>" />
+                    <input type="text" name="company" id="company" title="<?= $this->quoteEscape($this->__('Company')) ?>" value="<?= $this->escapeHtml($this->getAddress()->getCompany()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('company') ?>">
                 </div>
             </li>
             <li class="fields">
                 <div class="field">
                     <label for="telephone" class="required"><?= $this->__('Telephone') ?></label>
                     <div class="input-box">
-                        <input type="tel" name="telephone" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text  <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="telephone" />
+                        <input type="tel" name="telephone" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text  <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="telephone">
                     </div>
                 </div>
                 <div class="field">
                     <label for="fax"><?= $this->__('Fax') ?></label>
                     <div class="input-box">
-                        <input type="tel" name="fax" id="fax" title="<?= $this->quoteEscape($this->__('Fax')) ?>" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>" />
+                        <input type="tel" name="fax" id="fax" title="<?= $this->quoteEscape($this->__('Fax')) ?>" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>">
                     </div>
                 </div>
             </li>
@@ -62,7 +62,7 @@
             <li class="wide">
                 <label for="street_1" class="required"><?= $this->__('Street Address') ?></label>
                 <div class="input-box">
-                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getAddress()->getStreet(1)) ?>" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" id="street_1" class="input-text <?= $_streetValidationClass ?>" />
+                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getAddress()->getStreet(1)) ?>" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" id="street_1" class="input-text <?= $_streetValidationClass ?>">
                 </div>
             </li>
         <?php $_streetValidationClass = trim(str_replace('required-entry', '', $_streetValidationClass)); ?>
@@ -70,7 +70,7 @@
             <li class="wide">
                 <label for="billing:street<?= $_i ?>"><?= $this->__('Street Address %s', $_i) ?></label>
                 <div class="input-box">
-                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getAddress()->getStreet($_i)) ?>" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" id="street_<?= $_i ?>" class="input-text <?= $_streetValidationClass ?>" />
+                    <input type="text" name="street[]" value="<?= $this->escapeHtml($this->getAddress()->getStreet($_i)) ?>" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" id="street_<?= $_i ?>" class="input-text <?= $_streetValidationClass ?>">
                 </div>
             </li>
         <?php endfor ?>
@@ -78,7 +78,7 @@
             <li class="wide">
                 <label for="vat_id"><?= $this->__('VAT Number') ?></label>
                 <div class="input-box">
-                    <input type="text" name="vat_id" value="<?= $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?= $this->quoteEscape($this->__('VAT Number')) ?>" id="vat_id" class="input-text <?= Mage::helper('customer')->isVatValidationEnabled() ? 'validate-vat' : '' ?> <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>data-validate-vat-url="<?= $this->escapeUrl($this->getUrl('customer/vat/validate')) ?>" data-validate-vat-country="country"<?php endif ?> />
+                    <input type="text" name="vat_id" value="<?= $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?= $this->quoteEscape($this->__('VAT Number')) ?>" id="vat_id" class="input-text <?= Mage::helper('customer')->isVatValidationEnabled() ? 'validate-vat' : '' ?> <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>data-validate-vat-url="<?= $this->escapeUrl($this->getUrl('customer/vat/validate')) ?>" data-validate-vat-country="country"<?php endif ?>>
                 </div>
             </li>
             <?php endif ?>
@@ -86,7 +86,7 @@
                 <div class="field">
                     <label for="city" class="required"><?= $this->__('City') ?></label>
                     <div class="input-box">
-                        <input type="text" name="city" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>"  title="<?= $this->quoteEscape($this->__('City')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city" />
+                        <input type="text" name="city" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>"  title="<?= $this->quoteEscape($this->__('City')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="city">
                     </div>
                 </div>
                 <div class="field">
@@ -98,7 +98,7 @@
                         <script>
                             document.getElementById('region_id').defaultValue = "<?= $this->getAddress()->getRegionId() ?>";
                         </script>
-                        <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" />
+                        <input type="text" id="region" name="region" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>"  title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>">
                     </div>
                 </div>
             </li>
@@ -106,7 +106,7 @@
                 <div class="field">
                     <label for="zip" class="required"><?= $this->__('Zip/Postal Code') ?></label>
                     <div class="input-box">
-                        <input type="text" name="postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" id="zip" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" />
+                        <input type="text" name="postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" id="zip" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>">
                     </div>
                 </div>
                 <div class="field">
@@ -120,18 +120,18 @@
                 <?php if($this->isDefaultBilling()): ?>
                     <strong><?= $this->__('Default Billing Address') ?></strong>
                 <?php elseif($this->canSetAsDefaultBilling()): ?>
-                    <input type="checkbox" id="primary_billing" name="default_billing" value="1" title="<?= $this->quoteEscape($this->__('Use as My Default Billing Address')) ?>" class="checkbox" /><label for="primary_billing"><?= $this->__('Use as my default billing address') ?></label>
+                    <input type="checkbox" id="primary_billing" name="default_billing" value="1" title="<?= $this->quoteEscape($this->__('Use as My Default Billing Address')) ?>" class="checkbox"><label for="primary_billing"><?= $this->__('Use as my default billing address') ?></label>
                 <?php else: ?>
-                    <input type="hidden" name="default_billing" value="1" />
+                    <input type="hidden" name="default_billing" value="1">
                 <?php endif ?>
             </li>
             <li<?php if($this->canSetAsDefaultShipping()) echo ' class="control"' ?>>
                 <?php if($this->isDefaultShipping()): ?>
                     <strong><?= $this->__('Default Shipping Address') ?></strong>
                 <?php elseif($this->canSetAsDefaultShipping()): ?>
-                    <input type="checkbox" id="primary_shipping" name="default_shipping" value="1" title="<?= $this->quoteEscape($this->__('Use as My Default Shipping Address')) ?>" class="checkbox" /><label for="primary_shipping"><?= $this->__('Use as my default shipping address') ?></label>
+                    <input type="checkbox" id="primary_shipping" name="default_shipping" value="1" title="<?= $this->quoteEscape($this->__('Use as My Default Shipping Address')) ?>" class="checkbox"><label for="primary_shipping"><?= $this->__('Use as my default shipping address') ?></label>
                 <?php else: ?>
-                    <input type="hidden" name="default_shipping" value="1" />
+                    <input type="hidden" name="default_shipping" value="1">
                 <?php endif ?>
             </li>
         </ul>

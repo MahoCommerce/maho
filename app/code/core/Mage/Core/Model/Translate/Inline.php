@@ -242,9 +242,9 @@ class Mage_Core_Model_Translate_Inline
 <script src="<?= $baseJsUrl ?>maho-dialog.js"></script>
 
 <script src="<?= $baseJsUrl ?>mage/translate_inline.js"></script>
-<link rel="stylesheet" type="text/css" href="<?= $baseJsUrl ?>mage/translate_inline.css"/>
+<link rel="stylesheet" type="text/css" href="<?= $baseJsUrl ?>mage/translate_inline.css">
 
-<div id="translate-inline-trig"><img src="<?= $trigImg ?>" alt="[TR]" style="background: white; padding: 4px; border: 2px solid #ccc; border-radius: 3px; cursor: pointer;"/></div>
+<div id="translate-inline-trig"><img src="<?= $trigImg ?>" alt="[TR]" style="background: white; padding: 4px; border: 2px solid #ccc; border-radius: 3px; cursor: pointer;"></div>
 <script>
     new TranslateInline('translate-inline-trig', '<?= $ajaxUrl ?>', '<?= Mage::getDesign()->getArea() ?>');
 </script>

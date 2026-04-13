@@ -31,7 +31,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Wrapline extends Mage_Adm
         $wrappedLine = '';
         $lineLength = $this->getColumn()->getData('lineLength') ?: $this->_defaultMaxLineLength;
         for ($i = 0, $n = floor(Mage::helper('core/string')->strlen($line) / $lineLength); $i <= $n; $i++) {
-            $wrappedLine .= Mage::helper('core/string')->substr($line, ($lineLength * $i), $lineLength) . '<br />';
+            $wrappedLine .= Mage::helper('core/string')->substr($line, ($lineLength * $i), $lineLength) . '<br>';
         }
         return $wrappedLine;
     }

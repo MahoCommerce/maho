@@ -816,7 +816,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     </style>
 </head>
 <body>
-    <img src="' . $dataUri . '" class="shipping-label" alt="Shipping Label" />
+    <img src="' . $dataUri . '" class="shipping-label" alt="Shipping Label">
 </body>
 </html>';
 

@@ -14,7 +14,7 @@ if (Mage::helper('customer')->isCustomerEligibleForGuestOrderAssociation()): ?>
     <li class="notice-msg">
         <ul>
             <li>
-                <strong><?= $this->__('Missing an order?') ?></strong><br />
+                <strong><?= $this->__('Missing an order?') ?></strong><br>
                 <?= $this->__('If you placed an order as a guest using this email address, you can add it to your account.') ?>
                 <a href="<?= $this->getUrl('sales/order/associateGuestOrders') ?>" onclick="return confirm('<?= $this->escapeHtml($this->__('This will permanently associate all guest orders placed with your email address to your account. Continue?')) ?>');">
                     <?= $this->__('Click here to check for guest orders') ?>

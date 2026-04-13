@@ -41,7 +41,7 @@
         <td><h5 class="title"><?= $this->escapeHtml($_item->getName()) ?></h5>
             <div>
                 <strong><?= $this->helper('sales')->__('SKU') ?>:</strong>
-                <?= implode('<br />', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
+                <?= implode('<br>', Mage::helper('catalog')->splitSku($this->escapeHtml($_item->getSku()))) ?>
             </div>
         </td>
         <?php else: ?>
@@ -56,7 +56,7 @@
         </td>
         <td class="last">
             <?php if ($this->isShipmentSeparately($_item)): ?>
-                <input type="text" class="input-text" name="shipment[items][<?= $_item->getOrderItemId() ?>]" value="<?= $_item->getQty()*1 ?>" />
+                <input type="text" class="input-text" name="shipment[items][<?= $_item->getOrderItemId() ?>]" value="<?= $_item->getQty()*1 ?>">
             <?php else: ?>
                 &nbsp;
             <?php endif ?>

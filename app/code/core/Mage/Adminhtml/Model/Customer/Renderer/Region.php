@@ -82,7 +82,7 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements \Maho\Data\Form\E
             }
             $html .= '</select>' . "\n";
 
-            $html .= '<input type="hidden" name="' . $regionHtmlName . '" id="' . $regionHtmlId . '" value=""/>';
+            $html .= '<input type="hidden" name="' . $regionHtmlName . '" id="' . $regionHtmlId . '" value="">';
 
             $html .= '</td>';
             $element->setClass($elementClass);
@@ -96,8 +96,8 @@ class Mage_Adminhtml_Model_Customer_Renderer_Region implements \Maho\Data\Form\E
             $html .= '<td class="value">';
             $html .= '<input id="' . $regionHtmlId . '" name="' . $regionHtmlName
                 . '" value="' . $element->getEscapedValue() . '" '
-                . $element->serialize($htmlAttributes) . '/>' . "\n";
-            $html .= '<input type="hidden" name="' . $regionIdHtmlName . '" id="' . $regionIdHtmlId . '" value=""/>';
+                . $element->serialize($htmlAttributes) . '>' . "\n";
+            $html .= '<input type="hidden" name="' . $regionIdHtmlName . '" id="' . $regionIdHtmlId . '" value="">';
             $html .= '</td>' . "\n";
         }
         $html .= '</tr>' . "\n";

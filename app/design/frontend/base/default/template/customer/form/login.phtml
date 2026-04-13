@@ -48,7 +48,7 @@
                         <li>
                             <label for="email" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Email Address') ?></label>
                             <div class="input-box">
-                                <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true" />
+                                <input type="email" autocomplete="on" autocapitalize="off" autocorrect="off" spellcheck="false" name="login[username]" value="<?= $this->escapeHtml($this->getUsername()) ?>" id="email" class="input-text required-entry validate-email" title="<?= $this->quoteEscape($this->__('Email Address')) ?>" aria-required="true">
                             </div>
                         </li>
                         <?php if (!$isMagicLinkEnabled || $magicLinkMode !== Mage_Customer_Model_Config_Registrationmode::MODE_NO_PASSWORD): ?>
@@ -56,7 +56,7 @@
                             <?php $minPasswordLength = $this->getMinPasswordLength(); ?>
                             <label for="pass" class="required" aria-label="<?= $this->__('Required') ?>"><?= $this->__('Password') ?></label>
                             <div class="input-box">
-                                <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-<?= $minPasswordLength ?>" id="pass" title="<?= $this->quoteEscape($this->__('Password')) ?>" autocomplete="off" aria-required="true" />
+                                <input type="password" name="login[password]" class="input-text required-entry validate-password min-pass-length-<?= $minPasswordLength ?>" id="pass" title="<?= $this->quoteEscape($this->__('Password')) ?>" autocomplete="off" aria-required="true">
                             </div>
                         </li>
                         <?php endif ?>
@@ -78,7 +78,7 @@
             </div>
         </div>
         <?php if (Mage::helper('checkout')->isContextCheckout()): ?>
-            <input name="context" type="hidden" value="checkout" />
+            <input name="context" type="hidden" value="checkout">
         <?php endif ?>
     </form>
 

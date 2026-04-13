@@ -43,6 +43,6 @@ class Mage_Adminhtml_Block_Catalog_Form_Renderer_Attribute_Urlkey extends Mage_A
         $checkbox = new \Maho\Data\Form\Element\Checkbox($data);
         $checkbox->setForm($element->getForm());
 
-        return parent::getElementHtml() . '<br/>' . $hidden->getElementHtml() . $checkbox->getElementHtml() . $checkbox->getLabelHtml();
+        return parent::getElementHtml() . '<br>' . $hidden->getElementHtml() . $checkbox->getElementHtml() . $checkbox->getLabelHtml();
     }
 }

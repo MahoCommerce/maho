@@ -91,7 +91,7 @@ abstract class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Abstract extends
         return  '<input type="text" class="input-text '
                 . $this->getColumn()->getValidateClass()
                 . '" name="' . $this->getColumn()->getId()
-                . '" value="' . $this->_getInputValue($row) . '"/>';
+                . '" value="' . $this->_getInputValue($row) . '">';
     }
 
     /**

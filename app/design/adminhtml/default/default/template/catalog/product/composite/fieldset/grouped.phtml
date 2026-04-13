@@ -24,11 +24,11 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
             <p class="availability out-of-stock"><?= Mage::helper('catalog')->__('Availability:') ?> <span><?= Mage::helper('catalog')->__('Out of stock') ?></span></p>
         <?php endif ?>
         <table class="data-table grouped-items-table" id="super-product-table">
-            <col />
-            <col />
-            <col />
-            <col />
-            <col width="1" />
+            <col>
+            <col>
+            <col>
+            <col>
+            <col width="1">
             <thead>
                 <tr class="headings">
                     <th><?= Mage::helper('catalog')->__('ID') ?></th>
@@ -61,8 +61,8 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
                     <?php if ($product->isSaleable() || $skipSaleableCheck): ?>
                     <td class="a-center">
                     <?php if ($item->isSaleable() || $skipSaleableCheck): ?>
-                        <input type="number" name="super_group[<?= $item->getId() ?>]" id="super_group[<?= $item->getId() ?>]" maxlength="12" min="0" value="<?= $item->getQty()*1 ?>" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Qty')) ?>" class="input-text qty" />
-                        <input type="hidden" value="1" price="<?= $this->getCurrencyPrice($item->getPrice()) ?>" qtyId="super_group[<?= $item->getId() ?>]" />
+                        <input type="number" name="super_group[<?= $item->getId() ?>]" id="super_group[<?= $item->getId() ?>]" maxlength="12" min="0" value="<?= $item->getQty()*1 ?>" title="<?= $this->quoteEscape(Mage::helper('catalog')->__('Qty')) ?>" class="input-text qty">
+                        <input type="hidden" value="1" price="<?= $this->getCurrencyPrice($item->getPrice()) ?>" qtyId="super_group[<?= $item->getId() ?>]">
                     <?php else: ?>
                         <p class="availability out-of-stock"><span><?= $this->__('Out of stock') ?></span></p>
                     <?php endif ?>

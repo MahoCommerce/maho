@@ -14,10 +14,10 @@
 <!DOCTYPE html>
 <html lang="<?= substr(Mage::app()->getLocale()->getLocaleCode(), 0, 2) ?>">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="robots" content="noindex, nofollow" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="robots" content="noindex, nofollow">
     <title><?= Mage::helper('adminhtml')->__('Log into Maho Admin Page') ?></title>
-    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('login.css') ?>" media="all" />
+    <link type="text/css" rel="stylesheet" href="<?= $this->getSkinUrl('login.css') ?>" media="all">
     <?= Mage::helper('page')->getFaviconHtml() ?>
     <script src="<?= $this->getJsUrl('validation.js') ?>"></script>
     <script src="<?= $this->getJsUrl('maho-passkey-tools.js') ?>"></script>
@@ -27,25 +27,25 @@
         <div class="login-box">
             <form method="post" action="<?= $this->getUrl('adminhtml') ?>" id="loginForm">
                 <div class="login-form">
-                    <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>" />
+                    <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
                     <h2><?= Mage::helper('adminhtml')->__('Log in to Admin Panel') ?></h2>
                     <div id="messages">
                         <?= $this->getMessagesBlock()->toHtml() ?>
                     </div>
                     <div id="step1">
                         <div class="input-box input-left">
-                            <label for="username"><?= Mage::helper('adminhtml')->__('User Name:') ?></label><br />
-                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" autofocus="autofocus" autocomplete="username" />
+                            <label for="username"><?= Mage::helper('adminhtml')->__('User Name:') ?></label><br>
+                            <input type="text" id="username" name="login[username]" value="" class="required-entry input-text" autofocus="autofocus" autocomplete="username">
                         </div>
                         <div class="input-box input-right">
-                            <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label><br />
-                            <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" autocomplete="current-password" />
+                            <label for="login"><?= Mage::helper('adminhtml')->__('Password:') ?></label><br>
+                            <input type="password" id="login" name="login[password]" value="" class="required-entry input-text" autocomplete="current-password">
                         </div>
                         <?= $this->getChildHtml('form.additional.info') ?>
                         <div class="clear"></div>
                         <div class="form-buttons">
                             <a class="left" href="<?= Mage::helper('adminhtml')->getUrl('adminhtml/index/forgotpassword', ['_nosecret' => true]) ?>"><?= Mage::helper('adminhtml')->__('Forgot your password?') ?></a>
-                            <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
+                            <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>">
 
                             <button type="button" id="passkey-login-button" class="form-button">
                                 <?php echo $this->__('Login with Passkey') ?>
@@ -54,13 +54,13 @@
                     </div>
                     <div id="step2" class="no-display">
                         <div class="input-box input-left">
-                            <label for="twofa_verification_code"><?= Mage::helper('adminhtml')->__('2FA verification code:') ?></label><br />
-                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" autocomplete="one-time-code" disabled />
+                            <label for="twofa_verification_code"><?= Mage::helper('adminhtml')->__('2FA verification code:') ?></label><br>
+                            <input type="text" id="twofa_verification_code" name="login[twofa_verification_code]" value="" class="required-entry input-text validate-number" autocomplete="one-time-code" disabled>
                         </div>
                         <div class="clear"></div>
                         <div class="form-buttons">
                             <a id="back-button" class="left" href="#"><?= Mage::helper('adminhtml')->__('Back') ?></a>
-                            <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" />
+                            <input type="submit" class="form-button" value="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>" title="<?= $this->quoteEscape(Mage::helper('adminhtml')->__('Login')) ?>">
                         </div>
                     </div>
                 </div>

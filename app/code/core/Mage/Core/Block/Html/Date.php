@@ -75,7 +75,7 @@ class Mage_Core_Block_Html_Date extends Mage_Core_Block_Template
             }
         }
 
-        $html .= $this->getExtraParams() . '/>';
+        $html .= $this->getExtraParams() . '>';
 
         return $html;
     }

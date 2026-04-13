@@ -517,7 +517,7 @@ class Mage_Page_Block_Html_Head extends Mage_Core_Block_Template
                         continue;
                     }
 
-                    $this->_data['hreflang'][] = "<link rel=\"alternate\" hreflang=\"$language\" href=\"$targetUrl\" />\n";
+                    $this->_data['hreflang'][] = "<link rel=\"alternate\" hreflang=\"$language\" href=\"$targetUrl\">\n";
                 }
             }
         }

@@ -25,8 +25,8 @@
               <?php if ($_product->getOptions()): ?> enctype="multipart/form-data" <?php endif ?>>
             <?= $this->getBlockHtml('formkey') ?>
             <div class="no-display">
-                <input type="hidden" name="product" value="<?= $_product->getId() ?>" />
-                <input type="hidden" name="related_product" id="related-products-field" value="" />
+                <input type="hidden" name="product" value="<?= $_product->getId() ?>">
+                <input type="hidden" name="related_product" id="related-products-field" value="">
             </div>
 
             <div class="product-img-box">

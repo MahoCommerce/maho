@@ -34,7 +34,7 @@
                 <?php if (!is_null($rate['percent'])): ?>
                     (<?= (float)$rate['percent'] ?>%)
                 <?php endif ?>
-                <br />
+                <br>
             </td>
             <?php if ($isFirst): ?>
                 <td style="<?= $_style ?>" class="a-right" rowspan="<?= count($rates) ?>">
@@ -51,7 +51,7 @@
     <tr class="summary-details-<?= $taxIter ?> summary-details<?php if ($isTop): echo ' summary-details-first'; endif; ?>" style="display:none;">
         <td class="a-right" style="<?= $_style ?>" colspan="<?= $this->getColspan() ?>">
             <?= $this->escapeHtml($weeeTitle) ?>
-            <br />
+            <br>
         </td>
         <td style="<?= $_style ?>" class="a-right" rowspan="1">
             <?= $this->helper('checkout')->formatPrice($weeeAmount) ?>

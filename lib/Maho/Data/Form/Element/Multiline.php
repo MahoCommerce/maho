@@ -71,7 +71,7 @@ class Multiline extends AbstractElement
             }
             $html .= '<div class="multi-input"><input id="' . $this->getHtmlId() . $i . '" name="' . $this->getName()
                 . '[' . $i . ']' . '" value="' . $this->getEscapedValue($i) . '" '
-                . $this->serialize($this->getHtmlAttributes()) . ' />' . "\n";
+                . $this->serialize($this->getHtmlAttributes()) . '>' . "\n";
             if ($i == 0) {
                 $html .= $this->getAfterElementHtml();
             }
@@ -102,7 +102,7 @@ class Multiline extends AbstractElement
                 $html .= '<label>&nbsp;</label>' . "\n";
             }
             $html .= '<input id="' . $this->getHtmlId() . $i . '" name="' . $this->getName() . '[' . $i . ']'
-                . '" value="' . $this->getEscapedValue($i) . '"' . $this->serialize($this->getHtmlAttributes()) . ' />' . "\n";
+                . '" value="' . $this->getEscapedValue($i) . '"' . $this->serialize($this->getHtmlAttributes()) . '>' . "\n";
             if ($i == 0) {
                 $html .= $this->getAfterElementHtml();
             }

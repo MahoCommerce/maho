@@ -15,12 +15,12 @@
     <span class="paypal-or"><?= $this->__('-OR-') ?></span>
 
     <?php $shortcutHtmlId = $this->getShortcutHtmlId() ?>
-    <a class="paypal-button" data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl()?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>" title="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>" /></a>
+    <a class="paypal-button" data-action="checkout-form-submit" id="<?= $shortcutHtmlId ?>" href="<?= $this->getCheckoutUrl()?>"><img src="<?= $this->getImageUrl() ?>" alt="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>" title="<?= $this->quoteEscape(Mage::helper('paypal')->__('Checkout with PayPal')) ?>"></a>
 </p>
 
 <?php if ($this->getConfirmationUrl() || $this->getIsInCatalogProduct()): ?>
     <?php if ($this->getIsInCatalogProduct()): ?>
-        <input type="hidden" id="pp_checkout_url" name="return_url" value="" />
+        <input type="hidden" id="pp_checkout_url" name="return_url" value="">
     <?php endif ?>
     <script>
         document.getElementById('<?= $shortcutHtmlId ?>').addEventListener('click', function(event) {

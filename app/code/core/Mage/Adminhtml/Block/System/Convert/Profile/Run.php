@@ -61,7 +61,7 @@ class Mage_Adminhtml_Block_System_Convert_Profile_Run extends Mage_Adminhtml_Blo
                             'loader'  => Mage::getDesign()->getSkinUrl('images/loading.svg'),
                         ],
                         'template' => '<li style="#{style}" id="#{id}">'
-                                    . '<img id="#{id}_img" src="#{image}" class="v-middle" style="margin-right:5px"/>'
+                                    . '<img id="#{id}_img" src="#{image}" class="v-middle" style="margin-right:5px">'
                                     . '<span id="#{id}_status" class="text">#{text}</span>'
                                     . '</li>',
                         'text'     => $this->__('Processed <strong>%s%% %s/%d</strong> records', '#{percent}', '#{updated}', $this->getBatchItemsCount()),

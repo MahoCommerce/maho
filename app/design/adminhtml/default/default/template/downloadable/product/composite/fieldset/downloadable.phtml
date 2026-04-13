@@ -32,7 +32,7 @@ $skipSaleableCheck = Mage::helper('catalog/product')->getSkipSaleableCheck();
                     <?php if ($isRequired) $requiredIds[] = $link->getId() ?>
                     <li>
                     <?php if ($linksPurchasedSeparately): ?>
-                        <input type="checkbox" class="checkbox<?= $isRequired ? ' validate-one-required-by-name' : '' ?> product-downloadable-link" name="links[]" id="links_<?= $link->getId() ?>" value="<?= $link->getId() ?>" <?= $this->getLinkCheckedValue($link) ?> price="<?= $this->getCurrencyPrice($link->getPrice()) ?>"/>
+                        <input type="checkbox" class="checkbox<?= $isRequired ? ' validate-one-required-by-name' : '' ?> product-downloadable-link" name="links[]" id="links_<?= $link->getId() ?>" value="<?= $link->getId() ?>" <?= $this->getLinkCheckedValue($link) ?> price="<?= $this->getCurrencyPrice($link->getPrice()) ?>">
                     <?php endif ?>
                         <span class="label">
                             <label for="links_<?= $link->getId() ?>"><?= $this->escapeHtml($link->getTitle()) ?></label>

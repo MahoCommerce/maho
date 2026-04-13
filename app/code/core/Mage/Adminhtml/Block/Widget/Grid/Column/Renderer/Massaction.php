@@ -64,7 +64,7 @@ class Mage_Adminhtml_Block_Widget_Grid_Column_Renderer_Massaction extends Mage_A
     protected function _getCheckboxHtml($value, $checked)
     {
         $html = '<input type="checkbox" name="' . $this->getColumn()->getName() . '" ';
-        $html .= 'value="' . $this->escapeHtml($value) . '" class="massaction-checkbox"' . $checked . '/>';
+        $html .= 'value="' . $this->escapeHtml($value) . '" class="massaction-checkbox"' . $checked . '>';
         return $html;
     }
 }
