@@ -69,7 +69,7 @@ class Editor extends Textarea
 
         }
         // Display only buttons to additional features
-        if ($this->getConfig('widget_window_url') || $this->getConfig('plugins') || $this->getConfig('add_images')) {
+        if ($this->getConfig('widget_window_url') || $this->getConfig('plugins') || $this->getConfig('add_images') || $this->getConfig('validate_html_url')) {
             $html = $this->_getButtonsHtml() . parent::getElementHtml();
             $html = $this->_wrapIntoContainer($html);
             return $html;
@@ -166,6 +166,15 @@ class Editor extends Textarea
                 }
                 $buttonsHtml .= $this->_getButtonHtml($buttonOptions);
             }
+        }
+
+        if ($this->getConfig('validate_html_url')) {
+            $url = $this->getConfig('validate_html_url');
+            $buttonsHtml .= $this->_getButtonHtml([
+                'title'     => $this->translate('Validate HTML'),
+                'onclick'   => "validateHtmlContent('{$this->getHtmlId()}', '$url');",
+                'class'     => 'validate-html plugin' . ($visible ? '' : ' no-display'),
+            ]);
         }
 
         return $buttonsHtml;
