@@ -41,8 +41,7 @@ class RouteRegistry
     /**
      * Build the registry from config.xml router declarations.
      *
-     * Called once during front controller init. Replicates the logic from
-     * Router_Standard::collectRoutes() and Router_Admin::collectRoutes().
+     * Called once during front controller init.
      */
     public static function init(): void
     {
@@ -53,8 +52,20 @@ class RouteRegistry
         self::$modules = [];
         self::$routes = [];
 
-        self::collectArea('frontend', 'standard');
-        self::collectArea('admin', 'admin');
+        // Apply custom admin URL if configured, then register the adminhtml ↔ frontName mapping.
+        if ((string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_USE_CUSTOM_ADMIN_PATH)) {
+            $customUrl = (string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_CUSTOM_ADMIN_PATH);
+            $xmlPath = Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME;
+            if ($customUrl !== '' && (string) Mage::getConfig()->getNode($xmlPath) !== $customUrl) {
+                Mage::getConfig()->setNode($xmlPath, $customUrl, true);
+            }
+        }
+
+        $adminFrontName = self::getAdminFrontName();
+        if ($adminFrontName) {
+            self::$routes['adminhtml'] = $adminFrontName;
+            self::$modules[$adminFrontName] = ['Mage_Adminhtml'];
+        }
 
         self::$initialized = true;
     }
@@ -64,100 +75,6 @@ class RouteRegistry
         self::$modules = [];
         self::$routes = [];
         self::$initialized = false;
-    }
-
-    protected static function collectArea(string $configArea, string $useRouterName): void
-    {
-        $routersConfigNode = Mage::getConfig()->getNode($configArea . '/routers');
-        if (!$routersConfigNode) {
-            return;
-        }
-
-        // Admin router: apply custom admin URL before collecting
-        if ($configArea === 'admin') {
-            if ((string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_USE_CUSTOM_ADMIN_PATH)) {
-                $customUrl = (string) Mage::getConfig()->getNode(Mage_Adminhtml_Helper_Data::XML_PATH_CUSTOM_ADMIN_PATH);
-                $xmlPath = Mage_Adminhtml_Helper_Data::XML_PATH_ADMINHTML_ROUTER_FRONTNAME;
-                if ((string) Mage::getConfig()->getNode($xmlPath) !== $customUrl) {
-                    Mage::getConfig()->setNode($xmlPath, $customUrl, true);
-                }
-            }
-        }
-
-        $adminFrontName = self::getAdminFrontName();
-
-        foreach ($routersConfigNode->children() as $routerName => $routerConfig) {
-            $use = (string) $routerConfig->use;
-            if ($use !== $useRouterName) {
-                continue;
-            }
-
-            $baseModule = (string) $routerConfig->args->module;
-            if (!$baseModule) {
-                continue;
-            }
-
-            $frontName = (string) $routerConfig->args->frontName;
-            if (!$frontName) {
-                continue;
-            }
-
-            // Admin router: only accept modules under the configured admin frontName
-            if ($configArea === 'admin' && $frontName !== $adminFrontName) {
-                continue;
-            }
-
-            $modules = self::buildModuleChain($routerConfig, $baseModule);
-
-            // Merge into existing module chain (multiple config entries can contribute)
-            if (isset(self::$modules[$frontName])) {
-                self::$modules[$frontName] = array_unique(
-                    array_merge(self::$modules[$frontName], $modules),
-                );
-            } else {
-                self::$modules[$frontName] = $modules;
-            }
-            self::$routes[(string) $routerName] = $frontName;
-        }
-    }
-
-    /**
-     * Build the module chain with before/after ordering.
-     *
-     * @return string[]
-     */
-    protected static function buildModuleChain(mixed $routerConfig, string $baseModule): array
-    {
-        $modules = [$baseModule];
-
-        if (!$routerConfig->args->modules) {
-            return $modules;
-        }
-
-        foreach ($routerConfig->args->modules->children() as $customModule) {
-            $moduleName = (string) $customModule;
-            if (!$moduleName) {
-                continue;
-            }
-
-            if ($before = $customModule->getAttribute('before')) {
-                $position = array_search($before, $modules);
-                if ($position === false) {
-                    $position = 0;
-                }
-                array_splice($modules, $position, 0, $moduleName);
-            } elseif ($after = $customModule->getAttribute('after')) {
-                $position = array_search($after, $modules);
-                if ($position === false) {
-                    $position = count($modules);
-                }
-                array_splice($modules, $position + 1, 0, $moduleName);
-            } else {
-                $modules[] = $moduleName;
-            }
-        }
-
-        return $modules;
     }
 
     /**

@@ -52,15 +52,7 @@
         </template>
     </global>
     <admin>
-        <routers>
-            <adminhtml>
-                <use>admin</use>
-                <args>
-                    <module>Mage_Adminhtml</module>
-                    <frontName>admin</frontName>
-                </args>
-            </adminhtml>
-        </routers>
+        <base_path>admin</base_path>
     </admin>
     <adminhtml>
         <global_search>
