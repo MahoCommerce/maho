@@ -297,6 +297,11 @@
             </ident_support>
         </trans_email>
         <web>
+            <routers>
+                <symfony>
+                    <class>Mage_Core_Controller_Varien_Router_Symfony</class>
+                </symfony>
+            </routers>
             <url>
                 <use_store>0</use_store>
                 <redirect_to_base>1</redirect_to_base>
