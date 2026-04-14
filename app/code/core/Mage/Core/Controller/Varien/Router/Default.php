@@ -13,13 +13,16 @@
 class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Varien_Router_Abstract
 {
     /**
-     * Modify request and set to no-route action
-     * If store is admin and specified different admin front name,
-     * change store to default (Possible when enabled Store Code in URL)
+     * Try Symfony routing first (attributed routes, forward dispatch, legacy path rewrites),
+     * then fall back to the configured no-route action.
      */
     #[\Override]
     public function match(Mage_Core_Controller_Request_Http $request): bool
     {
+        if ($this->_matchSymfony($request)) {
+            return true;
+        }
+
         $noRoute        = explode('/', $this->_getNoRouteConfig());
         $moduleName     = isset($noRoute[0]) && $noRoute[0] ? $noRoute[0] : 'core';
         $controllerName = isset($noRoute[1]) && $noRoute[1] ? $noRoute[1] : 'index';
@@ -43,21 +46,53 @@ class Mage_Core_Controller_Varien_Router_Default extends Mage_Core_Controller_Va
     }
 
     /**
-     * Retrieve default router config
+     * Try to match using Symfony's UrlMatcher against compiled #[Route] attributes.
      *
-     * @return string
+     * Strategy 1 — Forward dispatch: module/controller/action already set by another router
+     *   (CMS, URL rewrite, _forward()); resolve via reverse lookup and dispatch.
+     *
+     * Strategy 2 — URL matching: match path against compiled #[Route] attributes.
+     *
+     * Strategy 3 — Legacy path: parse path as frontName/controller/action/key/value
+     *   (used by DB URL rewrites stored in legacy format).
      */
-    protected function _getNoRouteConfig()
+    protected function _matchSymfony(Mage_Core_Controller_Request_Http $request): bool
+    {
+        \Maho\Profiler::start('mage::dispatch::symfony_match');
+
+        $dispatcher = new \Maho\Routing\ControllerDispatcher();
+
+        try {
+            if ($request->getModuleName() && $request->getControllerName() && $request->getActionName()) {
+                return $dispatcher->dispatchForward($request, Mage::app()->getResponse());
+            }
+
+            $collection = (new \Maho\Routing\RouteCollectionBuilder())->build();
+            $context = new \Symfony\Component\Routing\RequestContext();
+            $context->fromRequest($request->getSymfonyRequest());
+            $matcher = new \Symfony\Component\Routing\Matcher\UrlMatcher($collection, $context);
+
+            $pathInfo = $request->getPathInfo();
+            $normalizedPath = (strlen($pathInfo) > 1) ? rtrim($pathInfo, '/') : $pathInfo;
+
+            $params = $matcher->match($normalizedPath);
+
+            return $dispatcher->dispatch($params, $request, Mage::app()->getResponse());
+        } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException) {
+            return $dispatcher->dispatchLegacyPath($request, Mage::app()->getResponse());
+        } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException) {
+            return false;
+        } finally {
+            \Maho\Profiler::stop('mage::dispatch::symfony_match');
+        }
+    }
+
+    protected function _getNoRouteConfig(): string
     {
         return Mage::app()->getStore()->getConfig('web/default/no_route');
     }
 
-    /**
-     * Check if store is admin store
-     *
-     * @return bool
-     */
-    protected function _isAdmin()
+    protected function _isAdmin(): bool
     {
         return Mage::app()->getStore()->isAdmin();
     }
