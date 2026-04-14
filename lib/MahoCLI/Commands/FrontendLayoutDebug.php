@@ -140,23 +140,17 @@ class FrontendLayoutDebug extends BaseMahoCommand
 
         $response = Mage::app()->getResponse();
 
-        // Run middleware pipeline (URL rewrites, store resolution, etc.) and route matching
+        // Run pre-dispatch checks (store resolution, URL rewrites, etc.) then route matching
         ob_start();
 
         try {
-            $pipeline = new \Maho\Http\MiddlewarePipeline(function () use ($front, $request): void {
-                foreach ($front->getRouters() as $router) {
-                    if ($router->match($request)) {
-                        break;
-                    }
+            Mage::dispatchEvent('controller_front_dispatch_before', ['front' => $front]);
+
+            foreach ($front->getRouters() as $router) {
+                if ($router->match($request)) {
+                    break;
                 }
-            });
-
-            $pipeline->add(new \Maho\Http\Middleware\StoreResolutionMiddleware());
-            $pipeline->add(new \Maho\Http\Middleware\UrlRewriteMiddleware());
-            $pipeline->add(new \Maho\Http\Middleware\ConfigRewriteMiddleware());
-
-            $pipeline->run($request, $response);
+            }
         } catch (\Exception $e) {
             ob_end_clean();
             return ['success' => false, 'error' => $e->getMessage()];
