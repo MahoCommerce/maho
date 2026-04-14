@@ -26,9 +26,6 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
      */
     protected $_routers = [];
 
-    /** @var \Maho\Http\MiddlewareInterface[] */
-    protected array $_middlewares = [];
-
     protected $_urlCache = [];
 
     public const XML_STORE_ROUTERS_PATH = 'web/routers';
@@ -152,15 +149,6 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     }
 
     /**
-     * Add a middleware to the pipeline
-     */
-    public function addMiddleware(\Maho\Http\MiddlewareInterface $middleware): self
-    {
-        $this->_middlewares[] = $middleware;
-        return $this;
-    }
-
-    /**
      * @return $this
      * @throws Mage_Core_Exception
      */
@@ -171,17 +159,11 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 
         $request->setPathInfo()->setDispatched(false);
 
-        $this->_registerMiddlewares();
+        Mage::dispatchEvent('controller_front_dispatch_before', ['front' => $this]);
 
-        $pipeline = new \Maho\Http\MiddlewarePipeline(function () use ($request): void {
+        if (!$response->isRedirect()) {
             $this->_matchRoutes($request);
-        });
-
-        foreach ($this->_middlewares as $middleware) {
-            $pipeline->add($middleware);
         }
-
-        $pipeline->run($request, $response);
 
         // This event gives possibility to launch something before sending output (allow cookie setting)
         Mage::dispatchEvent('controller_front_send_response_before', ['front' => $this]);
@@ -193,24 +175,7 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     }
 
     /**
-     * Register the built-in middleware pipeline
-     */
-    protected function _registerMiddlewares(): void
-    {
-        if (!empty($this->_middlewares)) {
-            return;
-        }
-
-        $this->addMiddleware(new \Maho\Http\Middleware\BaseUrlMiddleware());
-        $this->addMiddleware(new \Maho\Http\Middleware\TrailingSlashMiddleware());
-        $this->addMiddleware(new \Maho\Http\Middleware\StoreResolutionMiddleware());
-        $this->addMiddleware(new \Maho\Http\Middleware\UrlRewriteMiddleware());
-        $this->addMiddleware(new \Maho\Http\Middleware\ConfigRewriteMiddleware());
-        $this->addMiddleware(new \Maho\Http\Middleware\HttpsEnforcementMiddleware());
-    }
-
-    /**
-     * Execute the router match loop (terminal handler for the middleware pipeline)
+     * Execute the router match loop.
      */
     protected function _matchRoutes(Mage_Core_Controller_Request_Http $request): void
     {
