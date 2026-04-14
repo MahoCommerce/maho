@@ -64,6 +64,7 @@ class Mage_Cms_Model_Wysiwyg_Config extends \Maho\DataObject
             'no_display'                    => false,
             'translator'                    => Mage::helper('cms'),
             'directives_url'                => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/directive'),
+            'validate_html_url'             => Mage::getSingleton('adminhtml/url')->getUrl('*/cms_wysiwyg/validateHtml'),
             'width'                         => '100%',
             'plugins'                       => [],
         ]);
