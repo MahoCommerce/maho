@@ -120,6 +120,8 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     {
         Mage::dispatchEvent('controller_front_init_before', ['front' => $this]);
 
+        $this->addRouter('symfony', new Mage_Core_Controller_Varien_Router_Symfony());
+
         $routersInfo = Mage::app()->getStore()->getConfig(self::XML_STORE_ROUTERS_PATH);
 
         if ($routersInfo) {
@@ -182,76 +184,16 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
         \Maho\Profiler::start('mage::dispatch::routers_match');
         $i = 0;
         while (!$request->isDispatched() && $i++ < 100) {
-            // Try Symfony route matcher first (attribute routes + XML catch-alls)
-            // Don't break — a controller may _forward() which unsets dispatched,
-            // and the while loop needs to continue to process the forward.
-            if (!$this->_matchSymfonyRoute($request)) {
-                // Fall back to legacy router loop (CMS, custom routers, default/404)
-                foreach ($this->_routers as $router) {
-                    /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
-                    if ($router->match($request)) {
-                        break;
-                    }
+            foreach ($this->_routers as $router) {
+                /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
+                if ($router->match($request)) {
+                    break;
                 }
             }
         }
         \Maho\Profiler::stop('mage::dispatch::routers_match');
         if ($i > 100) {
             Mage::throwException('Front controller reached 100 router match iterations');
-        }
-    }
-
-    /**
-     * Try to match the request using Symfony's UrlMatcher.
-     *
-     * Two matching strategies:
-     * 1. URL-based: matches the request path against compiled #[Route] attributes and XML catch-alls
-     * 2. Forward-based: when another router (CMS, Default) has set module/controller/action on the
-     *    request, resolves via the reverse lookup map and dispatches the attributed controller
-     */
-    protected function _matchSymfonyRoute(Mage_Core_Controller_Request_Http $request): bool
-    {
-        \Maho\Profiler::start('mage::dispatch::symfony_match');
-
-        try {
-            $dispatcher = new \Maho\Routing\ControllerDispatcher();
-
-            // Strategy 1: If another router has set module/controller/action, dispatch via reverse lookup
-            // This handles _forward() calls where the controller/action changed but the URL didn't
-            if ($request->getModuleName() && $request->getControllerName() && $request->getActionName()) {
-                $result = $dispatcher->dispatchForward($request, Mage::app()->getResponse());
-                if ($result) {
-                    return true;
-                }
-                // If forward dispatch failed, let legacy routers handle it — don't fall through
-                // to URL matching which would re-match the original URL, not the forwarded action
-                return false;
-            }
-
-            // Strategy 2: URL path matching (strip trailing slash for matching)
-            $collection = (new \Maho\Routing\RouteCollectionBuilder())->build();
-            $context = new \Symfony\Component\Routing\RequestContext();
-            $context->fromRequest($request->getSymfonyRequest());
-            $matcher = new \Symfony\Component\Routing\Matcher\UrlMatcher($collection, $context);
-
-            $pathInfo = $request->getPathInfo();
-            $normalizedPath = (strlen($pathInfo) > 1) ? rtrim($pathInfo, '/') : $pathInfo;
-
-            $params = $matcher->match($normalizedPath);
-
-            return $dispatcher->dispatch(
-                $params,
-                $request,
-                Mage::app()->getResponse(),
-            );
-        } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException) {
-            // Strategy 3: Parse legacy internal paths (frontName/controller/action/key/value)
-            // These come from URL rewrites which store target paths in legacy format
-            return $dispatcher->dispatchLegacyPath($request, Mage::app()->getResponse());
-        } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException) {
-            return false;
-        } finally {
-            \Maho\Profiler::stop('mage::dispatch::symfony_match');
         }
     }
 
