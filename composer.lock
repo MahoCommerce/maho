@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b34eac66bf2dadf312fa4891b32b8618",
+    "content-hash": "bde041527e4b56ee6e27f7f5eb4cdacc",
     "packages": [
         {
             "name": "altcha-org/altcha",
@@ -941,6 +941,64 @@
                 "source": "https://github.com/ezyang/htmlpurifier/tree/v4.19.0"
             },
             "time": "2025-10-17T16:34:55+00:00"
+        },
+        {
+            "name": "fballiano/openmage-image-cleaner",
+            "version": "1.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/fballiano/openmage-image-cleaner.git",
+                "reference": "dd74352d507829cd3f403adf07a2b81a577caf13"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/fballiano/openmage-image-cleaner/zipball/dd74352d507829cd3f403adf07a2b81a577caf13",
+                "reference": "dd74352d507829cd3f403adf07a2b81a577caf13",
+                "shasum": ""
+            },
+            "require": {
+                "magento-hackathon/magento-composer-installer": "*",
+                "php": ">=7.4.0"
+            },
+            "type": "magento-module",
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "OSL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Fabrizio Balliano",
+                    "email": "fabrizio@fabrizioballiano.com",
+                    "homepage": "http://fabrizioballiano.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Image cleaner module for OpenMage (and Magento 1.9)",
+            "homepage": "https://github.com/fballiano/openmage-image-cleaner",
+            "keywords": [
+                "magento",
+                "magento1",
+                "openmage"
+            ],
+            "support": {
+                "issues": "https://github.com/fballiano/openmage-image-cleaner/issues",
+                "source": "https://github.com/fballiano/openmage-image-cleaner/tree/1.6.0"
+            },
+            "funding": [
+                {
+                    "url": "https://www.buymeacoffee.com/fballiano",
+                    "type": "buy_me_a_coffee"
+                },
+                {
+                    "url": "https://paypal.me/fabrizioballiano",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fballiano",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-03-22T12:30:39+00:00"
         },
         {
             "name": "intervention/gif",

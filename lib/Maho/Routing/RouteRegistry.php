@@ -64,7 +64,7 @@ class RouteRegistry
         $adminFrontName = self::getAdminFrontName();
         if ($adminFrontName) {
             self::$routes['adminhtml'] = $adminFrontName;
-            self::$modules[$adminFrontName] = ['Mage_Adminhtml'];
+            self::$modules[$adminFrontName] = self::buildAdminModuleChain();
         }
 
         self::$initialized = true;
@@ -113,6 +113,47 @@ class RouteRegistry
     public static function getAdminFrontName(): string
     {
         return RouteCollectionBuilder::getAdminFrontNameStatic();
+    }
+
+    /**
+     * Build the admin module chain from config.xml, including third-party extensions.
+     *
+     * Third-party modules extend the admin router by adding entries under
+     * admin/routers/adminhtml/args/modules with before/after ordering attributes.
+     * This replicates the logic from the former Router_Standard::collectRoutes().
+     *
+     * @return string[]
+     */
+    protected static function buildAdminModuleChain(): array
+    {
+        $modules = ['Mage_Adminhtml'];
+
+        // Third-party modules inject controllers via admin/routers/adminhtml/args/modules
+        $modulesNode = Mage::getConfig()->getNode('admin/routers/adminhtml/args/modules');
+        if (!$modulesNode) {
+            return $modules;
+        }
+
+        foreach ($modulesNode->children() as $customModule) {
+            $moduleName = (string) $customModule;
+            if (!$moduleName) {
+                continue;
+            }
+
+            if ($before = $customModule->getAttribute('before')) {
+                $position = array_search($before, $modules, true);
+                $position = ($position === false) ? 0 : $position;
+                array_splice($modules, $position, 0, $moduleName);
+            } elseif ($after = $customModule->getAttribute('after')) {
+                $position = array_search($after, $modules, true);
+                $position = ($position === false) ? count($modules) : $position + 1;
+                array_splice($modules, $position, 0, $moduleName);
+            } else {
+                $modules[] = $moduleName;
+            }
+        }
+
+        return $modules;
     }
 
     protected static function ensureInitialized(): void

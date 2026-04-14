@@ -64,7 +64,8 @@
         "symfony/polyfill-php85": "^1.32",
         "symfony/validator": "^7.4",
         "symfony/var-dumper": "^7.4",
-        "symfony/routing": "^7.4"
+        "symfony/routing": "^7.4",
+        "fballiano/openmage-image-cleaner": "^1.6"
     },
     "replace": {
         "magento-hackathon/magento-composer-installer": "^99.99",
