@@ -33,19 +33,6 @@
             </currencysymbol>
         </blocks>
     </global>
-
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <currencysymbol>Mage_CurrencySymbol_Adminhtml</currencysymbol>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
-
     <adminhtml>
         <layout>
             <updates>

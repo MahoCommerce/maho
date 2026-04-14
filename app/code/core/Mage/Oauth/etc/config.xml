@@ -64,17 +64,6 @@
             </email>
         </template>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <oauth before="Mage_Adminhtml">Mage_Oauth_Adminhtml</oauth>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <translate>
             <modules>

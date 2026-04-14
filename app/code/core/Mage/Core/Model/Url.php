@@ -385,7 +385,8 @@ class Mage_Core_Model_Url extends \Maho\DataObject
          * Add availability support urls without store code
          */
         if ($this->getType() == Mage_Core_Model_Store::URL_TYPE_LINK
-            && Mage::app()->getRequest()->isDirectAccessFrontendName($this->getRouteFrontName())
+            && ($routeFrontName = $this->getRouteFrontName()) !== null
+            && Mage::app()->getRequest()->isDirectAccessFrontendName($routeFrontName)
         ) {
             $this->setType(Mage_Core_Model_Store::URL_TYPE_DIRECT_LINK);
         }

@@ -48,17 +48,6 @@
             </contentversion>
         </blocks>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Maho_ContentVersion before="Mage_Adminhtml">Maho_ContentVersion_Adminhtml</Maho_ContentVersion>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>

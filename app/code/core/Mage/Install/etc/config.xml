@@ -44,15 +44,6 @@
         <secure_url>
             <install>/install/wizard/checkSecureHost</install>
         </secure_url>
-        <routers>
-            <install>
-                <use>install</use>
-                <args>
-                    <module>Mage_Install</module>
-                    <frontName>install</frontName>
-                </args>
-            </install>
-        </routers>
     </frontend>
     <install>
         <databases>

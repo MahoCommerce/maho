@@ -258,15 +258,4 @@
             </hosted_pro>
         </payment>
     </default>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Paypal before="Mage_Adminhtml">Mage_Paypal_Adminhtml</Mage_Paypal>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
 </config>

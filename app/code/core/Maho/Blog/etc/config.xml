@@ -103,17 +103,6 @@
             </resources_function_prefix>
         </v2>
     </api>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <blog before="Mage_Adminhtml">Maho_Blog_Adminhtml</blog>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <layout>
             <updates>

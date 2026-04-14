@@ -65,16 +65,4 @@
             </updates>
         </layout>
     </frontend>
-
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Authorizenet before="Mage_Adminhtml">Mage_Authorizenet_Adminhtml</Mage_Authorizenet>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
 </config>

@@ -84,18 +84,6 @@
         </layout>
     </frontend>
 
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <maho_paypal before="Mage_Adminhtml">Maho_Paypal_Adminhtml</maho_paypal>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
-
     <adminhtml>
         <translate>
             <modules>

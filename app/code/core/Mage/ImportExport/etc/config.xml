@@ -106,17 +106,6 @@
             </import>
         </importexport>
     </global>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <importexport before="Mage_Adminhtml">Mage_ImportExport_Adminhtml</importexport>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
     <adminhtml>
         <translate>
             <modules>

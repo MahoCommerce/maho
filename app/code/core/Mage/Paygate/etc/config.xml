@@ -63,18 +63,6 @@
             </modules>
         </translate>
     </frontend>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <Mage_Paygate before="Mage_Adminhtml">Mage_Paygate_Adminhtml</Mage_Paygate>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
-
     <default>
         <payment>
             <authorizenet>

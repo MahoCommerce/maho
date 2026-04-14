@@ -84,15 +84,4 @@
             </updates>
         </layout>
     </adminhtml>
-    <admin>
-        <routers>
-            <adminhtml>
-                <args>
-                    <modules>
-                        <widget before="Mage_Adminhtml">Mage_Widget_Adminhtml</widget>
-                    </modules>
-                </args>
-            </adminhtml>
-        </routers>
-    </admin>
 </config>
