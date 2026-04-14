@@ -300,9 +300,8 @@ class Mage_Cron_Model_Observer
 
         $now = Mage::getSingleton('core/date')->gmtTimestamp();
         foreach ($history->getIterator() as $record) {
-            if (empty($record->getExecutedAt())
-                || (strtotime($record->getExecutedAt()) < $now - $historyLifetimes[$record->getStatus()])
-            ) {
+            $referenceTime = $record->getExecutedAt() ?: $record->getScheduledAt();
+            if ($referenceTime && strtotime($referenceTime) < $now - $historyLifetimes[$record->getStatus()]) {
                 $record->delete();
             }
         }
