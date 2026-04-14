@@ -10,14 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Action
 {
     /**
      * New subscription action
      */
-    #[Route('/newsletter/subscriber/new', name: 'newsletter.subscriber.new', methods: ['POST'])]
+    #[Maho\Config\Route('/newsletter/subscriber/new', name: 'newsletter.subscriber.new', methods: ['POST'])]
     public function newAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -67,7 +65,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Subscription confirm action
      */
-    #[Route('/newsletter/subscriber/confirm', name: 'newsletter.subscriber.confirm', methods: ['GET'])]
+    #[Maho\Config\Route('/newsletter/subscriber/confirm', name: 'newsletter.subscriber.confirm', methods: ['GET'])]
     public function confirmAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');
@@ -97,7 +95,7 @@ class Mage_Newsletter_SubscriberController extends Mage_Core_Controller_Front_Ac
     /**
      * Unsubscribe newsletter
      */
-    #[Route('/newsletter/subscriber/unsubscribe', name: 'newsletter.subscriber.unsubscribe', methods: ['GET'])]
+    #[Maho\Config\Route('/newsletter/subscriber/unsubscribe', name: 'newsletter.subscriber.unsubscribe', methods: ['GET'])]
     public function unsubscribeAction(): void
     {
         $id    = (int) $this->getRequest()->getParam('id');

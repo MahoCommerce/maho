@@ -9,8 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -19,7 +17,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'catalog/reviews_ratings/ratings';
 
-    #[Route('/admin/rating/index')]
+    #[Maho\Config\Route('/admin/rating/index')]
 
     public function indexAction(): void
     {
@@ -33,7 +31,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    #[Route('/admin/rating/edit')]
+    #[Maho\Config\Route('/admin/rating/edit')]
 
     public function editAction(): void
     {
@@ -55,7 +53,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    #[Route('/admin/rating/new')]
+    #[Maho\Config\Route('/admin/rating/new')]
 
     public function newAction(): void
     {
@@ -65,7 +63,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
     /**
      * Save rating
      */
-    #[Route('/admin/rating/save')]
+    #[Maho\Config\Route('/admin/rating/save')]
     public function saveAction(): void
     {
         $this->_initEnityId();
@@ -119,7 +117,7 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/rating/delete')]
+    #[Maho\Config\Route('/admin/rating/delete')]
 
     public function deleteAction(): void
     {

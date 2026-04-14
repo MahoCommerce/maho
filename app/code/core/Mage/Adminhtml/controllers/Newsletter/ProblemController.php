@@ -9,8 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -19,7 +17,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
      */
     public const ADMIN_RESOURCE = 'newsletter/problem';
 
-    #[Route('/admin/newsletter_problem/index')]
+    #[Maho\Config\Route('/admin/newsletter_problem/index')]
 
     public function indexAction(): void
     {
@@ -46,7 +44,7 @@ class Mage_Adminhtml_Newsletter_ProblemController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
-    #[Route('/admin/newsletter_problem/grid')]
+    #[Maho\Config\Route('/admin/newsletter_problem/grid')]
 
     public function gridAction(): void
     {

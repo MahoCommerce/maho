@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -57,7 +55,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         return $this;
     }
 
-    #[Route('/admin/promo_quote/index')]
+    #[Maho\Config\Route('/admin/promo_quote/index')]
 
     public function indexAction(): void
     {
@@ -68,14 +66,14 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
             ->renderLayout();
     }
 
-    #[Route('/admin/promo_quote/new')]
+    #[Maho\Config\Route('/admin/promo_quote/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/promo_quote/edit')]
+    #[Maho\Config\Route('/admin/promo_quote/edit')]
 
     public function editAction(): void
     {
@@ -122,7 +120,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Promo quote save action
      */
-    #[Route('/admin/promo_quote/save')]
+    #[Maho\Config\Route('/admin/promo_quote/save')]
     public function saveAction(): void
     {
         if ($this->getRequest()->getPost()) {
@@ -209,7 +207,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/promo_quote/delete')]
+    #[Maho\Config\Route('/admin/promo_quote/delete')]
 
     public function deleteAction(): void
     {
@@ -254,7 +252,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
      *
      * @throws Mage_Core_Exception
      */
-    #[Route('/admin/promo_quote/newConditionHtml')]
+    #[Maho\Config\Route('/admin/promo_quote/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -286,7 +284,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         $this->getResponse()->setBody($html);
     }
 
-    #[Route('/admin/promo_quote/newActionHtml')]
+    #[Maho\Config\Route('/admin/promo_quote/newActionHtml')]
 
     public function newActionHtmlAction(): void
     {
@@ -312,7 +310,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         $this->getResponse()->setBody($html);
     }
 
-    #[Route('/admin/promo_quote/applyRules')]
+    #[Maho\Config\Route('/admin/promo_quote/applyRules')]
 
     public function applyRulesAction(): void
     {
@@ -320,7 +318,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
         $this->renderLayout();
     }
 
-    #[Route('/admin/promo_quote/grid')]
+    #[Maho\Config\Route('/admin/promo_quote/grid')]
 
     public function gridAction(): void
     {
@@ -330,7 +328,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Coupon codes grid
      */
-    #[Route('/admin/promo_quote/couponsGrid')]
+    #[Maho\Config\Route('/admin/promo_quote/couponsGrid')]
     public function couponsGridAction(): void
     {
         $this->_initRule();
@@ -340,7 +338,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Export coupon codes as excel xml file
      */
-    #[Route('/admin/promo_quote/exportCouponsXml')]
+    #[Maho\Config\Route('/admin/promo_quote/exportCouponsXml')]
     public function exportCouponsXmlAction(): void
     {
         $this->_initRule();
@@ -357,7 +355,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Export coupon codes as CSV file
      */
-    #[Route('/admin/promo_quote/exportCouponsCsv')]
+    #[Maho\Config\Route('/admin/promo_quote/exportCouponsCsv')]
     public function exportCouponsCsvAction(): void
     {
         $this->_initRule();
@@ -374,7 +372,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Coupons mass delete action
      */
-    #[Route('/admin/promo_quote/couponsMassDelete')]
+    #[Maho\Config\Route('/admin/promo_quote/couponsMassDelete')]
     public function couponsMassDeleteAction(): void
     {
         $this->_initRule();
@@ -399,7 +397,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Generate Coupons action
      */
-    #[Route('/admin/promo_quote/generate')]
+    #[Maho\Config\Route('/admin/promo_quote/generate')]
     public function generateAction(): void
     {
         if (!$this->getRequest()->isAjax()) {
@@ -446,7 +444,7 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     /**
      * Chooser source action
      */
-    #[Route('/admin/promo_quote/chooser')]
+    #[Maho\Config\Route('/admin/promo_quote/chooser')]
     public function chooserAction(): void
     {
         $uniqId = $this->getRequest()->getParam('uniq_id');

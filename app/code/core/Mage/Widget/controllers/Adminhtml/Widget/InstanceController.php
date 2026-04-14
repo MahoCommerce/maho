@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -87,7 +85,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Widget Instances Grid
      */
-    #[Route('/admin/widget_instance/index')]
+    #[Maho\Config\Route('/admin/widget_instance/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Widgets'));
@@ -99,7 +97,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * New widget instance action (forward to edit action)
      */
-    #[Route('/admin/widget_instance/new')]
+    #[Maho\Config\Route('/admin/widget_instance/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -108,7 +106,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Edit widget instance action
      */
-    #[Route('/admin/widget_instance/edit')]
+    #[Maho\Config\Route('/admin/widget_instance/edit')]
     public function editAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
@@ -137,7 +135,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Validate action
      */
-    #[Route('/admin/widget_instance/validate')]
+    #[Maho\Config\Route('/admin/widget_instance/validate')]
     public function validateAction(): void
     {
         $result = $this->_initWidgetInstance()->validate();
@@ -154,7 +152,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Save action
      */
-    #[Route('/admin/widget_instance/save')]
+    #[Maho\Config\Route('/admin/widget_instance/save')]
     public function saveAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
@@ -194,7 +192,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
      * Delete Action
      * @throws Mage_Core_Exception|Throwable
      */
-    #[Route('/admin/widget_instance/delete')]
+    #[Maho\Config\Route('/admin/widget_instance/delete')]
     public function deleteAction(): void
     {
         $widgetInstance = $this->_initWidgetInstance();
@@ -214,7 +212,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Categories chooser Action (Ajax request)
      */
-    #[Route('/admin/widget_instance/categories')]
+    #[Maho\Config\Route('/admin/widget_instance/categories')]
     public function categoriesAction(): void
     {
         $selected = $this->getRequest()->getParam('selected', '');
@@ -231,7 +229,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Products chooser Action (Ajax request)
      */
-    #[Route('/admin/widget_instance/products')]
+    #[Maho\Config\Route('/admin/widget_instance/products')]
     public function productsAction(): void
     {
         $selected = $this->getRequest()->getParam('selected', '');
@@ -251,7 +249,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Blocks Action (Ajax request)
      */
-    #[Route('/admin/widget_instance/blocks')]
+    #[Maho\Config\Route('/admin/widget_instance/blocks')]
     public function blocksAction(): void
     {
         /** @var Mage_Widget_Model_Widget_Instance $widgetInstance */
@@ -272,7 +270,7 @@ class Mage_Widget_Adminhtml_Widget_InstanceController extends Mage_Adminhtml_Con
     /**
      * Templates Chooser Action (Ajax request)
      */
-    #[Route('/admin/widget_instance/template')]
+    #[Maho\Config\Route('/admin/widget_instance/template')]
     public function templateAction(): void
     {
         /** @var Mage_Widget_Model_Widget_Instance $widgetInstance */

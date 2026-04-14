@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -42,7 +40,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
         return $txn;
     }
 
-    #[Route('/admin/sales_transactions/index')]
+    #[Maho\Config\Route('/admin/sales_transactions/index')]
 
     public function indexAction(): void
     {
@@ -57,7 +55,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * Ajax grid action
      */
-    #[Route('/admin/sales_transactions/grid')]
+    #[Maho\Config\Route('/admin/sales_transactions/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false);
@@ -67,7 +65,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * View Transaction Details action
      */
-    #[Route('/admin/sales_transactions/view')]
+    #[Maho\Config\Route('/admin/sales_transactions/view')]
     public function viewAction(): void
     {
         $txn = $this->_initTransaction();
@@ -86,7 +84,7 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     /**
      * Fetch transaction details action
      */
-    #[Route('/admin/sales_transactions/fetch')]
+    #[Maho\Config\Route('/admin/sales_transactions/fetch')]
     public function fetchAction(): void
     {
         $txn = $this->_initTransaction();

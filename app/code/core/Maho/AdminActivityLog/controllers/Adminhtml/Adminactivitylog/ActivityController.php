@@ -9,11 +9,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extends Mage_Adminhtml_Controller_Action
 {
-    #[Route('/admin/adminactivitylog_activity/index')]
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Admin Activity Log'));
@@ -25,7 +23,7 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->renderLayout();
     }
 
-    #[Route('/admin/adminactivitylog_activity/grid')]
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/grid')]
 
     public function gridAction(): void
     {
@@ -33,7 +31,7 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->renderLayout();
     }
 
-    #[Route('/admin/adminactivitylog_activity/view')]
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/view')]
 
     public function viewAction(): void
     {
@@ -59,7 +57,7 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->renderLayout();
     }
 
-    #[Route('/admin/adminactivitylog_activity/exportCsv')]
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/exportCsv')]
 
     public function exportCsvAction(): void
     {
@@ -70,7 +68,7 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_ActivityController extend
         $this->_prepareDownloadResponse($fileName, $content);
     }
 
-    #[Route('/admin/adminactivitylog_activity/exportXml')]
+    #[Maho\Config\Route('/admin/adminactivitylog_activity/exportXml')]
 
     public function exportXmlAction(): void
     {

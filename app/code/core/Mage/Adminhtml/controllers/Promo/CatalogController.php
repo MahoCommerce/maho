@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -50,7 +48,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         return $this;
     }
 
-    #[Route('/admin/promo_catalog/index')]
+    #[Maho\Config\Route('/admin/promo_catalog/index')]
 
     public function indexAction(): void
     {
@@ -69,14 +67,14 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
             ->renderLayout();
     }
 
-    #[Route('/admin/promo_catalog/new')]
+    #[Maho\Config\Route('/admin/promo_catalog/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/promo_catalog/edit')]
+    #[Maho\Config\Route('/admin/promo_catalog/edit')]
 
     public function editAction(): void
     {
@@ -116,7 +114,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_addBreadcrumb($breadcrumb, $breadcrumb)->renderLayout();
     }
 
-    #[Route('/admin/promo_catalog/save')]
+    #[Maho\Config\Route('/admin/promo_catalog/save')]
 
     public function saveAction(): void
     {
@@ -197,7 +195,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/promo_catalog/delete')]
+    #[Maho\Config\Route('/admin/promo_catalog/delete')]
 
     public function deleteAction(): void
     {
@@ -238,7 +236,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/promo_catalog/newConditionHtml')]
+    #[Maho\Config\Route('/admin/promo_catalog/newConditionHtml')]
 
     public function newConditionHtmlAction(): void
     {
@@ -264,7 +262,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
         $this->getResponse()->setBody($html);
     }
 
-    #[Route('/admin/promo_catalog/newActionHtml')]
+    #[Maho\Config\Route('/admin/promo_catalog/newActionHtml')]
 
     public function newActionHtmlAction(): void
     {
@@ -293,7 +291,7 @@ class Mage_Adminhtml_Promo_CatalogController extends Mage_Adminhtml_Controller_A
     /**
      * Apply all active catalog price rules
      */
-    #[Route('/admin/promo_catalog/applyRules')]
+    #[Maho\Config\Route('/admin/promo_catalog/applyRules')]
     public function applyRulesAction(): void
     {
         $errorMessage = Mage::helper('catalogrule')->__('Unable to apply rules.');

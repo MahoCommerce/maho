@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -29,7 +27,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
         return $this;
     }
 
-    #[Route('/admin/catalog_search/index')]
+    #[Maho\Config\Route('/admin/catalog_search/index')]
 
     public function indexAction(): void
     {
@@ -41,14 +39,14 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
             ->renderLayout();
     }
 
-    #[Route('/admin/catalog_search/new')]
+    #[Maho\Config\Route('/admin/catalog_search/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/catalog_search/edit')]
+    #[Maho\Config\Route('/admin/catalog_search/edit')]
 
     public function editAction(): void
     {
@@ -92,7 +90,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
     /**
      * Save search query
      */
-    #[Route('/admin/catalog_search/save')]
+    #[Maho\Config\Route('/admin/catalog_search/save')]
     public function saveAction(): void
     {
         $hasError   = false;
@@ -147,7 +145,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
         }
     }
 
-    #[Route('/admin/catalog_search/delete')]
+    #[Maho\Config\Route('/admin/catalog_search/delete')]
 
     public function deleteAction(): void
     {
@@ -169,7 +167,7 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/catalog_search/massDelete')]
+    #[Maho\Config\Route('/admin/catalog_search/massDelete')]
 
     public function massDeleteAction(): void
     {

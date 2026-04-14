@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Report_Abstract
 {
     /**
@@ -20,7 +18,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
      * @return $this
      */
     #[\Override]
-    #[Route('/admin/report_sales/_init')]
+    #[Maho\Config\Route('/admin/report_sales/_init')]
     public function _initAction()
     {
         parent::_initAction();
@@ -28,7 +26,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         return $this;
     }
 
-    #[Route('/admin/report_sales/sales')]
+    #[Maho\Config\Route('/admin/report_sales/sales')]
 
     public function salesAction(): void
     {
@@ -51,7 +49,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         $this->renderLayout();
     }
 
-    #[Route('/admin/report_sales/bestsellers')]
+    #[Maho\Config\Route('/admin/report_sales/bestsellers')]
 
     public function bestsellersAction(): void
     {
@@ -77,7 +75,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export bestsellers report grid to CSV format
      */
-    #[Route('/admin/report_sales/exportBestsellersCsv')]
+    #[Maho\Config\Route('/admin/report_sales/exportBestsellersCsv')]
     public function exportBestsellersCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_bestsellers_grid');
@@ -88,7 +86,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export bestsellers report grid to Excel XML format
      */
-    #[Route('/admin/report_sales/exportBestsellersExcel')]
+    #[Maho\Config\Route('/admin/report_sales/exportBestsellersExcel')]
     public function exportBestsellersExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_bestsellers_grid');
@@ -99,7 +97,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export sales report grid to CSV format
      */
-    #[Route('/admin/report_sales/exportSalesCsv')]
+    #[Maho\Config\Route('/admin/report_sales/exportSalesCsv')]
     public function exportSalesCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_sales_grid');
@@ -110,7 +108,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export sales report grid to Excel XML format
      */
-    #[Route('/admin/report_sales/exportSalesExcel')]
+    #[Maho\Config\Route('/admin/report_sales/exportSalesExcel')]
     public function exportSalesExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_sales_grid');
@@ -118,7 +116,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         $this->_prepareDownloadResponse(...$grid->getExcelFile('sales.xml', -1));
     }
 
-    #[Route('/admin/report_sales/tax')]
+    #[Maho\Config\Route('/admin/report_sales/tax')]
 
     public function taxAction(): void
     {
@@ -144,7 +142,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export tax report grid to CSV format
      */
-    #[Route('/admin/report_sales/exportTaxCsv')]
+    #[Maho\Config\Route('/admin/report_sales/exportTaxCsv')]
     public function exportTaxCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_tax_grid');
@@ -155,7 +153,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export tax report grid to Excel XML format
      */
-    #[Route('/admin/report_sales/exportTaxExcel')]
+    #[Maho\Config\Route('/admin/report_sales/exportTaxExcel')]
     public function exportTaxExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_tax_grid');
@@ -163,7 +161,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         $this->_prepareDownloadResponse(...$grid->getExcelFile('tax.xml', -1));
     }
 
-    #[Route('/admin/report_sales/shipping')]
+    #[Maho\Config\Route('/admin/report_sales/shipping')]
 
     public function shippingAction(): void
     {
@@ -189,7 +187,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export shipping report grid to CSV format
      */
-    #[Route('/admin/report_sales/exportShippingCsv')]
+    #[Maho\Config\Route('/admin/report_sales/exportShippingCsv')]
     public function exportShippingCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_shipping_grid');
@@ -200,7 +198,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export shipping report grid to Excel XML format
      */
-    #[Route('/admin/report_sales/exportShippingExcel')]
+    #[Maho\Config\Route('/admin/report_sales/exportShippingExcel')]
     public function exportShippingExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_shipping_grid');
@@ -208,7 +206,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         $this->_prepareDownloadResponse(...$grid->getExcelFile('shipping.xml', -1));
     }
 
-    #[Route('/admin/report_sales/invoiced')]
+    #[Maho\Config\Route('/admin/report_sales/invoiced')]
 
     public function invoicedAction(): void
     {
@@ -234,7 +232,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export invoiced report grid to CSV format
      */
-    #[Route('/admin/report_sales/exportInvoicedCsv')]
+    #[Maho\Config\Route('/admin/report_sales/exportInvoicedCsv')]
     public function exportInvoicedCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_invoiced_grid');
@@ -245,7 +243,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export invoiced report grid to Excel XML format
      */
-    #[Route('/admin/report_sales/exportInvoicedExcel')]
+    #[Maho\Config\Route('/admin/report_sales/exportInvoicedExcel')]
     public function exportInvoicedExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_invoiced_grid');
@@ -253,7 +251,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         $this->_prepareDownloadResponse(...$grid->getExcelFile('invoiced.xml', -1));
     }
 
-    #[Route('/admin/report_sales/refunded')]
+    #[Maho\Config\Route('/admin/report_sales/refunded')]
 
     public function refundedAction(): void
     {
@@ -279,7 +277,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export refunded report grid to CSV format
      */
-    #[Route('/admin/report_sales/exportRefundedCsv')]
+    #[Maho\Config\Route('/admin/report_sales/exportRefundedCsv')]
     public function exportRefundedCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_refunded_grid');
@@ -290,7 +288,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export refunded report grid to Excel XML format
      */
-    #[Route('/admin/report_sales/exportRefundedExcel')]
+    #[Maho\Config\Route('/admin/report_sales/exportRefundedExcel')]
     public function exportRefundedExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_refunded_grid');
@@ -298,7 +296,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
         $this->_prepareDownloadResponse(...$grid->getExcelFile('refunded.xml', -1));
     }
 
-    #[Route('/admin/report_sales/coupons')]
+    #[Maho\Config\Route('/admin/report_sales/coupons')]
 
     public function couponsAction(): void
     {
@@ -324,7 +322,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export coupons report grid to CSV format
      */
-    #[Route('/admin/report_sales/exportCouponsCsv')]
+    #[Maho\Config\Route('/admin/report_sales/exportCouponsCsv')]
     public function exportCouponsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_coupons_grid');
@@ -335,7 +333,7 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     /**
      * Export coupons report grid to Excel XML format
      */
-    #[Route('/admin/report_sales/exportCouponsExcel')]
+    #[Maho\Config\Route('/admin/report_sales/exportCouponsExcel')]
     public function exportCouponsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_sales_coupons_grid');

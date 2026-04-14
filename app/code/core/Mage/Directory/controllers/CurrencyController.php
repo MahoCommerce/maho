@@ -9,11 +9,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Directory_CurrencyController extends Mage_Core_Controller_Front_Action
 {
-    #[Route('/directory/currency/switch', name: 'directory.currency.switch')]
+    #[Maho\Config\Route('/directory/currency/switch', name: 'directory.currency.switch')]
     public function switchAction(): void
     {
         if ($curency = (string) $this->getRequest()->getParam('currency')) {

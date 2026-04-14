@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Controller_Sales_Shipment
 {
     /**
@@ -109,7 +107,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Shipment information page
      */
     #[\Override]
-    #[Route('/admin/sales_order_shipment/view')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/view')]
     public function viewAction(): void
     {
         $shipment = $this->_initShipment();
@@ -132,7 +130,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Start create shipment action
      */
-    #[Route('/admin/sales_order_shipment/start')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/start')]
     public function startAction(): void
     {
         /**
@@ -144,7 +142,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Shipment create page
      */
-    #[Route('/admin/sales_order_shipment/new')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/new')]
     public function newAction(): void
     {
         if ($shipment = $this->_initShipment()) {
@@ -167,7 +165,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Save shipment
      * We can save only new shipment. Existing shipments are not editable
      */
-    #[Route('/admin/sales_order_shipment/save')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost('shipment');
@@ -248,7 +246,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Send email with shipment data to customer
      */
-    #[Route('/admin/sales_order_shipment/email')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/email')]
     public function emailAction(): void
     {
         try {
@@ -278,7 +276,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Add new tracking number action
      */
-    #[Route('/admin/sales_order_shipment/addTrack')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/addTrack')]
     public function addTrackAction(): void
     {
         try {
@@ -328,7 +326,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Remove tracking number from shipment
      */
-    #[Route('/admin/sales_order_shipment/removeTrack')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/removeTrack')]
     public function removeTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
@@ -368,7 +366,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * View shipment tracking information
      */
-    #[Route('/admin/sales_order_shipment/viewTrack')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/viewTrack')]
     public function viewTrackAction(): void
     {
         $trackId    = $this->getRequest()->getParam('track_id');
@@ -412,7 +410,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Add comment to shipment history
      */
-    #[Route('/admin/sales_order_shipment/addComment')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/addComment')]
     public function addCommentAction(): void
     {
         try {
@@ -519,7 +517,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Create shipping label action for specific shipment
      */
-    #[Route('/admin/sales_order_shipment/createLabel')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/createLabel')]
     public function createLabelAction(): void
     {
         $response = new \Maho\DataObject();
@@ -545,7 +543,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Print label for one specific shipment
      */
-    #[Route('/admin/sales_order_shipment/printLabel')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/printLabel')]
     public function printLabelAction()
     {
         try {
@@ -596,7 +594,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
     /**
      * Create pdf document with information about packages
      */
-    #[Route('/admin/sales_order_shipment/printPackage')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/printPackage')]
     public function printPackageAction(): void
     {
         $shipment = $this->_initShipment();
@@ -617,7 +615,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      * Batch print shipping labels for whole shipments.
      * Push pdf document with shipping labels to user browser
      */
-    #[Route('/admin/sales_order_shipment/massPrintShippingLabel')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/massPrintShippingLabel')]
     public function massPrintShippingLabelAction(): void
     {
         $request = $this->getRequest();
@@ -855,7 +853,7 @@ class Mage_Adminhtml_Sales_Order_ShipmentController extends Mage_Adminhtml_Contr
      *
      * @return Mage_Core_Controller_Response_Http
      */
-    #[Route('/admin/sales_order_shipment/getShippingItemsGrid')]
+    #[Maho\Config\Route('/admin/sales_order_shipment/getShippingItemsGrid')]
     public function getShippingItemsGridAction()
     {
         $this->_initShipment();

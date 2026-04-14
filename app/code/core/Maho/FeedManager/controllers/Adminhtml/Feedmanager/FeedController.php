@@ -10,8 +10,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminhtml_Controller_Action
 {
     use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
@@ -49,7 +47,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         return $this;
     }
 
-    #[Route('/admin/feedmanager_feed/index')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/index')]
 
     public function indexAction(): void
     {
@@ -61,14 +59,14 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->renderLayout();
     }
 
-    #[Route('/admin/feedmanager_feed/new')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/feedmanager_feed/edit')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/edit')]
 
     public function editAction(): void
     {
@@ -106,7 +104,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->renderLayout();
     }
 
-    #[Route('/admin/feedmanager_feed/save')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/save')]
 
     public function saveAction(): void
     {
@@ -258,7 +256,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         return $arr['conditions'];
     }
 
-    #[Route('/admin/feedmanager_feed/delete')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/delete')]
 
     public function deleteAction(): void
     {
@@ -285,7 +283,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Duplicate a feed
      */
-    #[Route('/admin/feedmanager_feed/duplicate')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/duplicate')]
     public function duplicateAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -352,7 +350,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Generate action - redirects to edit page where async batch JS handles generation
      */
-    #[Route('/admin/feedmanager_feed/generate')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/generate')]
     public function generateAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -377,7 +375,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to get generation status
      */
-    #[Route('/admin/feedmanager_feed/status')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/status')]
     public function statusAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -394,7 +392,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action for CSV preview - uses Mapper for consistent output
      */
-    #[Route('/admin/feedmanager_feed/csvPreview')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/csvPreview')]
     public function csvPreviewAction(): void
     {
         $feedId = (int) $this->getRequest()->getParam('id');
@@ -456,7 +454,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action for JSON preview - uses Mapper for consistent output
      */
-    #[Route('/admin/feedmanager_feed/jsonPreview')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/jsonPreview')]
     public function jsonPreviewAction(): void
     {
         $feedId = (int) $this->getRequest()->getParam('id');
@@ -509,7 +507,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action for XML preview - uses Mapper for consistent output
      */
-    #[Route('/admin/feedmanager_feed/xmlPreview')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/xmlPreview')]
     public function xmlPreviewAction(): void
     {
         $feedId = (int) $this->getRequest()->getParam('id');
@@ -618,7 +616,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to get platform preset data for CSV/JSON/XML builders
      */
-    #[Route('/admin/feedmanager_feed/platformPreset')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/platformPreset')]
     public function platformPresetAction(): void
     {
         $platform = $this->getRequest()->getParam('platform');
@@ -702,7 +700,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Reset a hung feed
      */
-    #[Route('/admin/feedmanager_feed/reset')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/reset')]
     public function resetAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -753,7 +751,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
-    #[Route('/admin/feedmanager_feed/view')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/view')]
 
     public function viewAction(): void
     {
@@ -792,7 +790,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         }
     }
 
-    #[Route('/admin/feedmanager_feed/download')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/download')]
 
     public function downloadAction(): void
     {
@@ -839,7 +837,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
             $this->_redirect('*/*/');
         }
     }
-    #[Route('/admin/feedmanager_feed/massStatus')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/massStatus')]
     public function massStatusAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
@@ -869,7 +867,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/feedmanager_feed/massDelete')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/massDelete')]
 
     public function massDeleteAction(): void
     {
@@ -899,7 +897,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/feedmanager_feed/massGenerate')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/massGenerate')]
 
     public function massGenerateAction(): void
     {
@@ -957,7 +955,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/feedmanager_feed/logsGrid')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/logsGrid')]
 
     public function logsGridAction(): void
     {
@@ -972,7 +970,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to initialize batch generation
      */
-    #[Route('/admin/feedmanager_feed/generateInit')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateInit')]
     public function generateInitAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -1029,7 +1027,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to process a single batch
      */
-    #[Route('/admin/feedmanager_feed/generateBatch')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateBatch')]
     public function generateBatchAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
@@ -1057,7 +1055,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to finalize batch generation
      */
-    #[Route('/admin/feedmanager_feed/generateFinalize')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateFinalize')]
     public function generateFinalizeAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
@@ -1085,7 +1083,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to cancel batch generation
      */
-    #[Route('/admin/feedmanager_feed/generateCancel')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateCancel')]
     public function generateCancelAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
@@ -1112,7 +1110,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to force reset a stuck generation
      */
-    #[Route('/admin/feedmanager_feed/forceReset')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/forceReset')]
     public function forceResetAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -1159,7 +1157,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action to get batch job status
      */
-    #[Route('/admin/feedmanager_feed/generateStatus')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/generateStatus')]
     public function generateStatusAction(): void
     {
         $jobId = $this->getRequest()->getParam('job_id');
@@ -1186,7 +1184,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * Mass batch generate action - initializes batch generation for multiple feeds
      */
-    #[Route('/admin/feedmanager_feed/massBatchGenerate')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/massBatchGenerate')]
     public function massBatchGenerateAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
@@ -1240,7 +1238,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     /**
      * AJAX action for manual upload
      */
-    #[Route('/admin/feedmanager_feed/upload')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/upload')]
     public function uploadAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -1339,7 +1337,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
      * New condition HTML action (AJAX)
      * Used by the Rule conditions builder to add new conditions
      */
-    #[Route('/admin/feedmanager_feed/newConditionHtml')]
+    #[Maho\Config\Route('/admin/feedmanager_feed/newConditionHtml')]
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');

@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front_Action
 {
     #[\Override]
@@ -28,7 +26,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         return $this;
     }
 
-    #[Route('/productalert/unsubscribe/price', name: 'productalert.unsubscribe.price')]
+    #[Maho\Config\Route('/productalert/unsubscribe/price', name: 'productalert.unsubscribe.price')]
     public function priceAction(): void
     {
         $productId  = (int) $this->getRequest()->getParam('product');
@@ -65,7 +63,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $this->_redirectUrl($product->getProductUrl());
     }
 
-    #[Route('/productalert/unsubscribe/priceAll', name: 'productalert.unsubscribe.priceall')]
+    #[Maho\Config\Route('/productalert/unsubscribe/priceAll', name: 'productalert.unsubscribe.priceall')]
     public function priceAllAction(): void
     {
         $session = Mage::getSingleton('customer/session');
@@ -83,7 +81,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $this->_redirect('customer/account/');
     }
 
-    #[Route('/productalert/unsubscribe/stock', name: 'productalert.unsubscribe.stock')]
+    #[Maho\Config\Route('/productalert/unsubscribe/stock', name: 'productalert.unsubscribe.stock')]
     public function stockAction(): void
     {
         $productId  = (int) $this->getRequest()->getParam('product');
@@ -118,7 +116,7 @@ class Mage_ProductAlert_UnsubscribeController extends Mage_Core_Controller_Front
         $this->_redirectUrl($product->getProductUrl());
     }
 
-    #[Route('/productalert/unsubscribe/stockAll', name: 'productalert.unsubscribe.stockall')]
+    #[Maho\Config\Route('/productalert/unsubscribe/stockAll', name: 'productalert.unsubscribe.stockall')]
     public function stockAllAction(): void
     {
         $session = Mage::getSingleton('customer/session');

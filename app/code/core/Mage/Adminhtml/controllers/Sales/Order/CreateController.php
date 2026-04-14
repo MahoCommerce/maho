@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -329,7 +327,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Index page
      */
-    #[Route('/admin/sales_order_create/index')]
+    #[Maho\Config\Route('/admin/sales_order_create/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Orders'))->_title($this->__('New Order'));
@@ -340,7 +338,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
             ->renderLayout();
     }
 
-    #[Route('/admin/sales_order_create/reorder')]
+    #[Maho\Config\Route('/admin/sales_order_create/reorder')]
 
     public function reorderAction()
     {
@@ -372,7 +370,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Loading page block
      */
-    #[Route('/admin/sales_order_create/loadBlock')]
+    #[Maho\Config\Route('/admin/sales_order_create/loadBlock')]
     public function loadBlockAction(): void
     {
         $request = $this->getRequest();
@@ -421,7 +419,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Adds configured product to quote
      */
-    #[Route('/admin/sales_order_create/addConfigured')]
+    #[Maho\Config\Route('/admin/sales_order_create/addConfigured')]
     public function addConfiguredAction(): void
     {
         try {
@@ -441,7 +439,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Start order create action
      */
-    #[Route('/admin/sales_order_create/start')]
+    #[Maho\Config\Route('/admin/sales_order_create/start')]
     public function startAction(): void
     {
         $this->_getSession()->clear();
@@ -451,7 +449,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Cancel order create
      */
-    #[Route('/admin/sales_order_create/cancel')]
+    #[Maho\Config\Route('/admin/sales_order_create/cancel')]
     public function cancelAction(): void
     {
         if ($orderId = $this->_getSession()->getReordered()) {
@@ -468,7 +466,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Saving quote and create order
      */
-    #[Route('/admin/sales_order_create/save')]
+    #[Maho\Config\Route('/admin/sales_order_create/save')]
     public function saveAction(): void
     {
         try {
@@ -553,7 +551,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
      *
      * @return $this
      */
-    #[Route('/admin/sales_order_create/configureProductToAdd')]
+    #[Maho\Config\Route('/admin/sales_order_create/configureProductToAdd')]
     public function configureProductToAddAction()
     {
         $sessionQuote = Mage::getSingleton('adminhtml/session_quote');
@@ -574,7 +572,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
      *
      * @return $this
      */
-    #[Route('/admin/sales_order_create/configureQuoteItems')]
+    #[Maho\Config\Route('/admin/sales_order_create/configureQuoteItems')]
     public function configureQuoteItemsAction()
     {
         try {
@@ -618,7 +616,7 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     /**
      * Process data and display index page
      */
-    #[Route('/admin/sales_order_create/processData')]
+    #[Maho\Config\Route('/admin/sales_order_create/processData')]
     public function processDataAction(): void
     {
         $this->_initSession();

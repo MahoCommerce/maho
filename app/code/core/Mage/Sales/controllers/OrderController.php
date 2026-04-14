@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
 {
     /**
@@ -39,7 +37,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Customer order history
      */
-    #[Route('/sales/order/history', name: 'sales.order.history', methods: ['GET'])]
+    #[Maho\Config\Route('/sales/order/history', name: 'sales.order.history', methods: ['GET'])]
     public function historyAction(): void
     {
         $this->loadLayout();
@@ -56,7 +54,7 @@ class Mage_Sales_OrderController extends Mage_Sales_Controller_Abstract
     /**
      * Associate guest orders with current customer
      */
-    #[Route('/sales/order/associateGuestOrders', name: 'sales.order.associateguestorders', methods: ['POST'])]
+    #[Maho\Config\Route('/sales/order/associateGuestOrders', name: 'sales.order.associateguestorders', methods: ['POST'])]
     public function associateGuestOrdersAction(): void
     {
         $session = Mage::getSingleton('customer/session');

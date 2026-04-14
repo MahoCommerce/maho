@@ -9,8 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_SystemController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -19,7 +17,7 @@ class Mage_Adminhtml_SystemController extends Mage_Adminhtml_Controller_Action
      */
     public const ADMIN_RESOURCE = 'system';
 
-    #[Route('/admin/system/index')]
+    #[Maho\Config\Route('/admin/system/index')]
 
     public function indexAction(): void
     {
@@ -29,7 +27,7 @@ class Mage_Adminhtml_SystemController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    #[Route('/admin/system/setStore')]
+    #[Maho\Config\Route('/admin/system/setStore')]
 
     public function setStoreAction(): void
     {

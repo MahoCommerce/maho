@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -71,7 +69,7 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
     /**
      * Show grid with roles existing in systems
      */
-    #[Route('/admin/permissions_role/index')]
+    #[Maho\Config\Route('/admin/permissions_role/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -85,7 +83,7 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
     /**
      * Action for ajax request from grid
      */
-    #[Route('/admin/permissions_role/roleGrid')]
+    #[Maho\Config\Route('/admin/permissions_role/roleGrid')]
     public function roleGridAction(): void
     {
         $this->loadLayout();
@@ -95,7 +93,7 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
     /**
      * Edit role action
      */
-    #[Route('/admin/permissions_role/editRole')]
+    #[Maho\Config\Route('/admin/permissions_role/editRole')]
     public function editRoleAction(): void
     {
         $role = $this->_initRole();
@@ -128,7 +126,7 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
     /**
      * Remove role action
      */
-    #[Route('/admin/permissions_role/delete')]
+    #[Maho\Config\Route('/admin/permissions_role/delete')]
     public function deleteAction(): void
     {
         $role = $this->_initRole('role_id');
@@ -173,7 +171,7 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
     /**
      * Role form submit action to save or create new role
      */
-    #[Route('/admin/permissions_role/saveRole')]
+    #[Maho\Config\Route('/admin/permissions_role/saveRole')]
     public function saveRoleAction(): void
     {
         $rid        = $this->getRequest()->getParam('role_id', false);
@@ -250,7 +248,7 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
     /**
      * Action for ajax request from assigned users grid
      */
-    #[Route('/admin/permissions_role/editrolegrid')]
+    #[Maho\Config\Route('/admin/permissions_role/editrolegrid')]
     public function editrolegridAction(): void
     {
         $this->getResponse()->setBody(
@@ -302,7 +300,7 @@ class Mage_Adminhtml_Permissions_RoleController extends Mage_Adminhtml_Controlle
      * This method will make sure the rendered ACL resource tree checkboxes match the actual ACL permissions.
      * To be used after adding a new ACL resource via config
      */
-    #[Route('/admin/permissions_role/refreshRoles')]
+    #[Maho\Config\Route('/admin/permissions_role/refreshRoles')]
     public function refreshRolesAction(): void
     {
         $resourceAcl = Mage::getResourceModel('admin/acl')->loadAcl();

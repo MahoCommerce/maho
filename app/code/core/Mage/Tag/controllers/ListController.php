@@ -11,11 +11,9 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Tag_ListController extends Mage_Core_Controller_Front_Action
 {
-    #[Route('/tag/list', name: 'tag.list.index', methods: ['GET'])]
+    #[Maho\Config\Route('/tag/list', name: 'tag.list.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();

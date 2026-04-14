@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -74,7 +72,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
      *
      * @return $this
      */
-    #[Route('/admin/customer_wishlist_product_composite_wishlist/configure')]
+    #[Maho\Config\Route('/admin/customer_wishlist_product_composite_wishlist/configure')]
     public function configureAction()
     {
         try {
@@ -109,7 +107,7 @@ class Mage_Adminhtml_Customer_Wishlist_Product_Composite_WishlistController exte
      *
      * @return false
      */
-    #[Route('/admin/customer_wishlist_product_composite_wishlist/update')]
+    #[Maho\Config\Route('/admin/customer_wishlist_product_composite_wishlist/update')]
     public function updateAction()
     {
         try {

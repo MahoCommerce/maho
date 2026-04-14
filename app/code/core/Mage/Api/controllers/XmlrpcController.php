@@ -12,11 +12,9 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Api_XmlrpcController extends Mage_Api_Controller_Action
 {
-    #[Route('/api/xmlrpc', name: 'api.xmlrpc', methods: ['POST'])]
+    #[Maho\Config\Route('/api/xmlrpc', name: 'api.xmlrpc', methods: ['POST'])]
     public function indexAction(): void
     {
         $this->_getServer()->init($this, 'xmlrpc')

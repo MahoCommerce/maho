@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
 {
     public const XML_PATH_ENABLED                    = 'contacts/contacts/enabled';
@@ -35,7 +33,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
-    #[Route('/contacts', name: 'contacts.index', methods: ['GET'])]
+    #[Maho\Config\Route('/contacts', name: 'contacts.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -47,7 +45,7 @@ class Mage_Contacts_IndexController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
-    #[Route('/contacts/post', name: 'contacts.post', methods: ['POST'])]
+    #[Maho\Config\Route('/contacts/post', name: 'contacts.post', methods: ['POST'])]
     public function postAction(): void
     {
         $post = $this->getRequest()->getPost();

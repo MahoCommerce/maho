@@ -10,11 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Cms_PageController extends Mage_Core_Controller_Front_Action
 {
-    #[Route('/cms/page/view/{page_id}', name: 'cms.page.view', requirements: ['page_id' => '\d+'])]
+    #[Maho\Config\Route('/cms/page/view/{page_id}', name: 'cms.page.view', requirements: ['page_id' => '\d+'])]
     public function viewAction()
     {
         $pageId = $this->getRequest()

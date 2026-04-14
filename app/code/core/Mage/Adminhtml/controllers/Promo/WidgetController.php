@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -23,7 +21,7 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
     /**
      * Prepare block for chooser
      */
-    #[Route('/admin/promo_widget/chooser')]
+    #[Maho\Config\Route('/admin/promo_widget/chooser')]
     public function chooserAction(): void
     {
         $request = $this->getRequest();
@@ -60,7 +58,7 @@ class Mage_Adminhtml_Promo_WidgetController extends Mage_Adminhtml_Controller_Ac
     /**
      * Get tree node (Ajax version)
      */
-    #[Route('/admin/promo_widget/categoriesJson')]
+    #[Maho\Config\Route('/admin/promo_widget/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         try {

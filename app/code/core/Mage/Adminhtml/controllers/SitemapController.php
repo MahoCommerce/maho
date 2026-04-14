@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -62,7 +60,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Index action
      */
-    #[Route('/admin/sitemap/index')]
+    #[Maho\Config\Route('/admin/sitemap/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Google Sitemaps'));
@@ -75,7 +73,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Create new sitemap
      */
-    #[Route('/admin/sitemap/new')]
+    #[Maho\Config\Route('/admin/sitemap/new')]
     public function newAction(): void
     {
         // the same form is used to create and edit
@@ -85,7 +83,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit sitemap
      */
-    #[Route('/admin/sitemap/edit')]
+    #[Maho\Config\Route('/admin/sitemap/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Google Sitemaps'));
@@ -130,7 +128,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Save action
      */
-    #[Route('/admin/sitemap/save')]
+    #[Maho\Config\Route('/admin/sitemap/save')]
     public function saveAction(): void
     {
         // check if data sent
@@ -204,7 +202,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete action
      */
-    #[Route('/admin/sitemap/delete')]
+    #[Maho\Config\Route('/admin/sitemap/delete')]
     public function deleteAction(): void
     {
         // check if we know what should be deleted
@@ -248,7 +246,7 @@ class Mage_Adminhtml_SitemapController extends Mage_Adminhtml_Controller_Action
     /**
      * Generate sitemap
      */
-    #[Route('/admin/sitemap/generate')]
+    #[Maho\Config\Route('/admin/sitemap/generate')]
     public function generateAction(): void
     {
         // init and load sitemap model

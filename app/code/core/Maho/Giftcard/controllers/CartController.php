@@ -11,8 +11,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 /**
  * Gift Card cart controller
  */
@@ -85,7 +83,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Check gift card balance (AJAX)
      */
-    #[Route('/giftcard/cart/checkBalance', methods: ['POST'])]
+    #[Maho\Config\Route('/giftcard/cart/checkBalance', methods: ['POST'])]
     public function checkBalanceAction(): void
     {
         $result = ['success' => false, 'message' => ''];
@@ -153,7 +151,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Apply gift card to cart
      */
-    #[Route('/giftcard/cart/apply', methods: ['POST'])]
+    #[Maho\Config\Route('/giftcard/cart/apply', methods: ['POST'])]
     public function applyAction(): void
     {
         $code = trim((string) $this->getRequest()->getParam('giftcard_code'));
@@ -239,7 +237,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Remove gift card from cart
      */
-    #[Route('/giftcard/cart/remove', methods: ['POST'])]
+    #[Maho\Config\Route('/giftcard/cart/remove', methods: ['POST'])]
     public function removeAction(): void
     {
         $code = $this->getRequest()->getPost('code');
@@ -291,7 +289,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * AJAX apply gift card (for checkout payment step)
      */
-    #[Route('/giftcard/cart/ajaxApply', methods: ['POST'])]
+    #[Maho\Config\Route('/giftcard/cart/ajaxApply', methods: ['POST'])]
     public function ajaxApplyAction(): void
     {
         $result = ['success' => false, 'message' => '', 'html' => ''];
@@ -394,7 +392,7 @@ class Maho_Giftcard_CartController extends Mage_Core_Controller_Front_Action
     /**
      * AJAX remove gift card (for checkout payment step)
      */
-    #[Route('/giftcard/cart/ajaxRemove', methods: ['POST'])]
+    #[Maho\Config\Route('/giftcard/cart/ajaxRemove', methods: ['POST'])]
     public function ajaxRemoveAction(): void
     {
         $result = ['success' => false, 'message' => ''];

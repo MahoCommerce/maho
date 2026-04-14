@@ -9,8 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -22,7 +20,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * view grid
      */
-    #[Route('/admin/tax_class_product/index')]
+    #[Maho\Config\Route('/admin/tax_class_product/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -40,7 +38,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * new class action
      */
-    #[Route('/admin/tax_class_product/new')]
+    #[Maho\Config\Route('/admin/tax_class_product/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -49,7 +47,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * edit class action
      */
-    #[Route('/admin/tax_class_product/edit')]
+    #[Maho\Config\Route('/admin/tax_class_product/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -94,7 +92,7 @@ class Mage_Adminhtml_Tax_Class_ProductController extends Mage_Adminhtml_Controll
     /**
      * delete class action
      */
-    #[Route('/admin/tax_class_product/delete')]
+    #[Maho\Config\Route('/admin/tax_class_product/delete')]
     public function deleteAction(): void
     {
         $classId    = $this->getRequest()->getParam('id');

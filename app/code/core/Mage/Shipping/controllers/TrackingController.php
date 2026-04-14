@@ -9,11 +9,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Shipping_TrackingController extends Mage_Core_Controller_Front_Action
 {
-    #[Route('/shipping/tracking/ajax', name: 'shipping.tracking.ajax')]
+    #[Maho\Config\Route('/shipping/tracking/ajax', name: 'shipping.tracking.ajax')]
     public function ajaxAction(): void
     {
         if ($order = $this->_initOrder()) {
@@ -41,7 +39,7 @@ class Mage_Shipping_TrackingController extends Mage_Core_Controller_Front_Action
      * Popup action
      * Shows tracking info if it's present, otherwise redirects to 404
      */
-    #[Route('/shipping/tracking/popup', name: 'shipping.tracking.popup', methods: ['GET'])]
+    #[Maho\Config\Route('/shipping/tracking/popup', name: 'shipping.tracking.popup', methods: ['GET'])]
     public function popupAction(): void
     {
         $shippingInfoModel = Mage::getModel('shipping/info')->loadByHash($this->getRequest()->getParam('hash'));

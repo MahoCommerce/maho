@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
 {
     /**
@@ -57,7 +55,7 @@ class Mage_Sales_GuestController extends Mage_Sales_Controller_Abstract
     /**
      * Order view form page
      */
-    #[Route('/sales/guest/form', name: 'sales.guest.form', methods: ['GET'])]
+    #[Maho\Config\Route('/sales/guest/form', name: 'sales.guest.form', methods: ['GET'])]
     public function formAction(): void
     {
         if (Mage::getSingleton('customer/session')->isLoggedIn()) {

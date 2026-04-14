@@ -8,8 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/tools/cronjobs';
@@ -21,7 +19,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         return parent::preDispatch();
     }
 
-    #[Route('/admin/system_tools_cronjobs/index')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/index')]
 
     public function indexAction(): void
     {
@@ -43,7 +41,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->renderLayout();
     }
 
-    #[Route('/admin/system_tools_cronjobs/grid')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/grid')]
 
     public function gridAction(): void
     {
@@ -53,7 +51,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         );
     }
 
-    #[Route('/admin/system_tools_cronjobs/clearHistory')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/clearHistory')]
 
     public function clearHistoryAction(): void
     {
@@ -78,7 +76,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
-    #[Route('/admin/system_tools_cronjobs/history')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/history')]
 
     public function historyAction(): void
     {
@@ -125,7 +123,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->getResponse()->setBodyJson(['records' => $records]);
     }
 
-    #[Route('/admin/system_tools_cronjobs/run')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/run')]
 
     public function runAction(): void
     {
@@ -208,7 +206,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         exit;
     }
 
-    #[Route('/admin/system_tools_cronjobs/runStatus')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/runStatus')]
 
     public function runStatusAction(): void
     {
@@ -250,7 +248,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->getResponse()->setBodyJson($data);
     }
 
-    #[Route('/admin/system_tools_cronjobs/toggle')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/toggle')]
 
     public function toggleAction(): void
     {
@@ -283,7 +281,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
-    #[Route('/admin/system_tools_cronjobs/massDisable')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/massDisable')]
 
     public function massDisableAction(): void
     {
@@ -308,7 +306,7 @@ class Mage_Cron_Adminhtml_System_Tools_CronjobsController extends Mage_Adminhtml
         $this->_redirect('*/*/index');
     }
 
-    #[Route('/admin/system_tools_cronjobs/massEnable')]
+    #[Maho\Config\Route('/admin/system_tools_cronjobs/massEnable')]
 
     public function massEnableAction(): void
     {

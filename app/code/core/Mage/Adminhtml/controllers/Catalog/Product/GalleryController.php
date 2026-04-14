@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -20,7 +18,7 @@ class Mage_Adminhtml_Catalog_Product_GalleryController extends Mage_Adminhtml_Co
      */
     public const ADMIN_RESOURCE = 'catalog/products';
 
-    #[Route('/admin/catalog_product_gallery/upload')]
+    #[Maho\Config\Route('/admin/catalog_product_gallery/upload')]
 
     public function uploadAction(): void
     {

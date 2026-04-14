@@ -10,14 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Paypal_IpnController extends Mage_Core_Controller_Front_Action
 {
     /**
      * Instantiate IPN model and pass IPN request to it
      */
-    #[Route('/paypal/ipn', methods: ['POST'])]
+    #[Maho\Config\Route('/paypal/ipn', methods: ['POST'])]
     public function indexAction(): void
     {
         if (!$this->getRequest()->isPost()) {

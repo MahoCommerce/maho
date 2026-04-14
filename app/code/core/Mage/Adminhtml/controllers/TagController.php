@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
 {
     protected function _initAction()
@@ -52,7 +50,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Show grid action
      */
-    #[Route('/admin/tag/index')]
+    #[Maho\Config\Route('/admin/tag/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -68,7 +66,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Action to draw grid loaded by ajax
      */
-    #[Route('/admin/tag/ajaxGrid')]
+    #[Maho\Config\Route('/admin/tag/ajaxGrid')]
     public function ajaxGridAction(): void
     {
         $this->loadLayout();
@@ -78,7 +76,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Action to draw pending tags grid loaded by ajax
      */
-    #[Route('/admin/tag/ajaxPendingGrid')]
+    #[Maho\Config\Route('/admin/tag/ajaxPendingGrid')]
     public function ajaxPendingGridAction(): void
     {
         $this->loadLayout();
@@ -88,7 +86,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * New tag action
      */
-    #[Route('/admin/tag/new')]
+    #[Maho\Config\Route('/admin/tag/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -97,7 +95,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit tag action
      */
-    #[Route('/admin/tag/edit')]
+    #[Maho\Config\Route('/admin/tag/edit')]
     public function editAction()
     {
         $this->_title($this->__('Catalog'))
@@ -128,7 +126,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Save tag action
      */
-    #[Route('/admin/tag/save')]
+    #[Maho\Config\Route('/admin/tag/save')]
     public function saveAction()
     {
         if ($postData = $this->getRequest()->getPost()) {
@@ -179,7 +177,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete tag action
      */
-    #[Route('/admin/tag/delete')]
+    #[Maho\Config\Route('/admin/tag/delete')]
     public function deleteAction(): void
     {
         $model   = $this->_initTag();
@@ -202,7 +200,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Pending tags
      */
-    #[Route('/admin/tag/pending')]
+    #[Maho\Config\Route('/admin/tag/pending')]
     public function pendingAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -218,7 +216,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Assigned products (with serializer block)
      */
-    #[Route('/admin/tag/assigned')]
+    #[Maho\Config\Route('/admin/tag/assigned')]
     public function assignedAction(): void
     {
         $this->_title($this->__('Tags'))->_title($this->__('Assigned'));
@@ -231,7 +229,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Assigned products grid
      */
-    #[Route('/admin/tag/assignedGridOnly')]
+    #[Maho\Config\Route('/admin/tag/assignedGridOnly')]
     public function assignedGridOnlyAction(): void
     {
         $this->_initTag();
@@ -242,7 +240,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Tagged products
      */
-    #[Route('/admin/tag/product')]
+    #[Maho\Config\Route('/admin/tag/product')]
     public function productAction(): void
     {
         $this->_initTag();
@@ -253,7 +251,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Customers
      */
-    #[Route('/admin/tag/customer')]
+    #[Maho\Config\Route('/admin/tag/customer')]
     public function customerAction(): void
     {
         $this->_initTag();
@@ -264,7 +262,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Massaction for removing tags
      */
-    #[Route('/admin/tag/massDelete')]
+    #[Maho\Config\Route('/admin/tag/massDelete')]
     public function massDeleteAction(): void
     {
         $tagIds = $this->getRequest()->getParam('tag');
@@ -290,7 +288,7 @@ class Mage_Adminhtml_TagController extends Mage_Adminhtml_Controller_Action
     /**
      * Massaction for changing status of selected tags
      */
-    #[Route('/admin/tag/massStatus')]
+    #[Maho\Config\Route('/admin/tag/massStatus')]
     public function massStatusAction(): void
     {
         $tagIds = $this->getRequest()->getParam('tag');

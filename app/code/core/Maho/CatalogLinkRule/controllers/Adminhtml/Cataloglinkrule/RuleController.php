@@ -11,13 +11,11 @@
 
 declare(strict_types=1);
 
-use Maho\Config\Route;
-
 class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'catalog/linkrules';
 
-    #[Route('/admin/cataloglinkrule_rule/index')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/index')]
 
     public function indexAction(): void
     {
@@ -28,14 +26,14 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             ->renderLayout();
     }
 
-    #[Route('/admin/cataloglinkrule_rule/new')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/cataloglinkrule_rule/edit')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/edit')]
 
     public function editAction(): void
     {
@@ -67,7 +65,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             ->renderLayout();
     }
 
-    #[Route('/admin/cataloglinkrule_rule/save')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/save')]
 
     public function saveAction(): void
     {
@@ -121,7 +119,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/cataloglinkrule_rule/delete')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/delete')]
 
     public function deleteAction(): void
     {
@@ -141,7 +139,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/cataloglinkrule_rule/massDelete')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/massDelete')]
 
     public function massDeleteAction(): void
     {
@@ -167,7 +165,7 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/index');
     }
 
-    #[Route('/admin/cataloglinkrule_rule/massStatus')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/massStatus')]
 
     public function massStatusAction(): void
     {
@@ -195,14 +193,14 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/index');
     }
 
-    #[Route('/admin/cataloglinkrule_rule/newConditionHtml')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/newConditionHtml')]
 
     public function newConditionHtmlAction(): void
     {
         $this->_renderRuleHtml('conditions');
     }
 
-    #[Route('/admin/cataloglinkrule_rule/newActionHtml')]
+    #[Maho\Config\Route('/admin/cataloglinkrule_rule/newActionHtml')]
 
     public function newActionHtmlAction(): void
     {

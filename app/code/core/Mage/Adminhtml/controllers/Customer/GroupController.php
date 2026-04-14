@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -46,7 +44,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Customer groups list.
      */
-    #[Route('/admin/customer_group/index')]
+    #[Maho\Config\Route('/admin/customer_group/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Customers'))->_title($this->__('Customer Groups'));
@@ -61,7 +59,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Edit or create customer group.
      */
-    #[Route('/admin/customer_group/new')]
+    #[Maho\Config\Route('/admin/customer_group/new')]
     public function newAction(): void
     {
         $this->_initGroup();
@@ -90,7 +88,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Edit customer group action. Forward to new action.
      */
-    #[Route('/admin/customer_group/edit')]
+    #[Maho\Config\Route('/admin/customer_group/edit')]
     public function editAction(): void
     {
         $this->_forward('new');
@@ -99,7 +97,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Create or save customer group.
      */
-    #[Route('/admin/customer_group/save')]
+    #[Maho\Config\Route('/admin/customer_group/save')]
     public function saveAction(): void
     {
         $customerGroup = Mage::getModel('customer/group');
@@ -136,7 +134,7 @@ class Mage_Adminhtml_Customer_GroupController extends Mage_Adminhtml_Controller_
     /**
      * Delete customer group action
      */
-    #[Route('/admin/customer_group/delete')]
+    #[Maho\Config\Route('/admin/customer_group/delete')]
     public function deleteAction(): void
     {
         $customerGroup = Mage::getModel('customer/group');

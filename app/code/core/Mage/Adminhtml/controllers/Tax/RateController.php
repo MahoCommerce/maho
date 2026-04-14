@@ -10,14 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
 {
     /**
      * Show Main Grid
      */
-    #[Route('/admin/tax_rate/index')]
+    #[Maho\Config\Route('/admin/tax_rate/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -40,7 +38,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Show Add Form
      */
-    #[Route('/admin/tax_rate/add')]
+    #[Maho\Config\Route('/admin/tax_rate/add')]
     public function addAction(): void
     {
         $rateModel = Mage::getSingleton('tax/calculation_rate')->load(null);
@@ -76,7 +74,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
      * @return true|void
      * @throws Throwable
      */
-    #[Route('/admin/tax_rate/save')]
+    #[Maho\Config\Route('/admin/tax_rate/save')]
     public function saveAction()
     {
         $ratePost = $this->getRequest()->getPost();
@@ -113,7 +111,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Show Edit Form
      */
-    #[Route('/admin/tax_rate/edit')]
+    #[Maho\Config\Route('/admin/tax_rate/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -157,7 +155,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
      * @return true|void
      * @throws Throwable
      */
-    #[Route('/admin/tax_rate/delete')]
+    #[Maho\Config\Route('/admin/tax_rate/delete')]
     public function deleteAction()
     {
         if ($rateId = $this->getRequest()->getParam('rate')) {
@@ -189,7 +187,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Export rates grid to CSV format
      */
-    #[Route('/admin/tax_rate/exportCsv')]
+    #[Maho\Config\Route('/admin/tax_rate/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/tax_rate_grid');
@@ -199,7 +197,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Export rates grid to XML format
      */
-    #[Route('/admin/tax_rate/exportXml')]
+    #[Maho\Config\Route('/admin/tax_rate/exportXml')]
     public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/tax_rate_grid');
@@ -223,7 +221,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Import and export Page
      */
-    #[Route('/admin/tax_rate/importExport')]
+    #[Maho\Config\Route('/admin/tax_rate/importExport')]
     public function importExportAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -241,7 +239,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * Import action from import/export tax
      */
-    #[Route('/admin/tax_rate/importPost')]
+    #[Maho\Config\Route('/admin/tax_rate/importPost')]
     public function importPostAction(): void
     {
         if ($this->getRequest()->isPost() && !empty($_FILES['import_rates_file']['tmp_name'])) {
@@ -379,7 +377,7 @@ class Mage_Adminhtml_Tax_RateController extends Mage_Adminhtml_Controller_Action
     /**
      * export action from import/export tax
      */
-    #[Route('/admin/tax_rate/exportPost')]
+    #[Maho\Config\Route('/admin/tax_rate/exportPost')]
     public function exportPostAction(): void
     {
         /** start csv content and set template */

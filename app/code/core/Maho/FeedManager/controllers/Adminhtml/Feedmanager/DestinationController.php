@@ -10,8 +10,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_Adminhtml_Controller_Action
 {
     use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
@@ -34,7 +32,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         return $this;
     }
 
-    #[Route('/admin/feedmanager_destination/index')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/index')]
 
     public function indexAction(): void
     {
@@ -46,14 +44,14 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->renderLayout();
     }
 
-    #[Route('/admin/feedmanager_destination/new')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/feedmanager_destination/edit')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/edit')]
 
     public function editAction(): void
     {
@@ -89,7 +87,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->renderLayout();
     }
 
-    #[Route('/admin/feedmanager_destination/save')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/save')]
 
     public function saveAction(): void
     {
@@ -233,7 +231,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         return $config;
     }
 
-    #[Route('/admin/feedmanager_destination/delete')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/delete')]
 
     public function deleteAction(): void
     {
@@ -270,7 +268,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/feedmanager_destination/test')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/test')]
 
     public function testAction(): void
     {
@@ -309,7 +307,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         }
     }
 
-    #[Route('/admin/feedmanager_destination/massStatus')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/massStatus')]
 
     public function massStatusAction(): void
     {
@@ -340,7 +338,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_DestinationController extends Mage_
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/feedmanager_destination/massDelete')]
+    #[Maho\Config\Route('/admin/feedmanager_destination/massDelete')]
 
     public function massDeleteAction(): void
     {

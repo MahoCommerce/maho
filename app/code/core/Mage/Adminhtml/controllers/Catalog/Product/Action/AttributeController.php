@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -27,7 +25,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
         $this->setUsedModuleName('Mage_Catalog');
     }
 
-    #[Route('/admin/catalog_product_action_attribute/edit')]
+    #[Maho\Config\Route('/admin/catalog_product_action_attribute/edit')]
 
     public function editAction(): void
     {
@@ -42,7 +40,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
     /**
      * Update product attributes
      */
-    #[Route('/admin/catalog_product_action_attribute/save')]
+    #[Maho\Config\Route('/admin/catalog_product_action_attribute/save')]
     public function saveAction(): void
     {
         if (!$this->_validateProducts()) {
@@ -236,7 +234,7 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
     /**
      * Attributes validation action
      */
-    #[Route('/admin/catalog_product_action_attribute/validate')]
+    #[Maho\Config\Route('/admin/catalog_product_action_attribute/validate')]
     public function validateAction(): void
     {
         $response = new \Maho\DataObject();

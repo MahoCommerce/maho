@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -23,7 +21,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
     /**
      * Wysiwyg widget plugin main page
      */
-    #[Route('/admin/widget/index')]
+    #[Maho\Config\Route('/admin/widget/index')]
     public function indexAction(): void
     {
         // save extra params for widgets insertion form
@@ -39,7 +37,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
     /**
      * Ajax responder for loading plugin options form
      */
-    #[Route('/admin/widget/loadOptions')]
+    #[Maho\Config\Route('/admin/widget/loadOptions')]
     public function loadOptionsAction(): void
     {
         try {
@@ -65,7 +63,7 @@ class Mage_Widget_Adminhtml_WidgetController extends Mage_Adminhtml_Controller_A
     /**
      * Format widget pseudo-code for inserting into wysiwyg editor
      */
-    #[Route('/admin/widget/buildWidget')]
+    #[Maho\Config\Route('/admin/widget/buildWidget')]
     public function buildWidgetAction(): void
     {
         $type = $this->getRequest()->getPost('widget_type');

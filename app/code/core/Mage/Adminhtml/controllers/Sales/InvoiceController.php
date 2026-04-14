@@ -9,14 +9,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Sales_InvoiceController extends Mage_Adminhtml_Controller_Sales_Invoice
 {
     /**
      * Export invoice grid to CSV format
      */
-    #[Route('/admin/sales_invoice/exportCsv')]
+    #[Maho\Config\Route('/admin/sales_invoice/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_invoice_grid');
@@ -26,7 +24,7 @@ class Mage_Adminhtml_Sales_InvoiceController extends Mage_Adminhtml_Controller_S
     /**
      * Export invoice grid to Excel XML format
      */
-    #[Route('/admin/sales_invoice/exportExcel')]
+    #[Maho\Config\Route('/admin/sales_invoice/exportExcel')]
     public function exportExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_invoice_grid');

@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -34,7 +32,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
     /**
      * Display cache management form
      */
-    #[Route('/admin/system_cache/index')]
+    #[Maho\Config\Route('/admin/system_cache/index')]
     public function indexAction(): void
     {
         /** @var Mage_Adminhtml_Block_System_Cache_Edit $block */
@@ -48,7 +46,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
     /**
      * Seva cache settings
      */
-    #[Route('/admin/system_cache/save')]
+    #[Maho\Config\Route('/admin/system_cache/save')]
     public function saveAction(): void
     {
         /**
@@ -242,7 +240,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
-    #[Route('/admin/system_cache/refreshCatalogRewrites')]
+    #[Maho\Config\Route('/admin/system_cache/refreshCatalogRewrites')]
 
     public function refreshCatalogRewritesAction(): void
     {
@@ -260,7 +258,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
-    #[Route('/admin/system_cache/clearImagesCache')]
+    #[Maho\Config\Route('/admin/system_cache/clearImagesCache')]
 
     public function clearImagesCacheAction(): void
     {
@@ -278,7 +276,7 @@ class Mage_Adminhtml_System_CacheController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*');
     }
 
-    #[Route('/admin/system_cache/refreshLayeredNavigation')]
+    #[Maho\Config\Route('/admin/system_cache/refreshLayeredNavigation')]
 
     public function refreshLayeredNavigationAction(): void
     {

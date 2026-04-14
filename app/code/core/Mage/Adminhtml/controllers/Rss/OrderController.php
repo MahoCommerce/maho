@@ -11,8 +11,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Rss_OrderController extends Mage_Adminhtml_Controller_Rss_Abstract
 {
     /**
@@ -21,7 +19,7 @@ class Mage_Adminhtml_Rss_OrderController extends Mage_Adminhtml_Controller_Rss_A
      */
     public const ADMIN_RESOURCE = 'sales/order/actions/view';
 
-    #[Route('/admin/rss_order/new')]
+    #[Maho\Config\Route('/admin/rss_order/new')]
 
     public function newAction(): void
     {

@@ -10,8 +10,6 @@
 
 declare(strict_types=1);
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/tools/email_log';
@@ -23,7 +21,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         return parent::preDispatch();
     }
 
-    #[Route('/admin/system_email_log/index')]
+    #[Maho\Config\Route('/admin/system_email_log/index')]
 
     public function indexAction(): void
     {
@@ -44,7 +42,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
-    #[Route('/admin/system_email_log/grid')]
+    #[Maho\Config\Route('/admin/system_email_log/grid')]
 
     public function gridAction(): void
     {
@@ -52,7 +50,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
-    #[Route('/admin/system_email_log/view')]
+    #[Maho\Config\Route('/admin/system_email_log/view')]
 
     public function viewAction(): void
     {
@@ -91,7 +89,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
-    #[Route('/admin/system_email_log/massDelete')]
+    #[Maho\Config\Route('/admin/system_email_log/massDelete')]
 
     public function massDeleteAction(): void
     {
@@ -126,7 +124,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/system_email_log/exportCsv')]
+    #[Maho\Config\Route('/admin/system_email_log/exportCsv')]
 
     public function exportCsvAction(): void
     {
@@ -134,7 +132,7 @@ class Mage_Adminhtml_System_Email_LogController extends Mage_Adminhtml_Controlle
         $this->_prepareDownloadResponse(...$grid->getCsvFile('email_log.csv', -1));
     }
 
-    #[Route('/admin/system_email_log/exportXml')]
+    #[Maho\Config\Route('/admin/system_email_log/exportXml')]
 
     public function exportXmlAction(): void
     {

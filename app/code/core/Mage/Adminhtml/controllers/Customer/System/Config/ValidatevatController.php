@@ -18,7 +18,6 @@ declare(strict_types=1);
  * Provides AJAX endpoint for VAT number validation in admin panel.
  * Uses cached VIES validation with format pre-check.
  */
-use Maho\Config\Route;
 
 class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_Adminhtml_Controller_Action
 {
@@ -53,7 +52,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
      * - AJAX: JSON with full validation details
      * - Non-AJAX: Plain text "0" or "1" (legacy)
      */
-    #[Route('/admin/customer_system_config_validatevat/validate')]
+    #[Maho\Config\Route('/admin/customer_system_config_validatevat/validate')]
     public function validateAction(): void
     {
         $result = $this->_validate();
@@ -82,7 +81,7 @@ class Mage_Adminhtml_Customer_System_Config_ValidatevatController extends Mage_A
      *
      * Used by the "Validate VAT Number" button in order create form.
      */
-    #[Route('/admin/customer_system_config_validatevat/validateAdvanced')]
+    #[Maho\Config\Route('/admin/customer_system_config_validatevat/validateAdvanced')]
     public function validateAdvancedAction(): void
     {
         $result = $this->_validate();

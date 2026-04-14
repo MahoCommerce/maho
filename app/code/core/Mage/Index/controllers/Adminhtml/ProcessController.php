@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -41,7 +39,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     /**
      * Display processes grid action
      */
-    #[Route('/admin/process/list')]
+    #[Maho\Config\Route('/admin/process/list')]
     public function listAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Index Management'));
@@ -54,7 +52,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     /**
      * Process detail and edit action
      */
-    #[Route('/admin/process/edit')]
+    #[Maho\Config\Route('/admin/process/edit')]
     public function editAction(): void
     {
         /** @var Mage_Index_Model_Process $process */
@@ -82,7 +80,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     /**
      * Save process data
      */
-    #[Route('/admin/process/save')]
+    #[Maho\Config\Route('/admin/process/save')]
     public function saveAction(): void
     {
         /** @var Mage_Index_Model_Process $process */
@@ -117,7 +115,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     /**
      * Reindex all data what process is responsible
      */
-    #[Route('/admin/process/reindexProcess')]
+    #[Maho\Config\Route('/admin/process/reindexProcess')]
     public function reindexProcessAction(): void
     {
         /** @var Mage_Index_Model_Process $process */
@@ -151,19 +149,19 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     /**
      * Reindex pending events for index process
      */
-    #[Route('/admin/process/reindexEvents')]
+    #[Maho\Config\Route('/admin/process/reindexEvents')]
     public function reindexEventsAction(): void {}
 
     /**
      * Rebiuld all processes index
      */
-    #[Route('/admin/process/reindexAll')]
+    #[Maho\Config\Route('/admin/process/reindexAll')]
     public function reindexAllAction(): void {}
 
     /**
      * Mass rebuild selected processes index
      */
-    #[Route('/admin/process/massReindex')]
+    #[Maho\Config\Route('/admin/process/massReindex')]
     public function massReindexAction(): void
     {
         /** @var Mage_Index_Model_Indexer $indexer */
@@ -198,7 +196,7 @@ class Mage_Index_Adminhtml_ProcessController extends Mage_Adminhtml_Controller_A
     /**
      * Mass change index mode of selected processes index
      */
-    #[Route('/admin/process/massChangeMode')]
+    #[Maho\Config\Route('/admin/process/massChangeMode')]
     public function massChangeModeAction(): void
     {
         $processIds = $this->getRequest()->getParam('process');

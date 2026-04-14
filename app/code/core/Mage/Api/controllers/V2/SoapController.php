@@ -10,11 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Api_V2_SoapController extends Mage_Api_Controller_Action
 {
-    #[Route('/api/v2_soap', name: 'api.v2_soap')]
+    #[Maho\Config\Route('/api/v2_soap', name: 'api.v2_soap')]
     public function indexAction(): void
     {
         if (Mage::helper('api/data')->isComplianceWSI()) {

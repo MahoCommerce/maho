@@ -10,8 +10,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adminhtml_Controller_Action
 {
     use Maho_FeedManager_Controller_Adminhtml_JsonResponseTrait;
@@ -35,7 +33,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         return $this;
     }
 
-    #[Route('/admin/feedmanager_category/index')]
+    #[Maho\Config\Route('/admin/feedmanager_category/index')]
 
     public function indexAction(): void
     {
@@ -47,14 +45,14 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
         $this->renderLayout();
     }
 
-    #[Route('/admin/feedmanager_category/new')]
+    #[Maho\Config\Route('/admin/feedmanager_category/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/feedmanager_category/edit')]
+    #[Maho\Config\Route('/admin/feedmanager_category/edit')]
 
     public function editAction(): void
     {
@@ -86,7 +84,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Get categories tree as JSON for AJAX
      */
-    #[Route('/admin/feedmanager_category/categoriesJson')]
+    #[Maho\Config\Route('/admin/feedmanager_category/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');
@@ -122,7 +120,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Save category mapping
      */
-    #[Route('/admin/feedmanager_category/save')]
+    #[Maho\Config\Route('/admin/feedmanager_category/save')]
     public function saveAction(): void
     {
         $mappingsJson = $this->getRequest()->getParam('mappings');
@@ -175,7 +173,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Search platform taxonomy
      */
-    #[Route('/admin/feedmanager_category/searchTaxonomy')]
+    #[Maho\Config\Route('/admin/feedmanager_category/searchTaxonomy')]
     public function searchTaxonomyAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');
@@ -199,7 +197,7 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     /**
      * Auto-map categories based on name matching
      */
-    #[Route('/admin/feedmanager_category/autoMap')]
+    #[Maho\Config\Route('/admin/feedmanager_category/autoMap')]
     public function autoMapAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', 'google');

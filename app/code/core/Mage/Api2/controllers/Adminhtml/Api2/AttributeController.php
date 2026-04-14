@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -35,7 +33,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Show user types grid
      */
-    #[Route('/admin/api2_attribute/index')]
+    #[Maho\Config\Route('/admin/api2_attribute/index')]
     public function indexAction(): void
     {
         $this
@@ -53,7 +51,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Edit role
      */
-    #[Route('/admin/api2_attribute/edit')]
+    #[Maho\Config\Route('/admin/api2_attribute/edit')]
     public function editAction(): void
     {
         $this->loadLayout()
@@ -82,7 +80,7 @@ class Mage_Api2_Adminhtml_Api2_AttributeController extends Mage_Adminhtml_Contro
     /**
      * Save role
      */
-    #[Route('/admin/api2_attribute/save')]
+    #[Maho\Config\Route('/admin/api2_attribute/save')]
     public function saveAction(): void
     {
         $request = $this->getRequest();

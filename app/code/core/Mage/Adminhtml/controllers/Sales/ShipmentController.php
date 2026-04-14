@@ -9,14 +9,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Sales_ShipmentController extends Mage_Adminhtml_Controller_Sales_Shipment
 {
     /**
      * Export shipment grid to CSV format
      */
-    #[Route('/admin/sales_shipment/exportCsv')]
+    #[Maho\Config\Route('/admin/sales_shipment/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_shipment_grid');
@@ -26,7 +24,7 @@ class Mage_Adminhtml_Sales_ShipmentController extends Mage_Adminhtml_Controller_
     /**
      * Export shipment grid to Excel XML format
      */
-    #[Route('/admin/sales_shipment/exportExcel')]
+    #[Maho\Config\Route('/admin/sales_shipment/exportExcel')]
     public function exportExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_shipment_grid');

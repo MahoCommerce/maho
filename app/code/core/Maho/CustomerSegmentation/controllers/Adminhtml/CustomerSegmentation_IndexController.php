@@ -11,8 +11,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController extends Mage_Adminhtml_Controller_Action
 {
     protected function _initAction(): self
@@ -30,7 +28,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         return $this;
     }
 
-    #[Route('/admin/customersegmentation_index/index')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/index')]
 
     public function indexAction(): void
     {
@@ -41,14 +39,14 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             ->renderLayout();
     }
 
-    #[Route('/admin/customersegmentation_index/new')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/customersegmentation_index/edit')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/edit')]
 
     public function editAction(): void
     {
@@ -92,7 +90,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
             ->renderLayout();
     }
 
-    #[Route('/admin/customersegmentation_index/save')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/save')]
 
     public function saveAction(): void
     {
@@ -143,7 +141,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/customersegmentation_index/delete')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/delete')]
 
     public function deleteAction(): void
     {
@@ -163,7 +161,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/customersegmentation_index/massDelete')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/massDelete')]
 
     public function massDeleteAction(): void
     {
@@ -193,7 +191,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->_redirect('*/*/index');
     }
 
-    #[Route('/admin/customersegmentation_index/refresh')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/refresh')]
 
     public function refreshAction(): void
     {
@@ -219,7 +217,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/customersegmentation_index/massStatus')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/massStatus')]
 
     public function massStatusAction(): void
     {
@@ -248,7 +246,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         $this->_redirect('*/*/index');
     }
 
-    #[Route('/admin/customersegmentation_index/newConditionHtml')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/newConditionHtml')]
 
     public function newConditionHtmlAction(): void
     {
@@ -297,7 +295,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         }
     }
 
-    #[Route('/admin/customersegmentation_index/customersTab')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/customersTab')]
 
     public function customersTabAction(): void
     {
@@ -322,7 +320,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
         );
     }
 
-    #[Route('/admin/customersegmentation_index/customersGrid')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/customersGrid')]
 
     public function customersGridAction(): void
     {
@@ -350,7 +348,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     /**
      * Email Sequences Grid AJAX action (deprecated - use Enter/Exit specific actions)
      */
-    #[Route('/admin/customersegmentation_index/sequencesGrid')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/sequencesGrid')]
     public function sequencesGridAction(): void
     {
         $this->_forward('sequencesGridEnter');
@@ -359,7 +357,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     /**
      * Email Sequences Enter Grid AJAX action
      */
-    #[Route('/admin/customersegmentation_index/sequencesGridEnter')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/sequencesGridEnter')]
     public function sequencesGridEnterAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
@@ -386,7 +384,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     /**
      * Email Sequences Exit Grid AJAX action
      */
-    #[Route('/admin/customersegmentation_index/sequencesGridExit')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/sequencesGridExit')]
     public function sequencesGridExitAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
@@ -413,7 +411,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     /**
      * New email sequence action
      */
-    #[Route('/admin/customersegmentation_index/newSequence')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/newSequence')]
     public function newSequenceAction(): void
     {
         $this->_forward('editSequence');
@@ -422,7 +420,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     /**
      * Edit email sequence action
      */
-    #[Route('/admin/customersegmentation_index/editSequence')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/editSequence')]
     public function editSequenceAction(): void
     {
         $sequenceId = $this->getRequest()->getParam('id');
@@ -499,7 +497,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     /**
      * Save email sequence action
      */
-    #[Route('/admin/customersegmentation_index/saveSequence')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/saveSequence')]
     public function saveSequenceAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -556,7 +554,7 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     /**
      * Delete email sequence action
      */
-    #[Route('/admin/customersegmentation_index/deleteSequence')]
+    #[Maho\Config\Route('/admin/customersegmentation_index/deleteSequence')]
     public function deleteSequenceAction(): void
     {
         $sequenceId = $this->getRequest()->getParam('id');

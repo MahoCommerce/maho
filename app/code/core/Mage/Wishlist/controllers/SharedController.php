@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
 {
     /**
@@ -46,7 +44,7 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
     /**
      * Shared wishlist view page
      */
-    #[Route('/wishlist/shared', name: 'wishlist.shared.index', methods: ['GET'])]
+    #[Maho\Config\Route('/wishlist/shared', name: 'wishlist.shared.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $wishlist   = $this->_getWishlist();
@@ -71,7 +69,7 @@ class Mage_Wishlist_SharedController extends Mage_Wishlist_Controller_Abstract
      * If Product has required options - redirect
      * to product view page with message about needed defined required options
      */
-    #[Route('/wishlist/shared/cart', name: 'wishlist.shared.cart', methods: ['POST'])]
+    #[Maho\Config\Route('/wishlist/shared/cart', name: 'wishlist.shared.cart', methods: ['POST'])]
     public function cartAction()
     {
         $itemId = (int) $this->getRequest()->getParam('item');

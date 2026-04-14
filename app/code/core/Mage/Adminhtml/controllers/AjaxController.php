@@ -10,14 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_AjaxController extends Mage_Adminhtml_Controller_Action
 {
     /**
      * Ajax action for inline translation
      */
-    #[Route('/admin/ajax/translate')]
+    #[Maho\Config\Route('/admin/ajax/translate')]
     public function translateAction(): void
     {
         $translation = $this->getRequest()->getPost('translate');

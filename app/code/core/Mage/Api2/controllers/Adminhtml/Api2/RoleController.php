@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -29,7 +27,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Show grid
      */
-    #[Route('/admin/api2_role/index')]
+    #[Maho\Config\Route('/admin/api2_role/index')]
     public function indexAction(): void
     {
         $this
@@ -47,7 +45,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Updating grid by ajax
      */
-    #[Route('/admin/api2_role/grid')]
+    #[Maho\Config\Route('/admin/api2_role/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -57,7 +55,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Updating users grid by ajax
      */
-    #[Route('/admin/api2_role/usersGrid')]
+    #[Maho\Config\Route('/admin/api2_role/usersGrid')]
     public function usersGridAction(): void
     {
         $id = $this->getRequest()->getParam('id', false);
@@ -73,7 +71,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Create new role
      */
-    #[Route('/admin/api2_role/new')]
+    #[Maho\Config\Route('/admin/api2_role/new')]
     public function newAction(): void
     {
         $this
@@ -93,7 +91,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Edit role
      */
-    #[Route('/admin/api2_role/edit')]
+    #[Maho\Config\Route('/admin/api2_role/edit')]
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -143,7 +141,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Save role
      */
-    #[Route('/admin/api2_role/save')]
+    #[Maho\Config\Route('/admin/api2_role/save')]
     public function saveAction(): void
     {
         $request = $this->getRequest();
@@ -250,7 +248,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Delete role
      */
-    #[Route('/admin/api2_role/delete')]
+    #[Maho\Config\Route('/admin/api2_role/delete')]
     public function deleteAction(): void
     {
         $id = $this->getRequest()->getParam('id', false);
@@ -293,7 +291,7 @@ class Mage_Api2_Adminhtml_Api2_RoleController extends Mage_Adminhtml_Controller_
     /**
      * Get API2 roles ajax grid action
      */
-    #[Route('/admin/api2_role/rolesGrid')]
+    #[Maho\Config\Route('/admin/api2_role/rolesGrid')]
     public function rolesGridAction(): void
     {
         /** @var Mage_Admin_Model_User $model */

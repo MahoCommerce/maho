@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -42,7 +40,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         return $this;
     }
 
-    #[Route('/admin/api_role/index')]
+    #[Maho\Config\Route('/admin/api_role/index')]
 
     public function indexAction(): void
     {
@@ -57,7 +55,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    #[Route('/admin/api_role/roleGrid')]
+    #[Maho\Config\Route('/admin/api_role/roleGrid')]
 
     public function roleGridAction(): void
     {
@@ -67,7 +65,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
             ->toHtml());
     }
 
-    #[Route('/admin/api_role/editRole')]
+    #[Maho\Config\Route('/admin/api_role/editRole')]
 
     public function editRoleAction(): void
     {
@@ -105,7 +103,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->renderLayout();
     }
 
-    #[Route('/admin/api_role/delete')]
+    #[Maho\Config\Route('/admin/api_role/delete')]
 
     public function deleteAction(): void
     {
@@ -134,7 +132,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/api_role/saveRole')]
+    #[Maho\Config\Route('/admin/api_role/saveRole')]
 
     public function saveRoleAction(): void
     {
@@ -202,7 +200,7 @@ class Mage_Adminhtml_Api_RoleController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/editrole', ['rid' => $rid]);
     }
 
-    #[Route('/admin/api_role/editrolegrid')]
+    #[Maho\Config\Route('/admin/api_role/editrolegrid')]
 
     public function editrolegridAction(): void
     {

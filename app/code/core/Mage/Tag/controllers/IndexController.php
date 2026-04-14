@@ -10,14 +10,12 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Tag_IndexController extends Mage_Core_Controller_Front_Action
 {
     /**
      * Saving tag and relation between tag, customer, product and store
      */
-    #[Route('/tag/index/save', name: 'tag.index.save')]
+    #[Maho\Config\Route('/tag/index/save', name: 'tag.index.save')]
     public function saveAction(): void
     {
         $helper = Mage::helper('tag');

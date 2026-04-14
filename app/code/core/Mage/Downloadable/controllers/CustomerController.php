@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -38,7 +36,7 @@ class Mage_Downloadable_CustomerController extends Mage_Core_Controller_Front_Ac
     /**
      * Display downloadable links bought by customer
      */
-    #[Route('/downloadable/customer/products', name: 'downloadable.customer.products', methods: ['GET'])]
+    #[Maho\Config\Route('/downloadable/customer/products', name: 'downloadable.customer.products', methods: ['GET'])]
     public function productsAction(): void
     {
         $this->loadLayout();

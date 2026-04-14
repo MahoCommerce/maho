@@ -15,7 +15,6 @@
  *
  * Applications for logged admin user
  */
-use Maho\Config\Route;
 
 class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Controller_Action
 {
@@ -37,7 +36,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Render grid page
      */
-    #[Route('/admin/oauth_admin_token/index')]
+    #[Maho\Config\Route('/admin/oauth_admin_token/index')]
     public function indexAction(): void
     {
         $this
@@ -49,7 +48,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Render grid AJAX request
      */
-    #[Route('/admin/oauth_admin_token/grid')]
+    #[Maho\Config\Route('/admin/oauth_admin_token/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -59,7 +58,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Update revoke status action
      */
-    #[Route('/admin/oauth_admin_token/revoke')]
+    #[Maho\Config\Route('/admin/oauth_admin_token/revoke')]
     public function revokeAction(): void
     {
         $ids = $this->getRequest()->getParam('items');
@@ -114,7 +113,7 @@ class Mage_Oauth_Adminhtml_Oauth_Admin_TokenController extends Mage_Adminhtml_Co
     /**
      * Delete action
      */
-    #[Route('/admin/oauth_admin_token/delete')]
+    #[Maho\Config\Route('/admin/oauth_admin_token/delete')]
     public function deleteAction(): void
     {
         $ids = $this->getRequest()->getParam('items');

@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -68,7 +66,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Orders grid
      */
-    #[Route('/admin/sales_order/index')]
+    #[Maho\Config\Route('/admin/sales_order/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Orders'));
@@ -80,7 +78,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Order grid
      */
-    #[Route('/admin/sales_order/grid')]
+    #[Maho\Config\Route('/admin/sales_order/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false);
@@ -90,7 +88,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * View order detale
      */
-    #[Route('/admin/sales_order/view')]
+    #[Maho\Config\Route('/admin/sales_order/view')]
     public function viewAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Orders'));
@@ -115,7 +113,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Notify user
      */
-    #[Route('/admin/sales_order/email')]
+    #[Maho\Config\Route('/admin/sales_order/email')]
     public function emailAction(): void
     {
         if ($order = $this->_initOrder()) {
@@ -142,7 +140,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Cancel order
      */
-    #[Route('/admin/sales_order/cancel')]
+    #[Maho\Config\Route('/admin/sales_order/cancel')]
     public function cancelAction(): void
     {
         if ($order = $this->_initOrder()) {
@@ -165,7 +163,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Hold order
      */
-    #[Route('/admin/sales_order/hold')]
+    #[Maho\Config\Route('/admin/sales_order/hold')]
     public function holdAction(): void
     {
         if ($order = $this->_initOrder()) {
@@ -187,7 +185,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Unhold order
      */
-    #[Route('/admin/sales_order/unhold')]
+    #[Maho\Config\Route('/admin/sales_order/unhold')]
     public function unholdAction(): void
     {
         if ($order = $this->_initOrder()) {
@@ -211,7 +209,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      *
      * Either denies or approves a payment that is in "review" state
      */
-    #[Route('/admin/sales_order/reviewPayment')]
+    #[Maho\Config\Route('/admin/sales_order/reviewPayment')]
     public function reviewPaymentAction(): void
     {
         try {
@@ -250,7 +248,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Add order comment action
      */
-    #[Route('/admin/sales_order/addComment')]
+    #[Maho\Config\Route('/admin/sales_order/addComment')]
     public function addCommentAction(): void
     {
         if ($order = $this->_initOrder()) {
@@ -292,7 +290,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Generate invoices grid for ajax request
      */
-    #[Route('/admin/sales_order/invoices')]
+    #[Maho\Config\Route('/admin/sales_order/invoices')]
     public function invoicesAction(): void
     {
         $this->_initOrder();
@@ -304,7 +302,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Generate shipments grid for ajax request
      */
-    #[Route('/admin/sales_order/shipments')]
+    #[Maho\Config\Route('/admin/sales_order/shipments')]
     public function shipmentsAction(): void
     {
         $this->_initOrder();
@@ -316,7 +314,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Generate creditmemos grid for ajax request
      */
-    #[Route('/admin/sales_order/creditmemos')]
+    #[Maho\Config\Route('/admin/sales_order/creditmemos')]
     public function creditmemosAction(): void
     {
         $this->_initOrder();
@@ -328,7 +326,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Generate order history for ajax request
      */
-    #[Route('/admin/sales_order/commentsHistory')]
+    #[Maho\Config\Route('/admin/sales_order/commentsHistory')]
     public function commentsHistoryAction(): void
     {
         $this->_initOrder();
@@ -344,7 +342,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Cancel selected orders
      */
-    #[Route('/admin/sales_order/massCancel')]
+    #[Maho\Config\Route('/admin/sales_order/massCancel')]
     public function massCancelAction(): void
     {
         $orderIds = $this->getRequest()->getPost('order_ids', []);
@@ -376,7 +374,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Hold selected orders
      */
-    #[Route('/admin/sales_order/massHold')]
+    #[Maho\Config\Route('/admin/sales_order/massHold')]
     public function massHoldAction(): void
     {
         $orderIds = $this->getRequest()->getPost('order_ids', []);
@@ -410,7 +408,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Unhold selected orders
      */
-    #[Route('/admin/sales_order/massUnhold')]
+    #[Maho\Config\Route('/admin/sales_order/massUnhold')]
     public function massUnholdAction(): void
     {
         $orderIds = $this->getRequest()->getPost('order_ids', []);
@@ -443,13 +441,13 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Change status for selected orders
      */
-    #[Route('/admin/sales_order/massStatus')]
+    #[Maho\Config\Route('/admin/sales_order/massStatus')]
     public function massStatusAction(): void {}
 
     /**
      * Print documents for selected orders
      */
-    #[Route('/admin/sales_order/massPrint')]
+    #[Maho\Config\Route('/admin/sales_order/massPrint')]
     public function massPrintAction(): void
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
@@ -461,7 +459,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      *
      * @return Mage_Adminhtml_Sales_OrderController|void
      */
-    #[Route('/admin/sales_order/pdfinvoices')]
+    #[Maho\Config\Route('/admin/sales_order/pdfinvoices')]
     public function pdfinvoicesAction()
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
@@ -497,7 +495,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      *
      * @return Mage_Adminhtml_Sales_OrderController|void
      */
-    #[Route('/admin/sales_order/pdfshipments')]
+    #[Maho\Config\Route('/admin/sales_order/pdfshipments')]
     public function pdfshipmentsAction()
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
@@ -533,7 +531,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      *
      * @return Mage_Adminhtml_Sales_OrderController|void
      */
-    #[Route('/admin/sales_order/pdfcreditmemos')]
+    #[Maho\Config\Route('/admin/sales_order/pdfcreditmemos')]
     public function pdfcreditmemosAction()
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
@@ -569,7 +567,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
      *
      * @return Mage_Adminhtml_Sales_OrderController|void
      */
-    #[Route('/admin/sales_order/pdfdocs')]
+    #[Maho\Config\Route('/admin/sales_order/pdfdocs')]
     public function pdfdocsAction()
     {
         $orderIds = $this->getRequest()->getPost('order_ids');
@@ -633,7 +631,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Attempt to void the order payment
      */
-    #[Route('/admin/sales_order/voidPayment')]
+    #[Maho\Config\Route('/admin/sales_order/voidPayment')]
     public function voidPaymentAction(): void
     {
         if (!$order = $this->_initOrder()) {
@@ -675,7 +673,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Export order grid to CSV format
      */
-    #[Route('/admin/sales_order/exportCsv')]
+    #[Maho\Config\Route('/admin/sales_order/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_order_grid');
@@ -685,7 +683,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Export order grid to Excel XML format
      */
-    #[Route('/admin/sales_order/exportExcel')]
+    #[Maho\Config\Route('/admin/sales_order/exportExcel')]
     public function exportExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_order_grid');
@@ -695,7 +693,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Order transactions grid ajax action
      */
-    #[Route('/admin/sales_order/transactions')]
+    #[Maho\Config\Route('/admin/sales_order/transactions')]
     public function transactionsAction(): void
     {
         $this->_initOrder();
@@ -706,7 +704,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Edit order address form
      */
-    #[Route('/admin/sales_order/address')]
+    #[Maho\Config\Route('/admin/sales_order/address')]
     public function addressAction(): void
     {
         $addressId = $this->getRequest()->getParam('address_id');
@@ -732,7 +730,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Save order address
      */
-    #[Route('/admin/sales_order/addressSave')]
+    #[Maho\Config\Route('/admin/sales_order/addressSave')]
     public function addressSaveAction(): void
     {
         $addressId  = $this->getRequest()->getParam('address_id');
@@ -763,7 +761,7 @@ class Mage_Adminhtml_Sales_OrderController extends Mage_Adminhtml_Controller_Act
     /**
      * Change email address for guest orders
      */
-    #[Route('/admin/sales_order/guestOrderEmailChange')]
+    #[Maho\Config\Route('/admin/sales_order/guestOrderEmailChange')]
     public function guestOrderEmailChangeAction(): void
     {
         $orderId = $this->getRequest()->getParam('order_id');

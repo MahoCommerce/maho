@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -62,7 +60,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Profile custom options download action
      */
-    #[Route('/sales/download/downloadProfileCustomOption', name: 'sales.download.downloadprofilecustomoption', methods: ['GET'])]
+    #[Maho\Config\Route('/sales/download/downloadProfileCustomOption', name: 'sales.download.downloadprofilecustomoption', methods: ['GET'])]
     public function downloadProfileCustomOptionAction(): void
     {
         $recurringProfile = Mage::getModel('sales/recurring_profile')->load($this->getRequest()->getParam('id'));
@@ -106,7 +104,7 @@ class Mage_Sales_DownloadController extends Mage_Core_Controller_Front_Action
     /**
      * Custom options download action
      */
-    #[Route('/sales/download/downloadCustomOption', name: 'sales.download.downloadcustomoption', methods: ['GET'])]
+    #[Maho\Config\Route('/sales/download/downloadCustomOption', name: 'sales.download.downloadcustomoption', methods: ['GET'])]
     public function downloadCustomOptionAction(): void
     {
         $quoteItemOptionId = $this->getRequest()->getParam('id');

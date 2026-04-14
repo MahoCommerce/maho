@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -49,7 +47,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Render grid page
      */
-    #[Route('/admin/oauth_consumer/index')]
+    #[Maho\Config\Route('/admin/oauth_consumer/index')]
     public function indexAction(): void
     {
         $this
@@ -61,7 +59,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Render grid AJAX request
      */
-    #[Route('/admin/oauth_consumer/grid')]
+    #[Maho\Config\Route('/admin/oauth_consumer/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -71,7 +69,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Create page action
      */
-    #[Route('/admin/oauth_consumer/new')]
+    #[Maho\Config\Route('/admin/oauth_consumer/new')]
     public function newAction(): void
     {
         /** @var Mage_Oauth_Model_Consumer $model */
@@ -100,7 +98,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Edit page action
      */
-    #[Route('/admin/oauth_consumer/edit')]
+    #[Maho\Config\Route('/admin/oauth_consumer/edit')]
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -133,7 +131,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Render edit page
      */
-    #[Route('/admin/oauth_consumer/save')]
+    #[Maho\Config\Route('/admin/oauth_consumer/save')]
     public function saveAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -270,7 +268,7 @@ class Mage_Oauth_Adminhtml_Oauth_ConsumerController extends Mage_Adminhtml_Contr
     /**
      * Delete consumer action
      */
-    #[Route('/admin/oauth_consumer/delete')]
+    #[Maho\Config\Route('/admin/oauth_consumer/delete')]
     public function deleteAction(): void
     {
         $consumerId = (int) $this->getRequest()->getParam('id');

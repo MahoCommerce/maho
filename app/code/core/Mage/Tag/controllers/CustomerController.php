@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
 {
     #[\Override]
@@ -43,7 +41,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         return false;
     }
 
-    #[Route('/tag/customer', name: 'tag.customer.index', methods: ['GET'])]
+    #[Maho\Config\Route('/tag/customer', name: 'tag.customer.index', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
@@ -69,7 +67,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
-    #[Route('/tag/customer/view/{tagId}', name: 'tag.customer.view', methods: ['GET'], requirements: ['tagId' => '\d+'])]
+    #[Maho\Config\Route('/tag/customer/view/{tagId}', name: 'tag.customer.view', methods: ['GET'], requirements: ['tagId' => '\d+'])]
     public function viewAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {
@@ -96,7 +94,7 @@ class Mage_Tag_CustomerController extends Mage_Core_Controller_Front_Action
         }
     }
 
-    #[Route('/tag/customer/remove/{tagId}', name: 'tag.customer.remove', methods: ['POST'], requirements: ['tagId' => '\d+'])]
+    #[Maho\Config\Route('/tag/customer/remove/{tagId}', name: 'tag.customer.remove', methods: ['POST'], requirements: ['tagId' => '\d+'])]
     public function removeAction(): void
     {
         if (!Mage::getSingleton('customer/session')->isLoggedIn()) {

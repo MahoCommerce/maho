@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -32,7 +30,7 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
         return parent::preDispatch();
     }
 
-    #[Route('/admin/system_design/index')]
+    #[Maho\Config\Route('/admin/system_design/index')]
 
     public function indexAction(): void
     {
@@ -44,21 +42,21 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
             ->renderLayout();
     }
 
-    #[Route('/admin/system_design/grid')]
+    #[Maho\Config\Route('/admin/system_design/grid')]
 
     public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/system_design_grid')->toHtml());
     }
 
-    #[Route('/admin/system_design/new')]
+    #[Maho\Config\Route('/admin/system_design/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/system_design/edit')]
+    #[Maho\Config\Route('/admin/system_design/edit')]
 
     public function editAction(): void
     {
@@ -85,7 +83,7 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
         $this->renderLayout();
     }
 
-    #[Route('/admin/system_design/save')]
+    #[Maho\Config\Route('/admin/system_design/save')]
 
     public function saveAction(): void
     {
@@ -121,7 +119,7 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/system_design/delete')]
+    #[Maho\Config\Route('/admin/system_design/delete')]
 
     public function deleteAction(): void
     {

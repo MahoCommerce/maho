@@ -10,11 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
 {
-    #[Route('/admin/report/_init')]
+    #[Maho\Config\Route('/admin/report/_init')]
     public function _initAction()
     {
         $this->loadLayout()
@@ -22,7 +20,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
         return $this;
     }
 
-    #[Route('/admin/report/search')]
+    #[Maho\Config\Route('/admin/report/search')]
 
     public function searchAction(): void
     {
@@ -40,7 +38,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     /**
      * Export search report grid to CSV format
      */
-    #[Route('/admin/report/exportSearchCsv')]
+    #[Maho\Config\Route('/admin/report/exportSearchCsv')]
     public function exportSearchCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_search_grid');
@@ -50,7 +48,7 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     /**
      * Export search report to Excel XML format
      */
-    #[Route('/admin/report/exportSearchExcel')]
+    #[Maho\Config\Route('/admin/report/exportSearchExcel')]
     public function exportSearchExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_search_grid');

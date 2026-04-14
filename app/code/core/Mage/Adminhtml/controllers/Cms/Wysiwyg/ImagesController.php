@@ -12,8 +12,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -33,7 +31,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         return $this;
     }
 
-    #[Route('/admin/cms_wysiwyg_images/index')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/index')]
 
     public function indexAction()
     {
@@ -64,7 +62,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
-    #[Route('/admin/cms_wysiwyg_images/popup')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/popup')]
 
     public function popupAction(): void
     {
@@ -88,7 +86,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
-    #[Route('/admin/cms_wysiwyg_images/treeJson')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/treeJson')]
 
     public function treeJsonAction(): void
     {
@@ -102,7 +100,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
-    #[Route('/admin/cms_wysiwyg_images/contents')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/contents')]
 
     public function contentsAction(): void
     {
@@ -115,7 +113,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
-    #[Route('/admin/cms_wysiwyg_images/newFolder')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/newFolder')]
 
     public function newFolderAction(): void
     {
@@ -130,7 +128,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
         }
     }
 
-    #[Route('/admin/cms_wysiwyg_images/deleteFolder')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/deleteFolder')]
 
     public function deleteFolderAction(): void
     {
@@ -146,7 +144,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Delete file from media storage
      */
-    #[Route('/admin/cms_wysiwyg_images/deleteFiles')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/deleteFiles')]
     public function deleteFilesAction(): void
     {
         try {
@@ -176,7 +174,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Files upload processing
      */
-    #[Route('/admin/cms_wysiwyg_images/upload')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/upload')]
     public function uploadAction(): void
     {
         try {
@@ -192,7 +190,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Fire when select image
      */
-    #[Route('/admin/cms_wysiwyg_images/onInsert')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/onInsert')]
     public function onInsertAction(): void
     {
         $helper = Mage::helper('cms/wysiwyg_images');
@@ -213,7 +211,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Generate image thumbnail on the fly
      */
-    #[Route('/admin/cms_wysiwyg_images/thumbnail')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/thumbnail')]
     public function thumbnailAction(): void
     {
         try {
@@ -249,7 +247,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Get image URL for editing
      */
-    #[Route('/admin/cms_wysiwyg_images/getImageUrl')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/getImageUrl')]
     public function getImageUrlAction(): void
     {
         try {
@@ -302,7 +300,7 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     /**
      * Save edited image from image editor
      */
-    #[Route('/admin/cms_wysiwyg_images/editImage')]
+    #[Maho\Config\Route('/admin/cms_wysiwyg_images/editImage')]
     public function editImageAction(): void
     {
         try {

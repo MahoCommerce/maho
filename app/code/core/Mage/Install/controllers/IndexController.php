@@ -12,8 +12,6 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Install_IndexController extends Mage_Install_Controller_Action
 {
     #[\Override]
@@ -23,7 +21,7 @@ class Mage_Install_IndexController extends Mage_Install_Controller_Action
         parent::preDispatch();
     }
 
-    #[Route('/install')]
+    #[Maho\Config\Route('/install')]
     public function indexAction(): void
     {
         $this->_forward('license', 'wizard', 'install');

@@ -9,8 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Cms_Page_WidgetController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -22,7 +20,7 @@ class Mage_Adminhtml_Cms_Page_WidgetController extends Mage_Adminhtml_Controller
     /**
      * Chooser Source action
      */
-    #[Route('/admin/cms_page_widget/chooser')]
+    #[Maho\Config\Route('/admin/cms_page_widget/chooser')]
     public function chooserAction(): void
     {
         $uniqId = $this->getRequest()->getParam('uniq_id');

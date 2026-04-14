@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -56,7 +54,7 @@ class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
         return $review;
     }
 
-    #[Route('/review/customer', name: 'review.customer.index', methods: ['GET'])]
+    #[Maho\Config\Route('/review/customer', name: 'review.customer.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -74,7 +72,7 @@ class Mage_Review_CustomerController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
-    #[Route('/review/customer/view/{id}', name: 'review.customer.view', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Maho\Config\Route('/review/customer/view/{id}', name: 'review.customer.view', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function viewAction(): void
     {
         $review = $this->_loadReview((int) $this->getRequest()->getParam('id'));

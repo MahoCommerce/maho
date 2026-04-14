@@ -10,11 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
 {
-    #[Route('/rss/order/new', name: 'rss.order.new', methods: ['GET'])]
+    #[Maho\Config\Route('/rss/order/new', name: 'rss.order.new', methods: ['GET'])]
     public function newAction(): void
     {
         if ($this->checkFeedEnable('order/new')) {
@@ -27,7 +25,7 @@ class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
      * @return $this|void
      * @throws Mage_Core_Model_Store_Exception
      */
-    #[Route('/rss/order/customer', name: 'rss.order.customer', methods: ['GET'])]
+    #[Maho\Config\Route('/rss/order/customer', name: 'rss.order.customer', methods: ['GET'])]
     public function customerAction()
     {
         if ($this->checkFeedEnable('order/customer')) {
@@ -43,7 +41,7 @@ class Mage_Rss_OrderController extends Mage_Rss_Controller_Abstract
     /**
      * Order status action
      */
-    #[Route('/rss/order/status', name: 'rss.order.status', methods: ['GET'])]
+    #[Maho\Config\Route('/rss/order/status', name: 'rss.order.status', methods: ['GET'])]
     public function statusAction(): void
     {
         if ($this->isFeedEnable('order/status_notified')) {

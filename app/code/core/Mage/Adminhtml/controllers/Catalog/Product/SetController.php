@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -20,7 +18,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      */
     public const ADMIN_RESOURCE = 'catalog/attributes/sets';
 
-    #[Route('/admin/catalog_product_set/index')]
+    #[Maho\Config\Route('/admin/catalog_product_set/index')]
 
     public function indexAction(): void
     {
@@ -45,7 +43,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
-    #[Route('/admin/catalog_product_set/edit')]
+    #[Maho\Config\Route('/admin/catalog_product_set/edit')]
 
     public function editAction(): void
     {
@@ -80,7 +78,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
-    #[Route('/admin/catalog_product_set/setGrid')]
+    #[Maho\Config\Route('/admin/catalog_product_set/setGrid')]
 
     public function setGridAction(): void
     {
@@ -98,7 +96,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
      * [POST] Create attribute set from another set and redirect to edit page
      * [AJAX] Save attribute set data
      */
-    #[Route('/admin/catalog_product_set/save')]
+    #[Maho\Config\Route('/admin/catalog_product_set/save')]
     public function saveAction(): void
     {
         $entityTypeId   = $this->_getEntityTypeId();
@@ -162,7 +160,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         }
     }
 
-    #[Route('/admin/catalog_product_set/add')]
+    #[Maho\Config\Route('/admin/catalog_product_set/add')]
 
     public function addAction(): void
     {
@@ -181,7 +179,7 @@ class Mage_Adminhtml_Catalog_Product_SetController extends Mage_Adminhtml_Contro
         $this->renderLayout();
     }
 
-    #[Route('/admin/catalog_product_set/delete')]
+    #[Maho\Config\Route('/admin/catalog_product_set/delete')]
 
     public function deleteAction(): void
     {

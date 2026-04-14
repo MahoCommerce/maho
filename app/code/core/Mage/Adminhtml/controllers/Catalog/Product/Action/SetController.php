@@ -8,8 +8,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -25,7 +23,7 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
         $this->setUsedModuleName('Mage_Catalog');
     }
 
-    #[Route('/admin/catalog_product_action_set/save')]
+    #[Maho\Config\Route('/admin/catalog_product_action_set/save')]
 
     public function saveAction(): void
     {

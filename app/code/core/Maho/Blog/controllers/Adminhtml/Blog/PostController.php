@@ -9,8 +9,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'cms/blog/posts';
@@ -29,7 +27,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         return $this;
     }
 
-    #[Route('/admin/blog_post/index')]
+    #[Maho\Config\Route('/admin/blog_post/index')]
 
     public function indexAction(): void
     {
@@ -38,14 +36,14 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->renderLayout();
     }
 
-    #[Route('/admin/blog_post/new')]
+    #[Maho\Config\Route('/admin/blog_post/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/blog_post/edit')]
+    #[Maho\Config\Route('/admin/blog_post/edit')]
 
     public function editAction(): void
     {
@@ -82,7 +80,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
             ->renderLayout();
     }
 
-    #[Route('/admin/blog_post/save')]
+    #[Maho\Config\Route('/admin/blog_post/save')]
 
     public function saveAction(): void
     {
@@ -121,7 +119,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/blog_post/delete')]
+    #[Maho\Config\Route('/admin/blog_post/delete')]
 
     public function deleteAction(): void
     {
@@ -143,7 +141,7 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/blog_post/massDelete')]
+    #[Maho\Config\Route('/admin/blog_post/massDelete')]
 
     public function massDeleteAction(): void
     {

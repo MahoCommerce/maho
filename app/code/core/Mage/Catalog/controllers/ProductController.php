@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -30,7 +28,7 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
         return Mage::helper('catalog/product')->initProduct($productId, $this, $params);
     }
 
-    #[Route('/catalog/product/view/{id}', name: 'catalog.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Maho\Config\Route('/catalog/product/view/{id}', name: 'catalog.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function viewAction(): void
     {
         // Get initial data from request
@@ -70,7 +68,7 @@ class Mage_Catalog_ProductController extends Mage_Core_Controller_Front_Action
     /**
      * View product gallery action
      */
-    #[Route('/catalog/product/gallery/{id}', name: 'catalog.product.gallery', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Maho\Config\Route('/catalog/product/gallery/{id}', name: 'catalog.product.gallery', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function galleryAction(): void
     {
         if (!$this->_initProduct()) {

@@ -12,13 +12,11 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Catalog_DatafeedsController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'catalog/products';
 
-    #[Route('/admin/catalog_datafeeds/index')]
+    #[Maho\Config\Route('/admin/catalog_datafeeds/index')]
 
     public function indexAction(): void {}
 }

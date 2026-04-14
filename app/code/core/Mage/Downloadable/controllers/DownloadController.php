@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -75,7 +73,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
     /**
      * Download sample action
      */
-    #[Route('/downloadable/download/sample/{sample_id}', name: 'downloadable.download.sample', methods: ['GET'], requirements: ['sample_id' => '\d+'])]
+    #[Maho\Config\Route('/downloadable/download/sample/{sample_id}', name: 'downloadable.download.sample', methods: ['GET'], requirements: ['sample_id' => '\d+'])]
     public function sampleAction()
     {
         $sampleId = $this->getRequest()->getParam('sample_id', 0);
@@ -110,7 +108,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
     /**
      * Download link's sample action
      */
-    #[Route('/downloadable/download/linkSample/{link_id}', name: 'downloadable.download.linksample', methods: ['GET'], requirements: ['link_id' => '\d+'])]
+    #[Maho\Config\Route('/downloadable/download/linkSample/{link_id}', name: 'downloadable.download.linksample', methods: ['GET'], requirements: ['link_id' => '\d+'])]
     public function linkSampleAction()
     {
         $linkId = $this->getRequest()->getParam('link_id', 0);
@@ -147,7 +145,7 @@ class Mage_Downloadable_DownloadController extends Mage_Core_Controller_Front_Ac
      *
      * @return Mage_Core_Controller_Varien_Action|void
      */
-    #[Route('/downloadable/download/link/{id}', name: 'downloadable.download.link', methods: ['GET'])]
+    #[Maho\Config\Route('/downloadable/download/link/{id}', name: 'downloadable.download.link', methods: ['GET'])]
     public function linkAction()
     {
         $id = $this->getRequest()->getParam('id', 0);

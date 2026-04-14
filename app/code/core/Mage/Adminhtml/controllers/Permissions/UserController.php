@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -43,7 +41,7 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
         return $this;
     }
 
-    #[Route('/admin/permissions_user/index')]
+    #[Maho\Config\Route('/admin/permissions_user/index')]
 
     public function indexAction(): void
     {
@@ -56,14 +54,14 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
             ->renderLayout();
     }
 
-    #[Route('/admin/permissions_user/new')]
+    #[Maho\Config\Route('/admin/permissions_user/new')]
 
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
-    #[Route('/admin/permissions_user/edit')]
+    #[Maho\Config\Route('/admin/permissions_user/edit')]
 
     public function editAction(): void
     {
@@ -107,7 +105,7 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
         $this->renderLayout();
     }
 
-    #[Route('/admin/permissions_user/save')]
+    #[Maho\Config\Route('/admin/permissions_user/save')]
 
     public function saveAction()
     {
@@ -180,7 +178,7 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/permissions_user/delete')]
+    #[Maho\Config\Route('/admin/permissions_user/delete')]
 
     public function deleteAction(): void
     {
@@ -224,7 +222,7 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/permissions_user/rolesGrid')]
+    #[Maho\Config\Route('/admin/permissions_user/rolesGrid')]
 
     public function rolesGridAction(): void
     {
@@ -243,7 +241,7 @@ class Mage_Adminhtml_Permissions_UserController extends Mage_Adminhtml_Controlle
         );
     }
 
-    #[Route('/admin/permissions_user/roleGrid')]
+    #[Maho\Config\Route('/admin/permissions_user/roleGrid')]
 
     public function roleGridAction(): void
     {

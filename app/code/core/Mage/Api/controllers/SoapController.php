@@ -12,11 +12,9 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Api_SoapController extends Mage_Api_Controller_Action
 {
-    #[Route('/api/soap', name: 'api.soap')]
+    #[Maho\Config\Route('/api/soap', name: 'api.soap')]
     public function indexAction(): void
     {
         $this->_getServer()->init($this, 'soap')->run();

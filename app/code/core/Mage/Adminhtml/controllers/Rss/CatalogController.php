@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_Rss_CatalogController extends Mage_Adminhtml_Controller_Rss_Abstract
 {
     #[\Override]
@@ -27,7 +25,7 @@ class Mage_Adminhtml_Rss_CatalogController extends Mage_Adminhtml_Controller_Rss
         return Mage::getSingleton('admin/session')->isAllowed($path);
     }
 
-    #[Route('/admin/rss_catalog/notifystock')]
+    #[Maho\Config\Route('/admin/rss_catalog/notifystock')]
 
     public function notifystockAction(): void
     {
@@ -37,7 +35,7 @@ class Mage_Adminhtml_Rss_CatalogController extends Mage_Adminhtml_Controller_Rss
         }
     }
 
-    #[Route('/admin/rss_catalog/review')]
+    #[Maho\Config\Route('/admin/rss_catalog/review')]
 
     public function reviewAction(): void
     {

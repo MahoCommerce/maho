@@ -10,8 +10,6 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -59,7 +57,7 @@ class Mage_Catalog_CategoryController extends Mage_Core_Controller_Front_Action
      * Category view action
      * @throws Mage_Core_Exception
      */
-    #[Route('/catalog/category/view/{id}', name: 'catalog.category.view', methods: ['GET'], requirements: ['id' => '\d+'])]
+    #[Maho\Config\Route('/catalog/category/view/{id}', name: 'catalog.category.view', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function viewAction(): void
     {
         if ($category = $this->_initCategory()) {

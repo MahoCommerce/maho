@@ -10,11 +10,9 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
-use Maho\Config\Route;
-
 class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Action
 {
-    #[Route('/admin/notification/index')]
+    #[Maho\Config\Route('/admin/notification/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Notifications'));
@@ -26,7 +24,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
             ->renderLayout();
     }
 
-    #[Route('/admin/notification/markAsRead')]
+    #[Maho\Config\Route('/admin/notification/markAsRead')]
 
     public function markAsReadAction(): void
     {
@@ -57,7 +55,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/notification/massMarkAsRead')]
+    #[Maho\Config\Route('/admin/notification/massMarkAsRead')]
 
     public function massMarkAsReadAction(): void
     {
@@ -87,7 +85,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/notification/remove')]
+    #[Maho\Config\Route('/admin/notification/remove')]
 
     public function removeAction(): void
     {
@@ -117,7 +115,7 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*/');
     }
 
-    #[Route('/admin/notification/massRemove')]
+    #[Maho\Config\Route('/admin/notification/massRemove')]
 
     public function massRemoveAction(): void
     {
