@@ -263,7 +263,7 @@ final class Maho
         foreach ($driverClasses as $driverClass) {
             try {
                 return \Intervention\Image\ImageManager::usingDriver($driverClass, ...$options);
-            } catch (Intervention\Image\Exceptions\DriverException) {
+            } catch (\Throwable) {
             }
         }
 
