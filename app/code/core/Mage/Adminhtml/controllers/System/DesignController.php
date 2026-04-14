@@ -31,7 +31,6 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
     }
 
     #[Maho\Config\Route('/admin/system_design/index')]
-
     public function indexAction(): void
     {
         $this
@@ -43,21 +42,18 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
     }
 
     #[Maho\Config\Route('/admin/system_design/grid')]
-
     public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/system_design_grid')->toHtml());
     }
 
     #[Maho\Config\Route('/admin/system_design/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/system_design/edit')]
-
     public function editAction(): void
     {
         $this
@@ -84,7 +80,6 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
     }
 
     #[Maho\Config\Route('/admin/system_design/save')]
-
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -120,7 +115,6 @@ class Mage_Adminhtml_System_DesignController extends Mage_Adminhtml_Controller_A
     }
 
     #[Maho\Config\Route('/admin/system_design/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {

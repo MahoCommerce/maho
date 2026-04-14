@@ -29,7 +29,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Customers'))
@@ -40,14 +39,12 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/edit')]
-
     public function editAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
@@ -91,7 +88,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/save')]
-
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -142,7 +138,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/delete')]
-
     public function deleteAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
@@ -162,7 +157,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/massDelete')]
-
     public function massDeleteAction(): void
     {
         $segmentIds = $this->getRequest()->getParam('segment');
@@ -192,7 +186,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/refresh')]
-
     public function refreshAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
@@ -218,7 +211,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/massStatus')]
-
     public function massStatusAction(): void
     {
         $segmentIds = $this->getRequest()->getParam('segment');
@@ -247,7 +239,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/newConditionHtml')]
-
     public function newConditionHtmlAction(): void
     {
         try {
@@ -296,7 +287,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/customersTab')]
-
     public function customersTabAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');
@@ -321,7 +311,6 @@ class Maho_CustomerSegmentation_Adminhtml_CustomerSegmentation_IndexController e
     }
 
     #[Maho\Config\Route('/admin/customersegmentation_index/customersGrid')]
-
     public function customersGridAction(): void
     {
         $segmentId = $this->getRequest()->getParam('id');

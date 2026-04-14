@@ -26,7 +26,6 @@ class Mage_Adminhtml_Catalog_Product_Action_AttributeController extends Mage_Adm
     }
 
     #[Maho\Config\Route('/admin/catalog_product_action_attribute/edit')]
-
     public function editAction(): void
     {
         if (!$this->_validateProducts()) {

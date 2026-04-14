@@ -32,7 +32,6 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/index')]
-
     public function indexAction()
     {
         if ($this->getRequest()->isAjax()) {
@@ -63,7 +62,6 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/popup')]
-
     public function popupAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');
@@ -87,7 +85,6 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/treeJson')]
-
     public function treeJsonAction(): void
     {
         try {
@@ -101,7 +98,6 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/contents')]
-
     public function contentsAction(): void
     {
         try {
@@ -114,7 +110,6 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/newFolder')]
-
     public function newFolderAction(): void
     {
         try {
@@ -129,7 +124,6 @@ class Mage_Adminhtml_Cms_Wysiwyg_ImagesController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/cms_wysiwyg_images/deleteFolder')]
-
     public function deleteFolderAction(): void
     {
         try {

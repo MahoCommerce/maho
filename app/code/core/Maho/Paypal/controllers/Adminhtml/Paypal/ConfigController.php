@@ -32,7 +32,6 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
     ];
 
     #[Maho\Config\Route('/admin/paypal_config/testConnection')]
-
     public function testConnectionAction(): void
     {
         $result = ['success' => false, 'message' => ''];
@@ -57,7 +56,6 @@ class Maho_Paypal_Adminhtml_Paypal_ConfigController extends Mage_Adminhtml_Contr
     }
 
     #[Maho\Config\Route('/admin/paypal_config/registerWebhook')]
-
     public function registerWebhookAction(): void
     {
         $result = ['success' => false, 'message' => ''];

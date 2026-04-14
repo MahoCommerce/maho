@@ -24,7 +24,6 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_LoginController extends M
     }
 
     #[Maho\Config\Route('/admin/adminactivitylog_login/grid')]
-
     public function gridAction(): void
     {
         $this->loadLayout(false);
@@ -32,7 +31,6 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_LoginController extends M
     }
 
     #[Maho\Config\Route('/admin/adminactivitylog_login/exportCsv')]
-
     public function exportCsvAction(): void
     {
         $fileName = 'admin_login_activity.csv';
@@ -43,7 +41,6 @@ class Maho_AdminActivityLog_Adminhtml_Adminactivitylog_LoginController extends M
     }
 
     #[Maho\Config\Route('/admin/adminactivitylog_login/exportXml')]
-
     public function exportXmlAction(): void
     {
         $fileName = 'admin_login_activity.xml';

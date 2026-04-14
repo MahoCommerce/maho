@@ -41,7 +41,6 @@ class Mage_Adminhtml_Sales_TransactionsController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/sales_transactions/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))

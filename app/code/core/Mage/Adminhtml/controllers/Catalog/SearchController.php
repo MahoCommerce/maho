@@ -28,7 +28,6 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/catalog_search/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Search Terms'));
@@ -40,14 +39,12 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/catalog_search/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/catalog_search/edit')]
-
     public function editAction(): void
     {
         $this->_title($this->__('Catalog'))->_title($this->__('Search Terms'));
@@ -146,7 +143,6 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/catalog_search/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -168,7 +164,6 @@ class Mage_Adminhtml_Catalog_SearchController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/catalog_search/massDelete')]
-
     public function massDeleteAction(): void
     {
         $searchIds = $this->getRequest()->getParam('search');

@@ -30,7 +30,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -41,7 +40,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/new')]
-
     public function newAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -61,7 +59,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/edit')]
-
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -105,7 +102,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/save')]
-
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -186,7 +182,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -212,7 +207,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/massDelete')]
-
     public function massDeleteAction(): void
     {
         $restrictionIds = $this->getRequest()->getParam('restriction');
@@ -237,7 +231,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/massStatus')]
-
     public function massStatusAction(): void
     {
         $restrictionIds = $this->getRequest()->getParam('restriction');
@@ -264,7 +257,6 @@ class Mage_Payment_Adminhtml_Payment_RestrictionController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/payment_restriction/newConditionHtml')]
-
     public function newConditionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');

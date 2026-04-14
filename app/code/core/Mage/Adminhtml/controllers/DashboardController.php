@@ -19,7 +19,6 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     public const ADMIN_RESOURCE = 'dashboard';
 
     #[Maho\Config\Route('/admin/dashboard/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Dashboard'));
@@ -61,7 +60,6 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     }
 
     #[Maho\Config\Route('/admin/dashboard/ajaxBlock')]
-
     public function ajaxBlockAction(): void
     {
         $output   = '';

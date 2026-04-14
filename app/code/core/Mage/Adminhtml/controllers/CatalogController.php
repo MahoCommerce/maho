@@ -18,7 +18,6 @@ class Mage_Adminhtml_CatalogController extends Mage_Adminhtml_Controller_Action
     public const ADMIN_RESOURCE = 'catalog';
 
     #[Maho\Config\Route('/admin/catalog/index')]
-
     public function indexAction(): void
     {
         $this->loadLayout();

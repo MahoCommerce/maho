@@ -28,7 +28,6 @@ class Mage_Adminhtml_Sales_Order_View_GiftmessageController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/sales_order_view_giftmessage/save')]
-
     public function saveAction(): void
     {
         try {

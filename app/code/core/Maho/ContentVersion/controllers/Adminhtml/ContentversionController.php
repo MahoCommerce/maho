@@ -23,7 +23,6 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
     }
 
     #[Maho\Config\Route('/admin/contentversion/restore')]
-
     public function restoreAction(): void
     {
         $versionId = (int) $this->getRequest()->getParam('version_id');
@@ -48,7 +47,6 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
     }
 
     #[Maho\Config\Route('/admin/contentversion/preview')]
-
     public function previewAction(): void
     {
         $versionId = (int) $this->getRequest()->getParam('version_id');

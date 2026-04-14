@@ -339,7 +339,6 @@ class Mage_Adminhtml_Sales_Order_CreateController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/sales_order_create/reorder')]
-
     public function reorderAction()
     {
         $this->_getSession()->clear();

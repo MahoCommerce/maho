@@ -57,7 +57,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/directory_country/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -69,7 +68,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/directory_country/grid')]
-
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -77,14 +75,12 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/directory_country/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/directory_country/edit')]
-
     public function editAction(): void
     {
         $model = $this->_initCountry();
@@ -122,7 +118,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/directory_country/save')]
-
     public function saveAction(): void
     {
         $model = $this->_initCountry();
@@ -178,7 +173,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/directory_country/delete')]
-
     public function deleteAction(): void
     {
         $model = $this->_initCountry();
@@ -210,7 +204,6 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
     }
 
     #[Maho\Config\Route('/admin/directory_country/massDelete')]
-
     public function massDeleteAction(): void
     {
         $countryIds = $this->getRequest()->getPost('countries');

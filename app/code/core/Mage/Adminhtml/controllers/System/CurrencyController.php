@@ -48,7 +48,6 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/system_currency/fetchRates')]
-
     public function fetchRatesAction(): void
     {
         try {
@@ -83,7 +82,6 @@ class Mage_Adminhtml_System_CurrencyController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/system_currency/saveRates')]
-
     public function saveRatesAction(): void
     {
         $data = $this->getRequest()->getParam('rate');

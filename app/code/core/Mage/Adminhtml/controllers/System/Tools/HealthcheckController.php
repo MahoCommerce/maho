@@ -13,7 +13,6 @@ class Mage_Adminhtml_System_Tools_HealthcheckController extends Mage_Adminhtml_C
     public const ADMIN_RESOURCE = 'system/tools/healthcheck';
 
     #[Maho\Config\Route('/admin/system_tools_healthcheck/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('System'))

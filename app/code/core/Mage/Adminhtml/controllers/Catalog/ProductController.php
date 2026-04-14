@@ -723,7 +723,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/catalog_product/categoriesJson')]
-
     public function categoriesJsonAction(): void
     {
         $product = $this->_initProduct();
@@ -894,7 +893,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/catalog_product/created')]
-
     public function createdAction(): void
     {
         $this->_getSession()->addNotice(
@@ -908,7 +906,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/catalog_product/massDelete')]
-
     public function massDeleteAction(): void
     {
         $productIds = $this->getRequest()->getParam('product');
@@ -992,7 +989,6 @@ class Mage_Adminhtml_Catalog_ProductController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/catalog_product/quickCreate')]
-
     public function quickCreateAction(): void
     {
         $result = [];

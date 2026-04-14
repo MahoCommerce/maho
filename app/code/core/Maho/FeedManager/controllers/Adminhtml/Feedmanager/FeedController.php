@@ -48,7 +48,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -60,14 +59,12 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/edit')]
-
     public function editAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -105,7 +102,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/save')]
-
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -257,7 +253,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/delete')]
-
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -752,7 +747,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/view')]
-
     public function viewAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -791,7 +785,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/download')]
-
     public function downloadAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');
@@ -868,7 +861,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/massDelete')]
-
     public function massDeleteAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
@@ -898,7 +890,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/massGenerate')]
-
     public function massGenerateAction(): void
     {
         $feedIds = $this->getRequest()->getParam('feed_ids');
@@ -956,7 +947,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_FeedController extends Mage_Adminht
     }
 
     #[Maho\Config\Route('/admin/feedmanager_feed/logsGrid')]
-
     public function logsGridAction(): void
     {
         $id = (int) $this->getRequest()->getParam('id');

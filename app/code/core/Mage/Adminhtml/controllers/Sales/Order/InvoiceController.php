@@ -364,7 +364,6 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     }
 
     #[Maho\Config\Route('/admin/sales_order_invoice/addComment')]
-
     public function addCommentAction(): void
     {
         try {

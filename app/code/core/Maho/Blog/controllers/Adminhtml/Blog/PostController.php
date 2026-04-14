@@ -28,7 +28,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/blog_post/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Blog Posts'));
@@ -37,14 +36,12 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/blog_post/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/blog_post/edit')]
-
     public function editAction(): void
     {
         $this->_title($this->__('Blog Post'));
@@ -81,7 +78,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/blog_post/save')]
-
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -120,7 +116,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/blog_post/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -142,7 +137,6 @@ class Maho_Blog_Adminhtml_Blog_PostController extends Mage_Adminhtml_Controller_
     }
 
     #[Maho\Config\Route('/admin/blog_post/massDelete')]
-
     public function massDeleteAction(): void
     {
         $postIds = $this->getRequest()->getParam('post');

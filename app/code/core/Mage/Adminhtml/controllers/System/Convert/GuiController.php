@@ -99,7 +99,6 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     }
 
     #[Maho\Config\Route('/admin/system_convert_gui/upload')]
-
     public function uploadAction(): void
     {
         $this->_initProfile();
@@ -107,7 +106,6 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     }
 
     #[Maho\Config\Route('/admin/system_convert_gui/uploadPost')]
-
     public function uploadPostAction(): void
     {
         $this->_initProfile();
@@ -115,7 +113,6 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     }
 
     #[Maho\Config\Route('/admin/system_convert_gui/download')]
-
     public function downloadAction(): void
     {
         $filename = $this->getRequest()->getParam('filename');

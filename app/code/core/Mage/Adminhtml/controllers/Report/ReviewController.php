@@ -27,7 +27,6 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     }
 
     #[Maho\Config\Route('/admin/report_review/customer')]
-
     public function customerAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -62,7 +61,6 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     }
 
     #[Maho\Config\Route('/admin/report_review/product')]
-
     public function productAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -97,7 +95,6 @@ class Mage_Adminhtml_Report_ReviewController extends Mage_Adminhtml_Controller_A
     }
 
     #[Maho\Config\Route('/admin/report_review/productDetail')]
-
     public function productDetailAction(): void
     {
         $this->_title($this->__('Reports'))

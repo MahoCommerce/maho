@@ -193,7 +193,6 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/cache/cleanMinifiedFiles')]
-
     public function cleanMinifiedFilesAction(): void
     {
         try {

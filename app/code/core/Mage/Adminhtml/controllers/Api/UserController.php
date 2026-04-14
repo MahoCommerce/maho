@@ -42,7 +42,6 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/api_user/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -55,14 +54,12 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/api_user/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/api_user/edit')]
-
     public function editAction(): void
     {
         $this->_title($this->__('System'))
@@ -109,7 +106,6 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/api_user/save')]
-
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -183,7 +179,6 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/api_user/delete')]
-
     public function deleteAction(): void
     {
         $id = $this->getRequest()->getParam('user_id');
@@ -219,7 +214,6 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/api_user/rolesGrid')]
-
     public function rolesGridAction(): void
     {
         $id = $this->getRequest()->getParam('user_id');
@@ -234,7 +228,6 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/api_user/roleGrid')]
-
     public function roleGridAction(): void
     {
         $this->getResponse()

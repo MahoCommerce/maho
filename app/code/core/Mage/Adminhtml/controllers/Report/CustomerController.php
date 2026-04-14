@@ -33,7 +33,6 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/report_customer/accounts')]
-
     public function accountsAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -68,7 +67,6 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/report_customer/orders')]
-
     public function ordersAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -106,7 +104,6 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/report_customer/totals')]
-
     public function totalsAction(): void
     {
         $this->_title($this->__('Reports'))

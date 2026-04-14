@@ -57,7 +57,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -69,7 +68,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/grid')]
-
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -77,14 +75,12 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/directory_region/edit')]
-
     public function editAction(): void
     {
         $model = $this->_initRegion();
@@ -122,7 +118,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/save')]
-
     public function saveAction(): void
     {
         $model = $this->_initRegion();
@@ -178,7 +173,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/delete')]
-
     public function deleteAction(): void
     {
         $model = $this->_initRegion();
@@ -218,7 +212,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/massDelete')]
-
     public function massDeleteAction(): void
     {
         $regionIds = $this->getRequest()->getPost('regions');
@@ -269,7 +262,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/translationGrid')]
-
     public function translationGridAction(): void
     {
         $this->_initRegion();
@@ -277,7 +269,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/translationSave')]
-
     public function translationSaveAction(): void
     {
         $model = $this->_initRegion();
@@ -314,7 +305,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/translationMassDelete')]
-
     public function translationMassDeleteAction(): void
     {
         $model = $this->_initRegion();
@@ -368,7 +358,6 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/directory_region/import')]
-
     public function importAction(): void
     {
         try {

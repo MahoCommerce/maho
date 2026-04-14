@@ -28,7 +28,6 @@ class Mage_Adminhtml_SalesController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/sales/index')]
-
     public function indexAction(): void
     {
         $this->loadLayout();

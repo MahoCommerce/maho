@@ -86,7 +86,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/grid')]
-
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -463,7 +462,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/wishlist')]
-
     public function wishlistAction(): void
     {
         $this->_initCustomer();
@@ -580,7 +578,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/tagGrid')]
-
     public function tagGridAction(): void
     {
         $this->_initCustomer();
@@ -592,7 +589,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/validate')]
-
     public function validateAction(): void
     {
         $response       = new \Maho\DataObject();
@@ -678,7 +674,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/massSubscribe')]
-
     public function massSubscribeAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -702,7 +697,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/massUnsubscribe')]
-
     public function massUnsubscribeAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -727,7 +721,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/massDelete')]
-
     public function massDeleteAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -753,7 +746,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/massAssignGroup')]
-
     public function massAssignGroupAction(): void
     {
         $customersIds = $this->getRequest()->getParam('customer');
@@ -778,7 +770,6 @@ class Mage_Adminhtml_CustomerController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/customer/viewfile')]
-
     public function viewfileAction(): void
     {
         $plain  = false;

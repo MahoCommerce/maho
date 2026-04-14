@@ -56,7 +56,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     }
 
     #[Maho\Config\Route('/admin/promo_quote/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Promotions'))->_title($this->__('Shopping Cart Price Rules'));
@@ -67,14 +66,12 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     }
 
     #[Maho\Config\Route('/admin/promo_quote/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/promo_quote/edit')]
-
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -208,7 +205,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     }
 
     #[Maho\Config\Route('/admin/promo_quote/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -285,7 +281,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     }
 
     #[Maho\Config\Route('/admin/promo_quote/newActionHtml')]
-
     public function newActionHtmlAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -311,7 +306,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     }
 
     #[Maho\Config\Route('/admin/promo_quote/applyRules')]
-
     public function applyRulesAction(): void
     {
         $this->_initAction();
@@ -319,7 +313,6 @@ class Mage_Adminhtml_Promo_QuoteController extends Mage_Adminhtml_Controller_Act
     }
 
     #[Maho\Config\Route('/admin/promo_quote/grid')]
-
     public function gridAction(): void
     {
         $this->_initRule()->loadLayout()->renderLayout();

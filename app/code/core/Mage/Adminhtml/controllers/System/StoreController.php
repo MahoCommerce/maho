@@ -47,7 +47,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -59,7 +58,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/newWebsite')]
-
     public function newWebsiteAction(): void
     {
         Mage::register('store_type', 'website');
@@ -67,7 +65,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/newGroup')]
-
     public function newGroupAction(): void
     {
         Mage::register('store_type', 'group');
@@ -75,7 +72,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/newStore')]
-
     public function newStoreAction(): void
     {
         if (!Mage::registry('store_type')) {
@@ -86,7 +82,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/editWebsite')]
-
     public function editWebsiteAction(): void
     {
         Mage::register('store_type', 'website');
@@ -94,7 +89,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/editGroup')]
-
     public function editGroupAction(): void
     {
         Mage::register('store_type', 'group');
@@ -102,7 +96,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/editStore')]
-
     public function editStoreAction(): void
     {
         $this->_title($this->__('System'))
@@ -176,7 +169,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/save')]
-
     public function saveAction(): void
     {
         if ($this->getRequest()->isPost() && $postData = $this->getRequest()->getPost()) {
@@ -263,7 +255,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/deleteWebsite')]
-
     public function deleteWebsiteAction(): void
     {
         $this->_title($this->__('System'))
@@ -296,7 +287,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/deleteGroup')]
-
     public function deleteGroupAction(): void
     {
         $this->_title($this->__('System'))
@@ -329,7 +319,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/deleteStore')]
-
     public function deleteStoreAction(): void
     {
         $this->_title($this->__('System'))
@@ -362,7 +351,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/deleteWebsitePost')]
-
     public function deleteWebsitePostAction(): void
     {
         $itemId = $this->getRequest()->getParam('item_id');
@@ -392,7 +380,6 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/system_store/deleteGroupPost')]
-
     public function deleteGroupPostAction(): void
     {
         $itemId = $this->getRequest()->getParam('item_id');

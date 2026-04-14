@@ -41,7 +41,6 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/blog_category/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Blog Categories'));
@@ -50,14 +49,12 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/blog_category/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/blog_category/edit')]
-
     public function editAction(): void
     {
         $this->_title($this->__('Blog Category'));
@@ -94,7 +91,6 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/blog_category/save')]
-
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost('category')) {
@@ -140,7 +136,6 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/blog_category/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -165,7 +160,6 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     }
 
     #[Maho\Config\Route('/admin/blog_category/massDelete')]
-
     public function massDeleteAction(): void
     {
         $categoryIds = $this->getRequest()->getParam('category');

@@ -25,7 +25,6 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/notification/markAsRead')]
-
     public function markAsReadAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -56,7 +55,6 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/notification/massMarkAsRead')]
-
     public function massMarkAsReadAction(): void
     {
         $session = Mage::getSingleton('adminhtml/session');
@@ -86,7 +84,6 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/notification/remove')]
-
     public function removeAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -116,7 +113,6 @@ class Mage_Adminhtml_NotificationController extends Mage_Adminhtml_Controller_Ac
     }
 
     #[Maho\Config\Route('/admin/notification/massRemove')]
-
     public function massRemoveAction(): void
     {
         $session = Mage::getSingleton('adminhtml/session');

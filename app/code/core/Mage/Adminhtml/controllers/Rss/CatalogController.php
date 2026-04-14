@@ -26,7 +26,6 @@ class Mage_Adminhtml_Rss_CatalogController extends Mage_Adminhtml_Controller_Rss
     }
 
     #[Maho\Config\Route('/admin/rss_catalog/notifystock')]
-
     public function notifystockAction(): void
     {
         if ($this->checkFeedEnable('admin_catalog/notifystock')) {
@@ -36,7 +35,6 @@ class Mage_Adminhtml_Rss_CatalogController extends Mage_Adminhtml_Controller_Rss
     }
 
     #[Maho\Config\Route('/admin/rss_catalog/review')]
-
     public function reviewAction(): void
     {
         if ($this->checkFeedEnable('admin_catalog/review')) {

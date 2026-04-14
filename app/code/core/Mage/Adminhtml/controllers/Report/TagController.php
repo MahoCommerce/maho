@@ -27,7 +27,6 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     }
 
     #[Maho\Config\Route('/admin/report_tag/customer')]
-
     public function customerAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -62,7 +61,6 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     }
 
     #[Maho\Config\Route('/admin/report_tag/product')]
-
     public function productAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -97,7 +95,6 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     }
 
     #[Maho\Config\Route('/admin/report_tag/popular')]
-
     public function popularAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -132,7 +129,6 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     }
 
     #[Maho\Config\Route('/admin/report_tag/customerDetail')]
-
     public function customerDetailAction(): void
     {
         $detailBlock = $this->getLayout()->createBlock('adminhtml/report_tag_customer_detail');
@@ -171,7 +167,6 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     }
 
     #[Maho\Config\Route('/admin/report_tag/productDetail')]
-
     public function productDetailAction(): void
     {
         $detailBlock = $this->getLayout()->createBlock('adminhtml/report_tag_product_detail');
@@ -210,7 +205,6 @@ class Mage_Adminhtml_Report_TagController extends Mage_Adminhtml_Controller_Acti
     }
 
     #[Maho\Config\Route('/admin/report_tag/tagDetail')]
-
     public function tagDetailAction(): void
     {
         $detailBlock = $this->getLayout()->createBlock('adminhtml/report_tag_popular_detail');

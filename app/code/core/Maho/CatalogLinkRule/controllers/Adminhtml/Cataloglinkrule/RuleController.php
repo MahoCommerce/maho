@@ -16,7 +16,6 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     public const ADMIN_RESOURCE = 'catalog/linkrules';
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/index')]
-
     public function indexAction(): void
     {
         $this->loadLayout()
@@ -27,14 +26,12 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/edit')]
-
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -66,7 +63,6 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/save')]
-
     public function saveAction(): void
     {
         if ($this->getRequest()->getPost()) {
@@ -120,7 +116,6 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -140,7 +135,6 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/massDelete')]
-
     public function massDeleteAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -166,7 +160,6 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/massStatus')]
-
     public function massStatusAction(): void
     {
         $ruleIds = $this->getRequest()->getParam('rule_ids');
@@ -194,14 +187,12 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/newConditionHtml')]
-
     public function newConditionHtmlAction(): void
     {
         $this->_renderRuleHtml('conditions');
     }
 
     #[Maho\Config\Route('/admin/cataloglinkrule_rule/newActionHtml')]
-
     public function newActionHtmlAction(): void
     {
         $this->_renderRuleHtml('actions');

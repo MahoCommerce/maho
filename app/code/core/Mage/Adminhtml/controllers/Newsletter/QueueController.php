@@ -90,7 +90,6 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/start')]
-
     public function startAction(): void
     {
         $queue = Mage::getModel('newsletter/queue')
@@ -110,7 +109,6 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/pause')]
-
     public function pauseAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
@@ -128,7 +126,6 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/resume')]
-
     public function resumeAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
@@ -146,7 +143,6 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/cancel')]
-
     public function cancelAction(): void
     {
         $queue = Mage::getSingleton('newsletter/queue')
@@ -164,7 +160,6 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/sending')]
-
     public function sendingAction(): void
     {
         // Todo: put it somewhere in config!
@@ -181,7 +176,6 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/edit')]
-
     public function editAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Queue'));
@@ -215,7 +209,6 @@ class Mage_Adminhtml_Newsletter_QueueController extends Mage_Adminhtml_Controlle
     }
 
     #[Maho\Config\Route('/admin/newsletter_queue/save')]
-
     public function saveAction(): void
     {
         try {

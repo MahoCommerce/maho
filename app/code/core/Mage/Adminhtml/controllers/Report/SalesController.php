@@ -27,7 +27,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     #[Maho\Config\Route('/admin/report_sales/sales')]
-
     public function salesAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Sales'));
@@ -50,7 +49,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     #[Maho\Config\Route('/admin/report_sales/bestsellers')]
-
     public function bestsellersAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Products'))->_title($this->__('Bestsellers'));
@@ -117,7 +115,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     #[Maho\Config\Route('/admin/report_sales/tax')]
-
     public function taxAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Tax'));
@@ -162,7 +159,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     #[Maho\Config\Route('/admin/report_sales/shipping')]
-
     public function shippingAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Shipping'));
@@ -207,7 +203,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     #[Maho\Config\Route('/admin/report_sales/invoiced')]
-
     public function invoicedAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Total Invoiced'));
@@ -252,7 +247,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     #[Maho\Config\Route('/admin/report_sales/refunded')]
-
     public function refundedAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Total Refunded'));
@@ -297,7 +291,6 @@ class Mage_Adminhtml_Report_SalesController extends Mage_Adminhtml_Controller_Re
     }
 
     #[Maho\Config\Route('/admin/report_sales/coupons')]
-
     public function couponsAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Sales'))->_title($this->__('Coupons'));

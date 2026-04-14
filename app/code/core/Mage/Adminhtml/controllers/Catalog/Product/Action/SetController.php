@@ -24,7 +24,6 @@ class Mage_Adminhtml_Catalog_Product_Action_SetController extends Mage_Adminhtml
     }
 
     #[Maho\Config\Route('/admin/catalog_product_action_set/save')]
-
     public function saveAction(): void
     {
         try {

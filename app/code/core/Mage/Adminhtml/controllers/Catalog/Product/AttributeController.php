@@ -66,7 +66,6 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     }
 
     #[Maho\Config\Route('/admin/catalog_product_attribute/index')]
-
     public function indexAction(): void
     {
         $this->_initAction()
@@ -75,14 +74,12 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     }
 
     #[Maho\Config\Route('/admin/catalog_product_attribute/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/catalog_product_attribute/edit')]
-
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('attribute_id');
@@ -133,7 +130,6 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     }
 
     #[Maho\Config\Route('/admin/catalog_product_attribute/validate')]
-
     public function validateAction(): void
     {
         $response = new \Maho\DataObject();
@@ -190,7 +186,6 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     }
 
     #[Maho\Config\Route('/admin/catalog_product_attribute/save')]
-
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -341,7 +336,6 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
     }
 
     #[Maho\Config\Route('/admin/catalog_product_attribute/delete')]
-
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('attribute_id')) {

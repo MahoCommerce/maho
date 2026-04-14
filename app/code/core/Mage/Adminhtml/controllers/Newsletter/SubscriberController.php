@@ -18,7 +18,6 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     public const ADMIN_RESOURCE = 'newsletter/subscriber';
 
     #[Maho\Config\Route('/admin/newsletter_subscriber/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Newsletter'))->_title($this->__('Newsletter Subscribers'));
@@ -43,7 +42,6 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     }
 
     #[Maho\Config\Route('/admin/newsletter_subscriber/grid')]
-
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -73,7 +71,6 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     }
 
     #[Maho\Config\Route('/admin/newsletter_subscriber/massUnsubscribe')]
-
     public function massUnsubscribeAction(): void
     {
         $subscribersIds = $this->getRequest()->getParam('subscriber');
@@ -97,7 +94,6 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     }
 
     #[Maho\Config\Route('/admin/newsletter_subscriber/massDelete')]
-
     public function massDeleteAction(): void
     {
         $subscribersIds = $this->getRequest()->getParam('subscriber');

@@ -18,7 +18,6 @@ class Mage_Adminhtml_SystemController extends Mage_Adminhtml_Controller_Action
     public const ADMIN_RESOURCE = 'system';
 
     #[Maho\Config\Route('/admin/system/index')]
-
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -28,7 +27,6 @@ class Mage_Adminhtml_SystemController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/system/setStore')]
-
     public function setStoreAction(): void
     {
         $storeId = (int) $this->getRequest()->getParam('store');

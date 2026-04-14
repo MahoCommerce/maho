@@ -18,7 +18,6 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
     public const ADMIN_RESOURCE = 'catalog/reviews_ratings/ratings';
 
     #[Maho\Config\Route('/admin/rating/index')]
-
     public function indexAction(): void
     {
         $this->_initEnityId();
@@ -32,7 +31,6 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/rating/edit')]
-
     public function editAction(): void
     {
         $this->_initEnityId();
@@ -54,7 +52,6 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/rating/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -118,7 +115,6 @@ class Mage_Adminhtml_RatingController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/rating/delete')]
-
     public function deleteAction(): void
     {
         if ($this->getRequest()->getParam('id') > 0) {

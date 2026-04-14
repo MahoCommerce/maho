@@ -88,7 +88,6 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     }
 
     #[Maho\Config\Route('/admin/system_convert_profile/grid')]
-
     public function gridAction(): void
     {
         $this->getResponse()->setBody(
@@ -204,7 +203,6 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     }
 
     #[Maho\Config\Route('/admin/system_convert_profile/run')]
-
     public function runAction(): void
     {
         $this->_initProfile();
@@ -213,7 +211,6 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     }
 
     #[Maho\Config\Route('/admin/system_convert_profile/batchRun')]
-
     public function batchRunAction(): void
     {
         if ($this->getRequest()->isPost()) {
@@ -280,7 +277,6 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     }
 
     #[Maho\Config\Route('/admin/system_convert_profile/batchFinish')]
-
     public function batchFinishAction(): void
     {
         $batchId = $this->getRequest()->getParam('id');

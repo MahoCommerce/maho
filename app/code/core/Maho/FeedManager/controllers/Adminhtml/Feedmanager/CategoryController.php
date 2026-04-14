@@ -34,7 +34,6 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     }
 
     #[Maho\Config\Route('/admin/feedmanager_category/index')]
-
     public function indexAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -46,14 +45,12 @@ class Maho_FeedManager_Adminhtml_Feedmanager_CategoryController extends Mage_Adm
     }
 
     #[Maho\Config\Route('/admin/feedmanager_category/new')]
-
     public function newAction(): void
     {
         $this->_forward('edit');
     }
 
     #[Maho\Config\Route('/admin/feedmanager_category/edit')]
-
     public function editAction(): void
     {
         $platform = $this->getRequest()->getParam('platform', '');

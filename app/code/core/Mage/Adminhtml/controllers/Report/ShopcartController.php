@@ -23,7 +23,6 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/report_shopcart/customer')]
-
     public function customerAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -58,7 +57,6 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/report_shopcart/product')]
-
     public function productAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -93,7 +91,6 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     }
 
     #[Maho\Config\Route('/admin/report_shopcart/abandoned')]
-
     public function abandonedAction(): void
     {
         $this->_title($this->__('Reports'))

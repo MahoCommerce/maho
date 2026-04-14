@@ -21,7 +21,6 @@ class Mage_Adminhtml_ReportController extends Mage_Adminhtml_Controller_Action
     }
 
     #[Maho\Config\Route('/admin/report/search')]
-
     public function searchAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Search Terms'));
