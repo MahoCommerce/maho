@@ -168,7 +168,7 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 
         for ($time = $now; $time < $maxTime; $time += 60) {
             if ($schedule->trySchedule($time)) {
-                return date('Y-m-d H:i:s', $time);
+                return date('Y-m-d H:i:00', $time);
             }
         }
 
