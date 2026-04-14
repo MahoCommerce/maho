@@ -120,6 +120,8 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     {
         Mage::dispatchEvent('controller_front_init_before', ['front' => $this]);
 
+        $this->addRouter('symfony', new Mage_Core_Controller_Varien_Router_Symfony());
+
         $routersInfo = Mage::app()->getStore()->getConfig(self::XML_STORE_ROUTERS_PATH);
 
         if ($routersInfo) {
