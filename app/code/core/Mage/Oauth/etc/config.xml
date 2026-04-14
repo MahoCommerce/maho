@@ -94,15 +94,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <routers>
-            <oauth>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Oauth</module>
-                    <frontName>oauth</frontName>
-                </args>
-            </oauth>
-        </routers>
         <translate>
             <modules>
                 <Mage_Oauth>

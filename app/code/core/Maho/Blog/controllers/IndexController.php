@@ -9,8 +9,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Route('/blog', methods: ['GET'])]
     public function indexAction(): void
     {
         if (!Mage::helper('blog')->isEnabled()) {
@@ -25,6 +28,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Route('/blog/index/category', methods: ['GET'])]
     public function categoryAction(): void
     {
         $helper = Mage::helper('blog');
@@ -57,6 +61,7 @@ class Maho_Blog_IndexController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Route('/blog/index/view', methods: ['GET'])]
     public function viewAction(): void
     {
         if (!Mage::helper('blog')->isEnabled()) {

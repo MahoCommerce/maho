@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -46,6 +48,7 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
     /**
      * Index action
      */
+    #[Route('/admin/system_config/index')]
     public function indexAction(): void
     {
         $this->_forward('edit');
@@ -54,6 +57,7 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
     /**
      * Edit configuration section
      */
+    #[Route('/admin/system_config/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Configuration'));
@@ -117,6 +121,7 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
     /**
      * Save configuration
      */
+    #[Route('/admin/system_config/save')]
     public function saveAction(): void
     {
         $session = Mage::getSingleton('adminhtml/session');
@@ -219,6 +224,7 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
     /**
      * Save fieldset state through AJAX
      */
+    #[Route('/admin/system_config/state')]
     public function stateAction(): void
     {
         if ($this->getRequest()->getParam('isAjax') == 1
@@ -236,6 +242,7 @@ class Mage_Adminhtml_System_ConfigController extends Mage_Adminhtml_Controller_A
     /**
      * Export shipping table rates in csv format
      */
+    #[Route('/admin/system_config/exportTablerates')]
     public function exportTableratesAction(): void
     {
         /** @var Mage_Adminhtml_Block_Shipping_Carrier_Tablerate_Grid $grid */

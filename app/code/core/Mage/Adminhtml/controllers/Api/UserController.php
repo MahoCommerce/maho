@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -41,6 +43,8 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         return $this;
     }
 
+    #[Route('/admin/api_user/index')]
+
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -52,10 +56,14 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
             ->renderLayout();
     }
 
+    #[Route('/admin/api_user/new')]
+
     public function newAction(): void
     {
         $this->_forward('edit');
     }
+
+    #[Route('/admin/api_user/edit')]
 
     public function editAction(): void
     {
@@ -101,6 +109,8 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         );
         $this->renderLayout();
     }
+
+    #[Route('/admin/api_user/save')]
 
     public function saveAction(): void
     {
@@ -174,6 +184,8 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
+    #[Route('/admin/api_user/delete')]
+
     public function deleteAction(): void
     {
         $id = $this->getRequest()->getParam('user_id');
@@ -208,6 +220,8 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         $this->_redirect('*/*/');
     }
 
+    #[Route('/admin/api_user/rolesGrid')]
+
     public function rolesGridAction(): void
     {
         $id = $this->getRequest()->getParam('user_id');
@@ -220,6 +234,8 @@ class Mage_Adminhtml_Api_UserController extends Mage_Adminhtml_Controller_Action
         Mage::register('api_user', $model);
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/api_user_edit_tab_roles')->toHtml());
     }
+
+    #[Route('/admin/api_user/roleGrid')]
 
     public function roleGridAction(): void
     {

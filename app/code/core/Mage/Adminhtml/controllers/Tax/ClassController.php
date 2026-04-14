@@ -10,11 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Tax_ClassController extends Mage_Adminhtml_Controller_Action
 {
     /**
      * save class action
      */
+    #[Route('/admin/tax_class/save')]
     public function saveAction(): void
     {
         if ($postData = $this->getRequest()->getPost()) {

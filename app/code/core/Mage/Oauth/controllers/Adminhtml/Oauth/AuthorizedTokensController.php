@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -30,6 +32,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Render grid page
      */
+    #[Route('/admin/oauth_authorizedtokens/index')]
     public function indexAction(): void
     {
         $this
@@ -41,6 +44,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Render grid AJAX request
      */
+    #[Route('/admin/oauth_authorizedtokens/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -50,6 +54,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Update revoke status action
      */
+    #[Route('/admin/oauth_authorizedtokens/revoke')]
     public function revokeAction(): void
     {
         $ids = $this->getRequest()->getParam('items');
@@ -102,6 +107,7 @@ class Mage_Oauth_Adminhtml_Oauth_AuthorizedTokensController extends Mage_Adminht
     /**
      * Delete action
      */
+    #[Route('/admin/oauth_authorizedtokens/delete')]
     public function deleteAction(): void
     {
         $ids = $this->getRequest()->getParam('items');

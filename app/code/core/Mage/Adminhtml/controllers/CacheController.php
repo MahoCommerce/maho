@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -32,6 +34,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Display cache management grid
      */
+    #[Route('/admin/cache/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Cache Management'));
@@ -44,6 +47,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Flush cache storage
      */
+    #[Route('/admin/cache/flushAll')]
     public function flushAllAction(): void
     {
         Mage::app()->getCache()->flush();
@@ -55,6 +59,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Flush all Maho caches
      */
+    #[Route('/admin/cache/flushSystem')]
     public function flushSystemAction(): void
     {
         Mage::app()->getCache()->banUse('config');
@@ -78,6 +83,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache enabling
      */
+    #[Route('/admin/cache/massEnable')]
     public function massEnableAction(): void
     {
         $types = $this->getRequest()->getParam('types');
@@ -100,6 +106,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache disabling
      */
+    #[Route('/admin/cache/massDisable')]
     public function massDisableAction(): void
     {
         $types = $this->getRequest()->getParam('types');
@@ -123,6 +130,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Mass action for cache refresh
      */
+    #[Route('/admin/cache/massRefresh')]
     public function massRefreshAction(): void
     {
         $types = $this->getRequest()->getParam('types');
@@ -143,6 +151,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Clean catalog files cache
      */
+    #[Route('/admin/cache/cleanImages')]
     public function cleanImagesAction(): void
     {
         try {
@@ -165,6 +174,7 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
     /**
      * Clean configurable swatches files cache
      */
+    #[Route('/admin/cache/cleanSwatches')]
     public function cleanSwatchesAction(): void
     {
         try {
@@ -183,6 +193,8 @@ class Mage_Adminhtml_CacheController extends Mage_Adminhtml_Controller_Action
         }
         $this->_redirect('*/*');
     }
+
+    #[Route('/admin/cache/cleanMinifiedFiles')]
 
     public function cleanMinifiedFilesAction(): void
     {

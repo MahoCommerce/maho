@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -34,6 +36,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Index action
      */
+    #[Route('/admin/permissions_block/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -50,6 +53,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * New action
      */
+    #[Route('/admin/permissions_block/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -58,6 +62,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Edit action
      */
+    #[Route('/admin/permissions_block/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('System'))
@@ -105,6 +110,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
      *
      * @return $this|void
      */
+    #[Route('/admin/permissions_block/save')]
     public function saveAction()
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -154,6 +160,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Delete action
      */
+    #[Route('/admin/permissions_block/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('block_id');
@@ -178,6 +185,7 @@ class Mage_Adminhtml_Permissions_BlockController extends Mage_Adminhtml_Controll
     /**
      * Grid action
      */
+    #[Route('/admin/permissions_block/blockGrid')]
     public function blockGridAction(): void
     {
         $this->getResponse()

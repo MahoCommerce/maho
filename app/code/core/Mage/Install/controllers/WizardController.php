@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Install_WizardController extends Mage_Install_Controller_Action
 {
     #[\Override]
@@ -56,11 +58,13 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         return true;
     }
 
+    #[Route('/install/wizard')]
     public function indexAction(): void
     {
         $this->_forward('license');
     }
 
+    #[Route('/install/wizard/license')]
     public function licenseAction(): void
     {
         $this->_checkIfInstalled();
@@ -78,6 +82,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->renderLayout();
     }
 
+    #[Route('/install/wizard/licensePost', methods: ['POST'])]
     public function licensePostAction(): void
     {
         $this->_checkIfInstalled();
@@ -90,6 +95,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         }
     }
 
+    #[Route('/install/wizard/locale')]
     public function localeAction(): void
     {
         $this->_checkIfInstalled();
@@ -105,6 +111,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->renderLayout();
     }
 
+    #[Route('/install/wizard/localeChange')]
     public function localeChangeAction(): void
     {
         $this->_checkIfInstalled();
@@ -121,6 +128,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->_redirect('*/*/locale');
     }
 
+    #[Route('/install/wizard/localePost', methods: ['POST'])]
     public function localePostAction(): void
     {
         $this->_checkIfInstalled();
@@ -138,6 +146,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->getResponse()->setRedirect($step->getNextUrl());
     }
 
+    #[Route('/install/wizard/configuration')]
     public function configurationAction(): void
     {
         $this->_checkIfInstalled();
@@ -162,6 +171,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * @return Mage_Core_Controller_Varien_Action|void
      */
+    #[Route('/install/wizard/configurationPost', methods: ['POST'])]
     public function configurationPostAction()
     {
         $this->_checkIfInstalled();
@@ -189,6 +199,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->getResponse()->setRedirect($step->getUrl());
     }
 
+    #[Route('/install/wizard/installDb')]
     public function installDbAction(): void
     {
         $this->_checkIfInstalled();
@@ -209,6 +220,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         }
     }
 
+    #[Route('/install/wizard/sampledata')]
     public function sampledataAction(): void
     {
         $this->_checkIfInstalled();
@@ -229,6 +241,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->renderLayout();
     }
 
+    #[Route('/install/wizard/sampledataPost', methods: ['POST'])]
     public function sampledataPostAction(): void
     {
         $this->_checkIfInstalled();
@@ -277,6 +290,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         }
     }
 
+    #[Route('/install/wizard/sampledataProgress')]
     public function sampledataProgressAction(): void
     {
         $this->_checkIfInstalled();
@@ -290,6 +304,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($progress));
     }
 
+    #[Route('/install/wizard/sampledataSkip')]
     public function sampledataSkipAction(): void
     {
         $this->_checkIfInstalled();
@@ -306,6 +321,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Reindex all - only available during installation
      */
+    #[Route('/install/wizard/reindex')]
     public function reindexAction(): void
     {
         $this->_checkIfInstalled();
@@ -337,6 +353,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * Flush cache - only available during installation
      */
+    #[Route('/install/wizard/cacheflush')]
     public function cacheflushAction(): void
     {
         $this->_checkIfInstalled();
@@ -356,6 +373,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         }
     }
 
+    #[Route('/install/wizard/administrator')]
     public function administratorAction(): void
     {
         $this->_checkIfInstalled();
@@ -372,6 +390,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
     /**
      * @return false|void
      */
+    #[Route('/install/wizard/administratorPost', methods: ['POST'])]
     public function administratorPostAction()
     {
         $this->_checkIfInstalled();
@@ -406,6 +425,7 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         $this->getResponse()->setRedirect($step->getNextUrl());
     }
 
+    #[Route('/install/wizard/complete')]
     public function completeAction(): void
     {
         $this->_checkIfInstalled();
@@ -500,12 +520,14 @@ class Mage_Install_WizardController extends Mage_Install_Controller_Action
         }
     }
 
+    #[Route('/install/wizard/checkHost')]
     public function checkHostAction(): void
     {
         $this->getResponse()->setHeader('Transfer-encoding', '', true);
         $this->getResponse()->setBody(Mage_Install_Model_Installer::INSTALLER_HOST_RESPONSE);
     }
 
+    #[Route('/install/wizard/checkSecureHost')]
     public function checkSecureHostAction(): void
     {
         $this->getResponse()->setHeader('Transfer-encoding', '', true);

@@ -15,8 +15,11 @@
  *
  * @package    Mage_Adminhtml
  */
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller_Action
 {
+    #[Route('/admin/report_customer/_init')]
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -29,6 +32,8 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
             ->_addBreadcrumb(Mage::helper('reports')->__('Customers'), Mage::helper('reports')->__('Customers'));
         return $this;
     }
+
+    #[Route('/admin/report_customer/accounts')]
 
     public function accountsAction(): void
     {
@@ -46,6 +51,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export new accounts report grid to CSV format
      */
+    #[Route('/admin/report_customer/exportAccountsCsv')]
     public function exportAccountsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_accounts_grid');
@@ -55,11 +61,14 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export new accounts report grid to Excel XML format
      */
+    #[Route('/admin/report_customer/exportAccountsExcel')]
     public function exportAccountsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_accounts_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('accounts.xml', -1));
     }
+
+    #[Route('/admin/report_customer/orders')]
 
     public function ordersAction(): void
     {
@@ -80,6 +89,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers most ordered report to CSV format
      */
+    #[Route('/admin/report_customer/exportOrdersCsv')]
     public function exportOrdersCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_orders_grid');
@@ -89,11 +99,14 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers most ordered report to Excel XML format
      */
+    #[Route('/admin/report_customer/exportOrdersExcel')]
     public function exportOrdersExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_orders_grid');
         $this->_prepareDownloadResponse(...$grid->getExcel('customers_orders.xml', -1));
     }
+
+    #[Route('/admin/report_customer/totals')]
 
     public function totalsAction(): void
     {
@@ -114,6 +127,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers biggest totals report to CSV format
      */
+    #[Route('/admin/report_customer/exportTotalsCsv')]
     public function exportTotalsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_totals_grid');
@@ -123,6 +137,7 @@ class Mage_Adminhtml_Report_CustomerController extends Mage_Adminhtml_Controller
     /**
      * Export customers biggest totals report to Excel XML format
      */
+    #[Route('/admin/report_customer/exportTotalsExcel')]
     public function exportTotalsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_customer_totals_grid');

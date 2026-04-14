@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -74,6 +76,7 @@ class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage
      *
      * @return $this
      */
+    #[Route('/admin/customer_cart_product_composite_cart/configure')]
     public function configureAction()
     {
         try {
@@ -114,6 +117,7 @@ class Mage_Adminhtml_Customer_Cart_Product_Composite_CartController extends Mage
      *
      * @return false
      */
+    #[Route('/admin/customer_cart_product_composite_cart/update')]
     public function updateAction()
     {
         try {

@@ -198,15 +198,6 @@
         </layout>
     </adminhtml>
     <frontend>
-        <routers>
-            <downloadable>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Downloadable</module>
-                    <frontName>downloadable</frontName>
-                </args>
-            </downloadable>
-        </routers>
         <secure_url>
             <downloadable>/downloadable/customer/</downloadable>
             <downloadable_download>/downloadable/download/</downloadable_download>

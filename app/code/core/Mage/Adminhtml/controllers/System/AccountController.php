@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -17,6 +19,8 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
      */
     public const ADMIN_RESOURCE = 'system/myaccount';
+
+    #[Route('/admin/system_account/index')]
 
     public function indexAction(): void
     {
@@ -31,6 +35,7 @@ class Mage_Adminhtml_System_AccountController extends Mage_Adminhtml_Controller_
     /**
      * Saving edited user information
      */
+    #[Route('/admin/system_account/save')]
     public function saveAction(): void
     {
         $userId = Mage::getSingleton('admin/session')->getUser()->getId();

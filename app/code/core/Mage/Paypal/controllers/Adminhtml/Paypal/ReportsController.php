@@ -10,11 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Controller_Action
 {
     /**
      * Grid action
      */
+    #[Route('/admin/paypal_reports/index')]
     public function indexAction(): void
     {
         $this->_initAction()
@@ -25,6 +28,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     /**
      * Ajax callback for grid actions
      */
+    #[Route('/admin/paypal_reports/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -36,6 +40,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     /**
      * View transaction details action
      */
+    #[Route('/admin/paypal_reports/details')]
     public function detailsAction(): void
     {
         $rowId = $this->getRequest()->getParam('id');
@@ -54,6 +59,7 @@ class Mage_Paypal_Adminhtml_Paypal_ReportsController extends Mage_Adminhtml_Cont
     /**
      * Forced fetch reports action
      */
+    #[Route('/admin/paypal_reports/fetch')]
     public function fetchAction(): void
     {
         try {

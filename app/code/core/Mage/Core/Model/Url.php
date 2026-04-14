@@ -534,9 +534,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     {
         if (!$this->hasData('route_front_name')) {
             $routeName = $this->getRouteName();
-            $route = Mage::app()->getFrontController()->getRouterByRoute($routeName);
-            $frontName = $route->getFrontNameByRoute($routeName);
-
+            $frontName = \Maho\Routing\RouteRegistry::getFrontNameByRoute($routeName ?? '') ?? $routeName;
             $this->setRouteFrontName($frontName);
         }
 
@@ -750,7 +748,81 @@ class Mage_Core_Model_Url extends \Maho\DataObject
             $this->setRouteParams($routeParams, false);
         }
 
+        // Try Symfony named route URL generation (skip for rewrite/current-based URLs)
+        if (empty($routeParams['_use_rewrite']) && empty($routeParams['_current'])) {
+            $symfonyPath = $this->_generateSymfonyRoutePath();
+            if ($symfonyPath !== null) {
+                return $this->getBaseUrl() . $symfonyPath;
+            }
+        }
+
         return $this->getBaseUrl() . $this->getRoutePath($routeParams);
+    }
+
+    /**
+     * Try to generate a URL path using Symfony named routes.
+     *
+     * Resolves the current route/controller/action to a Symfony route name,
+     * substitutes path variables, and moves extra params to query string.
+     *
+     * @return string|null The route path (without leading slash, with trailing slash), or null to fall back to legacy
+     */
+    protected function _generateSymfonyRoutePath(): ?string
+    {
+        $frontName = $this->getRouteFrontName();
+        $controller = $this->getControllerName() ?: $this->getDefaultControllerName();
+        $action = $this->getActionName() ?: $this->getDefaultActionName();
+
+        if (!$frontName) {
+            return null;
+        }
+
+        $routeInfo = \Maho\Routing\RouteCollectionBuilder::resolveRoute($frontName, $controller, $action);
+        if ($routeInfo === null) {
+            return null;
+        }
+
+        $routeParams = $this->getRouteParams() ?? [];
+        $pathVariables = $routeInfo['pathVariables'];
+
+        // Check all required path variables are present
+        $pathParams = [];
+        foreach ($pathVariables as $var) {
+            if (!isset($routeParams[$var]) || $routeParams[$var] === '') {
+                return null;
+            }
+            $pathParams[$var] = $routeParams[$var];
+        }
+
+        // Build path by substituting path variables
+        $path = $routeInfo['path'];
+        foreach ($pathParams as $var => $value) {
+            $path = str_replace('{' . $var . '}', (string) $value, $path);
+        }
+        $path = ltrim($path, '/');
+
+        // Extra params (not path variables): admin routes use key/value path segments
+        // (captured by {_catchall}), other routes use query params
+        $extras = array_diff_key($routeParams, array_flip($pathVariables));
+        $area = $routeInfo['area'] ?? 'frontend';
+
+        foreach ($extras as $key => $value) {
+            if ($value === null || $value === false || $value === '' || !is_scalar($value)) {
+                continue;
+            }
+            if ($area === 'adminhtml') {
+                $path .= '/' . $key . '/' . $value;
+            } else {
+                $this->setQueryParam($key, $value);
+            }
+        }
+
+        $path = ltrim($path, '/');
+        if ($path !== '' && !str_ends_with($path, '/')) {
+            $path .= '/';
+        }
+
+        return $path;
     }
 
     /**

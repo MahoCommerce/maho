@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -56,6 +58,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     /**
      * Index Action
      */
+    #[Route('/admin/system_variable/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))->_title($this->__('Custom Variables'));
@@ -68,6 +71,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     /**
      * New Action (forward to edit action)
      */
+    #[Route('/admin/system_variable/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -77,6 +81,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Edit Action
      * @throws Mage_Core_Exception
      */
+    #[Route('/admin/system_variable/edit')]
     public function editAction(): void
     {
         $variable = $this->_initVariable();
@@ -95,6 +100,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Validate Action
      * @throws Mage_Core_Exception
      */
+    #[Route('/admin/system_variable/validate')]
     public function validateAction(): void
     {
         $variable = $this->_initVariable();
@@ -114,6 +120,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Save Action
      * @throws Mage_Core_Exception|Throwable
      */
+    #[Route('/admin/system_variable/save')]
     public function saveAction(): void
     {
         $variable = $this->_initVariable();
@@ -146,6 +153,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
      * Delete Action
      * @throws Mage_Core_Exception|Throwable
      */
+    #[Route('/admin/system_variable/delete')]
     public function deleteAction(): void
     {
         $variable = $this->_initVariable();
@@ -167,6 +175,7 @@ class Mage_Adminhtml_System_VariableController extends Mage_Adminhtml_Controller
     /**
      * WYSIWYG Plugin Action
      */
+    #[Route('/admin/system_variable/wysiwygPlugin')]
     public function wysiwygPluginAction(): void
     {
         $customVariables = Mage::getModel('core/variable')->getVariablesOptionArray(true);

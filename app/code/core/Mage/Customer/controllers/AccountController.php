@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
 {
     public const CUSTOMER_ID_SESSION_NAME = 'customerId';
@@ -94,6 +96,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Default customer account page
      */
+    #[Route('/customer/account', name: 'customer.account.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -110,6 +113,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer login form page
      */
+    #[Route('/customer/account/login', name: 'customer.account.login', methods: ['GET'])]
     public function loginAction(): void
     {
         if ($this->_getSession()->isLoggedIn()) {
@@ -127,6 +131,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Login post action
      */
+    #[Route('/customer/account/loginPost', name: 'customer.account.loginPost', methods: ['POST'])]
     public function loginPostAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -224,6 +229,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Customer logout action
      */
+    #[Route('/customer/account/logout', name: 'customer.account.logout', methods: ['GET'])]
     public function logoutAction(): void
     {
         $session = $this->_getSession();
@@ -240,6 +246,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Logout success page
      */
+    #[Route('/customer/account/logoutSuccess', name: 'customer.account.logoutSuccess', methods: ['GET'])]
     public function logoutSuccessAction(): void
     {
         $this->loadLayout();
@@ -250,6 +257,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Customer register form page
      * Forwards to login page which now includes registration form in tabs
      */
+    #[Route('/customer/account/create', name: 'customer.account.create', methods: ['GET'])]
     public function createAction(): void
     {
         if ($this->_getSession()->isLoggedIn()) {
@@ -267,6 +275,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Create customer account action
      */
+    #[Route('/customer/account/createPost', name: 'customer.account.createPost', methods: ['POST'])]
     public function createPostAction(): void
     {
         $errUrl = $this->_getUrl('*/*/create', ['_secure' => true]);
@@ -578,6 +587,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Confirm customer account by id and confirmation key
      */
+    #[Route('/customer/account/confirm', name: 'customer.account.confirm', methods: ['GET'])]
     public function confirmAction(): void
     {
         $session = $this->_getSession();
@@ -637,6 +647,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Send confirmation link to specified email
      */
+    #[Route('/customer/account/confirmation', name: 'customer.account.confirmation')]
     public function confirmationAction(): void
     {
         $customer = Mage::getModel('customer/customer');
@@ -694,6 +705,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Forgot customer password page
      * Forwards to login page which now includes forgot password in dialog
      */
+    #[Route('/customer/account/forgotpassword', name: 'customer.account.forgotPassword', methods: ['GET'])]
     public function forgotPasswordAction(): void
     {
         // Set parameter to auto-open forgot password dialog
@@ -707,6 +719,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Forgot customer password action
      * @throws Mage_Core_Model_Store_Exception
      */
+    #[Route('/customer/account/forgotPasswordPost', name: 'customer.account.forgotPasswordPost', methods: ['POST'])]
     public function forgotPasswordPostAction(): void
     {
         $email = (string) $this->getRequest()->getPost('email');
@@ -771,6 +784,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Display reset forgotten password form
      */
+    #[Route('/customer/account/changeForgotten', name: 'customer.account.changeForgotten', methods: ['GET'])]
     public function changeForgottenAction(): void
     {
         try {
@@ -789,6 +803,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      *
      * User is redirected on this action when he clicks on the corresponding link in password reset confirmation email.
      */
+    #[Route('/customer/account/resetPassword', name: 'customer.account.resetPassword', methods: ['GET'])]
     public function resetPasswordAction(): void
     {
         try {
@@ -808,6 +823,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
      * Reset forgotten password
      * Used to handle data received from reset forgotten password form
      */
+    #[Route('/customer/account/resetPasswordPost', name: 'customer.account.resetPasswordPost', methods: ['POST'])]
     public function resetPasswordPostAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -874,6 +890,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Process magic link request
      */
+    #[Route('/customer/account/magicLinkRequestPost', name: 'customer.account.magicLinkRequestPost', methods: ['POST'])]
     public function magicLinkRequestPostAction(): void
     {
         if (!Mage::helper('customer')->isMagicLinkEnabled()) {
@@ -949,6 +966,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Validate magic link token and login customer
      */
+    #[Route('/customer/account/magicLinkLogin', name: 'customer.account.magicLinkLogin', methods: ['GET'])]
     public function magicLinkLoginAction(): void
     {
         // Check if magic link is enabled
@@ -1062,6 +1080,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Forgot customer account information page
      */
+    #[Route('/customer/account/edit', name: 'customer.account.edit', methods: ['GET'])]
     public function editAction(): void
     {
         $this->loadLayout();
@@ -1089,6 +1108,7 @@ class Mage_Customer_AccountController extends Mage_Core_Controller_Front_Action
     /**
      * Change customer password action
      */
+    #[Route('/customer/account/editPost', name: 'customer.account.editPost', methods: ['POST'])]
     public function editPostAction()
     {
         if (!$this->_validateFormKey()) {

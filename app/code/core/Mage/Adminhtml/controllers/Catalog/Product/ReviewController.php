@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -31,6 +33,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         return parent::preDispatch();
     }
 
+    #[Route('/admin/catalog_product_review/index')]
+
     public function indexAction()
     {
         $this->_title($this->__('Catalog'))
@@ -50,6 +54,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
 
         $this->renderLayout();
     }
+
+    #[Route('/admin/catalog_product_review/pending')]
 
     public function pendingAction()
     {
@@ -73,6 +79,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Route('/admin/catalog_product_review/edit')]
+
     public function editAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -93,6 +101,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Route('/admin/catalog_product_review/new')]
+
     public function newAction(): void
     {
         $this->_title($this->__('Catalog'))
@@ -109,6 +119,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
 
         $this->renderLayout();
     }
+
+    #[Route('/admin/catalog_product_review/save')]
 
     public function saveAction()
     {
@@ -157,6 +169,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/');
     }
 
+    #[Route('/admin/catalog_product_review/delete')]
+
     public function deleteAction(): void
     {
         $reviewId   = $this->getRequest()->getParam('id', false);
@@ -183,6 +197,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/edit/', ['id' => $reviewId]);
     }
 
+    #[Route('/admin/catalog_product_review/massDelete')]
+
     public function massDeleteAction(): void
     {
         $reviewsIds = $this->getRequest()->getParam('reviews');
@@ -208,6 +224,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
 
         $this->_redirect('*/*/' . $this->getRequest()->getParam('ret', 'index'));
     }
+
+    #[Route('/admin/catalog_product_review/massUpdateStatus')]
 
     public function massUpdateStatusAction(): void
     {
@@ -239,6 +257,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/' . $this->getRequest()->getParam('ret', 'index'));
     }
 
+    #[Route('/admin/catalog_product_review/massVisibleIn')]
+
     public function massVisibleInAction(): void
     {
         $reviewsIds = $this->getRequest()->getParam('reviews');
@@ -269,15 +289,21 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         $this->_redirect('*/*/pending');
     }
 
+    #[Route('/admin/catalog_product_review/productGrid')]
+
     public function productGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/review_product_grid')->toHtml());
     }
 
+    #[Route('/admin/catalog_product_review/reviewGrid')]
+
     public function reviewGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/review_grid')->toHtml());
     }
+
+    #[Route('/admin/catalog_product_review/jsonProductInfo')]
 
     public function jsonProductInfoAction(): void
     {
@@ -295,6 +321,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
 
         $this->getResponse()->setBodyJson($response);
     }
+
+    #[Route('/admin/catalog_product_review/post')]
 
     public function postAction(): void
     {
@@ -347,6 +375,8 @@ class Mage_Adminhtml_Catalog_Product_ReviewController extends Mage_Adminhtml_Con
         }
         $this->getResponse()->setRedirect($this->getUrl('*/*/'));
     }
+
+    #[Route('/admin/catalog_product_review/ratingItems')]
 
     public function ratingItemsAction(): void
     {

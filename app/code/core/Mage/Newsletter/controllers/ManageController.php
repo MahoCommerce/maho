@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -32,6 +34,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Route('/newsletter/manage', name: 'newsletter.manage.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->loadLayout();
@@ -45,6 +48,7 @@ class Mage_Newsletter_ManageController extends Mage_Core_Controller_Front_Action
         $this->renderLayout();
     }
 
+    #[Route('/newsletter/manage/save', name: 'newsletter.manage.save', methods: ['POST'])]
     public function saveAction()
     {
         if (!$this->_validateFormKey()) {

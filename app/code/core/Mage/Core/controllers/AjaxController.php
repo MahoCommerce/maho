@@ -10,11 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Core_AjaxController extends Mage_Core_Controller_Front_Action
 {
     /**
      * Ajax action for inline translation
      */
+    #[Route('/core/ajax/translate', name: 'core.ajax.translate', methods: ['POST'])]
     public function translateAction(): void
     {
         $translation = $this->getRequest()->getPost('translate');

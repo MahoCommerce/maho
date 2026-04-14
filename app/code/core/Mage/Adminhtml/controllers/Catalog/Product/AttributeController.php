@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_Controller_Action
 {
     protected $_entityTypeId;
@@ -65,6 +67,8 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         return $this;
     }
 
+    #[Route('/admin/catalog_product_attribute/index')]
+
     public function indexAction(): void
     {
         $this->_initAction()
@@ -72,10 +76,14 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
             ->renderLayout();
     }
 
+    #[Route('/admin/catalog_product_attribute/new')]
+
     public function newAction(): void
     {
         $this->_forward('edit');
     }
+
+    #[Route('/admin/catalog_product_attribute/edit')]
 
     public function editAction(): void
     {
@@ -125,6 +133,8 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
 
         $this->renderLayout();
     }
+
+    #[Route('/admin/catalog_product_attribute/validate')]
 
     public function validateAction(): void
     {
@@ -180,6 +190,8 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         }
         return $data;
     }
+
+    #[Route('/admin/catalog_product_attribute/save')]
 
     public function saveAction(): void
     {
@@ -329,6 +341,8 @@ class Mage_Adminhtml_Catalog_Product_AttributeController extends Mage_Adminhtml_
         }
         $this->_redirect('*/*/');
     }
+
+    #[Route('/admin/catalog_product_attribute/delete')]
 
     public function deleteAction(): void
     {

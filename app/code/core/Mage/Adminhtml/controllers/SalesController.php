@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_SalesController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -26,6 +28,8 @@ class Mage_Adminhtml_SalesController extends Mage_Adminhtml_Controller_Action
     {
         $this->setUsedModuleName('Mage_Sales');
     }
+
+    #[Route('/admin/sales/index')]
 
     public function indexAction(): void
     {

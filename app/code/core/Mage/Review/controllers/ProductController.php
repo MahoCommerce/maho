@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -127,6 +129,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
     /**
      * Submit new review action
      */
+    #[Route('/review/product/post', name: 'review.product.post', methods: ['POST'])]
     public function postAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -198,6 +201,7 @@ class Mage_Review_ProductController extends Mage_Core_Controller_Front_Action
     /**
      * Show details of one review
      */
+    #[Route('/review/product/view/{id}', name: 'review.product.view', methods: ['GET'], requirements: ['id' => '\d+'])]
     public function viewAction(): void
     {
         $review = $this->_loadReview((int) $this->getRequest()->getParam('id'));

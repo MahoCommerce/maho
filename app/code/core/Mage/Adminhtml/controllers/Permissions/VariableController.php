@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -34,6 +36,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Index action
      */
+    #[Route('/admin/permissions_variable/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -49,6 +52,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * New action
      */
+    #[Route('/admin/permissions_variable/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -57,6 +61,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Edit action
      */
+    #[Route('/admin/permissions_variable/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('System'))
@@ -104,6 +109,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
      *
      * @return $this|void
      */
+    #[Route('/admin/permissions_variable/save')]
     public function saveAction()
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -153,6 +159,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Delete action
      */
+    #[Route('/admin/permissions_variable/delete')]
     public function deleteAction(): void
     {
         $id = (int) $this->getRequest()->getParam('variable_id');
@@ -177,6 +184,7 @@ class Mage_Adminhtml_Permissions_VariableController extends Mage_Adminhtml_Contr
     /**
      * Grid action
      */
+    #[Route('/admin/permissions_variable/variableGrid')]
     public function variableGridAction(): void
     {
         $this->getResponse()

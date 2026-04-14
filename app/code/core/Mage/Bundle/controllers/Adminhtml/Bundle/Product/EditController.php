@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Bundle_Adminhtml_Bundle_Product_EditController extends Mage_Adminhtml_Catalog_ProductController
 {
     #[\Override]
@@ -17,6 +19,8 @@ class Mage_Bundle_Adminhtml_Bundle_Product_EditController extends Mage_Adminhtml
     {
         $this->setUsedModuleName('Mage_Bundle');
     }
+
+    #[Route('/admin/bundle_product_edit/form')]
 
     public function formAction(): void
     {

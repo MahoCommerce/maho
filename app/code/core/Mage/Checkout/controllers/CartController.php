@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -108,6 +110,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Shopping cart display action
      */
+    #[Route('/checkout/cart', name: 'checkout.cart.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $cart = $this->_getCart();
@@ -170,6 +173,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
      *
      * @throws Mage_Core_Exception
      */
+    #[Route('/checkout/cart/add', name: 'checkout.cart.add', methods: ['POST'])]
     public function addAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
@@ -292,6 +296,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Add products in group to shopping cart action
      */
+    #[Route('/checkout/cart/addgroup', name: 'checkout.cart.addgroup', methods: ['POST'])]
     public function addgroupAction(): void
     {
         $orderItemIds = $this->getRequest()->getParam('order_items', []);
@@ -331,6 +336,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Action to reconfigure cart item
      */
+    #[Route('/checkout/cart/configure', name: 'checkout.cart.configure', methods: ['GET'])]
     public function configureAction(): void
     {
         // Extract item and product to configure
@@ -365,6 +371,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Update product configuration for a cart item
      */
+    #[Route('/checkout/cart/updateItemOptions', name: 'checkout.cart.updateItemOptions', methods: ['POST'])]
     public function updateItemOptionsAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
@@ -483,6 +490,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Update shopping cart data action
      */
+    #[Route('/checkout/cart/updatePost', name: 'checkout.cart.updatePost', methods: ['POST'])]
     public function updatePostAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -549,6 +557,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Delete shoping cart item action
      */
+    #[Route('/checkout/cart/delete', name: 'checkout.cart.delete', methods: ['POST'])]
     public function deleteAction(): void
     {
         if ($this->_validateFormKey()) {
@@ -572,6 +581,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Initialize shipping information
      */
+    #[Route('/checkout/cart/estimatePost', name: 'checkout.cart.estimatePost', methods: ['POST'])]
     public function estimatePostAction(): void
     {
         $country    = (string) $this->getRequest()->getParam('country_id');
@@ -632,6 +642,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Estimate update action
      */
+    #[Route('/checkout/cart/estimateUpdatePost', name: 'checkout.cart.estimateUpdatePost', methods: ['POST'])]
     public function estimateUpdatePostAction(): void
     {
         $code = (string) $this->getRequest()->getParam('estimate_method');
@@ -657,6 +668,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Initialize coupon - also handles gift cards when coupon code fails
      */
+    #[Route('/checkout/cart/couponPost', name: 'checkout.cart.couponPost', methods: ['POST'])]
     public function couponPostAction(): void
     {
         $isAjax = (bool) $this->getRequest()->getParam('isAjax');
@@ -961,6 +973,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Minicart delete action
      */
+    #[Route('/checkout/cart/ajaxDelete', name: 'checkout.cart.ajaxDelete', methods: ['POST'])]
     public function ajaxDeleteAction(): void
     {
         if (!$this->_validateFormKey()) {
@@ -992,6 +1005,7 @@ class Mage_Checkout_CartController extends Mage_Core_Controller_Front_Action
     /**
      * Minicart ajax update qty action
      */
+    #[Route('/checkout/cart/ajaxUpdate', name: 'checkout.cart.ajaxUpdate', methods: ['POST'])]
     public function ajaxUpdateAction(): void
     {
         if (!$this->_validateFormKey()) {

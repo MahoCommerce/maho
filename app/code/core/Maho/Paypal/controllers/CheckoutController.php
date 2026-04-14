@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+use Maho\Config\Route;
+
 class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -35,6 +37,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Route('/paypal/checkout/clientToken', methods: ['POST'])]
     public function clientTokenAction(): void
     {
         $result = ['success' => false];
@@ -58,6 +61,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
         $this->getResponse()->setBody(Mage::helper('core')->jsonEncode($result));
     }
 
+    #[Route('/paypal/checkout/createOrder', methods: ['POST'])]
     public function createOrderAction(): void
     {
         $result = ['success' => false];
@@ -173,6 +177,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
     /**
      * Approve (authorize or capture) a PayPal order and place the Mage order
      */
+    #[Route('/paypal/checkout/approveOrder', methods: ['POST'])]
     public function approveOrderAction(): void
     {
         $result = ['success' => false];
@@ -301,6 +306,7 @@ class Maho_Paypal_CheckoutController extends Mage_Core_Controller_Front_Action
      * their shipping address or selects a shipping option inside the popup.
      * PayPal POSTs order data and expects updated purchase_units in response.
      */
+    #[Route('/paypal/checkout/shippingCallback', methods: ['POST'])]
     public function shippingCallbackAction(): void
     {
         try {

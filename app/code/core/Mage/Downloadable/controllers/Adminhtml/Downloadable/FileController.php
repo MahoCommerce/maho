@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -21,6 +23,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_FileController extends Mage_Admin
     /**
      * Upload file controller action
      */
+    #[Route('/admin/downloadable_file/upload')]
     public function uploadAction(): void
     {
         $type = $this->getRequest()->getParam('type');

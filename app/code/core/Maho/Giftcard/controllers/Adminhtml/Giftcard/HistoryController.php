@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'sales/giftcard/history';
@@ -34,12 +36,16 @@ class Maho_Giftcard_Adminhtml_Giftcard_HistoryController extends Mage_Adminhtml_
         return $this;
     }
 
+    #[Route('/admin/giftcard_history/index')]
+
     public function indexAction(): void
     {
         $this->_initAction();
         $this->_title(Mage::helper('giftcard')->__('Gift Card History'));
         $this->renderLayout();
     }
+
+    #[Route('/admin/giftcard_history/grid')]
 
     public function gridAction(): void
     {

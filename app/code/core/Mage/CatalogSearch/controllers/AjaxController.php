@@ -10,8 +10,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_CatalogSearch_AjaxController extends Mage_Core_Controller_Front_Action
 {
+    #[Route('/catalogsearch/ajax/suggest', name: 'catalogsearch.ajax.suggest', methods: ['GET'])]
     public function suggestAction(): void
     {
         if (!$this->getRequest()->getParam('q', false)) {

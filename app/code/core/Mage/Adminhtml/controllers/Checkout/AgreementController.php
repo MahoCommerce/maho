@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -30,6 +32,8 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         return parent::preDispatch();
     }
 
+    #[Route('/admin/checkout_agreement/index')]
+
     public function indexAction()
     {
         $this->_title($this->__('Sales'))->_title($this->__('Terms and Conditions'));
@@ -40,10 +44,14 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
         return $this;
     }
 
+    #[Route('/admin/checkout_agreement/new')]
+
     public function newAction(): void
     {
         $this->_forward('edit');
     }
+
+    #[Route('/admin/checkout_agreement/edit')]
 
     public function editAction(): void
     {
@@ -78,6 +86,8 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
             ->renderLayout();
     }
 
+    #[Route('/admin/checkout_agreement/save')]
+
     public function saveAction(): void
     {
         if ($postData = $this->getRequest()->getPost()) {
@@ -101,6 +111,8 @@ class Mage_Adminhtml_Checkout_AgreementController extends Mage_Adminhtml_Control
             $this->_redirectReferer();
         }
     }
+
+    #[Route('/admin/checkout_agreement/delete')]
 
     public function deleteAction(): void
     {

@@ -12,8 +12,11 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Route('/core', name: 'core.index')]
     public function indexAction(): void
     {
         $this->_forward('noRoute');
@@ -27,6 +30,7 @@ class Mage_Core_IndexController extends Mage_Core_Controller_Front_Action
      * The browser then fetches images in parallel, each request generating and
      * caching one thumbnail.
      */
+    #[Route('/core/index/resize', name: 'core.index.resize', methods: ['GET'])]
     public function resizeAction(): void
     {
         $t = $this->getRequest()->getParam('t', '');

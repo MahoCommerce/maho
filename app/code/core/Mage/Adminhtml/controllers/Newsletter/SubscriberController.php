@@ -9,6 +9,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -16,6 +18,8 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
      */
     public const ADMIN_RESOURCE = 'newsletter/subscriber';
+
+    #[Route('/admin/newsletter_subscriber/index')]
 
     public function indexAction(): void
     {
@@ -40,6 +44,8 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
         $this->renderLayout();
     }
 
+    #[Route('/admin/newsletter_subscriber/grid')]
+
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -51,6 +57,7 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     /**
      * Export subscribers grid to CSV format
      */
+    #[Route('/admin/newsletter_subscriber/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/newsletter_subscriber_grid');
@@ -60,11 +67,14 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
     /**
      * Export subscribers grid to XML format
      */
+    #[Route('/admin/newsletter_subscriber/exportXml')]
     public function exportXmlAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/newsletter_subscriber_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('subscribers.xml', -1));
     }
+
+    #[Route('/admin/newsletter_subscriber/massUnsubscribe')]
 
     public function massUnsubscribeAction(): void
     {
@@ -87,6 +97,8 @@ class Mage_Adminhtml_Newsletter_SubscriberController extends Mage_Adminhtml_Cont
 
         $this->_redirect('*/*/index');
     }
+
+    #[Route('/admin/newsletter_subscriber/massDelete')]
 
     public function massDeleteAction(): void
     {

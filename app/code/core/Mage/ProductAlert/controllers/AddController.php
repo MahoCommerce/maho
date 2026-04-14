@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -29,6 +31,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         return $this;
     }
 
+    #[Route('/productalert/add/testObserver', name: 'productalert.add.testobserver')]
     public function testObserverAction(): void
     {
         $object = new \Maho\DataObject();
@@ -36,6 +39,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         $observer->process($object);
     }
 
+    #[Route('/productalert/add/price', name: 'productalert.add.price')]
     public function priceAction(): void
     {
         $session = Mage::getSingleton('catalog/session');
@@ -72,6 +76,7 @@ class Mage_ProductAlert_AddController extends Mage_Core_Controller_Front_Action
         $this->_redirectReferer();
     }
 
+    #[Route('/productalert/add/stock', name: 'productalert.add.stock')]
     public function stockAction(): void
     {
         $session = Mage::getSingleton('catalog/session');

@@ -62,15 +62,6 @@
                 </Mage_Paygate>
             </modules>
         </translate>
-        <routers>
-            <paygate>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Paygate</module>
-                    <frontName>paygate</frontName>
-                </args>
-            </paygate>
-        </routers>
     </frontend>
     <admin>
         <routers>

@@ -10,8 +10,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
 {
+    #[Route('/rss/catalog/new', name: 'rss.catalog.new', methods: ['GET'])]
     public function newAction(): void
     {
         if ($this->checkFeedEnable('catalog/new')) {
@@ -20,6 +23,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Route('/rss/catalog/special', name: 'rss.catalog.special', methods: ['GET'])]
     public function specialAction(): void
     {
         if ($this->checkFeedEnable('catalog/special')) {
@@ -28,6 +32,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Route('/rss/catalog/salesrule', name: 'rss.catalog.salesrule', methods: ['GET'])]
     public function salesruleAction(): void
     {
         if ($this->checkFeedEnable('catalog/salesrule')) {
@@ -36,6 +41,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Route('/rss/catalog/tag', name: 'rss.catalog.tag', methods: ['GET'])]
     public function tagAction(): void
     {
         if ($this->isFeedEnable('catalog/tag')) {
@@ -53,6 +59,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         $this->_forward('nofeed', 'index', 'rss');
     }
 
+    #[Route('/rss/catalog/notifystock', name: 'rss.catalog.notifystock', methods: ['GET'])]
     public function notifystockAction(): void
     {
         if ($this->checkFeedEnable('catalog/notifystock')) {
@@ -61,6 +68,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Route('/rss/catalog/review', name: 'rss.catalog.review', methods: ['GET'])]
     public function reviewAction(): void
     {
         if ($this->checkFeedEnable('catalog/review')) {
@@ -69,6 +77,7 @@ class Mage_Rss_CatalogController extends Mage_Rss_Controller_Abstract
         }
     }
 
+    #[Route('/rss/catalog/category', name: 'rss.catalog.category', methods: ['GET'])]
     public function categoryAction(): void
     {
         if ($this->checkFeedEnable('catalog/category')) {

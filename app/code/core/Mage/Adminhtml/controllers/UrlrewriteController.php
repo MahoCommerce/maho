@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -56,6 +58,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Show urlrewrites index page
      */
+    #[Route('/admin/urlrewrite/index')]
     public function indexAction(): void
     {
         $this->_initRegistry();
@@ -70,6 +73,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Show urlrewrite edit/create page
      */
+    #[Route('/admin/urlrewrite/edit')]
     public function editAction(): void
     {
         $this->_initRegistry();
@@ -85,6 +89,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Ajax products grid action
      */
+    #[Route('/admin/urlrewrite/productGrid')]
     public function productGridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/urlrewrite_product_grid')->toHtml());
@@ -93,6 +98,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Ajax categories tree loader action
      */
+    #[Route('/admin/urlrewrite/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         $this->getResponse()->setBodyJson(
@@ -104,6 +110,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite save action
      */
+    #[Route('/admin/urlrewrite/save')]
     public function saveAction(): void
     {
         $this->_initRegistry();
@@ -187,6 +194,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite delete action
      */
+    #[Route('/admin/urlrewrite/delete')]
     public function deleteAction(): void
     {
         $this->_initRegistry();
@@ -210,6 +218,7 @@ class Mage_Adminhtml_UrlrewriteController extends Mage_Adminhtml_Controller_Acti
     /**
      * Urlrewrite mass delete action
      */
+    #[Route('/admin/urlrewrite/massDelete')]
     public function massDeleteAction(): void
     {
         $ids = $this->getRequest()->getParam('url_rewrite');

@@ -12,6 +12,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Oauth_TokenController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -31,6 +33,7 @@ class Mage_Oauth_TokenController extends Mage_Core_Controller_Front_Action
     /**
      * Index action. Process request and response permanent token
      */
+    #[Route('/oauth/token', name: 'oauth.token', methods: ['POST'])]
     public function indexAction(): void
     {
         /** @var Mage_Oauth_Model_Server $server */

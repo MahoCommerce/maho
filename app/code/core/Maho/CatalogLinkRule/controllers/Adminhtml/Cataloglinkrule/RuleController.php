@@ -11,9 +11,13 @@
 
 declare(strict_types=1);
 
+use Maho\Config\Route;
+
 class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'catalog/linkrules';
+
+    #[Route('/admin/cataloglinkrule_rule/index')]
 
     public function indexAction(): void
     {
@@ -24,10 +28,14 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             ->renderLayout();
     }
 
+    #[Route('/admin/cataloglinkrule_rule/new')]
+
     public function newAction(): void
     {
         $this->_forward('edit');
     }
+
+    #[Route('/admin/cataloglinkrule_rule/edit')]
 
     public function editAction(): void
     {
@@ -58,6 +66,8 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
             ->_title($id ? $model->getName() : Mage::helper('cataloglinkrule')->__('New Rule'))
             ->renderLayout();
     }
+
+    #[Route('/admin/cataloglinkrule_rule/save')]
 
     public function saveAction(): void
     {
@@ -111,6 +121,8 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/');
     }
 
+    #[Route('/admin/cataloglinkrule_rule/delete')]
+
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -128,6 +140,8 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         }
         $this->_redirect('*/*/');
     }
+
+    #[Route('/admin/cataloglinkrule_rule/massDelete')]
 
     public function massDeleteAction(): void
     {
@@ -152,6 +166,8 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         }
         $this->_redirect('*/*/index');
     }
+
+    #[Route('/admin/cataloglinkrule_rule/massStatus')]
 
     public function massStatusAction(): void
     {
@@ -179,10 +195,14 @@ class Maho_CatalogLinkRule_Adminhtml_Cataloglinkrule_RuleController extends Mage
         $this->_redirect('*/*/index');
     }
 
+    #[Route('/admin/cataloglinkrule_rule/newConditionHtml')]
+
     public function newConditionHtmlAction(): void
     {
         $this->_renderRuleHtml('conditions');
     }
+
+    #[Route('/admin/cataloglinkrule_rule/newActionHtml')]
 
     public function newActionHtmlAction(): void
     {

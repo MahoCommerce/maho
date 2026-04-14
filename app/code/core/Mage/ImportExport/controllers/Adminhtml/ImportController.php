@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -46,6 +48,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Index action.
      */
+    #[Route('/admin/import/index')]
     public function indexAction(): void
     {
         $maxUploadSize = Mage::helper('importexport')->getMaxUploadSize();
@@ -62,6 +65,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Start import process action.
      */
+    #[Route('/admin/import/start')]
     public function startAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -94,6 +98,7 @@ class Mage_ImportExport_Adminhtml_ImportController extends Mage_Adminhtml_Contro
     /**
      * Validate uploaded files action.
      */
+    #[Route('/admin/import/validate')]
     public function validateAction(): void
     {
         $data = $this->getRequest()->getPost();

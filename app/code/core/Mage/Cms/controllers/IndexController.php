@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -17,6 +19,8 @@ class Mage_Cms_IndexController extends Mage_Core_Controller_Front_Action
      *
      * @param string $coreRoute
      */
+    #[Route('/', name: 'cms.home', methods: ['GET'])]
+    #[Route('/cms', name: 'cms.index', methods: ['GET'])]
     public function indexAction($coreRoute = null)
     {
         $pageId = Mage::getStoreConfig(Mage_Cms_Helper_Page::XML_PATH_HOME_PAGE);

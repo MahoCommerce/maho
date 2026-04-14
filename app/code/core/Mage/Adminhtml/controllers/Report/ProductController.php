@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_Report_Abstract
 {
     /**
@@ -18,6 +20,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
      * @return $this
      */
     #[\Override]
+    #[Route('/admin/report_product/_init')]
     public function _initAction()
     {
         parent::_initAction();
@@ -28,6 +31,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Sold Products Report Action
      */
+    #[Route('/admin/report_product/sold')]
     public function soldAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -44,6 +48,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export Sold Products report to CSV format action
      */
+    #[Route('/admin/report_product/exportSoldCsv')]
     public function exportSoldCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_sold_grid');
@@ -53,6 +58,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export Sold Products report to XML format action
      */
+    #[Route('/admin/report_product/exportSoldExcel')]
     public function exportSoldExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_sold_grid');
@@ -62,6 +68,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Most viewed products
      */
+    #[Route('/admin/report_product/viewed')]
     public function viewedAction(): void
     {
         $this->_title($this->__('Reports'))->_title($this->__('Products'))->_title($this->__('Most Viewed'));
@@ -86,6 +93,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export products most viewed report to CSV format
      */
+    #[Route('/admin/report_product/exportViewedCsv')]
     public function exportViewedCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_viewed_grid');
@@ -96,6 +104,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export products most viewed report to XML format
      */
+    #[Route('/admin/report_product/exportViewedExcel')]
     public function exportViewedExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_viewed_grid');
@@ -106,6 +115,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Low stock action
      */
+    #[Route('/admin/report_product/lowstock')]
     public function lowstockAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -122,6 +132,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export low stock products report to CSV format
      */
+    #[Route('/admin/report_product/exportLowstockCsv')]
     public function exportLowstockCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_lowstock_grid');
@@ -131,6 +142,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export low stock products report to XML format
      */
+    #[Route('/admin/report_product/exportLowstockExcel')]
     public function exportLowstockExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_lowstock_grid');
@@ -140,6 +152,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Downloads action
      */
+    #[Route('/admin/report_product/downloads')]
     public function downloadsAction(): void
     {
         $this->_title($this->__('Reports'))
@@ -156,6 +169,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export products downloads report to CSV format
      */
+    #[Route('/admin/report_product/exportDownloadsCsv')]
     public function exportDownloadsCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_downloads_grid');
@@ -165,6 +179,7 @@ class Mage_Adminhtml_Report_ProductController extends Mage_Adminhtml_Controller_
     /**
      * Export products downloads report to XLS format
      */
+    #[Route('/admin/report_product/exportDownloadsExcel')]
     public function exportDownloadsExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_product_downloads_grid');

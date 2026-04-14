@@ -9,6 +9,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -50,6 +52,7 @@ class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer chooses Paypal on Checkout/Payment page
      */
+    #[Route('/paypal/standard/redirect')]
     public function redirectAction(): void
     {
         $session = Mage::getSingleton('checkout/session');
@@ -62,6 +65,7 @@ class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer cancel payment from paypal.
      */
+    #[Route('/paypal/standard/cancel')]
     public function cancelAction(): void
     {
         $session = Mage::getSingleton('checkout/session');
@@ -82,6 +86,7 @@ class Mage_Paypal_StandardController extends Mage_Core_Controller_Front_Action
      * variables.  However, you don't want to "process" the order until you
      * get validation from the IPN.
      */
+    #[Route('/paypal/standard/success')]
     public function successAction(): void
     {
         $session = Mage::getSingleton('checkout/session');

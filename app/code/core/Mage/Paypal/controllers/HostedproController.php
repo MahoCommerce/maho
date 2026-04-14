@@ -9,11 +9,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Paypal_HostedproController extends Mage_Core_Controller_Front_Action
 {
     /**
      * When a customer return to website from gateway.
      */
+    #[Route('/paypal/hostedpro/return')]
     public function returnAction(): void
     {
         $session = $this->_getCheckout();
@@ -26,6 +29,7 @@ class Mage_Paypal_HostedproController extends Mage_Core_Controller_Front_Action
     /**
      * When a customer cancel payment from gateway.
      */
+    #[Route('/paypal/hostedpro/cancel')]
     public function cancelAction(): void
     {
         $gotoSection = $this->_cancelPayment();

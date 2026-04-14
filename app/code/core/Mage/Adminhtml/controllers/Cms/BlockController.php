@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -49,6 +51,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Index action
      */
+    #[Route('/admin/cms_block/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
@@ -60,6 +63,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Create new CMS block
      */
+    #[Route('/admin/cms_block/new')]
     public function newAction(): void
     {
         // the same form is used to create and edit
@@ -69,6 +73,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Edit CMS block
      */
+    #[Route('/admin/cms_block/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('CMS'))->_title($this->__('Static Blocks'));
@@ -107,6 +112,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Save action
      */
+    #[Route('/admin/cms_block/save')]
     public function saveAction(): void
     {
         // check if data sent
@@ -156,6 +162,7 @@ class Mage_Adminhtml_Cms_BlockController extends Mage_Adminhtml_Controller_Actio
     /**
      * Delete action
      */
+    #[Route('/admin/cms_block/delete')]
     public function deleteAction(): void
     {
         // check if we know what should be deleted

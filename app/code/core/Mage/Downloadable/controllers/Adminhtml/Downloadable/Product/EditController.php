@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Mage_Adminhtml_Catalog_ProductController
 {
     #[\Override]
@@ -21,6 +23,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
     /**
      * Load downloadable tab fieldsets
      */
+    #[Route('/admin/downloadable_product_edit/form')]
     public function formAction(): void
     {
         $this->_initProduct();
@@ -73,6 +76,7 @@ class Mage_Downloadable_Adminhtml_Downloadable_Product_EditController extends Ma
     /**
      * Download link action
      */
+    #[Route('/admin/downloadable_product_edit/link')]
     public function linkAction(): void
     {
         $linkId = $this->getRequest()->getParam('id', 0);

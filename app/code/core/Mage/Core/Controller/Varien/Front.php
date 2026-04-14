@@ -26,6 +26,9 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
      */
     protected $_routers = [];
 
+    /** @var \Maho\Http\MiddlewareInterface[] */
+    protected array $_middlewares = [];
+
     protected $_urlCache = [];
 
     public const XML_STORE_ROUTERS_PATH = 'web/routers';
@@ -122,28 +125,38 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 
         $routersInfo = Mage::app()->getStore()->getConfig(self::XML_STORE_ROUTERS_PATH);
 
-        \Maho\Profiler::start('mage::app::init_front_controller::collect_routers');
-        foreach ($routersInfo as $routerCode => $routerInfo) {
-            if (isset($routerInfo['disabled']) && $routerInfo['disabled']) {
-                continue;
-            }
-            if (isset($routerInfo['class'])) {
-                /** @var Mage_Core_Controller_Varien_Router_Standard $router */
-                $router = new $routerInfo['class']();
-                if (isset($routerInfo['area'])) {
-                    $router->collectRoutes($routerInfo['area'], $routerCode);
+        if ($routersInfo) {
+            foreach ($routersInfo as $routerCode => $routerInfo) {
+                if (isset($routerInfo['disabled']) && $routerInfo['disabled']) {
+                    continue;
                 }
-                $this->addRouter($routerCode, $router);
+                if (isset($routerInfo['class'])) {
+                    $router = new $routerInfo['class']();
+                    if ($router instanceof Mage_Core_Controller_Varien_Router_Abstract) {
+                        $this->addRouter($routerCode, $router);
+                    }
+                }
             }
         }
-        \Maho\Profiler::stop('mage::app::init_front_controller::collect_routers');
 
         Mage::dispatchEvent('controller_front_init_routers', ['front' => $this]);
+
+        // Build route registry from config.xml (replaces Router_Standard/Admin metadata)
+        \Maho\Routing\RouteRegistry::init();
 
         // Add default router at the last
         $default = new Mage_Core_Controller_Varien_Router_Default();
         $this->addRouter('default', $default);
 
+        return $this;
+    }
+
+    /**
+     * Add a middleware to the pipeline
+     */
+    public function addMiddleware(\Maho\Http\MiddlewareInterface $middleware): self
+    {
+        $this->_middlewares[] = $middleware;
         return $this;
     }
 
@@ -154,25 +167,66 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
     public function dispatch()
     {
         $request = $this->getRequest();
-
-        // If pre-configured, check equality of base URL and requested URL
-        $this->_checkBaseUrl($request);
-
-        $this->checkTrailingSlash($request);
+        $response = $this->getResponse();
 
         $request->setPathInfo()->setDispatched(false);
 
-        if (!Mage::app()->getStore()->isAdmin()) {
-            $this->_getRequestRewriteController()->rewrite();
+        $this->_registerMiddlewares();
+
+        $pipeline = new \Maho\Http\MiddlewarePipeline(function () use ($request): void {
+            $this->_matchRoutes($request);
+        });
+
+        foreach ($this->_middlewares as $middleware) {
+            $pipeline->add($middleware);
         }
 
+        $pipeline->run($request, $response);
+
+        // This event gives possibility to launch something before sending output (allow cookie setting)
+        Mage::dispatchEvent('controller_front_send_response_before', ['front' => $this]);
+        \Maho\Profiler::start('mage::app::dispatch::send_response');
+        $response->sendResponse();
+        \Maho\Profiler::stop('mage::app::dispatch::send_response');
+        Mage::dispatchEvent('controller_front_send_response_after', ['front' => $this]);
+        return $this;
+    }
+
+    /**
+     * Register the built-in middleware pipeline
+     */
+    protected function _registerMiddlewares(): void
+    {
+        if (!empty($this->_middlewares)) {
+            return;
+        }
+
+        $this->addMiddleware(new \Maho\Http\Middleware\BaseUrlMiddleware());
+        $this->addMiddleware(new \Maho\Http\Middleware\TrailingSlashMiddleware());
+        $this->addMiddleware(new \Maho\Http\Middleware\StoreResolutionMiddleware());
+        $this->addMiddleware(new \Maho\Http\Middleware\UrlRewriteMiddleware());
+        $this->addMiddleware(new \Maho\Http\Middleware\ConfigRewriteMiddleware());
+        $this->addMiddleware(new \Maho\Http\Middleware\HttpsEnforcementMiddleware());
+    }
+
+    /**
+     * Execute the router match loop (terminal handler for the middleware pipeline)
+     */
+    protected function _matchRoutes(Mage_Core_Controller_Request_Http $request): void
+    {
         \Maho\Profiler::start('mage::dispatch::routers_match');
         $i = 0;
         while (!$request->isDispatched() && $i++ < 100) {
-            foreach ($this->_routers as $router) {
-                /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
-                if ($router->match($request)) {
-                    break;
+            // Try Symfony route matcher first (attribute routes + XML catch-alls)
+            // Don't break — a controller may _forward() which unsets dispatched,
+            // and the while loop needs to continue to process the forward.
+            if (!$this->_matchSymfonyRoute($request)) {
+                // Fall back to legacy router loop (CMS, custom routers, default/404)
+                foreach ($this->_routers as $router) {
+                    /** @var Mage_Core_Controller_Varien_Router_Abstract $router */
+                    if ($router->match($request)) {
+                        break;
+                    }
                 }
             }
         }
@@ -180,165 +234,60 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
         if ($i > 100) {
             Mage::throwException('Front controller reached 100 router match iterations');
         }
-        // This event gives possibility to launch something before sending output (allow cookie setting)
-        Mage::dispatchEvent('controller_front_send_response_before', ['front' => $this]);
-        \Maho\Profiler::start('mage::app::dispatch::send_response');
-        $this->getResponse()->sendResponse();
-        \Maho\Profiler::stop('mage::app::dispatch::send_response');
-        Mage::dispatchEvent('controller_front_send_response_after', ['front' => $this]);
-        return $this;
     }
 
     /**
-     * Returns request rewrite instance.
-     * Class name alias is declared in the configuration
+     * Try to match the request using Symfony's UrlMatcher.
      *
-     * @return Mage_Core_Model_Url_Rewrite_Request
+     * Two matching strategies:
+     * 1. URL-based: matches the request path against compiled #[Route] attributes and XML catch-alls
+     * 2. Forward-based: when another router (CMS, Default) has set module/controller/action on the
+     *    request, resolves via the reverse lookup map and dispatches the attributed controller
      */
-    protected function _getRequestRewriteController()
+    protected function _matchSymfonyRoute(Mage_Core_Controller_Request_Http $request): bool
     {
-        $className = (string) Mage::getConfig()->getNode('global/request_rewrite/model');
-        $model = Mage::getSingleton('core/factory')->getModel($className, [
-            'routers' => $this->getRouters(),
-        ]);
-        assert($model instanceof \Mage_Core_Model_Url_Rewrite_Request);
-        return $model;
-    }
+        \Maho\Profiler::start('mage::dispatch::symfony_match');
 
-    /**
-     * Returns router instance by route name
-     *
-     * @param string $routeName
-     * @return Mage_Core_Controller_Varien_Router_Abstract
-     */
-    public function getRouterByRoute($routeName)
-    {
-        // empty route supplied - return base url
-        if (empty($routeName)) {
-            $router = $this->getRouter('standard');
-        } elseif ($this->getRouter('admin')->getFrontNameByRoute($routeName)) {
-            // try standard router url assembly
-            $router = $this->getRouter('admin');
-        } elseif ($this->getRouter('standard')->getFrontNameByRoute($routeName)) {
-            // try standard router url assembly
-            $router = $this->getRouter('standard');
-        } elseif ($router = $this->getRouter($routeName)) {
-            // try custom router url assembly
-        } else {
-            // get default router url
-            $router = $this->getRouter('default');
-        }
+        try {
+            $dispatcher = new \Maho\Routing\ControllerDispatcher();
 
-        return $router;
-    }
+            // Strategy 1: If another router has set module/controller/action, dispatch via reverse lookup
+            // This handles _forward() calls where the controller/action changed but the URL didn't
+            if ($request->getModuleName() && $request->getControllerName() && $request->getActionName()) {
+                $result = $dispatcher->dispatchForward($request, Mage::app()->getResponse());
+                if ($result) {
+                    return true;
+                }
+                // If forward dispatch failed, let legacy routers handle it — don't fall through
+                // to URL matching which would re-match the original URL, not the forwarded action
+                return false;
+            }
 
-    /**
-     * @param string $frontName
-     * @return false|Mage_Core_Controller_Varien_Router_Standard
-     */
-    public function getRouterByFrontName($frontName)
-    {
-        // empty route supplied - return base url
-        if (empty($frontName)) {
-            $router = $this->getRouter('standard');
-        } elseif ($this->getRouter('admin')->getRouteByFrontName($frontName)) {
-            // try standard router url assembly
-            $router = $this->getRouter('admin');
-        } elseif ($this->getRouter('standard')->getRouteByFrontName($frontName)) {
-            // try standard router url assembly
-            $router = $this->getRouter('standard');
-        } elseif ($router = $this->getRouter($frontName)) {
-            // try custom router url assembly
-        } else {
-            // get default router url
-            $router = $this->getRouter('default');
-        }
+            // Strategy 2: URL path matching (strip trailing slash for matching)
+            $collection = (new \Maho\Routing\RouteCollectionBuilder())->build();
+            $context = new \Symfony\Component\Routing\RequestContext();
+            $context->fromRequest($request->getSymfonyRequest());
+            $matcher = new \Symfony\Component\Routing\Matcher\UrlMatcher($collection, $context);
 
-        return $router;
-    }
+            $pathInfo = $request->getPathInfo();
+            $normalizedPath = (strlen($pathInfo) > 1) ? rtrim($pathInfo, '/') : $pathInfo;
 
-    /**
-     * Auto-redirect to base url (without SID) if the requested url doesn't match it.
-     * By default this feature is enabled in configuration.
-     *
-     * @param Mage_Core_Controller_Request_Http $request
-     */
-    protected function _checkBaseUrl($request)
-    {
-        if (!Mage::isInstalled() || $request->getPost() || strtolower($request->getMethod()) == 'post') {
-            return;
-        }
+            $params = $matcher->match($normalizedPath);
 
-        $redirectCode = Mage::getStoreConfigAsInt('web/url/redirect_to_base');
-        if (!$redirectCode) {
-            return;
-        }
-        if ($redirectCode != 301) {
-            $redirectCode = 302;
-        }
-
-        if ($this->_isAdminFrontNameMatched($request)) {
-            return;
-        }
-
-        $baseUrl = Mage::getBaseUrl(
-            Mage_Core_Model_Store::URL_TYPE_WEB,
-            Mage::app()->isCurrentlySecure(),
-        );
-        if (!$baseUrl) {
-            return;
-        }
-
-        $uri = @parse_url($baseUrl);
-        $requestUri = $request->getRequestUri() ?: '/';
-        if (isset($uri['scheme']) && $uri['scheme'] != $request->getScheme()
-            || isset($uri['host']) && $uri['host'] != $request->getHttpHost()
-            || isset($uri['path']) && !str_contains($requestUri, $uri['path'])
-        ) {
-            Mage::app()->getFrontController()->getResponse()
-                ->setRedirect($baseUrl, $redirectCode)
-                ->sendResponse();
-            exit;
+            return $dispatcher->dispatch(
+                $params,
+                $request,
+                Mage::app()->getResponse(),
+            );
+        } catch (\Symfony\Component\Routing\Exception\ResourceNotFoundException) {
+            // Strategy 3: Parse legacy internal paths (frontName/controller/action/key/value)
+            // These come from URL rewrites which store target paths in legacy format
+            return $dispatcher->dispatchLegacyPath($request, Mage::app()->getResponse());
+        } catch (\Symfony\Component\Routing\Exception\MethodNotAllowedException) {
+            return false;
+        } finally {
+            \Maho\Profiler::stop('mage::dispatch::symfony_match');
         }
     }
 
-    /**
-     * Normalize request path and redirect to canonical URL if needed
-     *
-     * Handles:
-     * - Consecutive slashes (e.g., //men -> /men)
-     * - Trailing slash based on store configuration
-     */
-    protected function checkTrailingSlash(Mage_Core_Controller_Request_Http $request): void
-    {
-        if (!Mage::isInstalled() || $request->getPost() || strtolower($request->getMethod()) === 'post') {
-            return;
-        }
-        if ($this->_isAdminFrontNameMatched($request)) {
-            return;
-        }
-
-        $requestUri = $request->getRequestUri();
-
-        // Normalize consecutive slashes to single slash
-        $canonicalUri = preg_replace('#/{2,}#', '/', $requestUri);
-
-        // Apply trailing slash configuration
-        $canonicalUri = Mage::helper('core/url')->addOrRemoveTrailingSlash($canonicalUri);
-
-        if ($canonicalUri !== $requestUri) {
-            Mage::app()->getFrontController()->getResponse()
-                ->setRedirect($canonicalUri, 301)
-                ->sendResponse();
-            exit;
-        }
-    }
-
-    /**
-     * Check if requested path starts with one of the admin front names
-     */
-    protected function _isAdminFrontNameMatched(Mage_Core_Controller_Request_Http $request): bool
-    {
-        return Mage::helper('adminhtml')->isAdminFrontNameMatched($request->getPathInfo());
-    }
 }

@@ -10,6 +10,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/directory/countries';
@@ -56,6 +58,8 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         return $this;
     }
 
+    #[Route('/admin/directory_country/index')]
+
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -66,16 +70,22 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         $this->renderLayout();
     }
 
+    #[Route('/admin/directory_country/grid')]
+
     public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
+    #[Route('/admin/directory_country/new')]
+
     public function newAction(): void
     {
         $this->_forward('edit');
     }
+
+    #[Route('/admin/directory_country/edit')]
 
     public function editAction(): void
     {
@@ -112,6 +122,8 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
         $this->renderLayout();
     }
+
+    #[Route('/admin/directory_country/save')]
 
     public function saveAction(): void
     {
@@ -167,6 +179,8 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
         }
     }
 
+    #[Route('/admin/directory_country/delete')]
+
     public function deleteAction(): void
     {
         $model = $this->_initCountry();
@@ -196,6 +210,8 @@ class Mage_Directory_Adminhtml_Directory_CountryController extends Mage_Adminhtm
 
         $this->_redirect('*/*/');
     }
+
+    #[Route('/admin/directory_country/massDelete')]
 
     public function massDeleteAction(): void
     {

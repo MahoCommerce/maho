@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -46,6 +48,8 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
         return $this;
     }
 
+    #[Route('/admin/system_store/index')]
+
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -56,17 +60,23 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
             ->renderLayout();
     }
 
+    #[Route('/admin/system_store/newWebsite')]
+
     public function newWebsiteAction(): void
     {
         Mage::register('store_type', 'website');
         $this->_forward('newStore');
     }
 
+    #[Route('/admin/system_store/newGroup')]
+
     public function newGroupAction(): void
     {
         Mage::register('store_type', 'group');
         $this->_forward('newStore');
     }
+
+    #[Route('/admin/system_store/newStore')]
 
     public function newStoreAction(): void
     {
@@ -77,17 +87,23 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
         $this->_forward('editStore');
     }
 
+    #[Route('/admin/system_store/editWebsite')]
+
     public function editWebsiteAction(): void
     {
         Mage::register('store_type', 'website');
         $this->_forward('editStore');
     }
 
+    #[Route('/admin/system_store/editGroup')]
+
     public function editGroupAction(): void
     {
         Mage::register('store_type', 'group');
         $this->_forward('editStore');
     }
+
+    #[Route('/admin/system_store/editStore')]
 
     public function editStoreAction(): void
     {
@@ -160,6 +176,8 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
             $this->_redirect('*/*/');
         }
     }
+
+    #[Route('/admin/system_store/save')]
 
     public function saveAction(): void
     {
@@ -246,6 +264,8 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
         $this->_redirect('*/*/');
     }
 
+    #[Route('/admin/system_store/deleteWebsite')]
+
     public function deleteWebsiteAction(): void
     {
         $this->_title($this->__('System'))
@@ -276,6 +296,8 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
                 ->setDataObject($model))
             ->renderLayout();
     }
+
+    #[Route('/admin/system_store/deleteGroup')]
 
     public function deleteGroupAction(): void
     {
@@ -308,6 +330,8 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
             ->renderLayout();
     }
 
+    #[Route('/admin/system_store/deleteStore')]
+
     public function deleteStoreAction(): void
     {
         $this->_title($this->__('System'))
@@ -339,6 +363,8 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
             ->renderLayout();
     }
 
+    #[Route('/admin/system_store/deleteWebsitePost')]
+
     public function deleteWebsitePostAction(): void
     {
         $itemId = $this->getRequest()->getParam('item_id');
@@ -366,6 +392,8 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
         }
         $this->_redirect('*/*/editWebsite', ['website_id' => $itemId]);
     }
+
+    #[Route('/admin/system_store/deleteGroupPost')]
 
     public function deleteGroupPostAction(): void
     {
@@ -398,6 +426,7 @@ class Mage_Adminhtml_System_StoreController extends Mage_Adminhtml_Controller_Ac
     /**
      * Delete store view post action
      */
+    #[Route('/admin/system_store/deleteStorePost')]
     public function deleteStorePostAction(): void
     {
         $itemId = $this->getRequest()->getParam('item_id');

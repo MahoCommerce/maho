@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -17,6 +19,8 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
      * @see Mage_Adminhtml_Controller_Action::_isAllowed()
      */
     public const ADMIN_RESOURCE = 'dashboard';
+
+    #[Route('/admin/dashboard/index')]
 
     public function indexAction(): void
     {
@@ -31,6 +35,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets most viewed products list
      */
+    #[Route('/admin/dashboard/productsViewed')]
     public function productsViewedAction(): void
     {
         $this->loadLayout();
@@ -40,6 +45,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets latest customers list
      */
+    #[Route('/admin/dashboard/customersNewest')]
     public function customersNewestAction(): void
     {
         $this->loadLayout();
@@ -49,11 +55,14 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets the list of most active customers
      */
+    #[Route('/admin/dashboard/customersMost')]
     public function customersMostAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
+
+    #[Route('/admin/dashboard/ajaxBlock')]
 
     public function ajaxBlockAction(): void
     {
@@ -68,6 +77,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets devices & browsers breakdown
      */
+    #[Route('/admin/dashboard/devices')]
     public function devicesAction(): void
     {
         $this->loadLayout();
@@ -77,6 +87,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets engagement metrics
      */
+    #[Route('/admin/dashboard/engagement')]
     public function engagementAction(): void
     {
         $this->loadLayout();
@@ -86,6 +97,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets entry & exit pages
      */
+    #[Route('/admin/dashboard/entryExit')]
     public function entryExitAction(): void
     {
         $this->loadLayout();
@@ -95,6 +107,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets language breakdown
      */
+    #[Route('/admin/dashboard/languages')]
     public function languagesAction(): void
     {
         $this->loadLayout();
@@ -104,6 +117,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets top pages
      */
+    #[Route('/admin/dashboard/topPages')]
     public function topPagesAction(): void
     {
         $this->loadLayout();
@@ -113,6 +127,7 @@ class Mage_Adminhtml_DashboardController extends Mage_Adminhtml_Controller_Actio
     /**
      * Gets traffic sources
      */
+    #[Route('/admin/dashboard/trafficSources')]
     public function trafficSourcesAction(): void
     {
         $this->loadLayout();

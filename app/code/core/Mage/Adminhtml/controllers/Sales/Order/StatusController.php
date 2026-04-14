@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -46,6 +48,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Statuses grid page
      */
+    #[Route('/admin/sales_order_status/index')]
     public function indexAction(): void
     {
         $this
@@ -58,6 +61,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * New status form
      */
+    #[Route('/admin/sales_order_status/new')]
     public function newAction(): void
     {
         $data = $this->_getSession()->getFormData(true);
@@ -76,6 +80,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Editing existing status form
      */
+    #[Route('/admin/sales_order_status/edit')]
     public function editAction(): void
     {
         $status = $this->_initStatus();
@@ -97,6 +102,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Save status form processing
      */
+    #[Route('/admin/sales_order_status/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -156,6 +162,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Assign status to state form
      */
+    #[Route('/admin/sales_order_status/assign')]
     public function assignAction(): void
     {
         $this
@@ -168,6 +175,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Save status assignment to state
      */
+    #[Route('/admin/sales_order_status/assignPost')]
     public function assignPostAction(): void
     {
         $data = $this->getRequest()->getPost();
@@ -201,6 +209,7 @@ class Mage_Adminhtml_Sales_Order_StatusController extends Mage_Adminhtml_Control
     /**
      * Unassign the status from a specific state
      */
+    #[Route('/admin/sales_order_status/unassign')]
     public function unassignAction(): void
     {
         $state  = $this->getRequest()->getParam('state');

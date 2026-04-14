@@ -12,6 +12,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Oauth_InitiateController extends Mage_Core_Controller_Front_Action
 {
     #[\Override]
@@ -28,6 +30,7 @@ class Mage_Oauth_InitiateController extends Mage_Core_Controller_Front_Action
     /**
      * Index action. Receive initiate request and response OAuth token
      */
+    #[Route('/oauth/initiate', name: 'oauth.initiate', methods: ['POST'])]
     public function indexAction(): void
     {
         /** @var Mage_Oauth_Model_Server $server */

@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'giftcard/manage';
@@ -18,6 +20,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Create gift card product(s) action
      */
+    #[Route('/admin/giftcard_product/create')]
     public function createAction(): void
     {
         $this->loadLayout();
@@ -29,6 +32,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_ProductController extends Mage_Adminhtml_
     /**
      * Save gift card product(s)
      */
+    #[Route('/admin/giftcard_product/save')]
     public function saveAction(): void
     {
         try {

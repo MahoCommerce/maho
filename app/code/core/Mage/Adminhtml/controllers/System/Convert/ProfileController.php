@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -47,6 +49,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Profiles list action
      */
+    #[Route('/admin/system_convert_profile/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -86,6 +89,8 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
         $this->renderLayout();
     }
 
+    #[Route('/admin/system_convert_profile/grid')]
+
     public function gridAction(): void
     {
         $this->getResponse()->setBody(
@@ -96,6 +101,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Profile edit action
      */
+    #[Route('/admin/system_convert_profile/edit')]
     public function editAction(): void
     {
         $this->_initProfile();
@@ -129,6 +135,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Create new profile action
      */
+    #[Route('/admin/system_convert_profile/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -137,6 +144,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Delete profile action
      */
+    #[Route('/admin/system_convert_profile/delete')]
     public function deleteAction(): void
     {
         $this->_initProfile();
@@ -157,6 +165,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Save profile action
      */
+    #[Route('/admin/system_convert_profile/save')]
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -196,12 +205,16 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
         }
     }
 
+    #[Route('/admin/system_convert_profile/run')]
+
     public function runAction(): void
     {
         $this->_initProfile();
         $this->loadLayout();
         $this->renderLayout();
     }
+
+    #[Route('/admin/system_convert_profile/batchRun')]
 
     public function batchRunAction(): void
     {
@@ -268,6 +281,8 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
         }
     }
 
+    #[Route('/admin/system_convert_profile/batchFinish')]
+
     public function batchFinishAction(): void
     {
         $batchId = $this->getRequest()->getParam('id');
@@ -293,6 +308,7 @@ class Mage_Adminhtml_System_Convert_ProfileController extends Mage_Adminhtml_Con
     /**
      * Customer orders grid
      */
+    #[Route('/admin/system_convert_profile/history')]
     public function historyAction(): void
     {
         $this->_initProfile();

@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -46,6 +48,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profiles listing
      */
+    #[Route('/sales/recurring_profile', name: 'sales.recurring_profile.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $this->_title($this->__('Recurring Profiles'));
@@ -57,6 +60,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profile main view
      */
+    #[Route('/sales/recurring_profile/view/{profile}', name: 'sales.recurring_profile.view', methods: ['GET'], requirements: ['profile' => '\d+'])]
     public function viewAction(): void
     {
         $this->_viewAction();
@@ -65,6 +69,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Profile related orders view
      */
+    #[Route('/sales/recurring_profile/orders/{profile}', name: 'sales.recurring_profile.orders', methods: ['GET'], requirements: ['profile' => '\d+'])]
     public function ordersAction(): void
     {
         $this->_viewAction();
@@ -73,6 +78,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Attempt to set profile state
      */
+    #[Route('/sales/recurring_profile/updateState', name: 'sales.recurring_profile.updateState', methods: ['POST'])]
     public function updateStateAction(): void
     {
         $profile = null;
@@ -107,6 +113,7 @@ class Mage_Sales_Recurring_ProfileController extends Mage_Core_Controller_Front_
     /**
      * Fetch an update with profile
      */
+    #[Route('/sales/recurring_profile/updateProfile', name: 'sales.recurring_profile.updateProfile', methods: ['POST'])]
     public function updateProfileAction(): void
     {
         $profile = null;

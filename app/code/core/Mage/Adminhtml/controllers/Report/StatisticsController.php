@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -25,6 +27,8 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      */
     protected $_adminSession = null;
 
+    #[Route('/admin/report_statistics/_init')]
+
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -37,6 +41,8 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
             ->_addBreadcrumb(Mage::helper('reports')->__('Statistics'), Mage::helper('reports')->__('Statistics'));
         return $this;
     }
+
+    #[Route('/admin/report_statistics/_initReport')]
 
     public function _initReportAction($blocks)
     {
@@ -105,6 +111,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      *
      * @return $this
      */
+    #[Route('/admin/report_statistics/refreshRecent')]
     public function refreshRecentAction()
     {
         try {
@@ -135,6 +142,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
      *
      * @return $this
      */
+    #[Route('/admin/report_statistics/refreshLifetime')]
     public function refreshLifetimeAction()
     {
         try {
@@ -158,6 +166,8 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
 
         return $this;
     }
+
+    #[Route('/admin/report_statistics/index')]
 
     public function indexAction(): void
     {

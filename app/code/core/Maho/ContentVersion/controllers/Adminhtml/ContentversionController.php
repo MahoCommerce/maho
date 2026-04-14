@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'cms/contentversion';
@@ -21,6 +23,8 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
         $this->_setForcedFormKeyActions(['restore']);
         return parent::preDispatch();
     }
+
+    #[Route('/admin/contentversion/restore')]
 
     public function restoreAction(): void
     {
@@ -44,6 +48,8 @@ class Maho_ContentVersion_Adminhtml_ContentversionController extends Mage_Adminh
             $this->_redirectReferer();
         }
     }
+
+    #[Route('/admin/contentversion/preview')]
 
     public function previewAction(): void
     {

@@ -8,8 +8,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_Captcha_IndexController extends Mage_Core_Controller_Front_Action
 {
+    #[Route('/captcha/index/challenge', methods: ['POST'])]
     public function challengeAction(): void
     {
         $helper = Mage::helper('captcha');

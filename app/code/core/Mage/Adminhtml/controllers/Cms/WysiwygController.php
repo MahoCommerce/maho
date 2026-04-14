@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -21,6 +23,7 @@ class Mage_Adminhtml_Cms_WysiwygController extends Mage_Adminhtml_Controller_Act
     /**
      * Template directives callback
      */
+    #[Route('/admin/cms_wysiwyg/directive')]
     public function directiveAction(): void
     {
         try {

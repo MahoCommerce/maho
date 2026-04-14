@@ -9,11 +9,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Paygate_Authorizenet_PaymentController extends Mage_Core_Controller_Front_Action
 {
     /**
      * Cancel active partail authorizations
      */
+    #[Route('/paygate/authorizenet_payment/cancel')]
     public function cancelAction(): void
     {
         $result['success'] = false;

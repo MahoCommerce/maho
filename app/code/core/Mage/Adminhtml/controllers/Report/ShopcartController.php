@@ -10,8 +10,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller_Action
 {
+    #[Route('/admin/report_shopcart/_init')]
     public function _initAction()
     {
         $act = $this->getRequest()->getActionName();
@@ -20,6 +23,8 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
             ->_addBreadcrumb(Mage::helper('reports')->__('Shopping Cart'), Mage::helper('reports')->__('Shopping Cart'));
         return $this;
     }
+
+    #[Route('/admin/report_shopcart/customer')]
 
     public function customerAction(): void
     {
@@ -37,6 +42,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export shopcart customer report to CSV format
      */
+    #[Route('/admin/report_shopcart/exportCustomerCsv')]
     public function exportCustomerCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_customer_grid');
@@ -46,11 +52,14 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export shopcart customer report to Excel XML format
      */
+    #[Route('/admin/report_shopcart/exportCustomerExcel')]
     public function exportCustomerExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_customer_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('shopcart_customer.xml', -1));
     }
+
+    #[Route('/admin/report_shopcart/product')]
 
     public function productAction(): void
     {
@@ -68,6 +77,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export products report grid to CSV format
      */
+    #[Route('/admin/report_shopcart/exportProductCsv')]
     public function exportProductCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_product_grid');
@@ -77,11 +87,14 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export products report to Excel XML format
      */
+    #[Route('/admin/report_shopcart/exportProductExcel')]
     public function exportProductExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_product_grid');
         $this->_prepareDownloadResponse(...$grid->getExcelFile('shopcart_product.xml', -1));
     }
+
+    #[Route('/admin/report_shopcart/abandoned')]
 
     public function abandonedAction(): void
     {
@@ -99,6 +112,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export abandoned carts report grid to CSV format
      */
+    #[Route('/admin/report_shopcart/exportAbandonedCsv')]
     public function exportAbandonedCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_abandoned_grid');
@@ -108,6 +122,7 @@ class Mage_Adminhtml_Report_ShopcartController extends Mage_Adminhtml_Controller
     /**
      * Export abandoned carts report to Excel XML format
      */
+    #[Route('/admin/report_shopcart/exportAbandonedExcel')]
     public function exportAbandonedExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/report_shopcart_abandoned_grid');

@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -23,6 +25,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
      *
      * @return $this
      */
+    #[Route('/admin/tax_rule/index')]
     public function indexAction()
     {
         $this->_title($this->__('Sales'))
@@ -38,6 +41,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Redirect to edit action
      */
+    #[Route('/admin/tax_rule/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -46,6 +50,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Edit action
      */
+    #[Route('/admin/tax_rule/edit')]
     public function editAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -87,6 +92,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Save action
      */
+    #[Route('/admin/tax_rule/save')]
     public function saveAction()
     {
         $postData = $this->getRequest()->getPost();
@@ -160,6 +166,7 @@ class Mage_Adminhtml_Tax_RuleController extends Mage_Adminhtml_Controller_Action
     /**
      * Delete action
      */
+    #[Route('/admin/tax_rule/delete')]
     public function deleteAction(): void
     {
         $ruleId = (int) $this->getRequest()->getParam('rule');

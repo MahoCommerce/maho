@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -48,6 +50,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
      *
      * @return Mage_Adminhtml_Controller_Action
      */
+    #[Route('/admin/export/export')]
     public function exportAction()
     {
         if ($this->getRequest()->getPost(Mage_ImportExport_Model_Export::FILTER_ELEMENT_GROUP)) {
@@ -88,6 +91,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     /**
      * Index action.
      */
+    #[Route('/admin/export/index')]
     public function indexAction(): void
     {
         $this->_initAction()
@@ -100,6 +104,7 @@ class Mage_ImportExport_Adminhtml_ExportController extends Mage_Adminhtml_Contro
     /**
      * Get grid-filter of entity attributes action.
      */
+    #[Route('/admin/export/getFilter')]
     public function getFilterAction()
     {
         $data = $this->getRequest()->getParams();

@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_TaxController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/config/tax';
@@ -17,6 +19,7 @@ class Mage_Adminhtml_TaxController extends Mage_Adminhtml_Controller_Action
     /**
      * Set tax ignore notification flag and redirect back
      */
+    #[Route('/admin/tax/ignoreTaxNotification')]
     public function ignoreTaxNotificationAction(): void
     {
         $section = $this->getRequest()->getParam('section');

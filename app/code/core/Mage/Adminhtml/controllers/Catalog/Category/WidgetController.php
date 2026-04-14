@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -21,6 +23,7 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
     /**
      * Chooser Source action
      */
+    #[Route('/admin/catalog_category_widget/chooser')]
     public function chooserAction(): void
     {
         $this->getResponse()->setBody(
@@ -31,6 +34,7 @@ class Mage_Adminhtml_Catalog_Category_WidgetController extends Mage_Adminhtml_Co
     /**
      * Categories tree node (Ajax version)
      */
+    #[Route('/admin/catalog_category_widget/categoriesJson')]
     public function categoriesJsonAction(): void
     {
         try {

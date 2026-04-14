@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -24,6 +26,7 @@ class Mage_CatalogSearch_ResultController extends Mage_Core_Controller_Front_Act
     /**
      * Display search result
      */
+    #[Route('/catalogsearch/result', name: 'catalogsearch.result.index', methods: ['GET'])]
     public function indexAction(): void
     {
         $query = Mage::helper('catalogsearch')->getQuery();

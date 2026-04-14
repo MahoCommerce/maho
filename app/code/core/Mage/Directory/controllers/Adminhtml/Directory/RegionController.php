@@ -10,6 +10,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'system/directory/regions';
@@ -56,6 +58,8 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         return $this;
     }
 
+    #[Route('/admin/directory_region/index')]
+
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -66,16 +70,22 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         $this->renderLayout();
     }
 
+    #[Route('/admin/directory_region/grid')]
+
     public function gridAction(): void
     {
         $this->loadLayout();
         $this->renderLayout();
     }
 
+    #[Route('/admin/directory_region/new')]
+
     public function newAction(): void
     {
         $this->_forward('edit');
     }
+
+    #[Route('/admin/directory_region/edit')]
 
     public function editAction(): void
     {
@@ -112,6 +122,8 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
         $this->renderLayout();
     }
+
+    #[Route('/admin/directory_region/save')]
 
     public function saveAction(): void
     {
@@ -167,6 +179,8 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         }
     }
 
+    #[Route('/admin/directory_region/delete')]
+
     public function deleteAction(): void
     {
         $model = $this->_initRegion();
@@ -204,6 +218,8 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
 
         $this->_redirect('*/*/');
     }
+
+    #[Route('/admin/directory_region/massDelete')]
 
     public function massDeleteAction(): void
     {
@@ -254,11 +270,15 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
         $this->_redirect('*/*/');
     }
 
+    #[Route('/admin/directory_region/translationGrid')]
+
     public function translationGridAction(): void
     {
         $this->_initRegion();
         $this->loadLayout()->renderLayout();
     }
+
+    #[Route('/admin/directory_region/translationSave')]
 
     public function translationSaveAction(): void
     {
@@ -294,6 +314,8 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             $this->getResponse()->setBodyJson(['error' => true, 'message' => $error]);
         }
     }
+
+    #[Route('/admin/directory_region/translationMassDelete')]
 
     public function translationMassDeleteAction(): void
     {
@@ -346,6 +368,8 @@ class Mage_Directory_Adminhtml_Directory_RegionController extends Mage_Adminhtml
             ]);
         }
     }
+
+    #[Route('/admin/directory_region/import')]
 
     public function importAction(): void
     {

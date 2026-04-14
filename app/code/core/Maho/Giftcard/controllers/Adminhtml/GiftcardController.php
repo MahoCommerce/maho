@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'sales/giftcard/manage';
@@ -49,6 +51,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Index action - gift card grid
      */
+    #[Route('/admin/giftcard/index')]
     public function indexAction(): void
     {
         $this->_initAction();
@@ -59,6 +62,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Grid action for AJAX
      */
+    #[Route('/admin/giftcard/grid')]
     public function gridAction(): void
     {
         $this->loadLayout();
@@ -68,6 +72,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * New gift card
      */
+    #[Route('/admin/giftcard/new')]
     public function newAction(): void
     {
         $this->_forward('edit');
@@ -76,6 +81,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Edit gift card
      */
+    #[Route('/admin/giftcard/edit')]
     public function editAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -110,6 +116,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Save gift card
      */
+    #[Route('/admin/giftcard/save')]
     public function saveAction(): void
     {
         if ($data = $this->getRequest()->getPost()) {
@@ -180,6 +187,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Delete gift card
      */
+    #[Route('/admin/giftcard/delete')]
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -210,6 +218,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Mass delete action
      */
+    #[Route('/admin/giftcard/massDelete')]
     public function massDeleteAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
@@ -242,6 +251,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Mass status change action
      */
+    #[Route('/admin/giftcard/massStatus')]
     public function massStatusAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
@@ -277,6 +287,7 @@ class Maho_Giftcard_Adminhtml_GiftcardController extends Mage_Adminhtml_Controll
     /**
      * Check balance action (AJAX)
      */
+    #[Route('/admin/giftcard/checkBalance')]
     public function checkBalanceAction(): void
     {
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);

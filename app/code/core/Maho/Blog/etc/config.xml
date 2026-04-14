@@ -133,15 +133,6 @@
         </translate>
     </adminhtml>
     <frontend>
-        <routers>
-            <blog>
-                <use>standard</use>
-                <args>
-                    <module>Maho_Blog</module>
-                    <frontName>blog</frontName>
-                </args>
-            </blog>
-        </routers>
         <layout>
             <updates>
                 <blog>

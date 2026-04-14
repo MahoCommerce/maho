@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'cms/blog/categories';
@@ -40,6 +42,8 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         return $model;
     }
 
+    #[Route('/admin/blog_category/index')]
+
     public function indexAction(): void
     {
         $this->_title($this->__('Blog Categories'));
@@ -47,10 +51,14 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         $this->renderLayout();
     }
 
+    #[Route('/admin/blog_category/new')]
+
     public function newAction(): void
     {
         $this->_forward('edit');
     }
+
+    #[Route('/admin/blog_category/edit')]
 
     public function editAction(): void
     {
@@ -86,6 +94,8 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
             )
             ->renderLayout();
     }
+
+    #[Route('/admin/blog_category/save')]
 
     public function saveAction(): void
     {
@@ -131,6 +141,8 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         $this->_redirect('*/*/');
     }
 
+    #[Route('/admin/blog_category/delete')]
+
     public function deleteAction(): void
     {
         if ($id = $this->getRequest()->getParam('id')) {
@@ -153,6 +165,8 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
         }
         $this->_redirect('*/*/');
     }
+
+    #[Route('/admin/blog_category/massDelete')]
 
     public function massDeleteAction(): void
     {
@@ -186,6 +200,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     /**
      * AJAX action for Posts tab (initial load with serializer)
      */
+    #[Route('/admin/blog_category/posts')]
     public function postsAction(): void
     {
         $this->_initCategory();
@@ -198,6 +213,7 @@ class Maho_Blog_Adminhtml_Blog_CategoryController extends Mage_Adminhtml_Control
     /**
      * AJAX action for Posts tab grid (filter/sort/page reload)
      */
+    #[Route('/admin/blog_category/postsGrid')]
     public function postsGridAction(): void
     {
         $this->_initCategory();

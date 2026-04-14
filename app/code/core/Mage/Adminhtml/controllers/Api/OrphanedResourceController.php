@@ -9,6 +9,8 @@ declare(strict_types=1);
  * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Controller_Action
 {
     /**
@@ -33,6 +35,7 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
     /**
      * Index action
      */
+    #[Route('/admin/api_orphanedresource/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -49,6 +52,7 @@ class Mage_Adminhtml_Api_OrphanedResourceController extends Mage_Adminhtml_Contr
     /**
      * Mass delete action
      */
+    #[Route('/admin/api_orphanedresource/massDelete')]
     public function massDeleteAction(): void
     {
         $resourceIds = $this->getRequest()->getParam('resource_id');

@@ -9,8 +9,11 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Tag_ProductController extends Mage_Core_Controller_Front_Action
 {
+    #[Route('/tag/product/list/{tagId}', name: 'tag.product.list', methods: ['GET'], requirements: ['tagId' => '\d+'])]
     public function listAction(): void
     {
         $tagId = $this->getRequest()->getParam('tagId');

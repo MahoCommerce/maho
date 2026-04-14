@@ -10,11 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Sales_CreditmemoController extends Mage_Adminhtml_Controller_Sales_Creditmemo
 {
     /**
      * Export credit memo grid to CSV format
      */
+    #[Route('/admin/sales_creditmemo/exportCsv')]
     public function exportCsvAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_creditmemo_grid');
@@ -24,6 +27,7 @@ class Mage_Adminhtml_Sales_CreditmemoController extends Mage_Adminhtml_Controlle
     /**
      * Export credit memo grid to Excel XML format
      */
+    #[Route('/admin/sales_creditmemo/exportExcel')]
     public function exportExcelAction(): void
     {
         $grid = $this->getLayout()->createBlock('adminhtml/sales_creditmemo_grid');
@@ -34,6 +38,7 @@ class Mage_Adminhtml_Sales_CreditmemoController extends Mage_Adminhtml_Controlle
      * Index page
      */
     #[\Override]
+    #[Route('/admin/sales_creditmemo/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Credit Memos'));

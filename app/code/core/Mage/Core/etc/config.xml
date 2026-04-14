@@ -164,15 +164,6 @@
         </request_rewrite>
     </global>
     <frontend>
-        <routers>
-            <core>
-                <use>standard</use>
-                <args>
-                    <module>Mage_Core</module>
-                    <frontName>core</frontName>
-                </args>
-            </core>
-        </routers>
         <translate>
             <modules>
                 <Mage_Core>
@@ -306,16 +297,6 @@
             </ident_support>
         </trans_email>
         <web>
-            <routers>
-                <admin>
-                    <area>admin</area>
-                    <class>Mage_Core_Controller_Varien_Router_Admin</class>
-                </admin>
-                <standard>
-                    <area>frontend</area>
-                    <class>Mage_Core_Controller_Varien_Router_Standard</class>
-                </standard>
-            </routers>
             <url>
                 <use_store>0</use_store>
                 <redirect_to_base>1</redirect_to_base>
@@ -435,18 +416,7 @@
     </default>
     <stores>
         <default>
-            <web>
-                <routers>
-                    <admin>
-                        <area>admin</area>
-                        <class>Mage_Core_Controller_Varien_Router_Admin</class>
-                    </admin>
-                    <standard>
-                        <area>frontend</area>
-                        <class>Mage_Core_Controller_Varien_Router_Standard</class>
-                    </standard>
-                </routers>
-            </web>
+            <web/>
         </default>
     </stores>
 </config>

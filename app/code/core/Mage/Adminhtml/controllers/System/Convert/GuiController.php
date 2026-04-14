@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_Convert_ProfileController
 {
     /**
@@ -22,6 +24,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profiles list action
      */
     #[\Override]
+    #[Route('/admin/system_convert_gui/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('System'))
@@ -56,6 +59,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
     }
 
     #[\Override]
+    #[Route('/admin/system_convert_gui/grid')]
     public function gridAction(): void
     {
         $this->getResponse()->setBody($this->getLayout()->createBlock('adminhtml/system_convert_gui_grid')->toHtml());
@@ -65,6 +69,7 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
      * Profile edit action
      */
     #[\Override]
+    #[Route('/admin/system_convert_gui/edit')]
     public function editAction(): void
     {
         $this->_initProfile();
@@ -95,17 +100,23 @@ class Mage_Adminhtml_System_Convert_GuiController extends Mage_Adminhtml_System_
         $this->renderLayout();
     }
 
+    #[Route('/admin/system_convert_gui/upload')]
+
     public function uploadAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
 
+    #[Route('/admin/system_convert_gui/uploadPost')]
+
     public function uploadPostAction(): void
     {
         $this->_initProfile();
         $profile = Mage::registry('current_convert_profile');
     }
+
+    #[Route('/admin/system_convert_gui/download')]
 
     public function downloadAction(): void
     {

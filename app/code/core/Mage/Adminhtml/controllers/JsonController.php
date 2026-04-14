@@ -10,11 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_JsonController extends Mage_Adminhtml_Controller_Action
 {
     /**
      * Return JSON-encoded array of country regions
      */
+    #[Route('/admin/json/countryRegion')]
     public function countryRegionAction(): void
     {
         $arrRes = [];

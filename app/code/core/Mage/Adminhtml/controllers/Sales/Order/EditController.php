@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Order_CreateController
 {
     /**
@@ -22,6 +24,7 @@ class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Ord
      * Start edit order initialization
      */
     #[\Override]
+    #[Route('/admin/sales_order_edit/start')]
     public function startAction(): void
     {
         $this->_getSession()->clear();
@@ -54,6 +57,7 @@ class Mage_Adminhtml_Sales_Order_EditController extends Mage_Adminhtml_Sales_Ord
      * Index page
      */
     #[\Override]
+    #[Route('/admin/sales_order_edit/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))->_title($this->__('Orders'))->_title($this->__('Edit Order'));

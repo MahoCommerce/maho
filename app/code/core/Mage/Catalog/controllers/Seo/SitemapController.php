@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Action
 {
     /**
@@ -31,6 +33,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
     /**
      * Display categories listing
      */
+    #[Route('/catalog/seo_sitemap/category', name: 'catalog.seo.sitemap.category', methods: ['GET'])]
     public function categoryAction(): void
     {
         $update = $this->getLayout()->getUpdate();
@@ -47,6 +50,7 @@ class Mage_Catalog_Seo_SitemapController extends Mage_Core_Controller_Front_Acti
     /**
      * Display products listing
      */
+    #[Route('/catalog/seo_sitemap/product', name: 'catalog.seo.sitemap.product', methods: ['GET'])]
     public function productAction(): void
     {
         $this->loadLayout();

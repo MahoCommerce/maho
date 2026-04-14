@@ -10,11 +10,14 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Controller_Action
 {
     /**
      * Billing agreements
      */
+    #[Route('/admin/sales_billing_agreement/index')]
     public function indexAction(): void
     {
         $this->_title($this->__('Sales'))
@@ -28,6 +31,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Ajax action for billing agreements
      */
+    #[Route('/admin/sales_billing_agreement/grid')]
     public function gridAction(): void
     {
         $this->loadLayout(false)
@@ -37,6 +41,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * View billing agreement action
      */
+    #[Route('/admin/sales_billing_agreement/view')]
     public function viewAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();
@@ -58,6 +63,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Related orders ajax action
      */
+    #[Route('/admin/sales_billing_agreement/ordersGrid')]
     public function ordersGridAction(): void
     {
         $this->_initBillingAgreement();
@@ -68,6 +74,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Cutomer billing agreements ajax action
      */
+    #[Route('/admin/sales_billing_agreement/customerGrid')]
     public function customerGridAction(): void
     {
         $this->_initCustomer();
@@ -78,6 +85,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Cancel billing agreement action
      */
+    #[Route('/admin/sales_billing_agreement/cancel')]
     public function cancelAction()
     {
         $agreementModel = $this->_initBillingAgreement();
@@ -102,6 +110,7 @@ class Mage_Adminhtml_Sales_Billing_AgreementController extends Mage_Adminhtml_Co
     /**
      * Delete billing agreement action
      */
+    #[Route('/admin/sales_billing_agreement/delete')]
     public function deleteAction(): void
     {
         $agreementModel = $this->_initBillingAgreement();

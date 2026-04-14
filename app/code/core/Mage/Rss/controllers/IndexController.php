@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
 {
     /**
@@ -29,6 +31,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Index action
      */
+    #[Route('/rss', name: 'rss.index', methods: ['GET'])]
     public function indexAction(): void
     {
         /** @var Mage_Rss_Helper_Data $helper */
@@ -46,6 +49,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
     /**
      * Display feed not found message
      */
+    #[Route('/rss/index/nofeed', name: 'rss.index.nofeed', methods: ['GET'])]
     public function nofeedAction(): void
     {
         $this->getResponse()->setHeader('HTTP/1.1', '404 Not Found');
@@ -58,6 +62,7 @@ class Mage_Rss_IndexController extends Mage_Rss_Controller_Abstract
      * Wishlist rss feed action
      * Show all public wishlists and private wishlists that belong to current user
      */
+    #[Route('/rss/index/wishlist', name: 'rss.index.wishlist', methods: ['GET'])]
     public function wishlistAction(): void
     {
         if (!$this->isFeedEnable('wishlist/active')) {

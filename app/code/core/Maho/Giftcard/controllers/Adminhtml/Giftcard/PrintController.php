@@ -11,6 +11,8 @@ declare(strict_types=1);
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Controller_Action
 {
     public const ADMIN_RESOURCE = 'giftcard/manage';
@@ -18,6 +20,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Print gift card as PDF
      */
+    #[Route('/admin/giftcard_print/pdf')]
     public function pdfAction(): void
     {
         $id = $this->getRequest()->getParam('id');
@@ -47,6 +50,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Print multiple gift cards as PDF
      */
+    #[Route('/admin/giftcard_print/massPdf')]
     public function massPdfAction(): void
     {
         $giftcardIds = $this->getRequest()->getParam('giftcard');
@@ -87,6 +91,7 @@ class Maho_Giftcard_Adminhtml_Giftcard_PrintController extends Mage_Adminhtml_Co
     /**
      * Email gift card to recipient
      */
+    #[Route('/admin/giftcard_print/email')]
     public function emailAction(): void
     {
         $id = $this->getRequest()->getParam('id');

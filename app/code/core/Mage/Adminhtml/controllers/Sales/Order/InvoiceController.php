@@ -10,6 +10,8 @@
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
+use Maho\Config\Route;
+
 class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Controller_Sales_Invoice
 {
     /**
@@ -118,6 +120,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Invoice information page
      */
     #[\Override]
+    #[Route('/admin/sales_order_invoice/view')]
     public function viewAction(): void
     {
         $invoice = $this->_initInvoice();
@@ -140,6 +143,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Start create invoice action
      */
+    #[Route('/admin/sales_order_invoice/start')]
     public function startAction(): void
     {
         /**
@@ -152,6 +156,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Invoice create page
      */
+    #[Route('/admin/sales_order_invoice/new')]
     public function newAction(): void
     {
         $invoice = $this->_initInvoice();
@@ -173,6 +178,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Update items qty action
      */
+    #[Route('/admin/sales_order_invoice/updateQty')]
     public function updateQtyAction(): void
     {
         try {
@@ -204,6 +210,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Save invoice
      * We can save only new invoice. Existing invoices are not editable
      */
+    #[Route('/admin/sales_order_invoice/save')]
     public function saveAction(): void
     {
         $data = $this->getRequest()->getPost('invoice');
@@ -295,6 +302,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Capture invoice action
      */
+    #[Route('/admin/sales_order_invoice/capture')]
     public function captureAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
@@ -316,6 +324,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Cancel invoice action
      */
+    #[Route('/admin/sales_order_invoice/cancel')]
     public function cancelAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
@@ -337,6 +346,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
     /**
      * Void invoice action
      */
+    #[Route('/admin/sales_order_invoice/void')]
     public function voidAction(): void
     {
         if ($invoice = $this->_initInvoice()) {
@@ -354,6 +364,8 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
             $this->_forward('noRoute');
         }
     }
+
+    #[Route('/admin/sales_order_invoice/addComment')]
 
     public function addCommentAction(): void
     {
@@ -394,6 +406,7 @@ class Mage_Adminhtml_Sales_Order_InvoiceController extends Mage_Adminhtml_Contro
      * Create pdf for current invoice
      */
     #[\Override]
+    #[Route('/admin/sales_order_invoice/print')]
     public function printAction(): void
     {
         $this->_initInvoice();
