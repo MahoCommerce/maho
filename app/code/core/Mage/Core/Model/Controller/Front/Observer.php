@@ -311,7 +311,7 @@ class Mage_Core_Model_Controller_Front_Observer
         if ($startPos !== false) {
             $endPos = strpos($url, '}');
             $routeName = substr($url, $startPos + 1, $endPos - $startPos - 1);
-            $frontName = \Maho\Routing\RouteRegistry::getFrontNameByRoute($routeName);
+            $frontName = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($routeName);
             if ($frontName) {
                 $url = str_replace('{' . $routeName . '}', $frontName, $url);
             }

@@ -44,29 +44,8 @@ class ControllerDispatcher
             return false;
         }
 
-        $controllerClass = null;
         $action = $actionName; // bare name without 'Action' suffix — hasAction/dispatch expect this
-        $controllerModule = '';
-
-        // Try reverse lookup first (finds attributed routes)
-        $routeInfo = RouteCollectionBuilder::resolveRoute($moduleName, $controllerName, $actionName);
-        if ($routeInfo) {
-            $compiled = \Maho::getCompiledAttributes();
-            $routes = $compiled['routes'] ?? [];
-            $routeData = $routes[$routeInfo['name']] ?? null;
-
-            if ($routeData) {
-                $controllerClass = $routeData['class'];
-                // Compiled action is 'indexAction' — strip suffix for hasAction/dispatch
-                $action = preg_replace('/Action$/', '', $routeData['action']);
-                $controllerModule = $routeData['module'] ?? '';
-            }
-        }
-
-        // Fall back to direct class resolution for non-attributed actions (e.g. norouteAction)
-        if (!$controllerClass) {
-            $controllerClass = $this->resolveControllerClassByFrontName($moduleName, $controllerName);
-        }
+        $controllerClass = $this->resolveControllerClassByFrontName($moduleName, $controllerName);
 
         if (!$controllerClass || !class_exists($controllerClass)) {
             return false;
@@ -78,9 +57,6 @@ class ControllerDispatcher
             return false;
         }
 
-        if ($controllerModule) {
-            $request->setControllerModule($controllerModule);
-        }
         // Set routeName for event dispatching (controller_action_predispatch_<routeName>)
         if (!$request->getRouteName()) {
             $request->setRouteName($moduleName);
@@ -131,9 +107,8 @@ class ControllerDispatcher
     /**
      * Resolve a controller class from frontName + controllerName.
      *
-     * First checks compiled #[Route] attributes, then falls back to config.xml
-     * module chain registrations via RouteRegistry (supports third-party modules
-     * that haven't migrated to #[Route] attributes yet).
+     * First checks compiled #[Route] attributes, then falls back to the admin
+     * module chain for third-party admin extensions without #[Route] attributes.
      */
     protected function resolveControllerClassByFrontName(string $frontName, string $controllerName): ?string
     {
@@ -166,10 +141,10 @@ class ControllerDispatcher
             }
         }
 
-        // Fall back to config.xml module chain (third-party modules without #[Route] attributes)
-        $modules = RouteRegistry::getModulesByFrontName($frontName);
-        if ($modules) {
-            foreach ($modules as $module) {
+        // Fall back to admin module chain for third-party admin extensions
+        $adminFrontName = RouteCollectionBuilder::getAdminFrontNameStatic();
+        if (strtolower($frontName) === strtolower($adminFrontName)) {
+            foreach ($this->buildAdminModuleChain() as $module) {
                 $className = $module . '_' . uc_words($controllerName) . 'Controller';
                 if (class_exists($className)) {
                     return $className;
@@ -258,72 +233,63 @@ class ControllerDispatcher
     }
 
     /**
-     * Walk the module chain to find the highest-priority controller class.
+     * Walk the admin module chain to find a controller override.
      *
-     * This supports third-party modules that register controller overrides via
-     * config.xml frontend/routers module chains (before/after ordering).
-     * Returns null if no module chain is found (falls back to compiled default).
+     * Only admin has an XML-based module override chain (before/after ordering).
+     * Frontend controllers use #[Route] attributes directly.
      */
     protected function resolveControllerClass(
         string $module,
         string $controllerName,
         string $area = 'frontend',
     ): ?string {
-        if (!$module || !$controllerName) {
+        if (!$module || !$controllerName || $area !== 'adminhtml') {
             return null;
         }
 
-        $frontName = $this->findFrontNameForModule($module, $area);
-        if (!$frontName) {
-            return null;
-        }
-
-        $modules = RouteRegistry::getModulesByFrontName($frontName);
-        if (!$modules) {
-            return null;
-        }
-
-        // Walk the chain — first module with a valid controller+action wins
-        foreach ($modules as $realModule) {
+        foreach ($this->buildAdminModuleChain() as $realModule) {
             $className = $realModule . '_' . uc_words($controllerName) . 'Controller';
-            if (!class_exists($className)) {
-                continue;
+            if (class_exists($className)) {
+                return $className;
             }
-
-            return $className;
         }
 
         return null;
     }
 
     /**
-     * Find the frontName for a given module by searching the route registry.
+     * Build the admin module chain from config.xml, respecting before/after ordering.
+     *
+     * @return string[]
      */
-    protected function findFrontNameForModule(string $module, string $area = 'frontend'): ?string
+    private function buildAdminModuleChain(): array
     {
-        $configArea = match ($area) {
-            'adminhtml' => 'admin',
-            default => 'frontend',
-        };
-
-        $routers = Mage::getConfig()->getNode($configArea . '/routers');
-        if (!$routers) {
-            return null;
+        $modules = ['Mage_Adminhtml'];
+        $modulesNode = Mage::getConfig()->getNode('admin/routers/adminhtml/args/modules');
+        if (!$modulesNode) {
+            return $modules;
         }
 
-        foreach ($routers->children() as $routerConfig) {
-            $frontName = (string) ($routerConfig->args->frontName ?? '');
-            if (!$frontName) {
+        foreach ($modulesNode->children() as $customModule) {
+            $moduleName = (string) $customModule;
+            if (!$moduleName) {
                 continue;
             }
 
-            $modules = RouteRegistry::getModulesByFrontName($frontName);
-            if ($modules && in_array($module, $modules, true)) {
-                return $frontName;
+            if ($before = $customModule->getAttribute('before')) {
+                $position = array_search($before, $modules, true);
+                $position = ($position === false) ? 0 : $position;
+                array_splice($modules, $position, 0, $moduleName);
+            } elseif ($after = $customModule->getAttribute('after')) {
+                $position = array_search($after, $modules, true);
+                $position = ($position === false) ? count($modules) : $position + 1;
+                array_splice($modules, $position, 0, $moduleName);
+            } else {
+                $modules[] = $moduleName;
             }
         }
 
-        return null;
+        return $modules;
     }
 
     /**
@@ -366,7 +332,7 @@ class ControllerDispatcher
         string $controllerModule,
         Mage_Core_Controller_Request_Http $request,
     ): void {
-        $adminFrontName = RouteRegistry::getAdminFrontName();
+        $adminFrontName = RouteCollectionBuilder::getAdminFrontNameStatic();
 
         $request->setModuleName($adminFrontName ?: 'admin');
         $request->setControllerName($controllerName);

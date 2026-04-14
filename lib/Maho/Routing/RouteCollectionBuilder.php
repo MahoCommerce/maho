@@ -29,13 +29,6 @@ class RouteCollectionBuilder
     protected const REGISTRY_KEY = '_maho_route_collection';
 
     /**
-     * Reverse lookup: "frontName/controllerName/actionName" → route info.
-     *
-     * @var array<string, array{name: string, path: string, pathVariables: string[], area: string}>|null
-     */
-    protected static ?array $_reverseLookup = null;
-
-    /**
      * Build or retrieve the cached RouteCollection for the current request.
      */
     public function build(): RouteCollection
@@ -108,57 +101,68 @@ class RouteCollectionBuilder
     }
 
     /**
-     * Resolve a Symfony route from legacy path components (frontName/controller/action).
+     * Resolve route metadata for URL generation from frontName/controller/action.
      *
-     * @return array{name: string, path: string, pathVariables: string[]}|null
+     * Scans compiled attributes directly — O(n) but only called during URL generation.
+     *
+     * @return array{name: string, path: string, pathVariables: string[], area: string}|null
      */
     public static function resolveRoute(string $frontName, string $controllerName, string $actionName): ?array
     {
-        if (self::$_reverseLookup === null) {
-            self::buildReverseLookup();
-        }
-
-        $key = strtolower($frontName . '/' . $controllerName . '/' . $actionName);
-        return self::$_reverseLookup[$key] ?? null;
-    }
-
-    protected static function buildReverseLookup(): void
-    {
-        self::$_reverseLookup = [];
         $compiled = \Maho::getCompiledAttributes();
-        $routes = $compiled['routes'] ?? [];
         $adminFrontName = self::getAdminFrontNameStatic();
 
-        foreach ($routes as $name => $routeData) {
-            $path = $routeData['path'];
+        foreach ($compiled['routes'] ?? [] as $name => $routeData) {
             $area = $routeData['area'] ?? 'frontend';
+            $path = $routeData['path'];
 
-            // Admin routes: replace '/admin/' prefix with actual admin frontName
-            if ($area === 'adminhtml' && $adminFrontName !== 'admin') {
-                $path = preg_replace('#^/admin(/|$)#', '/' . $adminFrontName . '$1', $path);
+            if ($area === 'adminhtml') {
+                $routeFrontName = $adminFrontName;
+                if ($adminFrontName !== 'admin') {
+                    $path = preg_replace('#^/admin(/|$)#', '/' . $adminFrontName . '$1', $path);
+                }
+            } else {
+                $segments = explode('/', ltrim($path, '/'));
+                $routeFrontName = $segments[0] ?? '';
             }
 
-            $segments = explode('/', ltrim($path, '/'));
-            $frontName = $segments[0] ?? '';
-
-            $controllerName = $routeData['controllerName'] ?? 'index';
-            $action = preg_replace('/Action$/', '', $routeData['action'] ?? 'indexAction');
+            if (
+                strtolower($routeFrontName) !== strtolower($frontName) ||
+                strtolower($routeData['controllerName'] ?? 'index') !== strtolower($controllerName) ||
+                strtolower(preg_replace('/Action$/', '', $routeData['action'] ?? 'indexAction')) !== strtolower($actionName)
+            ) {
+                continue;
+            }
 
             preg_match_all('/\{(\w+)\}/', $path, $matches);
-            $pathVariables = $matches[1];
-
-            $key = strtolower($frontName . '/' . $controllerName . '/' . $action);
-
-            // First route wins (attribute routes have priority)
-            if (!isset(self::$_reverseLookup[$key])) {
-                self::$_reverseLookup[$key] = [
-                    'name' => $name,
-                    'path' => $path,
-                    'pathVariables' => $pathVariables,
-                    'area' => $area,
-                ];
-            }
+            return ['name' => $name, 'path' => $path, 'pathVariables' => $matches[1], 'area' => $area];
         }
+
+        return null;
+    }
+
+    /**
+     * Convert a route name to its URL frontName.
+     * Only 'adminhtml' differs from its frontName; all other routes use routeName as frontName.
+     */
+    public static function getFrontNameByRoute(string $routeName): ?string
+    {
+        if ($routeName === 'adminhtml') {
+            return self::getAdminFrontNameStatic();
+        }
+        return null;
+    }
+
+    /**
+     * Convert a URL frontName to its route name.
+     * Only the admin frontName maps to 'adminhtml'; all others are identity.
+     */
+    public static function getRouteByFrontName(string $frontName): ?string
+    {
+        if ($frontName === self::getAdminFrontNameStatic()) {
+            return 'adminhtml';
+        }
+        return null;
     }
 
     protected function getAdminFrontName(): string

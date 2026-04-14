@@ -138,9 +138,6 @@ class Mage_Core_Controller_Varien_Front extends \Maho\DataObject
 
         Mage::dispatchEvent('controller_front_init_routers', ['front' => $this]);
 
-        // Build route registry from config.xml (replaces Router_Standard/Admin metadata)
-        \Maho\Routing\RouteRegistry::init();
-
         // Add default router at the last
         $default = new Mage_Core_Controller_Varien_Router_Default();
         $this->addRouter('default', $default);

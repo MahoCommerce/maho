@@ -78,6 +78,7 @@ class Mage_Cms_Controller_Router extends Mage_Core_Controller_Varien_Router_Abst
             $identifier,
         );
 
-        return true;
+        $dispatcher = new \Maho\Routing\ControllerDispatcher();
+        return $dispatcher->dispatchForward($request, Mage::app()->getFrontController()->getResponse());
     }
 }

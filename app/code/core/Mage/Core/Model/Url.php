@@ -535,7 +535,7 @@ class Mage_Core_Model_Url extends \Maho\DataObject
     {
         if (!$this->hasData('route_front_name')) {
             $routeName = $this->getRouteName();
-            $frontName = \Maho\Routing\RouteRegistry::getFrontNameByRoute($routeName ?? '') ?? $routeName;
+            $frontName = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($routeName ?? '') ?? $routeName;
             $this->setRouteFrontName($frontName);
         }
 
