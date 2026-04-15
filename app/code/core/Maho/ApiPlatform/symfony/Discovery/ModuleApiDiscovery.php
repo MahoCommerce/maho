@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace Maho\ApiPlatform\Discovery;
 
+use Maho\ComposerPlugin\AutoloadRuntime;
+
 /**
  * Discovers Maho modules that expose API resources via the Api/ convention.
  *
@@ -37,64 +39,23 @@ final class ModuleApiDiscovery
         $paths = [];
         $namespaces = [];
 
-        // Scan all code pools for modules with Api/ directories
-        $codePools = [
-            'core/Mage' => 'Mage',
-            'core/Maho' => 'Maho',
-            'community' => null,  // vendor prefix derived from directory structure
-            'local' => null,
-        ];
-
-        foreach ($codePools as $pool => $vendorPrefix) {
-            $basePath = BP . '/app/code/' . $pool;
-            if (!is_dir($basePath)) {
+        // Use globPackages so that Api/ directories are found across all installed
+        // packages (vendor/mahocommerce/maho, maho-modules, and the root project),
+        // not just BP/app/code/ which misses core modules in Composer-based projects.
+        foreach (AutoloadRuntime::globPackages('/app/code/*/*/*/Api', GLOB_ONLYDIR) as $apiDir) {
+            $pos = strpos($apiDir, '/app/code/');
+            if ($pos === false) {
                 continue;
             }
-
-            if ($vendorPrefix !== null) {
-                // Core pool: Maho/ModuleName/Api/
-                foreach (new \DirectoryIterator($basePath) as $item) {
-                    if ($item->isDot() || !$item->isDir()) {
-                        continue;
-                    }
-
-                    $moduleName = $item->getFilename();
-
-                    // Skip the ApiPlatform module itself — it uses its own mechanism
-                    if ($moduleName === 'ApiPlatform') {
-                        continue;
-                    }
-
-                    $apiDir = $basePath . '/' . $moduleName . '/Api';
-
-                    if (is_dir($apiDir)) {
-                        $paths[] = $apiDir;
-                        $namespaces["{$vendorPrefix}\\{$moduleName}\\Api\\"] = $apiDir;
-                    }
-                }
-            } else {
-                // Community/local pools: Vendor/ModuleName/Api/
-                foreach (new \DirectoryIterator($basePath) as $vendor) {
-                    if ($vendor->isDot() || !$vendor->isDir()) {
-                        continue;
-                    }
-                    $vendorName = $vendor->getFilename();
-                    $vendorPath = $basePath . '/' . $vendorName;
-
-                    foreach (new \DirectoryIterator($vendorPath) as $module) {
-                        if ($module->isDot() || !$module->isDir()) {
-                            continue;
-                        }
-                        $moduleName = $module->getFilename();
-                        $apiDir = $vendorPath . '/' . $moduleName . '/Api';
-
-                        if (is_dir($apiDir)) {
-                            $paths[] = $apiDir;
-                            $namespaces["{$vendorName}\\{$moduleName}\\Api\\"] = $apiDir;
-                        }
-                    }
-                }
+            // Segments after app/code/: [pool, nsPrefix, moduleName, 'Api']
+            $segments = explode('/', substr($apiDir, $pos + strlen('/app/code/')));
+            if (count($segments) !== 4) {
+                continue;
             }
+            [, $nsPrefix, $moduleName] = $segments;
+
+            $paths[] = $apiDir;
+            $namespaces["{$nsPrefix}\\{$moduleName}\\Api\\"] = $apiDir;
         }
 
         return self::$cache = ['paths' => $paths, 'namespaces' => $namespaces];
