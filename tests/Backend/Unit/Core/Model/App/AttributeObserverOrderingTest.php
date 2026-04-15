@@ -64,7 +64,7 @@ it('orders attribute observers by module dependency', function () {
 it('resolves attribute observers for the expected event', function () {
     $observers = resolveObservers('global', 'customer_save_after');
 
-    expect($observers)->toHaveKey('Mage_Newsletter_Model_Observer::subscribeCustomer');
+    expect($observers)->toHaveKey('newsletter/observer::subscribeCustomer');
 });
 
 it('compiled attributes file contains alias field for all observers', function () {

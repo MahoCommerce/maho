@@ -30,7 +30,7 @@ class Maho_Paypal_Block_Paylater_Message extends Mage_Core_Block_Template
 
         if ($isInCatalog) {
             $currentProduct = Mage::registry('current_product');
-            if ($currentProduct === null) {
+            if ($currentProduct === null || !$currentProduct->isSaleable()) {
                 $this->_shouldRender = false;
                 return $result;
             }
