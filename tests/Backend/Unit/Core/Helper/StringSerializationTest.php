@@ -322,3 +322,25 @@ describe('isSerializedArrayOrObject detects both JSON and legacy formats', funct
         expect($this->helper->isSerializedArrayOrObject(''))->toBeFalse();
     });
 });
+
+describe('validateSerializedObject does not call unserialize on JSON', function () {
+    beforeEach(function () {
+        $this->helper = Mage::helper('core/string');
+    });
+
+    it('passes JSON object without error', function () {
+        expect($this->helper->validateSerializedObject('{"394953":"468","394954":"273"}'))->toBeTrue();
+    });
+
+    it('passes JSON array without error', function () {
+        expect($this->helper->validateSerializedObject('[1,2,3]'))->toBeTrue();
+    });
+
+    it('passes valid PHP-serialized array', function () {
+        expect($this->helper->validateSerializedObject(serialize(['key' => 'val'])))->toBeTrue();
+    });
+
+    it('passes plain string', function () {
+        expect($this->helper->validateSerializedObject('just a string'))->toBeTrue();
+    });
+});
