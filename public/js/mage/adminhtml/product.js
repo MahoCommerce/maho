@@ -282,10 +282,10 @@ Product.Configurable = class {
         /* Generation templates */
         this.addAttributeTemplate = this.createTemplateFunction(
             document.getElementById(idPrefix + 'attribute_template').innerHTML.replace(/__id__/g,
-            "'{{html_id}}'").replace(/ template no-display/g, ''));
+            '{{html_id}}').replace(/ template no-display/g, ''));
         this.addValueTemplate = this.createTemplateFunction(
             document.getElementById(idPrefix + 'value_template').innerHTML.replace(/__id__/g,
-            "'{{html_id}}'").replace(/ template no-display/g, ''));
+            '{{html_id}}').replace(/ template no-display/g, ''));
         this.pricingValueTemplate = this.createTemplateFunction(document.getElementById(idPrefix + 'simple_pricing').innerHTML);
         this.pricingValueViewTemplate = this.createTemplateFunction(document.getElementById(idPrefix + 'simple_pricing_view').innerHTML);
 
