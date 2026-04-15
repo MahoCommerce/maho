@@ -307,16 +307,10 @@ class Mage_Core_Model_Controller_Front_Observer
 
     private function processRewriteUrl(string $url): string
     {
-        $startPos = strpos($url, '{');
-        if ($startPos !== false) {
-            $endPos = strpos($url, '}');
-            $routeName = substr($url, $startPos + 1, $endPos - $startPos - 1);
-            $frontName = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($routeName);
-            if ($frontName) {
-                $url = str_replace('{' . $routeName . '}', $frontName, $url);
-            }
-        }
-        return $url;
+        return preg_replace_callback('/\{(\w+)\}/', function (array $matches): string {
+            $frontName = \Maho\Routing\RouteCollectionBuilder::getFrontNameByRoute($matches[1]);
+            return $frontName ?: $matches[0];
+        }, $url) ?? $url;
     }
 
     private function enforceHttps(Mage_Core_Controller_Request_Http $request, Mage_Core_Controller_Response_Http $response): void

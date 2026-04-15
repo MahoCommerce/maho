@@ -200,7 +200,10 @@ class RouteCollectionBuilder
             }
             $generator = new UrlGenerator($collection, $context);
             return $generator->generate($name, $params);
-        } catch (\Throwable) {
+        } catch (\Symfony\Component\Routing\Exception\ExceptionInterface) {
+            return null;
+        } catch (\Throwable $e) {
+            Mage::logException($e);
             return null;
         }
     }

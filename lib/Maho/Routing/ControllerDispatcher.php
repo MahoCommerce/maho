@@ -84,10 +84,6 @@ class ControllerDispatcher
         }
 
         $parts = explode('/', $path);
-        if (count($parts) < 1) {
-            return false;
-        }
-
         $frontName = $parts[0];
         $controllerName = $parts[1] ?? 'index';
         $actionName = $parts[2] ?? 'index';
