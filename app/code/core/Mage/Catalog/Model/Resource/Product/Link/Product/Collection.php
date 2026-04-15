@@ -54,7 +54,7 @@ class Mage_Catalog_Model_Resource_Product_Link_Product_Collection extends Mage_C
     #[\Override]
     public function addItem(Maho\DataObject $item)
     {
-        if ($this->getSelect()->getPart(Maho\Db\Select::DISTINCT) && $this->getItemById($item->getId())) {
+        if ($this->getSelect()->getPart(Maho\Db\Select::DISTINCT) && isset($this->_items[$item->getId()])) {
             return $this;
         }
         return parent::addItem($item);

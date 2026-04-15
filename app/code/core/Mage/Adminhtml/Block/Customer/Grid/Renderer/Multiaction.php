@@ -32,7 +32,7 @@ class Mage_Adminhtml_Block_Customer_Grid_Renderer_Multiaction extends Mage_Admin
                     }
                 }
             }
-            $html = implode('<br />', $links);
+            $html = implode('<br>', $links);
         }
 
         if ($html == '') {

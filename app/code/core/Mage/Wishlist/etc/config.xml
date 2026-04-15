@@ -58,24 +58,6 @@
                 </wishlist_email_email_template>
             </email>
         </template>
-        <events>
-            <checkout_cart_update_items_before>
-                <observers>
-                    <wishlist>
-                        <class>wishlist/observer</class>
-                        <method>processCartUpdateBefore</method>
-                    </wishlist>
-                </observers>
-            </checkout_cart_update_items_before>
-            <checkout_cart_add_product_complete>
-                <observers>
-                    <wishlist>
-                        <class>wishlist/observer</class>
-                        <method>processAddToCart</method>
-                    </wishlist>
-                </observers>
-            </checkout_cart_add_product_complete>
-        </events>
         <wishlist>
             <item>
                 <product_attributes>
@@ -112,24 +94,6 @@
                 </wishlist>
             </updates>
         </layout>
-        <events>
-            <customer_login>
-                <observers>
-                    <wishlist>
-                        <class>wishlist/observer</class>
-                        <method>customerLogin</method>
-                    </wishlist>
-                </observers>
-            </customer_login>
-            <customer_logout>
-                <observers>
-                    <wishlist>
-                        <class>wishlist/observer</class>
-                        <method>customerLogout</method>
-                    </wishlist>
-                </observers>
-            </customer_logout>
-        </events>
         <secure_url>
             <wishlist>/wishlist/</wishlist>
         </secure_url>

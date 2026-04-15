@@ -30,7 +30,7 @@
         <?php endif ?>
         <?php $helpLinkId = 'msrp-click-' . $_product->getId() . $this->helper('core')->getRandomString(20); ?>
         <a href="#" class="map-link" id="<?php echo($helpLinkId);?>"><?= $this->__('Click for price') ?></a>
-        <script type="text/javascript">
+        <script>
             <?php if ($this->helper('catalog')->isShowPriceOnGesture($_product)): ?>
                 var newLink = Catalog.Map.addHelpLink(
                     '<?= $helpLinkId ?>',

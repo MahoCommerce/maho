@@ -51,7 +51,30 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
             ];
         }
 
+        foreach (Maho::getCompiledAttributes()['crontab'] ?? [] as $jobCode => $jobDef) {
+            $configPath = $jobDef['config_path'] ?? '';
+            $result[$jobCode] = [
+                'job_code' => $jobCode,
+                'model_method' => $jobDef['alias'] . '::' . $jobDef['method'],
+                'cron_expr' => $this->resolveCompiledCronExpr($jobDef),
+                'config_path' => $configPath,
+                'enabled' => $this->isJobEnabled($jobCode),
+            ];
+        }
+
         return $result;
+    }
+
+    public function resolveCompiledCronExpr(array $jobDef): string
+    {
+        $cronExpr = '';
+        if (!empty($jobDef['config_path'])) {
+            $cronExpr = (string) Mage::getStoreConfig($jobDef['config_path']);
+        }
+        if (empty($cronExpr) && !empty($jobDef['schedule'])) {
+            $cronExpr = $jobDef['schedule'];
+        }
+        return $cronExpr;
     }
 
     public function getHumanReadableCronExpr(string $expr): string
@@ -145,7 +168,7 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 
         for ($time = $now; $time < $maxTime; $time += 60) {
             if ($schedule->trySchedule($time)) {
-                return date('Y-m-d H:i:s', $time);
+                return date('Y-m-d H:i:00', $time);
             }
         }
 
@@ -224,9 +247,11 @@ class Mage_Cron_Helper_Data extends Mage_Core_Helper_Abstract
 
     public function isJobEnabled(string $jobCode): bool
     {
-        $node = Mage::getConfig()->getNode("crontab/jobs/{$jobCode}/schedule/enabled")
-            ?? Mage::getConfig()->getNode("default/crontab/jobs/{$jobCode}/schedule/enabled");
-        return $node === null || (string) $node !== '0';
+        $node = Mage::getConfig()->getNode("crontab/jobs/{$jobCode}/schedule/enabled");
+        if ($node === false) {
+            $node = Mage::getConfig()->getNode("default/crontab/jobs/{$jobCode}/schedule/enabled");
+        }
+        return $node === false || (string) $node !== '0';
     }
 
     public function setJobEnabled(string $jobCode, bool $enabled): void

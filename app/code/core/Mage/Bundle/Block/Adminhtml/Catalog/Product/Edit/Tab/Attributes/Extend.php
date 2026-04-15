@@ -66,7 +66,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Attributes_Extend ext
             $html .= '<span class="next-toselect">' . $elementHtml . '</span>';
         }
         if ($this->getDisableChild() && !$this->getElement()->getReadonly()) {
-            $html .= '<script type="text/javascript">
+            $html .= '<script>
                 function ' . $switchAttributeCode . "_change() {
                     if (document.getElementById('" . $switchAttributeCode . "').value == '" . self::DYNAMIC . "') {
                         if (document.getElementById('" . $this->getAttribute()->getAttributeCode() . "')) {

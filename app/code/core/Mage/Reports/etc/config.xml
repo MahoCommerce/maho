@@ -56,16 +56,6 @@
                 </setup>
             </reports_setup>
         </resources>
-        <events>
-            <log_log_clean_after>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>eventClean</method>
-                    </reports>
-                </observers>
-            </log_log_clean_after>
-        </events>
     </global>
     <adminhtml>
         <translate>
@@ -95,80 +85,6 @@
                 </reports>
             </updates>
         </layout>
-        <events>
-            <catalog_product_compare_remove_product>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>catalogProductCompareRemoveProduct</method>
-                    </reports>
-                </observers>
-            </catalog_product_compare_remove_product>
-            <customer_login>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>customerLogin</method>
-                    </reports>
-                </observers>
-            </customer_login>
-            <customer_logout>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>customerLogout</method>
-                    </reports>
-                </observers>
-            </customer_logout>
-            <catalog_controller_product_view>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>catalogProductView</method>
-                    </reports>
-                </observers>
-            </catalog_controller_product_view>
-            <catalog_product_compare_add_product>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>catalogProductCompareAddProduct</method>
-                    </reports>
-                </observers>
-            </catalog_product_compare_add_product>
-            <catalog_product_compare_item_collection_clear>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>catalogProductCompareClear</method>
-                    </reports>
-                </observers>
-            </catalog_product_compare_item_collection_clear>
-            <sales_quote_item_save_before>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>checkoutCartAddProduct</method>
-                    </reports>
-                </observers>
-            </sales_quote_item_save_before>
-            <wishlist_add_product>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>wishlistAddProduct</method>
-                    </reports>
-                </observers>
-            </wishlist_add_product>
-            <wishlist_share>
-                <observers>
-                    <reports>
-                        <class>reports/event_observer</class>
-                        <method>wishlistShare</method>
-                    </reports>
-                </observers>
-            </wishlist_share>
-        </events>
     </frontend>
     <default>
         <catalog>
@@ -193,16 +109,4 @@
             </crontab>
         </reports>
     </default>
-    <crontab>
-        <jobs>
-            <aggregate_reports_report_product_viewed_data>
-                <schedule>
-                    <config_path>reports/crontab/viewed_expr</config_path>
-                </schedule>
-                <run>
-                    <model>reports/observer::aggregateReportsReportProductViewedData</model>
-                </run>
-            </aggregate_reports_report_product_viewed_data>
-        </jobs>
-    </crontab>
 </config>

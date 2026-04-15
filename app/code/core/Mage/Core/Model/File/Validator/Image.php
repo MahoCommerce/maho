@@ -23,7 +23,6 @@ class Mage_Core_Model_File_Validator_Image
         IMAGETYPE_GIF,
         IMAGETYPE_JPEG2000,
         IMAGETYPE_PNG,
-        IMAGETYPE_ICO,
         IMAGETYPE_TIFF_II,
         IMAGETYPE_TIFF_MM,
     ];
@@ -57,7 +56,6 @@ class Mage_Core_Model_File_Validator_Image
             'jpeg' => [IMAGETYPE_JPEG, IMAGETYPE_JPEG2000],
             'gif' => [IMAGETYPE_GIF],
             'png' => [IMAGETYPE_PNG],
-            'ico' => [IMAGETYPE_ICO],
             'apng' => [IMAGETYPE_PNG],
             'svg' => [], // SVG is XML-based, not a raster format - handled by separate validator
         ];
@@ -95,9 +93,6 @@ class Mage_Core_Model_File_Validator_Image
 
         [$imageWidth, $imageHeight, $fileType] = \Maho\Io::getImageSize($filePath);
         if ($fileType) {
-            if ($fileType === IMAGETYPE_ICO) {
-                return null;
-            }
             if ($this->isImageType($fileType)) {
                 $imageQuality = Mage::getStoreConfigAsInt('system/media_storage_configuration/image_quality');
                 //replace tmp image with re-sampled copy to exclude images with malicious data

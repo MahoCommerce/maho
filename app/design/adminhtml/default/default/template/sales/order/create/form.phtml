@@ -11,7 +11,7 @@
 
 /** @var Mage_Adminhtml_Block_Sales_Order_Create_Form $this */
 ?>
-<script type="text/javascript">
+<script>
     var order = new AdminOrder(<?= $this->getOrderDataJson() ?>);
     order.setLoadBaseUrl('<?= $this->getLoadBlockUrl() ?>');
     var payment = {};

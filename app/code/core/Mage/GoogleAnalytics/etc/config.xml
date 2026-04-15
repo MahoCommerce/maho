@@ -50,32 +50,6 @@
                 </Mage_GoogleAnalytics>
             </modules>
         </translate>
-        <events>
-            <checkout_onepage_controller_success_action>
-                <observers>
-                    <googleanalytics_order_success>
-                        <class>googleanalytics/observer</class>
-                        <method>setGoogleAnalyticsOnOrderSuccessPageView</method>
-                    </googleanalytics_order_success>
-                </observers>
-            </checkout_onepage_controller_success_action>
-            <sales_quote_item_save_after>
-                <observers>
-                    <mage_googleanalytics>
-                        <class>googleanalytics/observer</class>
-                        <method>processItemsAddedOrRemovedFromCart</method>
-                    </mage_googleanalytics>
-                </observers>
-            </sales_quote_item_save_after>
-            <sales_quote_item_delete_after>
-                <observers>
-                    <mage_googleanalytics>
-                        <class>googleanalytics/observer</class>
-                        <method>processItemsAddedOrRemovedFromCart</method>
-                    </mage_googleanalytics>
-                </observers>
-            </sales_quote_item_delete_after>
-        </events>
         <layout>
             <updates>
                 <googleanalytics>

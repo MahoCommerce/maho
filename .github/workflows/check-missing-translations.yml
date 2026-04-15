@@ -34,7 +34,7 @@ jobs:
 
     - name: Check for missing translations
       run: |
-        output=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | ./maho translations:missing)
+        output=$(git diff --name-only ${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }} | ./maho dev:translations:missing)
 
         if [ -n "$output" ]; then
           echo "❌ Found missing translations in changed files:"

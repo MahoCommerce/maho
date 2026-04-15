@@ -150,7 +150,7 @@ class Mage_Bundle_Block_Adminhtml_Catalog_Product_Edit_Tab_Bundle_Option_Selecti
             $label = Mage::helper('bundle')->__('Use Default Value');
             $disabled = ($this->getCanEditPrice() === false) ? ' disabled="disabled"' : '';
             $checkboxHtml = '<input type="checkbox" id="' . $id . '" class="' . $class . '" name="' . $name
-                . '"' . $disabled . ' value="1" />';
+                . '"' . $disabled . ' value="1">';
             $checkboxHtml .= '<label class="normal" for="' . $id . '">' . $label . '</label>';
         }
         return $checkboxHtml;

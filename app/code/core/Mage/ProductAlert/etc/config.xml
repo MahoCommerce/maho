@@ -124,13 +124,4 @@
             </productalert_cron>
         </catalog>
     </default>
-    <crontab>
-        <jobs>
-            <catalog_product_alert>
-                <run>
-                    <model>productalert/observer::process</model>
-                </run>
-            </catalog_product_alert>
-        </jobs>
-    </crontab>
 </config>

@@ -38,7 +38,7 @@ class Mage_Adminhtml_Block_Customer_Form_Element_File extends \Maho\Data\Form\El
         }
 
         $element = sprintf(
-            '<input id="%s" name="%s" %s />%s%s',
+            '<input id="%s" name="%s" %s>%s%s',
             $this->getHtmlId(),
             $this->getName(),
             $this->serialize($this->getHtmlAttributes()),

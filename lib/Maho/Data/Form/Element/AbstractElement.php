@@ -247,7 +247,7 @@ abstract class AbstractElement extends AbstractForm
     public function getElementHtml()
     {
         $html = '<input id="' . $this->getHtmlId() . '" name="' . $this->getName()
-             . '" value="' . $this->getEscapedValue() . '" ' . $this->serialize($this->getHtmlAttributes()) . '/>' . "\n";
+             . '" value="' . $this->getEscapedValue() . '" ' . $this->serialize($this->getHtmlAttributes()) . '>' . "\n";
         $html .= $this->getAfterElementHtml();
         return $html;
     }

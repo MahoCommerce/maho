@@ -23,7 +23,7 @@
             $imageWidth = $imageSize[0];
             $imageHeight = $imageSize[1];
         }
-        $_imgHtml = '<p class="category-image"><img src="'.$_imgUrl.'" width="' . $imageWidth . '" height="' . $imageHeight . '" alt="'.$this->escapeHtml($_category->getName()).'" title="'.$this->escapeHtml($_category->getName()).'" /></p>';
+        $_imgHtml = '<p class="category-image"><img src="'.$_imgUrl.'" width="' . $imageWidth . '" height="' . $imageHeight . '" alt="'.$this->escapeHtml($_category->getName()).'" title="'.$this->escapeHtml($_category->getName()).'"></p>';
         $_imgHtml = $_helper->categoryAttribute($_category, $_imgHtml, 'image');
     }
 ?>

@@ -25,8 +25,8 @@
         $_id = 0;
         foreach($_result as $track): ?>
             <table class="tracking-table-popup data-table" id="tracking-table-popup-<?= $_id ?>">
-                <col width="15%" />
-                <col />
+                <col width="15%">
+                <col>
                 <tbody>
                 <?php if(is_object($track)): ?>
                     <tr>
@@ -114,12 +114,12 @@
                 </tbody>
             </table>
             <?php if (is_object($track) && is_array($track->getProgressdetail()) && count($track->getProgressdetail()) > 0): ?>
-                <br />
+                <br>
                 <table class="data-table" id="track-history-table-<?= $track->getTracking() ?>">
-                    <col />
-                    <col width="1" />
-                    <col width="1" />
-                    <col />
+                    <col>
+                    <col width="1">
+                    <col width="1">
+                    <col>
                     <thead>
                         <tr>
                             <th><?= $this->__('Location') ?></th>

@@ -64,7 +64,7 @@ class Mage_Dataflow_Model_Session_Adapter_Iterator extends Mage_Dataflow_Model_C
         </div>
     </div>
 </li>
-<script type="text/javascript">
+<script>
 function updateProgress(sessionId, idx, time, memory) {
     var total_rows = ' . $totalRows . ';
     var elapsed_time = time-' . time() . ';
@@ -102,7 +102,7 @@ function updateProgress(sessionId, idx, time, memory) {
     public function updateProgress($args)
     {
         $memory = empty($args['memory']) ? '' : $args['memory'];
-        echo '<script type="text/javascript">updateProgress("'
+        echo '<script>updateProgress("'
             . $args['row']['session_id'] . '", "' . $args['idx'] . '", "' . time() . '", "' . $memory . '");</script>';
         echo '<li>' . $memory . '</li>';
 

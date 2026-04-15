@@ -175,7 +175,7 @@ class Mage_Cms_Helper_Wysiwyg_Images extends Mage_Core_Helper_Abstract
         $mediaPath = str_replace(Mage::getBaseUrl('media'), '', $fileurl);
         $directive = sprintf('{{media url="%s"}}', $mediaPath);
         $html = sprintf(
-            '<img src="%s" alt="%s" />',
+            '<img src="%s" alt="%s">',
             $this->isUsingStaticUrlsAllowed() ? $fileurl : $directive,
             $this->escapeHtml(is_string($alt) ? $alt : ''),
         );

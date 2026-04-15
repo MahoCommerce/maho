@@ -27,7 +27,7 @@
         </div>
         <?= $this->showNoticeMessage($this->__('Please enter another credit card number to complete your purchase.')) ?>
 
-        <script type="text/javascript">
+        <script>
             var cancelButtonId = 'payment-button-cancel';
             var cancelButton = document.getElementById(cancelButtonId);
             cancelButton.onclick = null;
@@ -93,7 +93,7 @@
             <?php endif ?>
         </script>
         <span id="cancel-please-wait" class="please-wait" style="display:none">
-            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="" class="v-middle" /> <?= $this->__('Processing...') ?>
+            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="" class="v-middle"> <?= $this->__('Processing...') ?>
         </span>
     <?php endif ?>
 </div>

@@ -55,40 +55,6 @@
                 </Mage_ConfigurableSwatches>
             </modules>
         </translate>
-        <events>
-            <catalog_product_load_after>
-                <observers>
-                    <configurableswatches>
-                        <class>configurableswatches/observer</class>
-                        <method>productLoadAfter</method>
-                    </configurableswatches>
-                </observers>
-            </catalog_product_load_after>
-            <catalog_block_product_list_collection>
-                <observers>
-                    <configurableswatches>
-                        <class>configurableswatches/observer</class>
-                        <method>productListCollectionLoadAfter</method>
-                    </configurableswatches>
-                </observers>
-            </catalog_block_product_list_collection>
-            <catalog_product_attribute_backend_media_load_gallery_before>
-                <observers>
-                    <configurableswatches>
-                        <class>configurableswatches/observer</class>
-                        <method>loadChildProductImagesOnMediaLoad</method>
-                    </configurableswatches>
-                </observers>
-            </catalog_product_attribute_backend_media_load_gallery_before>
-            <controller_action_layout_generate_blocks_after>
-                <observers>
-                    <configurableswatches>
-                        <class>configurableswatches/observer</class>
-                        <method>convertLayerBlock</method>
-                    </configurableswatches>
-                </observers>
-            </controller_action_layout_generate_blocks_after>
-        </events>
         <product>
             <configurable>
                 <child>

@@ -20,11 +20,11 @@
             <?php if ($_numbers): ?>
                 <?php foreach ($_numbers as $_number): ?>
                     <a href="#" onclick="<?= $this->getViewLinkHtml($_number) ?>"><?= $_number ?></a>
-                    <a href="#" onclick="<?= $this->getRemoveLinkHtml($_number) ?>"><?= Mage::helper('sales')->__('Delete') ?></a><br/>
+                    <a href="#" onclick="<?= $this->getRemoveLinkHtml($_number) ?>"><?= Mage::helper('sales')->__('Delete') ?></a><br>
                     <span id="order_tracking_info_response_<?= $_number ?>"></span>
                 <?php endforeach ?>
             <?php endif ?>
-            <input class="input-text" type="text" id="tracking_number" name="tracking_number" value="" style="width:120px;"/>
+            <input class="input-text" type="text" id="tracking_number" name="tracking_number" value="" style="width:120px;">
             <?= $this->getSaveButtonHtml() ?>
         </td>
     </tr>

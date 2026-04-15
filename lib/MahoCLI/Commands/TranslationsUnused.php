@@ -23,7 +23,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-    name: 'translations:unused',
+    name: 'dev:translations:unused',
     description: 'Display defined translations strings that are not used in templates',
 )]
 class TranslationsUnused extends BaseMahoCommand

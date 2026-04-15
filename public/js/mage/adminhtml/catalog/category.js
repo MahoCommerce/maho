@@ -136,7 +136,8 @@ class CategoryEditForm {
         }
 
         gridObj.checkboxCheckCallback = (gridObj, element, checked) => {
-            const positionEl = event.target.closest('tr')?.querySelector('input[name=position]');
+            if (!element.value || !/^\d+$/.test(element.value)) return;
+            const positionEl = element.closest('tr')?.querySelector('input[name=position]');
             if (positionEl) {
                 positionEl.disabled = !checked;
             }

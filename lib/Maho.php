@@ -22,6 +22,8 @@ final class Maho
 
     private static ?string $bp = null;
 
+    private static ?array $compiledAttributes = null;
+
     /**
      * Return an array of Maho packages installed by Composer
      *
@@ -41,6 +43,18 @@ final class Maho
             self::$bp = realpath(self::getInstalledPackages()['root']['path']);
         }
         return self::$bp;
+    }
+
+    /**
+     * Return compiled PHP attributes (observers, cron jobs)
+     */
+    public static function getCompiledAttributes(): array
+    {
+        if (self::$compiledAttributes === null) {
+            $file = self::getBasePath() . '/vendor/composer/maho_attributes.php';
+            self::$compiledAttributes = file_exists($file) ? (include $file) : [];
+        }
+        return self::$compiledAttributes;
     }
 
     /**
@@ -249,7 +263,7 @@ final class Maho
         foreach ($driverClasses as $driverClass) {
             try {
                 return \Intervention\Image\ImageManager::usingDriver($driverClass, ...$options);
-            } catch (Intervention\Image\Exceptions\DriverException) {
+            } catch (\Throwable) {
             }
         }
 

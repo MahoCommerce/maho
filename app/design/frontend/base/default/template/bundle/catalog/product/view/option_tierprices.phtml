@@ -178,7 +178,7 @@ if (Mage::helper('weee')->typeOfDisplay($_product, [1,2,4])) {
         <?php if ($_catalogHelper->isShowPriceOnGesture($_product)):?>
             <?php $popupId = 'msrp-popup-' . $_product->getId() . $this->helper('core')->getRandomString(20); ?>
             <a href="#" id="<?php echo($popupId);?>"><?= $this->__('Click for price') ?></a>
-            <script type="text/javascript">
+            <script>
             <?php
                 $addToCartUrl = $this->getProduct()->isSalable()
                     ? $this->getAddToCartUrlCustom($_product, ['qty' => $_price['price_qty']], false)

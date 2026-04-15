@@ -24,7 +24,7 @@
     <?= $_element->getChildrenHtml() ?>
     </fieldset>
 </div>
-<script type="text/javascript">
+<script>
 var <?= $_element->getHtmlId() ?> = new VarienRulesForm('<?= $_element->getHtmlId() ?>', '<?= $this->getNewChildUrl() ?>');
 <?php if ($_element->getReadonly()): ?>
     <?= $_element->getHtmlId() ?>.setReadonly(true);

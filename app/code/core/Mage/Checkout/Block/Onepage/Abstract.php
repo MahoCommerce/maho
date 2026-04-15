@@ -147,7 +147,7 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
     }
 
     /**
-     * @param string $type
+     * @param string $type Address type ('billing' or 'shipping')
      * @return string
      * @throws Mage_Core_Model_Store_Exception
      */
@@ -158,6 +158,7 @@ abstract class Mage_Checkout_Block_Onepage_Abstract extends Mage_Core_Block_Temp
             $type . '[country_id]',
             $type . ':country_id',
             $this->helper('checkout')->__('Country'),
+            $type,
         );
     }
 

@@ -83,16 +83,6 @@
                 </widget>
             </updates>
         </layout>
-        <events>
-            <cms_wysiwyg_config_prepare>
-                <observers>
-                    <widget_observer>
-                        <class>widget/observer</class>
-                        <method>prepareWidgetsPluginConfig</method>
-                    </widget_observer>
-                </observers>
-            </cms_wysiwyg_config_prepare>
-        </events>
     </adminhtml>
     <admin>
         <routers>

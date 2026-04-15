@@ -25,7 +25,7 @@ $methodCode = $this->getMethodCode();
     <div id="paypal-card-errors" class="validation-advice" style="display:none"></div>
     <?php if ($this->isVaultAvailable()): ?>
     <label class="paypal-save-vault" for="paypal_advanced_save_vault">
-        <input type="checkbox" id="paypal_advanced_save_vault" name="payment[save_vault]" value="1" />
+        <input type="checkbox" id="paypal_advanced_save_vault" name="payment[save_vault]" value="1">
         <span class="paypal-save-vault-icon"><?= Mage::helper('core')->getIconSvg('lock', 'outline') ?></span>
         <span><?= $this->escapeHtml($this->__('Save this payment method for future purchases')) ?></span>
     </label>

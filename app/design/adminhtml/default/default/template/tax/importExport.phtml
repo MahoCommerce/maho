@@ -24,11 +24,11 @@
             </div>
             <fieldset>
                 <legend><?= Mage::helper('tax')->__('Import Tax Rates') ?></legend>
-                <input type="file" name="import_rates_file" class="input-file required-entry"/>
+                <input type="file" name="import_rates_file" class="input-file required-entry">
                 <?= $this->getButtonHtml('Import Tax Rates', "this.form.submit()") ?>
             </fieldset>
         </form>
-        <script type="text/javascript">
+        <script>
             var importForm = new varienForm('import_form');
         </script>
     </div>

@@ -276,7 +276,7 @@ class Maho_FeedManager_Block_Adminhtml_Feed_Edit_Tab_Mapping extends Mage_Adminh
 
         $transformerData = Mage::helper('core')->jsonEncode($data);
 
-        return '<script type="text/javascript">var TransformerData = ' . $transformerData . ';</script>';
+        return '<script>var TransformerData = ' . $transformerData . ';</script>';
     }
 
     /**

@@ -27,7 +27,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
-    name: 'frontend:layout:debug',
+    name: 'dev:frontend:layout:debug',
     description: 'Debug layout for a given URL showing handles, XML files, and block tree',
 )]
 class FrontendLayoutDebug extends BaseMahoCommand

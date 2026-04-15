@@ -39,12 +39,12 @@
         <form id="wishlist-allcart-form" action="<?= $this->getUrl('*/*/allcart') ?>" method="post">
             <?= $this->getBlockHtml('formkey') ?>
             <div class="no-display">
-                <input type="hidden" name="wishlist_id" id="wishlist_id" value="<?= $this->getWishlistInstance()->getId() ?>" />
-                <input type="hidden" name="qty" id="qty" value="" />
+                <input type="hidden" name="wishlist_id" id="wishlist_id" value="<?= $this->getWishlistInstance()->getId() ?>">
+                <input type="hidden" name="qty" id="qty" value="">
             </div>
         </form>
 
-        <script type="text/javascript">
+        <script>
             const wishlistForm = new Validation(document.getElementById('wishlist-view-form'));
             const wishlistAllCartForm = new Validation(document.getElementById('wishlist-allcart-form'));
 

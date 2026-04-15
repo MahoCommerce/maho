@@ -12,11 +12,13 @@
 
 class Mage_Checkout_Model_Observer
 {
+    #[Maho\Config\Observer('customer_logout', area: 'frontend')]
     public function unsetAll()
     {
         Mage::getSingleton('checkout/session')->unsetAll();
     }
 
+    #[Maho\Config\Observer('customer_login', area: 'frontend')]
     public function loadCustomerQuote()
     {
         try {
@@ -31,6 +33,7 @@ class Mage_Checkout_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('sales_quote_save_after', area: 'frontend')]
     public function salesQuoteSaveAfter(\Maho\Event\Observer $observer)
     {
         $quote = $observer->getEvent()->getQuote();
@@ -40,6 +43,7 @@ class Mage_Checkout_Model_Observer
         }
     }
 
+    #[Maho\Config\Observer('encryption_key_regenerated')]
     public function encryptionKeyRegenerated(\Maho\Event\Observer $observer): void
     {
         /** @var \Symfony\Component\Console\Output\OutputInterface $output */

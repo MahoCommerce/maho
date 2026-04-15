@@ -93,7 +93,7 @@ $canApplyMAP  = Mage::helper('catalog')->canApplyMsrp($_product);
 </div>
 <?php endif ?>
 <?php if($_product->isSaleable()): ?>
-<script type="text/javascript">
+<script>
     document.addEventListener('DOMContentLoaded', function() {
         bundle.reloadPrice();
     });

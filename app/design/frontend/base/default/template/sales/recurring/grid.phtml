@@ -21,7 +21,7 @@
     <?= $this->getChildHtml('pager') ?>
     <table id="<?= $this->getGridHtmlId() ?>" class="data-table linearize-table-large">
 <?php foreach ($this->getGridColumns() as $column):?>
-        <col <?php $width = $this->getObjectData($column, 'width'); echo $width ? ' width="' . $width . '"' : '' ?>/>
+        <col <?php $width = $this->getObjectData($column, 'width'); echo $width ? ' width="' . $width . '"' : '' ?>>
 <?php endforeach ?>
         <thead>
             <tr>

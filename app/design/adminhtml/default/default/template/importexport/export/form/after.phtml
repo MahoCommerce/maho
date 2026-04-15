@@ -16,15 +16,13 @@
         <h4><?= $this->__('Entity Attributes') ?></h4>
     </div>
     <form id="export_filter_form" action="<?= $this->getUrl('*/*/export') ?>" method="post">
-        <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>" />
+        <input name="form_key" type="hidden" value="<?= $this->getFormKey() ?>">
         <div id="export_filter_grid_container" class="fieldset"><!-- --></div>
     </form>
     <div class="a-right">
         <button class="scalable" type="button" onclick="getFile();"><span><?= $this->__('Continue') ?></span></button>
     </div>
 </div>
-<script type="text/javascript">
-//<![CDATA[
+<script>
    document.getElementById('entity').selectedIndex = 0; // forced resetting entity selector after page refresh
-//]]>
 </script>

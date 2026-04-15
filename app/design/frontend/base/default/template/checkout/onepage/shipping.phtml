@@ -25,14 +25,14 @@
             <fieldset class="fieldset">
                 <legend class="visually-hidden"><?= $this->__('Shipping Address') ?></legend>
                 <p class="required"><?= $this->__('* Required Fields') ?></p>
-                <input type="hidden" name="shipping[address_id]" value="<?= $this->getAddress()->getId() ?>" id="shipping:address_id" />
+                <input type="hidden" name="shipping[address_id]" value="<?= $this->getAddress()->getId() ?>" id="shipping:address_id">
                 <ul>
                     <li class="fields"><?= $this->getLayout()->createBlock('customer/widget_name')->setObject($this->getAddress())->setFieldIdFormat('shipping:%s')->setFieldNameFormat('shipping[%s]')->setFieldParams('onchange="shipping.setSameAsBilling(false)"')->toHtml() ?></li>
                     <li class="fields">
                         <div class="fields">
                             <label for="shipping:company"><?= $this->__('Company') ?></label>
                             <div class="input-box">
-                                <input type="text" id="shipping:company" name="shipping[company]" value="<?= $this->escapeHtml($this->getAddress()->getCompany()) ?>" title="<?= $this->quoteEscape($this->__('Company')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('company') ?>" onchange="shipping.setSameAsBilling(false);" />
+                                <input type="text" id="shipping:company" name="shipping[company]" value="<?= $this->escapeHtml($this->getAddress()->getCompany()) ?>" title="<?= $this->quoteEscape($this->__('Company')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('company') ?>" onchange="shipping.setSameAsBilling(false);">
                             </div>
                         </div>
                     </li>
@@ -40,7 +40,7 @@
                     <li class="wide">
                         <label for="shipping:street1" class="required"><?= $this->__('Street Address') ?></label>
                         <div class="input-box">
-                            <input type="text" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" name="shipping[street][]" id="shipping:street1" value="<?= $this->escapeHtml($this->getAddress()->getStreet(1)) ?>" class="input-text <?= $_streetValidationClass ?>" onchange="shipping.setSameAsBilling(false);" />
+                            <input type="text" title="<?= $this->quoteEscape($this->__('Street Address')) ?>" name="shipping[street][]" id="shipping:street1" value="<?= $this->escapeHtml($this->getAddress()->getStreet(1)) ?>" class="input-text <?= $_streetValidationClass ?>" onchange="shipping.setSameAsBilling(false);">
                         </div>
                     </li>
             <?php $_streetValidationClass = trim(str_replace('required-entry', '', $_streetValidationClass)); ?>
@@ -48,7 +48,7 @@
                     <li class="wide">
                         <label for="shipping:street<?= $_i ?>"><?= $this->__('Street Address %s', $_i) ?></label>
                         <div class="input-box">
-                            <input type="text" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" name="shipping[street][]" id="shipping:street<?= $_i ?>" value="<?= $this->escapeHtml($this->getAddress()->getStreet($_i)) ?>" class="input-text <?= $_streetValidationClass ?>" onchange="shipping.setSameAsBilling(false);" />
+                            <input type="text" title="<?= $this->quoteEscape($this->__('Street Address %s', $_i)) ?>" name="shipping[street][]" id="shipping:street<?= $_i ?>" value="<?= $this->escapeHtml($this->getAddress()->getStreet($_i)) ?>" class="input-text <?= $_streetValidationClass ?>" onchange="shipping.setSameAsBilling(false);">
                         </div>
                     </li>
             <?php endfor ?>
@@ -56,7 +56,7 @@
                     <li class="wide">
                         <label for="shipping:vat_id"><?= $this->__('VAT Number') ?></label>
                         <div class="input-box">
-                            <input type="text" id="shipping:vat_id" name="shipping[vat_id]" value="<?= $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?= $this->quoteEscape($this->__('VAT Number')) ?>" class="input-text <?= Mage::helper('customer')->isVatValidationEnabled() ? 'validate-vat' : '' ?> <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>data-validate-vat-url="<?= $this->escapeUrl($this->getUrl('customer/vat/validate')) ?>" data-validate-vat-country="shipping:country_id"<?php endif ?> />
+                            <input type="text" id="shipping:vat_id" name="shipping[vat_id]" value="<?= $this->escapeHtml($this->getAddress()->getVatId()) ?>" title="<?= $this->quoteEscape($this->__('VAT Number')) ?>" class="input-text <?= Mage::helper('customer')->isVatValidationEnabled() ? 'validate-vat' : '' ?> <?= $this->helper('customer/address')->getAttributeValidationClass('vat_id') ?>" <?php if (Mage::helper('customer')->isVatValidationEnabled()): ?>data-validate-vat-url="<?= $this->escapeUrl($this->getUrl('customer/vat/validate')) ?>" data-validate-vat-country="shipping:country_id"<?php endif ?>>
                         </div>
                     </li>
                     <?php endif ?>
@@ -64,7 +64,7 @@
                         <div class="field">
                             <label for="shipping:city" class="required"><?= $this->__('City') ?></label>
                             <div class="input-box">
-                                <input type="text" title="<?= $this->quoteEscape($this->__('City')) ?>" name="shipping[city]" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="shipping:city" onchange="shipping.setSameAsBilling(false);" />
+                                <input type="text" title="<?= $this->quoteEscape($this->__('City')) ?>" name="shipping[city]" value="<?= $this->escapeHtml($this->getAddress()->getCity()) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('city') ?>" id="shipping:city" onchange="shipping.setSameAsBilling(false);">
                             </div>
                         </div>
                         <div class="field">
@@ -73,10 +73,10 @@
                                 <select id="shipping:region_id" name="shipping[region_id]" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="validate-select" style="display:none;">
                                     <option value=""><?= $this->__('Please select region, state or province') ?></option>
                                 </select>
-                                <script type="text/javascript">
+                                <script>
                                     document.getElementById('shipping:region_id').setAttribute('defaultValue', "<?= $this->getAddress()->getRegionId() ?>");
                                 </script>
-                                <input type="text" id="shipping:region" name="shipping[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;" />
+                                <input type="text" id="shipping:region" name="shipping[region]" value="<?= $this->escapeHtml($this->getAddress()->getRegion()) ?>" title="<?= $this->quoteEscape($this->__('State/Province')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('region') ?>" style="display:none;">
                             </div>
                         </div>
                     </li>
@@ -84,7 +84,7 @@
                         <div class="field">
                             <label for="shipping:postcode" class="required"><?= $this->__('Zip/Postal Code') ?></label>
                             <div class="input-box">
-                                <input type="text" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" name="shipping[postcode]" id="shipping:postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" onchange="shipping.setSameAsBilling(false);" />
+                                <input type="text" title="<?= $this->quoteEscape($this->__('Zip/Postal Code')) ?>" name="shipping[postcode]" id="shipping:postcode" value="<?= $this->escapeHtml($this->getAddress()->getPostcode()) ?>" class="input-text validate-zip-international <?= $this->helper('customer/address')->getAttributeValidationClass('postcode') ?>" onchange="shipping.setSameAsBilling(false);">
                             </div>
                         </div>
                         <div class="field">
@@ -98,38 +98,38 @@
                         <div class="field">
                             <label for="shipping:telephone" class="required"><?= $this->__('Telephone') ?></label>
                             <div class="input-box">
-                                <input type="tel" name="shipping[telephone]" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="shipping:telephone" onchange="shipping.setSameAsBilling(false);" />
+                                <input type="tel" name="shipping[telephone]" value="<?= $this->escapeHtml($this->getAddress()->getTelephone()) ?>" title="<?= $this->quoteEscape($this->__('Telephone')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('telephone') ?>" id="shipping:telephone" onchange="shipping.setSameAsBilling(false);">
                             </div>
                         </div>
                         <div class="field">
                             <label for="shipping:fax"><?= $this->__('Fax') ?></label>
                             <div class="input-box">
-                                <input type="tel" name="shipping[fax]" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" title="<?= $this->quoteEscape($this->__('Fax')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>" id="shipping:fax" onchange="shipping.setSameAsBilling(false);" />
+                                <input type="tel" name="shipping[fax]" value="<?= $this->escapeHtml($this->getAddress()->getFax()) ?>" title="<?= $this->quoteEscape($this->__('Fax')) ?>" class="input-text <?= $this->helper('customer/address')->getAttributeValidationClass('fax') ?>" id="shipping:fax" onchange="shipping.setSameAsBilling(false);">
                             </div>
                         </div>
                     </li>
                 <?php if ($this->isCustomerLoggedIn() && $this->customerHasAddresses()):?>
                     <li class="control">
-                        <input type="checkbox" name="shipping[save_in_address_book]" value="1" title="<?= $this->quoteEscape($this->__('Save in address book')) ?>" id="shipping:save_in_address_book" onchange="shipping.setSameAsBilling(false);"<?php if ($this->getAddress()->getSaveInAddressBook()):?> checked="checked"<?php endif ?> class="checkbox" /><label for="shipping:save_in_address_book"><?= $this->__('Save in address book') ?></label></li>
+                        <input type="checkbox" name="shipping[save_in_address_book]" value="1" title="<?= $this->quoteEscape($this->__('Save in address book')) ?>" id="shipping:save_in_address_book" onchange="shipping.setSameAsBilling(false);"<?php if ($this->getAddress()->getSaveInAddressBook()):?> checked="checked"<?php endif ?> class="checkbox"><label for="shipping:save_in_address_book"><?= $this->__('Save in address book') ?></label></li>
                 <?php else: ?>
-                    <li class="no-display"><input type="hidden" name="shipping[save_in_address_book]" value="1" /></li>
+                    <li class="no-display"><input type="hidden" name="shipping[save_in_address_book]" value="1"></li>
                 <?php endif ?>
                 </ul>
             </fieldset>
         </li>
         <li class="control">
-            <input type="checkbox" name="shipping[same_as_billing]" id="shipping:same_as_billing" value="1"<?php if($this->getAddress()->getSameAsBilling()): ?> checked="checked"<?php endif ?> title="<?= $this->quoteEscape($this->__('Use Billing Address')) ?>" onclick="shipping.setSameAsBilling(this.checked)" class="checkbox" /><label for="shipping:same_as_billing"><?= $this->__('Use Billing Address') ?></label>
+            <input type="checkbox" name="shipping[same_as_billing]" id="shipping:same_as_billing" value="1"<?php if($this->getAddress()->getSameAsBilling()): ?> checked="checked"<?php endif ?> title="<?= $this->quoteEscape($this->__('Use Billing Address')) ?>" onclick="shipping.setSameAsBilling(this.checked)" class="checkbox"><label for="shipping:same_as_billing"><?= $this->__('Use Billing Address') ?></label>
         </li>
     </ul>
     <div class="buttons-set" id="shipping-buttons-container">
         <button type="button" class="button" title="<?= $this->quoteEscape($this->__('Continue')) ?>" onclick="shipping.save()"><?= $this->__('Continue') ?></button>
         <span id="shipping-please-wait" class="please-wait" style="display:none;">
-            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle" /> <?= $this->__('Loading next step...') ?>
+            <img src="<?= $this->getSkinUrl('images/loading.svg') ?>" alt="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" title="<?= $this->quoteEscape($this->__('Loading next step...')) ?>" class="v-middle"> <?= $this->__('Loading next step...') ?>
         </span>
     </div>
     <?= $this->getBlockHtml('formkey') ?>
 </form>
-<script type="text/javascript">
+<script>
     var shipping = new Shipping('co-shipping-form', '<?= $this->getUrl('checkout/onepage/getAddress') ?>address/',
         '<?= $this->getUrl('checkout/onepage/saveShipping') ?>', '<?= $this->getUrl('checkout/onepage/shippingMethod') ?>');
     var shippingForm = new VarienForm('co-shipping-form');

@@ -51,7 +51,7 @@
 
     <?= $this->escapeHtml($_item->getDescription()) ?>
     <?php if ($this->canDisplayGiftmessage()): ?>
-        <br/><a href="#" id="order-item-gift-message-link-<?= $_item->getId() ?>"
+        <br><a href="#" id="order-item-gift-message-link-<?= $_item->getId() ?>"
                 class="giftmessage-preview-link expand"
                 onclick="return giftMessageToogle('<?= $_item->getId() ?>')"><?= $this->__('Gift Message') ?></a>
     <?php endif ?>
@@ -115,12 +115,12 @@
                     <span class="cart-tax-total"
                           onclick="taxToggle('eunit-item-tax-details<?= $this->getItem()->getId() ?>', this, 'cart-tax-total-expanded');">
                         <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>
-                            :<br/> <?= $this->getOrder()->formatPrice($this->getItem()->getPrice() + $this->getItem()->getWeeeTaxAppliedAmount() + $this->getItem()->getWeeeTaxDisposition()) ?></span>
+                            :<br> <?= $this->getOrder()->formatPrice($this->getItem()->getPrice() + $this->getItem()->getWeeeTaxAppliedAmount() + $this->getItem()->getWeeeTaxDisposition()) ?></span>
                     </span>
                 <?php endif ?>
             <?php endif ?>
         </span>
-        <br/>
+        <br>
         <?php endif ?>
         <?php if ($this->helper('tax')->displayCartBothPrices() || $this->helper('tax')->displayCartPriceInclTax()): ?>
         <span class="price-incl-tax">
@@ -180,7 +180,7 @@
                         <span class="cart-tax-total"
                               onclick="taxToggle('unit-item-tax-details<?= $this->getItem()->getId() ?>', this, 'cart-tax-total-expanded');">
                         <span class="nobr"><?= Mage::helper('weee')->__('Total incl. tax') ?>
-                            :<br/> <?= $this->getOrder()->formatPrice($_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
+                            :<br> <?= $this->getOrder()->formatPrice($_incl + Mage::helper('weee')->getWeeeTaxInclTax($_item)) ?></span>
                     </span>
                     <?php endif ?>
                 <?php endif ?>
@@ -245,12 +245,12 @@
                     <span class="cart-tax-total"
                           onclick="taxToggle('esubtotal-item-tax-details<?= $this->getItem()->getId() ?>', this, 'cart-tax-total-expanded');">
                             <span class="nobr"><?= Mage::helper('weee')->__('Total') ?>
-                                :<br/> <?= $this->getOrder()->formatPrice($this->getItem()->getRowTotal() + $this->getItem()->getWeeeTaxAppliedRowAmount() + $this->getItem()->getWeeeTaxRowDisposition()) ?></span>
+                                :<br> <?= $this->getOrder()->formatPrice($this->getItem()->getRowTotal() + $this->getItem()->getWeeeTaxAppliedRowAmount() + $this->getItem()->getWeeeTaxRowDisposition()) ?></span>
                         </span>
                 <?php endif ?>
             <?php endif ?>
         </span>
-        <br/>
+        <br>
         <?php endif ?>
 
         <?php if ($this->helper('tax')->displayCartBothPrices() || $this->helper('tax')->displayCartPriceInclTax()): ?>
@@ -309,7 +309,7 @@
                         <span class="cart-tax-total"
                               onclick="taxToggle('subtotal-item-tax-details<?= $this->getItem()->getId() ?>', this, 'cart-tax-total-expanded');">
                         <span class="nobr"><?= Mage::helper('weee')->__('Total incl. tax') ?>
-                            :<br/> <?= $this->getOrder()->formatPrice($_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?></span>
+                            :<br> <?= $this->getOrder()->formatPrice($_incl + Mage::helper('weee')->getRowWeeeTaxInclTax($_item)) ?></span>
                     </span>
                     <?php endif ?>
                 <?php endif ?>

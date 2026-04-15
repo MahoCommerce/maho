@@ -92,7 +92,7 @@ class Mage_Adminhtml_Block_Customer_Sales_Order_Address_Form_Renderer_Vat extend
             ]);
 
             $optionsVarName = $this->getJsVariablePrefix() . 'VatParameters';
-            $beforeHtml = '<script type="text/javascript">var ' . $optionsVarName . ' = ' . $vatValidateOptions
+            $beforeHtml = '<script>var ' . $optionsVarName . ' = ' . $vatValidateOptions
                 . ';</script>';
 
             /** @var Mage_Adminhtml_Block_Widget_Button $block */

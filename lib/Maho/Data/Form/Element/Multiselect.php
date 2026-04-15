@@ -58,7 +58,7 @@ class Multiselect extends AbstractElement
         if ($this->getCanBeEmpty()) {
             $html .= '<input type="hidden" name="' . parent::getName() . '" value=""';
             $html .= empty($this->_data['disabled']) ? '' : ' disabled="disabled"';
-            $html .= '/>';
+            $html .= '>';
         }
         $html .= '<select id="' . $this->getHtmlId() . '" name="' . $this->getName() . '" ' .
             $this->serialize($this->getHtmlAttributes()) . ' multiple="multiple">' . "\n";
@@ -116,7 +116,7 @@ class Multiselect extends AbstractElement
 
         $result .= ($this->getNoSpan() === true) ? '' : '</span>' . "\n";
 
-        $result .= '<script type="text/javascript">' . "\n";
+        $result .= '<script>' . "\n";
         $result .= '   var ' . $this->getJsObjectName() . ' = {' . "\n";
         $result .= '     selectAll: function() { ' . "\n";
         $result .= '         var sel = document.getElementById("' . $this->getHtmlId() . '");' . "\n";

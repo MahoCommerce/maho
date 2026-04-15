@@ -86,13 +86,4 @@
             </generate>
         </sitemap>
     </default>
-    <crontab>
-        <jobs>
-            <sitemap_generate>
-                <run>
-                    <model>sitemap/observer::scheduledGenerateSitemaps</model>
-                </run>
-            </sitemap_generate>
-        </jobs>
-    </crontab>
 </config>

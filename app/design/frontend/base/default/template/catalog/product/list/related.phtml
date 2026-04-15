@@ -23,11 +23,11 @@
             <li class="item">
                 <?php if(!$_item->isComposite() && $_item->isSaleable()): ?>
                     <?php if (!$_item->getRequiredOptions()): ?>
-                        <input type="checkbox" class="checkbox related-checkbox" id="related-checkbox<?= $_item->getId() ?>" name="related_products[]" value="<?= $_item->getId() ?>" />
+                        <input type="checkbox" class="checkbox related-checkbox" id="related-checkbox<?= $_item->getId() ?>" name="related_products[]" value="<?= $_item->getId() ?>">
                     <?php endif ?>
                 <?php endif ?>
                 <div class="product">
-                    <a href="<?= $_item->getProductUrl() ?>" title="<?= $this->escapeHtml($_item->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(75) ?>" srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(150) ?> 2x" width="75" height="75" alt="<?= $this->escapeHtml($_item->getName()) ?>" /></a>
+                    <a href="<?= $_item->getProductUrl() ?>" title="<?= $this->escapeHtml($_item->getName()) ?>" class="product-image"><img src="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(75) ?>" srcset="<?= $this->helper('catalog/image')->init($_item, 'thumbnail')->resize(150) ?> 2x" width="75" height="75" alt="<?= $this->escapeHtml($_item->getName()) ?>"></a>
                     <div class="product-details">
                         <p class="product-name"><a href="<?= $_item->getProductUrl() ?>"><?= $this->escapeHtml($_item->getName()) ?></a></p>
                         <?= $this->getPriceHtml($_item, true, '-related') ?>
@@ -47,7 +47,7 @@
         <?php endforeach ?>
         </ol>
     </div>
-    <script type="text/javascript">
+    <script>
         document.querySelectorAll('.related-checkbox').forEach(elem => {
             elem.addEventListener('click', addRelatedToProduct);
         });

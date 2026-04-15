@@ -19,7 +19,7 @@ list($defaultQty, $canChangeQty) = $this->_getDefaultValues();
 <dt>
     <span class="qty-holder">
         <label for="bundle-option-<?= $option->getId() ?>-qty-input"><?= $this->__('Qty:') ?></label>
-        <input<?= !$canChangeQty ? ' disabled="disabled"' : '' ?> id="bundle-option-<?= $option->getId() ?>-qty-input" class="input-text qty<?= !$canChangeQty ? ' qty-disabled' : '' ?> required-entry validate-digits validate-greater-than-zero" type="number" min="1" name="bundle_option_qty[<?= $option->getId() ?>]" value="<?= $defaultQty ?>"/>
+        <input<?= !$canChangeQty ? ' disabled="disabled"' : '' ?> id="bundle-option-<?= $option->getId() ?>-qty-input" class="input-text qty<?= !$canChangeQty ? ' qty-disabled' : '' ?> required-entry validate-digits validate-greater-than-zero" type="number" min="1" name="bundle_option_qty[<?= $option->getId() ?>]" value="<?= $defaultQty ?>">
     </span>
     <label<?= $option->getRequired() ? ' class="required"' : '' ?>>
         <?= $this->escapeHtml($option->getTitle()) ?>
@@ -29,12 +29,12 @@ list($defaultQty, $canChangeQty) = $this->_getDefaultValues();
     <div class="input-box">
     <?php if ($this->_showSingle()): ?>
         <?= $this->getSelectionTitlePrice($selections[0]) ?>
-        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>" price="<?= $this->getSelectionPrice($selections[0]) ?>"/>
+        <input type="hidden" name="bundle_option[<?= $option->getId() ?>]" value="<?= $selections[0]->getSelectionId() ?>" price="<?= $this->getSelectionPrice($selections[0]) ?>">
     <?php else: ?>
         <ul class="options-list">
         <?php if (!$option->getRequired()): ?>
             <li>
-                <input type="radio" class="radio" id="bundle-option-<?= $option->getId() ?>" name="bundle_option[<?= $option->getId() ?>]"<?= $default?->isSalable() ? '' : ' checked="checked"' ?> value="" onclick="ProductConfigure.bundleControl.changeSelection(this)"/>
+                <input type="radio" class="radio" id="bundle-option-<?= $option->getId() ?>" name="bundle_option[<?= $option->getId() ?>]"<?= $default?->isSalable() ? '' : ' checked="checked"' ?> value="" onclick="ProductConfigure.bundleControl.changeSelection(this)">
                 <span class="label"><label for="bundle-option-<?= $option->getId() ?>"><?= $this->__('None') ?></label></span>
             </li>
         <?php endif ?>
@@ -42,7 +42,7 @@ list($defaultQty, $canChangeQty) = $this->_getDefaultValues();
             <li>
                 <?php $checked = $this->_isSelected($selection) ? ' checked="checked"' : '' ?>
                 <?php $disabled = !$selection->isSaleable() && !$skipSaleableCheck ? ' disabled="disabled"' : '' ?>
-                <input type="radio" class="change-container-classname radio bundle-option-<?= $option->getId() ?><?= $option->getRequired() ? ' validate-one-required-by-name' : '' ?>" id="bundle-option-<?= $option->getId() ?>-<?= $selection->getSelectionId() ?>" name="bundle_option[<?= $option->getId() ?>]"<?= $checked ?><?= $disabled ?> value="<?= $selection->getSelectionId() ?>" onclick="ProductConfigure.bundleControl.changeSelection(this)" price="<?= $this->getSelectionPrice($selection) ?>" qtyId="bundle-option-<?= $option->getId() ?>-qty-input"/>
+                <input type="radio" class="change-container-classname radio bundle-option-<?= $option->getId() ?><?= $option->getRequired() ? ' validate-one-required-by-name' : '' ?>" id="bundle-option-<?= $option->getId() ?>-<?= $selection->getSelectionId() ?>" name="bundle_option[<?= $option->getId() ?>]"<?= $checked ?><?= $disabled ?> value="<?= $selection->getSelectionId() ?>" onclick="ProductConfigure.bundleControl.changeSelection(this)" price="<?= $this->getSelectionPrice($selection) ?>" qtyId="bundle-option-<?= $option->getId() ?>-qty-input">
                 <span class="label"><label for="bundle-option-<?= $option->getId() ?>-<?= $selection->getSelectionId() ?>"><?= $this->getSelectionTitlePrice($selection) ?></label></span>
             <?php if ($option->getRequired()): ?>
                 <?= $this->setValidationContainer("bundle-option-{$option->getId()}-{$selection->getSelectionId()}", "bundle-option-{$option->getId()}-container") ?>

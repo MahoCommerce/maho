@@ -50,7 +50,7 @@ if (Mage::helper('configurableswatches')->isEnabled() && $_product && $_product-
                style="height: <?= $_swatchOuterHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchOuterWidth ?>px;">
             <span class="swatch-label" style="height: <?= $_swatchInnerHeight ?>px; <?php if (!$_hasImage): ?>min-<?php endif ?>width: <?= $_swatchInnerWidth ?>px; line-height: <?= $_swatchInnerHeight ?>px;">
             <?php if ($_hasImage): ?>
-                <img src="<?= $_swatchUrl ?>" alt="<?= $_optionLabel ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>" />
+                <img src="<?= $_swatchUrl ?>" alt="<?= $_optionLabel ?>" width="<?= $_swatchInnerWidth ?>" height="<?= $_swatchInnerHeight ?>">
             <?php else: ?>
                 <?= $_optionLabel ?>
             <?php endif ?>

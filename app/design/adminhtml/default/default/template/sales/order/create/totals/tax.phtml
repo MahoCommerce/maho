@@ -37,7 +37,7 @@ $taxIter++; ?>
                     <?php if (!is_null($rate['percent'])): ?>
                         (<?= (float)$rate['percent'] ?>%)
                     <?php endif ?>
-                    <br/>
+                    <br>
                 </td>
                 <?php if ($isFirst): ?>
                     <td style="<?= $this->getTotal()->getStyle() ?>" class="a-right"
@@ -55,7 +55,7 @@ $taxIter++; ?>
             style="display:none;">
             <td class="a-right" colspan="1">
                 <?= $this->escapeHtml($weeeTitle) ?>
-                <br/>
+                <br>
             </td>
             <td class="a-right" rowspan="1">
                 <?= $this->helper('checkout')->formatPrice($weeeAmount) ?>

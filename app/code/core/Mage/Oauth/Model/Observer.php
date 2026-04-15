@@ -25,6 +25,7 @@ class Mage_Oauth_Model_Observer
     /**
      * Redirect admin to authorize controller after login success
      */
+    #[Maho\Config\Observer('admin_session_user_login_success')]
     public function afterAdminLogin(\Maho\Event\Observer $observer)
     {
         if ($this->_getOauthToken() !== null) {
@@ -40,6 +41,7 @@ class Mage_Oauth_Model_Observer
     /**
      * Redirect admin to authorize controller after login fail
      */
+    #[Maho\Config\Observer('admin_session_user_login_failed')]
     public function afterAdminLoginFailed(\Maho\Event\Observer $observer)
     {
         if ($this->_getOauthToken() !== null) {

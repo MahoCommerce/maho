@@ -71,7 +71,7 @@
         </ol>
     </div>
 </div>
-<script type="text/javascript">
+<script>
     function deleteAddress(addressId) {
         if (confirm("<?= $this->jsQuoteEscape($this->__('Are you sure you want to delete this address?')) ?>")) {
             window.location = "<?= $this->getDeleteUrl() ?>id/" + addressId + "/";
