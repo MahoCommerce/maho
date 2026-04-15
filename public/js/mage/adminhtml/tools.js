@@ -619,3 +619,75 @@ function xssFilter(str) {
     // Filter out comment nodes to prevent their text from leaking as visible content
     return Array.from(safeNodes).filter(n => n.nodeType !== Node.COMMENT_NODE).map(n => n.outerHTML || n.textContent).join('');
 }
+
+async function validateHtmlContent(textareaId, url) {
+    const textarea = document.getElementById(textareaId);
+    if (!textarea) {
+        return;
+    }
+
+    const html = textarea.value.trim();
+    if (!html) {
+        Dialog.info('<p>There is no HTML content to validate.</p>', { title: 'HTML Validation', width: 500 });
+        return;
+    }
+
+    try {
+        const result = await mahoFetch(url, {
+            method: 'POST',
+            body: new URLSearchParams({ html }),
+        });
+
+        const messages = result.messages ?? [];
+
+        if (messages.length === 0) {
+            Dialog.info('<p class="validate-ok">No errors or warnings found.</p>', { title: 'HTML Validation', width: 500 });
+            return;
+        }
+
+        const errors = messages.filter(m => m.type === 'error');
+        const warnings = messages.filter(m => m.type !== 'error');
+        const summary = [];
+        if (errors.length) summary.push(`${errors.length} error${errors.length > 1 ? 's' : ''}`);
+        if (warnings.length) summary.push(`${warnings.length} warning${warnings.length > 1 ? 's' : ''}`);
+
+        const items = messages.map(msg => {
+            const isError = msg.type === 'error';
+            const label = isError ? 'Error' : 'Warning';
+            const line = msg.lastLine ? ` — line ${msg.lastLine}` : '';
+            let extractHtml = '';
+
+            if (msg.extract) {
+                if (msg.hiliteStart !== undefined && msg.hiliteLength) {
+                    const before = escapeHtml(msg.extract.substring(0, msg.hiliteStart));
+                    const hilite = escapeHtml(msg.extract.substring(msg.hiliteStart, msg.hiliteStart + msg.hiliteLength));
+                    const after = escapeHtml(msg.extract.substring(msg.hiliteStart + msg.hiliteLength));
+                    extractHtml = `<pre>${before}<mark>${hilite}</mark>${after}</pre>`;
+                } else {
+                    extractHtml = `<pre>${escapeHtml(msg.extract)}</pre>`;
+                }
+            }
+
+            return `<div class="${isError ? 'error-msg' : 'warning-msg'}">
+                <strong>${label}${line}:</strong> ${escapeHtml(msg.message ?? '')}
+                ${extractHtml}
+            </div>`;
+        }).join('');
+
+        const content = `
+            <style>
+                .dialog-content .error-msg,
+                .dialog-content .warning-msg { background-image: none !important; background-position: 0 !important; padding-left: 12px !important; }
+                .dialog-content .error-msg pre,
+                .dialog-content .warning-msg pre { margin: 6px 0 0; padding: 6px; background: #f5f5f5; border-radius: 3px; font-size: 12px; white-space: pre-wrap; overflow-x: auto; }
+                .dialog-content .error-msg mark { background: #fecaca; padding: 1px 2px; border-radius: 2px; }
+                .dialog-content .warning-msg mark { background: #fed7aa; padding: 1px 2px; border-radius: 2px; }
+            </style>
+            <p>${summary.join(' and ')} found:</p>
+            ${items}`;
+
+        Dialog.info(content, { title: 'HTML Validation', width: 600 });
+    } catch (e) {
+        Dialog.alert(`<p>${escapeHtml(e.message ?? 'Could not reach the HTML validator service.')}</p>`, { title: 'HTML Validation', width: 500 });
+    }
+}

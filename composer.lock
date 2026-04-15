@@ -1687,16 +1687,16 @@
         },
         {
             "name": "mahocommerce/maho-composer-plugin",
-            "version": "4.0.11",
+            "version": "v4.0.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MahoCommerce/maho-composer-plugin.git",
-                "reference": "4269a8521032b4ad1fc49967cbd1d01c767cf2ea"
+                "reference": "9ebb490b3a6ef4ec6508c39413bceca957d8bac8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/4269a8521032b4ad1fc49967cbd1d01c767cf2ea",
-                "reference": "4269a8521032b4ad1fc49967cbd1d01c767cf2ea",
+                "url": "https://api.github.com/repos/MahoCommerce/maho-composer-plugin/zipball/9ebb490b3a6ef4ec6508c39413bceca957d8bac8",
+                "reference": "9ebb490b3a6ef4ec6508c39413bceca957d8bac8",
                 "shasum": ""
             },
             "require": {
@@ -1729,9 +1729,9 @@
             "description": "Extension for Composer to copy assets and enable autoloading for Maho projects.",
             "support": {
                 "issues": "https://github.com/MahoCommerce/maho-composer-plugin/issues",
-                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/4.0.11"
+                "source": "https://github.com/MahoCommerce/maho-composer-plugin/tree/v4.0.17"
             },
-            "time": "2026-04-13T16:08:27+00:00"
+            "time": "2026-04-15T12:28:52+00:00"
         },
         {
             "name": "masterminds/html5",
@@ -4750,7 +4750,7 @@
         },
         {
             "name": "symfony/polyfill-php84",
-            "version": "v1.34.0",
+            "version": "v1.35.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php84.git",
@@ -4806,7 +4806,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php84/tree/v1.34.0"
+                "source": "https://github.com/symfony/polyfill-php84/tree/v1.35.0"
             },
             "funding": [
                 {
@@ -4830,7 +4830,7 @@
         },
         {
             "name": "symfony/polyfill-php85",
-            "version": "v1.34.0",
+            "version": "v1.35.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-php85.git",
@@ -4886,7 +4886,7 @@
                 "shim"
             ],
             "support": {
-                "source": "https://github.com/symfony/polyfill-php85/tree/v1.34.0"
+                "source": "https://github.com/symfony/polyfill-php85/tree/v1.35.0"
             },
             "funding": [
                 {
@@ -7967,16 +7967,16 @@
         },
         {
             "name": "pestphp/pest",
-            "version": "v4.5.0",
+            "version": "v4.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/pestphp/pest.git",
-                "reference": "13c322bab3ac4496f89279c0b6ac31b89ce8aa95"
+                "reference": "4e03cd3edbae9bb9e024660a6380ebb5832a6df9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/pestphp/pest/zipball/13c322bab3ac4496f89279c0b6ac31b89ce8aa95",
-                "reference": "13c322bab3ac4496f89279c0b6ac31b89ce8aa95",
+                "url": "https://api.github.com/repos/pestphp/pest/zipball/4e03cd3edbae9bb9e024660a6380ebb5832a6df9",
+                "reference": "4e03cd3edbae9bb9e024660a6380ebb5832a6df9",
                 "shasum": ""
             },
             "require": {
@@ -8068,7 +8068,7 @@
             ],
             "support": {
                 "issues": "https://github.com/pestphp/pest/issues",
-                "source": "https://github.com/pestphp/pest/tree/v4.5.0"
+                "source": "https://github.com/pestphp/pest/tree/v4.6.0"
             },
             "funding": [
                 {
@@ -8080,7 +8080,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-04-10T19:51:40+00:00"
+            "time": "2026-04-14T17:23:26+00:00"
         },
         {
             "name": "pestphp/pest-plugin",
@@ -8851,16 +8851,16 @@
         },
         {
             "name": "phpunit/php-code-coverage",
-            "version": "12.5.5",
+            "version": "12.5.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "a25bde1f8f83849f441ef5713c6466e470872a71"
+                "reference": "876099a072646c7745f673d7aeab5382c4439691"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/a25bde1f8f83849f441ef5713c6466e470872a71",
-                "reference": "a25bde1f8f83849f441ef5713c6466e470872a71",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/876099a072646c7745f673d7aeab5382c4439691",
+                "reference": "876099a072646c7745f673d7aeab5382c4439691",
                 "shasum": ""
             },
             "require": {
@@ -8915,7 +8915,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/php-code-coverage/issues",
                 "security": "https://github.com/sebastianbergmann/php-code-coverage/security/policy",
-                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.5.5"
+                "source": "https://github.com/sebastianbergmann/php-code-coverage/tree/12.5.6"
             },
             "funding": [
                 {
@@ -8935,7 +8935,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-13T04:53:32+00:00"
+            "time": "2026-04-15T08:23:17+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -10071,16 +10071,16 @@
         },
         {
             "name": "sebastian/comparator",
-            "version": "7.1.5",
+            "version": "7.1.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/comparator.git",
-                "reference": "c284f55811f43d555e51e8e5c166ac40d3e33c63"
+                "reference": "c769009dee98f494e0edc3fd4f4087501688f11e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/c284f55811f43d555e51e8e5c166ac40d3e33c63",
-                "reference": "c284f55811f43d555e51e8e5c166ac40d3e33c63",
+                "url": "https://api.github.com/repos/sebastianbergmann/comparator/zipball/c769009dee98f494e0edc3fd4f4087501688f11e",
+                "reference": "c769009dee98f494e0edc3fd4f4087501688f11e",
                 "shasum": ""
             },
             "require": {
@@ -10139,7 +10139,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/comparator/issues",
                 "security": "https://github.com/sebastianbergmann/comparator/security/policy",
-                "source": "https://github.com/sebastianbergmann/comparator/tree/7.1.5"
+                "source": "https://github.com/sebastianbergmann/comparator/tree/7.1.6"
             },
             "funding": [
                 {
@@ -10159,7 +10159,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-04-08T04:43:00+00:00"
+            "time": "2026-04-14T08:23:15+00:00"
         },
         {
             "name": "sebastian/complexity",
@@ -10288,16 +10288,16 @@
         },
         {
             "name": "sebastian/environment",
-            "version": "8.0.4",
+            "version": "8.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/environment.git",
-                "reference": "7b8842c2d8e85d0c3a5831236bf5869af6ab2a11"
+                "reference": "b121608b28a13f721e76ffbbd386d08eff58f3f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/7b8842c2d8e85d0c3a5831236bf5869af6ab2a11",
-                "reference": "7b8842c2d8e85d0c3a5831236bf5869af6ab2a11",
+                "url": "https://api.github.com/repos/sebastianbergmann/environment/zipball/b121608b28a13f721e76ffbbd386d08eff58f3f6",
+                "reference": "b121608b28a13f721e76ffbbd386d08eff58f3f6",
                 "shasum": ""
             },
             "require": {
@@ -10312,7 +10312,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "8.0-dev"
+                    "dev-main": "8.1-dev"
                 }
             },
             "autoload": {
@@ -10340,7 +10340,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/environment/issues",
                 "security": "https://github.com/sebastianbergmann/environment/security/policy",
-                "source": "https://github.com/sebastianbergmann/environment/tree/8.0.4"
+                "source": "https://github.com/sebastianbergmann/environment/tree/8.1.0"
             },
             "funding": [
                 {
@@ -10360,7 +10360,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2026-03-15T07:05:40+00:00"
+            "time": "2026-04-15T12:13:01+00:00"
         },
         {
             "name": "sebastian/exporter",
