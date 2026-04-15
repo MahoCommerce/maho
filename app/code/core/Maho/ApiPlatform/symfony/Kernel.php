@@ -120,9 +120,13 @@ class Kernel extends BaseKernel
                     ],
                 ],
             ],
-            'mapping' => [
-                'paths' => ['%kernel.project_dir%/ApiResource'],
-            ],
+            // 'mapping' is injected dynamically in build() from ModuleApiDiscovery.
+            // The static path that used to live here (%kernel.project_dir%/ApiResource)
+            // referenced the pre-refactor layout when all API resources lived in a single
+            // symfony/ApiResource/ directory. After the move to per-module Mage/*/Api/
+            // dirs, the static path is dead config and its target directory does not
+            // exist, which causes Symfony ApiPlatformExtension::getResourcesToWatch()
+            // to fatal at container compile time on any composer-starter install.
             'patch_formats' => [
                 'json' => ['application/merge-patch+json'],
             ],
