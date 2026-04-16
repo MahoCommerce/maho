@@ -79,6 +79,10 @@ class RouteCollectionBuilder
                 $requirements['_catchall'] = '.*';
             }
 
+            // Extract frontName from the first path segment (e.g. '/payflow/express/start' → 'payflow')
+            $pathSegments = explode('/', ltrim($routeData['path'], '/'));
+            $frontName = $pathSegments[0] ?? '';
+
             $route = new \Symfony\Component\Routing\Route(
                 $path,
                 array_merge($defaults, [
@@ -88,6 +92,7 @@ class RouteCollectionBuilder
                     '_maho_area' => $area,
                     '_maho_module' => $routeData['module'] ?? '',
                     '_maho_controller_name' => $routeData['controllerName'] ?? '',
+                    '_maho_front_name' => $frontName,
                 ]),
                 $requirements,
             );

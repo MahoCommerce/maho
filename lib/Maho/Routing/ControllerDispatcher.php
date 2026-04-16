@@ -219,7 +219,8 @@ class ControllerDispatcher
         } elseif ($area === 'install') {
             $this->setInstallRequestNames($controllerName, $actionName, $module, $request);
         } else {
-            $this->setRequestNamesFromController($controllerClass, $action, $request);
+            $frontName = $params['_maho_front_name'] ?? '';
+            $this->setFrontendRequestNames($frontName, $controllerName, $actionName, $module, $request);
         }
 
         $request->setDispatched(true);
@@ -356,36 +357,23 @@ class ControllerDispatcher
     }
 
     /**
-     * Derive module/controller/action names from the controller class for attribute routes.
+     * Set request names for frontend attribute routes.
      *
-     * e.g. Mage_Contacts_IndexController::postAction → contacts/index/post
+     * Uses the frontName extracted from the #[Route] path (e.g. '/payflow/express/start' → 'payflow')
+     * rather than deriving from the class name, because modules like PaypalUk have a frontName
+     * ('payflow') that differs from their module key ('paypaluk').
      */
-    protected function setRequestNamesFromController(
-        string $controllerClass,
-        string $action,
+    protected function setFrontendRequestNames(
+        string $frontName,
+        string $controllerName,
+        string $actionName,
+        string $controllerModule,
         Mage_Core_Controller_Request_Http $request,
     ): void {
-        $actionName = preg_replace('/Action$/', '', $action);
-
-        // Remove 'Controller' suffix: Mage_Catalog_Seo_SitemapController → Mage_Catalog_Seo_Sitemap
-        $name = preg_replace('/Controller$/', '', $controllerClass);
-        $parts = explode('_', $name);
-
-        // First two segments are the module (e.g. Mage_Catalog)
-        $moduleVendor = $parts[0] ?? '';
-        $moduleShort = $parts[1] ?? '';
-        $moduleName = strtolower($moduleShort ?: $moduleVendor);
-
-        // Everything after the module prefix is the controller name
-        // e.g. Mage_Catalog_Seo_Sitemap → seo_sitemap
-        // e.g. Mage_Contacts_Index → index
-        $controllerParts = array_slice($parts, 2);
-        $controllerName = strtolower(implode('_', $controllerParts));
-
-        $request->setModuleName($moduleName);
+        $request->setModuleName($frontName);
         $request->setControllerName($controllerName);
         $request->setActionName($actionName);
-        $request->setRouteName($moduleName);
-        $request->setControllerModule($moduleVendor . '_' . $moduleShort);
+        $request->setRouteName($frontName);
+        $request->setControllerModule($controllerModule);
     }
 }
