@@ -838,7 +838,10 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
         }
 
         if (!is_numeric($date)) {
-            $date = strtotime($date);
+            // Parse string dates explicitly as UTC to avoid server-timezone shifts
+            // when PHP's default timezone is not UTC
+            $dateTime = new DateTime($date, new DateTimeZone(self::DEFAULT_TIMEZONE));
+            return $dateTime->format($format);
         }
 
         return gmdate($format, (int) $date);
@@ -1474,12 +1477,17 @@ class Mage_Core_Model_Locale extends \Maho\DataObject
             $store = Mage::app()->getStore($store);
         }
 
+        // Parse all dates in the store timezone so interval boundaries align with
+        // the store's local calendar day, not the server's default timezone
+        $storeTz = new DateTimeZone(
+            $store->getConfig(self::XML_PATH_DEFAULT_TIMEZONE) ?: self::DEFAULT_TIMEZONE,
+        );
         $storeTimeStamp = $this->utcToStore($store)->getTimestamp();
-        $fromTimeStamp  = strtotime((string) $dateFrom);
-        $toTimeStamp    = strtotime((string) $dateTo);
+        $fromTimeStamp  = $dateFrom ? (new DateTime($dateFrom, $storeTz))->getTimestamp() : false;
+        $toTimeStamp    = false;
         if ($dateTo) {
             // fix date YYYY-MM-DD 00:00:00 to YYYY-MM-DD 23:59:59
-            $endDate = new DateTime((string) $dateTo);
+            $endDate = new DateTime($dateTo, $storeTz);
             $endDate->setTime(23, 59, 59);
             $toTimeStamp = $endDate->getTimestamp();
         }

@@ -610,7 +610,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Get catalog rules product price for specific date, website and
      * customer group
      *
-     * @param int|string $date
+     * @param int|string|DateTime $date
      * @param int $wId
      * @param int $gId
      * @param int $pId
@@ -627,7 +627,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
      * Retrieve product prices by catalog rule for specific date, website and customer group
      * Collect data with  product Id => price pairs
      *
-     * @param int|string $date
+     * @param int|string|DateTime $date
      * @param int $websiteId
      * @param int $customerGroupId
      * @param array $productIds
@@ -649,7 +649,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Get active rule data based on few filters
      *
-     * @param int|string $date
+     * @param int|string|DateTime $date
      * @param int $websiteId
      * @param int $customerGroupId
      * @param int $productId
@@ -658,7 +658,9 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     public function getRulesFromProduct($date, $websiteId, $customerGroupId, $productId)
     {
         $adapter = $this->_getReadAdapter();
-        if (is_string($date)) {
+        if ($date instanceof DateTime) {
+            $date = $date->getTimestamp();
+        } elseif (is_string($date)) {
             $date = strtotime($date);
         }
         $select = $adapter->select()
@@ -676,7 +678,7 @@ class Mage_CatalogRule_Model_Resource_Rule extends Mage_Rule_Model_Resource_Abst
     /**
      * Retrieve product price data for all customer groups
      *
-     * @param int|string $date
+     * @param int|string|DateTime $date
      * @param int $wId
      * @param int $pId
      *

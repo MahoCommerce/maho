@@ -381,9 +381,9 @@ class Mage_Catalog_Model_Product_Type_Price
         $finalPrice = self::calculateSpecialPrice($finalPrice, $specialPrice, $specialPriceFrom, $specialPriceTo, $sId);
 
         if ($rulePrice === false) {
-            $storeTimestamp = Mage::app()->getLocale()->utcToStore($sId, 'now')->getTimestamp();
+            $storeDateTime = Mage::app()->getLocale()->utcToStore($sId, 'now');
             $rulePrice = Mage::getResourceModel('catalogrule/rule')
-                ->getRulePrice($storeTimestamp, $wId, $gId, $productId);
+                ->getRulePrice($storeDateTime, $wId, $gId, $productId);
         }
 
         if ($rulePrice !== null && $rulePrice !== false) {
