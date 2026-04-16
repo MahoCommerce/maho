@@ -274,7 +274,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
     protected function _getTZRangeExpressionForAttribute($range, $attribute, $tzFrom = '+00:00', $tzTo = null)
     {
         if ($tzTo == null) {
-            $tzTo = Mage::app()->getLocale()->storeDate()->format('P');
+            $tzTo = Mage::app()->getLocale()->utcToStore()->format('P');
         }
         $adapter = $this->getConnection();
         $expression = $this->_getRangeExpression($range);
@@ -295,7 +295,7 @@ class Mage_Reports_Model_Resource_Order_Collection extends Mage_Sales_Model_Reso
      */
     public function getDateRange($range, $customStart, $customEnd, $returnObjects = false)
     {
-        $baseDate = Mage::app()->getLocale()->dateImmutable();
+        $baseDate = DateTimeImmutable::createFromMutable(Mage::app()->getLocale()->utcToStore());
         $dateStart = DateTime::createFromImmutable($baseDate);
         $dateStart->setTime(0, 0, 0);
         $dateEnd = DateTime::createFromImmutable($baseDate);

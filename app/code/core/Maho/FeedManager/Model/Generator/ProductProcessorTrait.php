@@ -411,7 +411,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
         $replacements = [
             '{{store_name}}' => $store->getName(),
             '{{store_url}}' => $store->getBaseUrl(),
-            '{{generation_date}}' => Mage_Core_Model_Locale::now(),
+            '{{generation_date}}' => Mage::app()->getLocale()->now(),
         ];
 
         return str_replace(array_keys($replacements), array_values($replacements), $template);
@@ -969,7 +969,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
                         $tableName,
                         [
                             'status' => Maho_FeedManager_Model_Log::STATUS_FAILED,
-                            'completed_at' => Mage_Core_Model_Locale::now(),
+                            'completed_at' => Mage::app()->getLocale()->now(),
                         ],
                         ['log_id = ?' => $runningRow['log_id']],
                     );
@@ -999,7 +999,7 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
             $this->_log = Mage::getModel('feedmanager/log');
             $this->_log->setFeedId($this->_feed->getId())
                 ->setStatus(Maho_FeedManager_Model_Log::STATUS_RUNNING)
-                ->setStartedAt(Mage_Core_Model_Locale::now())
+                ->setStartedAt(Mage::app()->getLocale()->now())
                 ->save();
 
             $connection->commit();
@@ -1089,14 +1089,14 @@ trait Maho_FeedManager_Model_Generator_ProductProcessorTrait
     protected function _finalizeGenerationSuccess(int $productCount, int $fileSize, array $errors): void
     {
         $this->_log->setStatus(Maho_FeedManager_Model_Log::STATUS_COMPLETED)
-            ->setCompletedAt(Mage_Core_Model_Locale::now())
+            ->setCompletedAt(Mage::app()->getLocale()->now())
             ->setProductCount($productCount)
             ->setFileSize($fileSize);
 
         $this->_saveErrorsToLog($errors);
         $this->_log->save();
 
-        $this->_feed->setLastGeneratedAt(Mage_Core_Model_Locale::now())
+        $this->_feed->setLastGeneratedAt(Mage::app()->getLocale()->now())
             ->setLastProductCount($productCount)
             ->setLastFileSize($fileSize)
             ->save();

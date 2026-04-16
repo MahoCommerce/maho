@@ -185,7 +185,7 @@ class Maho_CustomerSegmentation_Model_Segment extends Mage_Rule_Model_Abstract
             $matchedCustomers = $this->getMatchingCustomerIds();
             $this->getResource()->updateCustomerMembership($this, $matchedCustomers);
 
-            $utcDateTime = Mage::app()->getLocale()->utcDate(null, null, true);
+            $utcDateTime = Mage::app()->getLocale()->storeToUtc();
             $nowString = $utcDateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
             $this->setMatchedCustomersCount(count($matchedCustomers))

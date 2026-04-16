@@ -94,7 +94,7 @@ describe('Blog Post Collection', function () {
     });
 
     test('can filter by publish date', function () {
-        $today = Mage_Core_Model_Locale::today();
+        $today = Mage::app()->getLocale()->today();
         $pastCollection = Mage::getResourceModel('blog/post_collection');
         $pastCollection->getSelect()->where('publish_date IS NULL OR publish_date <= ?', $today);
 

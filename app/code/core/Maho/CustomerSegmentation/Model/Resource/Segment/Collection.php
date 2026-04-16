@@ -96,7 +96,7 @@ class Maho_CustomerSegmentation_Model_Resource_Segment_Collection extends Mage_C
 
     public function addNeedsRefreshFilter(int $hoursAgo = 24): self
     {
-        $cutoffDateTime = Mage::app()->getLocale()->utcDate(null, null, true);
+        $cutoffDateTime = Mage::app()->getLocale()->storeToUtc();
         $cutoffDateTime->sub(new DateInterval("PT{$hoursAgo}H"));
         $cutoffDate = $cutoffDateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 

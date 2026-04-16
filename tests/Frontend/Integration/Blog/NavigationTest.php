@@ -85,7 +85,7 @@ describe('Blog Navigation Integration', function () {
         $post->save();
 
         // Test filtering by current date (should exclude future posts)
-        $today = Mage_Core_Model_Locale::today();
+        $today = Mage::app()->getLocale()->today();
         $pastCollection = Mage::getResourceModel('blog/post_collection')
             ->addStoreFilter(Mage::app()->getStore())
             ->addFieldToFilter('is_active', 1)
@@ -164,7 +164,7 @@ describe('Blog Navigation Integration', function () {
 
         $collection->getSelect()->where(
             'publish_date IS NULL OR publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->today(),
         );
 
         expect($collection->getSize())->toBeGreaterThan(0);
@@ -223,7 +223,7 @@ describe('Blog Navigation Integration', function () {
             ->addFieldToFilter('entity_id', $currentStorePost->getId());
         $currentStoreCollection->getSelect()->where(
             'publish_date IS NULL OR publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->today(),
         );
 
         // Should find the post we just created
@@ -249,7 +249,7 @@ describe('Blog Navigation Integration', function () {
             ->addFieldToFilter('entity_id', $futurePost->getId());
         $futureFilteredCollection->getSelect()->where(
             'publish_date <= ?',
-            Mage_Core_Model_Locale::today(),
+            Mage::app()->getLocale()->today(),
         );
 
         expect($futureFilteredCollection->getSize())->toBe(0); // Future post filtered out

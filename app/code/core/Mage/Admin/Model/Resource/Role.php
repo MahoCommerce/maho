@@ -27,9 +27,9 @@ class Mage_Admin_Model_Resource_Role extends Mage_Core_Model_Resource_Db_Abstrac
     protected function _beforeSave(Mage_Core_Model_Abstract $object)
     {
         if (!$object->getId()) {
-            $object->setCreated($this->formatDate(true));
+            $object->setCreated(Mage::app()->getLocale()->formatDateForDb(true));
         }
-        $object->setModified($this->formatDate(true));
+        $object->setModified(Mage::app()->getLocale()->formatDateForDb(true));
         return $this;
     }
 }

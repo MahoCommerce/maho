@@ -40,12 +40,12 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Created extends Mage_Eav_Mode
         $date = $object->getData($attributeCode);
         if (is_null($date)) {
             if ($object->isObjectNew()) {
-                $object->setData($attributeCode, Mage_Core_Model_Locale::now());
+                $object->setData($attributeCode, Mage::app()->getLocale()->now());
             }
         } else {
             // convert to UTC
-            $zendDate = Mage::app()->getLocale()->utcDate(null, $date, true, $this->_getFormat($date));
-            $object->setData($attributeCode, $zendDate instanceof DateTime ? $zendDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT) : $zendDate);
+            $zendDate = Mage::app()->getLocale()->storeToUtc(null, $date);
+            $object->setData($attributeCode, $zendDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         }
 
         return $this;
@@ -70,8 +70,8 @@ class Mage_Eav_Model_Entity_Attribute_Backend_Time_Created extends Mage_Eav_Mode
             return $this;
         }
 
-        $zendDate = Mage::app()->getLocale()->storeDate(null, $date, true, $this->_getFormat($date));
-        $object->setData($attributeCode, $zendDate instanceof DateTime ? $zendDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT) : $zendDate);
+        $storeDate = Mage::app()->getLocale()->utcToStore(null, $date);
+        $object->setData($attributeCode, $storeDate->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
 
         parent::afterLoad($object);
 

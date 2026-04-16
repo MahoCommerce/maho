@@ -102,7 +102,7 @@ class Maho_Blog_Block_Adminhtml_Post_Edit_Tab_Content extends Mage_Adminhtml_Blo
         ]);
 
         if (!$model->getId() && !$model->getData('publish_date')) {
-            $model->setData('publish_date', Mage_Core_Model_Locale::today());
+            $model->setData('publish_date', Mage::app()->getLocale()->today());
         }
 
         $fieldset->addField('content', 'editor', [

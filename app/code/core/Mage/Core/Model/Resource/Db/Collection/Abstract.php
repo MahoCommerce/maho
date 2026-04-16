@@ -689,31 +689,15 @@ abstract class Mage_Core_Model_Resource_Db_Collection_Abstract extends \Maho\Dat
     /**
      * Format Date to internal database date format
      *
+     * @deprecated since 26.5 Use Mage::app()->getLocale()->formatDateForDb() instead
+     * @see Mage_Core_Model_Locale::formatDateForDb()
+     *
      * @param int|string|DateTime $date
      * @param bool $includeTime
      * @return string|null
      */
     public function formatDate($date, $includeTime = true)
     {
-        if ($date === true) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
-            return date($format);
-        }
-
-        if ($date instanceof DateTime) {
-            $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
-            return $date->format($format);
-        }
-
-        if (empty($date)) {
-            return null;
-        }
-
-        if (!is_numeric($date)) {
-            $date = strtotime($date);
-        }
-
-        $format = $includeTime ? Mage_Core_Model_Locale::DATETIME_FORMAT : Mage_Core_Model_Locale::DATE_FORMAT;
-        return date($format, $date);
+        return Mage::app()->getLocale()->formatDateForDb($date, $includeTime);
     }
 }

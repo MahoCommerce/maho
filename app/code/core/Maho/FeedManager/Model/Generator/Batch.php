@@ -87,7 +87,7 @@ class Maho_FeedManager_Model_Generator_Batch
             'batches_processed' => 0,
             'temp_path' => $tempPath,
             'errors' => [],
-            'started_at' => Mage_Core_Model_Locale::now(),
+            'started_at' => Mage::app()->getLocale()->now(),
         ];
         $this->_saveState();
 
@@ -589,7 +589,7 @@ class Maho_FeedManager_Model_Generator_Batch
             $success = $uploader->upload($filePath, $remoteName);
 
             // Update destination last upload info
-            $destination->setLastUploadAt(Mage_Core_Model_Locale::now())
+            $destination->setLastUploadAt(Mage::app()->getLocale()->now())
                 ->setLastUploadStatus($success ? 'success' : 'failed')
                 ->save();
 

@@ -356,12 +356,8 @@ abstract class Mage_Rule_Model_Abstract extends Mage_Core_Model_Abstract
                  * Convert dates into DateTime
                  */
                 if (in_array($key, ['from_date', 'to_date']) && $value) {
-                    $value = Mage::app()->getLocale()->dateMutable(
-                        $value,
-                        Mage_Core_Model_Locale::DATE_FORMAT,
-                        null,
-                        false,
-                    );
+                    $value = DateTime::createFromFormat(Mage_Core_Model_Locale::DATE_FORMAT, $value)
+                        ?: new DateTime($value);
                 }
                 $this->setData($key, $value);
             }

@@ -74,10 +74,9 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     public function getStoreCreateDate()
     {
         if ($date = $this->getCustomer()->getCreatedAtTimestamp()) {
-            $date = Mage::app()->getLocale()->storeDate(
+            $date = Mage::app()->getLocale()->utcToStore(
                 $this->getCustomer()->getStoreId(),
                 $date,
-                true,
             );
             return $this->formatDate($date, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true);
         }
@@ -108,10 +107,9 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
     public function getStoreLastLoginDate()
     {
         if ($date = $this->getCustomerLog()->getLoginAtTimestamp()) {
-            $date = Mage::app()->getLocale()->storeDate(
+            $date = Mage::app()->getLocale()->utcToStore(
                 $this->getCustomer()->getStoreId(),
                 $date,
-                true,
             );
             return $this->formatDate($date, Mage_Core_Model_Locale::FORMAT_TYPE_MEDIUM, true);
         }
@@ -132,7 +130,7 @@ class Mage_Adminhtml_Block_Customer_Edit_Tab_View extends Mage_Adminhtml_Block_T
         $log = $this->getCustomerLog();
         if ($log->getLogoutAt()
             || !$log->getLastVisitAt()
-            || strtotime(Mage_Core_Model_Locale::now()) - strtotime($log->getLastVisitAt()) > Mage_Log_Model_Visitor::getOnlineMinutesInterval() * 60
+            || strtotime(Mage::app()->getLocale()->now()) - strtotime($log->getLastVisitAt()) > Mage_Log_Model_Visitor::getOnlineMinutesInterval() * 60
         ) {
             return Mage::helper('customer')->__('Offline');
         }

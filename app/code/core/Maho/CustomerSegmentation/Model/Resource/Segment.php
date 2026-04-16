@@ -92,7 +92,7 @@ class Maho_CustomerSegmentation_Model_Resource_Segment extends Mage_Core_Model_R
         if (!empty($toInsert)) {
             $insertData = [];
             foreach ($toInsert as $customerId => $websiteId) {
-                $utcDateTime = Mage::app()->getLocale()->utcDate(null, null, true);
+                $utcDateTime = Mage::app()->getLocale()->storeToUtc();
                 $nowString = $utcDateTime->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
                 $insertData[] = [
                     'segment_id'  => $segmentId,

@@ -5,7 +5,7 @@ declare(strict_types=1);
 /**
  * Maho
  *
- * @copyright  Copyright (c) 2025-2026 Maho (https://mahocommerce.com)
+ * @copyright  Copyright (c) 2026 Maho (https://mahocommerce.com)
  * @license    https://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
  */
 
@@ -120,5 +120,164 @@ describe('Locale::storeDate() DateTime handling', function () {
 
         expect($result)->toBeString();
         expect($result)->toMatch('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/');
+    });
+});
+
+describe('Locale::utcToStore()', function () {
+    beforeEach(function () {
+        $this->locale = Mage::app()->getLocale();
+    });
+
+    it('returns DateTime for null input', function () {
+        $result = $this->locale->utcToStore(null);
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+    });
+
+    it('returns DateTime for "now" input', function () {
+        $result = $this->locale->utcToStore(null, 'now');
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+    });
+
+    it('converts UTC string to store timezone', function () {
+        $result = $this->locale->utcToStore(null, '2025-06-15 12:00:00');
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result->format('Y-m-d'))->toBe('2025-06-15');
+    });
+
+    it('handles integer timestamp input', function () {
+        $timestamp = mktime(12, 0, 0, 6, 15, 2025);
+        $result = $this->locale->utcToStore(null, $timestamp);
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+    });
+
+    it('handles DateTime input', function () {
+        $input = new DateTime('2025-06-15 12:00:00', new DateTimeZone('UTC'));
+        $result = $this->locale->utcToStore(null, $input);
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result->format('Y-m-d'))->toBe('2025-06-15');
+    });
+
+    it('handles DateTimeImmutable input', function () {
+        $input = new DateTimeImmutable('2025-06-15 12:00:00', new DateTimeZone('UTC'));
+        $result = $this->locale->utcToStore(null, $input);
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result->format('Y-m-d'))->toBe('2025-06-15');
+    });
+
+    it('does not modify original DateTime input', function () {
+        $input = new DateTime('2025-06-15 12:00:00', new DateTimeZone('UTC'));
+        $originalTimestamp = $input->getTimestamp();
+
+        $this->locale->utcToStore(null, $input);
+
+        expect($input->getTimestamp())->toBe($originalTimestamp);
+    });
+});
+
+describe('Locale::storeToUtc()', function () {
+    beforeEach(function () {
+        $this->locale = Mage::app()->getLocale();
+    });
+
+    it('returns DateTime for null input', function () {
+        $result = $this->locale->storeToUtc(null);
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result->getTimezone()->getName())->toBe('UTC');
+    });
+
+    it('converts store timezone string to UTC', function () {
+        $result = $this->locale->storeToUtc(null, '2025-06-15 12:00:00');
+
+        expect($result)->toBeInstanceOf(DateTime::class);
+        expect($result->getTimezone()->getName())->toBe('UTC');
+    });
+
+    it('round-trips with utcToStore', function () {
+        $original = '2025-06-15 14:30:00';
+        $storeDate = $this->locale->utcToStore(null, $original);
+        $roundTripped = $this->locale->storeToUtc(null, $storeDate);
+
+        expect($roundTripped->format(Mage_Core_Model_Locale::DATETIME_FORMAT))->toBe($original);
+    });
+});
+
+describe('Locale::formatDateForDb()', function () {
+    beforeEach(function () {
+        $this->locale = Mage::app()->getLocale();
+    });
+
+    it('returns current datetime for true input', function () {
+        $result = $this->locale->formatDateForDb(true);
+
+        expect($result)->toMatch('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/');
+    });
+
+    it('returns current date without time for true input', function () {
+        $result = $this->locale->formatDateForDb(true, withTime: false);
+
+        expect($result)->toMatch('/^\d{4}-\d{2}-\d{2}$/');
+    });
+
+    it('returns null for null input', function () {
+        expect($this->locale->formatDateForDb(null))->toBeNull();
+    });
+
+    it('returns null for empty string input', function () {
+        expect($this->locale->formatDateForDb(''))->toBeNull();
+    });
+
+    it('formats DateTime input with time', function () {
+        $date = new DateTime('2025-06-15 14:30:00');
+        $result = $this->locale->formatDateForDb($date);
+
+        expect($result)->toBe('2025-06-15 14:30:00');
+    });
+
+    it('formats DateTime input without time', function () {
+        $date = new DateTime('2025-06-15 14:30:00');
+        $result = $this->locale->formatDateForDb($date, withTime: false);
+
+        expect($result)->toBe('2025-06-15');
+    });
+
+    it('formats DateTimeImmutable input', function () {
+        $date = new DateTimeImmutable('2025-06-15 14:30:00');
+        $result = $this->locale->formatDateForDb($date);
+
+        expect($result)->toBe('2025-06-15 14:30:00');
+    });
+
+    it('formats string input', function () {
+        $result = $this->locale->formatDateForDb('2025-06-15 14:30:00');
+
+        expect($result)->toBe('2025-06-15 14:30:00');
+    });
+
+    it('formats numeric timestamp input', function () {
+        $timestamp = mktime(14, 30, 0, 6, 15, 2025);
+        $result = $this->locale->formatDateForDb($timestamp);
+
+        expect($result)->toBe('2025-06-15 14:30:00');
+    });
+});
+
+describe('Locale::now() and today() as instance methods', function () {
+    it('now() returns current datetime string', function () {
+        $result = Mage::app()->getLocale()->now();
+
+        expect($result)->toMatch('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/');
+    });
+
+    it('today() returns current date string', function () {
+        $result = Mage::app()->getLocale()->today();
+
+        expect($result)->toMatch('/^\d{4}-\d{2}-\d{2}$/');
     });
 });

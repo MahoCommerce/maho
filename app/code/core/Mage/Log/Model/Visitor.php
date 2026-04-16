@@ -190,7 +190,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     public function getFirstVisitAt()
     {
         if (!$this->hasData('first_visit_at')) {
-            $this->setData('first_visit_at', Mage_Core_Model_Locale::now());
+            $this->setData('first_visit_at', Mage::app()->getLocale()->now());
         }
         return $this->getData('first_visit_at');
     }
@@ -201,7 +201,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
     public function getLastVisitAt()
     {
         if (!$this->hasData('last_visit_at')) {
-            $this->setData('last_visit_at', Mage_Core_Model_Locale::now());
+            $this->setData('last_visit_at', Mage::app()->getLocale()->now());
         }
         return $this->getData('last_visit_at');
     }
@@ -226,7 +226,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
         $visitorId = $this->getId();
         if (!$visitorId) {
             $this->initServerData();
-            $this->setFirstVisitAt(Mage_Core_Model_Locale::now());
+            $this->setFirstVisitAt(Mage::app()->getLocale()->now());
             $this->setIsNewVisitor(true);
             $this->save();
         }
@@ -268,7 +268,7 @@ class Mage_Log_Model_Visitor extends Mage_Core_Model_Abstract
 
         try {
             $this->initServerData();
-            $this->setLastVisitAt(Mage_Core_Model_Locale::now());
+            $this->setLastVisitAt(Mage::app()->getLocale()->now());
             $this->save();
             $this->_session->setVisitorData($this->getData());
         } catch (Exception $e) {

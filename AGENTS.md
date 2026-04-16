@@ -177,14 +177,28 @@ Mage::helper('core')->isValidDate($value);
 
 ### Date Handling (Native PHP DateTime)
 - **Database storage**: Always UTC in `'Y-m-d H:i:s'` format
-- **Display**: `storeDate()` converts UTC → HTML5 format
-- **Processing**: `utcDate()` converts HTML5 → UTC for database
+- **Timezone conversion**: `utcToStore()` / `storeToUtc()` — always return `DateTime`, caller formats
+- **DB formatting**: `formatDateForDb()` normalizes any input to DB format string
 
 ```php
-$html = Mage::app()->getLocale()->storeDate(null, $dbDate, false, 'html5');
-$utc = Mage::app()->getLocale()->utcDate(null, $inputDate, false, 'html5');
-Mage_Core_Model_Locale::now();    // 'Y-m-d H:i:s'
-Mage_Core_Model_Locale::today();  // 'Y-m-d'
+$locale = Mage::app()->getLocale();
+
+// Current UTC
+$locale->now();                                                // 'Y-m-d H:i:s'
+$locale->today();                                              // 'Y-m-d'
+
+// Convert between timezones — always returns DateTime
+$dt = $locale->utcToStore($store, $date);                      // DateTime in store TZ
+$dt = $locale->storeToUtc($store, $date);                      // DateTime in UTC
+
+// Caller formats — no magic strings
+$dt->format(Mage_Core_Model_Locale::DATETIME_FORMAT);         // 'Y-m-d H:i:s'
+$dt->format(Mage_Core_Model_Locale::DATE_FORMAT);             // 'Y-m-d'
+$dt->format(Mage_Core_Model_Locale::HTML5_DATETIME_FORMAT);   // 'Y-m-d\TH:i'
+
+// Normalize to DB format
+$locale->formatDateForDb($date);                               // 'Y-m-d H:i:s'
+$locale->formatDateForDb($date, withTime: false);              // 'Y-m-d'
 ```
 
 ### Filtering & Locale

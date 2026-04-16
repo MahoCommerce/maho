@@ -139,20 +139,26 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     /**
-     * Format date using current locale options and time zone.
+     * Format date for display using the store's locale and timezone.
+     *
+     * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
+     * For machine-readable formats, use DateTime::format() directly instead.
      *
      * @param   string|int|DateTime|null   $date If empty, return current datetime.
      * @param   string                      $format   See Mage_Core_Model_Locale::FORMAT_TYPE_* constants
-     * @param   bool                        $showTime Whether to include time
+     * @param   bool                        $withTime Whether to include time
      * @return  string
      */
-    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $showTime = false)
+    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $withTime = false)
     {
-        return $this->formatTimezoneDate($date, $format, $showTime);
+        return $this->formatTimezoneDate($date, $format, $withTime);
     }
 
     /**
-     * Format date using current locale options and time zone.
+     * Format date for display using the store's locale and timezone.
+     *
+     * Produces locale-aware output (e.g. "April 16, 2026" in en_US, "16 avril 2026" in fr_FR).
+     * For machine-readable formats, use DateTime::format() directly instead.
      *
      * @param   string|int|DateTime|null   $date The date to format. Can be:
      *                                            - null: Uses current time
@@ -164,7 +170,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
      *                                            - FORMAT_TYPE_MEDIUM: Standard format (e.g., "Aug 1, 2025")
      *                                            - FORMAT_TYPE_LONG: Detailed format (e.g., "August 1, 2025")
      *                                            - FORMAT_TYPE_FULL: Complete format (e.g., "Thursday, August 1, 2025")
-     * @param   bool                        $showTime Whether to include time in the output
+     * @param   bool                        $withTime Whether to include time in the output
      *                                            - true: "Aug 1, 2025, 10:24:18 AM"
      *                                            - false: "Aug 1, 2025"
      * @param   bool                        $useTimezone Whether to convert the date to store timezone
@@ -175,7 +181,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
     public function formatTimezoneDate(
         string|int|DateTime|null $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
-        bool $showTime = false,
+        bool $withTime = false,
         bool $useTimezone = true,
     ): string {
         if (!in_array($format, $this->_allowedFormats, true)) {
@@ -184,12 +190,18 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
         $locale = Mage::app()->getLocale();
         if (empty($date)) {
-            $date = $locale->date(Mage::getSingleton('core/date')->gmtTimestamp(), null, null, $useTimezone);
+            $date = $useTimezone
+                ? $locale->utcToStore(null, Mage::getSingleton('core/date')->gmtTimestamp())
+                : new DateTime('@' . Mage::getSingleton('core/date')->gmtTimestamp());
         } elseif (is_int($date)) {
-            $date = $locale->date($date, null, null, $useTimezone);
+            $date = $useTimezone
+                ? $locale->utcToStore(null, $date)
+                : new DateTime('@' . $date);
         } elseif (!$date instanceof DateTime) {
             if (($time = strtotime($date)) !== false) {
-                $date = $locale->date($time, null, null, $useTimezone);
+                $date = $useTimezone
+                    ? $locale->utcToStore(null, $time)
+                    : new DateTime('@' . $time);
             } else {
                 return '';
             }
@@ -202,7 +214,7 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
             Mage_Core_Model_Locale::FORMAT_TYPE_FULL => IntlDateFormatter::FULL,
             default => IntlDateFormatter::SHORT,
         };
-        $timeStyle = $showTime ? $dateStyle : IntlDateFormatter::NONE;
+        $timeStyle = $withTime ? $dateStyle : IntlDateFormatter::NONE;
 
         $formatter = new IntlDateFormatter(
             $locale->getLocaleCode(),
@@ -230,11 +242,11 @@ class Mage_Core_Helper_Data extends Mage_Core_Helper_Abstract
 
         $locale = Mage::app()->getLocale();
         if (is_null($time)) {
-            $date = $locale->date(time());
+            $date = $locale->utcToStore(null, time());
         } elseif ($time instanceof DateTime) {
             $date = $time;
         } else {
-            $date = $locale->date(strtotime($time));
+            $date = $locale->utcToStore(null, strtotime($time));
         }
 
         // Use IntlDateFormatter to format with locale-specific patterns

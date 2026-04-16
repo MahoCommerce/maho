@@ -297,7 +297,7 @@ class Mage_CatalogInventory_Model_Resource_Stock extends Mage_Core_Model_Resourc
             '(use_config_notify_stock_qty = 1 AND qty < ?)',
             $this->_configNotifyStockQty,
         ) . ' OR (use_config_notify_stock_qty = 0 AND qty < notify_stock_qty)';
-        $currentDbTime = $adapter->quoteInto('?', $this->formatDate(true));
+        $currentDbTime = $adapter->quoteInto('?', Mage::app()->getLocale()->formatDateForDb(true));
         $conditionalDate = $adapter->getCheckSql($condition, $currentDbTime, 'NULL');
 
         $value  = [

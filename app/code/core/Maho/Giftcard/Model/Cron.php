@@ -52,7 +52,7 @@ class Maho_Giftcard_Model_Cron
     {
         try {
             // Get current time in UTC (expires_at is stored in UTC)
-            $currentTimeUtc = Mage::app()->getLocale()->utcDate(null, null, true);
+            $currentTimeUtc = Mage::app()->getLocale()->storeToUtc();
 
             // Get active gift cards that have expired
             $collection = Mage::getResourceModel('giftcard/giftcard_collection')
@@ -76,7 +76,7 @@ class Maho_Giftcard_Model_Cron
                         'balance_before' => (float) $giftcard->getBalance(),
                         'balance_after' => (float) $giftcard->getBalance(),
                         'comment' => 'Automatically expired by cron',
-                        'created_at' => Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
+                        'created_at' => Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT),
                     ]);
                     $history->save();
 

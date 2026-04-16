@@ -507,7 +507,7 @@ class Mage_Bundle_Model_Resource_Price_Index extends Mage_Core_Model_Resource_Db
     protected function _getBasePrice($productId, array $priceData, $website, $customerGroup)
     {
         $store          = $website->getDefaultStore();
-        $storeTimeStamp = Mage::app()->getLocale()->storeTimeStamp($store);
+        $storeTimeStamp = Mage::app()->getLocale()->utcToStore($store, 'now')->getTimestamp();
         $finalPrice     = $this->_calculateSpecialPrice($priceData['price'], $priceData, $website);
 
         $rulePrice = Mage::getResourceModel('catalogrule/rule')

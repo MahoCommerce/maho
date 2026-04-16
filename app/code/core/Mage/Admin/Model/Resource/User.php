@@ -47,7 +47,7 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
         $adapter = $this->_getWriteAdapter();
 
         $data = [
-            'logdate' => Mage_Core_Model_Locale::now(),
+            'logdate' => Mage::app()->getLocale()->now(),
             'lognum'  => $user->getLognum() + 1,
         ];
 
@@ -123,9 +123,9 @@ class Mage_Admin_Model_Resource_User extends Mage_Core_Model_Resource_Db_Abstrac
     protected function _beforeSave(Mage_Core_Model_Abstract $user)
     {
         if ($user->isObjectNew()) {
-            $user->setCreated($this->formatDate(true));
+            $user->setCreated(Mage::app()->getLocale()->formatDateForDb(true));
         }
-        $user->setModified($this->formatDate(true));
+        $user->setModified(Mage::app()->getLocale()->formatDateForDb(true));
 
         return parent::_beforeSave($user);
     }

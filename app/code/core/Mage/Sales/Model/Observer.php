@@ -167,7 +167,7 @@ class Mage_Sales_Model_Observer
     public function aggregateSalesReportOrderData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_order')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -183,7 +183,7 @@ class Mage_Sales_Model_Observer
     public function aggregateSalesReportShipmentData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_shipping')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -199,7 +199,7 @@ class Mage_Sales_Model_Observer
     public function aggregateSalesReportInvoicedData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_invoiced')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -215,7 +215,7 @@ class Mage_Sales_Model_Observer
     public function aggregateSalesReportRefundedData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_refunded')->aggregate($date);
         Mage::app()->getLocale()->revert();
@@ -231,7 +231,7 @@ class Mage_Sales_Model_Observer
     public function aggregateSalesReportBestsellersData()
     {
         Mage::app()->getLocale()->emulate(0);
-        $currentDate = Mage::app()->getLocale()->dateMutable();
+        $currentDate = Mage::app()->getLocale()->utcToStore();
         $date = $currentDate->modify('-25 hours');
         Mage::getResourceModel('sales/report_bestsellers')->aggregate($date);
         Mage::app()->getLocale()->revert();

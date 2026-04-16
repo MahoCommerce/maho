@@ -173,7 +173,7 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         // Validate publish_date and set to today if empty/invalid
         if (!$object->hasData('publish_date') || empty($object->getData('publish_date')) || !$coreHelper->isValidDate($object->getData('publish_date'))) {
             $locale = Mage::app()->getLocale();
-            $today = $locale->utcDate(null, null, true, Mage_Core_Model_Locale::DATE_FORMAT);
+            $today = $locale->storeToUtc()->format(Mage_Core_Model_Locale::DATE_FORMAT);
             $object->setData('publish_date', $today);
         }
 
@@ -214,9 +214,9 @@ class Maho_Blog_Model_Resource_Post extends Mage_Eav_Model_Entity_Abstract
         $locale = Mage::app()->getLocale();
 
         if (!$object->getId()) {
-            $object->setCreatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+            $object->setCreatedAt($locale->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
         }
-        $object->setUpdatedAt($locale->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
+        $object->setUpdatedAt($locale->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT));
 
         // First do the EAV save (creates entity and gets ID)
         parent::save($object);

@@ -41,11 +41,11 @@ class Mage_Rss_Block_Catalog_New extends Mage_Rss_Block_Catalog_Abstract
 
         $product = Mage::getModel('catalog/product');
 
-        $todayStartOfDayDate  = Mage::app()->getLocale()->dateImmutable()
+        $todayStartOfDayDate  = Mage::app()->getLocale()->utcToStore()
             ->setTime(0, 0, 0)
             ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 
-        $todayEndOfDayDate  = Mage::app()->getLocale()->dateImmutable()
+        $todayEndOfDayDate  = Mage::app()->getLocale()->utcToStore()
             ->setTime(23, 59, 59)
             ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
 

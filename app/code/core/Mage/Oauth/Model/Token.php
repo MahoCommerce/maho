@@ -207,7 +207,7 @@ class Mage_Oauth_Model_Token extends Mage_Core_Model_Abstract
         $this->validate();
 
         if ($this->isObjectNew() && $this->getCreatedAt() === null) {
-            $this->setCreatedAt(Mage_Core_Model_Locale::now());
+            $this->setCreatedAt(Mage::app()->getLocale()->now());
         }
         parent::_beforeSave();
         return $this;

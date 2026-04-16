@@ -276,7 +276,7 @@ class Mage_Reports_Model_Resource_Report_Collection
     public function timeShift($datetime)
     {
         return Mage::app()->getLocale()
-            ->utcDate(null, $datetime, true, Mage_Core_Model_Locale::DATETIME_FORMAT)
+            ->storeToUtc(null, $datetime)
             ->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
     }
 }

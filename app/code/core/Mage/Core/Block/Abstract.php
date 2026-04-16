@@ -1105,14 +1105,14 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
      *
      * @param string|int|DateTime|null $date
      * @param string $format
-     * @param bool $showTime
+     * @param bool $withTime
      * @return string
      */
-    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $showTime = false)
+    public function formatDate($date = null, $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT, $withTime = false)
     {
         /** @var Mage_Core_Helper_Data $helper */
         $helper = $this->helper('core');
-        return $helper->formatDate($date, $format, $showTime);
+        return $helper->formatDate($date, $format, $withTime);
     }
 
     /**
@@ -1123,12 +1123,12 @@ abstract class Mage_Core_Block_Abstract extends \Maho\DataObject
     public function formatTimezoneDate(
         $date = null,
         string $format = Mage_Core_Model_Locale::FORMAT_TYPE_SHORT,
-        bool $showTime = false,
+        bool $withTime = false,
         bool $useTimezone = true,
     ): string {
         /** @var Mage_Core_Helper_Data $helper */
         $helper = $this->helper('core');
-        return $helper->formatTimezoneDate($date, $format, $showTime, $useTimezone);
+        return $helper->formatTimezoneDate($date, $format, $withTime, $useTimezone);
     }
 
     /**

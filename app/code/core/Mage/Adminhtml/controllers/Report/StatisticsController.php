@@ -109,7 +109,7 @@ class Mage_Adminhtml_Report_StatisticsController extends Mage_Adminhtml_Controll
     {
         try {
             $collectionsNames = $this->_getCollectionNames();
-            $currentDate = Mage::app()->getLocale()->dateImmutable();
+            $currentDate = Mage::app()->getLocale()->utcToStore();
             $date = $currentDate->modify('-25 hours');
             foreach ($collectionsNames as $collectionName) {
                 Mage::getResourceModel($collectionName)->aggregate($date);

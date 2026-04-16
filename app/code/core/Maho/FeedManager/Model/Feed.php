@@ -162,7 +162,7 @@ class Maho_FeedManager_Model_Feed extends Mage_Rule_Model_Abstract
             $this->setFilename($filename);
         }
 
-        $now = Mage::app()->getLocale()->utcDate(null, null, true)->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
+        $now = Mage::app()->getLocale()->storeToUtc()->format(Mage_Core_Model_Locale::DATETIME_FORMAT);
         if (!$this->getCreatedAt()) {
             $this->setCreatedAt($now);
         }

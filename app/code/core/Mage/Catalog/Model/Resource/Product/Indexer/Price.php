@@ -560,10 +560,10 @@ class Mage_Catalog_Model_Resource_Product_Indexer_Price extends Mage_Index_Model
 
             $store = Mage::app()->getStore($item['store_id']);
             if ($store) {
-                $timestamp = Mage::app()->getLocale()->storeTimeStamp($store);
+                $timestamp = Mage::app()->getLocale()->utcToStore($store, 'now')->getTimestamp();
                 $data[] = [
                     'website_id' => $website->getId(),
-                    'website_date'       => $this->formatDate($timestamp, false),
+                    'website_date'       => Mage::app()->getLocale()->formatDateForDb($timestamp, withTime: false),
                     'rate'       => $rate,
                 ];
             }
